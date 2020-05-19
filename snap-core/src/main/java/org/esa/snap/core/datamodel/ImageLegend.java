@@ -91,12 +91,12 @@ public class ImageLegend {
 
     private double titleToUnitsVerticalGap;
     private double titleToUnitsHorizontalGap;
-    private double titleParameterHeight;
-    private double titleParameterWidth;
-    private double titleParameterSingleLetterWidth;
-    private double titleUnitsHeight;
-    private double titleUnitsWidth;
-    private double titleUnitsSingleLetterWidth;
+    private double titleHeight;
+    private double titleWidth;
+    private double titleSingleLetterWidth;
+    private double unitsHeight;
+    private double unitsWidth;
+    private double unitsSingleLetterWidth;
     private double labelHeight;
     private double labelLongestWidth;
     private double labelSingleLetterWidth;
@@ -107,12 +107,12 @@ public class ImageLegend {
     private boolean initialized = false;
     private final RasterDataNode raster;
     private boolean showTitle;
-    private boolean showTitleUnits;
-    private String headerText;
-    private String headerUnitsText;
+    private boolean showUnits;
+    private String titleText;
+    private String unitsText;
     private int orientation;
     private String distributionType;
-    private int numberOfTicks;
+    private int tickMarkCount;
 
 
     private String titleVerticalAnchor;
@@ -130,9 +130,9 @@ public class ImageLegend {
     private boolean borderShow = true;
 
 
-    private Color backgroundColor;
-    private boolean backgroundTransparencyEnabled;
-    private float backgroundTransparency;
+    private Color backdropColor;
+    private boolean transparencyEnabled;
+    private float backdropTransparency;
     private boolean backdropShow;
 
     private Color backdropBorderColor;
@@ -144,24 +144,24 @@ public class ImageLegend {
     private int labelsFontType;
 
 
-    private String titleParameterFontName;
-    private int titleParameterFontType;
-    private String titleUnitsFontName;
-    private int titleUnitsFontType;
+    private String titleFontName;
+    private int titleFontType;
+    private String unitsFontName;
+    private int unitsFontType;
 
     private Color labelsColor;
     private boolean labelsShow;
     private Color titleColor;
-    private Color titleUnitsColor;
+    private Color unitsColor;
 
     private boolean antialiasing;
     private int decimalPlaces;
     private boolean decimalPlacesForce;
-    private String fullCustomAddThesePoints;
+    private String customLabelValues;
 
     private double scalingFactor;
     private int titleFontSize;
-    private int titleUnitsFontSize;
+    private int unitsFontSize;
     private int labelsFontSize;
     private int colorBarLength;
     private int colorBarThickness;
@@ -172,7 +172,7 @@ public class ImageLegend {
 
     private int borderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP9
-    private int headerGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
+    private int titleGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
 
 
     // Dependent, internal attributes
@@ -189,14 +189,14 @@ public class ImageLegend {
         this.imageInfo = imageInfo;
         this.raster = raster;
         showTitle = true;
-        headerText = "";
+        titleText = "";
 
         orientation = HORIZONTAL;
-        backgroundColor = Color.white;
+        backdropColor = Color.white;
         tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
         labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
         titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
-        titleUnitsColor = ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT;
+        unitsColor = ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT;
 
         setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
         setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
@@ -206,13 +206,13 @@ public class ImageLegend {
         setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
 
 
-        backgroundTransparency = 1.0f;
+        backdropTransparency = 1.0f;
         antialiasing = true;
         setDecimalPlaces(2);
         scalingFactor = 1;
 
         setDecimalPlacesForce(false);
-        setFullCustomAddThesePoints("");
+        setCustomLabelValues("");
 
 
     }
@@ -229,27 +229,27 @@ public class ImageLegend {
         imageLegendCopy.setReversePalette(isReversePalette());
 
         imageLegendCopy.setShowTitle(isShowTitle());
-        imageLegendCopy.setHeaderText(getTitleText());
+        imageLegendCopy.setTitleText(getTitleText());
         imageLegendCopy.setTitleFontSize(getTitleFontSize());
         imageLegendCopy.setTitleColor(getTitleColor());
-        imageLegendCopy.setTitleParameterFontName(getTitleParameterFontName());
-        imageLegendCopy.setTitleParameterFontType(getTitleParameterFontType());
+        imageLegendCopy.setTitleFontName(getTitleFontName());
+        imageLegendCopy.setTitleFontType(getTitleFontType());
 
-        imageLegendCopy.setShowTitleUnits(isShowTitleUnits());
-        imageLegendCopy.setHeaderUnitsText(getTitleUnitsText());
-        imageLegendCopy.setTitleUnitsFontSize(getTitleUnitsFontSize());
-        imageLegendCopy.setTitleUnitsColor(getTitleUnitsColor());
-        imageLegendCopy.setTitleUnitsFontName(getTitleUnitsFontName());
-        imageLegendCopy.setTitleUnitsFontType(getTitleUnitsFontType());
-
-
+        imageLegendCopy.setShowUnits(isShowUnits());
+        imageLegendCopy.setUnitsText(getUnitsText());
+        imageLegendCopy.setUnitsFontSize(getUnitsFontSize());
+        imageLegendCopy.setUnitsColor(getUnitsColor());
+        imageLegendCopy.setUnitsFontName(getUnitsFontName());
+        imageLegendCopy.setUnitsFontType(getUnitsFontType());
 
 
 
 
-        imageLegendCopy.setNumberOfTicks(getNumberOfTicks());
+
+
+        imageLegendCopy.setTickMarkCount(getTickMarkCount());
         imageLegendCopy.setDistributionType(getDistributionType());
-        imageLegendCopy.setFullCustomAddThesePoints(getFullCustomAddThesePoints());
+        imageLegendCopy.setCustomLabelValues(getCustomLabelValues());
         imageLegendCopy.setScalingFactor(getScalingFactor());
         imageLegendCopy.setDecimalPlaces(getDecimalPlaces());
         imageLegendCopy.setDecimalPlacesForce(isDecimalPlacesForce());
@@ -287,8 +287,8 @@ public class ImageLegend {
         imageLegendCopy.setTickmarkWidth(getTickmarkWidth());
         imageLegendCopy.setTickmarkShow(isTickmarkShow());
 
-        imageLegendCopy.setBackgroundColor(getBackgroundColor());
-        imageLegendCopy.setBackgroundTransparency(getBackgroundTransparency());
+        imageLegendCopy.setBackdropColor(getBackdropColor());
+        imageLegendCopy.setBackdropTransparency(getBackdropTransparency());
         imageLegendCopy.setBackdropShow(isBackdropShow());
 
         imageLegendCopy.setBorderShow(isBorderShow());
@@ -330,13 +330,13 @@ public class ImageLegend {
 
         // Label Distribution and Values
 
-        setNumberOfTicks(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
+        setTickMarkCount(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT));
 
         setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
 
-        setFullCustomAddThesePoints(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
+        setCustomLabelValues(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT));
 
         setScalingFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_KEY,
@@ -377,7 +377,7 @@ public class ImageLegend {
 
         String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
 
-        setHeaderText(titleText);
+        setTitleText(titleText);
 
 
         setTitleFontSize(
@@ -388,7 +388,7 @@ public class ImageLegend {
                 configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
                         ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT));
 
-        setTitleParameterFontName(
+        setTitleFontName(
                 configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
                         ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT));
 
@@ -401,7 +401,7 @@ public class ImageLegend {
 
         int titleFontType = ColorBarLayer.getFontType(titleParameterItalic, titleParameterBold);
 
-        setTitleParameterFontType(titleFontType);
+        setTitleFontType(titleFontType);
 
 
 
@@ -416,42 +416,42 @@ public class ImageLegend {
 
         // Units parameters
 
-        setShowTitleUnits(
-                configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
-                        ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT));
+        setShowUnits(
+                configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_SHOW_KEY,
+                        ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT));
 
 
-        String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
+        String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
 
 
         String titleUnitsText = (ColorBarLayerType.NULL_SPECIAL.equals(titleUnitsTextDefault)) ? "(" + raster.getUnit() + ")" : titleUnitsTextDefault;
 
-        setHeaderUnitsText(titleUnitsText);
+        setUnitsText(titleUnitsText);
 
 
-        setTitleUnitsFontSize(
-                configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
-                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT));
+        setUnitsFontSize(
+                configuration.getPropertyInt(ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_KEY,
+                        ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_DEFAULT));
 
-        setTitleUnitsColor(
-                configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
-                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT));
+        setUnitsColor(
+                configuration.getPropertyColor(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
+                        ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT));
 
-        setTitleUnitsFontName(
-                configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
-                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT));
+        setUnitsFontName(
+                configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_KEY,
+                        ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_DEFAULT));
 
 
-        boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT);
+        boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
 
-        boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT);
+        boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
 
         int titleUnitsFontType = ColorBarLayer.getFontType(titleUnitsItalic, titleUnitsBold);
 
-        setTitleUnitsFontType(titleUnitsFontType);
+        setUnitsFontType(titleUnitsFontType);
 
 
 
@@ -510,13 +510,13 @@ public class ImageLegend {
         setBackdropShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_BACKDROP_SHOW_KEY,
                 ColorBarLayerType.PROPERTY_BACKDROP_SHOW_DEFAULT));
 
-        setBackgroundColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
+        setBackdropColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_BACKDROP_COLOR_DEFAULT));
 
         double backdropTrans = configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_KEY,
                 ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT);
 
-        setBackgroundTransparency(((Number) backdropTrans).floatValue());
+        setBackdropTransparency(((Number) backdropTrans).floatValue());
 
 
 
@@ -614,7 +614,7 @@ public class ImageLegend {
     }
 
     public String getTitleText() {
-        return (headerText == null) ? "null-test" : headerText;
+        return (titleText == null) ? "null-test" : titleText;
 //        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
 //            return titleOverRide;
 //        } else {
@@ -623,18 +623,16 @@ public class ImageLegend {
 //        return headerText;
     }
 
-    public void setHeaderText(String headerText) {
-        this.headerText = headerText;
+    public void setTitleText(String titleText) {
+        this.titleText = titleText;
     }
 
-    public String getTitleUnitsText() {
-        return (headerUnitsText == null) ? "null-test" : headerUnitsText;
-
-//        return headerUnitsText;
+    public String getUnitsText() {
+        return (unitsText == null) ? "null-test" : unitsText;
     }
 
-    public void setHeaderUnitsText(String headerUnitsText) {
-        this.headerUnitsText = headerUnitsText;
+    public void setUnitsText(String unitsText) {
+        this.unitsText = unitsText;
     }
 
     public int getOrientation() {
@@ -662,20 +660,20 @@ public class ImageLegend {
     }
 
 
-    public int getNumberOfTicks() {
-        return numberOfTicks;
+    public int getTickMarkCount() {
+        return tickMarkCount;
     }
 
-    public void setNumberOfTicks(int numberOfTicks) {
-        this.numberOfTicks = numberOfTicks;
+    public void setTickMarkCount(int tickMarkCount) {
+        this.tickMarkCount = tickMarkCount;
     }
 
-    public Color getBackgroundColor() {
-        return backgroundColor;
+    public Color getBackdropColor() {
+        return backdropColor;
     }
 
-    public void setBackgroundColor(Color backgroundColor) {
-        this.backgroundColor = backgroundColor;
+    public void setBackdropColor(Color backdropColor) {
+        this.backdropColor = backdropColor;
     }
 
 
@@ -689,35 +687,35 @@ public class ImageLegend {
 
     public void setTransparent(boolean isTransparent) {
         if (isTransparent) {
-            setBackgroundTransparency(1.0f);
+            setBackdropTransparency(1.0f);
         } else {
-            setBackgroundTransparency(0.0f);
+            setBackdropTransparency(0.0f);
         }
-        setBackgroundTransparencyEnabled(isTransparent);
+        setTransparencyEnabled(isTransparent);
     }
 
-    public boolean isBackgroundTransparencyEnabled() {
-        return backgroundTransparencyEnabled;
+    public boolean isTransparencyEnabled() {
+        return transparencyEnabled;
     }
 
-    public void setBackgroundTransparencyEnabled(boolean backgroundTransparencyEnabled) {
-        this.backgroundTransparencyEnabled = backgroundTransparencyEnabled;
+    public void setTransparencyEnabled(boolean transparencyEnabled) {
+        this.transparencyEnabled = transparencyEnabled;
     }
 
-    public float getBackgroundTransparency() {
-        return backgroundTransparency;
+    public float getBackdropTransparency() {
+        return backdropTransparency;
     }
 
-    public void setBackgroundTransparency(float backgroundTransparency) {
-        this.backgroundTransparency = backgroundTransparency;
+    public void setBackdropTransparency(float backdropTransparency) {
+        this.backdropTransparency = backdropTransparency;
     }
 
     public boolean isAlphaUsed() {
-        return backgroundTransparencyEnabled && backgroundTransparency > 0.0f && backgroundTransparency <= 1.0f;
+        return transparencyEnabled && backdropTransparency > 0.0f && backdropTransparency <= 1.0f;
     }
 
     public int getBackgroundAlpha() {
-        return isAlphaUsed() ? Math.round(255f * (1f - backgroundTransparency)) : 255;
+        return isAlphaUsed() ? Math.round(255f * (1f - backdropTransparency)) : 255;
     }
 
 
@@ -747,7 +745,7 @@ public class ImageLegend {
         int tmpTickmarkLength = getTickmarkLength();
         int tmpTickmarkWidth = getTickmarkWidth();
         int tmpTitleFontSize = getTitleFontSize();
-        int tmpTitleUnitsFontSize = getTitleUnitsFontSize();
+        int tmpTitleUnitsFontSize = getUnitsFontSize();
         int tmpColorBarLength = getColorBarLength();
         int tmpColorBarThickness = getColorBarThickness();
 
@@ -755,7 +753,7 @@ public class ImageLegend {
         setTickmarkLength((int) Math.round(scalingFactor * getTickmarkLength()));
         setTickmarkWidth((int) Math.round(scalingFactor * getTickmarkWidth()));
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
-        setTitleUnitsFontSize((int) Math.round(scalingFactor * getTitleUnitsFontSize()));
+        setUnitsFontSize((int) Math.round(scalingFactor * getUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
         setColorBarThickness((int) Math.round(scalingFactor * getColorBarThickness()));
 
@@ -765,7 +763,7 @@ public class ImageLegend {
         setTickmarkLength(tmpTickmarkLength);
         setTickmarkWidth(tmpTickmarkWidth);
         setTitleFontSize(tmpTitleFontSize);
-        setTitleUnitsFontSize(tmpTitleUnitsFontSize);
+        setUnitsFontSize(tmpTitleUnitsFontSize);
         setColorBarLength(tmpColorBarLength);
         setColorBarThickness(tmpColorBarThickness);
 
@@ -779,13 +777,13 @@ public class ImageLegend {
 
         int originalLabelsFontSize = getLabelsFontSize();
         int originalTitleFontSize = getTitleFontSize();
-        int originalTitleUnitsFontSize = getTitleUnitsFontSize();
+        int originalTitleUnitsFontSize = getUnitsFontSize();
         int originalColorBarLength = getColorBarLength();
         int originalColorBarThickness = getColorBarThickness();
 
         setLabelsFontSize((int) Math.round(scalingFactor * getLabelsFontSize()));
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
-        setTitleUnitsFontSize((int) Math.round(scalingFactor * getTitleUnitsFontSize()));
+        setUnitsFontSize((int) Math.round(scalingFactor * getUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
         setColorBarThickness((int) Math.round(scalingFactor * getColorBarThickness()));
 
@@ -794,7 +792,7 @@ public class ImageLegend {
 
         setLabelsFontSize(originalLabelsFontSize);
         setTitleFontSize(originalTitleFontSize);
-        setTitleUnitsFontSize(originalTitleUnitsFontSize);
+        setUnitsFontSize(originalTitleUnitsFontSize);
         setColorBarLength(originalColorBarLength);
         setColorBarThickness(originalColorBarThickness);
 
@@ -885,16 +883,16 @@ public class ImageLegend {
             }
             if (manualPointsArrayList.size() > 0) {
                 String manualPoints = StringUtils.join(manualPointsArrayList, ", ");
-                setFullCustomAddThesePoints(manualPoints);
+                setCustomLabelValues(manualPoints);
             }
         } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
-            if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() == 0) {
+            if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
                 // this will initialize the points
                 distributeEvenly();
                 colorBarInfos.clear();
             }
 
-            String addThese = getFullCustomAddThesePoints();
+            String addThese = getCustomLabelValues();
 
             if (addThese != null && addThese.length() > 0) {
                 String[] formattedValues = addThese.split(",");
@@ -991,7 +989,7 @@ public class ImageLegend {
 //        System.out.println("Title required width =" + headerRequiredDimension.width);
 //        System.out.println("Title required height =" + headerRequiredDimension.height);
 //        System.out.println("Title =" + getTitleText());
-//        System.out.println("Title units =" + getTitleUnitsText());
+//        System.out.println("Title units =" + getUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -1035,7 +1033,7 @@ public class ImageLegend {
 
             int requiredHeight = getBorderGap()
                     + requiredHeaderHeight
-                    + getHeaderGap()
+                    + getTitleGap()
                     + getColorBarThickness()
                     + getLabelGap()
                     + requiredLabelsHeight
@@ -1046,7 +1044,7 @@ public class ImageLegend {
 
 
             paletteRect = new Rectangle(getBorderGap() + firstLabelOverhangWidth,
-                    getBorderGap() + requiredHeaderHeight + getHeaderGap(),
+                    getBorderGap() + requiredHeaderHeight + getTitleGap(),
                     legendSize.width - getBorderGap() - getBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
                     getColorBarThickness());
 
@@ -1086,7 +1084,7 @@ public class ImageLegend {
 
                 requiredHeight = getBorderGap() +
                         colorBarWithLabelsRequiredHeight +
-                        getHeaderGap() +
+                        getTitleGap() +
                         headerRequiredDimension.getHeight()
                         + getBorderGap();
 
@@ -1105,12 +1103,12 @@ public class ImageLegend {
             } else {
 
                 requiredWidth = getBorderGap()
-                        + getTitleParameterHeight()
+                        + getTitleHeight()
                         + getColorBarThickness()
                         + getTickmarkLength()
                         + getLabelGap()
                         + getLongestLabelWidth(g2dTmp)
-                        + getHeaderGap()
+                        + getTitleGap()
                         + getBorderGap();
 
 
@@ -1137,7 +1135,7 @@ public class ImageLegend {
 
             if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
-                        getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getHeaderGap(),
+                        getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getTitleGap(),
                         getColorBarThickness(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
@@ -1152,7 +1150,7 @@ public class ImageLegend {
 
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
-                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getHeaderGap(),
+                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getTitleGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
@@ -1185,11 +1183,11 @@ public class ImageLegend {
 
 
     private boolean hasTitleParameter() {
-        return isShowTitle() && StringUtils.isNotNullAndNotEmpty(headerText);
+        return isShowTitle() && StringUtils.isNotNullAndNotEmpty(titleText);
     }
 
     private boolean hasTitleUnits() {
-        return isShowTitleUnits() && StringUtils.isNotNullAndNotEmpty(headerUnitsText);
+        return isShowUnits() && StringUtils.isNotNullAndNotEmpty(unitsText);
     }
 
     private void draw(Graphics2D g2d) {
@@ -1208,7 +1206,7 @@ public class ImageLegend {
     }
 
     private void fillBackground(Graphics2D g2d) {
-        Color color = backgroundColor;
+        Color color = backdropColor;
         if (isAlphaUsed()) {
             color = new Color(color.getRed(), color.getGreen(), color.getBlue(), getBackgroundAlpha());
         }
@@ -1236,7 +1234,7 @@ public class ImageLegend {
         double titleParameterSingleLetterWidth = titleSingleLetterRectangle.getWidth();
 
         g2d.setFont(getTitleUnitsFont());
-        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getTitleUnitsText(), g2d);
+        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getUnitsText(), g2d);
         Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
         double titleUnitsHeight = unitsRectangle.getHeight();
@@ -1261,19 +1259,19 @@ public class ImageLegend {
         setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
         setTitleToUnitsHorizontalGap(titleToUnitsHorizontalGap);
 
-        setTitleParameterHeight(titleParameterHeight);
-        setTitleParameterWidth(titleParameterWidth);
-        setTitleParameterSingleLetterWidth(titleParameterSingleLetterWidth);
+        setTitleHeight(titleParameterHeight);
+        setTitleWidth(titleParameterWidth);
+        setTitleSingleLetterWidth(titleParameterSingleLetterWidth);
 
-        setTitleUnitsHeight(titleUnitsHeight);
-        setTitleUnitsWidth(titleUnitsWidth);
-        setTitleUnitsSingleLetterWidth(titleUnitsSingleLetterWidth);
+        setUnitsHeight(titleUnitsHeight);
+        setUnitsWidth(titleUnitsWidth);
+        setUnitsSingleLetterWidth(titleUnitsSingleLetterWidth);
 
         setLabelLongestWidth(getLongestLabelWidth(g2d));
         setLabelHeight(labelSingleLetterRectangle.getHeight());
         setLabelSingleLetterWidth(labelSingleLetterRectangle.getWidth());
 
-        setHeaderGap(headerGap);
+        setTitleGap(headerGap);
         setBorderGap(borderGap);
 
 
@@ -1288,20 +1286,20 @@ public class ImageLegend {
 
         if (hasTitleParameter() && hasTitleUnits()) {
             if (lineBreak) {
-                height = getTitleParameterHeight() + getTitleToUnitsVerticalGap() + getTitleUnitsHeight();
-                width = Math.max(getTitleParameterWidth(), getTitleUnitsWidth());
+                height = getTitleHeight() + getTitleToUnitsVerticalGap() + getUnitsHeight();
+                width = Math.max(getTitleWidth(), getUnitsWidth());
             } else {
-                height = Math.max(getTitleParameterHeight(), getTitleUnitsHeight());
-                width = getTitleParameterWidth() + getTitleToUnitsHorizontalGap() + getTitleUnitsWidth();
+                height = Math.max(getTitleHeight(), getUnitsHeight());
+                width = getTitleWidth() + getTitleToUnitsHorizontalGap() + getUnitsWidth();
             }
         } else if (hasTitleUnits()) {
             // hasTitleUnits only
-            height = getTitleUnitsHeight();
-            width = getTitleUnitsWidth();
+            height = getUnitsHeight();
+            width = getUnitsWidth();
         } else {
             // hasTitleParameter only
-            height = getTitleParameterHeight();
-            width = getTitleParameterWidth();
+            height = getTitleHeight();
+            width = getTitleWidth();
         }
 
         if (rotate) {
@@ -1432,7 +1430,7 @@ public class ImageLegend {
 
             if (orientation == HORIZONTAL) {
                 double translateTitleX = x0;
-                double translateTitleY = y0 - getHeaderGap();
+                double translateTitleY = y0 - getTitleGap();
 
                 double translateUnitsX = 0;
                 double translateUnitsY = 0;
@@ -1443,9 +1441,9 @@ public class ImageLegend {
                 if (hasTitleParameter()) {
                     g2d.setFont(getTitleParameterFont());
                     g2d.setPaint(getTitleColor());
-                    g2d.drawString(headerText, 0, 0);
+                    g2d.drawString(titleText, 0, 0);
 
-                    translateUnitsX = getTitleParameterWidth() + getTitleToUnitsHorizontalGap();
+                    translateUnitsX = getTitleWidth() + getTitleToUnitsHorizontalGap();
                 }
 
 
@@ -1453,8 +1451,8 @@ public class ImageLegend {
 
                 if (hasTitleUnits()) {
                     g2d.setFont(getTitleUnitsFont());
-                    g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getTitleUnitsText(), 0, 0);
+                    g2d.setPaint(getUnitsColor());
+                    g2d.drawString(getUnitsText(), 0, 0);
                 }
 
 
@@ -1479,17 +1477,17 @@ public class ImageLegend {
                     translateX = x0;
 
                 } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
-                    translateX = x0 - getHeaderGap() - 0.5 * getTitleParameterHeight();
+                    translateX = x0 - getTitleGap() - 0.5 * getTitleHeight();
 
 
                 } else { // VERTICAL_TITLE_RIGHT
                     translateX = x0
-                            + 0.5 * getTitleParameterHeight()
+                            + 0.5 * getTitleHeight()
                             + getColorBarThickness()
                             + getTickmarkLength()
                             + getLabelGap()
                             + getLongestLabelWidth(g2d)
-                            + getHeaderGap();
+                            + getTitleGap();
 
                 }
 
@@ -1505,12 +1503,12 @@ public class ImageLegend {
 
                     if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                         if (hasTitleParameter() && hasTitleUnits()) {
-                            translateY = y0 - getHeaderGap() - labelOverhangHeight - getTitleUnitsHeight() - 0.5 * getTitleParameterHeight() - getTitleToUnitsVerticalGap();
+                            translateY = y0 - getTitleGap() - labelOverhangHeight - getUnitsHeight() - 0.5 * getTitleHeight() - getTitleToUnitsVerticalGap();
                         } else {
-                            translateY = y0 - getHeaderGap() - labelOverhangHeight - 0.5 * getTitleParameterHeight();
+                            translateY = y0 - getTitleGap() - labelOverhangHeight - 0.5 * getTitleHeight();
                         }
                     } else {
-                        translateY = y0 + getColorBarLength() + labelOverhangHeight + getHeaderGap() + 0.5 * getTitleParameterHeight();
+                        translateY = y0 + getColorBarLength() + labelOverhangHeight + getTitleGap() + 0.5 * getTitleHeight();
                     }
 
                     g2d.translate(translateX, translateY);
@@ -1518,8 +1516,8 @@ public class ImageLegend {
                     if (hasTitleParameter()) {
                         g2d.setFont(getTitleParameterFont());
                         g2d.setPaint(getTitleColor());
-                        g2d.drawString(headerText, 0, 0);
-                        translateY2 = getTitleParameterHeight() + getTitleToUnitsVerticalGap();
+                        g2d.drawString(titleText, 0, 0);
+                        translateY2 = getTitleHeight() + getTitleToUnitsVerticalGap();
                     }
 
 
@@ -1527,8 +1525,8 @@ public class ImageLegend {
 
                     if (hasTitleUnits()) {
                         g2d.setFont(getTitleUnitsFont());
-                        g2d.setPaint(getTitleUnitsColor());
-                        g2d.drawString(getTitleUnitsText(), 0, 0);
+                        g2d.setPaint(getUnitsColor());
+                        g2d.drawString(getUnitsText(), 0, 0);
                     }
 
                     g2d.translate(0, -translateY2);
@@ -1551,10 +1549,10 @@ public class ImageLegend {
                         g2d.rotate(rotate);
                         g2d.setFont(getTitleParameterFont());
                         g2d.setPaint(getTitleColor());
-                        g2d.drawString(headerText, 0, 0);
+                        g2d.drawString(titleText, 0, 0);
                         g2d.rotate(-rotate);
 
-                        translateY2 = -getTitleParameterWidth() - getTitleToUnitsHorizontalGap();
+                        translateY2 = -getTitleWidth() - getTitleToUnitsHorizontalGap();
                     }
 
 
@@ -1563,8 +1561,8 @@ public class ImageLegend {
                     if (hasTitleUnits()) {
                         g2d.rotate(rotate);
                         g2d.setFont(getTitleUnitsFont());
-                        g2d.setPaint(getTitleUnitsColor());
-                        g2d.drawString(getTitleUnitsText(), 0, 0);
+                        g2d.setPaint(getUnitsColor());
+                        g2d.drawString(getUnitsText(), 0, 0);
                         g2d.rotate(-rotate);
                     }
 
@@ -1999,21 +1997,21 @@ public class ImageLegend {
     }
 
 
-    public String getFullCustomAddThesePoints() {
-        return fullCustomAddThesePoints;
+    public String getCustomLabelValues() {
+        return customLabelValues;
     }
 
-    public void setFullCustomAddThesePoints(String fullCustomAddThesePoints) {
-        this.fullCustomAddThesePoints = fullCustomAddThesePoints;
+    public void setCustomLabelValues(String customLabelValues) {
+        this.customLabelValues = customLabelValues;
     }
 
 
     public Font getTitleParameterFont() {
-        return new Font(getTitleParameterFontName(), getTitleParameterFontType(), getTitleFontSize());
+        return new Font(getTitleFontName(), getTitleFontType(), getTitleFontSize());
     }
 
     public Font getTitleUnitsFont() {
-        return new Font(getTitleUnitsFontName(), getTitleUnitsFontType(), getTitleUnitsFontSize());
+        return new Font(getUnitsFontName(), getUnitsFontType(), getUnitsFontSize());
     }
 
 
@@ -2030,12 +2028,12 @@ public class ImageLegend {
         this.titleFontSize = titleFontSize;
     }
 
-    public int getTitleUnitsFontSize() {
-        return titleUnitsFontSize;
+    public int getUnitsFontSize() {
+        return unitsFontSize;
     }
 
-    public void setTitleUnitsFontSize(int titleUnitsFontSize) {
-        this.titleUnitsFontSize = titleUnitsFontSize;
+    public void setUnitsFontSize(int unitsFontSize) {
+        this.unitsFontSize = unitsFontSize;
     }
 
     public int getLabelsFontSize() {
@@ -2103,16 +2101,16 @@ public class ImageLegend {
         this.labelGap = labelGap;
     }
 
-    public int getHeaderGap() {
-        if (headerGap != NULL_INT) {
-            return headerGap;
+    public int getTitleGap() {
+        if (titleGap != NULL_INT) {
+            return titleGap;
         } else {
             return (int) Math.round(0.5 * getTitleFontSize());
         }
     }
 
-    public void setHeaderGap(int headerGap) {
-        this.headerGap = headerGap;
+    public void setTitleGap(int titleGap) {
+        this.titleGap = titleGap;
     }
 
 
@@ -2141,11 +2139,11 @@ public class ImageLegend {
         double roundedValue, adjustedWeight;
         colorBarInfos.clear();
 
-        if (getNumberOfTicks() >= 2) {
+        if (getTickMarkCount() >= 2) {
             ArrayList<String> manualPointsArrayList = new ArrayList<>();
-            double normalizedDelta = (1.0 / (getNumberOfTicks() - 1.0));
+            double normalizedDelta = (1.0 / (getTickMarkCount() - 1.0));
 
-            for (int i = 0; i < getNumberOfTicks(); i++) {
+            for (int i = 0; i < getTickMarkCount(); i++) {
 
                 weight = i * normalizedDelta;
                 double linearValue = getLinearValueUsingLinearWeight(weight, min, max);
@@ -2189,7 +2187,7 @@ public class ImageLegend {
             }
             if (manualPointsArrayList.size() > 0) {
                 String manualPoints = StringUtils.join(manualPointsArrayList, ", ");
-                setFullCustomAddThesePoints(manualPoints);
+                setCustomLabelValues(manualPoints);
             }
         }
     }
@@ -2343,52 +2341,52 @@ public class ImageLegend {
         this.labelsFontType = labelsFontType;
     }
 
-    public Color getTitleUnitsColor() {
-        return titleUnitsColor;
+    public Color getUnitsColor() {
+        return unitsColor;
     }
 
-    public void setTitleUnitsColor(Color titleUnitsColor) {
-        this.titleUnitsColor = titleUnitsColor;
+    public void setUnitsColor(Color unitsColor) {
+        this.unitsColor = unitsColor;
     }
 
-    public boolean isShowTitleUnits() {
-        return showTitleUnits;
+    public boolean isShowUnits() {
+        return showUnits;
     }
 
-    public void setShowTitleUnits(boolean showTitleUnits) {
-        this.showTitleUnits = showTitleUnits;
+    public void setShowUnits(boolean showUnits) {
+        this.showUnits = showUnits;
     }
 
-    public String getTitleParameterFontName() {
-        return titleParameterFontName;
+    public String getTitleFontName() {
+        return titleFontName;
     }
 
-    public void setTitleParameterFontName(String titleParameterFontName) {
-        this.titleParameterFontName = titleParameterFontName;
+    public void setTitleFontName(String titleFontName) {
+        this.titleFontName = titleFontName;
     }
 
-    public int getTitleParameterFontType() {
-        return titleParameterFontType;
+    public int getTitleFontType() {
+        return titleFontType;
     }
 
-    public void setTitleParameterFontType(int titleParameterFontType) {
-        this.titleParameterFontType = titleParameterFontType;
+    public void setTitleFontType(int titleFontType) {
+        this.titleFontType = titleFontType;
     }
 
-    public String getTitleUnitsFontName() {
-        return titleUnitsFontName;
+    public String getUnitsFontName() {
+        return unitsFontName;
     }
 
-    public void setTitleUnitsFontName(String titleUnitsFontName) {
-        this.titleUnitsFontName = titleUnitsFontName;
+    public void setUnitsFontName(String unitsFontName) {
+        this.unitsFontName = unitsFontName;
     }
 
-    public int getTitleUnitsFontType() {
-        return titleUnitsFontType;
+    public int getUnitsFontType() {
+        return unitsFontType;
     }
 
-    public void setTitleUnitsFontType(int titleUnitsFontType) {
-        this.titleUnitsFontType = titleUnitsFontType;
+    public void setUnitsFontType(int unitsFontType) {
+        this.unitsFontType = unitsFontType;
     }
 
     public boolean isLabelsShow() {
@@ -2433,52 +2431,52 @@ public class ImageLegend {
         this.titleToUnitsHorizontalGap = titleToUnitsHorizontalGap;
     }
 
-    public double getTitleParameterHeight() {
-        return titleParameterHeight;
+    public double getTitleHeight() {
+        return titleHeight;
     }
 
-    public void setTitleParameterHeight(double titleParameterHeight) {
-        this.titleParameterHeight = titleParameterHeight;
+    public void setTitleHeight(double titleHeight) {
+        this.titleHeight = titleHeight;
     }
 
-    public double getTitleParameterWidth() {
-        return titleParameterWidth;
+    public double getTitleWidth() {
+        return titleWidth;
     }
 
-    public void setTitleParameterWidth(double titleParameterWidth) {
-        this.titleParameterWidth = titleParameterWidth;
+    public void setTitleWidth(double titleWidth) {
+        this.titleWidth = titleWidth;
     }
 
-    public double getTitleParameterSingleLetterWidth() {
-        return titleParameterSingleLetterWidth;
+    public double getTitleSingleLetterWidth() {
+        return titleSingleLetterWidth;
     }
 
-    public void setTitleParameterSingleLetterWidth(double titleParameterSingleLetterWidth) {
-        this.titleParameterSingleLetterWidth = titleParameterSingleLetterWidth;
+    public void setTitleSingleLetterWidth(double titleSingleLetterWidth) {
+        this.titleSingleLetterWidth = titleSingleLetterWidth;
     }
 
-    public double getTitleUnitsHeight() {
-        return titleUnitsHeight;
+    public double getUnitsHeight() {
+        return unitsHeight;
     }
 
-    public void setTitleUnitsHeight(double titleUnitsHeight) {
-        this.titleUnitsHeight = titleUnitsHeight;
+    public void setUnitsHeight(double unitsHeight) {
+        this.unitsHeight = unitsHeight;
     }
 
-    public double getTitleUnitsWidth() {
-        return titleUnitsWidth;
+    public double getUnitsWidth() {
+        return unitsWidth;
     }
 
-    public void setTitleUnitsWidth(double titleUnitsWidth) {
-        this.titleUnitsWidth = titleUnitsWidth;
+    public void setUnitsWidth(double unitsWidth) {
+        this.unitsWidth = unitsWidth;
     }
 
-    public double getTitleUnitsSingleLetterWidth() {
-        return titleUnitsSingleLetterWidth;
+    public double getUnitsSingleLetterWidth() {
+        return unitsSingleLetterWidth;
     }
 
-    public void setTitleUnitsSingleLetterWidth(double titleUnitsSingleLetterWidth) {
-        this.titleUnitsSingleLetterWidth = titleUnitsSingleLetterWidth;
+    public void setUnitsSingleLetterWidth(double unitsSingleLetterWidth) {
+        this.unitsSingleLetterWidth = unitsSingleLetterWidth;
     }
 
 

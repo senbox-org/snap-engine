@@ -104,23 +104,23 @@ public class ColorBarLayer extends Layer {
 
 
             imageLegend.setShowTitle(isShowTitle());
-            imageLegend.setHeaderText(title);
+            imageLegend.setTitleText(title);
             imageLegend.setTitleFontSize(getTitleFontSize());
             imageLegend.setTitleColor(getTitleColor());
-            imageLegend.setTitleParameterFontName(getTitleFontName());
-            imageLegend.setTitleParameterFontType(getTitleFontType());
+            imageLegend.setTitleFontName(getTitleFontName());
+            imageLegend.setTitleFontType(getTitleFontType());
 
-            imageLegend.setShowTitleUnits(isShowTitleUnits());
-            imageLegend.setHeaderUnitsText(units);
-            imageLegend.setTitleUnitsFontSize(getTitleUnitsFontSize());
-            imageLegend.setTitleUnitsColor(getTitleUnitsColor());
-            imageLegend.setTitleUnitsFontName(getTitleUnitsFontName());
-            imageLegend.setTitleUnitsFontType(getTitleUnitsFontType());
+            imageLegend.setShowUnits(isShowTitleUnits());
+            imageLegend.setUnitsText(units);
+            imageLegend.setUnitsFontSize(getUnitsFontSize());
+            imageLegend.setUnitsColor(getUnitsColor());
+            imageLegend.setUnitsFontName(getUnitsFontName());
+            imageLegend.setUnitsFontType(getUnitsFontType());
 
 
-            imageLegend.setNumberOfTicks(getLabelValuesCount());
+            imageLegend.setTickMarkCount(getLabelValuesCount());
             imageLegend.setDistributionType(getLabelValuesMode());
-            imageLegend.setFullCustomAddThesePoints(getLabelValuesActual());
+            imageLegend.setCustomLabelValues(getLabelValuesActual());
 
 
             imageLegend.setOrientation(getOrientation());
@@ -128,35 +128,21 @@ public class ColorBarLayer extends Layer {
 
 
 
-
-
-
-
-
-
-
-
-
             imageLegend.setScalingFactor(getLabelValuesScalingFactor());
-            imageLegend.setDecimalPlaces(getLabelValuesDecimalPlaces());
-            imageLegend.setDecimalPlacesForce(getLabelValuesForceDecimalPlaces());
-
-
-
+            imageLegend.setDecimalPlaces(getDecimalPlaces());
+            imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
 
 
             imageLegend.setAntialiasing((Boolean) true);
-            imageLegend.setColorBarLength(getLegendLength());
-            imageLegend.setColorBarThickness(getLegendWidth());
-            imageLegend.setLayerScaling((Double) getSizeScaling());
-
-
+            imageLegend.setColorBarLength(getColorBarLength());
+            imageLegend.setColorBarThickness(getColorBarWidth());
+            imageLegend.setLayerScaling(getLayerScaling());
 
 
             imageLegend.setLabelsShow(isLabelsShow());
             imageLegend.setLabelsFontName(getLabelsFontName());
             imageLegend.setLabelsFontType(getLabelsFontType());
-            imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
+            imageLegend.setLabelsFontSize(getLablesFontSize());
             imageLegend.setLabelsColor(getLabelsColor());
 
 
@@ -165,8 +151,8 @@ public class ColorBarLayer extends Layer {
             imageLegend.setTickmarkWidth(getTickmarksWidth());
             imageLegend.setTickmarkShow(isTickmarksShow());
 
-            imageLegend.setBackgroundColor(getBackdropColor());
-            imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
+            imageLegend.setBackdropColor(getBackdropColor());
+            imageLegend.setBackdropTransparency(((Number) getBackdropTransparency()).floatValue());
             imageLegend.setBackdropShow(isBackdropShow());
 
             imageLegend.setBorderShow(isBorderShow());
@@ -181,7 +167,7 @@ public class ColorBarLayer extends Layer {
 
 
 
-            imageLegend.setBackgroundTransparencyEnabled(true);
+            imageLegend.setTransparencyEnabled(true);
 
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
@@ -195,8 +181,8 @@ public class ColorBarLayer extends Layer {
             allowImageLegendReset = false;
 
             if (imageLegend != null) {
-                if (getLabelValuesActual() == null || !getLabelValuesActual().equals(imageLegend.getFullCustomAddThesePoints())) {
-                    setLabelValuesActual(imageLegend.getFullCustomAddThesePoints());
+                if (getLabelValuesActual() == null || !getLabelValuesActual().equals(imageLegend.getCustomLabelValues())) {
+                    setLabelValuesActual(imageLegend.getCustomLabelValues());
                 }
             }
 
@@ -207,8 +193,8 @@ public class ColorBarLayer extends Layer {
             }
 
             if (imageLegend != null) {
-                if (getUnits() == null || !getUnits().equals(imageLegend.getTitleUnitsText())) {
-                    setUnits(imageLegend.getTitleUnitsText());
+                if (getUnits() == null || !getUnits().equals(imageLegend.getUnitsText())) {
+                    setUnits(imageLegend.getUnitsText());
                 }
             }
 
@@ -570,19 +556,19 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private int getLabelValuesDecimalPlaces() {
+    private int getDecimalPlaces() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT);
     }
 
-    private boolean getLabelValuesForceDecimalPlaces() {
+    private boolean getDecimalPlacesForce() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT);
     }
 
 
 
-    private int getFontSizePixels() {
+    private int getLablesFontSize() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
     }
@@ -846,8 +832,8 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean isShowTitleUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT);
     }
 
 
@@ -855,44 +841,44 @@ public class ColorBarLayer extends Layer {
         try {
             String valueCurrent = getUnits();
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY).setValue((Object) value);
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {
         }
     }
 
-    private int getTitleUnitsFontSize() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT);
+    private int getUnitsFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_DEFAULT);
     }
 
 
 
-    private Color getTitleUnitsColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT);
+    private Color getUnitsColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT);
     }
 
 
 
 
     private Boolean isTitleUnitsFontItalic() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
     }
 
     private Boolean isTitleUnitsFontBold() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
     }
 
-    private int getTitleUnitsFontType() {
+    private int getUnitsFontType() {
         return getFontType(isTitleUnitsFontItalic(), isTitleUnitsFontBold());
     }
 
-    private String getTitleUnitsFontName() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT);
+    private String getUnitsFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_DEFAULT);
     }
 
 
@@ -902,8 +888,8 @@ public class ColorBarLayer extends Layer {
 
 
     private String getUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
     }
 
 
@@ -914,19 +900,19 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private Double getSizeScaling() {
+    private Double getLayerScaling() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_DEFAULT);
     }
 
 
-    private int getLegendLength() {
+    private int getColorBarLength() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT);
     }
 
 
-    private int getLegendWidth() {
+    private int getColorBarWidth() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT);
     }

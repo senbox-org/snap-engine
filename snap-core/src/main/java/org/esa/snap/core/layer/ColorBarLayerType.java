@@ -284,7 +284,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Legend Scaling (%)";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 50.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 60.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
 
     public static final String PROPERTY_LEGEND_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.length";
@@ -306,7 +306,7 @@ public class ColorBarLayerType extends LayerType {
     public static final int PROPERTY_LEGEND_WIDTH_MAX = 400;
     public static final String PROPERTY_LEGEND_WIDTH_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MIN + "," + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MAX + "]";
 
-    public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 60;
+    public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 70;
     public static final Class PROPERTY_LEGEND_WIDTH_TYPE = Integer.class;
 
 
@@ -365,7 +365,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_FONT_SIZE_LABEL = "Title Size";
     public static final String PROPERTY_TITLE_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
     private static final String PROPERTY_TITLE_FONT_SIZE_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_TITLE_FONT_SIZE_DEFAULT = 35;
+    public static final int PROPERTY_TITLE_FONT_SIZE_DEFAULT = 50;
     public static final Class PROPERTY_TITLE_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_TITLE_FONT_SIZE_VALUE_MIN = 10;
     public static final int PROPERTY_TITLE_FONT_SIZE_VALUE_MAX = 200;
@@ -378,7 +378,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_COLOR_LABEL = "Title Color";
     public static final String PROPERTY_TITLE_COLOR_TOOLTIP = "Set color of the title";
     private static final String PROPERTY_TITLE_COLOR_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontColor";
-    public static final Color PROPERTY_TITLE_COLOR_DEFAULT = Color.YELLOW;
+    public static final Color PROPERTY_TITLE_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_TITLE_COLOR_TYPE = Color.class;
 
 
@@ -387,68 +387,68 @@ public class ColorBarLayerType extends LayerType {
 
     // Units Section
 
-    private static final String PROPERTY_TITLE_UNITS_ROOT_KEY = PROPERTY_ROOT_KEY + ".title.units";
-    private static final String PROPERTY_TITLE_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleUnits";
+    private static final String PROPERTY_UNITS_ROOT_KEY = PROPERTY_ROOT_KEY + ".units";
+    private static final String PROPERTY_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Units";
 
-    public static final String PROPERTY_TITLE_UNITS_SECTION_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_UNITS_SECTION_LABEL = "Units Format";
-    public static final String PROPERTY_TITLE_UNITS_SECTION_TOOLTIP = "Set title units of color bar";
-    public static final String PROPERTY_TITLE_UNITS_SECTION_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_UNITS_SECTION_KEY = PROPERTY_UNITS_ROOT_KEY + ".section";
+    public static final String PROPERTY_UNITS_SECTION_LABEL = "Units Format";
+    public static final String PROPERTY_UNITS_SECTION_TOOLTIP = "Set units of color bar";
+    public static final String PROPERTY_UNITS_SECTION_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "Section";
 
-    public static final String PROPERTY_TITLE_UNITS_SHOW_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".show";
-    public static final String PROPERTY_TITLE_UNITS_SHOW_LABEL = "Show Units";
-    public static final String PROPERTY_TITLE_UNITS_SHOW_TOOLTIP = "Add title units to the color bar";
-    private static final String PROPERTY_TITLE_UNITS_SHOW_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_TITLE_UNITS_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_TITLE_UNITS_SHOW_TYPE = Boolean.class;
+    public static final String PROPERTY_UNITS_SHOW_KEY = PROPERTY_UNITS_ROOT_KEY + ".show";
+    public static final String PROPERTY_UNITS_SHOW_LABEL = "Show Units";
+    public static final String PROPERTY_UNITS_SHOW_TOOLTIP = "Add units to the title of the color bar";
+    private static final String PROPERTY_UNITS_SHOW_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "Show";
+    public static final boolean PROPERTY_UNITS_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_UNITS_SHOW_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_UNITS_TEXT_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Units Text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_DEFAULT = NULL_SPECIAL;
-    public static final Class PROPERTY_TITLE_UNITS_TEXT_TYPE = String.class;
+    public static final String PROPERTY_UNITS_TEXT_KEY = PROPERTY_UNITS_ROOT_KEY + ".text";
+    public static final String PROPERTY_UNITS_TEXT_LABEL = "Units Text";
+    public static final String PROPERTY_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
+    public static final String PROPERTY_UNITS_TEXT_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "Text";
+    public static final String PROPERTY_UNITS_TEXT_DEFAULT = NULL_SPECIAL;
+    public static final Class PROPERTY_UNITS_TEXT_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.bold";
-    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_LABEL = "Units Bold Font";
-    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_TOOLTIP = "Format title units text font in bold";
-    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontBold";
-    public static final boolean PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT = false;
-    public static final Class PROPERTY_TITLE_UNITS_FONT_BOLD_TYPE = Boolean.class;
+    public static final String PROPERTY_UNITS_FONT_BOLD_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.bold";
+    public static final String PROPERTY_UNITS_FONT_BOLD_LABEL = "Units Bold Font";
+    public static final String PROPERTY_UNITS_FONT_BOLD_TOOLTIP = "Format title units text font in bold";
+    public static final String PROPERTY_UNITS_FONT_BOLD_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontBold";
+    public static final boolean PROPERTY_UNITS_FONT_BOLD_DEFAULT = false;
+    public static final Class PROPERTY_UNITS_FONT_BOLD_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.italic";
-    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_LABEL = "Units Italic Font";
-    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_TOOLTIP = "Format title units text font in italic";
-    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontItalic";
-    public static final boolean PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT = false;
-    public static final Class PROPERTY_TITLE_UNITS_FONT_ITALIC_TYPE = Boolean.class;
+    public static final String PROPERTY_UNITS_FONT_ITALIC_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.italic";
+    public static final String PROPERTY_UNITS_FONT_ITALIC_LABEL = "Units Italic Font";
+    public static final String PROPERTY_UNITS_FONT_ITALIC_TOOLTIP = "Format title units text font in italic";
+    public static final String PROPERTY_UNITS_FONT_ITALIC_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontItalic";
+    public static final boolean PROPERTY_UNITS_FONT_ITALIC_DEFAULT = false;
+    public static final Class PROPERTY_UNITS_FONT_ITALIC_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_LABEL = "Units Typeface";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_TOOLTIP = "Set the text font of the title units";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
-    public static final Class PROPERTY_TITLE_UNITS_FONT_NAME_TYPE = String.class;
-    public static final Object PROPERTY_TITLE_UNITS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
+    public static final String PROPERTY_UNITS_FONT_NAME_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.name";
+    public static final String PROPERTY_UNITS_FONT_NAME_LABEL = "Units Typeface";
+    public static final String PROPERTY_UNITS_FONT_NAME_TOOLTIP = "Set the text font of the title units";
+    public static final String PROPERTY_UNITS_FONT_NAME_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontName";
+    public static final String PROPERTY_UNITS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
+    public static final Class PROPERTY_UNITS_FONT_NAME_TYPE = String.class;
+    public static final Object PROPERTY_UNITS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
-    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.size";
-    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_LABEL = "Units Size";
-    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_TOOLTIP = "Set size of the title units";
-    private static final String PROPERTY_TITLE_UNITS_FONT_SIZE_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT = 35;
-    public static final Class PROPERTY_TITLE_UNITS_FONT_SIZE_TYPE = Integer.class;
-    public static final int PROPERTY_TITLE_UNITS_FONT_SIZE_VALUE_MIN = 10;
-    public static final int PROPERTY_TITLE_UNITS_FONT_SIZE_VALUE_MAX = 200;
-    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_INTERVAL =
-            "[" + ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_VALUE_MIN +
-                    "," + ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_VALUE_MAX + "]";
+    public static final String PROPERTY_UNITS_FONT_SIZE_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.size";
+    public static final String PROPERTY_UNITS_FONT_SIZE_LABEL = "Units Size";
+    public static final String PROPERTY_UNITS_FONT_SIZE_TOOLTIP = "Set size of the title units";
+    private static final String PROPERTY_UNITS_FONT_SIZE_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontSize";
+    public static final int PROPERTY_UNITS_FONT_SIZE_DEFAULT = 35;
+    public static final Class PROPERTY_UNITS_FONT_SIZE_TYPE = Integer.class;
+    public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MIN = 10;
+    public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MAX = 200;
+    public static final String PROPERTY_UNITS_FONT_SIZE_INTERVAL =
+            "[" + ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_VALUE_MIN +
+                    "," + ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_VALUE_MAX + "]";
 
-    public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.color";
-    public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_LABEL = "Units Color";
-    public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_TOOLTIP = "Set color of the title units";
-    private static final String PROPERTY_TITLE_UNITS_FONT_COLOR_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontColor";
-    public static final Color PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT = Color.YELLOW;
-    public static final Class PROPERTY_TITLE_UNITS_FONT_COLOR_TYPE = Color.class;
+    public static final String PROPERTY_UNITS_FONT_COLOR_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.color";
+    public static final String PROPERTY_UNITS_FONT_COLOR_LABEL = "Units Color";
+    public static final String PROPERTY_UNITS_FONT_COLOR_TOOLTIP = "Set color of the title units";
+    private static final String PROPERTY_UNITS_FONT_COLOR_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontColor";
+    public static final Color PROPERTY_UNITS_FONT_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_UNITS_FONT_COLOR_TYPE = Color.class;
 
 
 
@@ -508,7 +508,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_FONT_COLOR_LABEL = "Labels Color";
     public static final String PROPERTY_LABELS_FONT_COLOR_TOOLTIP = "Set the color of the tick-mark labels";
     private static final String PROPERTY_LABELS_FONT_COLOR_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontColor";
-    public static final Color PROPERTY_LABELS_FONT_COLOR_DEFAULT = Color.YELLOW;
+    public static final Color PROPERTY_LABELS_FONT_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_LABELS_FONT_COLOR_TYPE = Color.class;
 
 
@@ -536,13 +536,6 @@ public class ColorBarLayerType extends LayerType {
     public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
     public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TICKMARKS_COLOR_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".color";
-    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tick Color";
-    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
-    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Color";
-    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.YELLOW;
-    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
-
     public static final String PROPERTY_TICKMARKS_LENGTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".length";
     public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Tick Length";
     public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
@@ -557,7 +550,12 @@ public class ColorBarLayerType extends LayerType {
     public static final int PROPERTY_TICKMARKS_WIDTH_DEFAULT = 4;
     public static final Class PROPERTY_TICKMARKS_WIDTH_TYPE = Integer.class;
 
-
+    public static final String PROPERTY_TICKMARKS_COLOR_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".color";
+    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tick Color";
+    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
+    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Color";
+    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
 
 
 
@@ -583,14 +581,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Backdrop Color";
     public static final String PROPERTY_BACKDROP_COLOR_TOOLTIP = "Set color of the backdrop of the color bar legend backdrop";
     private static final String PROPERTY_BACKDROP_COLOR_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Color";
-    public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.BLACK;
+    public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.WHITE;
     public static final Class PROPERTY_BACKDROP_COLOR_TYPE = Color.class;
 
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_BACKDROP_ROOT_KEY + "transparency";
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Trans";
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the color bar legend backdrop";
     private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Transparency";
-    public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.5;
+    public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.0;
     public static final Class PROPERTY_BACKDROP_TRANSPARENCY_TYPE = Double.class;
 
 
@@ -651,7 +649,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_LABEL = "Border Width";
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_TOOLTIP = "Width of border line";
     private static final String PROPERTY_LEGEND_BORDER_WIDTH_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderWidth";
-    public static final int PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT = 1;
+    public static final int PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT = 3;
     public static final Class PROPERTY_LEGEND_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_LEGEND_BORDER_COLOR_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.color";
@@ -931,67 +929,67 @@ public class ColorBarLayerType extends LayerType {
 
         // Title Units Section
 
-        final Property titleUnitsSectionModel = Property.create(PROPERTY_TITLE_UNITS_SECTION_KEY,
+        final Property titleUnitsSectionModel = Property.create(PROPERTY_UNITS_SECTION_KEY,
                 Boolean.class,
                 true,
                 true);
-        titleUnitsSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_SECTION_ALIAS);
+        titleUnitsSectionModel.getDescriptor().setAlias(PROPERTY_UNITS_SECTION_ALIAS);
         vc.addProperty(titleUnitsSectionModel);
 
 
-        final Property titleUnitsShowModel = Property.create(PROPERTY_TITLE_UNITS_SHOW_KEY,
-                PROPERTY_TITLE_UNITS_SHOW_TYPE,
-                PROPERTY_TITLE_UNITS_SHOW_DEFAULT,
+        final Property titleUnitsShowModel = Property.create(PROPERTY_UNITS_SHOW_KEY,
+                PROPERTY_UNITS_SHOW_TYPE,
+                PROPERTY_UNITS_SHOW_DEFAULT,
                 true);
-        titleUnitsShowModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_SHOW_ALIAS);
+        titleUnitsShowModel.getDescriptor().setAlias(PROPERTY_UNITS_SHOW_ALIAS);
         vc.addProperty(titleUnitsShowModel);
 
 
-        final Property titleUnitsTextModel = Property.create(PROPERTY_TITLE_UNITS_TEXT_KEY,
-                PROPERTY_TITLE_UNITS_TEXT_TYPE,
-                PROPERTY_TITLE_UNITS_TEXT_DEFAULT,
+        final Property titleUnitsTextModel = Property.create(PROPERTY_UNITS_TEXT_KEY,
+                PROPERTY_UNITS_TEXT_TYPE,
+                PROPERTY_UNITS_TEXT_DEFAULT,
                 true);
-        titleUnitsTextModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_TEXT_ALIAS);
+        titleUnitsTextModel.getDescriptor().setAlias(PROPERTY_UNITS_TEXT_ALIAS);
         vc.addProperty(titleUnitsTextModel);
 
 
-        final Property titleUnitsBoldModel = Property.create(PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
-                PROPERTY_TITLE_UNITS_FONT_BOLD_TYPE,
-                PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT,
+        final Property titleUnitsBoldModel = Property.create(PROPERTY_UNITS_FONT_BOLD_KEY,
+                PROPERTY_UNITS_FONT_BOLD_TYPE,
+                PROPERTY_UNITS_FONT_BOLD_DEFAULT,
                 true);
-        titleUnitsBoldModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_FONT_BOLD_ALIAS);
+        titleUnitsBoldModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_BOLD_ALIAS);
         vc.addProperty(titleUnitsBoldModel);
 
 
-        final Property titleUnitsItalicModel = Property.create(PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
-                PROPERTY_TITLE_UNITS_FONT_ITALIC_TYPE,
-                PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT,
+        final Property titleUnitsItalicModel = Property.create(PROPERTY_UNITS_FONT_ITALIC_KEY,
+                PROPERTY_UNITS_FONT_ITALIC_TYPE,
+                PROPERTY_UNITS_FONT_ITALIC_DEFAULT,
                 true);
-        titleUnitsItalicModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_FONT_ITALIC_ALIAS);
+        titleUnitsItalicModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_ITALIC_ALIAS);
         vc.addProperty(titleUnitsItalicModel);
 
 
-        final Property titleUnitsFontNameModel = Property.create(PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
-                PROPERTY_TITLE_UNITS_FONT_NAME_TYPE,
-                PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT,
+        final Property titleUnitsFontNameModel = Property.create(PROPERTY_UNITS_FONT_NAME_KEY,
+                PROPERTY_UNITS_FONT_NAME_TYPE,
+                PROPERTY_UNITS_FONT_NAME_DEFAULT,
                 true);
-        titleUnitsFontNameModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_FONT_NAME_ALIAS);
+        titleUnitsFontNameModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_NAME_ALIAS);
         vc.addProperty(titleUnitsFontNameModel);
 
 
-        final Property titleUnitsColorModel = Property.create(PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
-                PROPERTY_TITLE_UNITS_FONT_COLOR_TYPE,
-                PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT,
+        final Property titleUnitsColorModel = Property.create(PROPERTY_UNITS_FONT_COLOR_KEY,
+                PROPERTY_UNITS_FONT_COLOR_TYPE,
+                PROPERTY_UNITS_FONT_COLOR_DEFAULT,
                 true);
-        titleUnitsColorModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_FONT_COLOR_ALIAS);
+        titleUnitsColorModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_COLOR_ALIAS);
         vc.addProperty(titleUnitsColorModel);
 
 
-        final Property titleUnitsFontSizeModel = Property.create(PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
-                PROPERTY_TITLE_UNITS_FONT_SIZE_TYPE,
-                PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT,
+        final Property titleUnitsFontSizeModel = Property.create(PROPERTY_UNITS_FONT_SIZE_KEY,
+                PROPERTY_UNITS_FONT_SIZE_TYPE,
+                PROPERTY_UNITS_FONT_SIZE_DEFAULT,
                 true);
-        titleUnitsFontSizeModel.getDescriptor().setAlias(PROPERTY_TITLE_UNITS_FONT_SIZE_ALIAS);
+        titleUnitsFontSizeModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_SIZE_ALIAS);
         vc.addProperty(titleUnitsFontSizeModel);
 
 
