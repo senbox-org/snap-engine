@@ -25,6 +25,8 @@ import org.esa.snap.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(LongTestRunner.class)
 public class TestElevations {
 
@@ -45,15 +47,19 @@ public class TestElevations {
 
         double ace30 = ace30Dem.getElevation(toronto);
         SystemUtils.LOG.info("ace30 = " + ace30);
+        assertEquals(ace30, 59.22894596680049, 0.0001);
 
         double srtm3 = srtm3Dem.getElevation(toronto);
         SystemUtils.LOG.info("SRTM3 = " + srtm3);
+        assertEquals(srtm3, 63.27811676636915, 0.0001);
 
         double srtm1 = srtm1Dem.getElevation(toronto);
         SystemUtils.LOG.info("SRTM1 = " + srtm1);
+        assertEquals(srtm1, 63.5916047484657, 0.0001);
 
         double cdem = cdemDem.getElevation(toronto);
         SystemUtils.LOG.info("CDEM = " + cdem);
+        assertEquals(cdem, 52.68920413692533, 0.0001);
     }
 }
 
