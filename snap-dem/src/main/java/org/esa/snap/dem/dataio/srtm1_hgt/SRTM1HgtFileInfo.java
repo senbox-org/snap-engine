@@ -27,7 +27,7 @@ import java.text.ParseException;
  */
 public class SRTM1HgtFileInfo {
 
-    private static final EastingNorthingParser PARSER = new EastingNorthingParser();
+    private final EastingNorthingParser PARSER = new EastingNorthingParser();
 
     private String fileName;
     private float easting;
@@ -67,7 +67,7 @@ public class SRTM1HgtFileInfo {
         northing = eastingNorthing[1];
     }
 
-    public static int[] parseEastingNorthing(final String text) throws ParseException {
+    public int[] parseEastingNorthing(final String text) throws ParseException {
         Guardian.assertNotNullOrEmpty("text", text);
         if (text.length() == 0) {
             return null;
