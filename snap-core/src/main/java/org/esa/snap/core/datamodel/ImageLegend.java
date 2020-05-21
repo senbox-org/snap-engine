@@ -725,11 +725,18 @@ public class ImageLegend {
 
         if (colorBarLayer) {
 
+            // todo want to use legend size for scaling
+            createColorBarInfos();
+            initDrawing();
+
+
             double oneHundredPercentScalingFactor;
             if (orientation == HORIZONTAL) {
-                oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) getColorBarLength();
+//                oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) getColorBarLength();
+                oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
             } else {
-                oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) getColorBarLength();
+//                oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) getColorBarLength();
+                oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
             }
 
             scalingFactor = getLayerScaling() / 100.0;
