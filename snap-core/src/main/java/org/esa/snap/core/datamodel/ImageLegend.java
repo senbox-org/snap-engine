@@ -825,7 +825,7 @@ public class ImageLegend {
 //        return new File(SystemUtils.getApplicationDataDir(), "beam-ui/auxdata/color-palettes");
 //    }
 
-    private void createColorBarInfos() {
+    public void createColorBarInfos() {
 
         final double min = getImageInfo().getColorPaletteDef().getMinDisplaySample();
         final double max = getImageInfo().getColorPaletteDef().getMaxDisplaySample();

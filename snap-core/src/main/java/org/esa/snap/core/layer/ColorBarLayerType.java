@@ -23,6 +23,8 @@ import java.awt.geom.AffineTransform;
 public class ColorBarLayerType extends LayerType {
 
     public static final String COLOR_BAR_LAYER_NAME = "ColorBar";
+    public static final String COLOR_BAR_LEGEND_NAME = "Color Bar Legend";
+    public static final String COLOR_BAR_LEGEND_NAME_LOWER_CASE = "color bar legend";
 
     public static final String OPTION_HORIZONTAL = "Horizontal";
     public static final String OPTION_VERTICAL = "Vertical";
