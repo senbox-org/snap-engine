@@ -180,26 +180,13 @@ public class ColorBarLayer extends Layer {
 
             allowImageLegendReset = false;
 
-            if (imageLegend != null) {
-                if (getLabelValuesActual() == null || !getLabelValuesActual().equals(imageLegend.getCustomLabelValues())) {
-                    setLabelValuesActual(imageLegend.getCustomLabelValues());
-                }
-            }
+            setLabelValuesActual(imageLegend.getCustomLabelValues());
 
-            if (imageLegend != null) {
-                if (getTitle() == null || !getTitle().equals(imageLegend.getTitleText())) {
-                    setTitle(imageLegend.getTitleText());
-                }
-            }
+            setTitle(imageLegend.getTitleText());
 
-            if (imageLegend != null) {
-                if (getUnits() == null || !getUnits().equals(imageLegend.getUnitsText())) {
-                    setUnits(imageLegend.getUnitsText());
-                }
-            }
+            setUnits(units);
 
             allowImageLegendReset = true;
-
 
         }
 
@@ -785,7 +772,9 @@ public class ColorBarLayer extends Layer {
     private void setTitle(String value) {
         try {
             String valueCurrent = getTitle();
+            System.out.println("Current title = " + valueCurrent);
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                System.out.println("Inside and setting title to " + value);
                 getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {
@@ -840,6 +829,7 @@ public class ColorBarLayer extends Layer {
     private void setUnits(String value) {
         try {
             String valueCurrent = getUnits();
+
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
                 getConfiguration().getProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY).setValue((Object) value);
             }

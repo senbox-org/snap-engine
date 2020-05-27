@@ -719,13 +719,11 @@ public class ImageLegend {
     }
 
 
-    public BufferedImage createImage(Dimension imageLayerDimension, boolean colorBarLayer) {
+    public BufferedImage createImage(Dimension imageLayerDimension, boolean scaleToDimension) {
 
-        double scalingFactor = 1;
 
-        if (colorBarLayer) {
+//        if (scaleToDimension) {
 
-            // todo want to use legend size for scaling
             createColorBarInfos();
             initDrawing();
 
@@ -739,14 +737,16 @@ public class ImageLegend {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
             }
 
-            scalingFactor = getLayerScaling() / 100.0;
+            double scalingFactor = getLayerScaling() / 100.0;
             scalingFactor = scalingFactor * oneHundredPercentScalingFactor;
 
-        } else {
-
-            scalingFactor = DEFAULT_FILE_LENGTH_PIXELS / (double) getColorBarLength();
-            // todo DANNY
-        }
+//        }
+//
+//        else {
+//
+//            scalingFactor = DEFAULT_FILE_LENGTH_PIXELS / (double) getColorBarLength();
+//            // todo DANNY
+//        }
 
         int tmpLabelsFontSize = getLabelsFontSize();
         int tmpTickmarkLength = getTickmarkLength();
