@@ -103,9 +103,9 @@ public class DEMFactory {
             final int w = srcProduct.getSceneRasterWidth();
             final int h = srcProduct.getSceneRasterHeight();
             final GeoPos geo1 = geocoding.getGeoPos(new PixelPos(0, 0), null);
-            final GeoPos geo2 = geocoding.getGeoPos(new PixelPos(w, 0), null);
-            final GeoPos geo3 = geocoding.getGeoPos(new PixelPos(w, h), null);
-            final GeoPos geo4 = geocoding.getGeoPos(new PixelPos(0, h), null);
+            final GeoPos geo2 = geocoding.getGeoPos(new PixelPos(w-1, 0), null);
+            final GeoPos geo3 = geocoding.getGeoPos(new PixelPos(w-1, h-1), null);
+            final GeoPos geo4 = geocoding.getGeoPos(new PixelPos(0, h-1), null);
 
             if ((geo1.getLat() > 60 && geo2.getLat() > 60 && geo3.getLat() > 60 && geo4.getLat() > 60) ||
                     (geo1.getLat() < -60 && geo2.getLat() < -60 && geo3.getLat() < -60 && geo4.getLat() < -60)) {

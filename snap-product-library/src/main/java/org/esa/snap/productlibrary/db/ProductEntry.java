@@ -235,9 +235,9 @@ public class ProductEntry {
         final int h = product.getSceneRasterHeight();
 
         geoCoding.getGeoPos(new PixelPos(0, 0), firstNear);
-        geoCoding.getGeoPos(new PixelPos(w, 0), firstFar);
-        geoCoding.getGeoPos(new PixelPos(0, h), lastNear);
-        geoCoding.getGeoPos(new PixelPos(w, h), lastFar);
+        geoCoding.getGeoPos(new PixelPos(w-1, 0), firstFar);
+        geoCoding.getGeoPos(new PixelPos(0, h-1), lastNear);
+        geoCoding.getGeoPos(new PixelPos(w-1, h-1), lastFar);
     }
 
     private static GeoPos[] getSMOSGeoBoundary(final Product product) {
