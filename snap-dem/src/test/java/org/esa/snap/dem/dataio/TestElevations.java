@@ -25,7 +25,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(LongTestRunner.class)
 public class TestElevations {
 
     private static final GeoPos toronto = new GeoPos(43.6532, -79.3832);
