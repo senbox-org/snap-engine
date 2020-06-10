@@ -300,45 +300,52 @@ public final class OperatorUtils {
             final double subSamplingX, final double subSamplingY,
             final PixelPos[] newTiePointPos) {
 
-        TiePointGrid latGrid = null;
-        TiePointGrid lonGrid = null;
+        final GeoCoding srcGeoCoding = sourceProduct.getSceneGeoCoding();
 
-        for (TiePointGrid srcTPG : sourceProduct.getTiePointGrids()) {
-
-            final float[] tiePoints = new float[gridWidth * gridHeight];
-            for (int k = 0; k < newTiePointPos.length; k++) {
-                tiePoints[k] = (float)srcTPG.getPixelDouble(newTiePointPos[k].x, newTiePointPos[k].y);
-            }
-
-            int discontinuity = TiePointGrid.DISCONT_NONE;
-            if (srcTPG.getName().equals(TPG_LONGITUDE)) {
-                discontinuity = TiePointGrid.DISCONT_AT_180;
-            }
-
-            final TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
-                    gridWidth,
-                    gridHeight,
-                    0.0f,
-                    0.0f,
-                    subSamplingX,
-                    subSamplingY,
-                    tiePoints,
-                    discontinuity);
-
-            TiePointGrid prevTPG = targetProduct.getTiePointGrid(tgtTPG.getName());
-            if(prevTPG != null) {
-                targetProduct.removeTiePointGrid(prevTPG);
-            }
-            targetProduct.addTiePointGrid(tgtTPG);
-
-            if (srcTPG.getName().equals(TPG_LATITUDE)) {
-                latGrid = tgtTPG;
-            } else if (srcTPG.getName().equals(TPG_LONGITUDE)) {
-                lonGrid = tgtTPG;
-            }
+        final float[] latTiePoints = new float[gridWidth * gridHeight];
+        final float[] lonTiePoints = new float[gridWidth * gridHeight];
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos pixelPos = new PixelPos();
+        for (int k = 0; k < newTiePointPos.length; k++) {
+            pixelPos.setLocation(newTiePointPos[k].x, newTiePointPos[k].y);
+            srcGeoCoding.getGeoPos(pixelPos, geoPos);
+            latTiePoints[k] = (float)geoPos.lat;
+            lonTiePoints[k] = (float)geoPos.lon;
         }
 
-        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGrid tgtLatTPG = new TiePointGrid(TPG_LATITUDE,
+                gridWidth,
+                gridHeight,
+                0.0D,
+                0.0D,
+                subSamplingX,
+                subSamplingY,
+                latTiePoints,
+                TiePointGrid.DISCONT_NONE);
+
+        final TiePointGrid tgtLonTPG = new TiePointGrid(TPG_LONGITUDE,
+                gridWidth,
+                gridHeight,
+                0.0f,
+                0.0f,
+                subSamplingX,
+                subSamplingY,
+                lonTiePoints,
+                TiePointGrid.DISCONT_AT_180);
+
+        TiePointGrid prevLatTPG = targetProduct.getTiePointGrid(tgtLatTPG.getName());
+        if (prevLatTPG != null) {
+            targetProduct.removeTiePointGrid(prevLatTPG);
+        }
+        targetProduct.addTiePointGrid(tgtLatTPG);
+
+        TiePointGrid prevLonTPG = targetProduct.getTiePointGrid(tgtLonTPG.getName());
+        if (prevLonTPG != null) {
+            targetProduct.removeTiePointGrid(prevLonTPG);
+        }
+        targetProduct.addTiePointGrid(tgtLonTPG);
+
+        final TiePointGeoCoding gc = new TiePointGeoCoding(tgtLatTPG, tgtLonTPG);
 
         targetProduct.setSceneGeoCoding(gc);
     }
