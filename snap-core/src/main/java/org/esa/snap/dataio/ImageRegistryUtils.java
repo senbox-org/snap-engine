@@ -20,10 +20,10 @@ public class ImageRegistryUtils {
         IIORegistry.getDefaultInstance().deregisterServiceProvider(imageInputStreamSpi);
     }
 
-    public static FileImageInputStreamSpi registerImageInputStreamSpi() {
-        FileImageInputStreamSpi imageInputStreamSpi = null;
+    public static synchronized FileImageInputStreamSpi registerImageInputStreamSpi() {
         IIORegistry defaultInstance = IIORegistry.getDefaultInstance();
-        if (defaultInstance.getServiceProviderByClass(FileImageInputStreamSpi.class) == null) {
+        FileImageInputStreamSpi imageInputStreamSpi = defaultInstance.getServiceProviderByClass(FileImageInputStreamSpi.class);
+        if (imageInputStreamSpi == null) {
             // register only if not already registered
             ImageInputStreamSpi toUnorder = null;
             Iterator<ImageInputStreamSpi> serviceProviders = defaultInstance.getServiceProviders(ImageInputStreamSpi.class, true);
