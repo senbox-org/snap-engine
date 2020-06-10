@@ -3,7 +3,7 @@ package org.esa.snap.dataio;
 import javax.imageio.stream.ImageInputStreamImpl;
 import java.io.IOException;
 
-class FileChannelImageInputStream extends ImageInputStreamImpl {
+public class FileChannelImageInputStream extends ImageInputStreamImpl {
 
     private FileChannelInputStream fileChannelInputStream;
 
