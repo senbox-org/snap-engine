@@ -30,6 +30,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
+import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 
 import javax.media.jai.JAI;
 import java.io.File;
@@ -165,10 +166,10 @@ public class TestUtils {
 
     private static void addGeoCoding(final Product product) {
 
-        final TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, 2, 2, 0.5f, 0.5f,
                                                       product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                                                       new float[]{10.0f, 10.0f, 5.0f, 5.0f});
-        final TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, 2, 2, 0.5f, 0.5f,
                                                       product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                                                       new float[]{10.0f, 10.0f, 5.0f, 5.0f},
                                                       TiePointGrid.DISCONT_AT_360);
