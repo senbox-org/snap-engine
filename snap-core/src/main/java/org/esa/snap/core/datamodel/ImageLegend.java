@@ -628,7 +628,11 @@ public class ImageLegend {
     }
 
     public String getUnitsText() {
-        return (unitsText == null) ? "null-test" : unitsText;
+        if (unitsText == null || unitsText.length() == 0) {
+            return "";
+        } else {
+            return unitsText;
+        }
     }
 
     public void setUnitsText(String unitsText) {

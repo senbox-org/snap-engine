@@ -478,6 +478,22 @@ public class BindingContext {
         component.setEnabled(enabled);
     }
 
+
+    /**
+     * Sets the <i>enabled</i> state of the components associated with {@code targetProperty}.
+     * Enablement of the target property matches that of the source property.
+     *
+     * @param targetPropertyName  The name of the target property.
+     * @param sourcePropertyName  The name of the source property.
+     */
+    public Enablement bindEnabledState(final String targetPropertyName,
+                                       final String sourcePropertyName) {
+        return bindEnabledState(targetPropertyName, true,
+                new EqualValuesCondition(sourcePropertyName, true));
+    }
+
+
+
     /**
      * Sets the <i>enabled</i> state of the components associated with {@code targetProperty}.
      * If the current value of {@code sourceProperty} equals {@code sourcePropertyValue} then

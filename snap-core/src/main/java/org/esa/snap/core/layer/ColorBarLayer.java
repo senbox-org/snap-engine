@@ -22,12 +22,16 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
+import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.EngineConfig;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
+import java.io.File;
+import java.util.prefs.Preferences;
 
 
 /**
@@ -66,6 +70,7 @@ public class ColorBarLayer extends Layer {
         setTransparency(0.0);
 
 
+
     }
 
 
@@ -95,8 +100,16 @@ public class ColorBarLayer extends Layer {
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
             String title = (ColorBarLayerType.NULL_SPECIAL.equals(getTitle())) ? raster.getName() : getTitle();
-            String units = (ColorBarLayerType.NULL_SPECIAL.equals(getUnits())) ? "(" + raster.getUnit() + ")" : getUnits();
 
+            String unitsText = "";
+            if (ColorBarLayerType.NULL_SPECIAL.equals(getUnits())) {
+                String unit = raster.getUnit();
+                if (unit != null && unit.length() > 0) {
+                    unitsText = "(" + raster.getUnit() + ")";
+                }
+            } else {
+                unitsText = getUnits();
+            }
 
 
             imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
@@ -111,7 +124,7 @@ public class ColorBarLayer extends Layer {
             imageLegend.setTitleFontType(getTitleFontType());
 
             imageLegend.setShowUnits(isShowTitleUnits());
-            imageLegend.setUnitsText(units);
+            imageLegend.setUnitsText(unitsText);
             imageLegend.setUnitsFontSize(getUnitsFontSize());
             imageLegend.setUnitsColor(getUnitsColor());
             imageLegend.setUnitsFontName(getUnitsFontName());
@@ -184,7 +197,7 @@ public class ColorBarLayer extends Layer {
 
             setTitle(imageLegend.getTitleText());
 
-            setUnits(units);
+            setUnits(unitsText);
 
             allowImageLegendReset = true;
 
