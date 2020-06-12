@@ -119,11 +119,13 @@ public class ResourceInstaller {
         if (!Files.exists(targetFile)) {
             return true;
         }
-        boolean sizeIsDifferent = Files.size(targetFile) != Files.size(resource);
-        FileTime existingFileModifiedTime = Files.getLastModifiedTime(targetFile);
-        FileTime newFileModifiedTime = Files.getLastModifiedTime(resource);
-        boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
-        return (newFileIsNewer || sizeIsDifferent) && Files.isRegularFile(resource);
+        final Path realTargetFile = targetFile.toRealPath();
+        final Path realResource = resource.toRealPath();
+        final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource);
+        final FileTime existingFileModifiedTime = Files.getLastModifiedTime(realTargetFile);
+        final FileTime newFileModifiedTime = Files.getLastModifiedTime(realResource);
+        final boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
+        return newFileIsNewer || sizeIsDifferent;
     }
 
     private Collection<Path> collectResources(String patternString) throws IOException {
