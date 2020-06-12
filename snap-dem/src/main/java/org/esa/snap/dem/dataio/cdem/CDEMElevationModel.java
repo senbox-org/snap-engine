@@ -90,14 +90,10 @@ public final class CDEMElevationModel extends BaseElevationModel {
         final File demInstallDir = descriptor.getDemInstallDir();
         final File demFolder = new File(demInstallDir, folder);
 
-        File[] files = demFolder.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".zip");
-            }
-        });
+        File[] files = demFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
         if (files == null || files.length == 0) {
             download(folder, demFolder);
+            files = demFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
         }
         if (files != null && files.length > 0) {
             List<CDEMFile> tileList = new ArrayList<>();
