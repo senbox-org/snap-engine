@@ -1,37 +1,45 @@
 package org.esa.snap.core.image;
 
-import com.bc.ceres.glevel.MultiLevelModel;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.jai.JAIUtils;
 
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.awt.color.ColorSpace;
+import java.awt.image.*;
 
 /**
  * Created by jcoravu on 11/12/2019.
  */
-public abstract class AbstractSubsetTileOpImage extends SingleBandedOpImage {
+public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
 
-    protected final LevelImageSupport levelImageSupport;
-    protected final Point imageReadOffset;
-    protected final Point levelTileOffsetFromReadBounds;
+    private final ImageReadBoundsSupport imageBoundsSupport;
+    private final int levelTileOffsetFromReadBoundsX;
+    private final int levelTileOffsetFromReadBoundsY;
 
-    protected AbstractSubsetTileOpImage(MultiLevelModel imageMultiLevelModel, int dataBufferType, Rectangle imageReadBounds,
-                                        Dimension tileSize, Point tileOffsetFromReadBounds, int level) {
+    protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
+                                        ImageReadBoundsSupport imageBoundsSupport) {
 
-        this(dataBufferType, imageReadBounds, tileSize, ImageUtils.computeLevelTileDimension(tileSize, level),
-                tileOffsetFromReadBounds, ResolutionLevel.create(imageMultiLevelModel, level));
+        this(ImageUtils.buildTileImageLayout(dataBufferType, tileWidth, tileHeight, imageBoundsSupport.getLevel()),
+             tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageBoundsSupport);
     }
 
-    protected AbstractSubsetTileOpImage(int dataBufferType, Rectangle imageReadBounds, Dimension tileSize, Dimension subTileSize,
-                                      Point tileOffsetFromReadBounds, ResolutionLevel resolutionLevel) {
+    private AbstractSubsetTileOpImage(ImageLayout layout, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport imageBoundsSupport) {
+        super(layout, null, layout.getSampleModel(null),
+                layout.getMinX(null), layout.getMinY(null),
+                layout.getWidth(null), layout.getHeight(null));
 
-        super(dataBufferType, null, tileSize.width, tileSize.height, subTileSize, null, resolutionLevel);
+        this.imageBoundsSupport = imageBoundsSupport;
+        this.levelTileOffsetFromReadBoundsX = ImageUtils.computeLevelSize(tileOffsetFromReadBoundsX, imageBoundsSupport.getLevel());
+        this.levelTileOffsetFromReadBoundsY = ImageUtils.computeLevelSize(tileOffsetFromReadBoundsY, imageBoundsSupport.getLevel());
 
-        this.levelTileOffsetFromReadBounds = ImageUtils.computeLevelOffset(tileOffsetFromReadBounds, resolutionLevel.getIndex());
-        this.imageReadOffset = new Point(imageReadBounds.x, imageReadBounds.y);
-        this.levelImageSupport = new LevelImageSupport(imageReadBounds.width, imageReadBounds.height, resolutionLevel);
+        if (getTileCache() == null) {
+            setTileCache(JAI.getDefaultInstance().getTileCache());
+        }
     }
 
     @Override
@@ -41,38 +49,42 @@ public abstract class AbstractSubsetTileOpImage extends SingleBandedOpImage {
         dispose();
     }
 
+    protected final int getLevel() {
+        return imageBoundsSupport.getLevel();
+    }
+
     protected final Rectangle computeIntersectionOnNormalBounds(Rectangle levelDestinationRectangle) {
         int sourceImageWidth = getImageWidth();
         int sourceImageHeight = getImageHeight();
 
-        int destinationSourceWidth = this.levelImageSupport.getSourceWidth(levelDestinationRectangle.width);
-        int destinationSourceHeight = this.levelImageSupport.getSourceHeight(levelDestinationRectangle.height);
-        int destinationSourceX = this.levelImageSupport.getSourceX(this.levelTileOffsetFromReadBounds.x + levelDestinationRectangle.x);
-        int destinationSourceY = this.levelImageSupport.getSourceY(this.levelTileOffsetFromReadBounds.y + levelDestinationRectangle.y);
+        int destinationSourceWidth = this.imageBoundsSupport.getSourceWidth(levelDestinationRectangle.width);
+        int destinationSourceHeight = this.imageBoundsSupport.getSourceHeight(levelDestinationRectangle.height);
+        int destinationSourceX = this.imageBoundsSupport.getSourceX(this.levelTileOffsetFromReadBoundsX + levelDestinationRectangle.x);
+        int destinationSourceY = this.imageBoundsSupport.getSourceY(this.levelTileOffsetFromReadBoundsY + levelDestinationRectangle.y);
         if (destinationSourceX + destinationSourceWidth > sourceImageWidth) {
             destinationSourceWidth = sourceImageWidth - destinationSourceX;
         }
         if (destinationSourceY + destinationSourceHeight > sourceImageHeight) {
             destinationSourceHeight = sourceImageHeight - destinationSourceY;
         }
-        destinationSourceX += this.imageReadOffset.x;
-        destinationSourceY += this.imageReadOffset.y;
+        destinationSourceX += this.imageBoundsSupport.getSourceX();
+        destinationSourceY += this.imageBoundsSupport.getSourceY();
 
         Rectangle normalTileBoundsInSourceImage = new Rectangle(destinationSourceX, destinationSourceY, destinationSourceWidth, destinationSourceHeight);
-        Rectangle normalSourceImageBounds = new Rectangle(this.imageReadOffset.x, this.imageReadOffset.y, sourceImageWidth, sourceImageHeight);
+        Rectangle normalSourceImageBounds = new Rectangle(this.imageBoundsSupport.getSourceX(), this.imageBoundsSupport.getSourceY(), sourceImageWidth, sourceImageHeight);
         return normalSourceImageBounds.intersection(normalTileBoundsInSourceImage);
     }
 
     protected final void writeDataOnLevelRaster(Raster normalRasterData, Rectangle normalBoundsIntersection, WritableRaster levelDestinationRaster,
                                                 Rectangle levelDestinationRectangle, int bandIndex) {
 
-        int offsetY = this.levelTileOffsetFromReadBounds.y + levelDestinationRectangle.y;
-        int offsetX = this.levelTileOffsetFromReadBounds.x + levelDestinationRectangle.x;
+        int offsetY = this.levelTileOffsetFromReadBoundsY + levelDestinationRectangle.y;
+        int offsetX = this.levelTileOffsetFromReadBoundsX + levelDestinationRectangle.x;
         for (int y = 0; y < levelDestinationRectangle.height; y++) {
-            int currentSrcYOffset = this.imageReadOffset.y + computeSourceY(offsetY + y);
+            int currentSrcYOffset = this.imageBoundsSupport.getSourceY() + computeSourceY(offsetY + y);
             validateCoordinate(currentSrcYOffset, normalBoundsIntersection.y, normalBoundsIntersection.height);
             for (int x = 0; x < levelDestinationRectangle.width; x++) {
-                int currentSrcXOffset = this.imageReadOffset.x + computeSourceX(offsetX + x);
+                int currentSrcXOffset = this.imageBoundsSupport.getSourceX() + computeSourceX(offsetX + x);
                 validateCoordinate(currentSrcXOffset, normalBoundsIntersection.x, normalBoundsIntersection.width);
                 double value = normalRasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, bandIndex);
                 levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, value);
@@ -94,10 +106,10 @@ public abstract class AbstractSubsetTileOpImage extends SingleBandedOpImage {
             destData = ProductData.createInstance(normalTileData.getType(), levelDestinationRectangle.width * levelDestinationRectangle.height);
         }
         for (int y = 0; y < levelDestinationRectangle.height; y++) {
-            int currentSrcYOffset = this.imageReadOffset.y + this.levelImageSupport.getSourceY(this.levelTileOffsetFromReadBounds.y + levelDestinationRectangle.y + y);
+            int currentSrcYOffset = this.imageBoundsSupport.getSourceY() + this.imageBoundsSupport.getSourceY(this.levelTileOffsetFromReadBoundsY + levelDestinationRectangle.y + y);
             int currentDestYOffset = y * levelDestinationRectangle.width;
             for (int x = 0; x < levelDestinationRectangle.width; x++) {
-                int currentSrcXOffset = this.imageReadOffset.x + this.levelImageSupport.getSourceX(this.levelTileOffsetFromReadBounds.x + levelDestinationRectangle.x + x);
+                int currentSrcXOffset = this.imageBoundsSupport.getSourceX() + this.imageBoundsSupport.getSourceX(this.levelTileOffsetFromReadBoundsX + levelDestinationRectangle.x + x);
                 double value = getSourceValue(normalTileBoundsIntersection, normalTileData, currentSrcXOffset, currentSrcYOffset);
                 destData.setElemDoubleAt(currentDestYOffset + x, value);
             }
@@ -108,19 +120,19 @@ public abstract class AbstractSubsetTileOpImage extends SingleBandedOpImage {
     }
 
     private int computeSourceX(double x) {
-        return this.levelImageSupport.getSourceCoord(x, 0, this.levelImageSupport.getSourceWidth()-1);
+        return this.imageBoundsSupport.getSourceCoord(x, 0, this.imageBoundsSupport.getSourceWidth()-1);
     }
 
     private int computeSourceY(double y) {
-        return this.levelImageSupport.getSourceCoord(y, 0, this.levelImageSupport.getSourceHeight()-1);
+        return this.imageBoundsSupport.getSourceCoord(y, 0, this.imageBoundsSupport.getSourceHeight()-1);
     }
 
     private int getImageWidth() {
-        return this.levelImageSupport.getSourceWidth();
+        return this.imageBoundsSupport.getSourceWidth();
     }
 
     private int getImageHeight() {
-        return this.levelImageSupport.getSourceHeight();
+        return this.imageBoundsSupport.getSourceHeight();
     }
 
     private static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {

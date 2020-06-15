@@ -27,6 +27,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import java.awt.*;
@@ -43,6 +44,63 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+
+    public static ImageLayout buildMosaicImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level) {
+        if (imageWidth < 0) {
+            throw new IllegalArgumentException("imageWidth");
+        }
+        if (imageHeight < 0) {
+            throw new IllegalArgumentException("imageHeight");
+        }
+
+        int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
+        int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
+
+        Dimension defaultTileSize = JAI.getDefaultTileSize();
+        int levelTileWidth = defaultTileSize.width;
+        int levelTileHeight = defaultTileSize.height;
+
+        SampleModel sampleModel = null;
+        ColorModel colorModel = null;
+        if (dataBufferType != null) {
+            sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType.intValue(), levelTileWidth, levelTileHeight);
+            colorModel = PlanarImage.createColorModel(sampleModel);
+            if (colorModel == null) {
+                int dataType = sampleModel.getDataType();
+                ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+                int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
+                colorModel = new ComponentColorModel(colorSpace, nBits, false, true, Transparency.OPAQUE, dataType);
+            }
+        }
+        return new ImageLayout(0, 0, levelImageWidth, levelImageHeight, 0, 0, levelTileWidth, levelTileHeight, sampleModel, colorModel);
+    }
+
+    public static ImageLayout buildTileImageLayout(int dataBufferType, int imageWidth, int imageHeight, int level) {
+        if (imageWidth < 0) {
+            throw new IllegalArgumentException("imageWidth");
+        }
+        if (imageHeight < 0) {
+            throw new IllegalArgumentException("imageHeight");
+        }
+
+        int levelSourceWidth = ImageUtils.computeLevelSize(imageWidth, level);
+        int levelSourceHeight = ImageUtils.computeLevelSize(imageHeight, level);
+
+        int levelTileSizeWidth = JAIUtils.computePreferredTileSize(levelSourceWidth, 1);
+        int levelTileSizeHeight = JAIUtils.computePreferredTileSize(levelSourceHeight, 1);
+
+        SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, levelTileSizeWidth, levelTileSizeHeight);
+
+        ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
+        if (colorModel == null) {
+            int dataType = sampleModel.getDataType();
+            ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+            int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
+            colorModel = new ComponentColorModel(colorSpace, nBits, false, true, Transparency.OPAQUE, dataType);
+        }
+
+        return new ImageLayout(0, 0, levelSourceWidth, levelSourceHeight, 0, 0, levelTileSizeWidth, levelTileSizeHeight, sampleModel, colorModel);
+    }
 
     public static CrsGeoCoding buildCrsGeoCoding(Point.Double coordinateUpperLeft, Point.Double resolution, Dimension defaultSize,
                                                  CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)

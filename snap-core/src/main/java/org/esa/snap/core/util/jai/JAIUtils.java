@@ -806,7 +806,7 @@ public class JAIUtils {
                              computePreferredTileSize(imageHeight, granularity));
     }
 
-    private static int computePreferredTileSize(int imageSize, int granularity) {
+    public static int computePreferredTileSize(int imageSize, int granularity) {
         if (imageSize <= MAX_TILE_SIZE) {
             return imageSize;
         }

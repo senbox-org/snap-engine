@@ -47,6 +47,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ImageUtils;
@@ -62,14 +63,15 @@ import org.jdom.input.DOMBuilder;
 import org.xml.sax.SAXException;
 
 import javax.imageio.spi.ImageInputStreamSpi;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
-import java.awt.image.DataBuffer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
+import java.awt.color.ColorSpace;
+import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -314,7 +316,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
                     GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredMosaicTileSize,
                                                                                            bandIndex, band.getGeoCoding(), isGlobalShifted180, noDataValue);
-                    band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
+
+                    ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(dataBufferType, productBounds.width, productBounds.height, 0);
+                    band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
                 }
                 bandIndex++; // increment the band index for non virtual bands
             }

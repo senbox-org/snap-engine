@@ -9,5 +9,6 @@ import java.awt.*;
  */
 public interface UncompressedTileOpImageCallback<TileDataType> {
 
-    public PlanarImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffsetFromCellReadBounds, Dimension tileSize, TileDataType tileData);
+    public PlanarImage buildTileOpImage(ImageReadBoundsSupport imageReadBoundsSupport, int tileWidth, int tileHeight,
+                                        int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, TileDataType tileData);
 }

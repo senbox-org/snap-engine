@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.geotiff;
 
-import com.bc.ceres.glevel.MultiLevelModel;
 import org.esa.snap.core.image.AbstractSubsetTileOpImage;
+import org.esa.snap.core.image.ImageReadBoundsSupport;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
@@ -15,17 +15,15 @@ import java.lang.ref.WeakReference;
 public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
     private final GeoTiffRasterRegion geoTiffImageReader;
-    private final boolean isGlobalShifted180;
-    private final int bandIndex;
+    private final GeoTiffBandSource geoTiffBandSource;
 
-    public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, MultiLevelModel imageMultiLevelModel, int dataBufferType, int bandIndex,
-                              Rectangle imageReadBounds, Dimension tileSize, Point tileOffset, int level, boolean isGlobalShifted180) {
+    public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
+                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport) {
 
-        super(imageMultiLevelModel, dataBufferType, imageReadBounds, tileSize, tileOffset, level);
+        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport);
 
         this.geoTiffImageReader = geoTiffImageReader;
-        this.isGlobalShifted180 = isGlobalShifted180;
-        this.bandIndex = bandIndex;
+        this.geoTiffBandSource = geoTiffBandSource;
     }
 
     @Override
@@ -38,7 +36,7 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
             } catch (Exception ex) {
                 throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
             }
-            writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.bandIndex);
+            writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
             WeakReference<Raster> referenceRaster = new WeakReference<>(normalRasterData);
             referenceRaster.clear();
         }
@@ -50,7 +48,7 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
         int sourceOffsetX = sourceStepX * destOffsetX;
         int sourceOffsetY = sourceStepY * destOffsetY;
         synchronized (this.geoTiffImageReader) {
-            return this.geoTiffImageReader.readRect(this.isGlobalShifted180, sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+            return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
         }
     }
 }
