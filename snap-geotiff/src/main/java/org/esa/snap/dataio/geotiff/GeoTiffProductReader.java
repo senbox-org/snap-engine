@@ -103,13 +103,27 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     @Override
+    public Object getInput() {
+        throw new UnsupportedOperationException("The 'getInput()' method is no longer supported.");
+    }
+
+    @Override
+    public ProductSubsetDef getSubsetDef() {
+        throw new UnsupportedOperationException("The 'getSubsetDef()' method is no longer supported.");
+    }
+
+    @Override
     protected Product readProductNodesImpl() throws IOException {
         if (this.geoTiffImageReader != null) {
             throw new IllegalStateException("There is already an image reader.");
         }
         boolean success = false;
         try {
-            Object productInput = super.getInput();
+            Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
+            ProductSubsetDef subsetDef = super.getSubsetDef(); // invoke the 'getSubsetDef' method from the parent class
+
+            setInput(null); // reset the attribute
+            setSubsetDef(null); // reset the attribute
 
             Path productPath = null;
             if (productInput instanceof String) {
@@ -131,7 +145,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             if (productPath != null) {
                 defaultProductName = FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
             }
-            Product product = readProduct(this.geoTiffImageReader, defaultProductName);
+
+            Product product = readProduct(this.geoTiffImageReader, defaultProductName, subsetDef);
             if (productPath != null) {
                 product.setFileLocation(productPath.toFile());
             }
@@ -217,10 +232,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName) throws Exception {
+        return readProduct(geoTiffImageReader, productName, (ProductSubsetDef)null);
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName, ProductSubsetDef subsetDef) throws Exception {
         if (geoTiffImageReader == null) {
             throw new NullPointerException("The image reader is null.");
         }
-        final ProductSubsetDef subsetDef = getSubsetDef();
+
         final int imageWidth = geoTiffImageReader.getImageWidth();
         final int imageHeight = geoTiffImageReader.getImageHeight();
 
@@ -236,10 +255,17 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
-        return readProduct(geoTiffImageReader, defaultProductName, productBounds, null);
+        return readProduct(geoTiffImageReader, defaultProductName, productBounds, null, null);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds, Double noDataValue) throws Exception {
+        return readProduct(geoTiffImageReader, defaultProductName, productBounds, noDataValue, null);
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds,
+                               Double noDataValue, ProductSubsetDef subsetDef)
+                               throws Exception {
+
         if (geoTiffImageReader == null) {
             throw new NullPointerException("The image reader is null.");
         }
@@ -267,7 +293,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
             sampleModel = geoTiffImageReader.getBaseImage().getSampleModel();
         }
 
-        ProductSubsetDef subsetDef = getSubsetDef();
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
             Rectangle subsetRegion = null;
