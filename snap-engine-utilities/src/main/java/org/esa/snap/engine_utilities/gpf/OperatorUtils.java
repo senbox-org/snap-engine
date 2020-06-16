@@ -300,50 +300,68 @@ public final class OperatorUtils {
             final double subSamplingX, final double subSamplingY,
             final PixelPos[] newTiePointPos) {
 
-        final GeoCoding srcGeoCoding = sourceProduct.getSceneGeoCoding();
+        for(TiePointGrid tpg : sourceProduct.getTiePointGrids()) {
 
-        final float[] latTiePoints = new float[gridWidth * gridHeight];
-        final float[] lonTiePoints = new float[gridWidth * gridHeight];
-        final GeoPos geoPos = new GeoPos();
-        final PixelPos pixelPos = new PixelPos();
-        for (int k = 0; k < newTiePointPos.length; k++) {
-            pixelPos.setLocation(newTiePointPos[k].x, newTiePointPos[k].y);
-            srcGeoCoding.getGeoPos(pixelPos, geoPos);
-            latTiePoints[k] = (float)geoPos.lat;
-            lonTiePoints[k] = (float)geoPos.lon;
+            final float[] newTiePointValues = new float[gridWidth * gridHeight];
+            for (int k = 0; k < newTiePointPos.length; k++) {
+                newTiePointValues[k] = (float)tpg.getPixelDouble(newTiePointPos[k].x, newTiePointPos[k].y);
+            }
+
+            final int disconnect = tpg.getName().equals(TPG_LONGITUDE) ? TiePointGrid.DISCONT_AT_180 : TiePointGrid.DISCONT_NONE;
+            final TiePointGrid newTPG = new TiePointGrid(tpg.getName(),
+                    gridWidth,
+                    gridHeight,
+                    0.0D,
+                    0.0D,
+                    subSamplingX,
+                    subSamplingY,
+                    newTiePointValues,
+                    disconnect);
+
+            targetProduct.removeTiePointGrid(tpg);
+            targetProduct.addTiePointGrid(newTPG);
         }
 
-        final TiePointGrid tgtLatTPG = new TiePointGrid(TPG_LATITUDE,
-                gridWidth,
-                gridHeight,
-                0.0D,
-                0.0D,
-                subSamplingX,
-                subSamplingY,
-                latTiePoints,
-                TiePointGrid.DISCONT_NONE);
+        TiePointGrid tgtLatTPG = targetProduct.getTiePointGrid(TPG_LATITUDE);
+        TiePointGrid tgtLonTPG = targetProduct.getTiePointGrid(TPG_LONGITUDE);
 
-        final TiePointGrid tgtLonTPG = new TiePointGrid(TPG_LONGITUDE,
-                gridWidth,
-                gridHeight,
-                0.0f,
-                0.0f,
-                subSamplingX,
-                subSamplingY,
-                lonTiePoints,
-                TiePointGrid.DISCONT_AT_180);
+        if(tgtLatTPG == null || tgtLonTPG == null) {
+            final GeoCoding srcGeoCoding = sourceProduct.getSceneGeoCoding();
 
-        TiePointGrid prevLatTPG = targetProduct.getTiePointGrid(tgtLatTPG.getName());
-        if (prevLatTPG != null) {
-            targetProduct.removeTiePointGrid(prevLatTPG);
+            final float[] latTiePoints = new float[gridWidth * gridHeight];
+            final float[] lonTiePoints = new float[gridWidth * gridHeight];
+            final GeoPos geoPos = new GeoPos();
+            final PixelPos pixelPos = new PixelPos();
+            for (int k = 0; k < newTiePointPos.length; k++) {
+                pixelPos.setLocation(newTiePointPos[k].x, newTiePointPos[k].y);
+                srcGeoCoding.getGeoPos(pixelPos, geoPos);
+                latTiePoints[k] = (float)geoPos.lat;
+                lonTiePoints[k] = (float)geoPos.lon;
+            }
+
+            tgtLatTPG = new TiePointGrid(TPG_LATITUDE,
+                    gridWidth,
+                    gridHeight,
+                    0.0D,
+                    0.0D,
+                    subSamplingX,
+                    subSamplingY,
+                    latTiePoints,
+                    TiePointGrid.DISCONT_NONE);
+
+            tgtLonTPG = new TiePointGrid(TPG_LONGITUDE,
+                    gridWidth,
+                    gridHeight,
+                    0.0f,
+                    0.0f,
+                    subSamplingX,
+                    subSamplingY,
+                    lonTiePoints,
+                    TiePointGrid.DISCONT_AT_180);
+
+            targetProduct.addTiePointGrid(tgtLatTPG);
+            targetProduct.addTiePointGrid(tgtLonTPG);
         }
-        targetProduct.addTiePointGrid(tgtLatTPG);
-
-        TiePointGrid prevLonTPG = targetProduct.getTiePointGrid(tgtLonTPG.getName());
-        if (prevLonTPG != null) {
-            targetProduct.removeTiePointGrid(prevLonTPG);
-        }
-        targetProduct.addTiePointGrid(tgtLonTPG);
 
         final TiePointGeoCoding gc = new TiePointGeoCoding(tgtLatTPG, tgtLonTPG);
 
