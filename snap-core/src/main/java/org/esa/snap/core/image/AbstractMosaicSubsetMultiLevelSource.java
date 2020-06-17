@@ -59,37 +59,49 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         System.gc();
     }
 
-    protected final <TileDataType> List<RenderedImage> buildDecompressedTileImages(int level, Rectangle imageCellReadBounds, Dimension decompresedTileSize, int defaultImageWidth,
+    protected final <TileDataType> List<RenderedImage> buildDecompressedTileImages(Rectangle imageCellReadBounds, DecompressedImageSupport decompressedImageSupport, int defaultImageWidth,
                                                                                    float translateLevelOffsetX, float translateLevelOffsetY,
                                                                                    DecompressedTileOpImageCallback<TileDataType> tileOpImageCallback, TileDataType tileData) {
 
         validateReadRegion(imageCellReadBounds);
-        validateTileSize(decompresedTileSize, imageCellReadBounds);
+        if (decompressedImageSupport == null) {
+            throw new NullPointerException("The decompressedImageSupport is null.");
+        }
+        if (decompressedImageSupport.getDecompressedTileWidth() < 1) {
+            throw new IllegalArgumentException("The decompressed tile width '"+decompressedImageSupport.getDecompressedTileWidth()+"' is invalid.");
+        }
+        if (decompressedImageSupport.getDecompressedTileHeight() < 1) {
+            throw new IllegalArgumentException("The decompressed tile height '"+decompressedImageSupport.getDecompressedTileHeight()+"' is invalid.");
+        }
         if (tileOpImageCallback == null) {
             throw new NullPointerException("The tile op image callback is null.");
         }
 
-        int startTileColumnIndex = imageCellReadBounds.x / decompresedTileSize.width;
-        int endTileColumnIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.x, imageCellReadBounds.width, decompresedTileSize.width);
+        int decompressedTileWidth = decompressedImageSupport.getDecompressedTileWidth();
+        int decompressedTileHeight = decompressedImageSupport.getDecompressedTileHeight();
+        int level = decompressedImageSupport.getLevel();
 
-        int startTileRowIndex = imageCellReadBounds.y / decompresedTileSize.height;
-        int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
+        int startTileColumnIndex = imageCellReadBounds.x / decompressedTileWidth;
+        int endTileColumnIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
+
+        int startTileRowIndex = imageCellReadBounds.y / decompressedTileHeight;
+        int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
 
         int levelTotalImageWidth = ImageUtils.computeLevelSize(imageCellReadBounds.width, level);
         int levelTotalImageHeight = ImageUtils.computeLevelSize(imageCellReadBounds.height, level);
 
-        int defaultColumnTileCount = ImageUtils.computeTileCount(defaultImageWidth, decompresedTileSize.width);
+        int defaultColumnTileCount = ImageUtils.computeTileCount(defaultImageWidth, decompressedTileWidth);
         java.util.List<RenderedImage> tileImages = new ArrayList<>();
 
         float levelTranslateY = 0.0f;
         int currentImageTileTopY = imageCellReadBounds.y;
         for (int tileRowIndex = startTileRowIndex; tileRowIndex <= endTileRowIndex; tileRowIndex++) {
-            int currentTileHeight = computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
+            int currentTileHeight = computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
             int levelImageTileHeight = ImageUtils.computeLevelSize(currentTileHeight, level);
 
             levelTranslateY -= computeTranslateDifference(levelTranslateY, levelImageTileHeight, levelTotalImageHeight, tileRowIndex, endTileRowIndex, level);
 
-            int tileOffsetYFromDecompressedImage = currentImageTileTopY - (tileRowIndex * decompresedTileSize.height);
+            int tileOffsetYFromDecompressedImage = currentImageTileTopY - (tileRowIndex * decompressedTileHeight);
             if (tileOffsetYFromDecompressedImage < 0) {
                 throw new IllegalStateException("The tile offset Y from the decompressed image file is negative on level " + level + ".");
             }
@@ -97,24 +109,21 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             float levelTranslateX = 0.0f;
             int currentImageTileLeftX = imageCellReadBounds.x;
             for (int tileColumnIndex = startTileColumnIndex; tileColumnIndex <= endTileColumnIndex; tileColumnIndex++) {
-                int currentTileWidth = computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompresedTileSize.width);
+                int currentTileWidth = computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
                 int levelImageTileWidth = ImageUtils.computeLevelSize(currentTileWidth, level);
 
                 levelTranslateX -= computeTranslateDifference(levelTranslateX, levelImageTileWidth, levelTotalImageWidth, tileColumnIndex, endTileColumnIndex, level);
 
-                int tileOffsetXFromDecompressedImage = currentImageTileLeftX - (tileColumnIndex * decompresedTileSize.width);
+                int tileOffsetXFromDecompressedImage = currentImageTileLeftX - (tileColumnIndex * decompressedTileWidth);
                 if (tileOffsetXFromDecompressedImage < 0) {
                     throw new IllegalStateException("The tile offset X from the decompressed image file is negative.");
                 }
 
                 int decompressTileIndex = tileColumnIndex + (tileRowIndex * defaultColumnTileCount);
 
-                Dimension currentTileSize = new Dimension(currentTileWidth, currentTileHeight);
-                Point tileOffsetFromDecompressedImage = new Point(tileOffsetXFromDecompressedImage, tileOffsetYFromDecompressedImage);
-                Point tileOffsetFromImage = new Point(currentImageTileLeftX, currentImageTileTopY);
-
-                SourcelessOpImage tileOpImage = tileOpImageCallback.buildTileOpImage(decompresedTileSize, currentTileSize, tileOffsetFromDecompressedImage, tileOffsetFromImage,
-                                                                                     decompressTileIndex, level, tileData);
+                SourcelessOpImage tileOpImage = tileOpImageCallback.buildTileOpImage(decompressedImageSupport, currentTileWidth, currentTileHeight,
+                                                                                     tileOffsetXFromDecompressedImage, tileOffsetYFromDecompressedImage,
+                                                                                     currentImageTileLeftX, currentImageTileTopY, decompressTileIndex, tileData);
                 validateTileImageSize(level, tileOpImage, levelImageTileWidth, levelImageTileHeight);
                 this.tileImageDisposer.registerForDisposal(tileOpImage);
 
@@ -147,9 +156,8 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             throw new IllegalArgumentException("The tile width '"+uncompressedTileWidth+"' is invalid.");
         }
         if (uncompressedTileHeight < 1) {
-            throw new IllegalArgumentException("The tile size '"+uncompressedTileHeight+"' is invalid.");
+            throw new IllegalArgumentException("The tile height '"+uncompressedTileHeight+"' is invalid.");
         }
-
         if (tileOpImageCallback == null) {
             throw new NullPointerException("The tile op image callback is null.");
         }

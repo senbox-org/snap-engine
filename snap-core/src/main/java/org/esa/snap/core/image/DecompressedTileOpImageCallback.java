@@ -8,6 +8,7 @@ import java.awt.*;
  */
 public interface DecompressedTileOpImageCallback<TileDataType> {
 
-    public SourcelessOpImage buildTileOpImage(Dimension decompresedTileSize, Dimension tileSize, Point tileOffsetFromDecompressedImage,
-                                              Point tileOffsetFromImage, int decompressTileIndex, int level, TileDataType tileData);
+    public SourcelessOpImage buildTileOpImage(DecompressedImageSupport decompressedImageSupport, int tileWidth, int tileHeight,
+                                              int tileOffsetXFromDecompressedImage, int tileOffsetYFromDecompressedImage,
+                                              int tileOffsetXFromImage, int tileOffsetYFromImage, int decompressTileIndex, TileDataType tileData);
 }

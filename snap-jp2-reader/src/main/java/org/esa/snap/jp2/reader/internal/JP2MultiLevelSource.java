@@ -1,5 +1,6 @@
 package org.esa.snap.jp2.reader.internal;
 
+import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.jp2.reader.JP2ImageFile;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
@@ -16,7 +17,8 @@ import java.util.List;
  *
  * @author Cosmin Cara
  */
-public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource implements DecompressedTileOpImageCallback<Void> {
+public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource implements DecompressedTileOpImageCallback<Void>,
+                                                                                         JP2BandSource, JP2BandData {
 
     private final int dataBufferType;
     private final int bandIndex;
@@ -26,9 +28,9 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     private final int bandCount;
 
     public JP2MultiLevelSource(JP2ImageFile jp2ImageFile, Path localCacheFolder, Dimension defaultImageSize, Rectangle imageReadBounds, int bandCount,
-                               int bandIndex, Dimension decompresedTileSize, int levelCount, int dataBufferType, GeoCoding geoCoding) {
+                               int bandIndex, Dimension decompressedTileSize, int levelCount, int dataBufferType, GeoCoding geoCoding) {
 
-        super(levelCount, imageReadBounds, decompresedTileSize, geoCoding);
+        super(levelCount, imageReadBounds, decompressedTileSize, geoCoding);
 
         this.jp2ImageFile = jp2ImageFile;
         this.localCacheFolder = localCacheFolder;
@@ -40,7 +42,8 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
 
     @Override
     protected RenderedImage createImage(int level) {
-        List<RenderedImage> tileImages = buildDecompressedTileImages(level, this.imageReadBounds, this.tileSize, this.defaultImageSize.width, 0.0f, 0.0f, this, null);
+        DecompressedImageSupport decompressedImageSupport = new DecompressedImageSupport(level, this.tileSize.width, this.tileSize.height);
+        List<RenderedImage> tileImages = buildDecompressedTileImages(this.imageReadBounds, decompressedImageSupport, this.defaultImageSize.width, 0.0f, 0.0f, this, null);
         if (tileImages.size() > 0) {
             return buildMosaicOp(level, tileImages, true);
         }
@@ -48,10 +51,37 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     }
 
     @Override
-    public SourcelessOpImage buildTileOpImage(Dimension decompresedTileSize, Dimension tileSize, Point tileOffsetFromDecompressedImage,
-                                              Point tileOffsetFromImage, int decompressTileIndex, int level, Void tileData) {
+    public SourcelessOpImage buildTileOpImage(DecompressedImageSupport decompressedImageSupport, int tileWidth, int tileHeight,
+                                              int tileOffsetXFromDecompressedImage, int tileOffsetYFromDecompressedImage,
+                                              int tileOffsetXFromImage, int tileOffsetYFromImage, int decompressTileIndex, Void tileData) {
 
-        return new JP2TileOpImage(this.jp2ImageFile, this.localCacheFolder, getModel(), decompresedTileSize, this.bandCount, this.bandIndex,
-                                        this.dataBufferType, tileSize, tileOffsetFromDecompressedImage, tileOffsetFromImage, decompressTileIndex, level);
+        return new JP2TileOpImage(this, this, decompressedImageSupport, tileWidth, tileHeight,
+                                  tileOffsetXFromDecompressedImage, tileOffsetYFromDecompressedImage,
+                                  tileOffsetXFromImage, tileOffsetYFromImage, decompressTileIndex);
+    }
+
+    @Override
+    public int getBandIndex() {
+        return this.bandIndex;
+    }
+
+    @Override
+    public int getDataBufferType() {
+        return this.dataBufferType;
+    }
+
+    @Override
+    public JP2ImageFile getJp2ImageFile() {
+        return this.jp2ImageFile;
+    }
+
+    @Override
+    public Path getLocalCacheFolder() {
+        return this.localCacheFolder;
+    }
+
+    @Override
+    public int getBandCount() {
+        return this.bandCount;
     }
 }
