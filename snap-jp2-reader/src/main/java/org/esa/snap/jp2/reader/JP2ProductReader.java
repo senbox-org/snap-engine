@@ -28,6 +28,7 @@ import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.jp2.reader.internal.JP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.CodeStreamInfo;
@@ -39,6 +40,7 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -68,8 +70,6 @@ public class JP2ProductReader extends AbstractProductReader {
         XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
     }
 
-    //TODO Jean remove attribute 'product'
-    private Product product;
     private VirtualJP2File virtualJp2File;
 
     public JP2ProductReader(ProductReaderPlugIn readerPlugIn) {
@@ -78,58 +78,49 @@ public class JP2ProductReader extends AbstractProductReader {
 
     @Override
     public void close() throws IOException {
-        if (this.product != null) {
-            for (Band band : this.product.getBands()) {
-                MultiLevelImage sourceImage = band.getSourceImage();
-                if (sourceImage != null) {
-                    sourceImage.reset();
-                    sourceImage.dispose();
-                }
-            }
-        }
-        this.virtualJp2File.deleteLocalFilesOnExit();
-
         super.close();
+
+        closeResources();
+    }
+
+    @Override
+    public Object getInput() {
+        throw new UnsupportedOperationException("The 'getInput()' method is no longer supported.");
+    }
+
+    @Override
+    public ProductSubsetDef getSubsetDef() {
+        throw new UnsupportedOperationException("The 'getSubsetDef()' method is no longer supported.");
     }
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        Path jp2File = AbstractProductReader.convertInputToPath(super.getInput());
-
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Reading product from the JP2 file '" + jp2File.toString() + "'.");
+        if (this.virtualJp2File != null) {
+            throw new IllegalStateException("There is already a file.");
         }
 
-        if (getReaderPlugIn().getDecodeQualification(super.getInput()) == DecodeQualification.UNABLE) {
-            throw new IOException("The selected product cannot be read with the current reader.");
-        }
-
-        this.virtualJp2File = new VirtualJP2File(jp2File, getClass());
-
+        boolean success = false;
         try {
-            OpjDumpFile opjDumpFile = new OpjDumpFile();
-            if (OpenJpegUtils.canReadJP2FileHeaderWithOpenJPEG()) {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "Use external application to read the header of the JP2 file '" + jp2File.toString() + "'.");
-                }
+            Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
+            ProductSubsetDef subsetDef = super.getSubsetDef(); // invoke the 'getSubsetDef' method from the parent class
 
-                if (!validateOpenJpegExecutables(OpenJpegExecRetriever.getOpjDump(), OpenJpegExecRetriever.getOpjDecompress())) {
-                    throw new IOException("Invalid OpenJpeg executables");
-                }
-                Path localJp2File = this.virtualJp2File.getLocalFile();
-                opjDumpFile.readHeaderWithOpenJPEG(localJp2File);
-            } else {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "Use input stream to read the header of the JP2 file '" + jp2File.toString() + "'.");
-                }
+            setInput(null); // reset the attribute
+            setSubsetDef(null); // reset the attribute
 
-                opjDumpFile.readHeaderWithInputStream(jp2File, 5 * 1024, true);
+            Path jp2File = AbstractProductReader.convertInputToPath(productInput);
+
+            if (getReaderPlugIn().getDecodeQualification(productInput) == DecodeQualification.UNABLE) {
+                throw new IOException("The selected product cannot be read with the current reader.");
             }
+
+            this.virtualJp2File = new VirtualJP2File(jp2File, getClass());
+
+            OpjDumpFile opjDumpFile = readJP2FileHeader(jp2File, this.virtualJp2File);
 
             ImageInfo imageInfo = opjDumpFile.getImageInfo();
             CodeStreamInfo csInfo = opjDumpFile.getCodeStreamInfo();
             Jp2XmlMetadata metadata = opjDumpFile.getMetadata();
-            ProductSubsetDef subsetDef = getSubsetDef();
+
             int defaultImageWidth = imageInfo.getWidth();
             int defaultImageHeight = imageInfo.getHeight();
 
@@ -153,9 +144,9 @@ public class JP2ProductReader extends AbstractProductReader {
                 productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, false);
             }
 
-            this.product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
+            Product product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
 
-            MetadataElement metadataRoot = this.product.getMetadataRoot();
+            MetadataElement metadataRoot = product.getMetadataRoot();
             if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
                 metadataRoot.addElement(imageInfo.toMetadataElement());
                 metadataRoot.addElement(csInfo.toMetadataElement());
@@ -165,21 +156,27 @@ public class JP2ProductReader extends AbstractProductReader {
                 if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
                     metadataRoot.addElement(metadata.getRootElement());
                 }
-                addGeoCoding(metadata, subsetDef, defaultImageWidth, defaultImageHeight);
+                addGeoCoding(product, metadata, subsetDef, defaultImageWidth, defaultImageHeight);
             }
 
             double[] bandScales = null;
             double[] bandOffsets = null;
-            addBands(imageInfo, csInfo, bandScales, bandOffsets, productBounds);
+            addBands(product, imageInfo, csInfo, bandScales, bandOffsets, productBounds, subsetDef);
 
-            this.product.setPreferredTileSize(JAI.getDefaultTileSize());
-            this.product.setFileLocation(jp2File.toFile());
+            product.setPreferredTileSize(JAI.getDefaultTileSize());
+            product.setFileLocation(jp2File.toFile());
 
-            return this.product;
-        } catch (RuntimeException | IOException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IOException("Error while reading file '" + jp2File.toString() + "'.", e);
+            success = true;
+
+            return product;
+        } catch (RuntimeException | IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IOException(exception);
+        } finally {
+            if (!success) {
+                closeResources();
+            }
         }
     }
 
@@ -190,9 +187,21 @@ public class JP2ProductReader extends AbstractProductReader {
         // do nothing
     }
 
-    private void addGeoCoding(Jp2XmlMetadata metadata, ProductSubsetDef subsetDef, int defaultProductWidth, int defaultProductHeight) {
-        int imageWidth = this.product.getSceneRasterWidth();
-        int imageHeight = this.product.getSceneRasterHeight();
+    private void closeResources() {
+        if (this.virtualJp2File != null) {
+            try {
+                this.virtualJp2File.deleteLocalFilesOnExit();
+            } catch (IOException e) {
+                // ignore
+            }
+            this.virtualJp2File = null;
+        }
+        System.gc();
+    }
+
+    private static void addGeoCoding(Product product, Jp2XmlMetadata metadata, ProductSubsetDef subsetDef, int defaultProductWidth, int defaultProductHeight) {
+        int imageWidth = product.getSceneRasterWidth();
+        int imageHeight = product.getSceneRasterHeight();
         Rectangle subsetRegion = null;
         if (subsetDef != null) {
             subsetRegion = subsetDef.getRegion();
@@ -209,12 +218,12 @@ public class JP2ProductReader extends AbstractProductReader {
                     latGrid = TiePointGrid.createSubset(latGrid, subsetDef);
                 }
                 geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
-                this.product.addTiePointGrid(latGrid);
-                this.product.addTiePointGrid(lonGrid);
+                product.addTiePointGrid(latGrid);
+                product.addTiePointGrid(lonGrid);
             }
         }
         if (geoCoding != null) {
-            this.product.setSceneGeoCoding(geoCoding);
+            product.setSceneGeoCoding(geoCoding);
         }
     }
 
@@ -251,7 +260,9 @@ public class JP2ProductReader extends AbstractProductReader {
         return tiePointGrids;
     }
 
-    private void addBands(ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets, Rectangle productBounds) {
+    private void addBands(Product product, ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets,
+                          Rectangle productBounds, ProductSubsetDef subsetDef) {
+
         List<CodeStreamInfo.TileComponentInfo> componentTilesInfo = csInfo.getComponentTilesInfo();
         int numBands = componentTilesInfo.size();
 
@@ -262,22 +273,23 @@ public class JP2ProductReader extends AbstractProductReader {
 
         for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
             String bandName = "band_" + (bandIndex + 1);
-            if (getSubsetDef() == null || getSubsetDef().isNodeAccepted(bandName)) {
+            if (subsetDef == null || subsetDef.isNodeAccepted(bandName)) {
                 ImageInfo.ImageInfoComponent bandImageInfo = imageInfo.getComponents().get(bandIndex);
                 int snapDataType = getSnapDataTypeFromImageInfo(bandImageInfo);
                 int awtDataType = getAwtDataTypeFromImageInfo(bandImageInfo);
 
-                Band band = new Band(bandName, snapDataType, this.product.getSceneRasterWidth(), this.product.getSceneRasterHeight());
-
-                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex,
-                                                                     decompressedTileSize, csInfo.getNumResolutions(), awtDataType, this.product.getSceneGeoCoding());
-                band.setSourceImage(new DefaultMultiLevelImage(source));
-
+                Band band = new Band(bandName, snapDataType, product.getSceneRasterWidth(), product.getSceneRasterHeight());
                 if (bandScales != null && bandOffsets != null) {
                     band.setScalingFactor(bandScales[bandIndex]);
                     band.setScalingOffset(bandOffsets[bandIndex]);
                 }
-                this.product.addBand(band);
+
+                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex,
+                                                                     decompressedTileSize, csInfo.getNumResolutions(), awtDataType, product.getSceneGeoCoding());
+                ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(awtDataType, productBounds.width, productBounds.height, 0);
+                band.setSourceImage(new DefaultMultiLevelImage(source, imageLayout));
+
+                product.addBand(band);
             }
         }
     }
@@ -314,5 +326,27 @@ public class JP2ProductReader extends AbstractProductReader {
             }
         }
         return null;
+    }
+
+    private static OpjDumpFile readJP2FileHeader(Path jp2File, VirtualJP2File virtualJp2File) throws IOException, InterruptedException {
+        OpjDumpFile opjDumpFile = new OpjDumpFile();
+        if (OpenJpegUtils.canReadJP2FileHeaderWithOpenJPEG()) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Use external application to read the header of the JP2 file '" + jp2File.toString() + "'.");
+            }
+
+            if (!validateOpenJpegExecutables(OpenJpegExecRetriever.getOpjDump(), OpenJpegExecRetriever.getOpjDecompress())) {
+                throw new IOException("Invalid OpenJpeg executables");
+            }
+            Path localJp2File = virtualJp2File.getLocalFile();
+            opjDumpFile.readHeaderWithOpenJPEG(localJp2File);
+        } else {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Use input stream to read the header of the JP2 file '" + jp2File.toString() + "'.");
+            }
+
+            opjDumpFile.readHeaderWithInputStream(jp2File, 5 * 1024, true);
+        }
+        return opjDumpFile;
     }
 }
