@@ -10,15 +10,21 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.math.FXYSum;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.runtime.Config;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.util.prefs.Preferences;
 
 public class TiePointInverse implements InverseCoding {
 
     public static final String KEY = "INV_TIE_POINT";
-
+    private final static String SYSPROP_TIE_POINT_INVERSE_HIGH_PRECISION = "snap.tiePointGeoCoding.maxPrecision";
     private static final int MAX_NUM_POINTS_PER_TILE = 1000;
     private static final double GEOLOCATION_MARGIN = 1e-5; // degree margin to compensate for float/double conversion (approx 1m at the equator)
+
+    // package access for testing only tb 2020-06-18
+    static boolean highPrecisionInverse = false;
 
     private TiePointGrid lonGrid;
     private TiePointGrid latGrid;
@@ -26,109 +32,6 @@ public class TiePointInverse implements InverseCoding {
     private Boundaries boundaries;
     private int rasterWidth;
     private int rasterHeight;
-
-    @Override
-    public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        if (pixelPos == null) {
-            pixelPos = new PixelPos();
-        }
-        pixelPos.setInvalid();
-        if (!geoPos.isValid()) {
-            return pixelPos;
-        }
-
-        double lat = normalizeLat(geoPos.lat);
-        double lon = normalizeLon(geoPos.lon, boundaries.normalizedLonMin, boundaries.normalizedLonMax);
-
-        Approximation approximation = getBestApproximation(approximations, lat, lon);
-        // retry with pixel in overlap range, re-normalise
-        // solves the problem with overlapping normalized and unnormalized orbit areas (AATSR)
-        if (lon >= boundaries.overlapStart && lon <= boundaries.overlapEnd) {
-            final double squareDistance;
-            if (approximation != null) {
-                squareDistance = approximation.getSquareDistance(lat, lon);
-            } else {
-                squareDistance = Double.MAX_VALUE;
-            }
-            double tempLon = lon + 360;
-            final Approximation renormalizedApproximation = findRenormalizedApproximation(approximations, lat, tempLon, squareDistance);
-            if (renormalizedApproximation != null) {
-                approximation = renormalizedApproximation;
-                lon = tempLon;
-            }
-        }
-        if (approximation == null) {
-            return pixelPos;
-        }
-
-        lat = rescaleLatitude(lat);
-        lon = rescaleLongitude(lon, approximation.getCenterLon());
-        pixelPos.x = approximation.getFX().computeZ(lat, lon);
-        pixelPos.y = approximation.getFY().computeZ(lat, lon);
-
-        if (pixelPos.x < 0 || pixelPos.x > rasterWidth || pixelPos.y < 0 || pixelPos.y > rasterHeight) {
-            pixelPos.setInvalid();
-        }
-
-        return pixelPos;
-    }
-
-    @Override
-    public void initialize(GeoRaster geoRaster, boolean containsAntiMeridian, PixelPos[] poleLocations) {
-        lonGrid = new TiePointGrid("lon", geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
-                geoRaster.getOffsetX(), geoRaster.getOffsetY(),
-                geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
-                RasterUtils.toFloat(geoRaster.getLongitudes()));
-
-        rasterWidth = geoRaster.getSceneWidth();
-        rasterHeight = geoRaster.getSceneHeight();
-
-        latGrid = new TiePointGrid("lat", geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
-                                   geoRaster.getOffsetX(), geoRaster.getOffsetY(),
-                                   geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
-                                   RasterUtils.toFloat(geoRaster.getLatitudes()));
-
-        if (containsAntiMeridian) {
-            lonGrid = normalizeLonGrid(lonGrid);
-        }
-
-        boundaries = initLatLonMinMax(lonGrid.getTiePoints(), latGrid.getTiePoints());
-        approximations = getApproximations(lonGrid, latGrid);
-    }
-
-    @Override
-    public String getKey() {
-        return KEY;
-    }
-
-    @Override
-    public void dispose() {
-        if (latGrid != null) {
-            latGrid.dispose();
-            latGrid = null;
-        }
-
-        if (lonGrid != null) {
-            lonGrid.dispose();
-            lonGrid = null;
-        }
-    }
-
-    @Override
-    public InverseCoding clone() {
-        final TiePointInverse clone = new TiePointInverse();
-
-        clone.lonGrid = lonGrid.cloneTiePointGrid();
-        clone.latGrid = latGrid.cloneTiePointGrid();
-
-        clone.rasterWidth = rasterWidth;
-        clone.rasterHeight = rasterHeight;
-
-        clone.boundaries = boundaries;
-        clone.approximations = approximations;
-
-        return clone;
-    }
 
     // package access for testing only tb 2019-12-12
     static Approximation getBestApproximation(Approximation[] approximations, double lat, double lon) {
@@ -308,9 +211,15 @@ public class TiePointInverse implements InverseCoding {
                     if (rmse < rmseMin) {
                         index = i;
                         rmseMin = rmse;
+
+                        // if high precision required we skip the break condition and select the approximation with the lowest overall RMSE tb 2020-06-18
+                        if (!highPrecisionInverse) {
+                            final double maxError = potentialPolynomial.getMaxError();
+                            if (maxError < 0.25) { // this accuracy is sufficient for display use tb 2020-06.18
+                                break;
+                            }
+                        }
                     }
-                    // the old version contained a condition to use the lowest order polynomial with an maxError below half a pixel
-                    // This led to quite large interpolation errors - therefore it is removed here. tb 2019-12-13
                 } catch (ArithmeticException e) {
                     Debug.trace("Polynomial cannot be constructed due to a numerically singular or degenerate matrix:");
                     Debug.trace(e);
@@ -513,16 +422,123 @@ public class TiePointInverse implements InverseCoding {
 
         if (eastNormalized || westNormalized) {
             return new TiePointGrid(lonGrid.getName(),
-                    lonGrid.getGridWidth(),
-                    lonGrid.getGridHeight(),
-                    lonGrid.getOffsetX(),
-                    lonGrid.getOffsetY(),
-                    lonGrid.getSubSamplingX(),
-                    lonGrid.getSubSamplingY(),
-                    normalizedLongitudes);
+                                    lonGrid.getGridWidth(),
+                                    lonGrid.getGridHeight(),
+                                    lonGrid.getOffsetX(),
+                                    lonGrid.getOffsetY(),
+                                    lonGrid.getSubSamplingX(),
+                                    lonGrid.getSubSamplingY(),
+                                    normalizedLongitudes);
         }
 
         return lonGrid;
+    }
+
+    @Override
+    public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
+        if (pixelPos == null) {
+            pixelPos = new PixelPos();
+        }
+        pixelPos.setInvalid();
+        if (!geoPos.isValid()) {
+            return pixelPos;
+        }
+
+        double lat = normalizeLat(geoPos.lat);
+        double lon = normalizeLon(geoPos.lon, boundaries.normalizedLonMin, boundaries.normalizedLonMax);
+
+        Approximation approximation = getBestApproximation(approximations, lat, lon);
+        // retry with pixel in overlap range, re-normalise
+        // solves the problem with overlapping normalized and unnormalized orbit areas (AATSR)
+        if (lon >= boundaries.overlapStart && lon <= boundaries.overlapEnd) {
+            final double squareDistance;
+            if (approximation != null) {
+                squareDistance = approximation.getSquareDistance(lat, lon);
+            } else {
+                squareDistance = Double.MAX_VALUE;
+            }
+            double tempLon = lon + 360;
+            final Approximation renormalizedApproximation = findRenormalizedApproximation(approximations, lat, tempLon, squareDistance);
+            if (renormalizedApproximation != null) {
+                approximation = renormalizedApproximation;
+                lon = tempLon;
+            }
+        }
+        if (approximation == null) {
+            return pixelPos;
+        }
+
+        lat = rescaleLatitude(lat);
+        lon = rescaleLongitude(lon, approximation.getCenterLon());
+        pixelPos.x = approximation.getFX().computeZ(lat, lon);
+        pixelPos.y = approximation.getFY().computeZ(lat, lon);
+
+        if (pixelPos.x < 0 || pixelPos.x > rasterWidth || pixelPos.y < 0 || pixelPos.y > rasterHeight) {
+            pixelPos.setInvalid();
+        }
+
+        return pixelPos;
+    }
+
+    @Override
+    public void initialize(GeoRaster geoRaster, boolean containsAntiMeridian, PixelPos[] poleLocations) {
+        lonGrid = new TiePointGrid("lon", geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
+                                   geoRaster.getOffsetX(), geoRaster.getOffsetY(),
+                                   geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                                   RasterUtils.toFloat(geoRaster.getLongitudes()));
+
+        rasterWidth = geoRaster.getSceneWidth();
+        rasterHeight = geoRaster.getSceneHeight();
+
+        latGrid = new TiePointGrid("lat", geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
+                                   geoRaster.getOffsetX(), geoRaster.getOffsetY(),
+                                   geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                                   RasterUtils.toFloat(geoRaster.getLatitudes()));
+
+        if (containsAntiMeridian) {
+            lonGrid = normalizeLonGrid(lonGrid);
+        }
+
+        final Preferences preferences = Config.instance().preferences();
+        highPrecisionInverse = preferences.getBoolean(SYSPROP_TIE_POINT_INVERSE_HIGH_PRECISION, false);
+
+        boundaries = initLatLonMinMax(lonGrid.getTiePoints(), latGrid.getTiePoints());
+        approximations = getApproximations(lonGrid, latGrid);
+    }
+
+    @Override
+    public String getKey() {
+        return KEY;
+    }
+
+    @Override
+    public void dispose() {
+        if (latGrid != null) {
+            latGrid.dispose();
+            latGrid = null;
+        }
+
+        if (lonGrid != null) {
+            lonGrid.dispose();
+            lonGrid = null;
+        }
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public InverseCoding clone() {
+        final TiePointInverse clone = new TiePointInverse();
+
+        clone.lonGrid = lonGrid.cloneTiePointGrid();
+        clone.latGrid = latGrid.cloneTiePointGrid();
+
+        clone.rasterWidth = rasterWidth;
+        clone.rasterHeight = rasterHeight;
+
+        clone.boundaries = boundaries;
+        clone.approximations = approximations;
+
+        return clone;
     }
 
     static class Boundaries {
