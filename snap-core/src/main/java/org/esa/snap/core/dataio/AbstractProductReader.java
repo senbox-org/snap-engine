@@ -171,18 +171,6 @@ public abstract class AbstractProductReader implements ProductReader {
         setInput(input);
         setSubsetDef(subsetDef);
 
-        if (logger.isLoggable(Level.FINE)) {
-            StringBuilder message = new StringBuilder();
-            message.append("Start reading the product: input: ")
-                    .append(input)
-                    .append(", reader: ")
-                    .append(getClass().getName())
-                    .append(", subset: ")
-                    .append(subsetDef)
-                    .append(".");
-            logger.log(Level.FINE, message.toString());
-        }
-
         long startTime = System.currentTimeMillis();
 
         final Product product = readProductNodesImpl();
