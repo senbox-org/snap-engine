@@ -84,16 +84,6 @@ public class JP2ProductReader extends AbstractProductReader {
     }
 
     @Override
-    public Object getInput() {
-        throw new UnsupportedOperationException("The 'getInput()' method is no longer supported.");
-    }
-
-    @Override
-    public ProductSubsetDef getSubsetDef() {
-        throw new UnsupportedOperationException("The 'getSubsetDef()' method is no longer supported.");
-    }
-
-    @Override
     protected Product readProductNodesImpl() throws IOException {
         if (this.virtualJp2File != null) {
             throw new IllegalStateException("There is already a file.");
@@ -103,9 +93,6 @@ public class JP2ProductReader extends AbstractProductReader {
         try {
             Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
             ProductSubsetDef subsetDef = super.getSubsetDef(); // invoke the 'getSubsetDef' method from the parent class
-
-            setInput(null); // reset the attribute
-            setSubsetDef(null); // reset the attribute
 
             Path jp2File = AbstractProductReader.convertInputToPath(productInput);
 
