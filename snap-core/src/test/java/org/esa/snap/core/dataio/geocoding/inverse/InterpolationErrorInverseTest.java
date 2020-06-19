@@ -3,7 +3,12 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.runtime.Config;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.prefs.Preferences;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,6 +19,20 @@ public class InterpolationErrorInverseTest {
     private static final int MAX_X = 2;
     private static final int MIN_Y = 3;
     private static final int MAX_Y = 4;
+
+    private boolean oldValue;
+
+    @Before
+    public void setUp() {
+        final Preferences preferences = Config.instance().preferences();
+        oldValue = preferences.getBoolean("snap.tiePointGeoCoding.maxPrecision", false);
+        preferences.putBoolean("snap.tiePointGeoCoding.maxPrecision", true);
+    }
+
+    @After
+    public void tearDown() {
+        Config.instance().preferences().putBoolean("snap.tiePointGeoCoding.maxPrecision", oldValue);
+    }
 
     @Test
     public void testTiePointInverse_AMSRE_3() {
