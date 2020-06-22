@@ -47,12 +47,17 @@ public class BeamInitialisationPart extends CfInitialisationPart {
         if (x == null || y == null) {
             throw new ProductIOException("Illegal Dimensions: Dimensions named (x,lon,lon_intern) and (y,lat,lat_intern) expected.");
         }
-        return new Product(
+        Product product = new Product(
                 (String) ctx.getProperty(Constants.PRODUCT_FILENAME_PROPERTY),
                 readProductType(ctx),
                 x.getLength(),
                 y.getLength()
         );
+
+        initPreferredTileSize(ctx, product);
+
+        return product;
+
     }
 
     @Override
