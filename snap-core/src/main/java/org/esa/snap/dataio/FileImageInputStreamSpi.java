@@ -18,6 +18,7 @@
 package org.esa.snap.dataio;
 
 import com.sun.media.imageioimpl.stream.ChannelImageInputStreamSpi;
+import com.sun.media.imageio.stream.FileChannelImageInputStream;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -57,7 +58,8 @@ public class FileImageInputStreamSpi extends ChannelImageInputStreamSpi {
                 }
             };
         }
-        return new FileChannelImageInputStream(new FileChannelInputStream(channel)) {
+        return new FileChannelImageInputStream(channel){
+        //return new FileChannelImageInputStream(new FileChannelInputStream(channel)) {
             @Override
             public void close() throws IOException {
                 channel.close();
