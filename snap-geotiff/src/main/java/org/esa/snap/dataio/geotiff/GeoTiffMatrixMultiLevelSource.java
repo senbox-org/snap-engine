@@ -5,8 +5,8 @@ import org.esa.snap.core.image.AbstractMatrixMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.esa.snap.core.image.MosaicMatrix;
 import org.esa.snap.core.image.UncompressedTileOpImageCallback;
-import org.esa.snap.core.util.ImageUtils;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.image.RenderedImage;
@@ -19,15 +19,14 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
 
     private final int bandIndex;
     private final Double noDataValue;
+    private final Dimension defaultJAIReadTileSize;
 
-    public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, int bandIndex, GeoCoding geoCoding, Double noDataValue) {
-        this(spotBandMatrix, imageMatrixReadBounds, ImageUtils.computePreferredMosaicTileSize(imageMatrixReadBounds.width, imageMatrixReadBounds.height, 1),
-             bandIndex, geoCoding, noDataValue);
-    }
+    public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, int bandIndex,
+                                         GeoCoding geoCoding, Double noDataValue, Dimension defaultJAIReadTileSize) {
 
-    public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, int bandIndex, GeoCoding geoCoding, Double noDataValue) {
-        super(spotBandMatrix, imageMatrixReadBounds, tileSize, geoCoding);
+        super(spotBandMatrix, imageMatrixReadBounds, defaultJAIReadTileSize, geoCoding);
 
+        this.defaultJAIReadTileSize = defaultJAIReadTileSize;
         this.bandIndex = bandIndex;
         this.noDataValue = noDataValue;
     }
@@ -37,7 +36,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, GeoTiffMatrixCell geoTiffMatrixCell) {
 
         return new GeoTiffTileOpImage(geoTiffMatrixCell, this, geoTiffMatrixCell.getDataBufferType(), tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
+                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize);
     }
 
     @Override
@@ -45,8 +44,13 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
                                                                       MosaicMatrix.MatrixCell matrixCell) {
 
         GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell)matrixCell;
-        return buildUncompressedTileImages(level, imageCellReadBounds, this.tileSize.width, this.tileSize.height,
+        return buildUncompressedTileImages(level, imageCellReadBounds, geoTiffMatrixCell.getCellWidth(), geoTiffMatrixCell.getCellHeight(),
                                            cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, this, geoTiffMatrixCell);
+    }
+
+    @Override
+    protected ImageLayout builMosaicImageLayout(int level) {
+        return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
     @Override

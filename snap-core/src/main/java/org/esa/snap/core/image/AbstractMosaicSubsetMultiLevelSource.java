@@ -25,7 +25,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
     protected final Rectangle imageReadBounds;
     protected final Dimension tileSize;
 
-    private final TileImageDisposer tileImageDisposer;
+    protected final TileImageDisposer tileImageDisposer;
 
     protected AbstractMosaicSubsetMultiLevelSource(Rectangle imageReadBounds, Dimension tileSize, GeoCoding geoCoding) {
         this(DefaultMultiLevelModel.getLevelCount(imageReadBounds.width, imageReadBounds.height), imageReadBounds, tileSize, geoCoding);
@@ -173,23 +173,23 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         List<RenderedImage> tileImages = new ArrayList<>(columnTileCount * rowTileCount);
         float levelTranslateY = 0.0f;
         for (int tileRowIndex = 0; tileRowIndex < rowTileCount; tileRowIndex++) {
-            int tileOffsetY = tileRowIndex * uncompressedTileHeight;
+            int tileOffsetFromReadBoundsY = tileRowIndex * uncompressedTileHeight;
             boolean isLastRow = (tileRowIndex == rowTileCount - 1);
-            int currentTileHeight = isLastRow ? (imageCellReadBounds.height - tileOffsetY) : uncompressedTileHeight;
+            int currentTileHeight = isLastRow ? (imageCellReadBounds.height - tileOffsetFromReadBoundsY) : uncompressedTileHeight;
             int levelImageTileHeight = ImageUtils.computeLevelSize(currentTileHeight, level);
 
             levelTranslateY -= computeTranslateDifference(levelTranslateY, levelImageTileHeight, levelTotalImageHeight, tileRowIndex, rowTileCount - 1, level);
 
             float levelTranslateX = 0.0f;
             for (int tileColumnIndex = 0; tileColumnIndex < columnTileCount; tileColumnIndex++) {
-                int tileOffsetX = tileColumnIndex * uncompressedTileWidth;
+                int tileOffsetFromReadBoundsX = tileColumnIndex * uncompressedTileWidth;
                 boolean isLastColumn = (tileColumnIndex == columnTileCount - 1);
-                int currentTileWidth = isLastColumn ? (imageCellReadBounds.width - tileOffsetX) : uncompressedTileWidth;
+                int currentTileWidth = isLastColumn ? (imageCellReadBounds.width - tileOffsetFromReadBoundsX) : uncompressedTileWidth;
                 int levelImageTileWidth = ImageUtils.computeLevelSize(currentTileWidth, level);
 
                 levelTranslateX -= computeTranslateDifference(levelTranslateX, levelImageTileWidth, levelTotalImageWidth, tileColumnIndex, columnTileCount - 1, level);
 
-                PlanarImage tileOpImage = tileOpImageCallback.buildTileOpImage(imageReadBoundsSupport, currentTileWidth, currentTileHeight, tileOffsetX, tileOffsetY, tileData);
+                PlanarImage tileOpImage = tileOpImageCallback.buildTileOpImage(imageReadBoundsSupport, currentTileWidth, currentTileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, tileData);
 
                 validateTileImageSize(level, tileOpImage, levelImageTileWidth, levelImageTileHeight);
                 this.tileImageDisposer.registerForDisposal(tileOpImage);
@@ -221,6 +221,18 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         return ImageUtils.computeLevelSize(this.imageReadBounds.height, level);
     }
 
+    protected ImageLayout builMosaicImageLayout(int level) {
+//        Dimension defaultTileSize = JAI.getDefaultTileSize();//getDefaultJAITileSize();
+//        ImageLayout imageLayout = new ImageLayout();
+//        imageLayout.setMinX(0);
+//        imageLayout.setMinY(0);
+//        imageLayout.setTileWidth(128);//defaultTileSize.width);
+//        imageLayout.setTileHeight(128);//defaultTileSize.height);
+//        imageLayout.setTileGridXOffset(0);
+//        imageLayout.setTileGridYOffset(0);
+        return ImageUtils.buildMosaicImageLayout(null, this.imageReadBounds.width, this.imageReadBounds.height, level);
+    }
+
     protected final RenderedOp buildMosaicOp(int level, java.util.List<RenderedImage> tileImages, boolean canCreateSourceROI) {
         if (tileImages == null) {
             throw new NullPointerException("The tile images list is null.");
@@ -229,21 +241,10 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             throw new IllegalStateException("No tiles found.");
         }
 
-        ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(null, this.imageReadBounds.width, this.imageReadBounds.height, level);
+        ImageLayout imageLayout = builMosaicImageLayout(level);
 
-        int imageLevelWidth = imageLayout.getWidth(null);// computeLevelTotalImageWidth(level);
-        int imageLevelTotalWidth = computeLevelTotalImageWidth(level);
-        if (imageLevelWidth != imageLevelTotalWidth) {
-            throw new IllegalStateException("Invalid image width: imageLevelWidth="+imageLevelWidth+", imageLevelTotalWidth="+imageLevelTotalWidth+", level="+level);
-        }
+        RenderingHints hints = (imageLayout == null) ? null : new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
 
-        int imageLevelHeight = imageLayout.getHeight(null);// computeLevelTotalImageHeight(level);
-        int imageLevelTotalHeight = computeLevelTotalImageHeight(level);
-        if (imageLevelHeight != imageLevelTotalHeight) {
-            throw new IllegalStateException("Invalid image height: imageLevelHeight="+imageLevelHeight+", imageLevelTotalHeight="+imageLevelTotalHeight+", level="+level);
-        }
-
-        RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
         RenderedImage[] sources = tileImages.toArray(new RenderedImage[tileImages.size()]);
 
         ROI[] sourceRois = null;
@@ -258,6 +259,9 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
                 sourceRois[i] = roi;
             }
         }
+
+        int imageLevelWidth = computeLevelTotalImageWidth(level);
+        int imageLevelHeight = computeLevelTotalImageHeight(level);
 
         RenderedOp mosaicOp = MosaicDescriptor.create(sources, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, sourceRois, getMosaicOpSourceThreshold(), getMosaicOpBackgroundValues(), hints);
 

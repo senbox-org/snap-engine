@@ -3,6 +3,7 @@ package org.esa.snap.dataio.geotiff;
 import org.esa.snap.core.image.AbstractSubsetTileOpImage;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 
+import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.image.Raster;
@@ -18,9 +19,9 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
     private final GeoTiffBandSource geoTiffBandSource;
 
     public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
-                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport) {
+                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport, Dimension defaultJAIReadTileSize) {
 
-        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport);
+        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, defaultJAIReadTileSize);
 
         this.geoTiffImageReader = geoTiffImageReader;
         this.geoTiffBandSource = geoTiffBandSource;
@@ -37,8 +38,6 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
                 throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
             }
             writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
-            WeakReference<Raster> referenceRaster = new WeakReference<>(normalRasterData);
-            referenceRaster.clear();
         }
     }
 

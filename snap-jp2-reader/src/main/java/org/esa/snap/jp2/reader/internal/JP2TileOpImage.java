@@ -55,7 +55,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
                           int tileWidth, int tileHeight, int tileOffsetFromDecompressedImageX, int tileOffsetFromDecompressedImageY,
                           int tileOffsetFromImageX, int tileOffsetFromImageY, int decompressTileIndex) {
 
-        this(ImageUtils.buildTileImageLayout(bandData.getDataBufferType(), tileWidth, tileHeight, decompressedImageSupport.getLevel()));
+        this(ImageUtils.buildTileImageLayout(bandData.getDataBufferType(), tileWidth, tileHeight, decompressedImageSupport.getLevel(), JAI.getDefaultTileSize()));
 
         this.bandSource = bandSource;
         this.bandData = bandData;

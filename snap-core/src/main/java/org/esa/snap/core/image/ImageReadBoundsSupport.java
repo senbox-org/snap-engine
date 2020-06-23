@@ -4,23 +4,24 @@ import java.awt.*;
 
 public class ImageReadBoundsSupport extends LevelImageSupport {
 
-    private final int sourceX;
-    private final int sourceY;
     private final Rectangle imageCellReadBounds;
 
     public ImageReadBoundsSupport(Rectangle imageCellReadBounds, int level, double scale) {
         super(imageCellReadBounds.width, imageCellReadBounds.height, level, scale);
 
-        this.sourceX = imageCellReadBounds.x;
-        this.sourceY = imageCellReadBounds.y;
         this.imageCellReadBounds = imageCellReadBounds;
     }
 
     public int getSourceX() {
-        return sourceX;
+        return this.imageCellReadBounds.x;
     }
 
     public int getSourceY() {
-        return sourceY;
+        return this.imageCellReadBounds.y;
+    }
+
+    public Rectangle computeIntersection(int destinationSourceX, int destinationSourceY, int destinationSourceWidth, int destinationSourceHeight) {
+        Rectangle normalTileBoundsInSourceImage = new Rectangle(destinationSourceX, destinationSourceY, destinationSourceWidth, destinationSourceHeight);
+        return this.imageCellReadBounds.intersection(normalTileBoundsInSourceImage);
     }
 }

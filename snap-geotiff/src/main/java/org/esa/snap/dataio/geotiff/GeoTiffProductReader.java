@@ -279,6 +279,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         } else {
             sampleModel = geoTiffImageReader.getBaseImage().getSampleModel();
         }
+        product.setProductReader(this);
 
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
@@ -298,9 +299,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product.getMetadataRoot().setModified(false);
         }
 
-        Dimension preferredMosaicTileSize = computePreferredMosaicTileSize(isGlobalShifted180, product.getSceneRasterSize());
-        product.setPreferredTileSize(preferredMosaicTileSize);
-        product.setProductReader(this);
+        Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();
+        product.setPreferredTileSize(defaultJAIReadTileSize);
+
+        Dimension mosaicImageTileSize;
+        if (isGlobalShifted180) {
+            mosaicImageTileSize = product.getSceneRasterSize();
+        } else {
+            mosaicImageTileSize = product.getSceneRasterSize(); // the same product size
+        }
 
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
         AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
@@ -326,10 +333,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
                         throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
-                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredMosaicTileSize,
-                                                                                           bandIndex, band.getGeoCoding(), isGlobalShifted180, noDataValue);
 
-                    ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(dataBufferType, productBounds.width, productBounds.height, 0);
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, mosaicImageTileSize, bandIndex,
+                                                                                           band.getGeoCoding(), isGlobalShifted180, noDataValue, defaultJAIReadTileSize);
+
+                    ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(dataBufferType, productBounds.width, productBounds.height, 0, defaultJAIReadTileSize);
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
                 }
                 bandIndex++; // increment the band index for non virtual bands

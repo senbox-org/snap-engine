@@ -24,8 +24,14 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
     protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
                                         ImageReadBoundsSupport imageBoundsSupport) {
 
-        this(ImageUtils.buildTileImageLayout(dataBufferType, tileWidth, tileHeight, imageBoundsSupport.getLevel()),
-             tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageBoundsSupport);
+        this(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageBoundsSupport, JAI.getDefaultTileSize());
+    }
+
+    protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
+                                        ImageReadBoundsSupport imageBoundsSupport, Dimension defaultJAIReadTileSize) {
+
+        this(ImageUtils.buildTileImageLayout(dataBufferType, tileWidth, tileHeight, imageBoundsSupport.getLevel(), defaultJAIReadTileSize),
+                tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageBoundsSupport);
     }
 
     private AbstractSubsetTileOpImage(ImageLayout layout, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport imageBoundsSupport) {
@@ -54,8 +60,8 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
     }
 
     protected final Rectangle computeIntersectionOnNormalBounds(Rectangle levelDestinationRectangle) {
-        int sourceImageWidth = getImageWidth();
-        int sourceImageHeight = getImageHeight();
+        int sourceImageWidth = this.imageBoundsSupport.getSourceWidth();
+        int sourceImageHeight = this.imageBoundsSupport.getSourceHeight();
 
         int destinationSourceWidth = this.imageBoundsSupport.getSourceWidth(levelDestinationRectangle.width);
         int destinationSourceHeight = this.imageBoundsSupport.getSourceHeight(levelDestinationRectangle.height);
@@ -70,9 +76,7 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
         destinationSourceX += this.imageBoundsSupport.getSourceX();
         destinationSourceY += this.imageBoundsSupport.getSourceY();
 
-        Rectangle normalTileBoundsInSourceImage = new Rectangle(destinationSourceX, destinationSourceY, destinationSourceWidth, destinationSourceHeight);
-        Rectangle normalSourceImageBounds = new Rectangle(this.imageBoundsSupport.getSourceX(), this.imageBoundsSupport.getSourceY(), sourceImageWidth, sourceImageHeight);
-        return normalSourceImageBounds.intersection(normalTileBoundsInSourceImage);
+        return this.imageBoundsSupport.computeIntersection(destinationSourceX, destinationSourceY, destinationSourceWidth, destinationSourceHeight);
     }
 
     protected final void writeDataOnLevelRaster(Raster normalRasterData, Rectangle normalBoundsIntersection, WritableRaster levelDestinationRaster,
@@ -125,14 +129,6 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
 
     private int computeSourceY(double y) {
         return this.imageBoundsSupport.getSourceCoord(y, 0, this.imageBoundsSupport.getSourceHeight()-1);
-    }
-
-    private int getImageWidth() {
-        return this.imageBoundsSupport.getSourceWidth();
-    }
-
-    private int getImageHeight() {
-        return this.imageBoundsSupport.getSourceHeight();
     }
 
     private static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {
