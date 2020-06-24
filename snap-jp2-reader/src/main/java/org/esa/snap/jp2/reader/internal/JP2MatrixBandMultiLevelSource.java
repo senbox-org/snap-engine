@@ -5,6 +5,7 @@ import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.core.image.DecompressedTileOpImageCallback;
 import org.esa.snap.core.image.MosaicMatrix;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -18,26 +19,32 @@ public class JP2MatrixBandMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     private final int bandIndex;
     private final Double mosaicOpSourceThreshold;
     private final Double mosaicOpBackgroundValue;
+    private final Dimension defaultJAIReadTileSize;
 
     public JP2MatrixBandMultiLevelSource(int levelCount, MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, AffineTransform imageToModelTransform,
-                                         int bandIndex, Double mosaicOpBackgroundValue, Double mosaicOpSourceThreshold) {
+                                         int bandIndex, Double mosaicOpBackgroundValue, Double mosaicOpSourceThreshold, Dimension defaultJAIReadTileSize) {
 
         super(levelCount, mosaicMatrix, imageMatrixReadBounds, new Dimension(1, 1), imageToModelTransform);
 
         this.bandIndex = bandIndex;
         this.mosaicOpBackgroundValue = mosaicOpBackgroundValue;
         this.mosaicOpSourceThreshold = mosaicOpSourceThreshold;
+        this.defaultJAIReadTileSize = defaultJAIReadTileSize;
+    }
+
+    @Override
+    protected ImageLayout builMosaicImageLayout(int level) {
+        return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
     @Override
     public SourcelessOpImage buildTileOpImage(DecompressedImageSupport decompressedImageSupport, int tileWidth, int tileHeight,
                                               int tileOffsetXFromDecompressedImage, int tileOffsetYFromDecompressedImage,
-                                              int tileOffsetXFromImage, int tileOffsetYFromImage,
-                                              int decompressTileIndex, JP2MosaicBandMatrixCell matrixCell) {
+                                              int tileOffsetXFromImage, int tileOffsetYFromImage, int decompressTileIndex, JP2MosaicBandMatrixCell matrixCell) {
 
         return new JP2TileOpImage(this, matrixCell, decompressedImageSupport, tileWidth, tileHeight,
                                   tileOffsetXFromDecompressedImage, tileOffsetYFromDecompressedImage,
-                                  tileOffsetXFromImage, tileOffsetYFromImage, decompressTileIndex);
+                                  tileOffsetXFromImage, tileOffsetYFromImage, decompressTileIndex, defaultJAIReadTileSize);
     }
 
     @Override

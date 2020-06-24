@@ -45,7 +45,7 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
 
     @Override
     protected ImageLayout builMosaicImageLayout(int level) {
-        return null;
+        return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
     @Override
