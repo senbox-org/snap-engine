@@ -2,6 +2,8 @@ package org.esa.snap.jp2.reader;
 
 import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.jp2.reader.metadata.JP2MetadataInspector;
+import org.esa.snap.runtime.LogUtils;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,9 +18,15 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created by jcoravu on 21/1/2020.
  */
-public class JP2MetadataInspectorTest extends AbstractJP2Test{
+public class JP2MetadataInspectorTest {
 
     public JP2MetadataInspectorTest() {
+    }
+
+    @BeforeClass
+    public static void initialize() throws Exception {
+        LogUtils.initLogger();
+        OpenJPEGLibraryInstaller.install();
     }
 
     @Test

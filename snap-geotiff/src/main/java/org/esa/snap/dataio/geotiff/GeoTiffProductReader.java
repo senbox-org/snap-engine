@@ -454,13 +454,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    private static Dimension computePreferredMosaicTileSize(boolean isGlobalShifted180, Dimension productSize) {
-        if (isGlobalShifted180) {
-            return new Dimension(productSize.width, productSize.height);
-        }
-        return ImageUtils.computePreferredMosaicTileSize(productSize.width, productSize.height, 1);
-    }
-
     private static ImageInfo buildIndexedImageInfo(Product product, TIFFRenderedImage baseImage, Band band) {
         final IndexColorModel colorModel = (IndexColorModel) baseImage.getColorModel();
         final IndexCoding indexCoding = new IndexCoding("color_map");

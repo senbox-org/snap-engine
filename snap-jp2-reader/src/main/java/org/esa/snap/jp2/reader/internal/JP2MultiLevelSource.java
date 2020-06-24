@@ -6,6 +6,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.DecompressedTileOpImageCallback;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.image.RenderedImage;
@@ -26,9 +27,10 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     private final Path localCacheFolder;
     private final Dimension defaultImageSize;
     private final int bandCount;
+    private final Dimension defaultJAIReadTileSize;
 
     public JP2MultiLevelSource(JP2ImageFile jp2ImageFile, Path localCacheFolder, Dimension defaultImageSize, Rectangle imageReadBounds, int bandCount,
-                               int bandIndex, Dimension decompressedTileSize, int levelCount, int dataBufferType, GeoCoding geoCoding) {
+                               int bandIndex, Dimension decompressedTileSize, int levelCount, int dataBufferType, GeoCoding geoCoding, Dimension defaultJAIReadTileSize) {
 
         super(levelCount, imageReadBounds, decompressedTileSize, geoCoding);
 
@@ -38,6 +40,12 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
         this.dataBufferType = dataBufferType;
         this.bandCount = bandCount;
         this.bandIndex = bandIndex;
+        this.defaultJAIReadTileSize = defaultJAIReadTileSize;
+    }
+
+    @Override
+    protected ImageLayout builMosaicImageLayout(int level) {
+        return null;
     }
 
     @Override
@@ -57,7 +65,7 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
 
         return new JP2TileOpImage(this, this, decompressedImageSupport, tileWidth, tileHeight,
                                   tileOffsetXFromDecompressedImage, tileOffsetYFromDecompressedImage,
-                                  tileOffsetXFromImage, tileOffsetYFromImage, decompressTileIndex);
+                                  tileOffsetXFromImage, tileOffsetYFromImage, decompressTileIndex, this.defaultJAIReadTileSize);
     }
 
     @Override

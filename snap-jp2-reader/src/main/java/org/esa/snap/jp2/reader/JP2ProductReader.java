@@ -132,6 +132,11 @@ public class JP2ProductReader extends AbstractProductReader {
             }
 
             Product product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
+            product.setFileLocation(jp2File.toFile());
+            product.setProductReader(this);
+
+            Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();
+            product.setPreferredTileSize(defaultJAIReadTileSize);
 
             MetadataElement metadataRoot = product.getMetadataRoot();
             if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
@@ -146,12 +151,7 @@ public class JP2ProductReader extends AbstractProductReader {
                 addGeoCoding(product, metadata, subsetDef, defaultImageWidth, defaultImageHeight);
             }
 
-            double[] bandScales = null;
-            double[] bandOffsets = null;
-            addBands(product, imageInfo, csInfo, bandScales, bandOffsets, productBounds, subsetDef);
-
-            product.setPreferredTileSize(JAI.getDefaultTileSize());
-            product.setFileLocation(jp2File.toFile());
+            addBands(product, imageInfo, csInfo, productBounds, subsetDef, defaultJAIReadTileSize);
 
             success = true;
 
@@ -227,7 +227,7 @@ public class JP2ProductReader extends AbstractProductReader {
             lonPoints = new float[]{oX, oX + w, oX, oX + w};
         } else {
             List<Point2D> polygonPositions = metadata.getPolygonPositions();
-            if (polygonPositions != null) {
+            if (polygonPositions != null && polygonPositions.size() > 0) {
                 latPoints = new float[]{(float) polygonPositions.get(0).getX(),
                         (float) polygonPositions.get(1).getX(),
                         (float) polygonPositions.get(3).getX(),
@@ -247,9 +247,7 @@ public class JP2ProductReader extends AbstractProductReader {
         return tiePointGrids;
     }
 
-    private void addBands(Product product, ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets,
-                          Rectangle productBounds, ProductSubsetDef subsetDef) {
-
+    private void addBands(Product product, ImageInfo imageInfo, CodeStreamInfo csInfo, Rectangle productBounds, ProductSubsetDef subsetDef, Dimension defaultJAIReadTileSize) {
         List<CodeStreamInfo.TileComponentInfo> componentTilesInfo = csInfo.getComponentTilesInfo();
         int numBands = componentTilesInfo.size();
 
@@ -266,14 +264,10 @@ public class JP2ProductReader extends AbstractProductReader {
                 int awtDataType = getAwtDataTypeFromImageInfo(bandImageInfo);
 
                 Band band = new Band(bandName, snapDataType, product.getSceneRasterWidth(), product.getSceneRasterHeight());
-                if (bandScales != null && bandOffsets != null) {
-                    band.setScalingFactor(bandScales[bandIndex]);
-                    band.setScalingOffset(bandOffsets[bandIndex]);
-                }
 
-                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex,
-                                                                     decompressedTileSize, csInfo.getNumResolutions(), awtDataType, product.getSceneGeoCoding());
-                ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(awtDataType, productBounds.width, productBounds.height, 0);
+                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex, decompressedTileSize,
+                                                                     csInfo.getNumResolutions(), awtDataType, product.getSceneGeoCoding(), defaultJAIReadTileSize);
+                ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(awtDataType, productBounds.width, productBounds.height, 0, defaultJAIReadTileSize);
                 band.setSourceImage(new DefaultMultiLevelImage(source, imageLayout));
 
                 product.addBand(band);

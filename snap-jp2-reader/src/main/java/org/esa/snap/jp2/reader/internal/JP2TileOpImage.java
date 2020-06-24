@@ -51,11 +51,21 @@ public class JP2TileOpImage extends SourcelessOpImage {
     private int tileOffsetFromImageX;
     private int tileOffsetFromImageY;
 
+    //TODO Jean remove
+    @Deprecated
     public JP2TileOpImage(JP2BandSource bandSource, JP2BandData bandData, DecompressedImageSupport decompressedImageSupport,
                           int tileWidth, int tileHeight, int tileOffsetFromDecompressedImageX, int tileOffsetFromDecompressedImageY,
                           int tileOffsetFromImageX, int tileOffsetFromImageY, int decompressTileIndex) {
 
-        this(ImageUtils.buildTileImageLayout(bandData.getDataBufferType(), tileWidth, tileHeight, decompressedImageSupport.getLevel(), JAI.getDefaultTileSize()));
+        this(bandSource, bandData, decompressedImageSupport, tileWidth, tileHeight, tileOffsetFromDecompressedImageX, tileOffsetFromDecompressedImageY,
+                 tileOffsetFromImageX, tileOffsetFromImageY, decompressTileIndex, JAI.getDefaultTileSize());
+    }
+
+    public JP2TileOpImage(JP2BandSource bandSource, JP2BandData bandData, DecompressedImageSupport decompressedImageSupport,
+                          int tileWidth, int tileHeight, int tileOffsetFromDecompressedImageX, int tileOffsetFromDecompressedImageY,
+                          int tileOffsetFromImageX, int tileOffsetFromImageY, int decompressTileIndex, Dimension defaultJAIReadTileSize) {
+
+        this(ImageUtils.buildTileImageLayout(bandData.getDataBufferType(), tileWidth, tileHeight, decompressedImageSupport.getLevel(), defaultJAIReadTileSize));
 
         this.bandSource = bandSource;
         this.bandData = bandData;
@@ -128,6 +138,9 @@ public class JP2TileOpImage extends SourcelessOpImage {
             try (ImageReader imageReader = new ImageReader(tileDecompressedFile)) {
                 Rectangle intersection = computeLevelIndirectIntersection(level, imageReader.getImageWidth(), imageReader.getImageHeight(), levelDestinationRectangle);
                 if (!intersection.isEmpty()) {
+                    //TODO Jean remove sout
+                    //System.out.println("JP2TileOpImage.computeRectIndirect hashcode="+hashCode()+"  level="+getLevel()+" levelDestinationRectangle="+levelDestinationRectangle+" intersection="+intersection);
+
                     RenderedImage readTileImage = imageReader.read(intersection);
                     writeDataOnLevelRaster(levelDestinationRaster, readTileImage.getData());
                 }

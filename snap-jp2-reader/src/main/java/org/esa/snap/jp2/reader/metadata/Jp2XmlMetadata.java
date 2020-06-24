@@ -17,6 +17,7 @@
 
 package org.esa.snap.jp2.reader.metadata;
 
+import org.apache.commons.lang.StringUtils;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.core.metadata.XmlMetadata;
 import org.esa.snap.core.datamodel.ProductData;
@@ -171,13 +172,17 @@ public class Jp2XmlMetadata extends XmlMetadata {
     }
 
     public List<Point2D> getPolygonPositions() {
-        List<Point2D> positions = new ArrayList<>();
-        String tiePointGridPointsString = getAttributeValue(JP2ProductReaderConstants.TAG_POLYGON_POSITIONS, "");
-        String[] values = tiePointGridPointsString.split(" ");
-        for(int index = 0; index < values.length; index+=2) {
-            positions.add(new Point2D.Double(Double.parseDouble(values[index]),
-                    Double.parseDouble(values[index+1])));
+        String tiePointGridPointsString = getAttributeValue(JP2ProductReaderConstants.TAG_POLYGON_POSITIONS, null);
+        if (!StringUtils.isBlank(tiePointGridPointsString)) {
+            List<Point2D> positions = new ArrayList<>();
+            String[] values = tiePointGridPointsString.split(" ");
+            for (int index = 0; index < values.length; index += 2) {
+                double x = Double.parseDouble(values[index]);
+                double y = Double.parseDouble(values[index + 1]);
+                positions.add(new Point2D.Double(x, y));
+            }
+            return positions;
         }
-        return positions;
+        return null;
     }
 }
