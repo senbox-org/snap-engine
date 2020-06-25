@@ -1,8 +1,8 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:annotation>
         <xsd:documentation xml:lang="DE">
-            Schema fuer BEAM-DIMAP Header-File-Format.
-            Copyright 2001 ???    Alle Rechte vorbehalten ???
+            Schema for BEAM-DIMAP Header-File-Format.
+            Copyright (C) 2001-2020 Brockmann Consult GmbH (info@brockmann-consult.de)
         </xsd:documentation>
     </xsd:annotation>
 
