@@ -26,9 +26,12 @@ import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
+import ucar.nc2.constants.CDM;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.List;
 
 public class CfInitialisationPart extends ProfileInitPartIO {
 
@@ -40,10 +43,23 @@ public class CfInitialisationPart extends ProfileInitPartIO {
                 ctx.getRasterDigest().getRasterDim().getDimensionX().getLength(),
                 ctx.getRasterDigest().getRasterDim().getDimensionY().getLength()
         );
+
+        initPreferredTileSize(ctx, product);
+
+        return product;
+    }
+
+    protected void initPreferredTileSize(ProfileReadContext ctx, Product product) {
+        if (!initPreferredTileSizeFromChunkSizes(ctx, product)) {
+            initPreferredTileSizeFromGAttribute(ctx, product);
+        }
+    }
+
+    private void initPreferredTileSizeFromGAttribute(ProfileReadContext ctx, Product product) {
         Attribute tileSize = ctx.getNetcdfFile().findGlobalAttribute("TileSize");
         if (tileSize != null) {
             String stringValue = tileSize.getStringValue();
-            if (stringValue!= null && stringValue.contains(":")) {
+            if (stringValue != null && stringValue.contains(":")) {
                 String[] tileSizes = stringValue.split(":");
                 if (tileSizes.length == 2) {
                     try {
@@ -55,7 +71,34 @@ public class CfInitialisationPart extends ProfileInitPartIO {
                 }
             }
         }
-        return product;
+    }
+
+    private boolean initPreferredTileSizeFromChunkSizes(ProfileReadContext ctx, Product product) {
+        List<Variable> variables = ctx.getNetcdfFile().getVariables();
+        Variable variable = getFirst2dVariable(variables);
+        if (variable != null) {
+            Attribute att = variable.findAttribute(CDM.CHUNK_SIZES);
+            if (att != null) {
+                Number numericValue = att.getNumericValue(0);
+                Number numericValue1 = att.getNumericValue(1);
+                if (numericValue != null && numericValue1 != null) {
+                    product.setPreferredTileSize(numericValue.intValue(), numericValue1.intValue());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private Variable getFirst2dVariable(List<Variable> variables) {
+        for (Variable variable : variables) {
+            final List<ucar.nc2.Dimension> dimensions = variable.getDimensions();
+            if (dimensions.size() == 2) {
+                return variable;
+            }
+
+        }
+        return null;
     }
 
     @Override
