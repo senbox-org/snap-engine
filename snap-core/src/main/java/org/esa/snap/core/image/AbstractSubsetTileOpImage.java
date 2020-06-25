@@ -22,12 +22,6 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
     private final int levelTileOffsetFromReadBoundsY;
 
     protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
-                                        ImageReadBoundsSupport imageBoundsSupport) {
-
-        this(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageBoundsSupport, JAI.getDefaultTileSize());
-    }
-
-    protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
                                         ImageReadBoundsSupport imageBoundsSupport, Dimension defaultJAIReadTileSize) {
 
         this(ImageUtils.buildTileImageLayout(dataBufferType, tileWidth, tileHeight, imageBoundsSupport.getLevel(), defaultJAIReadTileSize),
