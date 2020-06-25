@@ -134,15 +134,15 @@ pipeline {
                     agent { label 'snap-test' }
                     when {
                         expression {
-                            return "${env.GIT_BRANCH}" =~ /\d+\.x/;
+                            return "${params.launchTests}" == "true";
                         }
                     }
                     steps {
                         echo "Launch snap-gpt-tests using docker image snap:${branchVersion} and scope REGULAR"
-                        // build job: "snap-gpt-tests/${branchVersion}", parameters: [
-                        //    [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                        //    [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
-                        //]
+                            build job: "snap-gpt-tests/${branchVersion}", parameters: [
+                              [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                              [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
+                        ]
                     }
                 }
             }
