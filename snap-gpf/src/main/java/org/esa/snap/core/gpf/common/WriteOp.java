@@ -409,12 +409,34 @@ public class WriteOp extends Operator {
     }
 
     private void writeTileRow(Band band, Tile[] cacheLine) throws IOException {
+//        for (Tile tile : cacheLine) {
+//            final Rectangle r = tile.getRectangle();
+//            synchronized (productWriter) {
+//                System.out.println("wrote: " +  band.getName() + " " + r.x + " " + r.y + " " + r.width + " " + r.height);
+//                productWriter.writeBandRasterData(band, r.x, r.y, r.width, r.height, tile.getRawSamples(), ProgressMonitor.NULL);
+//            }
+//        }
+
+        int lineWidth = 0;
         for (Tile tile : cacheLine) {
-            final Rectangle r = tile.getRectangle();
-            synchronized (productWriter) {
-                productWriter.writeBandRasterData(band, r.x, r.y, r.width, r.height, tile.getRawSamples(), ProgressMonitor.NULL);
+            lineWidth += tile.getWidth();
+        }
+
+        final ProductData productData = ProductData.createInstance(band.getDataType(), lineWidth * cacheLine[0].getHeight());
+        final Object writeBuffer = productData.getElems();
+        for (Tile tile : cacheLine) {
+            final Object tileBuffer = tile.getDataBuffer().getElems();
+            final int tileStride = tile.getScanlineStride();
+            final int tileWidth = tile.getWidth();
+            final int minX = tile.getMinX();
+            for (int line = 0; line < tile.getHeight(); line++) {
+                int srcPos = line * tileStride;
+                int destPos = minX + line * lineWidth;
+                System.arraycopy(tileBuffer, srcPos, writeBuffer, destPos, tileWidth);
             }
         }
+
+        productWriter.writeBandRasterData(band, 0, cacheLine[0].getMinY(), lineWidth, cacheLine[0].getHeight(), productData, ProgressMonitor.NULL);
     }
 
     private void markTileAsHandled(Band targetBand, int tileX, int tileY) {
@@ -496,8 +518,5 @@ public class WriteOp extends Operator {
             }
             return tileY == other.tileY;
         }
-
-
     }
-
 }
