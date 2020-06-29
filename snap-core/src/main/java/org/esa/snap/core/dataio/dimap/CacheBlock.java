@@ -12,14 +12,14 @@ class CacheBlock {
     private final int height;
     private final Area unwrittenSpace;
 
-    private ProductData data;
+    private ProductData bufferData;
 
     CacheBlock(int yOffset, int width, int height, int dataType) {
         this.yOffset = yOffset;
         this.width = width;
         this.height = height;
 
-        data = ProductData.createInstance(dataType, width * height);
+        bufferData = ProductData.createInstance(dataType, width * height);
 
         unwrittenSpace = new Area(getRegion());
     }
@@ -32,21 +32,29 @@ class CacheBlock {
         return new Rectangle(0, yOffset, width, height);
     }
 
-    ProductData getData() {
-        return data;
+    ProductData getBufferData() {
+        return bufferData;
     }
 
     public void dispose() {
-        data = null;
+        bufferData = null;
     }
 
     public boolean isComplete() {
         return unwrittenSpace.isEmpty();
     }
 
+    public void update(int xOffset, int yOffset, int width, int height, ProductData data) {
+        final Object srcData = data.getElems();
+        final Object destData = bufferData.getElems();
+        final int targetLineOffset = yOffset - this.yOffset;
 
-    // update: int sourceOffsetX, int sourceOffsetY,
-    //                                    int sourceWidth, int sourceHeight,
-    //                                    ProductData sourceBuffer
+        for (int line = 0; line < height; line++) {
+            final int srcPos = line * width;
+            final int destPos = xOffset + (targetLineOffset + line) * this.width;
+            System.arraycopy(srcData, srcPos, destData, destPos, width);
+        }
 
+        this.unwrittenSpace.subtract(new Area(new Rectangle(xOffset, yOffset, width, height)));
+    }
 }

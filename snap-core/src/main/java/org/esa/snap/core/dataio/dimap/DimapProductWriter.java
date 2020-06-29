@@ -65,6 +65,13 @@ public class DimapProductWriter extends AbstractProductWriter {
     private boolean incremental = true;
     private Set<WriterExtender> writerExtenders;
 
+    private boolean useCache;
+    private WriteCache writeCache;
+
+    public void setUseCache(boolean useCache) {
+        this.useCache = useCache;
+    }
+
     /**
      * Construct a new instance of a product writer for the given BEAM-DIMAP product writer plug-in.
      *
@@ -72,6 +79,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     public DimapProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+        writeCache = new WriteCache();
     }
 
     /**
@@ -178,21 +186,26 @@ public class DimapProductWriter extends AbstractProductWriter {
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
-        try {
-            synchronized (outputStream) {
-                for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                    sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                    outputPos += sourceBandWidth;
-                    pm.worked(1);
-                    if (pm.isCanceled()) {
-                        break;
+        if (useCache) {
+            final VariableCache variableCache = writeCache.get(sourceBand);
+            variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+        } else {
+            long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
+            pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+            try {
+                synchronized (outputStream) {
+                    for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                        sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                        outputPos += sourceBandWidth;
+                        pm.worked(1);
+                        if (pm.isCanceled()) {
+                            break;
+                        }
                     }
                 }
+            } finally {
+                pm.done();
             }
-        } finally {
-            pm.done();
         }
     }
 
