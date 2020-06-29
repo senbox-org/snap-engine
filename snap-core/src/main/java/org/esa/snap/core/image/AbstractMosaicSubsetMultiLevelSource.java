@@ -369,4 +369,20 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         }
         return tileCount;
     }
+
+    protected static int computeTopLeftDecompressedTileHeight(Rectangle imageCellReadBounds, int decompressedTileHeight) {
+        int startTileRowIndex = imageCellReadBounds.y / decompressedTileHeight;
+        int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
+        int tileRowIndex = startTileRowIndex;
+        int currentImageTileTopY = imageCellReadBounds.y;
+        return computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
+    }
+
+    protected static int computeTopLeftDecompressedTileWidth(Rectangle imageCellReadBounds, int decompressedTileWidth) {
+        int startTileColumnIndex = imageCellReadBounds.x / decompressedTileWidth;
+        int endTileColumnIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
+        int tileColumnIndex = startTileColumnIndex;
+        int currentImageTileLeftX = imageCellReadBounds.x;
+        return computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
+    }
 }

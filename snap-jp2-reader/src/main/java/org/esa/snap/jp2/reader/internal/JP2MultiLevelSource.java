@@ -1,10 +1,11 @@
 package org.esa.snap.jp2.reader.internal;
 
-import org.esa.snap.core.image.DecompressedImageSupport;
-import org.esa.snap.jp2.reader.JP2ImageFile;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
+import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.core.image.DecompressedTileOpImageCallback;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.jp2.reader.JP2ImageFile;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * A single banded multi-level image source for JP2 files.
@@ -53,7 +55,9 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
         DecompressedImageSupport decompressedImageSupport = new DecompressedImageSupport(level, this.tileSize.width, this.tileSize.height);
         List<RenderedImage> tileImages = buildDecompressedTileImages(this.imageReadBounds, decompressedImageSupport, this.defaultImageSize.width, 0.0f, 0.0f, this, null);
         if (tileImages.size() > 0) {
-            return buildMosaicOp(level, tileImages, true);
+            RenderedImage image = buildMosaicOp(level, tileImages, true);
+            Vector<RenderedImage>ss=  image.getSources();
+            return image;
         }
         return null;
     }
@@ -91,5 +95,11 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     @Override
     public int getBandCount() {
         return this.bandCount;
+    }
+
+    public ImageLayout buildMultiLevelImageLayout() {
+        int topLeftTileWidth = computeTopLeftDecompressedTileWidth(this.imageReadBounds, this.tileSize.width);
+        int topLeftTileHeight = computeTopLeftDecompressedTileHeight(this.imageReadBounds, this.tileSize.height);
+        return ImageUtils.buildMosaicImageLayout(this.dataBufferType, imageReadBounds.width, imageReadBounds.height, 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }

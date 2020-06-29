@@ -265,10 +265,11 @@ public class JP2ProductReader extends AbstractProductReader {
 
                 Band band = new Band(bandName, snapDataType, product.getSceneRasterWidth(), product.getSceneRasterHeight());
 
-                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex, decompressedTileSize,
+                JP2MultiLevelSource multiLevelSource = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, productBounds, numBands, bandIndex, decompressedTileSize,
                                                                      csInfo.getNumResolutions(), awtDataType, product.getSceneGeoCoding(), defaultJAIReadTileSize);
-                ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(awtDataType, productBounds.width, productBounds.height, 0, defaultJAIReadTileSize);
-                band.setSourceImage(new DefaultMultiLevelImage(source, imageLayout));
+
+                ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
+                band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
 
                 product.addBand(band);
             }

@@ -50,6 +50,11 @@ public class ImageUtils {
     }
 
     public static ImageLayout buildMosaicImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
+        return buildMosaicImageLayout(dataBufferType, imageWidth, imageHeight, level, defaultJAIReadTileSize, defaultJAIReadTileSize.width, defaultJAIReadTileSize.height);
+    }
+
+    public static ImageLayout buildMosaicImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize,
+                                                     int topLeftTileWidth, int topLeftTileHeight) {
         if (imageWidth < 0) {
             throw new IllegalArgumentException("imageWidth");
         }
@@ -60,8 +65,8 @@ public class ImageUtils {
         int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
         int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
 
-        int levelTileWidth = defaultJAIReadTileSize.width;
-        int levelTileHeight = defaultJAIReadTileSize.height;
+        int levelTileWidth = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
+        int levelTileHeight = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
 
         SampleModel sampleModel = null;
         ColorModel colorModel = null;

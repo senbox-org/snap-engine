@@ -4,6 +4,7 @@ import org.esa.snap.core.image.AbstractMatrixMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.core.image.DecompressedTileOpImageCallback;
 import org.esa.snap.core.image.MosaicMatrix;
+import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
@@ -76,5 +77,15 @@ public class JP2MatrixBandMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     @Override
     public int getBandIndex() {
         return this.bandIndex;
+    }
+
+    public ImageLayout buildMultiLevelImageLayout() {
+        MatrixReadBounds matrixReadBounds = computeTopLeftMatrixCellReadBounds();
+        JP2MosaicBandMatrixCell topLeftMosaicMatrixCell = (JP2MosaicBandMatrixCell)matrixReadBounds.getMatrixCell();
+        Rectangle cellLocalIntersectionBounds = matrixReadBounds.getCellLocalIntersectionBounds();
+        int topLeftTileWidth = computeTopLeftDecompressedTileWidth(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getDecompressedTileWidth());
+        int topLeftTileHeight = computeTopLeftDecompressedTileHeight(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getDecompressedTileHeight());
+        return ImageUtils.buildMosaicImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
+                                                 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }
