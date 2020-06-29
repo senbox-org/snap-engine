@@ -336,8 +336,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
                     GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, mosaicImageTileSize, bandIndex,
                                                                                            band.getGeoCoding(), isGlobalShifted180, noDataValue, defaultJAIReadTileSize);
-
-                    ImageLayout imageLayout = ImageUtils.buildMosaicImageLayout(dataBufferType, productBounds.width, productBounds.height, 0, defaultJAIReadTileSize);
+                    ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
                 }
                 bandIndex++; // increment the band index for non virtual bands

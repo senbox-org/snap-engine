@@ -5,6 +5,7 @@ import org.esa.snap.core.image.AbstractMatrixMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.esa.snap.core.image.MosaicMatrix;
 import org.esa.snap.core.image.UncompressedTileOpImageCallback;
+import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
@@ -87,5 +88,15 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     @Override
     public int getBandIndex() {
         return this.bandIndex;
+    }
+
+    public ImageLayout buildMultiLevelImageLayout() {
+        MatrixReadBounds matrixReadBounds = computeTopLeftMatrixCellReadBounds();
+        GeoTiffMatrixCell topLeftMosaicMatrixCell = (GeoTiffMatrixCell)matrixReadBounds.getMatrixCell();
+        Rectangle cellLocalIntersectionBounds = matrixReadBounds.getCellLocalIntersectionBounds();
+        int topLeftTileWidth = computeTopLeftUncompressedTileWidth(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getCellWidth());
+        int topLeftTileHeight = computeTopLeftUncompressedTileHeight(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getCellHeight());
+        return ImageUtils.buildMosaicImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
+                0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }

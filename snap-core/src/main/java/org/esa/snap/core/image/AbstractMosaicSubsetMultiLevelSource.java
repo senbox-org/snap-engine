@@ -385,4 +385,20 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         int currentImageTileLeftX = imageCellReadBounds.x;
         return computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
     }
+
+    protected static int computeTopLeftUncompressedTileWidth(Rectangle imageCellReadBounds, int uncompressedTileWidth) {
+        int columnTileCount = computeUncompressedTileCount(imageCellReadBounds.width, uncompressedTileWidth);
+        int tileColumnIndex = 0;
+        int tileOffsetFromReadBoundsX = tileColumnIndex * uncompressedTileWidth;
+        boolean isLastColumn = (tileColumnIndex == columnTileCount - 1);
+        return isLastColumn ? (imageCellReadBounds.width - tileOffsetFromReadBoundsX) : uncompressedTileWidth;
+    }
+
+    protected static int computeTopLeftUncompressedTileHeight(Rectangle imageCellReadBounds, int uncompressedTileHeight) {
+        int rowTileCount = computeUncompressedTileCount(imageCellReadBounds.height, uncompressedTileHeight);
+        int tileRowIndex = 0;
+        int tileOffsetFromReadBoundsY = tileRowIndex * uncompressedTileHeight;
+        boolean isLastRow = (tileRowIndex == rowTileCount - 1);
+        return isLastRow ? (imageCellReadBounds.height - tileOffsetFromReadBoundsY) : uncompressedTileHeight;
+    }
 }
