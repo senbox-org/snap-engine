@@ -55,9 +55,7 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
         DecompressedImageSupport decompressedImageSupport = new DecompressedImageSupport(level, this.tileSize.width, this.tileSize.height);
         List<RenderedImage> tileImages = buildDecompressedTileImages(this.imageReadBounds, decompressedImageSupport, this.defaultImageSize.width, 0.0f, 0.0f, this, null);
         if (tileImages.size() > 0) {
-            RenderedImage image = buildMosaicOp(level, tileImages, true);
-            Vector<RenderedImage>ss=  image.getSources();
-            return image;
+            return buildMosaicOp(level, tileImages, true);
         }
         return null;
     }
