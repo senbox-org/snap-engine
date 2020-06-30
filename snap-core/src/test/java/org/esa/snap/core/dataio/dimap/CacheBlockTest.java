@@ -17,7 +17,7 @@ public class CacheBlockTest {
     public void testCreate_and_getter() {
         final int width = 2051;
         final int height = 64;
-        final CacheBlock cacheBlock = new CacheBlock(128, width, height, ProductData.TYPE_INT16);
+        final CacheBlock cacheBlock = new CacheBlock(128, width, height, ProductData.TYPE_INT16, -1);
 
         assertEquals(128, cacheBlock.getYOffset());
 
@@ -35,7 +35,7 @@ public class CacheBlockTest {
 
     @Test
     public void testCreate_and_dispose() {
-        final CacheBlock cacheBlock = new CacheBlock(411, 109, 14, ProductData.TYPE_INT32);
+        final CacheBlock cacheBlock = new CacheBlock(411, 109, 14, ProductData.TYPE_INT32, -2);
 
         assertNotNull(cacheBlock.getBufferData());
 
@@ -46,14 +46,14 @@ public class CacheBlockTest {
 
     @Test
     public void testCreate_and_isComplete() {
-        final CacheBlock cacheBlock = new CacheBlock(412, 110, 15, ProductData.TYPE_FLOAT32);
+        final CacheBlock cacheBlock = new CacheBlock(412, 110, 15, ProductData.TYPE_FLOAT32, Float.NaN);
 
         assertFalse(cacheBlock.isComplete());
     }
 
     @Test
     public void testUpdate_partially() {
-        final CacheBlock cacheBlock = new CacheBlock(413, 20, 10, ProductData.TYPE_FLOAT32);
+        final CacheBlock cacheBlock = new CacheBlock(413, 20, 10, ProductData.TYPE_FLOAT32, Float.NaN);
 
         final float[] data = createFloatBuffer();
 
@@ -71,7 +71,7 @@ public class CacheBlockTest {
 
     @Test
     public void testUpdate_completely_two_regions() {
-        final CacheBlock cacheBlock = new CacheBlock(414, 20, 10, ProductData.TYPE_FLOAT32);
+        final CacheBlock cacheBlock = new CacheBlock(414, 20, 10, ProductData.TYPE_FLOAT32, Float.NaN);
 
         final float[] data = createFloatBuffer();
 

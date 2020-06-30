@@ -2,7 +2,12 @@ package org.esa.snap.core.dataio.dimap;
 
 import org.esa.snap.core.datamodel.Band;
 
+import javax.imageio.stream.ImageOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 class WriteCache {
 
@@ -21,9 +26,12 @@ class WriteCache {
         return variableCache;
     }
 
-    void flush() {
-
+    void flush(Map<Band, ImageOutputStream> bandOutputStreams) throws IOException {
+        final Set<Map.Entry<Band, ImageOutputStream>> entries = bandOutputStreams.entrySet();
+        for (Map.Entry<Band, ImageOutputStream> next : entries) {
+            final String bandName = next.getKey().getName();
+            final VariableCache variableCache = variableMap.get(bandName);
+            variableCache.flush(next.getValue());
+        }
     }
-
-
 }

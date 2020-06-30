@@ -188,7 +188,10 @@ public class DimapProductWriter extends AbstractProductWriter {
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
         if (useCache) {
             final VariableCache variableCache = writeCache.get(sourceBand);
-            variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+            final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+            if (canWrite) {
+                variableCache.writeCompletedBlocks(outputStream);
+            }
         } else {
             long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
@@ -249,6 +252,9 @@ public class DimapProductWriter extends AbstractProductWriter {
     public synchronized void flush() throws IOException {
         if (bandOutputStreams == null) {
             return;
+        }
+        if (useCache) {
+            writeCache.flush(bandOutputStreams);
         }
         for (ImageOutputStream imageOutputStream : bandOutputStreams.values()) {
             imageOutputStream.flush();

@@ -14,12 +14,15 @@ class CacheBlock {
 
     private ProductData bufferData;
 
-    CacheBlock(int yOffset, int width, int height, int dataType) {
+    CacheBlock(int yOffset, int width, int height, int dataType, double noDataValue) {
         this.yOffset = yOffset;
         this.width = width;
         this.height = height;
 
         bufferData = ProductData.createInstance(dataType, width * height);
+        for (int i = 0; i < bufferData.getNumElems(); i++) {
+            bufferData.setElemDoubleAt(i, noDataValue);
+        }
 
         unwrittenSpace = new Area(getRegion());
     }
@@ -50,7 +53,7 @@ class CacheBlock {
         final int targetLineOffset = yOffset - this.yOffset;
 
         for (int line = 0; line < height; line++) {
-            final int srcPos = line * width;
+            final int srcPos = (yOffset + line) * width;
             final int destPos = xOffset + (targetLineOffset + line) * this.width;
             System.arraycopy(srcData, srcPos, destData, destPos, width);
         }
