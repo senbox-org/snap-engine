@@ -29,8 +29,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.core.datamodel.SceneFactory;
 import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -598,7 +596,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                     treatVirtualBandsAsRealBands = true;
                 }
 
-                //@todo 1 se/se - extract copy of a band or virtual band to create deep clone of band and virtual band
                 if (!treatVirtualBandsAsRealBands && sourceBand instanceof VirtualBand) {
                     VirtualBand virtualSource = (VirtualBand) sourceBand;
                     if(getSubsetDef() == null) {

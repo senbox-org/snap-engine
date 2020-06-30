@@ -127,15 +127,13 @@ public abstract class AbstractProductReader implements ProductReader {
     }
 
     /**
-     * Sets the subset information. This implemetation is protected to overwrite in the inherided class to ensure that
-     * the subset information cannot be set from the {@code readProductNodes} method.
+     * Sets the subset information.
      *
      * @param subsetDef the subset definition
      */
     protected void setSubsetDef(ProductSubsetDef subsetDef) {
         this.subsetDef = subsetDef;
     }
-
 
     /**
      * Tests whether or not a product node (a band, a tie-point grid or metadata element) with the given name is
