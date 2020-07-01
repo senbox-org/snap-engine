@@ -35,6 +35,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 /**
  * The product writer for the BEAM-DIMAP format.
@@ -57,6 +59,8 @@ import java.util.Set;
  * @see DimapProductReaderPlugIn
  */
 public class DimapProductWriter extends AbstractProductWriter {
+
+    private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.dimap.useCache";
 
     private File outputDir;
     private File outputFile;
@@ -79,6 +83,8 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     public DimapProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+        final Preferences preferences = Config.instance().preferences();
+        useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
         writeCache = new WriteCache();
     }
 
@@ -181,12 +187,13 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertNotNull("sourceBand", sourceBand);
         Guardian.assertNotNull("sourceBuffer", sourceBuffer);
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
-        final long sourceBandWidth = sourceBand.getRasterWidth();
-        final long sourceBandHeight = sourceBand.getRasterHeight();
+        final int sourceBandWidth = sourceBand.getRasterWidth();
+        final int sourceBandHeight = sourceBand.getRasterHeight();
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
+        final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        if (useCache) {
+        if (useCache && (!fullRaster)) {
             final VariableCache variableCache = writeCache.get(sourceBand);
             final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
             if (canWrite) {
@@ -235,6 +242,11 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
         Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
         Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
+    }
+
+    // package access for testing only tb 2020-07-01
+    static boolean isFullRaster(int sourceWidth, int sourceHeight, int rasterWidth, int rasterHeight) {
+        return (sourceWidth == rasterWidth) && (sourceHeight == rasterHeight);
     }
 
     private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {

@@ -58,7 +58,7 @@ public class CacheBlockTest {
         final float[] data = createFloatBuffer();
 
         final ProductData productData = ProductData.createInstance(data);
-        cacheBlock.update(0, 413, 10, 10, productData);
+        cacheBlock.update(0, 0, 413, 10, 10, productData);
 
         final ProductData bufferData = cacheBlock.getBufferData();
         assertEquals(0.0, bufferData.getElemFloatAt(0), 1e-8);
@@ -76,8 +76,8 @@ public class CacheBlockTest {
         final float[] data = createFloatBuffer();
 
         final ProductData productData = ProductData.createInstance(data);
-        cacheBlock.update(0, 414, 10, 10, productData);
-        cacheBlock.update(10, 414, 10, 10, productData);
+        cacheBlock.update(0, 0, 414, 10, 10, productData);
+        cacheBlock.update(10, 0, 414, 10, 10, productData);
 
         final ProductData bufferData = cacheBlock.getBufferData();
         assertEquals(0.0, bufferData.getElemFloatAt(0), 1e-8);

@@ -31,7 +31,9 @@ class WriteCache {
         for (Map.Entry<Band, ImageOutputStream> next : entries) {
             final String bandName = next.getKey().getName();
             final VariableCache variableCache = variableMap.get(bandName);
-            variableCache.flush(next.getValue());
+            if (variableCache != null) {
+                variableCache.flush(next.getValue());
+            }
         }
     }
 }

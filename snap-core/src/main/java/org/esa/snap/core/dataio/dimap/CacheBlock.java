@@ -7,15 +7,15 @@ import java.awt.geom.Area;
 
 class CacheBlock {
 
-    private final int yOffset;
+    private final int yStart;
     private final int width;
     private final int height;
     private final Area unwrittenSpace;
 
     private ProductData bufferData;
 
-    CacheBlock(int yOffset, int width, int height, int dataType, double noDataValue) {
-        this.yOffset = yOffset;
+    CacheBlock(int yStart, int width, int height, int dataType, double noDataValue) {
+        this.yStart = yStart;
         this.width = width;
         this.height = height;
 
@@ -28,11 +28,11 @@ class CacheBlock {
     }
 
     int getYOffset() {
-        return yOffset;
+        return yStart;
     }
 
     Rectangle getRegion() {
-        return new Rectangle(0, yOffset, width, height);
+        return new Rectangle(0, yStart, width, height);
     }
 
     ProductData getBufferData() {
@@ -47,17 +47,17 @@ class CacheBlock {
         return unwrittenSpace.isEmpty();
     }
 
-    public void update(int xOffset, int yOffset, int width, int height, ProductData data) {
+    public void update(int xOffset, int yReadOff, int yWriteOff, int width, int height, ProductData data) {
         final Object srcData = data.getElems();
         final Object destData = bufferData.getElems();
-        final int targetLineOffset = yOffset - this.yOffset;
+        final int writeLineOffset = yWriteOff - this.yStart;
 
         for (int line = 0; line < height; line++) {
-            final int srcPos = (yOffset + line) * width;
-            final int destPos = xOffset + (targetLineOffset + line) * this.width;
+            final int srcPos = (yReadOff + line) * width;
+            final int destPos = xOffset + (writeLineOffset + line) * this.width;
             System.arraycopy(srcData, srcPos, destData, destPos, width);
         }
 
-        this.unwrittenSpace.subtract(new Area(new Rectangle(xOffset, yOffset, width, height)));
+        this.unwrittenSpace.subtract(new Area(new Rectangle(xOffset, yWriteOff, width, height)));
     }
 }

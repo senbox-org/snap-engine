@@ -72,6 +72,7 @@ public class DimapProductWriterTest_WriteBandRasterData extends TestCase {
         Band band = new Band("band", ProductData.TYPE_INT8, sceneWidth, sceneHeight);
         product.addBand(band);
 
+        _productWriter.setUseCache(false);
         _productWriter.writeProductNodes(product, _outputFile);
         ProductData sourceBuffer = getFilledSourceData(sourceWidth * sourceHeight);
         _productWriter.writeBandRasterData(band, offsetX, offsetY, sourceWidth, sourceHeight, sourceBuffer,

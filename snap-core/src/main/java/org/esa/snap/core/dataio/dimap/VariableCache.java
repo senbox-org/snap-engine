@@ -39,16 +39,16 @@ class VariableCache {
 
         for (int index = firstIdx; index <= lastIdx; index++) {
             final int blockCount = index - firstIdx;
-            final int coveredHeight = blockCount * LINES_PER_BUFFER;
-            final int remainingHeight = sourceHeight - coveredHeight;
+            final int yReadOff = blockCount * LINES_PER_BUFFER;
+            final int remainingHeight = sourceHeight - yReadOff;
             final int blockHeight = remainingHeight > LINES_PER_BUFFER ? LINES_PER_BUFFER : remainingHeight;
-            final int readOffsetY = sourceOffsetY + coveredHeight;
+            final int yWriteOff = sourceOffsetY + yReadOff;
 
             synchronized (cacheBlocks) {
                 if (cacheBlocks[index] == null) {
-                    cacheBlocks[index] = new CacheBlock(readOffsetY, width, blockHeight, dataType, noDataValue);
+                    cacheBlocks[index] = new CacheBlock(yWriteOff, width, blockHeight, dataType, noDataValue);
                 }
-                cacheBlocks[index].update(sourceOffsetX, readOffsetY, sourceWidth, blockHeight, sourceBuffer);
+                cacheBlocks[index].update(sourceOffsetX, yReadOff, yWriteOff, sourceWidth, blockHeight, sourceBuffer);
                 final boolean complete = cacheBlocks[index].isComplete();
                 if (complete) {
                     completedIndices.add(index);
@@ -71,9 +71,11 @@ class VariableCache {
     }
 
     public void flush(ImageOutputStream outputStream) throws IOException {
-        for (int i = 0; i < cacheBlocks.length; i++) {
-            if (cacheBlocks[i] != null) {
-                writeCacheBlock(outputStream, i);
+        synchronized (cacheBlocks) {
+            for (int i = 0; i < cacheBlocks.length; i++) {
+                if (cacheBlocks[i] != null) {
+                    writeCacheBlock(outputStream, i);
+                }
             }
         }
     }
@@ -87,8 +89,4 @@ class VariableCache {
         cacheBlock.dispose();
         cacheBlocks[index] = null;
     }
-
-    // remove cacheBlock
-
-
 }

@@ -66,7 +66,7 @@ public class VariableCacheTest {
 
         final VariableCache variableCache = new VariableCache(band);
 
-        final boolean canWrite = variableCache.update(0, 128, 100, 128, createInt16Data(100 * 128));
+        final boolean canWrite = variableCache.update(0, 128, 100, 128, createInt16Data((128 + 100) * 128));
         assertFalse(canWrite);
         final CacheBlock cacheBlock = variableCache.cacheBlocks[1];
         assertNotNull(cacheBlock);
