@@ -21,6 +21,7 @@ import com.bc.ceres.glevel.MultiLevelSource;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.OpImage;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.TileCache;
 import javax.media.jai.operator.ScaleDescriptor;
 import java.awt.Rectangle;
@@ -144,9 +145,11 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
         if (jaiH == j2kH) {
             scaleY = (float) invScale;
         } else {
-            scaleY = (float) ((double) j2kH  /(double) sourceImage.getHeight());
+            scaleY = (float) ((double) j2kH / (double) sourceImage.getHeight());
         }
 
+        PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
+        planarImage.prefetchTiles(planarImage.getTileIndices(planarImage.getBounds()));
         return ScaleDescriptor.create(sourceImage, scaleX, scaleY, 0.0F, 0.0F, interpolation, null);
     }
 

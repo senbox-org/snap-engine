@@ -37,8 +37,12 @@ import java.util.logging.Logger;
 
 /**
  * The {@code AbstractProductReader}  class can be used as a base class for new product reader implementations. The
- * only two methods which clients must implement are {@code readProductNodes()} and {@code readBandData}
- * methods.
+ * only two methods which clients must implement are {@link #readProductNodes(Object, ProductSubsetDef)} and
+ * {@link #readBandRasterData(Band, int, int, int, int, ProductData, ProgressMonitor)} methods.<br><br>
+ * <p>
+ * To simplify implementation it is encouraged to implement {@link #readProductNodesImpl()} and
+ * {@link #readBandRasterDataImpl(int, int, int, int, int, int, Band, int, int, int, int, ProductData, ProgressMonitor) readBandRasterDataImpl(...)}
+ * instead.
  *
  * @author Norman Fomferra
  * @version $Revision$ $Date$
@@ -171,7 +175,7 @@ public abstract class AbstractProductReader implements ProductReader {
 
         long startTime = System.currentTimeMillis();
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Start reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The subset is '" + subsetDef + "'.");
+            logger.log(Level.FINE, "Start reading the product from input '" + input + "' using the '" + getClass().getName() + "' reader class. The subset is '" + subsetDef + "'.");
         }
 
         final Product product = readProductNodesImpl();
@@ -183,7 +187,7 @@ public abstract class AbstractProductReader implements ProductReader {
 
         if (logger.isLoggable(Level.FINE)) {
             long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
-            logger.log(Level.FINE, "Finish reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The time elapsed is " + elapsedSeconds + " seconds.");
+            logger.log(Level.FINE, "Finish reading the product from input '" + input + "' using the '" + getClass().getName() + "' reader class. The time elapsed is " + elapsedSeconds + " seconds.");
         }
 
         return product;
@@ -248,7 +252,7 @@ public abstract class AbstractProductReader implements ProductReader {
         if (getSubsetDef() != null) {
             sourceStepX = getSubsetDef().getSubSamplingX();
             sourceStepY = getSubsetDef().getSubSamplingY();
-            if(getSubsetDef().getRegionMap() != null && getSubsetDef().getRegionMap().containsKey(destBand.getName())){
+            if (getSubsetDef().getRegionMap() != null && getSubsetDef().getRegionMap().containsKey(destBand.getName())) {
                 sourceOffsetX = getSubsetDef().getRegionMap().get(destBand.getName()).x;
                 sourceOffsetY = getSubsetDef().getRegionMap().get(destBand.getName()).y;
             } else if (getSubsetDef().getRegion() != null) {
@@ -313,6 +317,23 @@ public abstract class AbstractProductReader implements ProductReader {
                                                    int destHeight,
                                                    ProductData destBuffer,
                                                    ProgressMonitor pm) throws IOException;
+
+    public void readLevelBandRasterData(int sourceOffsetX,
+                                        int sourceOffsetY,
+                                        int sourceWidth,
+                                        int sourceHeight,
+                                        int sourceStepX,
+                                        int sourceStepY,
+                                        Band destBand,
+                                        int destOffsetX,
+                                        int destOffsetY,
+                                        int destWidth,
+                                        int destHeight,
+                                        ProductData destBuffer,
+                                        ProgressMonitor pm) throws IOException {
+        readBandRasterDataImpl(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY, destBand,
+                               destOffsetX, destOffsetY, destWidth, destHeight, destBuffer, pm);
+    }
 
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
@@ -541,13 +562,13 @@ public abstract class AbstractProductReader implements ProductReader {
         if (input == null) {
             throw new NullPointerException();
         } else if (input instanceof File) {
-            return ((File)input).toPath();
+            return ((File) input).toPath();
         } else if (input instanceof Path) {
             return (Path) input;
         } else if (input instanceof String) {
             return Paths.get((String) input);
         } else {
-            throw new IllegalArgumentException("Unknown input '"+input+"'.");
+            throw new IllegalArgumentException("Unknown input '" + input + "'.");
         }
     }
 }
