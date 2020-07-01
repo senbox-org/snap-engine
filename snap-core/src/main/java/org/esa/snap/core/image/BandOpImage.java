@@ -19,13 +19,18 @@ package org.esa.snap.core.image;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -77,7 +82,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         if (band.isProductReaderDirectlyUsable() && band.getProductReader() instanceof AbstractProductReader) {
             AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
             int scale = (int) lvlSupport.getScale();
-            reader.readLevelBandRasterData(srcX, srcY, sourceWidth, sourceHeight, scale, scale, band, 0, 0, tileWidth, tileHeight, destData, ProgressMonitor.NULL);
+            ProductIO.readLevelBandRasterData(reader, srcX, srcY, sourceWidth, sourceHeight, scale, scale, band, 0, 0, tileWidth, tileHeight, destData, ProgressMonitor.NULL);
         } else {
             Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
             Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);

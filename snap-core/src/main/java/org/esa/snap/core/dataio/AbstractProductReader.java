@@ -27,7 +27,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.TreeNode;
 import org.esa.snap.runtime.Config;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -317,23 +317,6 @@ public abstract class AbstractProductReader implements ProductReader {
                                                    int destHeight,
                                                    ProductData destBuffer,
                                                    ProgressMonitor pm) throws IOException;
-
-    public void readLevelBandRasterData(int sourceOffsetX,
-                                        int sourceOffsetY,
-                                        int sourceWidth,
-                                        int sourceHeight,
-                                        int sourceStepX,
-                                        int sourceStepY,
-                                        Band destBand,
-                                        int destOffsetX,
-                                        int destOffsetY,
-                                        int destWidth,
-                                        int destHeight,
-                                        ProductData destBuffer,
-                                        ProgressMonitor pm) throws IOException {
-        readBandRasterDataImpl(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY, destBand,
-                               destOffsetX, destOffsetY, destWidth, destHeight, destBuffer, pm);
-    }
 
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
