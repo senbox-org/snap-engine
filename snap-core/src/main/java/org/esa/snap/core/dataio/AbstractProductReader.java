@@ -318,6 +318,23 @@ public abstract class AbstractProductReader implements ProductReader {
                                                    ProductData destBuffer,
                                                    ProgressMonitor pm) throws IOException;
 
+    public void readLevelBandRasterData(int sourceOffsetX,
+                                        int sourceOffsetY,
+                                        int sourceWidth,
+                                        int sourceHeight,
+                                        int sourceStepX,
+                                        int sourceStepY,
+                                        Band destBand,
+                                        int destOffsetX,
+                                        int destOffsetY,
+                                        int destWidth,
+                                        int destHeight,
+                                        ProductData destBuffer,
+                                        ProgressMonitor pm) throws IOException {
+        readBandRasterDataImpl(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY, destBand,
+                               destOffsetX, destOffsetY, destWidth, destHeight, destBuffer, pm);
+    }
+
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
      * directly owned by this reader. Its primary use is to allow the garbage collector to perform a vanilla job.
