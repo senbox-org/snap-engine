@@ -84,9 +84,50 @@ public class VariableCacheTest {
         assertEquals(1201, bufferElems[1897]);
     }
 
+    @Test
+    public void testUpdate_secondBlock_notMatchingHeight() {
+        final Band band = mock(Band.class);
+        when(band.getRasterSize()).thenReturn(new Dimension(600, 1000));
+        when(band.getDataType()).thenReturn(ProductData.TYPE_INT32);
+
+        final VariableCache variableCache = new VariableCache(band);
+
+        boolean canWrite = variableCache.update(0, 0, 200, 200, createInt32Data(200 * 200));
+        assertFalse(canWrite);
+        assertNotNull(variableCache.cacheBlocks[0]);
+        assertNotNull(variableCache.cacheBlocks[1]);
+
+        CacheBlock cacheBlock = variableCache.cacheBlocks[0];
+        int[] elems = (int[]) cacheBlock.getBufferData().getElems();
+        assertEquals(0, elems[0]);
+        assertEquals(1, elems[1]);
+        assertEquals(25400, elems[76200]);
+
+        cacheBlock = variableCache.cacheBlocks[1];
+        elems = (int[]) cacheBlock.getBufferData().getElems();
+        assertEquals(25600, elems[0]);
+        assertEquals(25601, elems[1]);
+        assertEquals(39800, elems[71 * 600]);
+
+        canWrite = variableCache.update(0, 200, 200, 200, createInt32Data(200 * 200));
+        assertFalse(canWrite);
+        assertNotNull(variableCache.cacheBlocks[0]);
+        assertNotNull(variableCache.cacheBlocks[1]);
+        assertNotNull(variableCache.cacheBlocks[2]);
+        assertNotNull(variableCache.cacheBlocks[3]);
+    }
+
     private ProductData createInt16Data(int size) {
         final short[] data = new short[size];
         for (short i = 0; i < data.length; i++) {
+            data[i] = i;
+        }
+        return ProductData.createInstance(data);
+    }
+
+    private ProductData createInt32Data(int size) {
+        final int[] data = new int[size];
+        for (int i = 0; i < data.length; i++) {
             data[i] = i;
         }
         return ProductData.createInstance(data);

@@ -17,12 +17,14 @@ class VariableCache {
     private final List<Integer> completedIndices;
 
     private final int width;
+    private final int rasterHeight;
     private final int dataType;
     private final double noDataValue;
 
     VariableCache(Band variable) {
         final Dimension rasterSize = variable.getRasterSize();
         width = rasterSize.width;
+        rasterHeight = rasterSize.height;
         dataType = variable.getDataType();
         noDataValue = variable.getNoDataValue();
 
@@ -36,24 +38,24 @@ class VariableCache {
         final int lastIdx = (sourceOffsetY + sourceHeight - 1) / LINES_PER_BUFFER;
 
         boolean canWrite = false;
-
+        int yReadOff = 0;
         for (int index = firstIdx; index <= lastIdx; index++) {
-            final int blockCount = index - firstIdx;
-            final int yReadOff = blockCount * LINES_PER_BUFFER;
             final int remainingHeight = sourceHeight - yReadOff;
             final int blockHeight = remainingHeight > LINES_PER_BUFFER ? LINES_PER_BUFFER : remainingHeight;
-            final int yWriteOff = sourceOffsetY + yReadOff;
+            final int cacheBufferStartY = index * LINES_PER_BUFFER;
 
             synchronized (cacheBlocks) {
                 if (cacheBlocks[index] == null) {
-                    cacheBlocks[index] = new CacheBlock(yWriteOff, width, blockHeight, dataType, noDataValue);
+                    final int cacheBufferHeight = (index + 1) * LINES_PER_BUFFER < rasterHeight ? LINES_PER_BUFFER : rasterHeight - cacheBufferStartY;
+                    cacheBlocks[index] = new CacheBlock(cacheBufferStartY, width, cacheBufferHeight, dataType, noDataValue);
                 }
-                cacheBlocks[index].update(sourceOffsetX, yReadOff, yWriteOff, sourceWidth, blockHeight, sourceBuffer);
+                cacheBlocks[index].update(sourceOffsetX, yReadOff, cacheBufferStartY, sourceWidth, blockHeight, sourceBuffer);
                 final boolean complete = cacheBlocks[index].isComplete();
                 if (complete) {
                     completedIndices.add(index);
                 }
                 canWrite |= complete;
+                yReadOff += blockHeight;
             }
         }
 

@@ -280,6 +280,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     @Override
     public synchronized void close() throws IOException {
+        flush();
         if (bandOutputStreams == null) {
             return;
         }
