@@ -210,7 +210,7 @@
                         <publicPackage>org.esa.snap.core.*</publicPackage>
                         <publicPackage>org.esa.snap.nn.*</publicPackage>
                         <publicPackage>org.esa.snap.examples.*</publicPackage>
-                        <publicPackage>com.google.common.primitives.*</publicPackage>
+                        <publicPackage>com.google.common.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
