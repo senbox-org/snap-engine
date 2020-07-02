@@ -11,7 +11,7 @@ import java.util.List;
 
 class VariableCache {
 
-    private static int LINES_PER_BUFFER = 128;
+    private static final int LINES_PER_BUFFER = 128;
     // package access for testing only in this first version - refactor later tb 2020-06-29
     final CacheBlock[] cacheBlocks;
     private final List<Integer> completedIndices;
@@ -41,7 +41,7 @@ class VariableCache {
         int yReadOff = 0;
         for (int index = firstIdx; index <= lastIdx; index++) {
             final int remainingHeight = sourceHeight - yReadOff;
-            final int blockHeight = remainingHeight > LINES_PER_BUFFER ? LINES_PER_BUFFER : remainingHeight;
+            final int blockHeight = Math.min(remainingHeight, LINES_PER_BUFFER);
             final int cacheBufferStartY = index * LINES_PER_BUFFER;
 
             synchronized (cacheBlocks) {
