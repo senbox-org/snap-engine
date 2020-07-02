@@ -303,6 +303,10 @@ public class DimapProductReader extends AbstractProductReader {
                                           int destWidth, int destHeight,
                                           ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
+        final int sourceMinX = sourceOffsetX;
+        final int sourceMinY = sourceOffsetY;
+        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
         final File dataFile = bandDataFiles.get(destBand);
 
