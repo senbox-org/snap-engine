@@ -17,10 +17,12 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.image.LevelImageSupport;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.SystemUtils;
@@ -606,21 +608,24 @@ public class ProductIO {
         }
     }
 
-    public static void readLevelBandRasterData(AbstractProductReader reader, int sourceOffsetX,
-                                               int sourceOffsetY,
-                                               int sourceWidth,
-                                               int sourceHeight,
-                                               int sourceStepX,
-                                               int sourceStepY,
+    public static void readLevelBandRasterData(AbstractProductReader reader,
                                                Band destBand,
-                                               int destOffsetX,
-                                               int destOffsetY,
-                                               int destWidth,
-                                               int destHeight,
-                                               ProductData destBuffer,
-                                               ProgressMonitor pm) throws IOException {
-        reader.readBandRasterDataImpl(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY, destBand,
-                                      destOffsetX, destOffsetY, destWidth, destHeight, destBuffer, pm);
+                                               LevelImageSupport lvlSupport,
+                                               Rectangle destRect,
+                                               ProductData destBuffer) throws IOException {
+
+        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
+        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
+        final int srcX = lvlSupport.getSourceX(destRect.x);
+        final int srcY = lvlSupport.getSourceY(destRect.y);
+        final int scale = (int) lvlSupport.getScale();
+
+        final MultiLevelImage img = destBand.getSourceImage();
+        final int tileWidth = img.getTileWidth();
+        final int tileHeight = img.getTileHeight();
+
+        reader.readBandRasterDataImpl(srcX, srcY, sourceWidth, sourceHeight, scale, scale, destBand,
+                                      0, 0, tileWidth, tileHeight, destBuffer, ProgressMonitor.NULL);
     }
 
     private static class Finisher {

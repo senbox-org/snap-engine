@@ -70,20 +70,20 @@ public class BandOpImage extends RasterDataNodeOpImage {
     }
 
     private static void readHigherLevelData(Band band, ProductData destData, Rectangle destRect, LevelImageSupport lvlSupport) throws IOException {
-        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
-        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
-        final int srcX = lvlSupport.getSourceX(destRect.x);
-        final int srcY = lvlSupport.getSourceY(destRect.y);
-
-        final MultiLevelImage img = band.getSourceImage();
-        final int tileWidth = img.getTileWidth();
-        final int tileHeight = img.getTileHeight();
 
         if (band.isProductReaderDirectlyUsable() && band.getProductReader() instanceof AbstractProductReader) {
             AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
-            int scale = (int) lvlSupport.getScale();
-            ProductIO.readLevelBandRasterData(reader, srcX, srcY, sourceWidth, sourceHeight, scale, scale, band, 0, 0, tileWidth, tileHeight, destData, ProgressMonitor.NULL);
+            ProductIO.readLevelBandRasterData(reader, band, lvlSupport, destRect, destData);
         } else {
+            final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
+            final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
+            final int srcX = lvlSupport.getSourceX(destRect.x);
+            final int srcY = lvlSupport.getSourceY(destRect.y);
+
+            final MultiLevelImage img = band.getSourceImage();
+            final int tileWidth = img.getTileWidth();
+            final int tileHeight = img.getTileHeight();
+
             Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
             Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
