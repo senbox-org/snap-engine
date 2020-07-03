@@ -35,6 +35,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 /**
  * The product writer for the BEAM-DIMAP format.
@@ -58,12 +60,21 @@ import java.util.Set;
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
+    private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.dimap.useCache";
+
     private File outputDir;
     private File outputFile;
     private Map<Band, ImageOutputStream> bandOutputStreams;
     private File dataOutputDir;
     private boolean incremental = true;
     private Set<WriterExtender> writerExtenders;
+
+    private boolean useCache;
+    private WriteCache writeCache;
+
+    public void setUseCache(boolean useCache) {
+        this.useCache = useCache;
+    }
 
     /**
      * Construct a new instance of a product writer for the given BEAM-DIMAP product writer plug-in.
@@ -72,6 +83,9 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     public DimapProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+        final Preferences preferences = Config.instance().preferences();
+        useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
+        writeCache = new WriteCache();
     }
 
     /**
@@ -173,26 +187,38 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertNotNull("sourceBand", sourceBand);
         Guardian.assertNotNull("sourceBuffer", sourceBuffer);
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
-        final long sourceBandWidth = sourceBand.getRasterWidth();
-        final long sourceBandHeight = sourceBand.getRasterHeight();
+        final int sourceBandWidth = sourceBand.getRasterWidth();
+        final int sourceBandHeight = sourceBand.getRasterHeight();
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
+        final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
-        try {
-            synchronized (outputStream) {
-                for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                    sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                    outputPos += sourceBandWidth;
-                    pm.worked(1);
-                    if (pm.isCanceled()) {
-                        break;
-                    }
+        if (useCache && (!fullRaster)) {
+            // @todo 1 tb/tb progress monitoring 2020-07-03
+            final VariableCache variableCache = writeCache.get(sourceBand);
+            final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+            if (canWrite) {
+                synchronized (outputStream){
+                    variableCache.writeCompletedBlocks(outputStream);
                 }
             }
-        } finally {
-            pm.done();
+        } else {
+            long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
+            pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+            try {
+                synchronized (outputStream) {
+                    for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                        sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                        outputPos += sourceBandWidth;
+                        pm.worked(1);
+                        if (pm.isCanceled()) {
+                            break;
+                        }
+                    }
+                }
+            } finally {
+                pm.done();
+            }
         }
     }
 
@@ -221,6 +247,11 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
     }
 
+    // package access for testing only tb 2020-07-01
+    static boolean isFullRaster(int sourceWidth, int sourceHeight, int rasterWidth, int rasterHeight) {
+        return (sourceWidth == rasterWidth) && (sourceHeight == rasterHeight);
+    }
+
     private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
         final int expectedBufferSize = sourceWidth * sourceHeight;
         final int actualBufferSize = sourceBuffer.getNumElems();
@@ -237,6 +268,9 @@ public class DimapProductWriter extends AbstractProductWriter {
         if (bandOutputStreams == null) {
             return;
         }
+        if (useCache) {
+            writeCache.flush(bandOutputStreams);
+        }
         for (ImageOutputStream imageOutputStream : bandOutputStreams.values()) {
             imageOutputStream.flush();
         }
@@ -249,6 +283,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     @Override
     public synchronized void close() throws IOException {
+        flush();
         if (bandOutputStreams == null) {
             return;
         }
