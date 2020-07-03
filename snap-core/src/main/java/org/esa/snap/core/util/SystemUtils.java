@@ -25,7 +25,6 @@ import org.geotools.util.logging.Logging;
 
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
-import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -442,11 +441,8 @@ public class SystemUtils {
         }
         int parallelism = Config.instance().preferences().getInt(SNAP_PARALLELISM_PROPERTY_NAME,
                                                                  Runtime.getRuntime().availableProcessors());
-        TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
-        tileScheduler.setParallelism(parallelism);
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(parallelism);
         LOG.fine(MessageFormat.format("JAI tile scheduler parallelism set to {0}", parallelism));
-        tileScheduler.setPrefetchParallelism(parallelism);
-        LOG.fine(MessageFormat.format("JAI tile scheduler prefetch parallelism set to {0}", parallelism));
 
         long OneMiB = 1024L * 1024L;
 

@@ -88,7 +88,6 @@ public class BandOpImage extends RasterDataNodeOpImage {
             Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
             Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-            img.prefetchTiles(tileIndices);
             for (Point tileIndex : tileIndices) {
                 final int xTileIdx = tileIndex.x;
                 final int yTileIdx = tileIndex.y;
