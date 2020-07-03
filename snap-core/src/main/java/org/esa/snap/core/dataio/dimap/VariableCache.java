@@ -40,16 +40,19 @@ class VariableCache {
         boolean canWrite = false;
         int yReadOff = 0;
         for (int index = firstIdx; index <= lastIdx; index++) {
-            final int remainingHeight = sourceHeight - yReadOff;
-            final int blockHeight = Math.min(remainingHeight, LINES_PER_BUFFER);
             final int cacheBufferStartY = index * LINES_PER_BUFFER;
+            final int writeOffset = Math.max(0, sourceOffsetY - cacheBufferStartY);
+
+            final int remainingHeight = sourceHeight - yReadOff;
+            final int heightToNextCacheBlock = LINES_PER_BUFFER - writeOffset;
+            final int blockHeight = Math.min(remainingHeight, heightToNextCacheBlock);
 
             synchronized (cacheBlocks) {
                 if (cacheBlocks[index] == null) {
                     final int cacheBufferHeight = (index + 1) * LINES_PER_BUFFER < rasterHeight ? LINES_PER_BUFFER : rasterHeight - cacheBufferStartY;
                     cacheBlocks[index] = new CacheBlock(cacheBufferStartY, width, cacheBufferHeight, dataType, noDataValue);
                 }
-                cacheBlocks[index].update(sourceOffsetX, yReadOff, cacheBufferStartY, sourceWidth, blockHeight, sourceBuffer);
+                cacheBlocks[index].update(sourceOffsetX, yReadOff, cacheBufferStartY + writeOffset, sourceWidth, blockHeight, sourceBuffer);
                 final boolean complete = cacheBlocks[index].isComplete();
                 if (complete) {
                     completedIndices.add(index);
