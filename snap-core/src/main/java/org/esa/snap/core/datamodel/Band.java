@@ -318,7 +318,7 @@ public class Band extends AbstractBand {
         }
     }
 
-    private boolean isProductReaderDirectlyUsable() {
+    public boolean isProductReaderDirectlyUsable() {
         final ProductReader productReader = getProductReader();
         if (productReader != null) {
             if (isSourceImageSet() && getSourceImage().getImage(0) instanceof BandOpImage) {

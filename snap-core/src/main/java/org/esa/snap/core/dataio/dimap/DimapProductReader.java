@@ -52,12 +52,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -109,7 +107,7 @@ public class DimapProductReader extends AbstractProductReader {
      * method can be sure that the input object and eventually the subset information has already been set.
      * <p>This method is called as a last step in the <code>readProductNodes(input, subsetInfo)</code> method.
      *
-     * @throws java.io.IOException                                      if an I/O error occurs
+     * @throws java.io.IOException        if an I/O error occurs
      * @throws IllegalFileFormatException if the input file in not decodeable
      */
     @Override
@@ -168,8 +166,8 @@ public class DimapProductReader extends AbstractProductReader {
             } else if (geoCodings.length == product.getNumBands()) {
                 for (int i = 0; i < geoCodings.length; i++) {
                     final Band band = product.getBandAt(i);
-                    if (product.getSceneRasterWidth() == band.getRasterWidth() &&
-                            product.getSceneRasterHeight() == band.getRasterHeight()) {
+                    if (product.getSceneRasterWidth() == band.getRasterWidth()
+                        && product.getSceneRasterHeight() == band.getRasterHeight()) {
                         product.setSceneGeoCoding(geoCodings[i]);
                     }
                     band.setGeoCoding(geoCodings[i]);
@@ -305,41 +303,45 @@ public class DimapProductReader extends AbstractProductReader {
                                           int destWidth, int destHeight,
                                           ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
-        final int sourceMinX = sourceOffsetX;
-        final int sourceMinY = sourceOffsetY;
-        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
-        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
         final File dataFile = bandDataFiles.get(destBand);
-        final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
-        if (inputStream == null) {
-            return;
-        }
 
         int destPos = 0;
 
-        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
+        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
         // For each scan in the data source
         try {
-            synchronized (inputStream) {
-                for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
+//            synchronized (inputStream) {
+            try (ImageInputStream inputStream = new FileImageInputStream(dataFile)) {
+                final int type = destBuffer.getType();
+                final boolean longType = ProductData.TYPE_INT64 == type;
+                final ProductData line = ProductData.createInstance(type, sourceWidth);
+
+                for (int sourceY = sourceOffsetY; sourceY < sourceOffsetY + sourceHeight; sourceY += sourceStepY) {
                     if (pm.isCanceled()) {
                         break;
                     }
                     final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
+                    long inputPos = sourcePosY + sourceOffsetX;
                     if (sourceStepX == 1) {
-                        long inputPos = sourcePosY + sourceMinX;
                         destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
                         destPos += destWidth;
                     } else {
-                        for (int sourceX = sourceMinX; sourceX <= sourceMaxX; sourceX += sourceStepX) {
-                            long inputPos = sourcePosY + sourceX;
-                            destBuffer.readFrom(destPos, 1, inputStream, inputPos);
+                        line.readFrom(0, sourceWidth, inputStream, inputPos);
+                        for (int lineX = 0; lineX < sourceWidth; lineX += sourceStepX) {
+                            if (longType) {
+                                destBuffer.setElemLongAt(destPos, line.getElemLongAt(lineX));
+                            } else {
+                                destBuffer.setElemDoubleAt(destPos, line.getElemDoubleAt(lineX));
+                            }
                             destPos++;
                         }
                     }
                 }
                 pm.worked(1);
+            } catch (IOException e) {
+                throw new IOException("DimapProductReader: Unable to read file '" + dataFile + "' referenced by '"
+                                      + destBand.getName() + "'.", e);
             }
         } finally {
             pm.done();
@@ -372,35 +374,7 @@ public class DimapProductReader extends AbstractProductReader {
         super.close();
     }
 
-    private ImageInputStream getOrCreateImageInputStream(Band band, File file) throws IOException {
-        ImageInputStream inputStream = getImageInputStream(band);
-        if (inputStream == null) {
-            try {
-                inputStream = new FileImageInputStream(file);
-            } catch (IOException e) {
-                SystemUtils.LOG.log(Level.WARNING,
-                                    "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",
-                                    e);
-            }
-            if (inputStream == null) {
-                return null;
-            }
-            if (bandInputStreams == null) {
-                bandInputStreams = new Hashtable<>();
-            }
-            bandInputStreams.put(band, inputStream);
-        }
-        return inputStream;
-    }
-
-    private ImageInputStream getImageInputStream(Band band) {
-        if (bandInputStreams != null) {
-            return bandInputStreams.get(band);
-        }
-        return null;
-    }
-
-    private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) throws IOException {
+    private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) {
         String dataDirName = FileUtils.getFilenameWithoutExtension(
                 inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
         File dataDir = new File(inputDir, dataDirName);
@@ -413,7 +387,7 @@ public class DimapProductReader extends AbstractProductReader {
         }
     }
 
-    private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) throws IOException {
+    private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) {
         try (FileReader reader = new FileReader(vectorFile)) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
@@ -428,9 +402,9 @@ public class DimapProductReader extends AbstractProductReader {
             };
             OptimalPlacemarkDescriptorProvider descriptorProvider = new OptimalPlacemarkDescriptorProvider();
             VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getName(), reader, product,
-                    crsProvider, descriptorProvider, modelCrs,
-                    VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
-                    ProgressMonitor.NULL);
+                                                                      crsProvider, descriptorProvider, modelCrs,
+                                                                      VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
+                                                                      ProgressMonitor.NULL);
             if (vectorDataNode != null) {
                 final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
                 final VectorDataNode existing = vectorDataGroup.get(vectorDataNode.getName());

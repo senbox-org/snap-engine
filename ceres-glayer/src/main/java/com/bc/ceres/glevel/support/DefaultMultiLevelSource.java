@@ -144,7 +144,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
         if (jaiH == j2kH) {
             scaleY = (float) invScale;
         } else {
-            scaleY = (float) ((double) j2kH  /(double) sourceImage.getHeight());
+            scaleY = (float) ((double) j2kH / (double) sourceImage.getHeight());
         }
 
         return ScaleDescriptor.create(sourceImage, scaleX, scaleY, 0.0F, 0.0F, interpolation, null);

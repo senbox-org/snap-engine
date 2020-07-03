@@ -17,10 +17,12 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.image.LevelImageSupport;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.SystemUtils;
@@ -604,6 +606,43 @@ public class ProductIO {
             data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
             band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
         }
+    }
+
+    /**
+     * This method is not part of the official API and might change in the future.
+     * <p>
+     * The method directly delegates to {@link AbstractProductReader#readProductNodesImpl()} which is not
+     * publicly available.
+     * <p>
+     * This overcomes a short coming in the current API. A reader can be used with a SubsetDef but this can not be
+     * changed dynamically.
+     *
+     * @param reader     the reader to read from
+     * @param destBand   the band which shall be read
+     * @param lvlSupport defines the level (resolution) within the level image pyramid which shall be read
+     * @param destRect   the rectangular area which shall be filled with data
+     * @param destBuffer the buffer where to put the data
+     * @throws IOException in case an error occurs during reading
+     */
+    // Todo mp 2020-07-03 - https://senbox.atlassian.net/browse/SNAP-1134
+    public static void readLevelBandRasterData(AbstractProductReader reader,
+                                               Band destBand,
+                                               LevelImageSupport lvlSupport,
+                                               Rectangle destRect,
+                                               ProductData destBuffer) throws IOException {
+
+        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
+        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
+        final int srcX = lvlSupport.getSourceX(destRect.x);
+        final int srcY = lvlSupport.getSourceY(destRect.y);
+        final int scale = (int) lvlSupport.getScale();
+
+        final MultiLevelImage img = destBand.getSourceImage();
+        final int tileWidth = img.getTileWidth();
+        final int tileHeight = img.getTileHeight();
+
+        reader.readBandRasterDataImpl(srcX, srcY, sourceWidth, sourceHeight, scale, scale, destBand,
+                                      0, 0, tileWidth, tileHeight, destBuffer, ProgressMonitor.NULL);
     }
 
     private static class Finisher {
