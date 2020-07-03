@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -307,11 +306,6 @@ public class DimapProductReader extends AbstractProductReader {
 
         final File dataFile = bandDataFiles.get(destBand);
 
-//        final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
-//        if (inputStream == null) {
-//            return;
-//        }
-
         int destPos = 0;
 
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
@@ -380,35 +374,7 @@ public class DimapProductReader extends AbstractProductReader {
         super.close();
     }
 
-    private ImageInputStream getOrCreateImageInputStream(Band band, File file) throws IOException {
-        ImageInputStream inputStream = getImageInputStream(band);
-        if (inputStream == null) {
-            try {
-                inputStream = new FileImageInputStream(file);
-            } catch (IOException e) {
-                SystemUtils.LOG.log(Level.WARNING,
-                                    "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",
-                                    e);
-            }
-            if (inputStream == null) {
-                return null;
-            }
-            if (bandInputStreams == null) {
-                bandInputStreams = new Hashtable<>();
-            }
-            bandInputStreams.put(band, inputStream);
-        }
-        return inputStream;
-    }
-
-    private ImageInputStream getImageInputStream(Band band) {
-        if (bandInputStreams != null) {
-            return bandInputStreams.get(band);
-        }
-        return null;
-    }
-
-    private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) throws IOException {
+    private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) {
         String dataDirName = FileUtils.getFilenameWithoutExtension(
                 inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
         File dataDir = new File(inputDir, dataDirName);
@@ -421,7 +387,7 @@ public class DimapProductReader extends AbstractProductReader {
         }
     }
 
-    private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) throws IOException {
+    private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) {
         try (FileReader reader = new FileReader(vectorFile)) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
