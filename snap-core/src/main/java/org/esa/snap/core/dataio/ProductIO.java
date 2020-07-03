@@ -608,6 +608,23 @@ public class ProductIO {
         }
     }
 
+    /**
+     * This method is not part of the official API and might change in the future.
+     * <p>
+     * The method directly delegates to {@link AbstractProductReader#readProductNodesImpl()} which is not
+     * publicly available.
+     * <p>
+     * This overcomes a short coming in the current API. A reader can be used with a SubsetDef but this can not be
+     * changed dynamically.
+     *
+     * @param reader     the reader to read from
+     * @param destBand   the band which shall be read
+     * @param lvlSupport defines the level (resolution) within the level image pyramid which shall be read
+     * @param destRect   the rectangular area which shall be filled with data
+     * @param destBuffer the buffer where to put the data
+     * @throws IOException in case an error occurs during reading
+     */
+    // Todo mp 2020-07-03 - https://senbox.atlassian.net/browse/SNAP-1134
     public static void readLevelBandRasterData(AbstractProductReader reader,
                                                Band destBand,
                                                LevelImageSupport lvlSupport,
