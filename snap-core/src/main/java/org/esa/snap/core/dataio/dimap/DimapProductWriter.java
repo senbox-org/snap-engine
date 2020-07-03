@@ -194,10 +194,13 @@ public class DimapProductWriter extends AbstractProductWriter {
         final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
         if (useCache && (!fullRaster)) {
+            // @todo 1 tb/tb progress monitoring 2020-07-03
             final VariableCache variableCache = writeCache.get(sourceBand);
             final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
             if (canWrite) {
-                variableCache.writeCompletedBlocks(outputStream);
+                synchronized (outputStream){
+                    variableCache.writeCompletedBlocks(outputStream);
+                }
             }
         } else {
             long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
