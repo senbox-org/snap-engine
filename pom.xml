@@ -1125,15 +1125,7 @@
             <email>marco.peters@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
-                <role>Java Developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>marcoz</id>
-            <name>Marco Zuehlke</name>
-            <email>marco.zuehlke@brockmann-consult.de</email>
-            <organization>Brockmann Consult</organization>
-            <roles>
+                <role>Project Manager</role>
                 <role>Java Developer</role>
             </roles>
         </developer>
@@ -1143,7 +1135,6 @@
             <email>norman.fomferra@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
-                <role>Project Manager</role>
                 <role>Java Developer</role>
             </roles>
         </developer>
