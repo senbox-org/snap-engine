@@ -47,7 +47,7 @@ public class TestFTPDownloader {
             internetAvailable = false;
         }
 
-        Assume.assumeTrue("Internet connection not available, skipping BrrOpIntegrationTest", internetAvailable);
+        Assume.assumeTrue("Internet connection not available, skipping TestFTPDownloader", internetAvailable);
 
         final String server = "speedtest.tele2.net";
         final String remotePath = "";
