@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio.dimap;
+package org.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class VariableCache {
+public class VariableCache {
 
     private static final int LINES_PER_BUFFER = 128;
     // package access for testing only in this first version - refactor later tb 2020-06-29
@@ -33,7 +33,7 @@ class VariableCache {
         completedIndices = new ArrayList<>();
     }
 
-    boolean update(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
+    public boolean update(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
         final int firstIdx = sourceOffsetY / LINES_PER_BUFFER;
         final int lastIdx = (sourceOffsetY + sourceHeight - 1) / LINES_PER_BUFFER;
 
@@ -65,7 +65,7 @@ class VariableCache {
         return canWrite;
     }
 
-    void writeCompletedBlocks(ImageOutputStream outputStream) throws IOException {
+    public void writeCompletedBlocks(ImageOutputStream outputStream) throws IOException {
         synchronized (cacheBlocks) {
             for (int index : completedIndices) {
                 writeCacheBlock(outputStream, index);

@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio.dimap;
+package org.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.Band;
 import org.junit.Test;

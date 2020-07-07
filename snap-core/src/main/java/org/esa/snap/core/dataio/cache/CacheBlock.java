@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio.dimap;
+package org.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.ProductData;
 
@@ -47,6 +47,7 @@ class CacheBlock {
         return unwrittenSpace.isEmpty();
     }
 
+    @SuppressWarnings("SuspiciousSystemArraycopy")
     public void update(int xOffset, int yReadOff, int yWriteOff, int width, int height, ProductData data) {
         final Object srcData = data.getElems();
         final Object destData = bufferData.getElems();
