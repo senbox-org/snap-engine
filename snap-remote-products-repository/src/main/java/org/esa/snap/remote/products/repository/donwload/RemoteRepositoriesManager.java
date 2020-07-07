@@ -209,7 +209,16 @@ public class RemoteRepositoriesManager {
             dataSourceComponent.setProgressListener(taoProgressListener);
             dataSourceComponent.setProductStatusListener(taoProductStatusListener);
 
-            EOProduct product = new EOProduct();
+            EOProduct product = new EOProduct() {
+                @Override
+                public void setApproximateSize(long approximateSize) {
+                    super.setApproximateSize(approximateSize);
+
+                    if (approximateSize > 0) {
+                        progressListener.notifyApproximateSize(approximateSize);
+                    }
+                }
+            };
             product.setApproximateSize(repositoryProduct.getApproximateSize());
             product.setId(repositoryProduct.getId());
             product.setProductType(repositoryProduct.getRemoteMission().getName());

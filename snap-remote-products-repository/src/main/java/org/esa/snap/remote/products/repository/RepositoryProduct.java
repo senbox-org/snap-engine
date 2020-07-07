@@ -23,6 +23,8 @@ public interface RepositoryProduct {
 
     public long getApproximateSize();
 
+    public void setApproximateSize(long approximateSize);
+
     public String getDownloadQuickLookImageURL();
 
     public String getURL();

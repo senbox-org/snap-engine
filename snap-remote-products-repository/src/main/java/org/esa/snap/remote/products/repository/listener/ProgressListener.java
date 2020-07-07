@@ -6,4 +6,6 @@ package org.esa.snap.remote.products.repository.listener;
 public interface ProgressListener {
 
     public void notifyProgress(short progressPercent);
+
+    public void notifyApproximateSize(long approximateSize);
 }
