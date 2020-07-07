@@ -36,7 +36,7 @@ public class CfTileSizeTest {
     }
 
     private File getTestFile() throws URISyntaxException {
-        URL url = CfTileSizeTest.class.getResource("tileSizeTest_nc4Cf.nc");
+        URL url = CfTileSizeTest.class.getResource("tileSizeTest_nc4CF.nc");
         return new File(url.toURI());
     }
 
