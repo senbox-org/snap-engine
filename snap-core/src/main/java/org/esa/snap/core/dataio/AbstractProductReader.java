@@ -318,6 +318,10 @@ public abstract class AbstractProductReader implements ProductReader {
                                                    ProductData destBuffer,
                                                    ProgressMonitor pm) throws IOException;
 
+    public boolean isReadRasterDataImplFullyImplemented() {
+        return false;
+    }
+
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
      * directly owned by this reader. Its primary use is to allow the garbage collector to perform a vanilla job.

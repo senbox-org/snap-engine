@@ -348,6 +348,11 @@ public class DimapProductReader extends AbstractProductReader {
         }
     }
 
+    @Override
+    public boolean isReadRasterDataImplFullyImplemented() {
+        return true;
+    }
+
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
      * directly owned by this reader. Its primary use is to allow the garbage collector to perform a vanilla job.

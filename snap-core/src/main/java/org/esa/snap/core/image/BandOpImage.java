@@ -73,49 +73,51 @@ public class BandOpImage extends RasterDataNodeOpImage {
 
         if (band.isProductReaderDirectlyUsable() && band.getProductReader() instanceof AbstractProductReader) {
             AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
-            ProductIO.readLevelBandRasterData(reader, band, lvlSupport, destRect, destData);
-        } else {
-            final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
-            final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
-            final int srcX = lvlSupport.getSourceX(destRect.x);
-            final int srcY = lvlSupport.getSourceY(destRect.y);
+            if (reader.isReadRasterDataImplFullyImplemented()) {
+                ProductIO.readLevelBandRasterData(reader, band, lvlSupport, destRect, destData);
+                return;
+            }
+        }
+        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
+        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
+        final int srcX = lvlSupport.getSourceX(destRect.x);
+        final int srcY = lvlSupport.getSourceY(destRect.y);
 
-            final MultiLevelImage img = band.getSourceImage();
-            final int tileWidth = img.getTileWidth();
-            final int tileHeight = img.getTileHeight();
+        final MultiLevelImage img = band.getSourceImage();
+        final int tileWidth = img.getTileWidth();
+        final int tileHeight = img.getTileHeight();
 
-            Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
-            Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
+        Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
+        Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
-            Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-            for (Point tileIndex : tileIndices) {
-                final int xTileIdx = tileIndex.x;
-                final int yTileIdx = tileIndex.y;
-                final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
-                final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
-                if (yPositions == null || xPositions == null) {
-                    continue;
-                }
-                Rectangle tileRect = img.getTileRect(xTileIdx, yTileIdx);
-                if (tileRect.isEmpty()) {
-                    continue;
-                }
-                final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
-                band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
+        Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
+        for (Point tileIndex : tileIndices) {
+            final int xTileIdx = tileIndex.x;
+            final int yTileIdx = tileIndex.y;
+            final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
+            final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
+            if (yPositions == null || xPositions == null) {
+                continue;
+            }
+            Rectangle tileRect = img.getTileRect(xTileIdx, yTileIdx);
+            if (tileRect.isEmpty()) {
+                continue;
+            }
+            final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
+            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
 
-                for (PositionCouple yPos : yPositions) {
-                    final int ySrc = yPos.srcPos;
-                    final int yPosInTile = ySrc % tileHeight;
-                    final int yOffsetInTile = yPosInTile * tileRect.width;
-                    final int yDest = yPos.destPos;
-                    final int yDestOffset = (yDest - destRect.y) * destRect.width;
-                    for (PositionCouple xPos : xPositions) {
-                        final int xSrc = xPos.srcPos;
-                        final int xPosInTile = xSrc % tileWidth;
-                        final int xDest = xPos.destPos;
-                        final double v = tileData.getElemDoubleAt(yOffsetInTile + xPosInTile);
-                        destData.setElemDoubleAt(yDestOffset + xDest - destRect.x, v);
-                    }
+            for (PositionCouple yPos : yPositions) {
+                final int ySrc = yPos.srcPos;
+                final int yPosInTile = ySrc % tileHeight;
+                final int yOffsetInTile = yPosInTile * tileRect.width;
+                final int yDest = yPos.destPos;
+                final int yDestOffset = (yDest - destRect.y) * destRect.width;
+                for (PositionCouple xPos : xPositions) {
+                    final int xSrc = xPos.srcPos;
+                    final int xPosInTile = xSrc % tileWidth;
+                    final int xDest = xPos.destPos;
+                    final double v = tileData.getElemDoubleAt(yOffsetInTile + xPosInTile);
+                    destData.setElemDoubleAt(yDestOffset + xDest - destRect.x, v);
                 }
             }
         }
