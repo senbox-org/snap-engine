@@ -1,10 +1,11 @@
-
 package org.esa.snap.dataio.envi;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
+import org.esa.snap.core.dataio.cache.VariableCache;
+import org.esa.snap.core.dataio.cache.WriteCache;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.dimap.DimapProductReader;
 import org.esa.snap.core.dataio.dimap.EnviHeader;
@@ -18,6 +19,7 @@ import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -26,17 +28,22 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 /**
  * The product writer for ENVI products.
- *
  */
 public class EnviProductWriter extends AbstractProductWriter {
 
+    private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.envi.useCache";
+
     protected File _outputDir;
     protected File _outputFile;
-    private Map _bandOutputStreams;
+    private Map<Band, ImageOutputStream> _bandOutputStreams;
     private boolean _incremental = true;
+
+    private boolean useCache;
+    private WriteCache writeCache;
 
     /**
      * Construct a new instance of a product writer for the given ENVI product writer plug-in.
@@ -45,6 +52,52 @@ public class EnviProductWriter extends AbstractProductWriter {
      */
     public EnviProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+
+        final Preferences preferences = Config.instance().preferences();
+        useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
+        if (useCache) {
+            writeCache = new WriteCache();
+        }
+    }
+
+    private static void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight,
+                                                          final int sourceBandHeight, int sourceOffsetX,
+                                                          int sourceOffsetY) {
+        Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
+        Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
+        Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
+        Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
+    }
+
+    private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
+        final long expectedBufferSize = (long) sourceWidth * (long) sourceHeight;
+        final long actualBufferSize = sourceBuffer.getNumElems();
+        Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
+    }
+
+    private static void createPhysicalImageFile(Band band, File file) throws IOException {
+        createPhysicalFile(file, getImageFileSize(band));
+    }
+
+    private static long getImageFileSize(RasterDataNode band) {
+        return (long) ProductData.getElemSize(band.getDataType()) *
+                (long) band.getRasterWidth() *
+                (long) band.getRasterHeight();
+    }
+
+    private static void createPhysicalFile(File file, long fileSize) throws IOException {
+        final File parentDir = file.getParentFile();
+        if (parentDir != null) {
+            parentDir.mkdirs();
+        }
+        final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+        randomAccessFile.setLength(fileSize);
+        randomAccessFile.close();
+    }
+
+    // @todo 3 tb/tb duplicated code -  tb 2020-07-07
+    private static boolean isFullRaster(int sourceWidth, int sourceHeight, int rasterWidth, int rasterHeight) {
+        return (sourceWidth == rasterWidth) && (sourceHeight == rasterHeight);
     }
 
     /**
@@ -82,7 +135,7 @@ public class EnviProductWriter extends AbstractProductWriter {
      * @param outputFile the dimap header file location.
      */
     protected void initDirs(final File outputFile) {
-        final String name = FileUtils.getFilenameWithoutExtension(outputFile);          
+        final String name = FileUtils.getFilenameWithoutExtension(outputFile);
         _outputDir = outputFile.getParentFile();
         if (_outputDir == null) {
             _outputDir = new File(".");
@@ -114,17 +167,36 @@ public class EnviProductWriter extends AbstractProductWriter {
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = (long) sourceOffsetY * (long) sourceBandWidth + sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
-        try {
-            final long max = sourceHeight * sourceWidth;
-            for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
-                sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                outputPos += sourceBandWidth;
+        final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
+        if (useCache && (!fullRaster)) {
+            try {
+                final VariableCache variableCache = writeCache.get(sourceBand);
+                pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);
+                final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+                if (canWrite) {
+                    synchronized (outputStream) {
+                        variableCache.writeCompletedBlocks(outputStream);
+                    }
+                }
+                pm.worked(1);
+            } finally {
+                pm.done();
             }
-            pm.worked(1);
-        } finally {
-            pm.done();
+        } else {
+            long outputPos = (long) sourceOffsetY * (long) sourceBandWidth + sourceOffsetX;
+            pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
+            try {
+                synchronized (outputStream) {
+                    final long max = sourceHeight * sourceWidth;
+                    for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
+                        sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                        outputPos += sourceBandWidth;
+                    }
+                    pm.worked(1);
+                }
+            } finally {
+                pm.done();
+            }
         }
     }
 
@@ -139,21 +211,6 @@ public class EnviProductWriter extends AbstractProductWriter {
         }
     }
 
-    private static void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight,
-                                                          final int sourceBandHeight, int sourceOffsetX,
-                                                          int sourceOffsetY) {
-        Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
-        Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
-        Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
-        Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
-    }
-
-    private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
-        final long expectedBufferSize = (long) sourceWidth * (long) sourceHeight;
-        final long actualBufferSize = sourceBuffer.getNumElems();
-        Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
-    }
-
     /**
      * Writes all data in memory to disk. After a flush operation, the writer can be closed safely
      *
@@ -162,6 +219,9 @@ public class EnviProductWriter extends AbstractProductWriter {
     public void flush() throws IOException {
         if (_bandOutputStreams == null) {
             return;
+        }
+        if (useCache) {
+            writeCache.flush(_bandOutputStreams);
         }
         for (Object o : _bandOutputStreams.values()) {
             ((ImageOutputStream) o).flush();
@@ -193,7 +253,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
             if (_bandOutputStreams == null) {
-                _bandOutputStreams = new HashMap();
+                _bandOutputStreams = new HashMap<>();
             }
             _bandOutputStreams.put(band, outputStream);
         }
@@ -225,10 +285,6 @@ public class EnviProductWriter extends AbstractProductWriter {
         return file;
     }
 
-    private static void createPhysicalImageFile(Band band, File file) throws IOException {
-        createPhysicalFile(file, getImageFileSize(band));
-    }
-
     protected void writeEnviHeader(Band band) throws IOException {
         EnviHeader.createPhysicalFile(getEnviHeaderFile(band),
                                       band,
@@ -238,12 +294,6 @@ public class EnviProductWriter extends AbstractProductWriter {
 
     protected ImageOutputStream createImageOutputStream(Band band) throws IOException {
         return new FileImageOutputStream(getValidImageFile(band));
-    }
-
-    private static long getImageFileSize(RasterDataNode band) {
-        return (long) ProductData.getElemSize(band.getDataType()) *
-                (long) band.getRasterWidth() *
-                (long) band.getRasterHeight();
     }
 
     protected File getEnviHeaderFile(Band band) {
@@ -260,16 +310,6 @@ public class EnviProductWriter extends AbstractProductWriter {
 
     protected String createImageFilename(Band band) {
         return band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
-    }
-
-    private static void createPhysicalFile(File file, long fileSize) throws IOException {
-        final File parentDir = file.getParentFile();
-        if (parentDir != null) {
-            parentDir.mkdirs();
-        }
-        final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-        randomAccessFile.setLength(fileSize);
-        randomAccessFile.close();
     }
 
     @Override
@@ -294,6 +334,16 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     /**
+     * Returns whether this product writer writes only modified product nodes.
+     *
+     * @return <code>true</code> if so
+     */
+    @Override
+    public boolean isIncrementalMode() {
+        return _incremental;
+    }
+
+    /**
      * Enables resp. disables incremental writing of this product writer. By default, a reader should enable progress
      * listening.
      *
@@ -302,16 +352,6 @@ public class EnviProductWriter extends AbstractProductWriter {
     @Override
     public void setIncrementalMode(boolean enabled) {
         _incremental = enabled;
-    }
-
-    /**
-     * Returns whether this product writer writes only modified product nodes.
-     *
-     * @return <code>true</code> if so
-     */
-    @Override
-    public boolean isIncrementalMode() {
-        return _incremental;
     }
 
     /**
