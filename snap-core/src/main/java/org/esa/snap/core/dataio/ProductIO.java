@@ -17,7 +17,6 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -637,12 +636,8 @@ public class ProductIO {
         final int srcY = lvlSupport.getSourceY(destRect.y);
         final int scale = (int) lvlSupport.getScale();
 
-        final MultiLevelImage img = destBand.getSourceImage();
-        final int tileWidth = img.getTileWidth();
-        final int tileHeight = img.getTileHeight();
-
         reader.readBandRasterDataImpl(srcX, srcY, sourceWidth, sourceHeight, scale, scale, destBand,
-                                      0, 0, tileWidth, tileHeight, destBuffer, ProgressMonitor.NULL);
+                                      destRect.x, destRect.y, destRect.width, destRect.height, destBuffer, ProgressMonitor.NULL);
     }
 
     private static class Finisher {

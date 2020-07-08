@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio.dimap;
+package org.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.Band;
 
@@ -8,15 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-class WriteCache {
+public class WriteCache {
 
     private final HashMap<String, VariableCache> variableMap;
 
-    WriteCache() {
+    public WriteCache() {
         variableMap = new HashMap<>();
     }
 
-    VariableCache get(Band band) {
+    public VariableCache get(Band band) {
         VariableCache variableCache = variableMap.get(band.getName());
         if (variableCache == null) {
             variableCache = new VariableCache(band);
@@ -25,7 +25,7 @@ class WriteCache {
         return variableCache;
     }
 
-    void flush(Map<Band, ImageOutputStream> bandOutputStreams) throws IOException {
+    public void flush(Map<Band, ImageOutputStream> bandOutputStreams) throws IOException {
         final Set<Map.Entry<Band, ImageOutputStream>> entries = bandOutputStreams.entrySet();
         for (Map.Entry<Band, ImageOutputStream> next : entries) {
             final String bandName = next.getKey().getName();

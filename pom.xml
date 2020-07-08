@@ -83,7 +83,6 @@
         <module>snap-geotiff</module>
         <module>snap-jp2-reader</module>
         <module>snap-hdf5-writer</module>
-        <module>snap-jython</module>
         <module>snap-land-cover</module>
         <module>snap-leveltest</module>
         <module>snap-ndvi</module>
