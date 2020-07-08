@@ -73,7 +73,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
 
         if (band.isProductReaderDirectlyUsable() && band.getProductReader() instanceof AbstractProductReader) {
             AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
-            if (reader.isReadRasterDataImplFullyImplemented()) {
+            if (reader.isSubsetReadingFullySupported()) {
                 ProductIO.readLevelBandRasterData(reader, band, lvlSupport, destRect, destData);
                 return;
             }

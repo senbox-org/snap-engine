@@ -349,7 +349,7 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     @Override
-    public boolean isReadRasterDataImplFullyImplemented() {
+    public boolean isSubsetReadingFullySupported() {
         return true;
     }
 

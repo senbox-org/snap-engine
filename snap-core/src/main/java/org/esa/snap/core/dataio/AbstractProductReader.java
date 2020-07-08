@@ -280,6 +280,22 @@ public abstract class AbstractProductReader implements ProductReader {
     }
 
     /**
+     * Returns if the reader fully supports the reading of subsets.
+     * Including sub-sampling in X- and Y-direction.
+     * This method is intended to be a hint to the SNAP framework. Depending on the return value the reading can
+     * be optimised.
+     * <p>
+     * Implementations of this class should override this method in order to specify if subset reading is
+     * fully supported.
+     * The default implementation returns <code>false</code>
+     *
+     * @return <code>false</code> or <code>true</code>, depending if subset reading is fully supported or not.
+     */
+    public boolean isSubsetReadingFullySupported() {
+        return false;
+    }
+
+    /**
      * The template method which is called by the method after an optional spatial subset has been applied to the input
      * parameters.
      * <p>The destination band, buffer and region parameters are exactly the ones passed to the original  call. Since
@@ -318,9 +334,6 @@ public abstract class AbstractProductReader implements ProductReader {
                                                    ProductData destBuffer,
                                                    ProgressMonitor pm) throws IOException;
 
-    public boolean isReadRasterDataImplFullyImplemented() {
-        return false;
-    }
 
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
