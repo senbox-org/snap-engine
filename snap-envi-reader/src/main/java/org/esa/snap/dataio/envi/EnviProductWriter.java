@@ -39,7 +39,7 @@ public class EnviProductWriter extends AbstractProductWriter {
 
     protected File _outputDir;
     protected File _outputFile;
-    private Map _bandOutputStreams;
+    private Map<Band, ImageOutputStream> _bandOutputStreams;
     private boolean _incremental = true;
 
     private boolean useCache;
@@ -55,7 +55,9 @@ public class EnviProductWriter extends AbstractProductWriter {
 
         final Preferences preferences = Config.instance().preferences();
         useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
-        writeCache = new WriteCache();
+        if (useCache) {
+            writeCache = new WriteCache();
+        }
     }
 
     private static void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight,
@@ -167,14 +169,19 @@ public class EnviProductWriter extends AbstractProductWriter {
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
         final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
         if (useCache && (!fullRaster)) {
-            final VariableCache variableCache = writeCache.get(sourceBand);
-            final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
-            if (canWrite) {
-                synchronized (outputStream) {
-                    variableCache.writeCompletedBlocks(outputStream);
+            try {
+                final VariableCache variableCache = writeCache.get(sourceBand);
+                pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);
+                final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+                if (canWrite) {
+                    synchronized (outputStream) {
+                        variableCache.writeCompletedBlocks(outputStream);
+                    }
                 }
+                pm.worked(1);
+            } finally {
+                pm.done();
             }
-            pm.worked(1);
         } else {
             long outputPos = (long) sourceOffsetY * (long) sourceBandWidth + sourceOffsetX;
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
@@ -213,6 +220,9 @@ public class EnviProductWriter extends AbstractProductWriter {
         if (_bandOutputStreams == null) {
             return;
         }
+        if (useCache) {
+            writeCache.flush(_bandOutputStreams);
+        }
         for (Object o : _bandOutputStreams.values()) {
             ((ImageOutputStream) o).flush();
         }
@@ -243,7 +253,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
             if (_bandOutputStreams == null) {
-                _bandOutputStreams = new HashMap();
+                _bandOutputStreams = new HashMap<>();
             }
             _bandOutputStreams.put(band, outputStream);
         }

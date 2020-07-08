@@ -83,7 +83,9 @@ public class DimapProductWriter extends AbstractProductWriter {
         super(writerPlugIn);
         final Preferences preferences = Config.instance().preferences();
         useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
-        writeCache = new WriteCache();
+        if (useCache) {
+            writeCache = new WriteCache();
+        }
     }
 
     private static void checkSourceRegionInsideBandRegion(int sourceWidth, final long sourceBandWidth, int sourceHeight,
@@ -255,13 +257,18 @@ public class DimapProductWriter extends AbstractProductWriter {
         final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
         if (useCache && (!fullRaster)) {
             final VariableCache variableCache = writeCache.get(sourceBand);
-            final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
-            if (canWrite) {
-                synchronized (outputStream) {
-                    variableCache.writeCompletedBlocks(outputStream);
+            try {
+                pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);
+                final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+                if (canWrite) {
+                    synchronized (outputStream) {
+                        variableCache.writeCompletedBlocks(outputStream);
+                    }
                 }
+                pm.worked(1);
+            } finally {
+                pm.done();
             }
-            pm.worked(1);
         } else {
             long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
