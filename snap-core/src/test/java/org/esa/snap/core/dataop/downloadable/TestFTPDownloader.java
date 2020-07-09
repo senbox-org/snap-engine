@@ -15,7 +15,6 @@
  */
 package org.esa.snap.core.dataop.downloadable;
 
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.Assume;
 import org.junit.Test;
@@ -80,7 +79,7 @@ public class TestFTPDownloader {
             }
             fail(msg);
 
-        } catch (FTPConnectionClosedException e) {
+        } catch (IOException e) {
             Assume.assumeNoException("Connection to Server could not be established, skipping TestFTPDownloader", e);
         }
 
