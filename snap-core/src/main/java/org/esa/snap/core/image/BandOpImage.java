@@ -39,6 +39,8 @@ import java.util.Objects;
  */
 public class BandOpImage extends RasterDataNodeOpImage {
 
+    public static boolean PREFETCH;
+
     public BandOpImage(Band band) {
         this(band, ResolutionLevel.MAXRES);
     }
@@ -48,6 +50,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         if (Boolean.getBoolean("snap.imageManager.disableSourceTileCaching")) {
             setTileCache(null);
         }
+        PREFETCH = "true".equals(System.getProperty("---prefetchBandOpImage", "" + false));
     }
 
     public Band getBand() {
@@ -90,18 +93,20 @@ public class BandOpImage extends RasterDataNodeOpImage {
         Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
         Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
-            Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
+        Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
+        if (PREFETCH) {
             img.prefetchTiles(tileIndices);
-            for (Point tileIndex : tileIndices) {
-                final int xTileIdx = tileIndex.x;
-                final int yTileIdx = tileIndex.y;
-                final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
-                final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
-                if (yPositions == null || xPositions == null) {
-                    continue;
-                }
-                Rectangle tileRect = img.getTileRect(xTileIdx, yTileIdx);
-                if (tileRect.isEmpty()) {
+        }
+        for (Point tileIndex : tileIndices) {
+            final int xTileIdx = tileIndex.x;
+            final int yTileIdx = tileIndex.y;
+            final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
+            final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
+            if (yPositions == null || xPositions == null) {
+                continue;
+            }
+            Rectangle tileRect = img.getTileRect(xTileIdx, yTileIdx);
+            if (tileRect.isEmpty()) {
                     continue;
                 }
                 final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);

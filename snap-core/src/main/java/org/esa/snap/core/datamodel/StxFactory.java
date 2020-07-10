@@ -311,9 +311,11 @@ public class StxFactory {
         try {
             pm.beginTask("Computing " + op.getName(), dataImage.getNumXTiles() * dataImage.getNumYTiles());
 
-            prefetchTiles(dataImage, dataImage.getBounds());
-            if (maskImage != null) {
-                prefetchTiles(maskImage, maskImage.getBounds());
+            if ("true".equals(System.getProperty("---prefetchStxFactory", "false"))) {
+                prefetchTiles(dataImage, dataImage.getBounds());
+                if (maskImage != null) {
+                    prefetchTiles(maskImage, maskImage.getBounds());
+                }
             }
 
             for (int tileY = dataImage.getMinTileY(); tileY <= dataImage.getMaxTileY(); tileY++) {

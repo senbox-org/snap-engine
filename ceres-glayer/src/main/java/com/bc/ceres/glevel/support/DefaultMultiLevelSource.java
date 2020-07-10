@@ -148,8 +148,10 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
             scaleY = (float) ((double) j2kH / (double) sourceImage.getHeight());
         }
 
-        PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
-        planarImage.prefetchTiles(planarImage.getTileIndices(planarImage.getBounds()));
+        if ("true".equals(System.getProperty("---prefetchDefaultMultiLevelSource", "" + false))) {
+            PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
+            planarImage.prefetchTiles(planarImage.getTileIndices(planarImage.getBounds()));
+        }
         return ScaleDescriptor.create(sourceImage, scaleX, scaleY, 0.0F, 0.0F, interpolation, null);
     }
 
