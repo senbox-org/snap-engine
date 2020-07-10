@@ -5,6 +5,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.jai.NoDataRaster;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.Histogram;
 import javax.media.jai.ImageLayout;
@@ -311,7 +312,7 @@ public class StxFactory {
         try {
             pm.beginTask("Computing " + op.getName(), dataImage.getNumXTiles() * dataImage.getNumYTiles());
 
-            if ("true".equals(System.getProperty("---prefetchStxFactory", "false"))) {
+            if (Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true)) {
                 prefetchTiles(dataImage, dataImage.getBounds());
                 if (maskImage != null) {
                     prefetchTiles(maskImage, maskImage.getBounds());

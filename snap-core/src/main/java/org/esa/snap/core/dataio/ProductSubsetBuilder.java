@@ -35,6 +35,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.Histogram;
 import java.awt.Dimension;
@@ -52,7 +53,7 @@ import java.util.Map;
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
-    static boolean prefetchTiles = false;
+    private static boolean prefetchTiles = false;
 
     public ProductSubsetBuilder() {
         this(false);
@@ -60,8 +61,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
     public ProductSubsetBuilder(boolean sourceProductOwner) {
         super(sourceProductOwner);
-        boolean prop = "true".equals(System.getProperty("---prefetchProductSubsetBuilder", "false"));
-        prefetchTiles = prop;
+        prefetchTiles = Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true);
     }
 
     public static Product createProductSubset(Product sourceProduct, ProductSubsetDef subsetDef, String name,

@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.runtime.Config;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -39,7 +40,7 @@ import java.util.Objects;
  */
 public class BandOpImage extends RasterDataNodeOpImage {
 
-    public static boolean PREFETCH;
+    public static boolean prefetchTiles;
 
     public BandOpImage(Band band) {
         this(band, ResolutionLevel.MAXRES);
@@ -50,7 +51,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         if (Boolean.getBoolean("snap.imageManager.disableSourceTileCaching")) {
             setTileCache(null);
         }
-        PREFETCH = "true".equals(System.getProperty("---prefetchBandOpImage", "" + false));
+        prefetchTiles = Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true);
     }
 
     public Band getBand() {
@@ -94,7 +95,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
         Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-        if (PREFETCH) {
+        if (prefetchTiles) {
             img.prefetchTiles(tileIndices);
         }
         for (Point tileIndex : tileIndices) {

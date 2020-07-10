@@ -42,6 +42,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
 
     private final RenderedImage sourceImage;
     private final Interpolation interpolation;
+    private final boolean prefetchTiles;
 
     /**
      * Constructs a new instance with {@link #DEFAULT_INTERPOLATION}.
@@ -85,6 +86,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
         super(multiLevelModel);
         this.sourceImage = sourceImage;
         this.interpolation = interpolation;
+        prefetchTiles = Boolean.parseBoolean(System.getProperty("snap.jai.prefetchTiles", "true"));
     }
 
     public RenderedImage getSourceImage() {
@@ -148,7 +150,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
             scaleY = (float) ((double) j2kH / (double) sourceImage.getHeight());
         }
 
-        if ("true".equals(System.getProperty("---prefetchDefaultMultiLevelSource", "" + false))) {
+        if (prefetchTiles) {
             PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
             planarImage.prefetchTiles(planarImage.getTileIndices(planarImage.getBounds()));
         }
