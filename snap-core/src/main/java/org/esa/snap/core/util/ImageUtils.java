@@ -45,10 +45,6 @@ import java.util.Vector;
  */
 public class ImageUtils {
 
-    public static ImageLayout buildMosaicImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level) {
-        return buildMosaicImageLayout(dataBufferType, imageWidth, imageHeight, level, JAI.getDefaultTileSize());
-    }
-
     public static ImageLayout buildMosaicImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
         return buildMosaicImageLayout(dataBufferType, imageWidth, imageHeight, level, defaultJAIReadTileSize, defaultJAIReadTileSize.width, defaultJAIReadTileSize.height);
     }

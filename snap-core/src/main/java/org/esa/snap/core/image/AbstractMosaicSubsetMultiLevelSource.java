@@ -51,6 +51,8 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         this.tileImageDisposer = new TileImageDisposer();
     }
 
+    protected abstract ImageLayout builMosaicImageLayout(int level);
+
     @Override
     public synchronized void reset() {
         super.reset();
@@ -219,18 +221,6 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
 
     protected final int computeLevelTotalImageHeight(int level) {
         return ImageUtils.computeLevelSize(this.imageReadBounds.height, level);
-    }
-
-    protected ImageLayout builMosaicImageLayout(int level) {
-//        Dimension defaultTileSize = JAI.getDefaultTileSize();//getDefaultJAITileSize();
-//        ImageLayout imageLayout = new ImageLayout();
-//        imageLayout.setMinX(0);
-//        imageLayout.setMinY(0);
-//        imageLayout.setTileWidth(128);//defaultTileSize.width);
-//        imageLayout.setTileHeight(128);//defaultTileSize.height);
-//        imageLayout.setTileGridXOffset(0);
-//        imageLayout.setTileGridYOffset(0);
-        return ImageUtils.buildMosaicImageLayout(null, this.imageReadBounds.width, this.imageReadBounds.height, level);
     }
 
     protected final RenderedOp buildMosaicOp(int level, java.util.List<RenderedImage> tileImages, boolean canCreateSourceROI) {

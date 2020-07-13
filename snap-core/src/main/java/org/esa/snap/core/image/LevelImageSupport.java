@@ -29,10 +29,7 @@ public class LevelImageSupport {
     private final double scale;
 
     public LevelImageSupport(int sourceWidth, int sourceHeight, ResolutionLevel level) {
-        this.sourceWidth = sourceWidth;
-        this.sourceHeight = sourceHeight;
-        this.level = level.getIndex();
-        this.scale = level.getScale();
+        this(sourceWidth, sourceHeight, level.getIndex(), level.getScale());
     }
 
     public LevelImageSupport(int sourceWidth, int sourceHeight, int level, double scale) {

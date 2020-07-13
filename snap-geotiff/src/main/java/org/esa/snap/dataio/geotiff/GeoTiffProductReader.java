@@ -47,14 +47,11 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.subset.PixelSubsetRegion;
-import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
@@ -65,12 +62,10 @@ import org.xml.sax.SAXException;
 import javax.imageio.spi.ImageInputStreamSpi;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -302,12 +297,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();
         product.setPreferredTileSize(defaultJAIReadTileSize);
 
-        Dimension mosaicImageTileSize;
-        if (isGlobalShifted180) {
-            mosaicImageTileSize = product.getSceneRasterSize();
-        } else {
-            mosaicImageTileSize = product.getSceneRasterSize(); // the same product size
-        }
+        Dimension mosaicImageTileSize = product.getSceneRasterSize();
 
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
         AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
