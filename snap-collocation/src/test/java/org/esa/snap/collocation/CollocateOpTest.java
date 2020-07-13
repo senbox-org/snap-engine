@@ -101,9 +101,9 @@ public class CollocateOpTest {
         assertNotNull(mask3);
         assertNotNull(mask4);
         assertEquals("bitmask_M", mask1.getName());
-        assertEquals("invalid_M", mask2.getName());
+        assertEquals("INVALID_M", mask2.getName());
         assertEquals("bitmask_S", mask3.getName());
-        assertEquals("invalid_S", mask4.getName());
+        assertEquals("INVALID_S", mask4.getName());
         assertEquals("radiance_1_M > 10", Mask.BandMathsType.getExpression(mask1));
         assertEquals("l1_flags_M.INVALID", Mask.BandMathsType.getExpression(mask2));
         assertEquals("radiance_1_S > 10", Mask.BandMathsType.getExpression(mask3));
@@ -191,8 +191,8 @@ public class CollocateOpTest {
         assertNotNull(mask2);
         assertNotNull(mask3);
         assertEquals("bitmask_M", mask1.getName());
-        assertEquals("invalid_M", mask2.getName());
-        assertEquals("invalid_S", mask3.getName());
+        assertEquals("INVALID_M", mask2.getName());
+        assertEquals("INVALID_S", mask3.getName());
         assertEquals("radiance_1_M > 10", Mask.BandMathsType.getExpression(mask1));
         assertEquals("l1_flags_M.INVALID", Mask.BandMathsType.getExpression(mask2));
         assertEquals("l2_flags_S.INVALID", Mask.BandMathsType.getExpression(mask3));
@@ -297,7 +297,7 @@ public class CollocateOpTest {
         product.addTiePointGrid(createTPG("dem_altitude"));
         setSceneGeoCoding(product);
         product.addMask("bitmask", "radiance_1 > 10", null, Color.RED, 0.5f);
-        product.addMask("invalid", "l1_flags.INVALID", null, Color.GREEN, 0.5f);
+        product.addMask("INVALID", "l1_flags.INVALID", null, Color.GREEN, 0.5f);
         product.setAutoGrouping("radiance");
         return product;
     }
@@ -318,7 +318,7 @@ public class CollocateOpTest {
         product.addTiePointGrid(createTPG("longitude"));
         product.addTiePointGrid(createTPG("dem_altitude"));
         setSceneGeoCoding(product);
-        product.addMask("invalid", "l2_flags.INVALID", null, Color.BLUE, 0.5f);
+        product.addMask("INVALID", "l2_flags.INVALID", null, Color.BLUE, 0.5f);
         product.setAutoGrouping("reflec");
         return product;
     }
