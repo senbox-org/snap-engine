@@ -8,8 +8,13 @@ import java.util.logging.*;
 
 public class LogUtils {
 
+    private static final String PROPERTY_NAME_SNAP_MAIN_LOGGER_NAME = "snap.main.logger.name";
+
     public static void initLogger() throws Exception {
-        String mainLoggerName = "org.esa";
+        String mainLoggerName = System.getProperty(PROPERTY_NAME_SNAP_MAIN_LOGGER_NAME); // mainLoggerName = "org.esa";
+        if (mainLoggerName == null) {
+            return; // no logger to configure
+        }
         boolean init = true;
         Logger mainLogger = Logger.getLogger(mainLoggerName);
         for (Handler handler : mainLogger.getHandlers()) {

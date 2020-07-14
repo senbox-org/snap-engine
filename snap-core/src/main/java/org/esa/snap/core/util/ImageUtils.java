@@ -64,6 +64,33 @@ public class ImageUtils {
         int levelTileWidth = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
         int levelTileHeight = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
 
+        return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
+    }
+
+    public static ImageLayout buildTileImageLayout(int dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
+        if (imageWidth < 0) {
+            throw new IllegalArgumentException("imageWidth");
+        }
+        if (imageHeight < 0) {
+            throw new IllegalArgumentException("imageHeight");
+        }
+
+        int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
+        int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
+
+        int levelTileWidth = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
+        if (levelTileWidth > levelImageWidth) {
+            levelTileWidth = levelImageWidth;
+        }
+        int levelTileHeight = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
+        if (levelTileHeight > levelImageHeight) {
+            levelTileHeight = levelImageHeight;
+        }
+
+        return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
+    }
+
+    private static ImageLayout buildImageLayout(Integer dataBufferType, int levelImageWidth, int levelImageHeight, int levelTileWidth, int levelTileHeight) {
         SampleModel sampleModel = null;
         ColorModel colorModel = null;
         if (dataBufferType != null) {
@@ -77,39 +104,6 @@ public class ImageUtils {
             }
         }
         return new ImageLayout(0, 0, levelImageWidth, levelImageHeight, 0, 0, levelTileWidth, levelTileHeight, sampleModel, colorModel);
-    }
-
-    public static ImageLayout buildTileImageLayout(int dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
-        if (imageWidth < 0) {
-            throw new IllegalArgumentException("imageWidth");
-        }
-        if (imageHeight < 0) {
-            throw new IllegalArgumentException("imageHeight");
-        }
-
-        int levelSourceWidth = ImageUtils.computeLevelSize(imageWidth, level);
-        int levelSourceHeight = ImageUtils.computeLevelSize(imageHeight, level);
-
-        int levelTileWidth = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
-        if (levelTileWidth > levelSourceWidth) {
-            levelTileWidth = levelSourceWidth;
-        }
-        int levelTileHeight = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
-        if (levelTileHeight > levelSourceHeight) {
-            levelTileHeight = levelSourceHeight;
-        }
-
-        SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, levelTileWidth, levelTileHeight);
-
-        ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
-        if (colorModel == null) {
-            int dataType = sampleModel.getDataType();
-            ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-            int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
-            colorModel = new ComponentColorModel(colorSpace, nBits, false, true, Transparency.OPAQUE, dataType);
-        }
-
-        return new ImageLayout(0, 0, levelSourceWidth, levelSourceHeight, 0, 0, levelTileWidth, levelTileHeight, sampleModel, colorModel);
     }
 
     public static CrsGeoCoding buildCrsGeoCoding(Point.Double coordinateUpperLeft, Point.Double resolution, Dimension defaultSize,
