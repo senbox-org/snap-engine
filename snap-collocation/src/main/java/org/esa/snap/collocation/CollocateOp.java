@@ -30,6 +30,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.gpf.Operator;
@@ -424,7 +425,7 @@ public class CollocateOp extends Operator {
             if (StringUtils.isNullOrEmpty(slaveComponentPattern)) {
                 throw new OperatorException(format(
                         "Target product already contains a raster data node with name ''{0}''. " +
-                                "Parameter 'slaveComponentPattern' must be set.",
+                        "Parameter 'slaveComponentPattern' must be set.",
                         rasterDataNodeName));
             }
             return rename(rasterDataNodeName, productIndex);
@@ -449,9 +450,38 @@ public class CollocateOp extends Operator {
             //System.out.printf("[%s] --> [%s]%n", oldExternalName, newExternalName);
             for (RasterDataNode raster : rasters) {
                 //System.out.printf("  [%s]:%s%n", raster.getName(), raster.getClass().getSimpleName());
-                raster.updateExpression(oldExternalName, newExternalName);
+                raster.setValidPixelExpression(replace(raster.getValidPixelExpression(), oldExternalName, newExternalName));
+                if (raster instanceof Mask) {
+                    Mask mask = (Mask) raster;
+                    Mask.ImageType imageType = mask.getImageType();
+                    if (imageType instanceof Mask.BandMathsType) {
+                        Mask.BandMathsType mathsType = (Mask.BandMathsType) imageType;
+                        mathsType.setExpression(mask, replace(mathsType.getExpression(mask), oldExternalName, newExternalName));
+                    } else {
+                        imageType.handleRename(mask, oldExternalName, newExternalName);
+                    }
+                }
+                if (raster instanceof VirtualBand) {
+                    VirtualBand virtualBand = (VirtualBand) raster;
+                    virtualBand.setExpression(replace(virtualBand.getExpression(), oldExternalName, newName));
+                }
             }
         }
+    }
+
+    private String replace(String expression, String oldName, String newName) {
+        if (expression == null || expression.trim().length() == 0) {
+            return expression;
+        }
+        String[] fragments = expression.split("\\b");
+        for (int i = 0; i < fragments.length; i++) {
+            if (oldName.equals(fragments[i])) {
+                if (i == 0 || !".".equals(fragments[i - 1].trim())) {
+                    fragments[i] = newName;
+                }
+            }
+        }
+        return String.join("", fragments);
     }
 
     private void validateProduct(Product product) {
@@ -592,7 +622,7 @@ public class CollocateOp extends Operator {
 
                         if (sourcePixelPos != null) {
                             resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
+                                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
                             double sample;
                             if (resampling == Resampling.NEAREST_NEIGHBOUR) {
                                 sample = sourceTile.getSampleDouble((int) resamplingIndex.i0, (int) resamplingIndex.j0);
@@ -655,9 +685,9 @@ public class CollocateOp extends Operator {
             if (!targetProduct.getMaskGroup().contains(sourceMask.getName())) {
                 Mask.ImageType imageType = sourceMask.getImageType();
                 Mask targetMask = new Mask(sourceMask.getName(),
-                        targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight(),
-                        imageType);
+                                           targetProduct.getSceneRasterWidth(),
+                                           targetProduct.getSceneRasterHeight(),
+                                           imageType);
                 targetMask.setDescription(sourceMask.getDescription());
                 for (Property property : sourceMask.getImageConfig().getProperties()) {
                     targetMask.getImageConfig().setValue(property.getDescriptor().getName(), property.getValue());
