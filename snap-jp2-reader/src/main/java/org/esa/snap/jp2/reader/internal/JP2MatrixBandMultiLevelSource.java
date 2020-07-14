@@ -8,7 +8,8 @@ import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 
@@ -34,7 +35,7 @@ public class JP2MatrixBandMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     }
 
     @Override
-    protected ImageLayout builMosaicImageLayout(int level) {
+    protected ImageLayout buildMosaicImageLayout(int level) {
         return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
@@ -85,7 +86,7 @@ public class JP2MatrixBandMultiLevelSource extends AbstractMatrixMosaicSubsetMul
         Rectangle cellLocalIntersectionBounds = matrixReadBounds.getCellLocalIntersectionBounds();
         int topLeftTileWidth = computeTopLeftDecompressedTileWidth(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getDecompressedTileWidth());
         int topLeftTileHeight = computeTopLeftDecompressedTileHeight(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getDecompressedTileHeight());
-        return ImageUtils.buildMosaicImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
-                                                 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
+        return ImageUtils.buildImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
+                                           0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }

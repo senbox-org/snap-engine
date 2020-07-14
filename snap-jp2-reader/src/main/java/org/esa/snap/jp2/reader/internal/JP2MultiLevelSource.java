@@ -9,11 +9,11 @@ import org.esa.snap.jp2.reader.JP2ImageFile;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * A single banded multi-level image source for JP2 files.
@@ -46,7 +46,7 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     }
 
     @Override
-    protected ImageLayout builMosaicImageLayout(int level) {
+    protected ImageLayout buildMosaicImageLayout(int level) {
         return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
@@ -98,6 +98,6 @@ public class JP2MultiLevelSource extends AbstractMosaicSubsetMultiLevelSource im
     public ImageLayout buildMultiLevelImageLayout() {
         int topLeftTileWidth = computeTopLeftDecompressedTileWidth(this.imageReadBounds, this.tileSize.width);
         int topLeftTileHeight = computeTopLeftDecompressedTileHeight(this.imageReadBounds, this.tileSize.height);
-        return ImageUtils.buildMosaicImageLayout(this.dataBufferType, imageReadBounds.width, imageReadBounds.height, 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
+        return ImageUtils.buildImageLayout(this.dataBufferType, imageReadBounds.width, imageReadBounds.height, 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }

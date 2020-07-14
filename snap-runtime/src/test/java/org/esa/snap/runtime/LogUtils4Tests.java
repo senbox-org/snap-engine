@@ -4,9 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Enumeration;
-import java.util.logging.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
-public class LogUtils {
+public class LogUtils4Tests {
 
     private static final String PROPERTY_NAME_SNAP_MAIN_LOGGER_NAME = "snap.main.logger.name";
 

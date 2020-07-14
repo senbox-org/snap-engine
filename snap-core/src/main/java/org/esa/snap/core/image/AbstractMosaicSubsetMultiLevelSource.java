@@ -6,12 +6,21 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ImageUtils;
 
-import javax.media.jai.*;
+import javax.media.jai.BorderExtender;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.ROI;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.SourcelessOpImage;
 import javax.media.jai.operator.BorderDescriptor;
 import javax.media.jai.operator.ConstantDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
@@ -51,7 +60,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         this.tileImageDisposer = new TileImageDisposer();
     }
 
-    protected abstract ImageLayout builMosaicImageLayout(int level);
+    protected abstract ImageLayout buildMosaicImageLayout(int level);
 
     @Override
     public synchronized void reset() {
@@ -231,7 +240,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             throw new IllegalStateException("No tiles found.");
         }
 
-        ImageLayout imageLayout = builMosaicImageLayout(level);
+        ImageLayout imageLayout = buildMosaicImageLayout(level);
 
         RenderingHints hints = (imageLayout == null) ? null : new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
 

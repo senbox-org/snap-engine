@@ -7,18 +7,20 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.subset.PixelSubsetRegion;
-import org.esa.snap.runtime.LogUtils;
+import org.esa.snap.runtime.LogUtils4Tests;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by jcoravu on 5/11/2019.
@@ -30,7 +32,7 @@ public class JP2ProductReaderTest {
 
     @BeforeClass
     public static void initialize() throws Exception {
-        LogUtils.initLogger();
+        LogUtils4Tests.initLogger();
         OpenJPEGLibraryInstaller.install();
     }
 

@@ -9,7 +9,8 @@ import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 
@@ -50,7 +51,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     }
 
     @Override
-    protected ImageLayout builMosaicImageLayout(int level) {
+    protected ImageLayout buildMosaicImageLayout(int level) {
         return null; // no image layout to configure the mosaic image since the tile images are configured
     }
 
@@ -96,7 +97,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
         Rectangle cellLocalIntersectionBounds = matrixReadBounds.getCellLocalIntersectionBounds();
         int topLeftTileWidth = computeTopLeftUncompressedTileWidth(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getCellWidth());
         int topLeftTileHeight = computeTopLeftUncompressedTileHeight(cellLocalIntersectionBounds, topLeftMosaicMatrixCell.getCellHeight());
-        return ImageUtils.buildMosaicImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
-                0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
+        return ImageUtils.buildImageLayout(topLeftMosaicMatrixCell.getDataBufferType(), this.imageReadBounds.width, this.imageReadBounds.height,
+                                           0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
 }
