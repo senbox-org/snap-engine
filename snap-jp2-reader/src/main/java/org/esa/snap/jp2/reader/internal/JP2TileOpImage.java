@@ -1,12 +1,9 @@
 package org.esa.snap.jp2.reader.internal;
 
-import com.bc.ceres.glevel.MultiLevelModel;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
-import org.esa.snap.jp2.reader.JP2ImageFile;
-import org.esa.snap.engine_utilities.util.PathUtils;
-import org.esa.snap.core.image.ResolutionLevel;
-import org.esa.snap.core.image.SingleBandedOpImage;
+import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.engine_utilities.util.PathUtils;
 import org.esa.snap.lib.openjpeg.dataio.OpenJP2Decoder;
 import org.esa.snap.lib.openjpeg.dataio.Utils;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
@@ -15,7 +12,10 @@ import org.esa.snap.runtime.Config;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
+import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -35,37 +35,51 @@ import java.util.logging.Logger;
  *
  * @author Cosmin Cara
  */
-public class JP2TileOpImage extends SingleBandedOpImage {
+public class JP2TileOpImage extends SourcelessOpImage {
 
     private static final Logger logger = Logger.getLogger(JP2TileOpImage.class.getName());
 
     private static final byte LAYER = 20;
 
-    private final boolean useOpenJp2Jna;
-    private final JP2ImageFile jp2ImageFile;
-    private final Path cacheDir;
-    private final int decompressTileIndex;
-    private final int bandIndex;
-    private final Point tileOffsetFromDecompressedImage;
-    private final Dimension decompresedTileSize;
-    private final Point tileOffsetFromImage;
+    private JP2BandSource bandSource;
+    private JP2BandData bandData;
+    private DecompressedImageSupport decompressedImageSupport;
+    private boolean useOpenJp2Jna;
+    private int decompressTileIndex;
+    private int tileOffsetFromDecompressedImageX;
+    private int tileOffsetFromDecompressedImageY;
+    private int tileOffsetFromImageX;
+    private int tileOffsetFromImageY;
 
-    public JP2TileOpImage(JP2ImageFile jp2ImageFile, Path cacheDir, MultiLevelModel imageModel, Dimension decompresedTileSize, int bandCount, int bandIndex, int dataBufferType,
-                          Dimension tileSize, Point tileOffsetFromDecompressedImage, Point tileOffsetFromImage, int decompressTileIndex, int level) {
+    public JP2TileOpImage(JP2BandSource bandSource, JP2BandData bandData, DecompressedImageSupport decompressedImageSupport,
+                          int tileWidth, int tileHeight, int tileOffsetFromDecompressedImageX, int tileOffsetFromDecompressedImageY,
+                          int tileOffsetFromImageX, int tileOffsetFromImageY, int decompressTileIndex, Dimension defaultJAIReadTileSize) {
 
-        super(dataBufferType, null, tileSize.width, tileSize.height, ImageUtils.computeLevelTileDimension(tileSize, level),
-                null, ResolutionLevel.create(imageModel, level));
+        this(ImageUtils.buildTileImageLayout(bandData.getDataBufferType(), tileWidth, tileHeight, decompressedImageSupport.getLevel(), defaultJAIReadTileSize));
 
-        this.jp2ImageFile = jp2ImageFile;
-        this.bandIndex = bandIndex;
-        this.cacheDir = cacheDir;
-        this.decompresedTileSize = decompresedTileSize;
+        this.bandSource = bandSource;
+        this.bandData = bandData;
+        this.decompressedImageSupport = decompressedImageSupport;
         this.decompressTileIndex = decompressTileIndex;
-        this.tileOffsetFromImage = tileOffsetFromImage;
-        this.tileOffsetFromDecompressedImage = tileOffsetFromDecompressedImage;
+
+        this.tileOffsetFromImageX = tileOffsetFromImageX;
+        this.tileOffsetFromImageY = tileOffsetFromImageY;
+
+        this.tileOffsetFromDecompressedImageX = tileOffsetFromDecompressedImageX;
+        this.tileOffsetFromDecompressedImageY = tileOffsetFromDecompressedImageY;
 
         String openJp2 = OpenJpegExecRetriever.getOpenJp2();
-        this.useOpenJp2Jna = openJp2 != null && bandCount == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
+        this.useOpenJp2Jna = openJp2 != null && this.bandData.getBandCount() == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
+    }
+
+    private JP2TileOpImage(ImageLayout layout) {
+        super(layout, null, layout.getSampleModel(null),
+                layout.getMinX(null), layout.getMinY(null),
+                layout.getWidth(null), layout.getHeight(null));
+
+        if (getTileCache() == null) {
+            setTileCache(JAI.getDefaultInstance().getTileCache());
+        }
     }
 
     @Override
@@ -88,12 +102,19 @@ public class JP2TileOpImage extends SingleBandedOpImage {
         }
     }
 
+    private int getLevel() {
+        return this.decompressedImageSupport.getLevel();
+    }
+
     private void computeRectDirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws IOException {
-        if (this.bandIndex != 0) {
+        if (this.bandSource.getBandIndex() != 0) {
             throw new IllegalStateException("The OpenJP2Decoder API can be used to the band count is 1 and band index is 0.");
         }
         int level = getLevel();
-        try (OpenJP2Decoder decoder = new OpenJP2Decoder(this.cacheDir, getLocalImageFile(), this.bandIndex, getSampleModel().getDataType(), level, LAYER, this.decompressTileIndex)) {
+        Path localCacheFolder = this.bandData.getLocalCacheFolder();
+        Path localImageFile = getLocalImageFile();
+        int dataType = getSampleModel().getDataType();
+        try (OpenJP2Decoder decoder = new OpenJP2Decoder(localCacheFolder, localImageFile, this.bandSource.getBandIndex(), dataType, level, LAYER, this.decompressTileIndex)) {
             Dimension levelDecompressedImageSize = decoder.getImageDimensions(); // the whole image size from the specified level
             Rectangle intersection = computeLevelDirectIntersection(level, levelDecompressedImageSize.width, levelDecompressedImageSize.height, levelDestinationRectangle);
             if (!intersection.isEmpty()) {
@@ -118,26 +139,26 @@ public class JP2TileOpImage extends SingleBandedOpImage {
     }
 
     private void writeDataOnLevelRaster(WritableRaster levelDestinationRaster, Raster readTileImage) {
-        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{this.bandIndex});
+        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{this.bandSource.getBandIndex()});
         levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(), readBandRaster);
     }
 
     private Rectangle computeLevelIndirectIntersection(int level, int levelDecompressedTileImageWidth, int levelDecompressedTileImageHeight, Rectangle levelDestinationRectangle) {
-        int x = computeIndirectLevelOffsetToRead(level, this.tileOffsetFromDecompressedImage.x, getWidth(), levelDestinationRectangle.x, levelDecompressedTileImageWidth);
-        int y = computeIndirectLevelOffsetToRead(level, this.tileOffsetFromDecompressedImage.y, getHeight(), levelDestinationRectangle.y, levelDecompressedTileImageHeight);
+        int x = computeIndirectLevelOffsetToRead(level, this.tileOffsetFromDecompressedImageX, getWidth(), levelDestinationRectangle.x, levelDecompressedTileImageWidth);
+        int y = computeIndirectLevelOffsetToRead(level, this.tileOffsetFromDecompressedImageY, getHeight(), levelDestinationRectangle.y, levelDecompressedTileImageHeight);
         Rectangle levelTileBounds = new Rectangle(x, y, levelDestinationRectangle.width, levelDestinationRectangle.height);
         Rectangle decompressedImageFileTileBounds = new Rectangle(0, 0, levelDecompressedTileImageWidth, levelDecompressedTileImageHeight);
         return decompressedImageFileTileBounds.intersection(levelTileBounds);
     }
 
     private Rectangle computeLevelDirectIntersection(int level, int levelDecompressedImageWidth, int levelDecompressedImageHeight, Rectangle levelDestinationRectangle) {
-        int x = computeDirectLevelOffsetToRead(level, this.tileOffsetFromImage.x, this.decompresedTileSize.width,levelDestinationRectangle.x, levelDestinationRectangle.width);
-        int y = computeDirectLevelOffsetToRead(level, this.tileOffsetFromImage.y, this.decompresedTileSize.height, levelDestinationRectangle.y, levelDestinationRectangle.height);
+        int x = computeDirectLevelOffsetToRead(level, this.tileOffsetFromImageX, this.decompressedImageSupport.getDecompressedTileWidth(), levelDestinationRectangle.x, levelDestinationRectangle.width);
+        int y = computeDirectLevelOffsetToRead(level, this.tileOffsetFromImageY, this.decompressedImageSupport.getDecompressedTileHeight(), levelDestinationRectangle.y, levelDestinationRectangle.height);
 
-        int decompressedTileLeftX = computeDirectDecompressedTileStartPosition(this.tileOffsetFromImage.x, this.decompresedTileSize.width);
+        int decompressedTileLeftX = computeDirectDecompressedTileStartPosition(this.tileOffsetFromImageX, this.decompressedImageSupport.getDecompressedTileWidth());
         int levelDecompressedTileLeftX = ImageUtils.computeLevelSize(decompressedTileLeftX, level);
 
-        int decompressedTileTopY = computeDirectDecompressedTileStartPosition(this.tileOffsetFromImage.y, this.decompresedTileSize.height);
+        int decompressedTileTopY = computeDirectDecompressedTileStartPosition(this.tileOffsetFromImageY, this.decompressedImageSupport.getDecompressedTileHeight());
         int levelDecompressedTileTopY = ImageUtils.computeLevelSize(decompressedTileTopY, level);
 
         Rectangle levelTileBounds = new Rectangle(x, y, levelDestinationRectangle.width, levelDestinationRectangle.height);
@@ -150,10 +171,11 @@ public class JP2TileOpImage extends SingleBandedOpImage {
     }
 
     private Path decompressTile(int level) throws InterruptedException, IOException {
-        Path imageFile = getLocalImageFile();
-        String imageFileName = PathUtils.getFileNameWithoutExtension(imageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
-        Path tileFile = PathUtils.get(this.cacheDir, imageFileName);
-        if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), imageFile.toFile()) < 0L)) {
+        Path localImageFile = getLocalImageFile();
+        Path localCacheFolder = this.bandData.getLocalCacheFolder();
+        String imageFileName = PathUtils.getFileNameWithoutExtension(localImageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
+        Path tileFile = PathUtils.get(localCacheFolder, imageFileName);
+        if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), localImageFile.toFile()) < 0L)) {
             String tileFileName;
             if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
                 tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator + tileFile.getName(tileFile.getNameCount()-1);
@@ -162,7 +184,7 @@ public class JP2TileOpImage extends SingleBandedOpImage {
             }
 
             Map<String, String> params = new HashMap<String, String>();
-            params.put("-i", Utils.GetIterativeShortPathNameW(imageFile.toString()));
+            params.put("-i", Utils.GetIterativeShortPathNameW(localImageFile.toString()));
             params.put("-r", String.valueOf(level));
             params.put("-l", Byte.toString(LAYER));
             params.put("-o", tileFileName);
@@ -182,9 +204,7 @@ public class JP2TileOpImage extends SingleBandedOpImage {
     }
 
     private Path getLocalImageFile() throws IOException {
-        synchronized (this.jp2ImageFile) {
-            return this.jp2ImageFile.getLocalFile();
-        }
+        return this.bandData.getJp2ImageFile().getLocalFile();
     }
 
     private static int computeDirectDecompressedTileEndPosition(int tileOffsetFromImage, int decompresedTileSize) {

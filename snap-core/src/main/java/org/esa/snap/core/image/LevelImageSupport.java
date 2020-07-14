@@ -21,7 +21,7 @@ package org.esa.snap.core.image;
  * Supports the development of images, which are returned by implementations of the
  * {@link com.bc.ceres.glevel.MultiLevelSource MultiLevelSource} interface.
  */
-public final class LevelImageSupport {
+public class LevelImageSupport {
 
     private final int sourceWidth;
     private final int sourceHeight;
@@ -29,10 +29,14 @@ public final class LevelImageSupport {
     private final double scale;
 
     public LevelImageSupport(int sourceWidth, int sourceHeight, ResolutionLevel level) {
+        this(sourceWidth, sourceHeight, level.getIndex(), level.getScale());
+    }
+
+    public LevelImageSupport(int sourceWidth, int sourceHeight, int level, double scale) {
         this.sourceWidth = sourceWidth;
         this.sourceHeight = sourceHeight;
-        this.level = level.getIndex();
-        this.scale = level.getScale();
+        this.level = level;
+        this.scale = scale;
     }
 
     public int getSourceWidth() {

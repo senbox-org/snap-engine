@@ -21,17 +21,34 @@ package org.esa.snap.core.util;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
-import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import javax.media.jai.JAI;
+import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferDouble;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferShort;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.util.Vector;
 
 /**
@@ -43,6 +60,67 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+
+    public static ImageLayout buildImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
+        return buildImageLayout(dataBufferType, imageWidth, imageHeight, level, defaultJAIReadTileSize, defaultJAIReadTileSize.width, defaultJAIReadTileSize.height);
+    }
+
+    public static ImageLayout buildImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize,
+                                               int topLeftTileWidth, int topLeftTileHeight) {
+        if (imageWidth < 0) {
+            throw new IllegalArgumentException("imageWidth");
+        }
+        if (imageHeight < 0) {
+            throw new IllegalArgumentException("imageHeight");
+        }
+
+        int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
+        int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
+
+        int levelTileWidth = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
+        int levelTileHeight = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
+
+        return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
+    }
+
+    public static ImageLayout buildTileImageLayout(int dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
+        if (imageWidth < 0) {
+            throw new IllegalArgumentException("imageWidth");
+        }
+        if (imageHeight < 0) {
+            throw new IllegalArgumentException("imageHeight");
+        }
+
+        int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
+        int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
+
+        int levelTileWidth = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
+        if (levelTileWidth > levelImageWidth) {
+            levelTileWidth = levelImageWidth;
+        }
+        int levelTileHeight = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
+        if (levelTileHeight > levelImageHeight) {
+            levelTileHeight = levelImageHeight;
+        }
+
+        return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
+    }
+
+    private static ImageLayout buildImageLayout(Integer dataBufferType, int levelImageWidth, int levelImageHeight, int levelTileWidth, int levelTileHeight) {
+        SampleModel sampleModel = null;
+        ColorModel colorModel = null;
+        if (dataBufferType != null) {
+            sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType.intValue(), levelTileWidth, levelTileHeight);
+            colorModel = PlanarImage.createColorModel(sampleModel);
+            if (colorModel == null) {
+                int dataType = sampleModel.getDataType();
+                ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+                int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
+                colorModel = new ComponentColorModel(colorSpace, nBits, false, true, Transparency.OPAQUE, dataType);
+            }
+        }
+        return new ImageLayout(0, 0, levelImageWidth, levelImageHeight, 0, 0, levelTileWidth, levelTileHeight, sampleModel, colorModel);
+    }
 
     public static CrsGeoCoding buildCrsGeoCoding(Point.Double coordinateUpperLeft, Point.Double resolution, Dimension defaultSize,
                                                  CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
@@ -114,21 +192,6 @@ public class ImageUtils {
         return new Dimension(defaultSceneRasterWidth, defaultSceneRasterHeight);
     }
 
-    public static Dimension computePreferredMosaicTileSize(int imageWidth, int imageHeight, int granularity) {
-        Dimension dimension = JAIUtils.computePreferredTileSize(imageWidth, imageHeight, granularity);
-        int maximumRowTileCount = 10;
-        int maximumColumnTileCount = 10;
-        int mosaicTileWidth = imageWidth / maximumColumnTileCount;
-        int mosaicTileHeight = imageHeight / maximumRowTileCount;
-        if (mosaicTileWidth < dimension.width) {
-            mosaicTileWidth = dimension.width; // increase the mosaic tile width
-        }
-        if (mosaicTileHeight < dimension.height) {
-            mosaicTileHeight = dimension.height; // increase the mosaic tile height
-        }
-        return new Dimension(mosaicTileWidth, mosaicTileHeight);
-    }
-
     public static int computeTileCount(int imageSize, int tileSize) {
         int tileCount = imageSize / tileSize;
         if (imageSize % tileSize != 0) {
@@ -141,27 +204,8 @@ public class ImageUtils {
         return sourceSize / Math.pow(2, level);
     }
 
-    public static Point computeLevelOffset(Point offset, int level) {
-        return new Point(ImageUtils.computeLevelSize(offset.x, level), ImageUtils.computeLevelSize(offset.y, level));
-    }
-
     public static int computeLevelSize(int sourceSize, int level) {
         return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
-    }
-
-    public static Dimension computeLevelTileDimension(Dimension tileSize, int level) {
-        return computeLevelTileDimension(tileSize.width, tileSize.height, level);
-    }
-
-    public static Dimension computeLevelTileDimension(int fullTileWidth, int fullTileHeight, int level) {
-        int width = computeLevelSize(fullTileWidth, level);
-        int height = computeLevelSize(fullTileHeight, level);
-        return getTileDimension(width, height);
-    }
-
-    private static Dimension getTileDimension(int width, int height) {
-        Dimension defaultSize = JAI.getDefaultTileSize();
-        return new Dimension((width < defaultSize.width) ? width : defaultSize.width, (height < defaultSize.height) ? height : defaultSize.height);
     }
 
     /**

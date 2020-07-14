@@ -2,25 +2,38 @@ package org.esa.snap.jp2.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.runtime.LogUtils4Tests;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.awt.*;
+import javax.media.jai.PlanarImage;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.File;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by jcoravu on 5/11/2019.
  */
-public class JP2ProductReaderTest extends AbstractJP2Test {
+public class JP2ProductReaderTest {
 
     public JP2ProductReaderTest() {
+    }
+
+    @BeforeClass
+    public static void initialize() throws Exception {
+        LogUtils4Tests.initLogger();
+        OpenJPEGLibraryInstaller.install();
     }
 
     @Test
@@ -30,10 +43,9 @@ public class JP2ProductReaderTest extends AbstractJP2Test {
 
         File productFile = new File(resource.toURI());
 
-        JP2ProductReaderPlugin readerPlugin = new JP2ProductReaderPlugin();
-        JP2ProductReader productReader = new JP2ProductReader(readerPlugin);
-
+        ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, null);
+
         assertNotNull(product);
         assertNotNull(product.getFileLocation());
         assertNull(product.getSceneGeoCoding());
@@ -52,16 +64,29 @@ public class JP2ProductReaderTest extends AbstractJP2Test {
         assertEquals("band_1", band.getName());
         assertEquals(400, band.getRasterWidth());
         assertEquals(300, band.getRasterHeight());
+        assertEquals(20, band.getDataType());
 
-        Rectangle part = new Rectangle(0, 0, 10, 10);
         MultiLevelImage multiLevelImage = band.getSourceImage();
         assertNotNull(multiLevelImage);
         assertNotNull(multiLevelImage.getColorModel());
         assertNotNull(multiLevelImage.getData());
         assertNotNull(multiLevelImage.getBounds());
 
+        Rectangle part = new Rectangle(0, 0, 10, 10);
         BufferedImage bufferedImage = multiLevelImage.getAsBufferedImage(part, multiLevelImage.getColorModel());
         assertNotNull(bufferedImage);
+
+        int level = 1;
+        int x = 60;
+        int y = 60;
+        PlanarImage image = (PlanarImage)band.getGeophysicalImage().getImage(level);
+        assertNotNull(image);
+        int tx = image.XToTileX(x);
+        int ty = image.YToTileY(y);
+        Raster tile = image.getTile(tx, ty);
+        assertNotNull(tile);
+        int pixelValue = tile.getSample(x, y, 0);
+        assertEquals(129, pixelValue);
     }
 
     @Test
@@ -71,16 +96,15 @@ public class JP2ProductReaderTest extends AbstractJP2Test {
 
         File productFile = new File(resource.toURI());
 
-        JP2ProductReaderPlugin readerPlugin = new JP2ProductReaderPlugin();
-        JP2ProductReader productReader = new JP2ProductReader(readerPlugin);
-
         Rectangle subsetRegion = new Rectangle(100, 100, 278, 189);
         ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.setNodeNames(new String[] { "band_2", "band_3"} );
         subsetDef.setSubsetRegion(new PixelSubsetRegion(subsetRegion, 0));
         subsetDef.setSubSampling(1, 1);
 
+        ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, subsetDef);
+
         assertNotNull(product);
         assertNotNull(product.getFileLocation());
         assertNull(product.getSceneGeoCoding());
@@ -135,5 +159,10 @@ public class JP2ProductReaderTest extends AbstractJP2Test {
         assertEquals(18, pixels[765]);
         assertEquals(8, pixels[999]);
         assertEquals(49, pixels[665]);
+    }
+
+    private static ProductReader buildProductReader() {
+        JP2ProductReaderPlugin plugin = new JP2ProductReaderPlugin();
+        return plugin.createReaderInstance();
     }
 }
