@@ -221,6 +221,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
 
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
+        ImageIO.setUseCache(false); // use_cache in CacheInfo defaults to true. This could be set by a preference.
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceImage);
         if (imageInputStream == null) {
             throw new NullPointerException("The image input stream is null for source image '" + sourceImage + "'.");

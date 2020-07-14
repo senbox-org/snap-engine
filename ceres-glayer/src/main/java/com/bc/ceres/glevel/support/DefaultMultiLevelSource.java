@@ -21,6 +21,7 @@ import com.bc.ceres.glevel.MultiLevelSource;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.OpImage;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.TileCache;
 import javax.media.jai.operator.ScaleDescriptor;
 import java.awt.Rectangle;
@@ -41,6 +42,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
 
     private final RenderedImage sourceImage;
     private final Interpolation interpolation;
+    private final boolean prefetchTiles;
 
     /**
      * Constructs a new instance with {@link #DEFAULT_INTERPOLATION}.
@@ -84,6 +86,7 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
         super(multiLevelModel);
         this.sourceImage = sourceImage;
         this.interpolation = interpolation;
+        prefetchTiles = Boolean.parseBoolean(System.getProperty("snap.jai.prefetchTiles", "true"));
     }
 
     public RenderedImage getSourceImage() {
@@ -144,9 +147,13 @@ public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
         if (jaiH == j2kH) {
             scaleY = (float) invScale;
         } else {
-            scaleY = (float) ((double) j2kH  /(double) sourceImage.getHeight());
+            scaleY = (float) ((double) j2kH / (double) sourceImage.getHeight());
         }
 
+        if (prefetchTiles) {
+            PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
+            planarImage.prefetchTiles(planarImage.getTileIndices(planarImage.getBounds()));
+        }
         return ScaleDescriptor.create(sourceImage, scaleX, scaleY, 0.0F, 0.0F, interpolation, null);
     }
 

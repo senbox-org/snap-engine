@@ -300,45 +300,70 @@ public final class OperatorUtils {
             final double subSamplingX, final double subSamplingY,
             final PixelPos[] newTiePointPos) {
 
-        TiePointGrid latGrid = null;
-        TiePointGrid lonGrid = null;
+        for(TiePointGrid tpg : sourceProduct.getTiePointGrids()) {
 
-        for (TiePointGrid srcTPG : sourceProduct.getTiePointGrids()) {
-
-            final float[] tiePoints = new float[gridWidth * gridHeight];
+            final float[] newTiePointValues = new float[gridWidth * gridHeight];
             for (int k = 0; k < newTiePointPos.length; k++) {
-                tiePoints[k] = (float)srcTPG.getPixelDouble(newTiePointPos[k].x, newTiePointPos[k].y);
+                newTiePointValues[k] = (float)tpg.getPixelDouble(newTiePointPos[k].x, newTiePointPos[k].y);
             }
 
-            int discontinuity = TiePointGrid.DISCONT_NONE;
-            if (srcTPG.getName().equals(TPG_LONGITUDE)) {
-                discontinuity = TiePointGrid.DISCONT_AT_180;
+            final int disconnect = tpg.getName().equals(TPG_LONGITUDE) ? TiePointGrid.DISCONT_AT_180 : TiePointGrid.DISCONT_NONE;
+            final TiePointGrid newTPG = new TiePointGrid(tpg.getName(),
+                    gridWidth,
+                    gridHeight,
+                    0.0D,
+                    0.0D,
+                    subSamplingX,
+                    subSamplingY,
+                    newTiePointValues,
+                    disconnect);
+
+            targetProduct.removeTiePointGrid(tpg);
+            targetProduct.addTiePointGrid(newTPG);
+        }
+
+        TiePointGrid tgtLatTPG = targetProduct.getTiePointGrid(TPG_LATITUDE);
+        TiePointGrid tgtLonTPG = targetProduct.getTiePointGrid(TPG_LONGITUDE);
+
+        if(tgtLatTPG == null || tgtLonTPG == null) {
+            final GeoCoding srcGeoCoding = sourceProduct.getSceneGeoCoding();
+
+            final float[] latTiePoints = new float[gridWidth * gridHeight];
+            final float[] lonTiePoints = new float[gridWidth * gridHeight];
+            final GeoPos geoPos = new GeoPos();
+            final PixelPos pixelPos = new PixelPos();
+            for (int k = 0; k < newTiePointPos.length; k++) {
+                pixelPos.setLocation(newTiePointPos[k].x, newTiePointPos[k].y);
+                srcGeoCoding.getGeoPos(pixelPos, geoPos);
+                latTiePoints[k] = (float)geoPos.lat;
+                lonTiePoints[k] = (float)geoPos.lon;
             }
 
-            final TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
+            tgtLatTPG = new TiePointGrid(TPG_LATITUDE,
+                    gridWidth,
+                    gridHeight,
+                    0.0D,
+                    0.0D,
+                    subSamplingX,
+                    subSamplingY,
+                    latTiePoints,
+                    TiePointGrid.DISCONT_NONE);
+
+            tgtLonTPG = new TiePointGrid(TPG_LONGITUDE,
                     gridWidth,
                     gridHeight,
                     0.0f,
                     0.0f,
                     subSamplingX,
                     subSamplingY,
-                    tiePoints,
-                    discontinuity);
+                    lonTiePoints,
+                    TiePointGrid.DISCONT_AT_180);
 
-            TiePointGrid prevTPG = targetProduct.getTiePointGrid(tgtTPG.getName());
-            if(prevTPG != null) {
-                targetProduct.removeTiePointGrid(prevTPG);
-            }
-            targetProduct.addTiePointGrid(tgtTPG);
-
-            if (srcTPG.getName().equals(TPG_LATITUDE)) {
-                latGrid = tgtTPG;
-            } else if (srcTPG.getName().equals(TPG_LONGITUDE)) {
-                lonGrid = tgtTPG;
-            }
+            targetProduct.addTiePointGrid(tgtLatTPG);
+            targetProduct.addTiePointGrid(tgtLonTPG);
         }
 
-        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGeoCoding gc = new TiePointGeoCoding(tgtLatTPG, tgtLonTPG);
 
         targetProduct.setSceneGeoCoding(gc);
     }

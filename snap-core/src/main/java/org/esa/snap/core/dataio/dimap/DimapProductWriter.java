@@ -19,6 +19,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
+import org.esa.snap.core.dataio.cache.VariableCache;
+import org.esa.snap.core.dataio.cache.WriteCache;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeWriter;
 import org.esa.snap.core.datamodel.Band;
@@ -35,6 +37,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -45,6 +48,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 /**
  * The product writer for the BEAM-DIMAP format.
@@ -58,12 +62,17 @@ import java.util.Set;
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
+    private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.dimap.useCache";
+
     private File outputDir;
     private File outputFile;
     private Map<Band, ImageOutputStream> bandOutputStreams;
     private File dataOutputDir;
     private boolean incremental = true;
     private Set<WriterExtender> writerExtenders;
+
+    private boolean useCache;
+    private WriteCache writeCache;
 
     /**
      * Construct a new instance of a product writer for the given BEAM-DIMAP product writer plug-in.
@@ -72,6 +81,73 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     public DimapProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+        final Preferences preferences = Config.instance().preferences();
+        useCache = preferences.getBoolean(SYSPROP_USE_CACHE, true);
+        if (useCache) {
+            writeCache = new WriteCache();
+        }
+    }
+
+    private static void checkSourceRegionInsideBandRegion(int sourceWidth, final long sourceBandWidth, int sourceHeight,
+                                                          final long sourceBandHeight, int sourceOffsetX,
+                                                          int sourceOffsetY) {
+        Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
+        Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
+        Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
+        Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
+    }
+
+    // package access for testing only tb 2020-07-01
+    static boolean isFullRaster(int sourceWidth, int sourceHeight, int rasterWidth, int rasterHeight) {
+        return (sourceWidth == rasterWidth) && (sourceHeight == rasterHeight);
+    }
+
+    private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
+        final int expectedBufferSize = sourceWidth * sourceHeight;
+        final int actualBufferSize = sourceBuffer.getNumElems();
+        Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
+    }
+
+    private static void createPhysicalImageFile(Band band, File file) throws IOException {
+        createPhysicalFile(file, getImageFileSize(band));
+    }
+
+    private static void createPhysicalImageFile(TiePointGrid tiePointGrid, File file) throws IOException {
+        createPhysicalFile(file, getImageFileSize(tiePointGrid));
+    }
+
+    private static long getImageFileSize(Band band) {
+        return (long) ProductData.getElemSize(band.getDataType()) *
+                (long) band.getRasterWidth() *
+                (long) band.getRasterHeight();
+    }
+
+    private static long getImageFileSize(TiePointGrid tpg) {
+        return (long) ProductData.getElemSize(tpg.getDataType()) *
+                (long) tpg.getGridWidth() *
+                (long) tpg.getGridHeight();
+    }
+
+    private static String createEnviHeaderFilename(Band band) {
+        return band.getName() + EnviHeader.FILE_EXTENSION;
+    }
+
+    private static String createImageFilename(Band band) {
+        return band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
+    }
+
+    private static void createPhysicalFile(File file, long fileSize) throws IOException {
+        final File parentDir = file.getParentFile();
+        if (parentDir != null) {
+            parentDir.mkdirs();
+        }
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
+            randomAccessFile.setLength(fileSize);
+        }
+    }
+
+    public void setUseCache(boolean useCache) {
+        this.useCache = useCache;
     }
 
     /**
@@ -173,26 +249,43 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertNotNull("sourceBand", sourceBand);
         Guardian.assertNotNull("sourceBuffer", sourceBuffer);
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
-        final long sourceBandWidth = sourceBand.getRasterWidth();
-        final long sourceBandHeight = sourceBand.getRasterHeight();
+        final int sourceBandWidth = sourceBand.getRasterWidth();
+        final int sourceBandHeight = sourceBand.getRasterHeight();
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
-        try {
-            synchronized (outputStream) {
-                for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                    sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                    outputPos += sourceBandWidth;
-                    pm.worked(1);
-                    if (pm.isCanceled()) {
-                        break;
+        final boolean fullRaster = isFullRaster(sourceWidth, sourceHeight, sourceBandWidth, sourceBandHeight);
+        if (useCache && (!fullRaster)) {
+            final VariableCache variableCache = writeCache.get(sourceBand);
+            try {
+                pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);
+                final boolean canWrite = variableCache.update(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer);
+                if (canWrite) {
+                    synchronized (outputStream) {
+                        variableCache.writeCompletedBlocks(outputStream);
                     }
                 }
+                pm.worked(1);
+            } finally {
+                pm.done();
             }
-        } finally {
-            pm.done();
+        } else {
+            long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
+            pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+            try {
+                synchronized (outputStream) {
+                    for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                        sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                        outputPos += sourceBandWidth;
+                        pm.worked(1);
+                        if (pm.isCanceled()) {
+                            break;
+                        }
+                    }
+                }
+            } finally {
+                pm.done();
+            }
         }
     }
 
@@ -212,20 +305,10 @@ public class DimapProductWriter extends AbstractProductWriter {
         }
     }
 
-    private static void checkSourceRegionInsideBandRegion(int sourceWidth, final long sourceBandWidth, int sourceHeight,
-                                                          final long sourceBandHeight, int sourceOffsetX,
-                                                          int sourceOffsetY) {
-        Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
-        Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
-        Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
-        Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
-    }
-
-    private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
-        final int expectedBufferSize = sourceWidth * sourceHeight;
-        final int actualBufferSize = sourceBuffer.getNumElems();
-        Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
-    }
+    /*
+     * Returns the data output stream associated with the given <code>Band</code>. If no stream exists, one is created
+     * and fed into the hash map
+     */
 
     /**
      * Writes all data in memory to disk. After a flush operation, the writer can be closed safely
@@ -236,6 +319,9 @@ public class DimapProductWriter extends AbstractProductWriter {
     public synchronized void flush() throws IOException {
         if (bandOutputStreams == null) {
             return;
+        }
+        if (useCache) {
+            writeCache.flush(bandOutputStreams);
         }
         for (ImageOutputStream imageOutputStream : bandOutputStreams.values()) {
             imageOutputStream.flush();
@@ -249,6 +335,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     @Override
     public synchronized void close() throws IOException {
+        flush();
         if (bandOutputStreams == null) {
             return;
         }
@@ -262,6 +349,12 @@ public class DimapProductWriter extends AbstractProductWriter {
             writerExtenders = null;
         }
     }
+
+    /*
+     * Returns a file associated with the given <code>Band</code>. The method ensures that the file exists and have the
+     * right size. Also ensures a recreate if the file not exists or the file have a different file size. A new envi
+     * header file was written every call.
+     */
 
     private void writeDimapDocument() throws IOException {
         final DimapHeaderWriter writer = new DimapHeaderWriter(getSourceProduct(), getOutputFile(),
@@ -293,11 +386,6 @@ public class DimapProductWriter extends AbstractProductWriter {
         tiePointGridDir.mkdirs();
     }
 
-    /*
-     * Returns the data output stream associated with the given <code>Band</code>. If no stream exists, one is created
-     * and fed into the hash map
-     */
-
     private synchronized ImageOutputStream getOrCreateImageOutputStream(Band band) throws IOException {
         ImageOutputStream outputStream = getImageOutputStream(band);
         if (outputStream == null) {
@@ -317,12 +405,6 @@ public class DimapProductWriter extends AbstractProductWriter {
         return null;
     }
 
-    /*
-     * Returns a file associated with the given <code>Band</code>. The method ensures that the file exists and have the
-     * right size. Also ensures a recreate if the file not exists or the file have a different file size. A new envi
-     * header file was written every call.
-     */
-
     private File getValidImageFile(Band band) throws IOException {
         writeEnviHeader(band); // always (re-)write ENVI header
         final File file = getImageFile(band);
@@ -341,14 +423,6 @@ public class DimapProductWriter extends AbstractProductWriter {
         final File file = getImageFile(tiePointGrid);
         createPhysicalImageFile(tiePointGrid, file);
         return file;
-    }
-
-    private static void createPhysicalImageFile(Band band, File file) throws IOException {
-        createPhysicalFile(file, getImageFileSize(band));
-    }
-
-    private static void createPhysicalImageFile(TiePointGrid tiePointGrid, File file) throws IOException {
-        createPhysicalFile(file, getImageFileSize(tiePointGrid));
     }
 
     private void writeEnviHeader(Band band) throws IOException {
@@ -373,24 +447,8 @@ public class DimapProductWriter extends AbstractProductWriter {
         return new FileImageOutputStream(getValidImageFile(tiePointGrid));
     }
 
-    private static long getImageFileSize(Band band) {
-        return (long) ProductData.getElemSize(band.getDataType()) *
-                (long) band.getRasterWidth() *
-                (long) band.getRasterHeight();
-    }
-
-    private static long getImageFileSize(TiePointGrid tpg) {
-        return (long) ProductData.getElemSize(tpg.getDataType()) *
-                (long) tpg.getGridWidth() *
-                (long) tpg.getGridHeight();
-    }
-
     private File getEnviHeaderFile(Band band) {
         return new File(dataOutputDir, createEnviHeaderFilename(band));
-    }
-
-    private static String createEnviHeaderFilename(Band band) {
-        return band.getName() + EnviHeader.FILE_EXTENSION;
     }
 
     private File getEnviHeaderFile(TiePointGrid tiePointGrid) {
@@ -402,23 +460,9 @@ public class DimapProductWriter extends AbstractProductWriter {
         return new File(dataOutputDir, createImageFilename(band));
     }
 
-    private static String createImageFilename(Band band) {
-        return band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
-    }
-
     private File getImageFile(TiePointGrid tiePointGrid) {
         return new File(new File(dataOutputDir, DimapProductConstants.TIE_POINT_GRID_DIR_NAME),
                         tiePointGrid.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
-    }
-
-    private static void createPhysicalFile(File file, long fileSize) throws IOException {
-        final File parentDir = file.getParentFile();
-        if (parentDir != null) {
-            parentDir.mkdirs();
-        }
-        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
-            randomAccessFile.setLength(fileSize);
-        }
     }
 
     @Override
@@ -431,7 +475,7 @@ public class DimapProductWriter extends AbstractProductWriter {
                 }
             }
         }
-        if(node instanceof RasterDataNode && ((RasterDataNode) node).isSynthetic()) {
+        if (node instanceof RasterDataNode && ((RasterDataNode) node).isSynthetic()) {
             return false;
         }
         if (node instanceof VirtualBand) {
@@ -454,6 +498,16 @@ public class DimapProductWriter extends AbstractProductWriter {
     }
 
     /**
+     * Returns whether this product writer writes only modified product nodes.
+     *
+     * @return <code>true</code> if so
+     */
+    @Override
+    public boolean isIncrementalMode() {
+        return incremental;
+    }
+
+    /**
      * Enables resp. disables incremental writing of this product writer. By default, a reader should enable progress
      * listening.
      *
@@ -462,16 +516,6 @@ public class DimapProductWriter extends AbstractProductWriter {
     @Override
     public void setIncrementalMode(boolean enabled) {
         incremental = enabled;
-    }
-
-    /**
-     * Returns whether this product writer writes only modified product nodes.
-     *
-     * @return <code>true</code> if so
-     */
-    @Override
-    public boolean isIncrementalMode() {
-        return incremental;
     }
 
     private void deleteRemovedNodes() throws IOException {
@@ -540,6 +584,15 @@ public class DimapProductWriter extends AbstractProductWriter {
         }
     }
 
+    public void addExtender(WriterExtender writerExtender) {
+        if (writerExtenders == null) {
+            writerExtenders = new HashSet<>();
+        }
+        if (writerExtender != null) {
+            writerExtenders.add(writerExtender);
+        }
+    }
+
     public static abstract class WriterExtender {
 
         /**
@@ -556,14 +609,5 @@ public class DimapProductWriter extends AbstractProductWriter {
          * @param outputDir the directory where the DIMAP header file should be written
          */
         public abstract void intendToWriteDimapHeaderTo(File outputDir, Product product);
-    }
-
-    public void addExtender(WriterExtender writerExtender) {
-        if (writerExtenders == null) {
-            writerExtenders = new HashSet<>();
-        }
-        if (writerExtender != null) {
-            writerExtenders.add(writerExtender);
-        }
     }
 }

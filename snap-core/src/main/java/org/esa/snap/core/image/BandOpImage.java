@@ -18,13 +18,20 @@ package org.esa.snap.core.image;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.runtime.Config;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -32,6 +39,8 @@ import java.util.*;
  * given {@code RasterDataNode} at a given pyramid level.
  */
 public class BandOpImage extends RasterDataNodeOpImage {
+
+    public static boolean prefetchTiles;
 
     public BandOpImage(Band band) {
         this(band, ResolutionLevel.MAXRES);
@@ -42,6 +51,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         if (Boolean.getBoolean("snap.imageManager.disableSourceTileCaching")) {
             setTileCache(null);
         }
+        prefetchTiles = Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true);
     }
 
     public Band getBand() {
@@ -56,14 +66,22 @@ public class BandOpImage extends RasterDataNodeOpImage {
         }
         if (getLevel() == 0) {
             band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
-                    destRect.width, destRect.height,
-                    destData, ProgressMonitor.NULL);
+                                                       destRect.width, destRect.height,
+                                                       destData, ProgressMonitor.NULL);
         } else {
             readHigherLevelData(band, destData, destRect, getLevelImageSupport());
         }
     }
 
     private static void readHigherLevelData(Band band, ProductData destData, Rectangle destRect, LevelImageSupport lvlSupport) throws IOException {
+
+        if (band.isProductReaderDirectlyUsable() && band.getProductReader() instanceof AbstractProductReader) {
+            AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
+            if (reader.isSubsetReadingFullySupported()) {
+                ProductIO.readLevelBandRasterData(reader, band, lvlSupport, destRect, destData);
+                return;
+            }
+        }
         final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
         final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
         final int srcX = lvlSupport.getSourceX(destRect.x);
@@ -77,6 +95,9 @@ public class BandOpImage extends RasterDataNodeOpImage {
         Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
         Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
+        if (prefetchTiles) {
+            img.prefetchTiles(tileIndices);
+        }
         for (Point tileIndex : tileIndices) {
             final int xTileIdx = tileIndex.x;
             final int yTileIdx = tileIndex.y;
@@ -149,7 +170,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
             }
             PositionCouple that = (PositionCouple) o;
             return srcPos == that.srcPos &&
-                    destPos == that.destPos;
+                   destPos == that.destPos;
         }
 
         @Override
@@ -160,9 +181,9 @@ public class BandOpImage extends RasterDataNodeOpImage {
         @Override
         public String toString() {
             return "PositionCouple{" +
-                    "srcPos=" + srcPos +
-                    ", destPos=" + destPos +
-                    '}';
+                   "srcPos=" + srcPos +
+                   ", destPos=" + destPos +
+                   '}';
         }
     }
 }

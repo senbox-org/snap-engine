@@ -5,6 +5,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.jai.NoDataRaster;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.Histogram;
 import javax.media.jai.ImageLayout;
@@ -296,6 +297,10 @@ public class StxFactory {
         accumulate(op, dataImage, maskImage, maskShape, pm);
     }
 
+    private static void prefetchTiles(PlanarImage dataImage, Rectangle rectangle) {
+        dataImage.prefetchTiles(dataImage.getTileIndices(rectangle));
+    }
+
     static void accumulate(StxOp op, PlanarImage dataImage, PlanarImage maskImage, Shape maskShape, ProgressMonitor pm) {
         if (maskImage != null) {
             ensureImageCompatibility(dataImage, maskImage);
@@ -306,6 +311,13 @@ public class StxFactory {
 
         try {
             pm.beginTask("Computing " + op.getName(), dataImage.getNumXTiles() * dataImage.getNumYTiles());
+
+            if (Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true)) {
+                prefetchTiles(dataImage, dataImage.getBounds());
+                if (maskImage != null) {
+                    prefetchTiles(maskImage, maskImage.getBounds());
+                }
+            }
 
             for (int tileY = dataImage.getMinTileY(); tileY <= dataImage.getMaxTileY(); tileY++) {
                 for (int tileX = dataImage.getMinTileX(); tileX <= dataImage.getMaxTileX(); tileX++) {

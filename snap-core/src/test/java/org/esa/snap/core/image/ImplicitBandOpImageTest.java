@@ -26,6 +26,7 @@ import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.Point;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
@@ -33,7 +34,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ImplicitBandOpImageTest {
 
@@ -51,7 +53,7 @@ public class ImplicitBandOpImageTest {
     }
 
     @Test
-    public void testGeophysicalImages() throws IOException {
+    public void testGeophysicalImages() {
         testGeophysicalImage("B_FLOAT64", DataBuffer.TYPE_DOUBLE);
         testGeophysicalImage("B_FLOAT32", DataBuffer.TYPE_FLOAT);
 
@@ -74,19 +76,15 @@ public class ImplicitBandOpImageTest {
         assertTrue(sampleModel instanceof SingleBandedSampleModel);
         assertEquals(dataBufferType, sampleModel.getDataType());
 
-        final Raster[] rasters = geophysicalImage.getTiles();
-        assertEquals(4, rasters.length);
-
         final double[] coefficients = productFactory.getCoefficients(band);
-        testTileData(geophysicalImage.getTile(0, 0), coefficients);
-        testTileData(geophysicalImage.getTile(1, 0), coefficients);
-        testTileData(geophysicalImage.getTile(0, 1), coefficients);
-        testTileData(geophysicalImage.getTile(1, 1), coefficients);
+        Point[] tileIndices = geophysicalImage.getTileIndices(null);
+        for (Point tileIndex : tileIndices) {
+            testTileData(geophysicalImage.getTile(tileIndex.x, tileIndex.y), coefficients);
+        }
     }
 
     private static void testTileData(Raster tile, double[] coefficients) {
         final DataBuffer dataBuffer = tile.getDataBuffer();
-        assertEquals(TILE_SIZE * TILE_SIZE, dataBuffer.getSize());
 
         for (int dbIndex = 0, pdIndex = 0; dbIndex < dataBuffer.getSize(); dbIndex++) {
             final int x = tile.getMinX() + dbIndex % tile.getWidth();
@@ -104,17 +102,16 @@ public class ImplicitBandOpImageTest {
 
     private static class ProductFactory extends AbstractProductReader {
 
-        final Map<Band, double[]> coefficients = new HashMap<Band, double[]>(10);
+        final Map<Band, double[]> coefficients = new HashMap<>(10);
 
         ProductFactory() {
             super(null);
         }
 
-        Band createBand(Product p, String bandName, int productDataType, double factor, double offset) {
+        void addBand(Product p, String bandName, int productDataType, double factor, double offset) {
             final Band band = p.addBand(bandName, productDataType);
             coefficients.put(band, new double[]{factor, offset});
 
-            return band;
         }
 
         double[] getCoefficients(Band band) {
@@ -122,17 +119,17 @@ public class ImplicitBandOpImageTest {
         }
 
         @Override
-        protected Product readProductNodesImpl() throws IOException {
+        protected Product readProductNodesImpl() {
             final Product product = new Product("N", "T", IMAGE_W, IMAGE_H);
             product.setPreferredTileSize(TILE_SIZE, TILE_SIZE);
-            createBand(product, "B_INT8", ProductData.TYPE_INT8, 1.0, -8.0);
-            createBand(product, "B_UINT8", ProductData.TYPE_UINT8, 1.0, 8.0);
-            createBand(product, "B_INT16", ProductData.TYPE_INT16, 1.0, -16.0);
-            createBand(product, "B_UINT16", ProductData.TYPE_UINT16, 1.0, 16.0);
-            createBand(product, "B_INT32", ProductData.TYPE_INT32, 1.0, -32.0);
-            createBand(product, "B_UINT32", ProductData.TYPE_UINT32, 1.0, 32.0);
-            createBand(product, "B_FLOAT32", ProductData.TYPE_FLOAT32, 1.0, 32.5);
-            createBand(product, "B_FLOAT64", ProductData.TYPE_FLOAT64, 1.0, 64.5);
+            addBand(product, "B_INT8", ProductData.TYPE_INT8, 1.0, -8.0);
+            addBand(product, "B_UINT8", ProductData.TYPE_UINT8, 1.0, 8.0);
+            addBand(product, "B_INT16", ProductData.TYPE_INT16, 1.0, -16.0);
+            addBand(product, "B_UINT16", ProductData.TYPE_UINT16, 1.0, 16.0);
+            addBand(product, "B_INT32", ProductData.TYPE_INT32, 1.0, -32.0);
+            addBand(product, "B_UINT32", ProductData.TYPE_UINT32, 1.0, 32.0);
+            addBand(product, "B_FLOAT32", ProductData.TYPE_FLOAT32, 1.0, 32.5);
+            addBand(product, "B_FLOAT64", ProductData.TYPE_FLOAT64, 1.0, 64.5);
 
             return product;
         }
@@ -150,7 +147,7 @@ public class ImplicitBandOpImageTest {
                                               int destWidth,
                                               int destHeight,
                                               ProductData destBuffer,
-                                              ProgressMonitor pm) throws IOException {
+                                              ProgressMonitor pm) {
             final double[] coefficients = getCoefficients(destBand);
             for (int i = 0; i < destBuffer.getNumElems(); i++) {
                 destBuffer.setElemDoubleAt(i, coefficients[0] * i + coefficients[1]);

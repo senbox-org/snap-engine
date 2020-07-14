@@ -255,8 +255,6 @@ public class WriteOpTest {
                                                                  targetProduct.getSceneGeoCoding());
 
             targetProduct.getPinGroup().add(placemark);
-
-            System.out.println("placemark = " + placemark.getName());
         }
 
         public static class Spi extends OperatorSpi {

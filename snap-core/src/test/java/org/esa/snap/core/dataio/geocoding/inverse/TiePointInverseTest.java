@@ -182,7 +182,7 @@ public class TiePointInverseTest {
     }
 
     @Test
-    public void testGetBestPolynomial_linear_six_points() {
+    public void testGetBestPolynomial_linear_six_points_standard() {
         final int[] xIndices = new int[]{0, 1, 2};
         final double[][] data = new double[][]{
                 {-0.47030532360076904, 18.45865821838379, 6.5, 3.5},
@@ -196,7 +196,33 @@ public class TiePointInverseTest {
 
         final FXYSum bestPolynomial = TiePointInverse.getBestPolynomial(data, xIndices);
         assertNotNull(bestPolynomial);
-        assertTrue(bestPolynomial instanceof FXYSum.Quadric);
+        assertTrue(bestPolynomial instanceof FXYSum.Linear);
+    }
+
+    @Test
+    public void testGetBestPolynomial_linear_six_points_highRes() {
+        final boolean oldValue = TiePointInverse.highPrecisionInverse;
+
+        try {
+            TiePointInverse.highPrecisionInverse = true;
+
+            final int[] xIndices = new int[]{0, 1, 2};
+            final double[][] data = new double[][]{
+                    {-0.47030532360076904, 18.45865821838379, 6.5, 3.5},
+                    {-0.38233229517936707, 18.3734130859375, 9.5, 3.5},
+                    {-0.295753538608551, 18.286771774291992, 12.5, 3.5},
+                    // next line
+                    {-0.20022891461849213, 18.400646209716797, 6.5, 6.5},
+                    {-0.1122138500213623, 18.315458297729492, 9.5, 6.5},
+                    {-0.025592802092432976, 18.228870391845703, 12.5, 6.5},
+            };
+
+            final FXYSum bestPolynomial = TiePointInverse.getBestPolynomial(data, xIndices);
+            assertNotNull(bestPolynomial);
+            assertTrue(bestPolynomial instanceof FXYSum.Quadric);
+        } finally {
+            TiePointInverse.highPrecisionInverse = oldValue;
+        }
     }
 
     @Test
@@ -212,12 +238,12 @@ public class TiePointInverseTest {
         assertEquals(18.94758203294542, approximation.getCenterLon(), 1e-8);
         assertEquals(71.76979488796658, approximation.getCenterLat(), 1e-8);
         assertEquals(0.4521953022058632, approximation.getMinSquareDistance(), 1e-8);
-        assertTrue(approximation.getFX() instanceof FXYSum.Quadric);
-        assertTrue(approximation.getFY() instanceof FXYSum.Quadric);
+        assertTrue(approximation.getFX() instanceof FXYSum.Linear);
+        assertTrue(approximation.getFY() instanceof FXYSum.Linear);
     }
 
     @Test
-    public void testGetApproximations_MER_RR() {
+    public void testGetApproximations_MER_RR_standard() {
         final TiePointGrid lonGrid = new TiePointGrid("lon", 5, 5, 0.5, 0.5,
                 16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
         final TiePointGrid latGrid = new TiePointGrid("lat", 5, 5, 0.5, 0.5,
@@ -231,9 +257,38 @@ public class TiePointInverseTest {
         assertEquals(18.4977986907959, approximation.getCenterLon(), 1e-8);
         assertEquals(71.81846588134766, approximation.getCenterLat(), 1e-8);
         assertEquals(1.8236899446395034, approximation.getMinSquareDistance(), 1e-8);
-        assertTrue(approximation.getFX() instanceof FXYSum.Quadric);
+        //noinspection ConstantConditions
+        assertTrue(approximation.getFX() instanceof FXYSum);
         //noinspection ConstantConditions
         assertTrue(approximation.getFY() instanceof FXYSum);
+    }
+
+    @Test
+    public void testGetApproximations_MER_RR__highRes() {
+        final boolean oldValue = TiePointInverse.highPrecisionInverse;
+
+        try {
+            TiePointInverse.highPrecisionInverse = true;
+
+            final TiePointGrid lonGrid = new TiePointGrid("lon", 5, 5, 0.5, 0.5,
+                                                          16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
+            final TiePointGrid latGrid = new TiePointGrid("lat", 5, 5, 0.5, 0.5,
+                                                          16, 16, RasterUtils.toFloat(MERIS.MER_RR_LAT));
+
+            final Approximation[] approximations = TiePointInverse.getApproximations(lonGrid, latGrid);
+            assertNotNull(approximations);
+            assertEquals(1, approximations.length);
+
+            final Approximation approximation = approximations[0];
+            assertEquals(18.4977986907959, approximation.getCenterLon(), 1e-8);
+            assertEquals(71.81846588134766, approximation.getCenterLat(), 1e-8);
+            assertEquals(1.8236899446395034, approximation.getMinSquareDistance(), 1e-8);
+            assertTrue(approximation.getFX() instanceof FXYSum.Quadric);
+            //noinspection ConstantConditions
+            assertTrue(approximation.getFY() instanceof FXYSum);
+        } finally {
+            TiePointInverse.highPrecisionInverse = oldValue;
+        }
     }
 
     @Test
@@ -346,13 +401,13 @@ public class TiePointInverseTest {
         final GeoPos geoPos = new GeoPos(72.23247, 17.933608);
 
         PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-        assertEquals(0.50263718071056475, pixelPos.x, 1e-8);
-        assertEquals(0.5990279717018105, pixelPos.y, 1e-8);
+        assertEquals(0.5080185422612828, pixelPos.x, 1e-8);
+        assertEquals(0.7195644732153523, pixelPos.y, 1e-8);
 
         final InverseCoding clone = inverse.clone();
         pixelPos = clone.getPixelPos(geoPos, null);
-        assertEquals(0.50263718071056475, pixelPos.x, 1e-8);
-        assertEquals(0.5990279717018105, pixelPos.y, 1e-8);
+        assertEquals(0.5080185422612828, pixelPos.x, 1e-8);
+        assertEquals(0.7195644732153523, pixelPos.y, 1e-8);
     }
 
     @Test
@@ -364,39 +419,71 @@ public class TiePointInverseTest {
         final GeoPos geoPos = new GeoPos(72.23147, 17.932608);
 
         PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-        assertEquals(0.5057342815309056, pixelPos.x, 1e-8);
-        assertEquals(0.698795141887042, pixelPos.y, 1e-8);
+        assertEquals(0.5113243845520969, pixelPos.x, 1e-8);
+        assertEquals(0.8194118216661801, pixelPos.y, 1e-8);
 
         final InverseCoding clone = inverse.clone();
         inverse.dispose();
 
         pixelPos = clone.getPixelPos(geoPos, null);
-        assertEquals(0.5057342815309056, pixelPos.x, 1e-8);
-        assertEquals(0.698795141887042, pixelPos.y, 1e-8);
+        assertEquals(0.5113243845520969, pixelPos.x, 1e-8);
+        assertEquals(0.8194118216661801, pixelPos.y, 1e-8);
     }
 
     @Test
-    public void testGetPixelPos_MER_RR() {
+    public void testGetPixelPos_MER_RR_precise() {
+        final boolean oldValue = TiePointInverse.highPrecisionInverse;
+
+        try {
+            TiePointInverse.highPrecisionInverse = true;
+
+            final TiePointInverse inverse = new TiePointInverse();
+            final GeoRaster geoRaster = TestData.get_MER_RR();
+
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+            PixelPos pixelPos = inverse.getPixelPos(new GeoPos(72.23347, 17.934608), null);
+            assertEquals(0.5047090982800455, pixelPos.x, 1e-8);
+            assertEquals(0.6197171247663436, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(72.03501, 19.767054), null);
+            assertEquals(64.56166475037037, pixelPos.x, 1e-8);
+            assertEquals(0.5938550362058521, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(71.403755, 19.034266), null);
+            assertEquals(64.50322724574488, pixelPos.x, 1e-8);
+            assertEquals(64.61495115617421, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(71.59687, 17.25663), null);
+            assertEquals(0.5570270065002774, pixelPos.x, 1e-8);
+            assertEquals(64.5867943686521, pixelPos.y, 1e-8);
+        } finally {
+            TiePointInverse.highPrecisionInverse = oldValue;
+        }
+    }
+
+    @Test
+    public void testGetPixelPos_MER_RR_lowRes() {
         final TiePointInverse inverse = new TiePointInverse();
         final GeoRaster geoRaster = TestData.get_MER_RR();
 
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         PixelPos pixelPos = inverse.getPixelPos(new GeoPos(72.23347, 17.934608), null);
-        assertEquals(0.49953691719531435, pixelPos.x, 1e-8);
-        assertEquals(0.4992613374779962, pixelPos.y, 1e-8);
+        assertEquals(0.5047090982800455, pixelPos.x, 1e-8);
+        assertEquals(0.6197171247663436, pixelPos.y, 1e-8);
 
         pixelPos = inverse.getPixelPos(new GeoPos(72.03501, 19.767054), null);
-        assertEquals(64.50022001607829, pixelPos.x, 1e-8);
-        assertEquals(0.5002002253142156, pixelPos.y, 1e-8);
+        assertEquals(64.56166475037037, pixelPos.x, 1e-8);
+        assertEquals(0.5938550362058521, pixelPos.y, 1e-8);
 
         pixelPos = inverse.getPixelPos(new GeoPos(71.403755, 19.034266), null);
-        assertEquals(64.50034531684295, pixelPos.x, 1e-8);
-        assertEquals(64.50045026784427, pixelPos.y, 1e-8);
+        assertEquals(64.50322724574488, pixelPos.x, 1e-8);
+        assertEquals(64.61495115617421, pixelPos.y, 1e-8);
 
         pixelPos = inverse.getPixelPos(new GeoPos(71.59687, 17.25663), null);
-        assertEquals(0.4998781895296531, pixelPos.x, 1e-8);
-        assertEquals(64.49991367701459, pixelPos.y, 1e-8);
+        assertEquals(0.5570270065002774, pixelPos.x, 1e-8);
+        assertEquals(64.5867943686521, pixelPos.y, 1e-8);
     }
 
     @Test

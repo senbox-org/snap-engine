@@ -47,36 +47,42 @@ public class TestFTPDownloader {
             internetAvailable = false;
         }
 
-        Assume.assumeTrue("Internet connection not available, skipping BrrOpIntegrationTest", internetAvailable);
+        Assume.assumeTrue("Internet connection not available, skipping TestFTPDownloader", internetAvailable);
 
         final String server = "speedtest.tele2.net";
         final String remotePath = "";
 
-        final FtpDownloader ftp = new FtpDownloader(server);
-        final Map<String, Long> fileSizeMap = FtpDownloader.readRemoteFileList(ftp, server, remotePath);
+        try {
+            final FtpDownloader ftp = new FtpDownloader(server);
+            final Map<String, Long> fileSizeMap = FtpDownloader.readRemoteFileList(ftp, server, remotePath);
 
-        final File localFile = new File(SystemUtils.getCacheDir(), "1KB.zip");
-        final String remoteFileName = localFile.getName();
-        final Long fileSize = fileSizeMap.get(remoteFileName);
+            final File localFile = new File(SystemUtils.getCacheDir(), "1KB.zip");
+            final String remoteFileName = localFile.getName();
+            final Long fileSize = fileSizeMap.get(remoteFileName);
 
-        Exception exception = null;
-        for (int i = 0; i < 5; i++) {
-            final FtpDownloader.FTPError result;
-            try {
-                result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
-                if(result == FtpDownloader.FTPError.OK) {
-                    localFile.delete();
-                    return;
+            Exception exception = null;
+            for (int i = 0; i < 5; i++) {
+                final FtpDownloader.FTPError result;
+                try {
+                    result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
+                    if (result == FtpDownloader.FTPError.OK) {
+                        localFile.delete();
+                        return;
+                    }
+                } catch (Exception ex) {
+                    exception = ex;
                 }
-            } catch (Exception ex) {
-                exception = ex;
             }
+            String msg = "Not able to retrieve file";
+            if (exception != null) {
+                msg += " (" + exception.getMessage() + ")";
+            }
+            fail(msg);
+
+        } catch (IOException e) {
+            Assume.assumeNoException("Connection to Server could not be established, skipping TestFTPDownloader", e);
         }
-        String msg = "Not able to retrieve file";
-        if(exception != null) {
-            msg += " (" + exception.getMessage() + ")";
-        }
-        fail(msg);
+
     }
 
 }
