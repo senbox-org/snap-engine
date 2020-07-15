@@ -96,6 +96,9 @@ public final class GLCMOp extends Operator {
     @Parameter(description = "Pixel displacement", interval = "[1, 8]", defaultValue = "4", label = "Displacement")
     private int displacement = 4;
 
+    @Parameter(description = "Target product no data value", label = "No Data Value", defaultValue = "-9999.0")
+    private double noDataValue = -9999.0;
+
     @Parameter(description = "Output Contrast", defaultValue = "true", label = "Contrast")
     private Boolean outputContrast = true;
 
@@ -345,6 +348,7 @@ public final class GLCMOp extends Operator {
         targetBandNames = getTargetBandNames();
         final Band[] bands = OperatorUtils.addBands(targetProduct, targetBandNames, "");
         for (Band band : bands) {
+            band.setNoDataValue(noDataValue);
             band.setNoDataValueUsed(true);
         }
     }
