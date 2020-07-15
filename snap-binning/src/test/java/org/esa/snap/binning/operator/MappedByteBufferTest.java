@@ -80,15 +80,11 @@ public class MappedByteBufferTest {
         assertTrue(file.exists());
         assertEquals(fileSize, file.length());
 
-        System.out.println("free mem before opening: " + mem1 + " MiB");
-        System.out.println("free mem after opening:  " + mem2 + " MiB");
-        System.out.println("free mem before closing: " + mem3 + " MiB");
-        System.out.println("free mem after closing:  " + mem4 + " MiB");
-
         // If these memory checks fail, check if 1 MiB is still too fine grained
-        assertEquals(mem2, mem1);
-        assertEquals(mem3, mem1);
-        assertEquals(mem4, mem1);
+        String msgFormat = "memory should not have increased %s: %d > %d";
+        assertTrue(String.format(msgFormat, "after opening", mem2, mem1), mem1 <= mem2);
+        assertTrue(String.format(msgFormat, "before closing", mem3, mem1), mem1 <= mem3);
+        assertTrue(String.format(msgFormat, "after closing", mem4, mem1), mem1 <= mem4);
 
         // Now make sure we get the values back
         try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
