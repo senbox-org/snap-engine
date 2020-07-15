@@ -441,7 +441,8 @@ public final class GLCMOp extends Operator {
             int cnt = 0;
             for (String srcBandName : sourceBands) {
                 final Band sourceBand = sourceProduct.getBand(srcBandName);
-                srcInfoList[cnt] = new SrcInfo(numQuantLevels, sourceBand, getSourceTile(sourceBand, sourceTileRectangle));
+                srcInfoList[cnt] = new SrcInfo(
+                        numQuantLevels, sourceBand, getSourceTile(sourceBand, sourceTileRectangle), noDataValue);
 
                 final List<TileData> tileDataList = new ArrayList<>();
                 for (String targetBandName : targetBandNames) {
@@ -1018,7 +1019,7 @@ public final class GLCMOp extends Operator {
         public GLCMElem[] GLCM;
         private final int numQuantLevels;
 
-        public SrcInfo(final int numQuantLevels, final Band srcBand, final Tile srcTile) {
+        public SrcInfo(final int numQuantLevels, final Band srcBand, final Tile srcTile, final double noDataValue) {
             this.numQuantLevels = numQuantLevels;
             this.sourceTile = srcTile;
             this.srcIndex = new TileIndex(sourceTile);
