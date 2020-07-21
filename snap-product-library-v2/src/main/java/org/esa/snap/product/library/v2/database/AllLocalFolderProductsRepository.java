@@ -76,6 +76,14 @@ public class AllLocalFolderProductsRepository {
         return LocalRepositoryDatabaseLayer.saveLocalProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
     }
 
+    public boolean existsProductQuickLookImage(int productId) {
+        return LocalRepositoryDatabaseLayer.existsProductQuickLookImage(productId, this.databaseParameters.getParentFolderPath());
+    }
+
+    public void writeQuickLookImage(int productId, BufferedImage quickLookImage) throws IOException {
+        LocalRepositoryDatabaseLayer.writeQuickLookImage(productId, quickLookImage, this.databaseParameters.getParentFolderPath());
+    }
+
     public Set<Integer> deleteMissingProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {
         return LocalRepositoryDatabaseLayer.deleteMissingLocalRepositoryProducts(localRepositoryId, savedProductIds, this.databaseParameters);
     }
