@@ -16,22 +16,26 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.sun.media.jai.codec.TIFFField;
+import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.w3c.dom.CharacterData;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +44,64 @@ import java.util.StringTokenizer;
 public class Utils {
 
     public static final int PRIVATE_BEAM_TIFF_TAG_NUMBER = 65000;
+
+    /**
+     * Tests if the given file is a cloud-optimized GeoTIFF or not.
+     * @param filePath  The file path
+     */
+    public static boolean isCOGGeoTIFF(Path filePath) throws Exception {
+        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(filePath.toFile())) {
+            return isCOGGeoTIFF(imageInputStream);
+        }
+    }
+
+    /**
+     * Tests if the given image stream is a cloud-optimized GeoTIFF or not.
+     * @param stream  The image stream
+     */
+    public static boolean isCOGGeoTIFF(ImageInputStream stream) throws Exception {
+        final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
+        TIFFImageReader tiffReader = null;
+        while (imageReaders.hasNext()) {
+            final ImageReader reader = imageReaders.next();
+            if (reader instanceof TIFFImageReader) {
+                tiffReader = (TIFFImageReader) reader;
+                tiffReader.setInput(stream);
+                break;
+            }
+        }
+        if (tiffReader == null) {
+            throw new Exception("No tiff reader found!");
+        }
+        final int numImages = tiffReader.getNumImages(true);
+        int numReducedImages = 0;
+        if (numImages > 1) {
+            for (int i = 1; i < numImages; i++) {
+                final TIFFImageMetadata metadata = (TIFFImageMetadata) tiffReader.getImageMetadata(i);
+                final TiffFileInfo tiffInfo = new TiffFileInfo(metadata.getRootIFD());
+                final it.geosolutions.imageio.plugins.tiff.TIFFField subFileType = tiffInfo.getField(BaselineTIFFTagSet.TAG_SUBFILE_TYPE);
+                final it.geosolutions.imageio.plugins.tiff.TIFFField newSubFileType = tiffInfo.getField(BaselineTIFFTagSet.TAG_NEW_SUBFILE_TYPE);
+                if (newSubFileType == null && subFileType == null) {
+                    break;
+                }
+                if (newSubFileType != null && BaselineTIFFTagSet.NEW_SUBFILE_TYPE_REDUCED_RESOLUTION == newSubFileType.getAsInt(0)) {
+                    numReducedImages++;
+                }
+                if (newSubFileType == null && BaselineTIFFTagSet.SUBFILE_TYPE_REDUCED_RESOLUTION == subFileType.getAsInt(0)) {
+                    numReducedImages++;
+                }
+
+                final it.geosolutions.imageio.plugins.tiff.TIFFField imageWidth = tiffInfo.getField(BaselineTIFFTagSet.TAG_IMAGE_WIDTH);
+                final TIFFImageMetadata prevMetadata = (TIFFImageMetadata) tiffReader.getImageMetadata(i - 1);
+                final TiffFileInfo prevTiffInfo = new TiffFileInfo(prevMetadata.getRootIFD());
+                final it.geosolutions.imageio.plugins.tiff.TIFFField prevImageWidth = prevTiffInfo.getField(BaselineTIFFTagSet.TAG_IMAGE_WIDTH);
+                if (prevImageWidth.getAsInt(0) < (imageWidth.getAsInt(0) - 1) * 2) {
+                    break;
+                }
+            }
+        }
+        return numImages > 1 && numReducedImages == numImages - 1;
+    }
 
     static List<TIFFField> createGeoTIFFFields(GeoTIFFMetadata geoTIFFMetadata) {
         final List<TIFFField> list = new ArrayList<TIFFField>(6);

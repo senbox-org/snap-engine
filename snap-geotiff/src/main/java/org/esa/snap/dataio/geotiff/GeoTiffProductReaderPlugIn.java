@@ -141,18 +141,19 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                     return DecodeQualification.SUITABLE;
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             return DecodeQualification.UNABLE;
         }
         return DecodeQualification.UNABLE;
     }
 
-    private static boolean isImageReaderAvailable(ImageInputStream stream) {
+    private static boolean isImageReaderAvailable(ImageInputStream stream) throws Exception {
         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
         while (imageReaders.hasNext()) {
             final ImageReader reader = imageReaders.next();
             if (reader instanceof TIFFImageReader) {
-                return true;
+                // 2020-07-21 CC Added COG check
+                return !Utils.isCOGGeoTIFF(stream);
             }
         }
         return false;

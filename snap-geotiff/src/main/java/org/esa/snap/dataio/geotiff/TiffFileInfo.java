@@ -25,7 +25,7 @@ import org.esa.snap.dataio.geotiff.internal.GeoKeyHeader;
 
 import java.util.*;
 
-class TiffFileInfo {
+public class TiffFileInfo {
 
     private static final int TAG_GEO_KEY_DIRECTORY___SPOT = 34735;
     private static final int TAG_GEO_DOUBLE_PARAMS___SPOT = 34736;
@@ -33,7 +33,7 @@ class TiffFileInfo {
 
     private final Map<Integer, TIFFField> fieldMap;
 
-    TiffFileInfo(final TIFFDirectory dir) {
+    public TiffFileInfo(final TIFFDirectory dir) {
         Assert.notNull(dir);
         final TIFFField[] tiffFields = dir.getTIFFFields();
         fieldMap = new HashMap<>(tiffFields.length);
@@ -46,7 +46,7 @@ class TiffFileInfo {
         return fieldMap.containsKey(GeoTIFFTagSet.TAG_GEO_KEY_DIRECTORY);
     }
 
-    TIFFField getField(int tagNumber) {
+    public TIFFField getField(int tagNumber) {
         return fieldMap.get(tagNumber);
     }
 
