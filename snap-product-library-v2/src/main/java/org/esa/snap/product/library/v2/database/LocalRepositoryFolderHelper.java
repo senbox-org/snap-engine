@@ -26,6 +26,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The class contains methods to add a local folder in the local repository, scan the local repository.
+ *
  * Created by jcoravu on 4/10/2019.
  */
 public class LocalRepositoryFolderHelper {

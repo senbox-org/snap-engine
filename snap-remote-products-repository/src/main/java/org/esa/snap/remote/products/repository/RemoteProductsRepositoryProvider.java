@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The repository provider used to access the remote repository to search, download products.
+ *
  * Created by jcoravu on 26/8/2019.
  */
 public interface RemoteProductsRepositoryProvider {

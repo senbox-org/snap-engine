@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * The data about the search parameters for the local repository.
+ *
  * Created by jcoravu on 20/11/2019.
  */
 public class LocalRepositoryParameterValues {

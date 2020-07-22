@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * The parameters to connect to a H2 local database.
+ *
  * Created by jcoravu on 20/1/2020.
  */
 public class H2DatabaseParameters {

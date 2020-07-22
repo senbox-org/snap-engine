@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * The configuration data of a remote provider.
+ *
  * Created by jcoravu on 27/1/2020.
  */
 class RemoteConfigurationProvider implements ConfigurationProvider {

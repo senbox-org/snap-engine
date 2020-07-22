@@ -3,6 +3,8 @@ package org.esa.snap.remote.products.repository;
 import java.io.IOException;
 
 /**
+ * Handle HTTP exception when searching, downloading the products from a the remote repository.
+ *
  * Created by jcoravu on 27/1/2020.
  */
 public class HTTPServerException extends IOException {

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The class stores the download messages when a remote product is downloaded.
+ *
  * Created by jcoravu on 7/2/2020.
  */
 class DownloadProductStatusListener implements ProductStatusListener {

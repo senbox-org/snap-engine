@@ -4,6 +4,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 
 /**
+ * The coordinates of a polygon.
+ *
  * Created by jcoravu on 31/1/2020.
  */
 public class Polygon2D extends AbstractGeometry2D {

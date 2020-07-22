@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * The data about a query parameter to be displayed in the application for a remote repository
+ *
  * Created by jcoravu on 14/8/2019.
  */
 public class RepositoryQueryParameter {

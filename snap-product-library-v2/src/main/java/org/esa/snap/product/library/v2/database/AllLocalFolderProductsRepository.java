@@ -19,6 +19,8 @@ import java.sql.Statement;
 import java.util.*;
 
 /**
+ * The local repository provider used to access the local products.
+ *
  * Created by jcoravu on 5/9/2019.
  */
 public class AllLocalFolderProductsRepository {

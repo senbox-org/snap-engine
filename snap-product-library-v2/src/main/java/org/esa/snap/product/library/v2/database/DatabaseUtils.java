@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
+ * The class contains utility methods to read the SQL statements from the text files.
+ *
  * Created by jcoravu on 3/9/2019.
  */
 public class DatabaseUtils {

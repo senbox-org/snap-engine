@@ -7,6 +7,8 @@ import org.esa.snap.remote.products.repository.Attribute;
 import java.util.List;
 
 /**
+ * The data about a product saved in the local database.
+ *
  * Created by jcoravu on 17/9/2019.
  */
 public class SaveProductData {

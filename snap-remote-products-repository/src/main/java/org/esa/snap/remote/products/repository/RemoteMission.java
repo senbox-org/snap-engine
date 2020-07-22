@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * The data of a remote mission.
+ *
  * Created by jcoravu on 14/2/2020.
  */
 public class RemoteMission {

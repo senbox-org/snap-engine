@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The class contains methods to access the local database where are saved the products metadata.
+ *
  * Created by jcoravu on 3/9/2019.
  */
 class LocalRepositoryDatabaseLayer {

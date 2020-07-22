@@ -6,6 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The class notifies the downloading progress for a remote product.
+ *
  * Created by jcoravu on 19/8/2019.
  */
 class DownloadProductProgressListener implements ro.cs.tao.ProgressListener {
