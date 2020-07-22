@@ -65,8 +65,13 @@ import javax.media.jai.JAI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.image.DataBuffer;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -366,7 +371,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Product buildProductWithoutDimapHeader(String defaultProductName, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-                                                          throws ParserConfigurationException, SAXException, IOException {
+            throws Exception {
 
         String productName = null;
         if (tiffInfo.containsField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION)) {
@@ -382,15 +387,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
         Product product = new Product(productName, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
 
         Band[] bands = buildBands(tiffInfo, baseImage, product.getSceneRasterWidth(), product.getSceneRasterHeight());
-        for (int i = 0; i < bands.length; i++) {
-            product.addBand(bands[i]);
+        for (Band band : bands) {
+            product.addBand(band);
         }
 
         return product;
     }
 
     private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-                                     throws IOException, ParserConfigurationException, SAXException {
+            throws Exception {
 
         SampleModel sampleModel = baseImage.getSampleModel();
         int numBands = sampleModel.getNumBands();

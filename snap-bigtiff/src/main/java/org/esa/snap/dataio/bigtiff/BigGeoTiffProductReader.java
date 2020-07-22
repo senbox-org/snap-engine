@@ -41,7 +41,6 @@ import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
@@ -52,6 +51,7 @@ import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.bigtiff.internal.GeoKeyEntry;
+import org.esa.snap.dataio.geotiff.Utils;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
@@ -258,7 +258,11 @@ class BigGeoTiffProductReader extends AbstractProductReader {
     }
 
     Product readGeoTIFFProduct(final ImageInputStream stream, final File inputFile) throws IOException {
-        imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(stream);
+        try {
+            imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(stream);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
         if (imageReader == null) {
             throw new IOException("GeoTiff imageReader not found");
         }
@@ -676,13 +680,13 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         if (gdalMetadataTiffField != null) {
             final String gdalMetadataXmlString = gdalMetadataTiffField.getAsString(0);
             try {
-                final Band[] bandsFromGdalMetadata = BigGeoTiffUtils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
+                final Band[] bandsFromGdalMetadata = Utils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
                                                                                       productDataType,
                                                                                       product.getSceneRasterWidth(),
                                                                                       product.getSceneRasterHeight());
                 if (bandsFromGdalMetadata.length == numBands) {
-                    for (int i = 0; i < bandsFromGdalMetadata.length; i++) {
-                        product.addBand(bandsFromGdalMetadata[i]);
+                    for (Band bandsFromGdalMetadatum : bandsFromGdalMetadata) {
+                        product.addBand(bandsFromGdalMetadatum);
                     }
                 } else {
                     for (int i = 0; i < numBands; i++) {
