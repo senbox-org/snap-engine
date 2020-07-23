@@ -197,8 +197,8 @@ public class TiePointGrid extends RasterDataNode {
                         int discontinuity) {
         this(name, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY);
         Assert.argument(tiePoints.length == gridWidth * gridHeight, "tiePoints.length == gridWidth * gridHeight");
-        Assert.argument(discontinuity == DISCONT_NONE ||
-                        discontinuity == DISCONT_AT_180 || discontinuity == DISCONT_AT_360,
+        Assert.argument(discontinuity == DISCONT_NONE || discontinuity == DISCONT_AUTO ||
+                                discontinuity == DISCONT_AT_180 || discontinuity == DISCONT_AT_360,
                         "discontinuity");
         this.discontinuity = discontinuity;
         setData(ProductData.createInstance(tiePoints));
