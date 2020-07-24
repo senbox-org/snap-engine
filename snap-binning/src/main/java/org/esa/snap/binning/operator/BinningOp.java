@@ -38,8 +38,8 @@ import org.esa.snap.binning.operator.metadata.MetadataAggregatorFactory;
 import org.esa.snap.binning.support.SpatialDataPeriod;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -737,7 +737,7 @@ public class BinningOp extends Operator {
             subsetOp.setSourceProduct(sourceProduct);
 
             final Rectangle subsetRectangle = SubsetOp.computePixelRegion(sourceProduct, region, 0);
-            if (sourceProduct.getSceneGeoCoding() instanceof PixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
+            if (sourceProduct.getSceneGeoCoding() instanceof BasicPixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
                 // workaround for SNAP-1264
                 // PixelGeoCodings can't work on such small rasters
                 // increase rectangle size by 1 pixel to each side, making sure not to extend source product boundaries
