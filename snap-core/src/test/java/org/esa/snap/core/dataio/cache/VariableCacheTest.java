@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.awt.Dimension;
 
+import static org.esa.snap.core.dataio.cache.VariableCache.getStreamOutputPos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -360,5 +361,18 @@ public class VariableCacheTest {
             data[i] = i;
         }
         return ProductData.createInstance(data);
+    }
+
+
+    @Test
+    public void testGetStreamOutputPos() {
+        assertEquals(0, getStreamOutputPos(new CacheBlock(0, 200, 10, ProductData.TYPE_UINT32, Double.NaN)));
+        assertEquals(200, getStreamOutputPos(new CacheBlock(1, 200, 10, ProductData.TYPE_UINT32, Double.NaN)));
+        assertEquals(1000, getStreamOutputPos(new CacheBlock(5, 200, 10, ProductData.TYPE_UINT32, Double.NaN)));
+
+        assertEquals(36000000, getStreamOutputPos(new CacheBlock(12000, 3000, 10, ProductData.TYPE_UINT32, Double.NaN)));
+        assertEquals(5688609412L, getStreamOutputPos(new CacheBlock(53558, 106214, 10, ProductData.TYPE_UINT32, Double.NaN)));
+
+
     }
 }
