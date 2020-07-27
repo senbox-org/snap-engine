@@ -88,10 +88,15 @@ public class VariableCache {
     private void writeCacheBlock(ImageOutputStream outputStream, int index) throws IOException {
         final CacheBlock cacheBlock = cacheBlocks[index];
         final ProductData bufferData = cacheBlock.getBufferData();
-        final long outputPos = ((long) cacheBlock.getYOffset()) * cacheBlock.getRegion().width;
+        final long outputPos = getStreamOutputPos(cacheBlock);
         bufferData.writeTo(0, bufferData.getNumElems(), outputStream, outputPos);
 
         cacheBlock.dispose();
         cacheBlocks[index] = null;
+    }
+
+    // package public for testing purpose only
+    static long getStreamOutputPos(CacheBlock cacheBlock) {
+        return ((long) cacheBlock.getYOffset()) * cacheBlock.getRegion().width;
     }
 }
