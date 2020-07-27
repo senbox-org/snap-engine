@@ -88,7 +88,7 @@ public class VariableCache {
     private void writeCacheBlock(ImageOutputStream outputStream, int index) throws IOException {
         final CacheBlock cacheBlock = cacheBlocks[index];
         final ProductData bufferData = cacheBlock.getBufferData();
-        final int outputPos = cacheBlock.getYOffset() * cacheBlock.getRegion().width;
+        final long outputPos = ((long) cacheBlock.getYOffset()) * cacheBlock.getRegion().width;
         bufferData.writeTo(0, bufferData.getNumElems(), outputStream, outputPos);
 
         cacheBlock.dispose();
