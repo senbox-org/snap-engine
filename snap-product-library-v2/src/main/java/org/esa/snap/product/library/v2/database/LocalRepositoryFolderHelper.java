@@ -54,18 +54,6 @@ public class LocalRepositoryFolderHelper {
     protected void finishSavingProduct(SaveProductData saveProductData) {
     }
 
-    protected void invalidProduct(Path path) throws IOException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "The path '"+path.toString()+"' does not represent a valid product.");
-        }
-    }
-
-    protected void missingProductGeoCoding(Path path) throws IOException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "The local product from the path '"+path.toString()+"' does not contain the geo-coding associated with the scene raster.");
-        }
-    }
-
     public List<SaveProductData> addRepository(Path localRepositoryFolderPath, ThreadStatus threadStatus, ProgressMonitor progressMonitor) throws Exception {
         List<SaveProductData> savedProducts = null;
         if (Files.exists(localRepositoryFolderPath)) {
@@ -163,6 +151,10 @@ public class LocalRepositoryFolderHelper {
             foldersList.addAll(subfoldersList);
         }
 
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Scan " + foldersList.size()+" folders to read local products.");
+        }
+
         final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(false);
         final List<File> fileList = new ArrayList<>(foldersList.size());
         for (File file : foldersList) {
@@ -171,6 +163,10 @@ public class LocalRepositoryFolderHelper {
                 fileList.addAll(Arrays.asList(files));
             }
             progressMonitor.setTaskName("Collecting " + fileList.size() + " files...");
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Process " + fileList.size()+" files to read local products.");
         }
 
         List<LocalProductMetadata> existingLocalRepositoryProducts = this.allLocalFolderProductsRepository.loadRepositoryProductsMetadata(localRepositoryFolderPath);
@@ -209,6 +205,7 @@ public class LocalRepositoryFolderHelper {
                         // read and save the product into the database
                         Product product = readProduct(productPath);
                         if (product != null) {
+                            // the product has been read from the local folder
                             boolean canDisposeProduct = true;
                             try {
                                 ThreadStatus.checkCancelled(threadStatus);
@@ -251,9 +248,17 @@ public class LocalRepositoryFolderHelper {
             }
             progressMonitor.worked(1);
         }
-        if (productsToGenerateQuickLookImage.size() > 0) {
-            generateQuickLookImages(productsToGenerateQuickLookImage, threadStatus, progressMonitor);
+
+        if (this.generateQuickLookImages) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Generate the quick look images for " + productsToGenerateQuickLookImage.size()+" local products.");
+            }
+
+            if (productsToGenerateQuickLookImage.size() > 0) {
+                generateQuickLookImages(productsToGenerateQuickLookImage, threadStatus, progressMonitor);
+            }
         }
+
         return savedProducts;
     }
 
@@ -265,17 +270,21 @@ public class LocalRepositoryFolderHelper {
         Product product = ProductIO.readProduct(productPath.toFile());
         if (product == null) {
             // the local product has not been read
-            invalidProduct(productPath);
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "The path '"+productPath.toString()+"' does not represent a valid product.");
+            }
             return null; // no product to return
         } else if (product.getSceneGeoCoding() == null) {
             // the local product has not geo coding
-            try {
-                product.dispose();
-            } finally {
-                missingProductGeoCoding(productPath);
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "The local product from the path '"+productPath.toString()+"' does not contain the geo-coding associated with the scene raster.");
             }
+            product.dispose();
             return null; // no product to return
         } else {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "The path '"+productPath.toString()+"' is a valid product with geo coding.");
+            }
             return product; // the local product has geo coding
         }
     }
