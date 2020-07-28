@@ -167,7 +167,7 @@ public class DimapProductReader extends AbstractProductReader {
                 for (int i = 0; i < geoCodings.length; i++) {
                     final Band band = product.getBandAt(i);
                     if (product.getSceneRasterWidth() == band.getRasterWidth()
-                        && product.getSceneRasterHeight() == band.getRasterHeight()) {
+                            && product.getSceneRasterHeight() == band.getRasterHeight()) {
                         product.setSceneGeoCoding(geoCodings[i]);
                     }
                     band.setGeoCoding(geoCodings[i]);
@@ -254,7 +254,7 @@ public class DimapProductReader extends AbstractProductReader {
         return dom;
     }
 
-    private void initInput() throws IOException {
+    private void initInput() {
         if (getInput() instanceof String) {
             inputFile = new File((String) getInput());
         } else if (getInput() instanceof File) {
@@ -306,13 +306,12 @@ public class DimapProductReader extends AbstractProductReader {
 
         final File dataFile = bandDataFiles.get(destBand);
 
-        int destPos = 0;
 
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
         // For each scan in the data source
         try {
-//            synchronized (inputStream) {
             try (ImageInputStream inputStream = new FileImageInputStream(dataFile)) {
+                int destPos = 0;
                 final int type = destBuffer.getType();
                 final boolean longType = ProductData.TYPE_INT64 == type;
                 final ProductData line = ProductData.createInstance(type, sourceWidth);
@@ -321,31 +320,38 @@ public class DimapProductReader extends AbstractProductReader {
                     if (pm.isCanceled()) {
                         break;
                     }
-                    final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
+                    final long sourcePosY = sourceY * destBand.getRasterWidth();
                     long inputPos = sourcePosY + sourceOffsetX;
-                    if (sourceStepX == 1) {
-                        destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
-                        destPos += destWidth;
-                    } else {
-                        line.readFrom(0, sourceWidth, inputStream, inputPos);
-                        for (int lineX = 0; lineX < sourceWidth; lineX += sourceStepX) {
-                            if (longType) {
-                                destBuffer.setElemLongAt(destPos, line.getElemLongAt(lineX));
-                            } else {
-                                destBuffer.setElemDoubleAt(destPos, line.getElemDoubleAt(lineX));
-                            }
-                            destPos++;
-                        }
-                    }
+                    destPos = readLineRasterDataImpl(sourceStepX, sourceWidth, destPos, destWidth, destBuffer,
+                                                     inputStream, longType, line, inputPos);
                 }
                 pm.worked(1);
             } catch (IOException e) {
                 throw new IOException("DimapProductReader: Unable to read file '" + dataFile + "' referenced by '"
-                                      + destBand.getName() + "'.", e);
+                                              + destBand.getName() + "'.", e);
             }
         } finally {
             pm.done();
         }
+    }
+
+    private static int readLineRasterDataImpl(int sourceStepX, int sourceWidth, int destPos, int destWidth, ProductData destBuffer,
+                                              ImageInputStream inputStream, boolean longType, ProductData line, long inputPos) throws IOException {
+        if (sourceStepX == 1) {
+            destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
+            destPos += destWidth;
+        } else {
+            line.readFrom(0, sourceWidth, inputStream, inputPos);
+            for (int lineX = 0; lineX < sourceWidth; lineX += sourceStepX) {
+                if (longType) {
+                    destBuffer.setElemLongAt(destPos, line.getElemLongAt(lineX));
+                } else {
+                    destBuffer.setElemDoubleAt(destPos, line.getElemDoubleAt(lineX));
+                }
+                destPos++;
+            }
+        }
+        return destPos;
     }
 
     @Override
