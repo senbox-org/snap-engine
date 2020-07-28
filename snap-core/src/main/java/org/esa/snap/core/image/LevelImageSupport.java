@@ -17,6 +17,8 @@
 package org.esa.snap.core.image;
 
 
+import java.awt.Rectangle;
+
 /**
  * Supports the development of images, which are returned by implementations of the
  * {@link com.bc.ceres.glevel.MultiLevelSource MultiLevelSource} interface.
@@ -73,6 +75,14 @@ public class LevelImageSupport {
 
     public final int getSourceCoord(double destCoord, int min, int max) {
         return double2int(getScale() * destCoord, min, max);
+    }
+
+    public Rectangle getSourceRectangle(Rectangle destRect) {
+        final int srcX = getSourceX(destRect.x);
+        final int srcY = getSourceY(destRect.y);
+        final int sourceWidth = Math.min(getSourceWidth() - srcX, getSourceWidth(destRect.width));
+        final int sourceHeight = Math.min(getSourceHeight() - srcY, getSourceHeight(destRect.height));
+        return new Rectangle(srcX, srcY, sourceWidth, sourceHeight);
     }
 
     private static int double2int(double v, int min, int max) {

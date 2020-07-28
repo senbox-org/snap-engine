@@ -630,13 +630,10 @@ public class ProductIO {
                                                Rectangle destRect,
                                                ProductData destBuffer) throws IOException {
 
-        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
-        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
-        final int srcX = lvlSupport.getSourceX(destRect.x);
-        final int srcY = lvlSupport.getSourceY(destRect.y);
+        Rectangle srcRect = lvlSupport.getSourceRectangle(destRect);
         final int scale = (int) lvlSupport.getScale();
 
-        reader.readBandRasterDataImpl(srcX, srcY, sourceWidth, sourceHeight, scale, scale, destBand,
+        reader.readBandRasterDataImpl(srcRect.x, srcRect.y, srcRect.width, srcRect.height, scale, scale, destBand,
                                       destRect.x, destRect.y, destRect.width, destRect.height, destBuffer, ProgressMonitor.NULL);
     }
 
