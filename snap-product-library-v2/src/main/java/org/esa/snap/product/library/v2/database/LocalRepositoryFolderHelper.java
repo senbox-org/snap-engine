@@ -141,18 +141,21 @@ public class LocalRepositoryFolderHelper {
     private List<SaveProductData> scanFolderProducts(Path localRepositoryFolderPath, ThreadStatus threadStatus, ProgressMonitor progressMonitor)
                                                      throws Exception {
 
+        long startTime = System.currentTimeMillis();
+
         List<SaveProductData> savedProducts = new ArrayList<>();
 
         final List<File> foldersList = new ArrayList<>(20);
         foldersList.add(localRepositoryFolderPath.toFile());
 
         if (this.scanRecursively) {
-            List<File> subfoldersList = collectAllSubfolders(localRepositoryFolderPath.toFile(), 0, progressMonitor);
+            ProductFunctions.DirectoryFileFilter folderFilter = new ProductFunctions.DirectoryFileFilter();
+            List<File> subfoldersList = collectAllSubfolders(localRepositoryFolderPath.toFile(), folderFilter, 0, progressMonitor);
             foldersList.addAll(subfoldersList);
         }
 
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Scan " + foldersList.size()+" folders to read local products.");
+            logger.log(Level.FINE, "Scan " + foldersList.size()+" folders to read the local products.");
         }
 
         final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(false);
@@ -166,7 +169,7 @@ public class LocalRepositoryFolderHelper {
         }
 
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Process " + fileList.size()+" files to read local products.");
+            logger.log(Level.FINE, "Process " + fileList.size()+" files to read the local products.");
         }
 
         List<LocalProductMetadata> existingLocalRepositoryProducts = this.allLocalFolderProductsRepository.loadRepositoryProductsMetadata(localRepositoryFolderPath);
@@ -218,6 +221,8 @@ public class LocalRepositoryFolderHelper {
                                 savedProducts.add(saveProductData);
                                 finishSavingProduct(saveProductData);
 
+                                ThreadStatus.checkCancelled(threadStatus);
+
                                 if (this.generateQuickLookImages) {
                                     productsToGenerateQuickLookImage.put(saveProductData.getProductId(), product);
                                     canDisposeProduct = false;
@@ -249,13 +254,49 @@ public class LocalRepositoryFolderHelper {
             progressMonitor.worked(1);
         }
 
+        if (logger.isLoggable(Level.FINE)) {
+            double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0d;
+            StringBuilder message = new StringBuilder();
+            message.append("Finish reading the local products: local repository folder :")
+                    .append(localRepositoryFolderPath.toString())
+                    .append(", process folder count : ")
+                    .append(foldersList.size())
+                    .append(", process file count : ")
+                    .append(fileList.size())
+                    .append(", error file count: ")
+                    .append(this.errorFiles.size())
+                    .append(", new product count : ")
+                    .append(newProductCount)
+                    .append(", quick look image count to generate: ")
+                    .append(productsToGenerateQuickLookImage.size())
+                    .append(", elapsed time: ")
+                    .append(elapsedSeconds)
+                    .append(" seconds.");
+            logger.log(Level.FINE, message.toString());
+        }
+
         if (this.generateQuickLookImages) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Generate the quick look images for " + productsToGenerateQuickLookImage.size()+" local products.");
             }
 
             if (productsToGenerateQuickLookImage.size() > 0) {
+                long quickLookImagesStartTime = System.currentTimeMillis();
+
                 generateQuickLookImages(productsToGenerateQuickLookImage, threadStatus, progressMonitor);
+
+                if (logger.isLoggable(Level.FINE)) {
+                    double elapsedSeconds = (System.currentTimeMillis() - quickLookImagesStartTime) / 1000.0d;
+                    StringBuilder message = new StringBuilder();
+                    message.append("Finish generating the quick look images: local repository folder :")
+                            .append(localRepositoryFolderPath.toString())
+                            .append(", quick look image count: ")
+                            .append(productsToGenerateQuickLookImage.size())
+                            .append(", elapsed time: ")
+                            .append(elapsedSeconds)
+                            .append(" seconds.");
+                    logger.log(Level.FINE, message.toString());
+                }
             }
         }
 
@@ -335,18 +376,18 @@ public class LocalRepositoryFolderHelper {
         executor.complete();
     }
 
-    private static List<File> collectAllSubfolders(final File dir, int count, final ProgressMonitor pm) {
+    private static List<File> collectAllSubfolders(final File dir, ProductFunctions.DirectoryFileFilter folderFilter, int count, final ProgressMonitor pm) {
         final List<File> dirList = new ArrayList<>(20);
-        final ProductFunctions.DirectoryFileFilter dirFilter = new ProductFunctions.DirectoryFileFilter();
 
-        final File[] subDirs = dir.listFiles(dirFilter);
-        if (subDirs != null) {
+        final File[] subDirs = dir.listFiles(folderFilter);
+        if (subDirs != null && subDirs.length > 0) {
             count += subDirs.length;
             pm.setTaskName("Collecting " + count + " folders...");
 
             for (final File subDir : subDirs) {
                 dirList.add(subDir);
-                List<File> dirs = collectAllSubfolders(subDir, count, pm);
+
+                List<File> dirs = collectAllSubfolders(subDir, folderFilter, count, pm);
                 dirList.addAll(dirs);
             }
         }
