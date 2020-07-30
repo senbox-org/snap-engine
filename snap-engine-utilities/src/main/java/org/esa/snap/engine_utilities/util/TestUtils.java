@@ -31,10 +31,13 @@ import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -60,9 +63,23 @@ public class TestUtils {
 
         try {
             SystemUtils.init3rdPartyLibs(GPT.class);
+            initAuxData();
             testEnvironmentInitialized = true;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void initAuxData() {
+        Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
+        }
+        if(propFile.toFile().exists()) {
+            Config.instance(Settings.SNAP_AUXDATA).load(propFile);
         }
     }
 
