@@ -21,6 +21,7 @@ package org.esa.snap.core.util;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -100,8 +101,22 @@ public class ImageUtils {
         int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
         int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
 
-        int levelTileWidth = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
-        int levelTileHeight = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
+        int levelTileWidth;// = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
+        int levelTileHeight;// = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
+        if (defaultJAIReadTileSize == null) {
+            levelTileWidth = JAIUtils.computePreferredTileSize(levelImageWidth, 1);
+            levelTileHeight = JAIUtils.computePreferredTileSize(levelImageHeight, 1);
+        } else {
+            // do not compute the tile size using the level
+            levelTileWidth = defaultJAIReadTileSize.width;
+            levelTileHeight = defaultJAIReadTileSize.height;
+        }
+        if (levelTileWidth > topLeftTileWidth) {
+            levelTileWidth = topLeftTileWidth;
+        }
+        if (levelTileHeight > topLeftTileHeight) {
+            levelTileHeight = topLeftTileHeight;
+        }
 
         return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
     }
@@ -127,11 +142,19 @@ public class ImageUtils {
         int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
         int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
 
-        int levelTileWidth = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
+        int levelTileWidth;// = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
+        int levelTileHeight;// = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
+        if (defaultJAIReadTileSize == null) {
+            levelTileWidth = JAIUtils.computePreferredTileSize(levelImageWidth, 1);
+            levelTileHeight = JAIUtils.computePreferredTileSize(levelImageHeight, 1);
+        } else {
+            // do not compute the tile size using the level
+            levelTileWidth = defaultJAIReadTileSize.width;
+            levelTileHeight = defaultJAIReadTileSize.height;
+        }
         if (levelTileWidth > levelImageWidth) {
             levelTileWidth = levelImageWidth;
         }
-        int levelTileHeight = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
         if (levelTileHeight > levelImageHeight) {
             levelTileHeight = levelImageHeight;
         }
