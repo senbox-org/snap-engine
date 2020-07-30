@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * The data about an attribute of a downloaded product.
+ *
  * Created by jcoravu on 3/9/2019.
  */
 public class Attribute {

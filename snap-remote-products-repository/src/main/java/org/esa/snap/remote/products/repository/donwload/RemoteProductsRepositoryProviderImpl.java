@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The implementation class of a remote repository provider.
+ *
  * Created by jcoravu on 28/8/2019.
  */
 class RemoteProductsRepositoryProviderImpl implements RemoteProductsRepositoryProvider {

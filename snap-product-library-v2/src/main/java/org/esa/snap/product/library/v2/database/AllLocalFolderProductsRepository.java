@@ -19,6 +19,8 @@ import java.sql.Statement;
 import java.util.*;
 
 /**
+ * The local repository provider used to access the local products.
+ *
  * Created by jcoravu on 5/9/2019.
  */
 public class AllLocalFolderProductsRepository {
@@ -74,6 +76,14 @@ public class AllLocalFolderProductsRepository {
                                             throws IOException, SQLException {
 
         return LocalRepositoryDatabaseLayer.saveLocalProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
+    }
+
+    public boolean existsProductQuickLookImage(int productId) {
+        return LocalRepositoryDatabaseLayer.existsProductQuickLookImage(productId, this.databaseParameters.getParentFolderPath());
+    }
+
+    public void writeQuickLookImage(int productId, BufferedImage quickLookImage) throws IOException {
+        LocalRepositoryDatabaseLayer.writeQuickLookImage(productId, quickLookImage, this.databaseParameters.getParentFolderPath());
     }
 
     public Set<Integer> deleteMissingProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {

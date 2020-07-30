@@ -64,6 +64,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The class represents a singleton and it is used to access the remote repositories to search the product list, download products.
+ *
  * Created by jcoravu on 21/11/2019.
  */
 public class RemoteRepositoriesManager {

@@ -3,6 +3,8 @@ package org.esa.snap.product.library.v2.database;
 import java.util.Date;
 
 /**
+ * The data about a local product.
+ *
  * Created by jcoravu on 9/10/2019.
  */
 public class LocalProductMetadata {

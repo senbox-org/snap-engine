@@ -10,6 +10,8 @@ import java.sql.*;
 import java.util.*;
 
 /**
+ * The class contains utility methods to open a connection on a database, upgrade the database structure.
+ *
  * Created by jcoravu on 10/9/2019.
  */
 public class H2DatabaseAccessor {

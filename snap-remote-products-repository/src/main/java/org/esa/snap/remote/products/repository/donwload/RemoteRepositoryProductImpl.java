@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * The implementation class for a remote repository product.
+ *
  * Created by jcoravu on 28/8/2019.
  */
 public class RemoteRepositoryProductImpl implements RepositoryProduct {

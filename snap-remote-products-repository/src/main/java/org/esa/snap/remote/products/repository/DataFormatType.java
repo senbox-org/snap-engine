@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * The type of the data format for a downloaded product.
+ *
  * Created by jcoravu on 9/9/2019.
  */
 public enum DataFormatType {

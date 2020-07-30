@@ -1,6 +1,8 @@
 package org.esa.snap.product.library.v2.database.model;
 
 /**
+ * The data about a remote repository saved in the local database.
+ *
  * Created by jcoravu on 16/9/2019.
  */
 public class RemoteRepository {

@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The class contains methods to access the local database where are saved the products metadata.
+ *
  * Created by jcoravu on 3/9/2019.
  */
 class LocalRepositoryDatabaseLayer {
@@ -867,13 +869,19 @@ class LocalRepositoryDatabaseLayer {
         return new SaveProductData(productId, remoteMission, localRepositoryFolder, localProductAttributes);
     }
 
+    public static boolean existsProductQuickLookImage(int productId, Path databaseParentFolder) {
+        Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+        Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+        return Files.exists(quickLookImageFile);
+    }
+
     private static void deleteQuickLookImage(int productId, Path databaseParentFolder) throws IOException {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
         Files.deleteIfExists(quickLookImageFile);
     }
 
-    private static void writeQuickLookImage(int productId, BufferedImage quickLookImage, Path databaseParentFolder) throws IOException {
+    public static void writeQuickLookImage(int productId, BufferedImage quickLookImage, Path databaseParentFolder) throws IOException {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         FileIOUtils.ensureExists(quickLookImagesFolder);
         Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");

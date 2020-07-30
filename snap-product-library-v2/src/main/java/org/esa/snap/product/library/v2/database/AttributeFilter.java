@@ -3,6 +3,8 @@ package org.esa.snap.product.library.v2.database;
 import org.esa.snap.remote.products.repository.Attribute;
 
 /**
+ * The data about an attribute.
+ *
  * Created by jcoravu on 24/9/2019.
  */
 public class AttributeFilter {

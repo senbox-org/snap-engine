@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * The implementation class for a local repository product.
+ *
  * Created by jcoravu on 5/9/2019.
  */
 public class LocalRepositoryProduct implements RepositoryProduct {

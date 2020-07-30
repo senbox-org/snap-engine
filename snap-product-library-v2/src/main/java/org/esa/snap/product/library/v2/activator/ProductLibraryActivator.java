@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The activator class used to initialize the H2 local database of the Product Library Tool.
+ *
  * Created by jcoravu on 3/9/2019.
  */
 public class ProductLibraryActivator implements Activator {
