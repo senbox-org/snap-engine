@@ -17,14 +17,17 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
     private final GeoTiffRasterRegion geoTiffImageReader;
     private final GeoTiffBandSource geoTiffBandSource;
+    private final boolean synchronizeReadRegion;
 
     public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
-                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport, Dimension defaultJAIReadTileSize) {
+                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport,
+                              Dimension defaultJAIReadTileSize, boolean synchronizeReadRegion) {
 
         super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, defaultJAIReadTileSize);
 
         this.geoTiffImageReader = geoTiffImageReader;
         this.geoTiffBandSource = geoTiffBandSource;
+        this.synchronizeReadRegion = synchronizeReadRegion;
     }
 
     @Override
@@ -46,7 +49,11 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
         int sourceStepY = 1;
         int sourceOffsetX = sourceStepX * destOffsetX;
         int sourceOffsetY = sourceStepY * destOffsetY;
-        synchronized (this.geoTiffImageReader) {
+        if (this.synchronizeReadRegion) {
+            synchronized (this.geoTiffImageReader) {
+                return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+            }
+        } else {
             return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
         }
     }

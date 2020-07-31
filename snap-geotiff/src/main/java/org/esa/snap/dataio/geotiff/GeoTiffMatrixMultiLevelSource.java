@@ -9,10 +9,8 @@ import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.RenderedImage;
-import java.io.IOException;
 
 /**
  * Created by jcoravu on 7/1/2020.
@@ -38,7 +36,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, GeoTiffMatrixCell geoTiffMatrixCell) {
 
         return new GeoTiffTileOpImage(geoTiffMatrixCell, this, geoTiffMatrixCell.getDataBufferType(), tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize);
+                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize, false);
     }
 
     @Override
@@ -61,24 +59,6 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
             return super.getMosaicOpBackgroundValues();
         }
         return new double[] { this.noDataValue.doubleValue() };
-    }
-
-    @Override
-    public synchronized void reset() {
-        super.reset();
-
-        for (int rowIndex = 0; rowIndex < this.mosaicMatrix.getRowCount(); rowIndex++) {
-            for (int columnIndex = 0; columnIndex < this.mosaicMatrix.getColumnCount(); columnIndex++) {
-                GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell)this.mosaicMatrix.getCellAt(rowIndex, columnIndex);
-                synchronized (geoTiffMatrixCell) {
-                    try {
-                        geoTiffMatrixCell.close();
-                    } catch (IOException e) {
-                        // do nothing
-                    }
-                }
-            }
-        }
     }
 
     @Override

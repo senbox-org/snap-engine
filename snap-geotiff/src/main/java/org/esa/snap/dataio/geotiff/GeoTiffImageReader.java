@@ -132,19 +132,14 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         int subsamplingYOffset = sourceOffsetY % sourceStepY;
         this.readParam.setSourceSubsampling(sourceStepX, sourceStepY, subsamplingXOffset, subsamplingYOffset);
         RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(FIRST_IMAGE, this.readParam);
-        try {
-            this.rectangle.setBounds(destOffsetX, destOffsetY, destWidth, destHeight);
-            if (isGlobalShifted180) {
-                if (this.swappedSubsampledImage == null) {
-                    this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
-                }
-                return this.swappedSubsampledImage.getData(this.rectangle);
-            } else {
-                return subsampledImage.getData(this.rectangle);
+        this.rectangle.setBounds(destOffsetX, destOffsetY, destWidth, destHeight);
+        if (isGlobalShifted180) {
+            if (this.swappedSubsampledImage == null) {
+                this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
             }
-        } finally {
-            WeakReference<RenderedImage> referenceImage = new WeakReference<>(subsampledImage);
-            referenceImage.clear();
+            return this.swappedSubsampledImage.getData(this.rectangle);
+        } else {
+            return subsampledImage.getData(this.rectangle);
         }
     }
 
