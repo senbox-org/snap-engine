@@ -17,9 +17,9 @@ import java.awt.image.*;
  */
 public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
 
-    private final ImageReadBoundsSupport imageBoundsSupport;
-    private final int levelTileOffsetFromReadBoundsX;
-    private final int levelTileOffsetFromReadBoundsY;
+    protected final ImageReadBoundsSupport imageBoundsSupport;
+    protected final int levelTileOffsetFromReadBoundsX;
+    protected final int levelTileOffsetFromReadBoundsY;
 
     protected AbstractSubsetTileOpImage(int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
                                         ImageReadBoundsSupport imageBoundsSupport, Dimension defaultJAIReadTileSize) {
@@ -117,15 +117,15 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
         }
     }
 
-    private int computeSourceX(double x) {
+    protected final int computeSourceX(double x) {
         return this.imageBoundsSupport.getSourceCoord(x, 0, this.imageBoundsSupport.getSourceWidth()-1);
     }
 
-    private int computeSourceY(double y) {
+    protected final int computeSourceY(double y) {
         return this.imageBoundsSupport.getSourceCoord(y, 0, this.imageBoundsSupport.getSourceHeight()-1);
     }
 
-    private static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {
+    protected final static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {
         if ((coordinateToCheck < minimumCoordinate) || (coordinateToCheck > (minimumCoordinate + size))) {
             throw new IllegalStateException("The coordinate " + coordinateToCheck + " is out of bounds. The minimum coordinate is " + minimumCoordinate+ " and the size is " + size + ".");
         }
