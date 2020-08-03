@@ -10,13 +10,15 @@ import java.nio.file.Path;
 /**
  * Created by jcoravu on 7/1/2020.
  */
-public class GeoTiffMatrixCell implements MosaicMatrix.MatrixCell, GeoTiffRasterRegion {
+public class GeoTiffMatrixCell implements MosaicMatrix.MatrixCell, GeoTiffRasterRegion, Closeable {
 
     private final int cellWidth;
     private final int cellHeight;
     private final int dataBufferType;
-    private final Path imageParentPath;
-    private final String imageRelativeFilePath;
+
+    private Path imageParentPath;
+    private String imageRelativeFilePath;
+    private GeoTiffImageReader geoTiffImageReader;
 
     public GeoTiffMatrixCell(int cellWidth, int cellHeight, int dataBufferType, Path imageParentPath, String imageRelativeFilePath) {
         if (imageParentPath == null) {
@@ -26,7 +28,7 @@ public class GeoTiffMatrixCell implements MosaicMatrix.MatrixCell, GeoTiffRaster
         this.cellHeight = cellHeight;
         this.dataBufferType = dataBufferType;
         this.imageParentPath = imageParentPath;
-        this.imageRelativeFilePath = imageRelativeFilePath; // the relative path may be null
+        this.imageRelativeFilePath = imageRelativeFilePath;
     }
 
     @Override
@@ -48,8 +50,17 @@ public class GeoTiffMatrixCell implements MosaicMatrix.MatrixCell, GeoTiffRaster
                            int destOffsetX, int destOffsetY, int destWidth, int destHeight)
                            throws Exception {
 
-        try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(this.imageParentPath, this.imageRelativeFilePath)) {
-            return geoTiffImageReader.readRect(isGlobalShifted180, sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+        if (this.geoTiffImageReader == null) {
+            this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(this.imageParentPath, this.imageRelativeFilePath);
+        }
+        return this.geoTiffImageReader.readRect(isGlobalShifted180, sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.geoTiffImageReader != null) {
+            this.geoTiffImageReader.close();
+            this.geoTiffImageReader = null;
         }
     }
 }

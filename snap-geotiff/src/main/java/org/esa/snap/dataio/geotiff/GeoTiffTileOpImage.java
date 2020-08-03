@@ -2,13 +2,12 @@ package org.esa.snap.dataio.geotiff;
 
 import org.esa.snap.core.image.AbstractSubsetTileOpImage;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
+import org.esa.snap.core.util.ImageUtils;
 
-import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.lang.ref.WeakReference;
 
 /**
  * Created by jcoravu on 22/11/2019.
@@ -17,44 +16,123 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
     private final GeoTiffRasterRegion geoTiffImageReader;
     private final GeoTiffBandSource geoTiffBandSource;
-    private final boolean synchronizeReadRegion;
+    private final Dimension defaultJAIReadTileSize;
 
     public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
-                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport,
-                              Dimension defaultJAIReadTileSize, boolean synchronizeReadRegion) {
+                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport, Dimension defaultJAIReadTileSize) {
 
         super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, defaultJAIReadTileSize);
 
         this.geoTiffImageReader = geoTiffImageReader;
         this.geoTiffBandSource = geoTiffBandSource;
-        this.synchronizeReadRegion = synchronizeReadRegion;
+        this.defaultJAIReadTileSize = defaultJAIReadTileSize;
     }
 
     @Override
     protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
         Rectangle normalBoundsIntersection = computeIntersectionOnNormalBounds(levelDestinationRectangle);
         if (!normalBoundsIntersection.isEmpty()) {
-            Raster normalRasterData;
-            try {
-                normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
-            } catch (Exception ex) {
-                throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
+            if (getLevel() == 0) {
+                Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
+                writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
+            } else {
+                String propertyValue = System.getProperty("read.whole.specified.area");
+                if (Boolean.parseBoolean(propertyValue)) {
+                    Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
+                    writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
+                } else {
+                    readHigherLevelData(normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle);
+                }
             }
-            writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
         }
     }
 
-    private Raster readRasterData(int destOffsetX, int destOffsetY, int destWidth, int destHeight) throws Exception {
-        int sourceStepX = 1;
-        int sourceStepY = 1;
-        int sourceOffsetX = sourceStepX * destOffsetX;
-        int sourceOffsetY = sourceStepY * destOffsetY;
-        if (this.synchronizeReadRegion) {
-            synchronized (this.geoTiffImageReader) {
-                return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+    private void readHigherLevelData(Rectangle normalBoundsIntersection, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
+        int defaultTileWidthToRead = computeTileSizeToRead(getTileWidth(), this.defaultJAIReadTileSize.width, normalBoundsIntersection.width);
+        int defaultTileHeightToRead = computeTileSizeToRead(getTileHeight(), this.defaultJAIReadTileSize.height, normalBoundsIntersection.height);
+
+        int columnTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.width, defaultTileWidthToRead);
+        int rowTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.height, defaultTileHeightToRead);
+
+        int bandIndex = this.geoTiffBandSource.getBandIndex();
+        int levelOffsetY = this.levelTileOffsetFromReadBoundsY + levelDestinationRectangle.y;
+        int levelOffsetX = this.levelTileOffsetFromReadBoundsX + levelDestinationRectangle.x;
+
+        int levelColumnReadOffsetX = 0;
+
+        // iterate horizontally the tiles to read
+        for (int columnIndex = 0; columnIndex < columnTileCount; columnIndex++) {
+            int tileLeftXToRead = (columnIndex * defaultTileWidthToRead);
+            int tileWidthToRead = (columnIndex < columnTileCount - 1) ? defaultTileWidthToRead : (normalBoundsIntersection.width - tileLeftXToRead);
+            tileLeftXToRead += normalBoundsIntersection.x;
+            int tileRightXToRead = tileLeftXToRead + tileWidthToRead - 1;
+
+            int levelColumnReadOffsetY = 0;
+
+            // iterate vertically the tiles to read
+            for (int rowIndex = 0; rowIndex < rowTileCount; rowIndex++) {
+                int tileTopYToRead = rowIndex * defaultTileHeightToRead;
+                int tileHeightToRead = (rowIndex < rowTileCount - 1) ? defaultTileHeightToRead : (normalBoundsIntersection.height - tileTopYToRead);
+                tileTopYToRead += normalBoundsIntersection.y;
+                int tileBottomYToRead = tileTopYToRead + tileHeightToRead - 1;
+
+                Raster normalRasterData = readRasterData(tileLeftXToRead, tileTopYToRead, tileWidthToRead, tileHeightToRead);
+
+                int x = levelColumnReadOffsetX;
+                int y = levelColumnReadOffsetY;
+                int currentSrcXOffset;
+                while ((currentSrcXOffset = this.imageBoundsSupport.getSourceX() + computeSourceX(levelOffsetX + x)) <= tileRightXToRead) {
+                    if (currentSrcXOffset >= tileLeftXToRead) {
+                        y = levelColumnReadOffsetY; // initialize again the 'y' variable
+                        int currentSrcYOffset;
+                        while ((currentSrcYOffset = this.imageBoundsSupport.getSourceY() + computeSourceY(levelOffsetY + y)) <= tileBottomYToRead) {
+                            if (currentSrcYOffset >= tileTopYToRead) {
+                                double value = normalRasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, bandIndex);
+                                levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, value);
+                            } else {
+                                throw new IllegalStateException("Invalid values when iterate on the Y axis: levelColumnReadOffsetY=" + levelColumnReadOffsetY + ", y=" + y + ", currentSrcYOffset=" + currentSrcYOffset + ", tileTopYToRead=" + tileTopYToRead + ".");
+                            }
+                            y++;
+                            if (y >= levelDestinationRectangle.height) {
+                                break;
+                            }
+                        }
+                    } else {
+                        throw new IllegalStateException("Invalid values when iterate on the X axis: levelColumnReadOffsetX=" + levelColumnReadOffsetX + ", x=" + x + ", currentSrcXOffset=" + currentSrcXOffset + ".");
+                    }
+                    x++;
+                    if (x >= levelDestinationRectangle.width) {
+                        break;
+                    }
+                }
+                levelColumnReadOffsetY = y;
+                if (rowIndex == rowTileCount - 1) {
+                    levelColumnReadOffsetX = x; // the last cell in the vertical column
+                }
             }
-        } else {
-            return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
         }
+    }
+
+    private Raster readRasterData(int destOffsetX, int destOffsetY, int destWidth, int destHeight) {
+        try {
+            int sourceStepX = 1;
+            int sourceStepY = 1;
+            int sourceOffsetX = sourceStepX * destOffsetX;
+            int sourceOffsetY = sourceStepY * destOffsetY;
+            synchronized (this.geoTiffImageReader) {
+                return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY,
+                                                        sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to read the data: level=" + getLevel() + ", bounds=[x"+ destOffsetX + ", y="+destOffsetY+ ", width="+destWidth+", height="+destHeight+"].", ex);
+        }
+    }
+
+    private static int computeTileSizeToRead(int actualTileSize, int defaultJAIReadTileSize, int normalBoundsSize) {
+        int defaultTileSizeToRead = Math.max(actualTileSize, defaultJAIReadTileSize);
+        if (defaultTileSizeToRead > normalBoundsSize) {
+            defaultTileSizeToRead = normalBoundsSize;
+        }
+        return defaultTileSizeToRead;
     }
 }

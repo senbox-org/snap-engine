@@ -43,7 +43,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, Void tileData) {
 
         return new GeoTiffTileOpImage(this.geoTiffImageReader, this, this.dataBufferType, tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize, true);
+                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize);
     }
 
     @Override
