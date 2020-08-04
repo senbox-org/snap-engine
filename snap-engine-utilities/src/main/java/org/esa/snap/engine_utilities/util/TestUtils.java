@@ -70,7 +70,7 @@ public class TestUtils {
         }
     }
 
-    private static void initAuxData() {
+    private static void initAuxData() throws Exception {
         Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
         if(!Files.exists(propFile)) {
             propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
@@ -79,7 +79,10 @@ public class TestUtils {
             propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
         }
         if(propFile.toFile().exists()) {
+            System.out.println("Auxdata properties loaded from "  + propFile);
             Config.instance(Settings.SNAP_AUXDATA).load(propFile);
+        } else {
+            throw new Exception("etc/snap.auxdata.properties not found");
         }
     }
 
