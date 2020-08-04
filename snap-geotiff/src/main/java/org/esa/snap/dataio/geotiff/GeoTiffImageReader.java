@@ -370,7 +370,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         }
     }
 
-    private static GeoTiffImageReader buildGeoTiffImageReaderObject(Path tiffPath, Closeable closeable) throws IOException {
+    public static GeoTiffImageReader buildGeoTiffImageReaderObject(Path tiffPath, Closeable closeable) throws IOException {
         boolean success = false;
         InputStream inputStream = Files.newInputStream(tiffPath);
         try {

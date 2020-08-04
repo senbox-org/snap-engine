@@ -48,8 +48,9 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
     }
 
     private void readHigherLevelData(Rectangle normalBoundsIntersection, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
-        int defaultTileWidthToRead = computeTileSizeToRead(getTileWidth(), this.defaultJAIReadTileSize.width, normalBoundsIntersection.width);
-        int defaultTileHeightToRead = computeTileSizeToRead(getTileHeight(), this.defaultJAIReadTileSize.height, normalBoundsIntersection.height);
+        int multiplyFactor = 2; // read twice the default JAI tile size
+        int defaultTileWidthToRead = computeTileSizeToRead(getTileWidth(), this.defaultJAIReadTileSize.width*multiplyFactor, normalBoundsIntersection.width);
+        int defaultTileHeightToRead = computeTileSizeToRead(getTileHeight(), this.defaultJAIReadTileSize.height*multiplyFactor, normalBoundsIntersection.height);
 
         int columnTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.width, defaultTileWidthToRead);
         int rowTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.height, defaultTileHeightToRead);
@@ -124,7 +125,7 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
                                                         sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
             }
         } catch (Exception ex) {
-            throw new IllegalStateException("Failed to read the data: level=" + getLevel() + ", bounds=[x"+ destOffsetX + ", y="+destOffsetY+ ", width="+destWidth+", height="+destHeight+"].", ex);
+            throw new IllegalStateException("Failed to read the data: level=" + getLevel() + ", region=[x="+ destOffsetX + ", y="+destOffsetY+ ", width="+destWidth+", height="+destHeight+"].", ex);
         }
     }
 
