@@ -26,6 +26,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.main.GPT;
+import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
@@ -77,6 +78,10 @@ public class TestUtils {
         }
         if(!Files.exists(propFile)) {
             propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(TestUtils.class);
+            propFile = moduleBasePath.resolve("etc/snap.auxdata.properties");
         }
         if(propFile.toFile().exists()) {
             System.out.println("Auxdata properties loaded from "  + propFile);
