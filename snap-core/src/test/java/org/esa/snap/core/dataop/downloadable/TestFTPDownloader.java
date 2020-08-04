@@ -49,14 +49,14 @@ public class TestFTPDownloader {
 
         Assume.assumeTrue("Internet connection not available, skipping TestFTPDownloader", internetAvailable);
 
-        final String server = "speedtest.tele2.net";
+        final String server = "ftp.otenet.gr";
         final String remotePath = "";
 
         try {
-            final FtpDownloader ftp = new FtpDownloader(server);
+            final FtpDownloader ftp = new FtpDownloader(server, "speedtest", "speedtest");
             final Map<String, Long> fileSizeMap = FtpDownloader.readRemoteFileList(ftp, server, remotePath);
 
-            final File localFile = new File(SystemUtils.getCacheDir(), "1KB.zip");
+            final File localFile = new File(SystemUtils.getCacheDir(), "test100k.db");
             final String remoteFileName = localFile.getName();
             final Long fileSize = fileSizeMap.get(remoteFileName);
 
