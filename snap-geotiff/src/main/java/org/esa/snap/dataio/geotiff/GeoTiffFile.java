@@ -1,6 +1,5 @@
 package org.esa.snap.dataio.geotiff;
 
-import com.bc.ceres.core.VirtualDir;
 import org.esa.snap.engine_utilities.file.AbstractFile;
 import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
@@ -8,7 +7,6 @@ import org.esa.snap.engine_utilities.util.NotRegularFileException;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -29,14 +27,19 @@ public class GeoTiffFile implements Closeable {
     private final Path imageParentPath;
     private final String imageRelativeFilePath;
     private final boolean copyFileFromZipArchiveOnLocalDisk;
+    private final Path localTempFolder;
 
-    private File localTempFolder;
+    private Path localFile;
 
-    public GeoTiffFile(Path imageParentPath, String imageRelativeFilePath, boolean copyFileFromZipArchiveOnLocalDisk) {
+    public GeoTiffFile(Path imageParentPath, String imageRelativeFilePath, boolean copyFileFromZipArchiveOnLocalDisk, Path localTempFolder) {
         if (imageParentPath == null) {
             throw new NullPointerException("The image path is null.");
         }
+        if (localTempFolder == null) {
+            throw new NullPointerException("The local temp folder is null.");
+        }
         this.imageParentPath = imageParentPath;
+        this.localTempFolder = localTempFolder;
         this.imageRelativeFilePath = imageRelativeFilePath; // the relative path may be null when the parent path is a file
         this.copyFileFromZipArchiveOnLocalDisk = copyFileFromZipArchiveOnLocalDisk;
     }
@@ -54,8 +57,9 @@ public class GeoTiffFile implements Closeable {
     }
 
     public GeoTiffImageReader buildImageReader() throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (this.localTempFolder != null) {
-            return processLocalCopiedFile();
+        GeoTiffImageReader geoTiffImageReader = processLocalCopiedFile();
+        if (geoTiffImageReader != null) {
+            return geoTiffImageReader;
         }
         if (Files.exists(this.imageParentPath)) {
             // the product path exists
@@ -69,7 +73,7 @@ public class GeoTiffFile implements Closeable {
                     return processImageZipArchive();
                 } else {
                     if (this.imageRelativeFilePath != null) {
-                        throw new NullPointerException("The relative file path '"+this.imageRelativeFilePath+"' must be null.");
+                        throw new IllegalStateException("The relative file path '"+this.imageRelativeFilePath+"' must be null.");
                     }
                     return new GeoTiffImageReader(this.imageParentPath.toFile());
                 }
@@ -83,11 +87,11 @@ public class GeoTiffFile implements Closeable {
         }
     }
 
-    protected void cleanup() {
-        if (this.localTempFolder != null) {
-            VirtualDir.deleteFileTree(this.localTempFolder);
-            this.localTempFolder = null;
+    protected void cleanup() throws IOException {
+        if (this.localFile != null) {
+            Files.delete(this.localFile);
         }
+        this.localFile = null; // reset
     }
 
     private GeoTiffImageReader processImageFolder() throws IOException {
@@ -124,8 +128,8 @@ public class GeoTiffFile implements Closeable {
                 if (findChildFileVisitor.getExistingChildFile() != null) {
                     // the entry exists into the zip archive
                     if (this.copyFileFromZipArchiveOnLocalDisk) {
-                        Path fileToReturn = copyFileOnLocalDisk(findChildFileVisitor.getExistingChildFile());
-                        return new GeoTiffImageReader(fileToReturn.toFile());
+                        copyFileOnLocalDisk(findChildFileVisitor.getExistingChildFile());
+                        return new GeoTiffImageReader(this.localFile.toFile());
                     } else {
                         GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReaderObject(findChildFileVisitor.getExistingChildFile(), fileSystem);
                         success = true;
@@ -142,28 +146,25 @@ public class GeoTiffFile implements Closeable {
     }
 
     private GeoTiffImageReader processLocalCopiedFile() throws IOException {
-        Path localFilePath = this.localTempFolder.toPath().resolve(this.imageRelativeFilePath);
-        if (Files.exists(this.imageParentPath)) {
-            if (Files.isRegularFile(localFilePath)) {
-                return new GeoTiffImageReader(localFilePath.toFile());
+        if (this.localFile != null && Files.exists(this.localFile)) {
+            if (Files.isRegularFile(this.localFile)) {
+                return new GeoTiffImageReader(this.localFile.toFile());
             } else {
-                // the product path does not represent a folder or a file
-                throw new NotRegularFileException(localFilePath.toString());
+                // the path does not represent a folder or a file
+                throw new NotRegularFileException(this.localFile.toString());
             }
-        } else {
-            // the product path does not exist
-            throw new FileNotFoundException("The local path '"+localFilePath+"' does not exist.");
         }
+        return null;
     }
 
-    private Path copyFileOnLocalDisk(Path sourcePath) throws IOException {
+    private void copyFileOnLocalDisk(Path sourcePath) throws IOException {
         // copy the file from the zip archive on the local disk
-        if (this.localTempFolder == null) {
-            this.localTempFolder = VirtualDir.createUniqueTempDir();
+        if (this.localFile != null) {
+            throw new IllegalStateException("The local file path '"+this.localFile+"' must be null.");
         }
-        Path localFilePath = this.localTempFolder.toPath().resolve(this.imageRelativeFilePath);
-        if (FileHelper.canCopyOrReplaceFile(sourcePath, localFilePath)) {
-            Path parentFolder = localFilePath.getParent();
+        this.localFile = this.localTempFolder.resolve(this.imageRelativeFilePath);
+        if (FileHelper.canCopyOrReplaceFile(sourcePath, this.localFile)) {
+            Path parentFolder = this.localFile.getParent();
 
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Copy file '" + sourcePath.toString() + "' to local folder '" + parentFolder.toString() + "'.");
@@ -172,8 +173,7 @@ public class GeoTiffFile implements Closeable {
             if (!Files.exists(parentFolder)) {
                 Files.createDirectories(parentFolder);
             }
-            FileHelper.copyFileUsingInputStream(sourcePath, localFilePath.toString(), AbstractFile.BUFFER_SIZE);
+            FileHelper.copyFileUsingInputStream(sourcePath, this.localFile.toString(), AbstractFile.BUFFER_SIZE);
         }
-        return localFilePath;
     }
 }

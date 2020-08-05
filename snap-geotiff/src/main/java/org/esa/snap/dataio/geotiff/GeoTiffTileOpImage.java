@@ -14,43 +14,39 @@ import java.awt.image.WritableRaster;
  */
 public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
-    private final GeoTiffRasterRegion geoTiffImageReader;
+    private final GeoTiffRasterRegion geoTiffRasterRegion;
     private final GeoTiffBandSource geoTiffBandSource;
-    private final Dimension defaultJAIReadTileSize;
 
-    public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffImageReader, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
-                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport, Dimension defaultJAIReadTileSize) {
+    public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffRasterRegion, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
+                              int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport) {
 
-        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, defaultJAIReadTileSize);
+        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, geoTiffBandSource.getDefaultJAIReadTileSize());
 
-        this.geoTiffImageReader = geoTiffImageReader;
+        this.geoTiffRasterRegion = geoTiffRasterRegion;
         this.geoTiffBandSource = geoTiffBandSource;
-        this.defaultJAIReadTileSize = defaultJAIReadTileSize;
     }
 
     @Override
     protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
         Rectangle normalBoundsIntersection = computeIntersectionOnNormalBounds(levelDestinationRectangle);
         if (!normalBoundsIntersection.isEmpty()) {
-            if (getLevel() == 0) {
+            if (getLevel() == 0) { // the first image level
                 Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
                 writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
+            } else if (this.geoTiffBandSource.canDivideTileRegionToRead()) {
+                readHigherLevelData(normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle);
             } else {
-                String propertyValue = System.getProperty("read.whole.specified.area");
-                if (Boolean.parseBoolean(propertyValue)) {
-                    Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
-                    writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
-                } else {
-                    readHigherLevelData(normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle);
-                }
+                Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
+                writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
             }
         }
     }
 
     private void readHigherLevelData(Rectangle normalBoundsIntersection, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
         int multiplyFactor = 2; // read twice the default JAI tile size
-        int defaultTileWidthToRead = computeTileSizeToRead(getTileWidth(), this.defaultJAIReadTileSize.width*multiplyFactor, normalBoundsIntersection.width);
-        int defaultTileHeightToRead = computeTileSizeToRead(getTileHeight(), this.defaultJAIReadTileSize.height*multiplyFactor, normalBoundsIntersection.height);
+        Dimension defaultJAIReadTileSize = this.geoTiffBandSource.getDefaultJAIReadTileSize();
+        int defaultTileWidthToRead = computeTileSizeToRead(getTileWidth(), defaultJAIReadTileSize.width * multiplyFactor, normalBoundsIntersection.width);
+        int defaultTileHeightToRead = computeTileSizeToRead(getTileHeight(), defaultJAIReadTileSize.height * multiplyFactor, normalBoundsIntersection.height);
 
         int columnTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.width, defaultTileWidthToRead);
         int rowTileCount = ImageUtils.computeTileCount(normalBoundsIntersection.height, defaultTileHeightToRead);
@@ -120,8 +116,8 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
             int sourceStepY = 1;
             int sourceOffsetX = sourceStepX * destOffsetX;
             int sourceOffsetY = sourceStepY * destOffsetY;
-            synchronized (this.geoTiffImageReader) {
-                return this.geoTiffImageReader.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY,
+            synchronized (this.geoTiffRasterRegion) {
+                return this.geoTiffRasterRegion.readRect(this.geoTiffBandSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY,
                                                         sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
             }
         } catch (Exception ex) {

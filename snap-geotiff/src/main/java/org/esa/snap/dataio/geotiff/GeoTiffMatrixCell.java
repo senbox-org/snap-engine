@@ -4,6 +4,7 @@ import org.esa.snap.core.image.MosaicMatrix;
 
 import java.awt.image.Raster;
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -17,8 +18,8 @@ public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.Matri
 
     private GeoTiffImageReader geoTiffImageReader;
 
-    public GeoTiffMatrixCell(int cellWidth, int cellHeight, int dataBufferType, Path imageParentPath, String imageRelativeFilePath) {
-        super(imageParentPath, imageRelativeFilePath, true);
+    public GeoTiffMatrixCell(int cellWidth, int cellHeight, int dataBufferType, Path imageParentPath, String imageRelativeFilePath, Path localTempFolder) {
+        super(imageParentPath, imageRelativeFilePath, true, localTempFolder);
 
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
@@ -51,7 +52,7 @@ public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.Matri
     }
 
     @Override
-    protected void cleanup() {
+    protected void cleanup() throws IOException {
         if (this.geoTiffImageReader != null) {
             this.geoTiffImageReader.close();
             this.geoTiffImageReader = null;
