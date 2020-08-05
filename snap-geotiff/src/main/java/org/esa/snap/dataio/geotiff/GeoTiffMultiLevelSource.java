@@ -93,8 +93,8 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     }
 
     @Override
-    public boolean canDivideTileRegionToRead() {
-        return false;
+    public boolean canDivideTileRegionToRead(int level) {
+        return (level > 6);
     }
 
     public ImageLayout buildMultiLevelImageLayout() {

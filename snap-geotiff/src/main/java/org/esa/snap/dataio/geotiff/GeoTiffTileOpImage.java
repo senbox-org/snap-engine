@@ -33,7 +33,7 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
             if (getLevel() == 0) { // the first image level
                 Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
                 writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.geoTiffBandSource.getBandIndex());
-            } else if (this.geoTiffBandSource.canDivideTileRegionToRead()) {
+            } else if (this.geoTiffBandSource.canDivideTileRegionToRead(getLevel())) {
                 readHigherLevelData(normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle);
             } else {
                 Raster normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);

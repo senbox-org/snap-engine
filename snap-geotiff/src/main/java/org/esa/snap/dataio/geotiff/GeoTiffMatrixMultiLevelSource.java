@@ -106,7 +106,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     }
 
     @Override
-    public boolean canDivideTileRegionToRead() {
+    public boolean canDivideTileRegionToRead(int level) {
         return true;
     }
 

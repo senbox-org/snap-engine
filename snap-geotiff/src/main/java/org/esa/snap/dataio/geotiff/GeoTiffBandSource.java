@@ -10,5 +10,5 @@ public interface GeoTiffBandSource {
 
     public Dimension getDefaultJAIReadTileSize();
 
-    public boolean canDivideTileRegionToRead();
+    public boolean canDivideTileRegionToRead(int level);
 }
