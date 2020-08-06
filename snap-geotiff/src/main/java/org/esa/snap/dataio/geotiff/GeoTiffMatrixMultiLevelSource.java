@@ -1,6 +1,8 @@
 package org.esa.snap.dataio.geotiff;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.image.AbstractMatrixMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.esa.snap.core.image.MosaicMatrix;
@@ -26,7 +28,14 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, int bandIndex,
                                          GeoCoding geoCoding, Double noDataValue, Dimension defaultJAIReadTileSize) {
 
-        super(spotBandMatrix, imageMatrixReadBounds, defaultJAIReadTileSize, geoCoding);
+        this(DefaultMultiLevelModel.getLevelCount(imageMatrixReadBounds.width, imageMatrixReadBounds.height),
+                spotBandMatrix, imageMatrixReadBounds, bandIndex, geoCoding, noDataValue, defaultJAIReadTileSize);
+    }
+
+    public GeoTiffMatrixMultiLevelSource(int levelCount, MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, int bandIndex,
+                                         GeoCoding geoCoding, Double noDataValue, Dimension defaultJAIReadTileSize) {
+
+        super(levelCount, spotBandMatrix, imageMatrixReadBounds, defaultJAIReadTileSize, Product.findImageToModelTransform(geoCoding));
 
         this.defaultJAIReadTileSize = defaultJAIReadTileSize;
         this.bandIndex = bandIndex;
@@ -38,7 +47,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, GeoTiffMatrixCell geoTiffMatrixCell) {
 
         return new GeoTiffTileOpImage(geoTiffMatrixCell, this, geoTiffMatrixCell.getDataBufferType(), tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize);
+                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
     }
 
     @Override
@@ -89,6 +98,16 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     @Override
     public int getBandIndex() {
         return this.bandIndex;
+    }
+
+    @Override
+    public Dimension getDefaultJAIReadTileSize() {
+        return defaultJAIReadTileSize;
+    }
+
+    @Override
+    public boolean canDivideTileRegionToRead(int level) {
+        return true;
     }
 
     public ImageLayout buildMultiLevelImageLayout() {

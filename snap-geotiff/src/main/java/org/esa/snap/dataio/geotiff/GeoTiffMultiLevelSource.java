@@ -43,7 +43,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, Void tileData) {
 
         return new GeoTiffTileOpImage(this.geoTiffImageReader, this, this.dataBufferType, tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, this.defaultJAIReadTileSize);
+                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
     }
 
     @Override
@@ -85,6 +85,16 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     @Override
     public int getBandIndex() {
         return this.bandIndex;
+    }
+
+    @Override
+    public Dimension getDefaultJAIReadTileSize() {
+        return defaultJAIReadTileSize;
+    }
+
+    @Override
+    public boolean canDivideTileRegionToRead(int level) {
+        return (level > 6);
     }
 
     public ImageLayout buildMultiLevelImageLayout() {
