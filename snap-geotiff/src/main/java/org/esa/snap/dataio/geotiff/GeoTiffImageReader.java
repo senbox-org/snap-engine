@@ -5,7 +5,6 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.util.ImageUtils;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
@@ -236,7 +235,10 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         // At line 323 pos shouldn't be casted but only the result of the module operation.
         // Using FileCacheImageInputStream explicitly works around this issue
         if (sourceImage instanceof InputStream) {
-            imageInputStream = new FileCacheImageInputStream((InputStream) sourceImage, SystemUtils.getCacheDir());
+            // use system default cache dir, in tests SystemUtils.getCacheDir() seem not to be set correctly.
+            // At least on linux. However, it caused errors
+            File systemCacheDir = null;
+            imageInputStream = new FileCacheImageInputStream((InputStream) sourceImage, systemCacheDir);
         } else {
             imageInputStream = ImageIO.createImageInputStream(sourceImage);
         }
