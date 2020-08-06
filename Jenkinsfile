@@ -129,62 +129,6 @@ pipeline {
                 wait: true
             }
         }
-        stage('Create docker image') {
-            agent { label 'snap-test' }
-            when {
-                expression {
-                    return "${params.launchTests}" == "true";
-                }
-            }
-            steps {
-                echo "Launch snap-installer"
-                build job: "create-snap-docker-image", parameters: [
-                    [$class: 'StringParameterValue', name: 'toolName', value: "${toolName}"],
-                    [$class: 'StringParameterValue', name: 'snapMajorVersion', value: "${snapMajorVersion}"],
-                    [$class: 'StringParameterValue', name: 'deployDirName', value: "${deployDirName}"],
-                    [$class: 'StringParameterValue', name: 'branchVersion', value: "${branchVersion}"],
-                    [$class: 'BooleanParameterValue', name: 'maintenanceBranch', value: "false"]
-                ],
-                quietPeriod: 0,
-                propagate: true,
-                wait: true
-            }
-        }
-        stage ('Starting Tests') {
-            parallel {
-                stage ('Starting GPT Tests') {
-                    agent { label 'snap-test' }
-                    when {
-                        expression {
-                            return "${env.GIT_BRANCH}" =~ /\d+\.x/;
-                        }
-                    }
-                    steps {
-                        echo "Launch snap-gpt-tests using docker image snap:${branchVersion} and scope REGULAR"
-                        // build job: "snap-gpt-tests/${branchVersion}", parameters: [
-                        //    [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                        //    [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
-                        //]
-                    }
-                }
-                // DISABLE GUI TESTING
-                // stage ('Starting GUI Tests') {
-                //     agent { label 'snap-test' }
-                //     when {
-                //         expression {
-                //             return "${env.GIT_BRANCH}" =~ /\d+\.x/;
-                //         }
-                //     }
-                //     steps {
-                //         echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
-                //         build job: "snap-gui-tests/${branchVersion}", parameters: [
-                //             [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                //             [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
-                //         ]
-                //     }
-                // }
-            }
-        }
     }
     /* disable email send on failure
     post {
