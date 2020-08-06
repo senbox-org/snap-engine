@@ -5,6 +5,7 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
@@ -27,18 +28,25 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.CropDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystem;
@@ -120,7 +128,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     @Override
     public Raster readRect(boolean isGlobalShifted180, int sourceOffsetX, int sourceOffsetY, int sourceStepX, int sourceStepY,
                            int destOffsetX, int destOffsetY, int destWidth, int destHeight)
-                           throws IOException {
+            throws IOException {
 
         if (this.readParam == null) {
             this.readParam = this.imageReader.getDefaultReadParam();
@@ -166,7 +174,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
 
     public SampleModel getSampleModel() throws IOException {
         Iterator iter = this.imageReader.getImageTypes(FIRST_IMAGE);
-        ImageTypeSpecifier its = (ImageTypeSpecifier)iter.next();
+        ImageTypeSpecifier its = (ImageTypeSpecifier) iter.next();
         return its.getSampleModel();
     }
 
@@ -210,11 +218,11 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     public Dimension validateArea(Rectangle area) throws IOException {
         int imageWidth = getImageWidth();
         if ((area.x + area.width) > imageWidth) {
-            throw new IllegalStateException("The coordinates are out of bounds: area.x="+area.x+", area.width="+area.width+", image.width=" + imageWidth);
+            throw new IllegalStateException("The coordinates are out of bounds: area.x=" + area.x + ", area.width=" + area.width + ", image.width=" + imageWidth);
         }
         int imageHeight = getImageHeight();
         if ((area.y + area.height) > imageHeight) {
-            throw new IllegalStateException("The coordinates are out of bounds: area.y="+area.y+", area.height="+area.height+", image.height=" + imageHeight);
+            throw new IllegalStateException("The coordinates are out of bounds: area.y=" + area.y + ", area.height=" + area.height + ", image.height=" + imageHeight);
         }
         return new Dimension(imageWidth, imageHeight);
     }
@@ -222,7 +230,16 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
         ImageIO.setUseCache(false); // use_cache in CacheInfo defaults to true. This could be set by a preference.
-        ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceImage);
+        ImageInputStream imageInputStream;
+        // ImageIO.createImageInputStream creates for some inputs a MemoryCacheImageInputStream.
+        // This causes problems because the class MemoryCache in JDK has an issue.
+        // At line 323 pos shouldn't be casted but only the result of the module operation.
+        // Using FileCacheImageInputStream explicitly works around this issue
+        if (sourceImage instanceof InputStream) {
+            imageInputStream = new FileCacheImageInputStream((InputStream) sourceImage, SystemUtils.getCacheDir());
+        } else {
+            imageInputStream = ImageIO.createImageInputStream(sourceImage);
+        }
         if (imageInputStream == null) {
             throw new NullPointerException("The image input stream is null for source image '" + sourceImage + "'.");
         }
@@ -278,7 +295,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     public static GeoTiffImageReader buildGeoTiffImageReader(Path productPath, String childRelativePath)
-                                            throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
+            throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
 
         if (Files.exists(productPath)) {
             // the product path exists
@@ -289,10 +306,10 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                     if (Files.isRegularFile(child)) {
                         return new GeoTiffImageReader(child.toFile());
                     } else {
-                        throw new NotRegularFileException("The product folder '"+productPath.toString()+"' does not contain the file '" + childRelativePath+"'.");
+                        throw new NotRegularFileException("The product folder '" + productPath.toString() + "' does not contain the file '" + childRelativePath + "'.");
                     }
                 } else {
-                    throw new FileNotFoundException("The product folder '"+productPath.toString()+"' does not contain the path '" + childRelativePath+"'.");
+                    throw new FileNotFoundException("The product folder '" + productPath.toString() + "' does not contain the path '" + childRelativePath + "'.");
                 }
             } else if (Files.isRegularFile(productPath)) {
                 // the product path represents a file
@@ -311,12 +328,12 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
             }
         } else {
             // the product path does not exist
-            throw new FileNotFoundException("The product path '"+productPath+"' does not exist.");
+            throw new FileNotFoundException("The product path '" + productPath + "' does not exist.");
         }
     }
 
     private static GeoTiffImageReader buildGeoTiffImageReaderFromZipArchive(Path productPath, String zipEntryPath)
-                                                        throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
+            throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
 
         boolean success = false;
         FileSystem fileSystem = null;
@@ -344,7 +361,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     private static GeoTiffImageReader buildGeoTiffImageReaderFromZipArchive(Path productPath)
-                                                        throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
+            throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
 
         boolean success = false;
         FileSystem fileSystem = null;
@@ -362,7 +379,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                     return geoTiffImageReader;
                 }
             }
-            throw new IllegalArgumentException("The zip archive '" + productPath.toString() + "' does not contain an image. The item count is " + filePaths.size()+".");
+            throw new IllegalArgumentException("The zip archive '" + productPath.toString() + "' does not contain an image. The item count is " + filePaths.size() + ".");
         } finally {
             if (fileSystem != null && !success) {
                 fileSystem.close();
@@ -370,7 +387,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         }
     }
 
-    private static GeoTiffImageReader buildGeoTiffImageReaderObject(Path tiffPath, Closeable closeable) throws IOException {
+    public static GeoTiffImageReader buildGeoTiffImageReaderObject(Path tiffPath, Closeable closeable) throws IOException {
         boolean success = false;
         InputStream inputStream = Files.newInputStream(tiffPath);
         try {
@@ -409,7 +426,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                 mapCRS = DefaultGeographicCRS.WGS84;
             }
         }
-        AffineTransform transform = (AffineTransform)toModel;
+        AffineTransform transform = (AffineTransform) toModel;
         if (metadataDecoder.getModelPixelScales() == null) {
             Rectangle imageBounds;
             if (subsetRegion == null) {
