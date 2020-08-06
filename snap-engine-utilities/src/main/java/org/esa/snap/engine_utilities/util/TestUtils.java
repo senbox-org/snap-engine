@@ -26,15 +26,19 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.main.GPT;
+import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -60,9 +64,30 @@ public class TestUtils {
 
         try {
             SystemUtils.init3rdPartyLibs(GPT.class);
+            initAuxData();
             testEnvironmentInitialized = true;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void initAuxData() throws Exception {
+        Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(TestUtils.class);
+            propFile = moduleBasePath.resolve("etc/snap.auxdata.properties");
+        }
+        if(propFile.toFile().exists()) {
+            System.out.println("Auxdata properties loaded from "  + propFile);
+            Config.instance(Settings.SNAP_AUXDATA).load(propFile);
+        } else {
+            throw new Exception("etc/snap.auxdata.properties not found");
         }
     }
 
