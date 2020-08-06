@@ -166,7 +166,7 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDouble(i++, record.getFileSize());
         stmtSaveNewRecord.setDouble(i++, record.getLastModified());
         stmtSaveNewRecord.setString(i++, record.getFileFormat());
-        final String geoStr = record.formatGeoBoundayString();
+        final String geoStr = record.formatGeoBoundaryString();
         if (geoStr.length() > 1200) {
             SystemUtils.LOG.warning("Geoboundary string exceeds 1200");
             stmtSaveNewRecord.setString(i++, "");

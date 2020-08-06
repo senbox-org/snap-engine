@@ -18,6 +18,7 @@ package org.esa.snap.productlibrary.db;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.datamodel.quicklooks.Quicklook;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
@@ -304,7 +305,7 @@ public class ProductEntry {
         if (gc == null)
             return new GeoPos[0];
         final int step = Math.max(30, (product.getSceneRasterWidth() + product.getSceneRasterHeight()) / 10);
-        GeoPos[] geoPoints = ProductUtils.createGeoBoundary(product, null, step, true);
+        GeoPos[] geoPoints = GeoUtils.createGeoBoundary(product, null, step, true);
         if(geoPoints.length > 1 && !geoPoints[0].equals(geoPoints[geoPoints.length-1])) {
             final GeoPos[] newgeoPoints = new GeoPos[geoPoints.length+1];
             int i=0;
@@ -318,7 +319,7 @@ public class ProductEntry {
         return geoPoints;
     }
 
-    public String formatGeoBoundayString() {
+    public String formatGeoBoundaryString() {
         final StringBuilder str = new StringBuilder(geoboundary.length * 20);
         for (GeoPos geo : geoboundary) {
             str.append(decimalFormat.format(geo.getLat()));
@@ -495,14 +496,6 @@ public class ProductEntry {
             } catch (IOException e) {
                 // continue
             }
-        }
-        return entryList.toArray(new ProductEntry[entryList.size()]);
-    }
-
-    public static ProductEntry[] createProductEntryList(final Product[] productList) {
-        final List<ProductEntry> entryList = new ArrayList<>(productList.length);
-        for (Product prod : productList) {
-            entryList.add(new ProductEntry(prod));
         }
         return entryList.toArray(new ProductEntry[entryList.size()]);
     }
