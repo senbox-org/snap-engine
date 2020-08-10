@@ -25,8 +25,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 
-import static org.junit.Assert.fail;
-
 /**
  * FTPDownloaderTester.
  *
@@ -73,11 +71,10 @@ public class TestFTPDownloader {
                     exception = ex;
                 }
             }
-            String msg = "Not able to retrieve file";
             if (exception != null) {
-                msg += " (" + exception.getMessage() + ")";
+                String msg = String.format("Not able to retrieve file (%s)", exception.getMessage());
+                Assume.assumeNoException(msg, exception);
             }
-            fail(msg);
 
         } catch (IOException e) {
             Assume.assumeNoException("Connection to Server could not be established, skipping TestFTPDownloader", e);
