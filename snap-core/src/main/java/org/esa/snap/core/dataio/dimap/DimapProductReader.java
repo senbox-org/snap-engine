@@ -320,7 +320,7 @@ public class DimapProductReader extends AbstractProductReader {
                     if (pm.isCanceled()) {
                         break;
                     }
-                    final long sourcePosY = sourceY * destBand.getRasterWidth();
+                    final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
                     long inputPos = sourcePosY + sourceOffsetX;
                     destPos = readLineRasterDataImpl(sourceStepX, sourceWidth, destPos, destWidth, destBuffer,
                                                      inputStream, longType, line, inputPos);
