@@ -39,7 +39,7 @@ public class TestFTPDownloader {
 
         boolean internetAvailable;
         try {
-            URLConnection urlConnection = new URL("http://speedtest.tele2.net/").openConnection();
+            URLConnection urlConnection = new URL("http://speedtest.ftp.otenet.gr/").openConnection();
             urlConnection.setConnectTimeout(2000);
             urlConnection.getContent();
             internetAvailable = true;
