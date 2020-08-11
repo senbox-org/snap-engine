@@ -106,6 +106,43 @@ public final class ReaderUtils {
         return virtBand;
     }
 
+    public static Band createVirtualIntensityDBBand(final Product product, final Band bandI, final Band bandQ, final String suffix) {
+        return createVirtualIntensityDBBand(product, bandI, bandQ, createName(bandI.getName(), "Intensity"), suffix);
+    }
+
+    public static Band createVirtualIntensityDBBand(final Product product, final Band bandI, final Band bandQ,
+                                                    final String bandName, final String suffix) {
+        final String bandNameI = bandI.getName();
+        final double nodatavalueI = bandI.getNoDataValue();
+        final String bandNameQ = bandQ.getName();
+        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : 10.0*log10(" +
+                bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ + ")";
+
+        String name = bandName;
+        if (!name.endsWith(suffix)) {
+            name += suffix;
+        }
+        final VirtualBand virtBand = new VirtualBand(name + "_db",
+                ProductData.TYPE_FLOAT32,
+                bandI.getRasterWidth(),
+                bandI.getRasterHeight(),
+                expression);
+        virtBand.setUnit(Unit.INTENSITY);
+        virtBand.setDescription("Intensity in dB from complex data");
+        virtBand.setNoDataValueUsed(true);
+        virtBand.setNoDataValue(nodatavalueI);
+        virtBand.setOwner(product);
+        product.addBand(virtBand);
+
+        if (bandI.getGeoCoding() != product.getSceneGeoCoding()) {
+            virtBand.setGeoCoding(bandI.getGeoCoding());
+        }
+        // set as band to use for quicklook
+        product.setQuicklookBandName(virtBand.getName());
+
+        return virtBand;
+    }
+
     /**
      * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
