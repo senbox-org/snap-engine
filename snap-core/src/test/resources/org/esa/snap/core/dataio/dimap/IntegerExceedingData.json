@@ -1,0 +1,70 @@
+{
+    "id": "IntegerExceedingData",
+    "decodeQualification": "INTENDED",
+    "expectedContent": {
+        "sceneWidth": 53568,
+        "sceneHeight": 50000,
+        "bands": [
+            {
+                "name": "dummy",
+                "description": "",
+                "bandWidth": 53568,
+                "bandHeight": 50000,
+                "noDataValue": "0.0",
+                "noDataValueUsed": "false",
+                "spectralWavelength": "0.0",
+                "spectralBandwidth": "0.0",
+                "expectedPixels": [
+                    {
+                        "x": 23104,
+                        "y": 26878,
+                        "value": 117.0
+                    },
+                    {
+                        "x": 39771,
+                        "y": 32445,
+                        "value": 20.0
+                    }
+                ]
+            }
+        ],
+        "metadata": [
+            {
+                "path": "Processing_Graph/node.1/parameters/writeEntireTileRows",
+                "value": "true"
+            },
+            {
+                "path": "Processing_Graph/node.1/parameters/formatName",
+                "value": "BEAM-DIMAP"
+            },
+            {
+                "path": "Processing_Graph/node.1/sources/sourceProduct",
+                "value": "ExceedIntLengthImageOp$173DDA6F69B"
+            },
+            {
+                "path": "Processing_Graph/node.1/parameters/deleteOutputOnFailure",
+                "value": "true"
+            },
+            {
+                "path": "Processing_Graph/node.1/sources/sourceProduct",
+                "value": "ExceedIntLengthImageOp$173DDA6F69B"
+            },
+            {
+                "path": "Processing_Graph/node.1/sources/sourceProduct",
+                "value": "ExceedIntLengthImageOp$173DDA6F69B"
+            },
+            {
+                "path": "Processing_Graph/node.1/parameters/writeEntireTileRows",
+                "value": "true"
+            },
+            {
+                "path": "Processing_Graph/node.1/parameters/deleteOutputOnFailure",
+                "value": "true"
+            },
+            {
+                "path": "Processing_Graph/node.1/parameters/clearCacheAfterRowWrite",
+                "value": "false"
+            }
+        ]
+    }
+}
