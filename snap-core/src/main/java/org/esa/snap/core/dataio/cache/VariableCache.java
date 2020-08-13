@@ -68,7 +68,9 @@ public class VariableCache {
     public void writeCompletedBlocks(ImageOutputStream outputStream) throws IOException {
         synchronized (cacheBlocks) {
             for (int index : completedIndices) {
-                writeCacheBlock(outputStream, index);
+                if (cacheBlocks[index] != null) {
+                    writeCacheBlock(outputStream, index);
+                }
             }
 
             completedIndices.clear();
