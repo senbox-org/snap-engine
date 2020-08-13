@@ -9,17 +9,17 @@ import org.esa.snap.binning.Observation;
 import org.esa.snap.binning.VariableContext;
 import org.esa.snap.binning.Vector;
 import org.esa.snap.binning.WritableVector;
-import org.esa.snap.binning.support.GrowableVector;
+import org.esa.snap.core.gpf.annotations.Parameter;
 
 public class AggregatorSum extends AbstractAggregator {
 
     private final int varIndex;
 
-    public AggregatorSum(VariableContext varCtx, String varName) {
+    AggregatorSum(VariableContext varCtx, String varName, String targetName) {
         super(Descriptor.NAME,
               createFeatureNames(varName, "sum", "counts"),
               createFeatureNames(varName, "sum", "counts"),
-              createFeatureNames(varName, "sum", "counts"));
+              createFeatureNames(targetName, "sum", "counts"));
 
         varIndex = varCtx.getVariableIndex(varName);
     }
@@ -41,27 +41,47 @@ public class AggregatorSum extends AbstractAggregator {
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
-        // nothing to do here tb 2020-08-11
+        // nothing to do here tb 2020-08-12
     }
 
     @Override
     public void initTemporal(BinContext ctx, WritableVector vector) {
-
+        vector.set(0, 0.0f);
     }
 
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs, WritableVector temporalVector) {
-
+        float accum = temporalVector.get(0);
+        accum += spatialVector.get(0);
+        temporalVector.set(0, accum);
     }
 
     @Override
     public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
-
+        // nothing to do here tb 2020-08-13
     }
 
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
+        outputVector.set(0, temporalVector.get(0));
+    }
 
+    public static class Config extends AggregatorConfig {
+        @Parameter(label = "Source band name", notEmpty = true, notNull = true, description = "The source band used for aggregation.")
+        String varName;
+
+        @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
+        String targetName;
+
+        public Config() {
+            this(null, null);
+        }
+
+        public Config(String varName, String targetName) {
+            super(AggregatorAverageOutlierAware.Descriptor.NAME);
+            this.varName = varName;
+            this.targetName = targetName;
+        }
     }
 
     public static class Descriptor implements AggregatorDescriptor {
@@ -70,7 +90,8 @@ public class AggregatorSum extends AbstractAggregator {
 
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-            return null;
+            AggregatorSum.Config config = (AggregatorSum.Config) aggregatorConfig;
+            return new AggregatorSum(varCtx, config.varName, config.targetName);
         }
 
         @Override
@@ -85,7 +106,7 @@ public class AggregatorSum extends AbstractAggregator {
 
         @Override
         public String getName() {
-            return null;
+            return NAME;
         }
 
         @Override
