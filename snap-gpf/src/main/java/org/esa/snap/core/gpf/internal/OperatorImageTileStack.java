@@ -107,8 +107,7 @@ public class OperatorImageTileStack extends OperatorImage {
             // this first conditional skips the creation of a WritableRaster for output-nodes. For some reason not
             // really understood, this overwrites the tile-data computed by operators further up the graph when running
             // in tile-stack-computation modus.
-            if (!(operatorContext.isOutputNode())
-                    && (band == getTargetBand() || operatorContext.isComputingImageOf(band))) {
+            if (!(operatorContext.isOutputNode()) && operatorContext.isComputingImageOf(band)) {
                 WritableRaster tileRaster = getWritableRaster(band, tile);
                 writableRasters.put(band, tileRaster);
                 Tile targetTile = createTargetTile(band, tileRaster, destRect);
