@@ -18,9 +18,9 @@ public class AggregatorSum extends AbstractAggregator {
 
     AggregatorSum(VariableContext varCtx, String varName, String targetName) {
         super(Descriptor.NAME,
-              createFeatureNames(varName, "sum", "counts"),
-              createFeatureNames(varName, "sum", "counts"),
-              createFeatureNames(targetName, "sum", "counts"));
+              createFeatureNames(varName, "sum"),
+              createFeatureNames(varName, "sum"),
+              createFeatureNames(targetName, "sum"));
 
         varIndex = varCtx.getVariableIndex(varName);
     }
@@ -106,7 +106,7 @@ public class AggregatorSum extends AbstractAggregator {
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
             final AggregatorSum.Config config = (AggregatorSum.Config) aggregatorConfig;
             final String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
-            return createFeatureNames(targetName, "sum", "counts");
+            return createFeatureNames(targetName, "sum");
         }
 
         @Override
