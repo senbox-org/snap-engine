@@ -68,9 +68,7 @@ public class VariableCache {
     public void writeCompletedBlocks(ImageOutputStream outputStream) throws IOException {
         synchronized (cacheBlocks) {
             for (int index : completedIndices) {
-                if (cacheBlocks[index] != null) {
-                    writeCacheBlock(outputStream, index);
-                }
+                writeCacheBlock(outputStream, index);
             }
 
             completedIndices.clear();
@@ -80,21 +78,21 @@ public class VariableCache {
     public void flush(ImageOutputStream outputStream) throws IOException {
         synchronized (cacheBlocks) {
             for (int i = 0; i < cacheBlocks.length; i++) {
-                if (cacheBlocks[i] != null) {
-                    writeCacheBlock(outputStream, i);
-                }
+                writeCacheBlock(outputStream, i);
             }
         }
     }
 
     private void writeCacheBlock(ImageOutputStream outputStream, int index) throws IOException {
         final CacheBlock cacheBlock = cacheBlocks[index];
-        final ProductData bufferData = cacheBlock.getBufferData();
-        final long outputPos = getStreamOutputPos(cacheBlock);
-        bufferData.writeTo(0, bufferData.getNumElems(), outputStream, outputPos);
+        if (cacheBlock != null) {
+            final ProductData bufferData = cacheBlock.getBufferData();
+            final long outputPos = getStreamOutputPos(cacheBlock);
+            bufferData.writeTo(0, bufferData.getNumElems(), outputStream, outputPos);
 
-        cacheBlock.dispose();
-        cacheBlocks[index] = null;
+            cacheBlock.dispose();
+            cacheBlocks[index] = null;
+        }
     }
 
     // package public for testing purpose only
