@@ -39,8 +39,8 @@ public class VariableCache {
 
         boolean canWrite = false;
         int yReadOff = 0;
-        for (int index = firstIdx; index <= lastIdx; index++) {
-            final int cacheBufferStartY = index * LINES_PER_BUFFER;
+        for (int cacheBlockIndex = firstIdx; cacheBlockIndex <= lastIdx; cacheBlockIndex++) {
+            final int cacheBufferStartY = cacheBlockIndex * LINES_PER_BUFFER;
             final int writeOffset = Math.max(0, sourceOffsetY - cacheBufferStartY);
 
             final int remainingHeight = sourceHeight - yReadOff;
@@ -48,14 +48,14 @@ public class VariableCache {
             final int blockHeight = Math.min(remainingHeight, heightToNextCacheBlock);
 
             synchronized (cacheBlocks) {
-                if (cacheBlocks[index] == null) {
-                    final int cacheBufferHeight = (index + 1) * LINES_PER_BUFFER < rasterHeight ? LINES_PER_BUFFER : rasterHeight - cacheBufferStartY;
-                    cacheBlocks[index] = new CacheBlock(cacheBufferStartY, width, cacheBufferHeight, dataType, noDataValue);
+                if (cacheBlocks[cacheBlockIndex] == null) {
+                    final int cacheBufferHeight = (cacheBlockIndex + 1) * LINES_PER_BUFFER < rasterHeight ? LINES_PER_BUFFER : rasterHeight - cacheBufferStartY;
+                    cacheBlocks[cacheBlockIndex] = new CacheBlock(cacheBufferStartY, width, cacheBufferHeight, dataType, noDataValue);
                 }
-                cacheBlocks[index].update(sourceOffsetX, yReadOff, cacheBufferStartY + writeOffset, sourceWidth, blockHeight, sourceBuffer);
-                final boolean complete = cacheBlocks[index].isComplete();
+                cacheBlocks[cacheBlockIndex].update(sourceOffsetX, yReadOff, cacheBufferStartY + writeOffset, sourceWidth, blockHeight, sourceBuffer);
+                final boolean complete = cacheBlocks[cacheBlockIndex].isComplete();
                 if (complete) {
-                    completedIndices.add(index);
+                    completedIndices.add(cacheBlockIndex);
                 }
                 canWrite |= complete;
                 yReadOff += blockHeight;
@@ -97,6 +97,6 @@ public class VariableCache {
 
     // package public for testing purpose only
     static long getStreamOutputPos(CacheBlock cacheBlock) {
-        return ((long) cacheBlock.getYOffset()) * cacheBlock.getRegion().width;
+        return (long) cacheBlock.getYOffset() * cacheBlock.getRegion().width;
     }
 }
