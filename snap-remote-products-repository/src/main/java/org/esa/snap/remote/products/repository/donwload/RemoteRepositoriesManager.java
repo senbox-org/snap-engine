@@ -378,6 +378,9 @@ public class RemoteRepositoriesManager {
             logger.log(Level.FINE, logMessage.toString());
         }
 
+        // avoid Read timeout errors from SciHub
+        NetUtils.setTimeout(300000);
+
         DataQuery query = buildDataQuery(dataSourceName, mission, credentials, parameterValues);
         query.setPageNumber(0);
         query.setPageSize(0);

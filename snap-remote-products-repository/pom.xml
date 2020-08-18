@@ -19,7 +19,7 @@
     <description>The Remote Products Repository allows downloading the products from a list of repositories.</description>
 
     <properties>
-        <tao.version>1.0.2</tao.version>
+        <tao.version>1.0.3</tao.version>
     </properties>
 
     <dependencies>
