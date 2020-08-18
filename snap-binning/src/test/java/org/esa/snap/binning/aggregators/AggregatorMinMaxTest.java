@@ -65,7 +65,7 @@ public class AggregatorMinMaxTest {
     }
 
     @Test
-    public void tesAggregatorMinMax() {
+    public void testAggregatorMinMax() {
         AggregatorMinMax agg = new AggregatorMinMax(new MyVariableContext("a"), "a", "Out");
 
         VectorImpl svec = vec(NaN, NaN);
