@@ -121,10 +121,10 @@ public class ResourceInstaller {
         }
         final Path realTargetFile = targetFile.toRealPath();
         final Path realResource = resource.toRealPath();
-        final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource);
+        final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource) && Files.size(realResource) != 0;
         final FileTime existingFileModifiedTime = Files.getLastModifiedTime(realTargetFile);
         final FileTime newFileModifiedTime = Files.getLastModifiedTime(realResource);
-        final boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
+        final boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0 && Files.size(realResource) != 0;  // access to attributes of files in jars is restricted
         return newFileIsNewer || sizeIsDifferent;
     }
 
