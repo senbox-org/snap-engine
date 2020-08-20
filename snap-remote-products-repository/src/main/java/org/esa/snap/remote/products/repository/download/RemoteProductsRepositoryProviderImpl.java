@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.donwload;
+package org.esa.snap.remote.products.repository.download;
 
 import org.apache.http.auth.Credentials;
 import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;

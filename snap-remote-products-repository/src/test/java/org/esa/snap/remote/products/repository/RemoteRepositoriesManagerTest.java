@@ -4,8 +4,8 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.esa.snap.remote.products.repository.download.RemoteRepositoriesManager;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
-import org.esa.snap.remote.products.repository.donwload.RemoteRepositoriesManager;
 import org.junit.Assume;
 import org.junit.Test;
 

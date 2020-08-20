@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.donwload;
+package org.esa.snap.remote.products.repository.download;
 
 import ro.cs.tao.configuration.ConfigurationProvider;
 

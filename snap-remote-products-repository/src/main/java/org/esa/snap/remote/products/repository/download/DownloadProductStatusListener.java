@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.donwload;
+package org.esa.snap.remote.products.repository.download;
 
 import ro.cs.tao.datasource.ProductStatusListener;
 import ro.cs.tao.eodata.EOProduct;
