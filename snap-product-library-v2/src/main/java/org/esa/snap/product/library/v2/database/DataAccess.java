@@ -240,7 +240,7 @@ public class DataAccess {
             sql.append(" FROM products AS p");
             if (localRepositoryFolder == null) {
                 // no local repository filter
-                sql.append(", repositories as lr");
+                sql.append(", local_repositories as lr");
             }
             if (remoteMissionName != null) {
                 // the mission is specified
@@ -799,7 +799,7 @@ public class DataAccess {
             if (rs.next()) {
                 return rs.getShort(1);
             }
-            statement = connection.prepareStatement("INSERT INTO remoe_repositories (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+            statement = connection.prepareStatement("INSERT INTO remote_repositories (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, remoteRepositoryName);
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -884,7 +884,7 @@ public class DataAccess {
         final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
                 "(name, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
                 "last_modified_date, geometry) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)");
+                "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         statement.setString(1, productToSave.getName());
         statement.setInt(2, localRepositoryId);
         statement.setString(3, relativePath.toString());
@@ -936,7 +936,7 @@ public class DataAccess {
         final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
                 "(name, remote_mission_id, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
                 "last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         statement.setString(1, productToSave.getName());
         statement.setInt(2, remoteMissionId);
         statement.setInt(3, localRepositoryId);
