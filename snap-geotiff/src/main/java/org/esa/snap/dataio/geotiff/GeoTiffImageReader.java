@@ -233,6 +233,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         // ImageIO.createImageInputStream creates for some inputs a MemoryCacheImageInputStream.
         // This causes problems because the class MemoryCache in JDK has an issue.
         // At line 323 pos shouldn't be casted but only the result of the module operation.
+        // This has been reported and accepted as issue: https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8252080
         // Using FileCacheImageInputStream explicitly works around this issue
         if (sourceImage instanceof InputStream) {
             // use system default cache dir, in tests SystemUtils.getCacheDir() seem not to be set correctly.
