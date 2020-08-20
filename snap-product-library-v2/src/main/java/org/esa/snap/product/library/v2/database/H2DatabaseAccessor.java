@@ -117,8 +117,7 @@ public class H2DatabaseAccessor {
         if (databaseProperties == null) {
             throw new NullPointerException("The database properties are null.");
         }
-        final Connection connection = DriverManager.getConnection(databaseUrl, databaseProperties);
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        return connection;
+        databaseUrl.concat(";AUTO_SERVER=TRUE");
+        return DriverManager.getConnection(databaseUrl, databaseProperties);
     }
 }

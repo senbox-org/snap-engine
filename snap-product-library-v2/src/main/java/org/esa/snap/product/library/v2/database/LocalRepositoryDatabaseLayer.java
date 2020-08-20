@@ -708,9 +708,9 @@ class LocalRepositoryDatabaseLayer {
         }
 
         StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO ")
+        sql.append("MERGE INTO ")
                 .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                .append(" (folder_path) VALUES ('")
+                .append(" (folder_path) KEY(folder_path) VALUES ('")
                 .append(localRepositoryFolderPath.toString())
                 .append("')");
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
@@ -719,7 +719,7 @@ class LocalRepositoryDatabaseLayer {
                 throw new SQLException("Failed to insert the local repository, no rows affected.");
             } else {
                 short localRepositoryId;
-                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                try (ResultSet generatedKeys = connection.prepareStatement("SELECT id FROM " + DatabaseTableNames.LOCAL_REPOSITORIES + " WHERE folder_path='" + localRepositoryFolderPath.toString() + "'").executeQuery()) {
                     if (generatedKeys.next()) {
                         localRepositoryId = generatedKeys.getShort(1);
                     } else {
