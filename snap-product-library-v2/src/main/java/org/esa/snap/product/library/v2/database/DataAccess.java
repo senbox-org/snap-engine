@@ -4,8 +4,10 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
+import org.esa.snap.engine_utilities.util.ZipUtils;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
 import org.esa.snap.product.library.v2.database.model.RemoteMission;
@@ -28,6 +30,7 @@ import org.locationtech.jts.geom.Polygon;
 import javax.imageio.ImageIO;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,6 +59,11 @@ public class DataAccess {
 
     public static final String DATABASE_DEFINITION_LANGUAGE_SOURCE_FOLDER_PATH = "org/esa/snap/product/library/v2/database";
     public static final String DATABASE_SQL_FILE_NAME_PREFIX = "h2gis-database-script-";
+
+    private static final Set<String> SIMPLE_PRODUCT_EXTENSIONS = new HashSet<String>() {{
+        add(".png"); add(".bmp"); add(".gif");
+    }};
+
     private static H2DatabaseParameters dbParams;
 
     public static void initialize() {
@@ -578,8 +586,8 @@ public class DataAccess {
                 Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
 
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
-                long sizeInBytes = FileIOUtils.computeFileSize(productPath);
-
+                long sizeInBytes = computeFileSize(localProductToSave, productPath);
+                final File fileLocation = localProductToSave.getFileLocation();
                 productId = getProductId(localRepositoryFolder.getId(), relativePath);
                 if (productId == null) {
                     productId = insertProduct(localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
@@ -1007,6 +1015,22 @@ public class DataAccess {
             ResultSet result = databaseMetaData.getTables(null, null, tableName.toUpperCase(), null);
             return result.next();
         }
+    }
+
+    private static long computeFileSize(Product product, Path productPath) throws IOException {
+        final Path computedPath;
+        final String extension = FileUtils.getExtension(productPath.toString());
+        if (ZipUtils.isZipped(productPath) || (extension != null && SIMPLE_PRODUCT_EXTENSIONS.contains(extension.toLowerCase()))) {
+            computedPath = productPath;
+        } else {
+            final String[] formatNames = product.getProductReader().getReaderPlugIn().getFormatNames();
+            if (Arrays.stream(formatNames).anyMatch(f -> f.startsWith("GeoTIFF"))) {
+                computedPath = productPath;
+            } else {
+                computedPath = productPath.getParent();
+            }
+        }
+        return FileIOUtils.computeFileSize(computedPath);
     }
 
     private static Connection getConnection() throws SQLException {
