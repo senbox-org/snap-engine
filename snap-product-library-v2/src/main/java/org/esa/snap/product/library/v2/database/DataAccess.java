@@ -468,27 +468,7 @@ public class DataAccess {
 
     static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws SQLException {
         try (Connection connection = getConnection()) {
-            final List<Integer> productIds = new ArrayList<>();
-            final PreparedStatement statement = connection.prepareStatement("SELECT id FROM products WHERE local_repository_id = ?");
-            statement.setInt(1, localRepositoryFolder.getId());
-            final ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                productIds.add(resultSet.getInt("id"));
-            }
-
-            connection.setAutoCommit(false);
-            try {
-                final Integer[] ids = productIds.toArray(new Integer[0]);
-                deleteRecordsFromTable(connection, "product_remote_attributes", "product_id", ids);
-                deleteRecordsFromTable(connection, "product_local_attributes", "product_id", ids);
-                deleteRecordsFromTable(connection, "products", "local_repository_id", (int) localRepositoryFolder.getId());
-                deleteRecordsFromTable(connection, "local_repositories", "id", (int) localRepositoryFolder.getId());
-                // commit the data
-                connection.commit();
-            } catch (Exception e) {
-                // rollback the statements from the transaction
-                connection.rollback();
-            }
+            deleteRecordsFromTable(connection, "local_repositories", "id", (int) localRepositoryFolder.getId());
         }
     }
 
@@ -496,8 +476,8 @@ public class DataAccess {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try {
-                deleteProductRemoteAttributes(productId, connection);
-                deleteProductLocalAttributes(productId, connection);
+                //deleteProductRemoteAttributes(productId, connection);
+                //deleteProductLocalAttributes(productId, connection);
                 deleteRecordsFromTable(connection, "products", "id", productId);
                 // commit the data
                 connection.commit();
@@ -520,7 +500,7 @@ public class DataAccess {
         deleteRecordsFromTable(connection, "product_local_attributes", "product_id", productId);
     }
 
-    private static int deleteRecordsFromTable(Connection connection, String tableName, String columnName, Integer... values) throws SQLException {
+    private static void deleteRecordsFromTable(Connection connection, String tableName, String columnName, Integer... values) throws SQLException {
         final PreparedStatement statement =
                 connection.prepareStatement(
                         String.format("DELETE FROM %s WHERE %s %s",
@@ -528,9 +508,9 @@ public class DataAccess {
                                       columnName,
                                       values != null && values.length > 1 ?
                                               " IN (" + Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(",")) + ")" :
-                                              " = " + values != null ? values[0] : "null"));
+                                              " = " + (values != null ? values[0] : "null")));
 
-        return statement.executeUpdate();
+        statement.executeUpdate();
     }
 
     private static Path extractProductPathRelativeToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
@@ -587,7 +567,6 @@ public class DataAccess {
 
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
                 long sizeInBytes = computeFileSize(localProductToSave, productPath);
-                final File fileLocation = localProductToSave.getFileLocation();
                 productId = getProductId(localRepositoryFolder.getId(), relativePath);
                 if (productId == null) {
                     productId = insertProduct(localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
@@ -764,6 +743,26 @@ public class DataAccess {
         return Files.exists(quickLookImageFile);
     }
 
+    public static boolean checkSame(String name, Path currentPath) {
+        try (Connection connection = getConnection()) {
+            final PreparedStatement statement =
+                    connection.prepareStatement(String.format("SELECT l.folder_path || '%s' || p.relative_path FROM local_repositories l join products p on p.local_repository_id = l.id where p.name = ?",
+                                                              File.separator));
+            statement.setString(1, name);
+            final ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                String path = resultSet.getString(1);
+                Path dbPath = Paths.get(path).getParent();
+                return currentPath.getParent().toString().startsWith(dbPath.toString());
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.warning(e.getMessage());
+            return false;
+        }
+    }
+
     private static void deleteQuickLookImage(int productId, Path databaseParentFolder) throws IOException {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         Path quickLookImageFile = quickLookImagesFolder.resolve(productId + ".png");
@@ -863,6 +862,75 @@ public class DataAccess {
         }
     }
 
+    private static int insertProduct(Product productToSave, AbstractGeometry2D geometry, Path relativePath, int localRepositoryId,
+                                     FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
+        return addLocalProduct(connection, productToSave.getName(), null, localRepositoryId, relativePath.toString(),
+                               sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
+                               fileTime.toMillis(), geometry.toWKT(), null, null, null);
+    }
+
+    private static int insertProduct(RepositoryProduct productToSave, Path relativePath, int remoteMissionId, int localRepositoryId,
+                                     FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
+        return addLocalProduct(connection, productToSave.getName(), remoteMissionId, localRepositoryId, relativePath.toString(),
+                               sizeInBytes, productToSave.getAcquisitionDate(), fileTime.toMillis(), productToSave.getPolygon().toWKT(),
+                               productToSave.getDataFormatType().getValue(), productToSave.getPixelType().getValue(),
+                               productToSave.getSensorType().getValue());
+    }
+
+    private static int addLocalProduct(Connection connection, String name, Integer remoteMissionId, int repositoryId, String relativePath,
+                                       long size, Date acquisitionDate, long lastModified, String footprint,
+                                       Integer dataFormatId, Integer pixelTypeId, Integer sensorTypeId) throws SQLException {
+        final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
+                                                                                "(name, remote_mission_id, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
+                                                                                "last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) " +
+                                                                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        statement.setString(1, name);
+        if (remoteMissionId != null) {
+            statement.setInt(2, remoteMissionId);
+        } else {
+            statement.setNull(2, Types.INTEGER);
+        }
+        statement.setInt(3, repositoryId);
+        statement.setString(4, relativePath);
+        statement.setLong(5, size);
+        if (acquisitionDate != null) {
+            statement.setTimestamp(6, new Timestamp(acquisitionDate.getTime()));
+        } else {
+            statement.setNull(6, Types.TIMESTAMP);
+        }
+        statement.setTimestamp(7, new Timestamp(lastModified));
+        statement.setString(8, footprint);
+        if (dataFormatId != null) {
+            statement.setInt(9, dataFormatId);
+        } else {
+            statement.setNull(9, Types.INTEGER);
+        }
+        if (pixelTypeId != null) {
+            statement.setInt(10, pixelTypeId);
+        } else {
+            statement.setNull(10, Types.INTEGER);
+        }
+        if (sensorTypeId != null) {
+            statement.setInt(11, sensorTypeId);
+        } else {
+            statement.setNull(11, Types.INTEGER);
+        }
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows == 0) {
+            throw new SQLException("Failed to insert the product, no rows affected.");
+        } else {
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Failed to get the generated product id.");
+                }
+            }
+        }
+    }
+
     private static void updateProduct(int productId, Product productToSave, AbstractGeometry2D geometry, Path relativePath, int localRepositoryId,
                                       FileTime fileTime, long sizeInBytes, Connection connection)
                                       throws SQLException {
@@ -886,39 +954,6 @@ public class DataAccess {
         statement.executeUpdate();
     }
 
-    private static int insertProduct(Product productToSave, AbstractGeometry2D geometry, Path relativePath, int localRepositoryId,
-                                     FileTime fileTime, long sizeInBytes, Connection connection)
-                                     throws SQLException {
-        final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
-                "(name, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
-                "last_modified_date, geometry) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-        statement.setString(1, productToSave.getName());
-        statement.setInt(2, localRepositoryId);
-        statement.setString(3, relativePath.toString());
-        statement.setLong(4, sizeInBytes);
-        Date acquisitionDate = (productToSave.getStartTime() == null) ? null : productToSave.getStartTime().getAsDate();
-        if (acquisitionDate != null) {
-            statement.setTimestamp(5, new Timestamp(acquisitionDate.getTime()));
-        } else {
-            statement.setNull(5, Types.TIMESTAMP);
-        }
-        statement.setTimestamp(6, new Timestamp(fileTime.toMillis()));
-        statement.setString(7, geometry.toWKT());
-        int affectedRows = statement.executeUpdate();
-        if (affectedRows == 0) {
-            throw new SQLException("Failed to insert the product, no rows affected.");
-        } else {
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("Failed to get the generated product id.");
-                }
-            }
-        }
-    }
-
     private static void updateProduct(int productId, RepositoryProduct productToSave, Path relativePath, int remoteMissionId,
                                       int localRepositoryId, FileTime fileTime, long sizeInBytes, Connection connection)
                                       throws SQLException {
@@ -936,38 +971,6 @@ public class DataAccess {
         statement.setInt(9, productToSave.getSensorType().getValue());
         statement.setInt(10, productId);
         statement.executeUpdate();
-    }
-
-    private static int insertProduct(RepositoryProduct productToSave, Path relativePath, int remoteMissionId, int localRepositoryId,
-                                     FileTime fileTime, long sizeInBytes, Connection connection)
-                                     throws SQLException {
-        final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
-                "(name, remote_mission_id, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
-                "last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-        statement.setString(1, productToSave.getName());
-        statement.setInt(2, remoteMissionId);
-        statement.setInt(3, localRepositoryId);
-        statement.setString(4, relativePath.toString());
-        statement.setLong(5, sizeInBytes);
-        statement.setTimestamp(6, new Timestamp(productToSave.getAcquisitionDate().getTime()));
-        statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
-        statement.setString(8, productToSave.getPolygon().toWKT());
-        statement.setInt(9, productToSave.getDataFormatType().getValue());
-        statement.setInt(10, productToSave.getPixelType().getValue());
-        statement.setInt(11, productToSave.getSensorType().getValue());
-        int affectedRows = statement.executeUpdate();
-        if (affectedRows == 0) {
-            throw new SQLException("Failed to insert the product, no rows affected.");
-        } else {
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("Failed to get the generated product id.");
-                }
-            }
-        }
     }
 
     private static void insertProductRemoteAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {

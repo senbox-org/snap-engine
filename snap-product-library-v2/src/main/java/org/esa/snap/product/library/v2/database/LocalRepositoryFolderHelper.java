@@ -201,13 +201,15 @@ public class LocalRepositoryFolderHelper {
             if (canContinue) {
                 try {
                     SaveProductData saveProductData = checkUnchangedProduct(localRepositoryFolderPath, existingLocalRepositoryProducts, productPath);
-
                     ThreadStatus.checkCancelled(threadStatus);
 
                     if (saveProductData == null) {
                         // read and save the product into the database
                         Product product = readProduct(productPath);
                         if (product != null) {
+                            if (DataAccess.checkSame(product.getName(), productPath)) {
+                                continue;
+                            }
                             // the product has been read from the local folder
                             boolean canDisposeProduct = true;
                             try {

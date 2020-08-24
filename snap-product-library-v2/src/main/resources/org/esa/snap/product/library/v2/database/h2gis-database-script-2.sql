@@ -4,6 +4,6 @@ CREATE TABLE product_local_attributes(
 	name VARCHAR(256) NOT NULL,
 	value VARCHAR(1024) NOT NULL,
 	UNIQUE (product_id, name),
-	FOREIGN KEY (product_id) REFERENCES products(id)
+	FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 )
 ;
