@@ -599,7 +599,7 @@ public class DataAccess {
         Connection conn = connection != null ? connection : getConnection();
         try {
             final String path = localRepositoryFolderPath.toString();
-            PreparedStatement statement = conn.prepareStatement("SELECT id, folder_path FROM local_repositories WHERE folder_path = ? OR ? LIKE folder_path || '%'");
+            PreparedStatement statement = conn.prepareStatement("SELECT id, folder_path FROM local_repositories WHERE folder_path = ? OR INSTR(?, folder_path) > 0");
             statement.setString(1, path);
             statement.setString(2, path);
             ResultSet resultSet = statement.executeQuery();
