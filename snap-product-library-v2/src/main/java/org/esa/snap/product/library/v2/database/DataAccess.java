@@ -746,14 +746,25 @@ public class DataAccess {
     public static boolean checkSame(String name, Path currentPath) {
         try (Connection connection = getConnection()) {
             final PreparedStatement statement =
-                    connection.prepareStatement(String.format("SELECT l.folder_path || '%s' || p.relative_path FROM local_repositories l join products p on p.local_repository_id = l.id where p.name = ?",
-                                                              File.separator));
-            statement.setString(1, name);
+                    connection.prepareStatement(String.format("SELECT l.folder_path, p.relative_path FROM local_repositories l " +
+                                                                      "join products p on p.local_repository_id = l.id where p.name ilike ? " +
+                                                                      "or instr(?, left(l.folder_path || '%s' || p.relative_path, instr(l.folder_path || '%s' || p.relative_path, '%s',-1))) > 0",
+                                                              File.separator, File.separator, File.separator));
+            statement.setString(1, name + "%");
+            statement.setString(2, currentPath.toString());
             final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                String path = resultSet.getString(1);
-                Path dbPath = Paths.get(path).getParent();
-                return currentPath.getParent().toString().startsWith(dbPath.toString());
+                String folder = resultSet.getString(1);
+                String productPath = resultSet.getString(2);
+                Path dbRoot = Paths.get(folder);
+                Path dbExistingPath = Paths.get(productPath);
+                Path currentRelative;
+                try {
+                    currentRelative = dbRoot.relativize(currentPath);
+                    return currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
             } else {
                 return false;
             }
