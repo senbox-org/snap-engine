@@ -38,7 +38,7 @@ CREATE TABLE remote_missions(
 	name VARCHAR(256) NOT NULL,
 	remote_repository_id SMALLINT NOT NULL,
 	UNIQUE (remote_repository_id, name),
-    FOREIGN KEY (remote_repository_id) REFERENCES remote_repositories(id)
+    FOREIGN KEY (remote_repository_id) REFERENCES remote_repositories(id) ON DELETE CASCADE
 )
 ;
 
@@ -47,7 +47,7 @@ CREATE TABLE remote_attributes(
 	name VARCHAR(256) NOT NULL,
 	remote_mission_id SMALLINT NOT NULL,
 	UNIQUE (remote_mission_id, name),
-    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id)
+    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id) ON DELETE CASCADE
 )
 ;
 
@@ -66,8 +66,8 @@ CREATE TABLE products(
 	pixel_type_id SMALLINT,
 	sensor_type_id SMALLINT,
 	UNIQUE (local_repository_id, relative_path),
-    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id),
-    FOREIGN KEY (local_repository_id) REFERENCES local_repositories(id),
+    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id) ON DELETE CASCADE,
+    FOREIGN KEY (local_repository_id) REFERENCES local_repositories(id) ON DELETE CASCADE,
     FOREIGN KEY (data_format_type_id) REFERENCES data_format_types(id),
     FOREIGN KEY (pixel_type_id) REFERENCES pixel_types(id),
     FOREIGN KEY (sensor_type_id) REFERENCES sensor_types(id)
@@ -80,7 +80,7 @@ CREATE TABLE product_remote_attributes(
 	name VARCHAR(256) NOT NULL,
 	value VARCHAR(102400) NOT NULL,
 	UNIQUE (product_id, name),
-	FOREIGN KEY (product_id) REFERENCES products(id)
+	FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 )
 ;
 

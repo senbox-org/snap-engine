@@ -1,10 +1,8 @@
 package org.esa.snap.product.library.v2.activator;
 
-import org.esa.snap.product.library.v2.database.H2DatabaseAccessor;
-import org.esa.snap.product.library.v2.database.H2DatabaseParameters;
+import org.esa.snap.product.library.v2.database.DataAccess;
 import org.esa.snap.runtime.Activator;
 
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,9 +23,8 @@ public class ProductLibraryActivator implements Activator {
         try {
             // load H2 driver
             Class.forName("org.h2.Driver");
-
-            H2DatabaseParameters databaseParameters = new H2DatabaseParameters(H2DatabaseAccessor.getDatabaseParentFolder());
-            H2DatabaseAccessor.upgradeDatabase(databaseParameters.getUrl(), databaseParameters.getProperties());
+            DataAccess.initialize();
+            DataAccess.upgradeDatabase();
         } catch (Exception exception) {
             logger.log(Level.SEVERE, "Failed to initialize the database.", exception);
         }

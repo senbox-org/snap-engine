@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.donwload;
+package org.esa.snap.remote.products.repository.download;
 
 import org.esa.snap.remote.products.repository.*;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;

@@ -201,7 +201,6 @@ public class LocalRepositoryFolderHelper {
             if (canContinue) {
                 try {
                     SaveProductData saveProductData = checkUnchangedProduct(localRepositoryFolderPath, existingLocalRepositoryProducts, productPath);
-
                     ThreadStatus.checkCancelled(threadStatus);
 
                     if (saveProductData == null) {
@@ -213,15 +212,17 @@ public class LocalRepositoryFolderHelper {
                             try {
                                 ThreadStatus.checkCancelled(threadStatus);
 
-                                Polygon2D polygon2D = buildProductPolygon(product);
-                                BufferedImage quickLookImage = null; // no quick look image when saving the product
-                                saveProductData = this.allLocalFolderProductsRepository.saveLocalProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
-                                // the product has been saved into the database
-                                newProductCount++;
-                                savedProducts.add(saveProductData);
-                                finishSavingProduct(saveProductData);
+                                if (!DataAccess.checkSame(product.getName(), productPath)) {
+                                    Polygon2D polygon2D = buildProductPolygon(product);
+                                    BufferedImage quickLookImage = null; // no quick look image when saving the product
+                                    saveProductData = this.allLocalFolderProductsRepository.saveLocalProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
+                                    // the product has been saved into the database
+                                    newProductCount++;
+                                    savedProducts.add(saveProductData);
+                                    finishSavingProduct(saveProductData);
 
-                                ThreadStatus.checkCancelled(threadStatus);
+                                    ThreadStatus.checkCancelled(threadStatus);
+                                }
 
                                 if (this.generateQuickLookImages) {
                                     productsToGenerateQuickLookImage.put(saveProductData.getProductId(), product);
