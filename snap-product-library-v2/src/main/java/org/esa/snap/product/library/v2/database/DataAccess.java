@@ -761,13 +761,14 @@ public class DataAccess {
                 Path currentRelative;
                 try {
                     currentRelative = dbRoot.relativize(currentPath);
-                    return currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
+                    if (currentRelative.getParent() != null && dbExistingPath.getParent() != null) {
+                        return currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
+                    }
                 } catch (IllegalArgumentException e) {
                     return false;
                 }
-            } else {
-                return false;
             }
+            return false;
         } catch (SQLException e) {
             logger.warning(e.getMessage());
             return false;
