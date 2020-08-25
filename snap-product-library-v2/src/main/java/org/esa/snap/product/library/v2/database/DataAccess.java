@@ -70,6 +70,10 @@ public class DataAccess {
         dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
     }
 
+    public static void setDbParams(H2DatabaseParameters dbParams) {
+        DataAccess.dbParams = dbParams;
+    }
+
     public static Path getDatabaseFolder() {
         return dbParams.getParentFolderPath();
     }
