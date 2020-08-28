@@ -166,7 +166,7 @@ public class ConvertDataTypeOp extends Operator {
                 if (!(band instanceof VirtualBand) || includeVirtualBands)
                     bandNameList.add(band.getName());
             }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+            sourceBandNames = bandNameList.toArray(new String[0]);
         }
 
         final List<Band> sourceBandList = new ArrayList<>(sourceBandNames.length);
@@ -176,14 +176,19 @@ public class ConvertDataTypeOp extends Operator {
                 sourceBandList.add(sourceBand);
             }
         }
-        return sourceBandList.toArray(new Band[sourceBandList.size()]);
+        return sourceBandList.toArray(new Band[0]);
     }
 
     private void addSelectedBands() {
         final Band[] sourceBands = getSourceBands(sourceProduct, sourceBandNames, false);
 
         for (Band srcBand : sourceBands) {
-            final Band targetBand = new Band(srcBand.getName(), dataType,
+            final String srcBandName = srcBand.getName();
+            if (targetProduct.containsBand(srcBandName)) {
+                // these are most likely flag-bands - we skip them here tb 2020-08-28
+                continue;
+            }
+            final Band targetBand = new Band(srcBandName, dataType,
                     sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
             targetBand.setUnit(srcBand.getUnit());
             targetBand.setNoDataValue(targetNoDataValue);
