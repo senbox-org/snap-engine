@@ -383,7 +383,7 @@ public class SystemUtils {
      * @since BEAM 4.8
      */
     public static void init3rdPartyLibs(Class<?> cls) {
-        init3rdPartyLibs(cls != null ? cls.getClassLoader() : Thread.currentThread().getContextClassLoader());
+        init3rdPartyLibsByCl(cls != null ? cls.getClassLoader() : Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -392,7 +392,7 @@ public class SystemUtils {
      * @param cl The most useful class loader.
      * @since SNAP 8.0
      */
-    public static void init3rdPartyLibs(ClassLoader cl) {
+    public static void init3rdPartyLibsByCl(ClassLoader cl) {
         initJAI(cl);
         initGeoTools();
         initNetCdf();
