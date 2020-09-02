@@ -115,7 +115,15 @@ public class VersionChecker {
         if (localVersion.get() == null) {
             Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(VersionChecker.VERSION_FILE_NAME);
             try {
-                localVersion.set(readVersionFromStream(localVersionStream == null ? Files.newInputStream(versionFile) : localVersionStream));
+                if (localVersionStream != null) {
+                    localVersion.set(readVersionFromStream(localVersionStream));
+                } else if (Files.exists(versionFile)) {
+                    try (InputStream inputStream = Files.newInputStream(versionFile)) {
+                        localVersion.set(readVersionFromStream(inputStream));
+                    }
+                } else {
+                    return null;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
