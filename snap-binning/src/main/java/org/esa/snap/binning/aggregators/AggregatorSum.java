@@ -10,6 +10,7 @@ import org.esa.snap.binning.VariableContext;
 import org.esa.snap.binning.Vector;
 import org.esa.snap.binning.WritableVector;
 import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.util.StringUtils;
 
 public class AggregatorSum extends AbstractAggregator {
 
@@ -17,9 +18,9 @@ public class AggregatorSum extends AbstractAggregator {
 
     AggregatorSum(VariableContext varCtx, String varName, String targetName) {
         super(Descriptor.NAME,
-              createFeatureNames(varName, "sum", "counts"),
-              createFeatureNames(varName, "sum", "counts"),
-              createFeatureNames(targetName, "sum", "counts"));
+              createFeatureNames(varName, "sum"),
+              createFeatureNames(varName, "sum"),
+              createFeatureNames(targetName, "sum"));
 
         varIndex = varCtx.getVariableIndex(varName);
     }
@@ -77,8 +78,10 @@ public class AggregatorSum extends AbstractAggregator {
             this(null, null);
         }
 
+        public Config(String varName) { this(varName, null); }
+
         public Config(String varName, String targetName) {
-            super(AggregatorAverageOutlierAware.Descriptor.NAME);
+            super(Descriptor.NAME);
             this.varName = varName;
             this.targetName = targetName;
         }
@@ -90,18 +93,22 @@ public class AggregatorSum extends AbstractAggregator {
 
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-            AggregatorSum.Config config = (AggregatorSum.Config) aggregatorConfig;
-            return new AggregatorSum(varCtx, config.varName, config.targetName);
+            Config config = (Config) aggregatorConfig;
+            String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
+            return new AggregatorSum(varCtx, config.varName, targetName);
         }
 
         @Override
         public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
-            return new String[0];
+            Config config = (Config) aggregatorConfig;
+            return new String[]{config.varName};
         }
 
         @Override
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
-            return new String[0];
+            Config config = (Config) aggregatorConfig;
+            String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
+            return createFeatureNames(targetName, "sum");
         }
 
         @Override
@@ -111,7 +118,7 @@ public class AggregatorSum extends AbstractAggregator {
 
         @Override
         public AggregatorConfig createConfig() {
-            return null;
+            return new Config();
         }
     }
 }
