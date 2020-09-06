@@ -112,7 +112,9 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
             this.swappedSubsampledImage = null;
         } finally {
                 try {
-                    this.closeable.close();
+                    if(this.closeable != null) {
+                        this.closeable.close();
+                    }
                 } catch (IOException ignore) {
                     // ignore
                 }
