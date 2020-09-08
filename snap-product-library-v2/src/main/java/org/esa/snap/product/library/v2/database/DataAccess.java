@@ -650,6 +650,7 @@ public class DataAccess {
                 statement.setString(2, relativePath.toString());
                 statement.setLong(3, sizeInBytes);
                 statement.setTimestamp(4, new java.sql.Timestamp(fileTime.toMillis()));
+                statement.setInt(5, productToUpdate.getId());
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
                     throw new SQLException("Failed to update the product, no rows affected.");
