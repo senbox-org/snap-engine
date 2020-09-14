@@ -16,11 +16,8 @@
 package org.esa.snap.dem.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.apache.commons.math3.util.FastMath;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
@@ -59,6 +56,7 @@ public final class ComputeSlopeAspectOp extends Operator {
 
     @SourceProduct(alias = "source")
     private Product sourceProduct;
+
     @TargetProduct
     private Product targetProduct;
 
@@ -77,6 +75,9 @@ public final class ComputeSlopeAspectOp extends Operator {
     @Parameter(label = "External DEM Apply EGM", defaultValue = "false")
     private Boolean externalDEMApplyEGM = false;
 
+    @Parameter(label = "Elevation Band Name", defaultValue = "elevation")
+    private String demBandName;
+
 
     private ElevationModel dem = null;
     private int sourceImageWidth = 0;
@@ -86,8 +87,10 @@ public final class ComputeSlopeAspectOp extends Operator {
     private double noDataValue = 0.0;
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
-    private Band slopeBand = null;
-    private Band aspectBand = null;
+    private Band demBand = null; // source band
+    private Band elevationBand = null; // target band
+    private Band slopeBand = null; // target band
+    private Band aspectBand = null; // target band
     private Resampling selectedResampling = null;
 
     /**
@@ -108,26 +111,11 @@ public final class ComputeSlopeAspectOp extends Operator {
         try {
             getPixelSpacings();
 
+            checkDEM();
+
             createTargetProduct();
 
-            if (demName.equals("External DEM") && externalDEMFile == null) {
-                throw new OperatorException("External DEM file is not found");
-            }
-
-            if (externalDEMApplyEGM == null) {
-                externalDEMApplyEGM = false;
-            }
-
-            selectedResampling = ResamplingFactory.createResampling(demResamplingMethod);
-            if(selectedResampling == null) {
-                throw new OperatorException("Resampling method "+ demResamplingMethod + " is invalid");
-            }
-
-            if (externalDEMFile == null) {
-                DEMFactory.checkIfDEMInstalled(demName);
-            }
-
-            DEMFactory.validateDEM(demName, sourceProduct);
+            updateMetadata();
 
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -157,6 +145,163 @@ public final class ComputeSlopeAspectOp extends Operator {
         }
     }
 
+    private void checkDEM() throws Exception {
+
+        if (demName.equals("External DEM") && externalDEMFile == null) {
+            throw new OperatorException("External DEM file is not found");
+        }
+
+        if (externalDEMApplyEGM == null) {
+            externalDEMApplyEGM = false;
+        }
+
+        selectedResampling = ResamplingFactory.createResampling(demResamplingMethod);
+        if(selectedResampling == null) {
+            throw new OperatorException("Resampling method "+ demResamplingMethod + " is invalid");
+        }
+
+        if (externalDEMFile == null) {
+            DEMFactory.checkIfDEMInstalled(demName);
+        }
+
+        DEMFactory.validateDEM(demName, sourceProduct);
+
+        if (demName.equals("Band DEM")) {
+            demBand = sourceProduct.getBand(demBandName);
+            if (demBand == null) {
+                throw new OperatorException("Source product does not have an elevation band named " + demBandName);
+            }
+            demNoDataValue = demBand.getNoDataValue();
+        }
+    }
+
+    /**
+     * Create target product.
+     */
+    private void createTargetProduct() {
+
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+
+        targetProduct = new Product(sourceProduct.getName(),
+                sourceProduct.getProductType(),
+                sourceImageWidth,
+                sourceImageHeight);
+
+        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+
+        addSelectedBands();
+    }
+
+    private void addSelectedBands() {
+
+        for (Band band : sourceProduct.getBands()) {
+            if (band instanceof VirtualBand) {
+                ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) band, band.getName());
+            } else if (!band.getName().equals(demBandName)) { // not copy dem band directly because it introduces artifacts
+                ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
+            }
+        }
+
+        slopeBand = new Band("slope", ProductData.TYPE_FLOAT32, sourceImageWidth, sourceImageHeight);
+        slopeBand.setUnit(Unit.DEGREES);
+        targetProduct.addBand(slopeBand);
+
+        aspectBand = new Band("aspect", ProductData.TYPE_FLOAT32, sourceImageWidth, sourceImageHeight);
+        aspectBand.setUnit(Unit.DEGREES);
+        targetProduct.addBand(aspectBand);
+
+        elevationBand = new Band(demBandName, ProductData.TYPE_FLOAT32, sourceImageWidth, sourceImageHeight);
+        elevationBand.setUnit(Unit.METERS);
+        targetProduct.addBand(elevationBand);
+    }
+
+    private void updateMetadata() {
+
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+
+        if (externalDEMFile != null) { // if external DEM file is specified by user
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
+        } else {
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        }
+
+        absTgt.setAttributeString("DEM resampling method", demResamplingMethod);
+
+        if (externalDEMFile != null) {
+            absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
+        }
+    }
+
+
+    /**
+     * Called by the framework in order to compute the stack of tiles for the given target bands.
+     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
+     *
+     * @param targetTiles     The current tiles to be computed for each target band.
+     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
+     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException if an error occurs during computation of the target rasters.
+     */
+    @Override
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm)
+            throws OperatorException {
+
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+        final int w = targetRectangle.width;
+        final int h = targetRectangle.height;
+
+        try {
+            if (!isElevationModelAvailable && demBand == null) {
+                getElevationModel();
+            }
+
+            final int extTileHeight = h + 2;
+            final int extTileWidth = w + 2;
+            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(
+                    targetProduct, x0 - 1, y0 - 1, extTileWidth, extTileHeight);
+
+            final double[][] localDEM = new double[extTileHeight][extTileWidth];
+            if (demBand == null) {
+                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, demResamplingMethod, tileGeoRef,
+                        x0, y0, w, h, sourceProduct, true, localDEM);
+
+                if (!valid) {
+                    return;
+                }
+            } else {
+                getLocalDEMFromBand(x0, y0, w, h, localDEM);
+            }
+
+            final Tile slopeTile = targetTiles.get(slopeBand);
+            final Tile aspectTile = targetTiles.get(aspectBand);
+            final Tile elevationTile = targetTiles.get(elevationBand);
+            final ProductData slopeData = slopeTile.getDataBuffer();
+            final ProductData aspectData = aspectTile.getDataBuffer();
+            final ProductData elevationData = elevationTile.getDataBuffer();
+            final TileIndex targetIndex = new TileIndex(slopeTile);
+
+            final int ymax = y0 + h;
+            final int xmax = x0 + w;
+            for (int y = y0; y < ymax; ++y) {
+                targetIndex.calculateStride(y);
+                final int yy = y - y0 + 1;
+
+                for (int x = x0; x < xmax; ++x) {
+                    final int tgtIdx = targetIndex.getIndex(x);
+
+                    final double[] slopeAspect = computeSlope(x, y, x0, y0, localDEM);
+                    slopeData.setElemFloatAt(tgtIdx, (float) slopeAspect[0]);
+                    aspectData.setElemFloatAt(tgtIdx, (float) slopeAspect[1]);
+                    elevationData.setElemFloatAt(tgtIdx, (float)localDEM[yy][x - x0 + 1]);
+                }
+            }
+        } catch (Throwable e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
     /**
      * Get elevation model.
      */
@@ -181,117 +326,53 @@ public final class ComputeSlopeAspectOp extends Operator {
         isElevationModelAvailable = true;
     }
 
-    /**
-     * Create target product.
-     */
-    private void createTargetProduct() {
+    private void getLocalDEMFromBand(final int x0, final int y0, final int w, final int h, final double[][] localDEM) {
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
+        //       the left and 1 extra column to the right of the tile.
 
-        targetProduct = new Product(sourceProduct.getName(),
-                sourceProduct.getProductType(),
-                sourceImageWidth,
-                sourceImageHeight);
+        final int maxY = y0 + h + 1;
+        final int maxX = x0 + w + 1;
+        final Rectangle sourceRectangle = getSourceRectangle(x0, y0, w, h);
+        final Tile demTile = getSourceTile(demBand, sourceRectangle);
+        final ProductData demData = demTile.getDataBuffer();
+        final TileIndex srcIndex = new TileIndex(demTile);
 
-        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+        for (int y = y0 - 1; y < maxY; ++y) {
+            final int yy = y - y0 + 1;
 
-        addSelectedBands();
-
-        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (externalDEMFile != null) { // if external DEM file is specified by user
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
-        } else {
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
-        }
-
-        absTgt.setAttributeString("DEM resampling method", demResamplingMethod);
-
-        if (externalDEMFile != null) {
-            absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
-        }
-    }
-
-    private void addSelectedBands() {
-
-        for (Band band : sourceProduct.getBands()) {
-            if (band instanceof VirtualBand) {
-                ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) band, band.getName());
-            } else {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-
-        slopeBand = new Band("Slope", ProductData.TYPE_FLOAT32, sourceImageWidth, sourceImageHeight);
-        slopeBand.setUnit(Unit.DEGREES);
-        targetProduct.addBand(slopeBand);
-
-        aspectBand = new Band("Aspect", ProductData.TYPE_FLOAT32, sourceImageWidth, sourceImageHeight);
-        aspectBand.setUnit(Unit.DEGREES);
-        targetProduct.addBand(aspectBand);
-    }
-
-
-    /**
-     * Called by the framework in order to compute the stack of tiles for the given target bands.
-     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-     *
-     * @param targetTiles     The current tiles to be computed for each target band.
-     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
-     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
-     * @throws OperatorException if an error occurs during computation of the target rasters.
-     */
-    @Override
-    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-
-        final int x0 = targetRectangle.x;
-        final int y0 = targetRectangle.y;
-        final int w = targetRectangle.width;
-        final int h = targetRectangle.height;
-
-        try {
-            if (!isElevationModelAvailable) {
-                getElevationModel();
-            }
-
-            final int extTileHeight = h + 2;
-            final int extTileWidth = w + 2;
-            final double[][] localDEM = new double[extTileHeight][extTileWidth];
-
-            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(
-                    targetProduct, x0 - 1, y0 - 1, extTileWidth, extTileHeight);
-
-            final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, demResamplingMethod, tileGeoRef,
-                    x0, y0, w, h, sourceProduct, true, localDEM);
-
-            if (!valid) {
-                return;
-            }
-
-            final Tile slopeTile = targetTiles.get(slopeBand);
-            final Tile aspectTile = targetTiles.get(aspectBand);
-            final ProductData slopeData = slopeTile.getDataBuffer();
-            final ProductData aspectData = aspectTile.getDataBuffer();
-            final TileIndex targetIndex = new TileIndex(slopeTile);
-
-            final int ymax = y0 + h;
-            final int xmax = x0 + w;
-            for (int y = y0; y < ymax; ++y) {
-                targetIndex.calculateStride(y);
-
-                for (int x = x0; x < xmax; ++x) {
-                    final int tgtIdx = targetIndex.getIndex(x);
-
-                    final double[] slopeAspect = computeSlope(x, y, x0, y0, localDEM);
-                    slopeData.setElemFloatAt(tgtIdx, (float) slopeAspect[0]);
-                    aspectData.setElemFloatAt(tgtIdx, (float) slopeAspect[1]);
+            if (y < 0 || y >= sourceImageHeight) {
+                for (int i = 0; i < w + 2; ++i) {
+                    localDEM[yy][i] = demNoDataValue;
                 }
+                continue;
             }
-        } catch (Throwable e) {
-            OperatorUtils.catchOperatorException(getId(), e);
+
+            srcIndex.calculateStride(y);
+
+            for (int x = x0 - 1; x < maxX; x++) {
+                final int xx = x - x0 + 1;
+
+                if (x < 0 || x >= sourceImageWidth) {
+                    localDEM[yy][xx] = demNoDataValue;
+                    continue;
+                }
+
+                localDEM[yy][xx] = demData.getElemDoubleAt(srcIndex.getIndex(x));
+            }
         }
+    }
+
+    private Rectangle getSourceRectangle(final int x0, final int y0, final int w, final int h) {
+
+        final int sx0 = FastMath.max(x0 - 1, 0);
+        final int sy0 = FastMath.max(y0 - 1, 0);
+        final int sxMax = FastMath.min(x0 + w, sourceImageWidth - 1);
+        final int syMax = FastMath.min(y0 + h, sourceImageHeight - 1);
+        final int sw = sxMax - sx0 + 1;
+        final int sh = syMax - sy0 + 1;
+
+        return new Rectangle(sx0, sy0, sw, sh);
     }
 
     private double[] computeSlope(final int x, final int y, final int x0, final int y0, final double[][] localDEM) {
