@@ -29,8 +29,7 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -604,6 +603,7 @@ public class ProductIO {
             final ProductData rasterData = band.createCompatibleRasterData(rect.width, rect.height);
             data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
             band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+            rasterData.dispose();
         }
     }
 

@@ -97,6 +97,7 @@ public abstract class AbstractBand extends RasterDataNode {
             }
         }
         writeRasterData(x, y, w, h, subRasterData, pm);
+        subRasterData.dispose();
     }
 
 
@@ -132,6 +133,7 @@ public abstract class AbstractBand extends RasterDataNode {
             }
         }
         writeRasterData(x, y, w, h, subRasterData, pm);
+        subRasterData.dispose();
     }
 
     /**
@@ -165,6 +167,7 @@ public abstract class AbstractBand extends RasterDataNode {
             }
         }
         writeRasterData(x, y, w, h, subRasterData, pm);
+        subRasterData.dispose();
     }
 
     /**
