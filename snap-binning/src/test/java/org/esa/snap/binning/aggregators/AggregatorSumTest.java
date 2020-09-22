@@ -38,17 +38,14 @@ public class AggregatorSumTest {
 
         assertEquals("SUM", agg.getName());
 
-        assertEquals(2, agg.getSpatialFeatureNames().length);
+        assertEquals(1, agg.getSpatialFeatureNames().length);
         assertEquals("var_sum", agg.getSpatialFeatureNames()[0]);
-        assertEquals("var_counts", agg.getSpatialFeatureNames()[1]);
 
-        assertEquals(2, agg.getTemporalFeatureNames().length);
+        assertEquals(1, agg.getTemporalFeatureNames().length);
         assertEquals("var_sum", agg.getTemporalFeatureNames()[0]);
-        assertEquals("var_counts", agg.getTemporalFeatureNames()[1]);
 
-        assertEquals(2, agg.getOutputFeatureNames().length);
+        assertEquals(1, agg.getOutputFeatureNames().length);
         assertEquals("out_sum", agg.getOutputFeatureNames()[0]);
-        assertEquals("out_counts", agg.getOutputFeatureNames()[1]);
     }
 
     @Test
@@ -197,8 +194,7 @@ public class AggregatorSumTest {
         assertNotNull(aggregator);
 
         final String[] spatialFeatureNames = aggregator.getSpatialFeatureNames();
-        assertEquals(2, spatialFeatureNames.length);
+        assertEquals(1, spatialFeatureNames.length);
         assertEquals("Jenni_sum", spatialFeatureNames[0]);
-        assertEquals("Jenni_counts", spatialFeatureNames[1]);
-    }
+    }   
 }
