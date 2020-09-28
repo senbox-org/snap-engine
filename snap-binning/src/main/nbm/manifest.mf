@@ -4,7 +4,7 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP
+OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>The Level-3 Binning Operator perfo
  rms a spatial and temporal aggregation of a number of input (Level-2)
   products using the NASA SeaDAS binning scheme. This module has repla

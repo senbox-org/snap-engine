@@ -4,7 +4,7 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP
+OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>A module to compute automatically
  optimum configuration for SNAP, considering system characteristics
  such as RAM, CPUs, disks, etc. as well as a selected processing chain.

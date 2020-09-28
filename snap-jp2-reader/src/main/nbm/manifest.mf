@@ -4,6 +4,6 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP
+OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Layer: org/esa/snap/jp2/reader/layer.xml
 OpenIDE-Module-Long-Description: <p>This module reads JP2 (JPEG2000) files</p>
