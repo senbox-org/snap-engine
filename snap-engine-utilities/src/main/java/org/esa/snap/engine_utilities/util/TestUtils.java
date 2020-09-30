@@ -34,7 +34,6 @@ import org.esa.snap.engine_utilities.gpf.CommonReaders;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -179,7 +178,8 @@ public class TestUtils {
     }
 
     public static Band createBand(final Product testProduct, final String bandName, final int w, final int h) {
-        final Band band = testProduct.addBand(bandName, ProductData.TYPE_INT32);
+        Band band = new Band(bandName, ProductData.TYPE_INT32, w, h);
+        testProduct.addBand(band);
         band.setUnit(Unit.AMPLITUDE);
         final int[] intValues = new int[w * h];
         for (int i = 0; i < w * h; i++) {
