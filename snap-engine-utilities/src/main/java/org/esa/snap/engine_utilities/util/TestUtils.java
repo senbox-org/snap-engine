@@ -178,14 +178,28 @@ public class TestUtils {
     }
 
     public static Band createBand(final Product testProduct, final String bandName, final int w, final int h) {
-        Band band = new Band(bandName, ProductData.TYPE_INT32, w, h);
+        return createBand(testProduct, bandName, ProductData.TYPE_INT32, Unit.AMPLITUDE, w, h, true);
+    }
+
+    public static Band createBand(final Product testProduct, final String bandName, final int dataType,
+                                  final String unit, final int w, final int h, final boolean increasing) {
+        Band band = new Band(bandName, dataType, w, h);
         testProduct.addBand(band);
-        band.setUnit(Unit.AMPLITUDE);
-        final int[] intValues = new int[w * h];
-        for (int i = 0; i < w * h; i++) {
-            intValues[i] = i + 1;
+        band.setUnit(unit);
+        final int size = w * h;
+        if(dataType == ProductData.TYPE_FLOAT32) {
+            final float[] floatValues = new float[size];
+            for (int i = 0; i < size; i++) {
+                floatValues[increasing ? i : size-1-i] = i + 1.5f;
+            }
+            band.setData(ProductData.createInstance(floatValues));
+        } else {
+            final int[] intValues = new int[size];
+            for (int i = 0; i < size; i++) {
+                intValues[increasing ? i : size-1-i] = i + 1;
+            }
+            band.setData(ProductData.createInstance(intValues));
         }
-        band.setData(ProductData.createInstance(intValues));
         return band;
     }
 
