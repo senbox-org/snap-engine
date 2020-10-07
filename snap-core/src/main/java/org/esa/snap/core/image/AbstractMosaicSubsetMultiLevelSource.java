@@ -299,7 +299,8 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
 
     private static int computeDecompressedEndTileIndex(int startTileIndex, int imageReadOffset, int imageReadSize, int tileSize) {
         int endTileIndex = startTileIndex;
-        if (imageReadSize > tileSize) {
+        // verify if the reading area needs other tiles
+        if (imageReadSize > ((startTileIndex + 1) * tileSize - imageReadOffset)) {
             int imageReadEndPosition = imageReadOffset + imageReadSize;
             endTileIndex = imageReadEndPosition / tileSize;
             if (imageReadEndPosition % tileSize == 0) {
