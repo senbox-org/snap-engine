@@ -79,6 +79,11 @@ public class CfNetCdfWriterPlugIn extends AbstractNetCdfWriterPlugIn {
     }
 
     @Override
+    public ProfilePartWriter createIndexCodingPartWriter() {
+        return new CfIndexCodingPart();
+    }
+
+    @Override
     public ProfilePartWriter createGeoCodingPartWriter() {
         return new CfGeocodingPart();
     }

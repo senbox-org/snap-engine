@@ -128,10 +128,10 @@ public class N4Variable implements NVariable {
                         Attribute attribute = new Attribute(name, (Double) value, false);
                         return variable.addAttribute(attribute);
                     } else if (value instanceof Byte) {
-                        Attribute attribute = new Attribute(name, (Byte) value);
+                        Attribute attribute = new Attribute(name, (Byte) value, isUnsigned);
                         return variable.addAttribute(attribute);
                     } else if (value instanceof Short) {
-                        Attribute attribute = new Attribute(name, (Short) value);
+                        Attribute attribute = new Attribute(name, (Short) value, isUnsigned);
                         return variable.addAttribute(attribute);
                     } else if (value instanceof int[]) {
                         List<Integer> temp = Ints.asList((int[]) value);

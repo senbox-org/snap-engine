@@ -19,32 +19,43 @@ package org.esa.snap.csv.dataio.reader;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelTimeCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.csv.dataio.CsvFile;
 import org.esa.snap.csv.dataio.CsvSource;
 import org.esa.snap.csv.dataio.CsvSourceParser;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 import org.opengis.feature.type.AttributeDescriptor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.stream.DoubleStream;
 
-import static org.esa.snap.core.dataio.Constants.GEOCODING;
-import static org.esa.snap.csv.dataio.Constants.*;
+import static org.esa.snap.csv.dataio.Constants.LAT_NAMES;
+import static org.esa.snap.csv.dataio.Constants.LON_NAMES;
+import static org.esa.snap.csv.dataio.Constants.NAME_METADATA_ELEMENT_CSV_HEADER_PROPERTIES;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_COLUMN;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_PATTERN;
 
 /**
  * The CsvProductReader is able to read a CSV file as a product.
@@ -145,12 +156,12 @@ public class CsvProductReader extends AbstractProductReader {
         final int rasterHeight = lonBand.getRasterHeight();
         final int size = rasterWidth * rasterHeight;
 
-        final double[] longitudes = lonBand.getSourceImage().getImage(0).getData()
+        final double[] longitudes = lonBand.getGeophysicalImage().getImage(0).getData()
                 .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-        final double[] latitudes = latBand.getSourceImage().getImage(0).getData()
+        final double[] latitudes = latBand.getGeophysicalImage().getImage(0).getData()
                 .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
-                rasterWidth, rasterHeight, Double.parseDouble(rasterResolutionString));
+                                                  rasterWidth, rasterHeight, Double.parseDouble(rasterResolutionString));
 
         final ForwardCoding forwardCoding = ComponentFactory.getForward(PixelForward.KEY);
         final InverseCoding inverseCoding = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
