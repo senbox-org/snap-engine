@@ -10,7 +10,7 @@ import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCodingPersistable implements DimapPersistable {
@@ -157,9 +157,9 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
             final int size = rasterWidth * rasterHeight;
-            final double[] longitudes = lonRaster.getSourceImage().getImage(0).getData()
+            final double[] longitudes = lonRaster.getGeophysicalImage().getImage(0).getData()
                     .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-            final double[] latitudes = latRaster.getSourceImage().getImage(0).getData()
+            final double[] latitudes = latRaster.getGeophysicalImage().getImage(0).getData()
                     .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
                                       resolutionInKm);

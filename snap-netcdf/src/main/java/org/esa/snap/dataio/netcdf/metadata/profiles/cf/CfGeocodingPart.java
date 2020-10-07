@@ -392,10 +392,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         //   I'm forced to understand the parametrisation  etc ...
         // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
         // tb 2020-04-14
-        final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        final double[] longitudes = lonBand.getGeophysicalImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
         lonBand.unloadRasterData();
 
-        final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        final double[] latitudes = latBand.getGeophysicalImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
         latBand.unloadRasterData();
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);

@@ -336,8 +336,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
-            longitudes = lonRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-            latitudes = latRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            longitudes = lonRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            latitudes = latRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
 
             offsetX = 0.5;
             offsetY = 0.5;
