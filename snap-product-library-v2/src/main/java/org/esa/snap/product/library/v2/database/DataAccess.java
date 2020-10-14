@@ -974,16 +974,18 @@ public class DataAccess {
         final PreparedStatement statement = connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = ?," +
                 "local_repository_id = ?, relative_path = ?, entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, " +
                 "last_modified_date = ?, geometry = ?, data_format_type_id = ?, pixel_type_id = ?, sensor_type_id = ? WHERE id = ?");
-        statement.setInt(1, localRepositoryId);
-        statement.setString(2, relativePath.toString());
-        statement.setLong(3, sizeInBytes);
-        statement.setTimestamp(4, new Timestamp(productToSave.getAcquisitionDate().getTime()));
-        statement.setTimestamp(5, new Timestamp(fileTime.toMillis()));
-        statement.setString(6, productToSave.getPolygon().toWKT());
-        statement.setInt(7, productToSave.getDataFormatType().getValue());
-        statement.setInt(8, productToSave.getPixelType().getValue());
-        statement.setInt(9, productToSave.getSensorType().getValue());
-        statement.setInt(10, productId);
+        statement.setString(1, productToSave.getName());
+        statement.setInt(2, remoteMissionId);
+        statement.setInt(3, localRepositoryId);
+        statement.setString(4, relativePath.toString());
+        statement.setLong(5, sizeInBytes);
+        statement.setTimestamp(6, new Timestamp(productToSave.getAcquisitionDate().getTime()));
+        statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
+        statement.setString(8, productToSave.getPolygon().toWKT());
+        statement.setInt(9, productToSave.getDataFormatType().getValue());
+        statement.setInt(10, productToSave.getPixelType().getValue());
+        statement.setInt(11, productToSave.getSensorType().getValue());
+        statement.setInt(12, productId);
         statement.executeUpdate();
     }
 
