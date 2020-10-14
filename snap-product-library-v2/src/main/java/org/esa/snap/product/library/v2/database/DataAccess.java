@@ -157,7 +157,7 @@ public class DataAccess {
     static List<String> listMetadataMissionNames() throws SQLException {
         final List<String> metadataMissionNames = new ArrayList<>();
         try (Connection connection = getConnection()) {
-            final PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT metadata_mission FROM products ORDER BY metadata_mission");
+            final PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT metadata_mission FROM products WHERE metadata_mission IS NOT NULL ORDER BY metadata_mission");
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 metadataMissionNames.add(resultSet.getString("metadata_mission"));
