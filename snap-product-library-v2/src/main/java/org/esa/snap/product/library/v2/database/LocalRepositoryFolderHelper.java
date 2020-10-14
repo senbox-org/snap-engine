@@ -416,7 +416,7 @@ public class LocalRepositoryFolderHelper {
             FileTime fileTime = Files.getLastModifiedTime(productPathToCheck);
             if (fileTime.toMillis() == localProductMetadata.getLastModifiedDate().getTime()) {
                 // unchanged product
-                saveProductData = new SaveProductData(localProductMetadata.getId(), null, null, null);
+                saveProductData = new SaveProductData(localProductMetadata.getId(), null, null, null, null);
             }
         }
         return saveProductData;

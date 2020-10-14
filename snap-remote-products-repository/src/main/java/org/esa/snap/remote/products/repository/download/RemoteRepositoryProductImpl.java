@@ -21,6 +21,7 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     private final AbstractGeometry2D polygon;
     private final Date acquisitionDate;
 
+    private String metadataMission;
     private List<Attribute> remoteAttributes;
     private List<Attribute> localAttributes;
     private long approximateSize;
@@ -113,6 +114,16 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     @Override
     public RemoteMission getRemoteMission() {
         return this.remoteMission;
+    }
+
+    @Override
+    public String getMetadataMission() {
+        return metadataMission;
+    }
+
+    @Override
+    public void setMetadataMission(String metadataMission) {
+        this.metadataMission = metadataMission;
     }
 
     @Override

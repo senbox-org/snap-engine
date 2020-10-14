@@ -123,7 +123,13 @@ public class AllLocalFolderProductsRepository {
         final Map<Short, Set<String>> remoteAttributeNamesPerMission = DataAccess.listRemoteAttributeNames();
         final Set<String> localAttributeNames = DataAccess.listLocalAttributeNames();
         final List<String> remoteMissionNames = DataAccess.listRemoteMissionNames();
-        return new LocalRepositoryParameterValues(remoteMissionNames, remoteAttributeNamesPerMission, localAttributeNames, localRepositoryFolders);
+        final List<String> metadataMissionNames = DataAccess.listMetadataMissionNames();
+        // make an union from remote missions and metadata missions
+        // (users can have local repositories created by downloading products with Product Library and also existing folders added as local repositories in Product Library)
+        final List<String> remoteAndMetadataMissionNames = new ArrayList<>();
+        remoteAndMetadataMissionNames.addAll(remoteMissionNames);
+        remoteAndMetadataMissionNames.addAll(metadataMissionNames);
+        return new LocalRepositoryParameterValues(remoteAndMetadataMissionNames, remoteAttributeNamesPerMission, localAttributeNames, localRepositoryFolders);
     }
 
     public List<LocalProductMetadata> loadRepositoryProductsMetadata(Path localRepositoryFolderPath) throws SQLException {

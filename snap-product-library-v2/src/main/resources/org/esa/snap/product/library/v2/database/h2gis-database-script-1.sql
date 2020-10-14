@@ -55,6 +55,7 @@ CREATE TABLE products(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	name VARCHAR(512) NOT NULL,
 	remote_mission_id SMALLINT,
+	metadata_mission VARCHAR(512),
 	local_repository_id SMALLINT NOT NULL,
 	relative_path VARCHAR(2048) NOT NULL,
 	entry_point VARCHAR(512),

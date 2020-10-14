@@ -44,4 +44,8 @@ public interface RepositoryProduct {
     public SensorType getSensorType();
 
     public RemoteMission getRemoteMission();
+
+    public String getMetadataMission();
+
+    public void setMetadataMission(String metadataMission);
 }
