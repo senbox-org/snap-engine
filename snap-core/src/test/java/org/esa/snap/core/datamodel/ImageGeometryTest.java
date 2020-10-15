@@ -79,43 +79,43 @@ public class ImageGeometryTest {
     }
 
 
-    @Test
-    public void testPixelSizeCalculationWithPixelGeoCoding() throws Exception {
-        Product product = new Product("test", "T", 2, 2);
-        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
-        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        latBand.setSynthetic(true);
-        lonBand.setSynthetic(true);
-        // these are the outer bounds
-        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
-        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
-
-        ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
-                                                                         null, null, null, null, null, null, null, null, null);
-        assertEquals(2.0, imageGeometry.getPixelSizeX(), 1.0e-6);
-        assertEquals(2.0, imageGeometry.getPixelSizeY(), 1.0e-6);
-    }
-
-    @Test
-    public void testMapBoundaryWithPixelGeoCoding() throws Exception {
-        Product product = new Product("test", "T", 2, 2);
-        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
-        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        latBand.setSynthetic(true);
-        lonBand.setSynthetic(true);
-        // these are the outer bounds
-        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
-        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
-
-        Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
-
-        assertEquals(10.5, mapBoundary.getMinX(), 1.0e-6);
-        assertEquals(14.5, mapBoundary.getMaxX(), 1.0e-6);
-        assertEquals(45.5, mapBoundary.getMinY(), 1.0e-6);
-        assertEquals(49.5, mapBoundary.getMaxY(), 1.0e-6);
-    }
+//    @Test
+//    public void testPixelSizeCalculationWithPixelGeoCoding() throws Exception {
+//        Product product = new Product("test", "T", 2, 2);
+//        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+//        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+//        latBand.setSynthetic(true);
+//        lonBand.setSynthetic(true);
+//        // these are the outer bounds
+//        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+//        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+//        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
+//
+//        ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
+//                                                                         null, null, null, null, null, null, null, null, null);
+//        assertEquals(2.0, imageGeometry.getPixelSizeX(), 1.0e-6);
+//        assertEquals(2.0, imageGeometry.getPixelSizeY(), 1.0e-6);
+//    }
+//
+//    @Test
+//    public void testMapBoundaryWithPixelGeoCoding() throws Exception {
+//        Product product = new Product("test", "T", 2, 2);
+//        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+//        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+//        latBand.setSynthetic(true);
+//        lonBand.setSynthetic(true);
+//        // these are the outer bounds
+//        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+//        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+//        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
+//
+//        Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
+//
+//        assertEquals(10.5, mapBoundary.getMinX(), 1.0e-6);
+//        assertEquals(14.5, mapBoundary.getMaxX(), 1.0e-6);
+//        assertEquals(45.5, mapBoundary.getMinY(), 1.0e-6);
+//        assertEquals(49.5, mapBoundary.getMaxY(), 1.0e-6);
+//    }
 
     @Test
     public void testPixelSizeCalculationWithCrsGeoCoding() throws Exception {
