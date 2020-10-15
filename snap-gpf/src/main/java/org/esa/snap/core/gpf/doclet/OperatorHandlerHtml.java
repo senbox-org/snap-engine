@@ -181,15 +181,15 @@ class OperatorHandlerHtml implements OperatorHandler {
         writer.println("<body>");
 
         writer.println("" +
-                       "<table class=\"header\">\n" +
-                       "    <tr class=\"header\">\n" +
-                       "        <td class=\"header\">&nbsp;" + title + "</td>\n" +
-                       "        <td class=\"header\" align=\"right\">\n" +
-                       "          <a href=\"../general/overview/SnapOverview.html\">" +
-                       "             <img src=\"images/snap_header.jpg\" border=\"0\"/></a>\n" +
-                       "        </td>\n" +
-                       "    </tr>\n" +
-                       "</table>");
+                               "<table class=\"header\">\n" +
+                               "    <tr class=\"header\">\n" +
+                               "        <td class=\"header\">&nbsp;" + title + "</td>\n" +
+                               "        <td class=\"header\" align=\"right\">\n" +
+                               "          <a href=\"nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html\">\n" +
+                               "          <img src=\"images/snap_header.jpg\" border=\"0\"/></a>\n" +
+                               "        </td>\n" +
+                               "    </tr>\n" +
+                               "</table>");
     }
 
     private static void writeFooter(PrintWriter writer) {
