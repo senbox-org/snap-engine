@@ -757,7 +757,7 @@ public class DataAccess {
                 try {
                     currentRelative = dbRoot.relativize(currentPath);
                     if (currentRelative.getParent() != null && dbExistingPath.getParent() != null) {
-                        return currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
+                        return !ZipUtils.isZipped(currentRelative) && !ZipUtils.isZipped(dbExistingPath) && currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
                     }
                 } catch (IllegalArgumentException e) {
                     return false;
@@ -951,7 +951,7 @@ public class DataAccess {
         final PreparedStatement statement =
                 connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = NULL, local_repository_id = ?, relative_path = ?," +
                                             "entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, last_modified_date = ?, geometry = ?," +
-                                            "data_format_type_id = NULL, pixel_type_id = NULL, sensor_type_id = NULL WHERE id = ?");
+                                            "data_format_type_id = NULL, pixel_type_id = NULL, sensor_type_id = NULL, metadata_mission = ? WHERE id = ?");
         statement.setString(1, productToSave.getName());
         statement.setInt(2, localRepositoryId);
         statement.setString(3, relativePath.toString());
@@ -964,7 +964,9 @@ public class DataAccess {
         }
         statement.setTimestamp(6, new Timestamp(fileTime.toMillis()));
         statement.setString(7, geometry.toWKT());
-        statement.setInt(8, productId);
+        // in future we may change the attribute from metadata from where we take the mission, therefore preview an update at re-scan & update products
+        statement.setString(8, AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION));
+        statement.setInt(9, productId);
         statement.executeUpdate();
     }
 
