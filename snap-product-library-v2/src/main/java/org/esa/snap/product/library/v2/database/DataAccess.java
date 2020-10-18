@@ -757,7 +757,12 @@ public class DataAccess {
                 try {
                     currentRelative = dbRoot.relativize(currentPath);
                     if (currentRelative.getParent() != null && dbExistingPath.getParent() != null) {
-                        return !ZipUtils.isZipped(currentRelative) && !ZipUtils.isZipped(dbExistingPath) && currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString());
+                        // Different zips can have common parts in their path, but they are different products and each one should be taken into account (so exclude this case here).
+                        // Also, there are unzipped products having the raster bands on the same level as the metadata entry file (e.g. Landsat8),
+                        // for which the metadata file should be taken into account regardless if the raster bands were already processed, depending on files order (probably more complex checks are needed here)
+                        return !ZipUtils.isZipped(currentRelative) && !ZipUtils.isZipped(dbExistingPath) &&
+                                currentRelative.getParent().toString().startsWith(dbExistingPath.getParent().toString()) &&
+                                currentRelative.getParent().toString().length() != dbExistingPath.getParent().toString().length();
                     }
                 } catch (IllegalArgumentException e) {
                     return false;
