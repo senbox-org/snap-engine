@@ -17,6 +17,7 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.Assert;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.math.LogLinearTransform;
 
 import java.awt.Color;
 import java.awt.Transparency;
@@ -29,8 +30,23 @@ import java.awt.image.IndexColorModel;
  * This class contains information about how a product's raster data node is displayed as an image.
  *
  * @author Norman Fomferra
+ * @author Daniel Knowles (NASA)
  * @version $Revision$ $Date$
  */
+// OCT 2019 - Knowles
+//          - Added logic to transform weighted points between logarithmic scaling and
+//            linear scaling in both directions.
+//  NOV 2019 - Knowles
+//           - Added logic to invert the direction of the color palette
+//  DEC 2019 - Knowles
+//           - Moved some of the log/liner transform methods into the class LogLinearTransform
+// JAN 2020 - Knowles
+//          - Added ColorSchemeInfo colorSchemeInfo to be able to set the color scheme selector in the ColorManipulation GUI
+// FEB 2020 - Knowles
+//          - Added ColorPaletteDef source->target transfer of the fields sourceFileMin and sourceFileMax
+//          - When tranferring points of the ColorPaletteDef, log scaling field in image info is also updated
+//          - Added zoomToHistLimits
+
 public class ImageInfo implements Cloneable {
 
     public static final Color NO_COLOR = new Color(0, 0, 0, 0);
@@ -44,6 +60,9 @@ public class ImageInfo implements Cloneable {
     public static final String HISTOGRAM_MATCHING_EQUALIZE = "equalize";
     @Deprecated
     public static final String HISTOGRAM_MATCHING_NORMALIZE = "normalize";
+
+    private static final double FORCED_CHANGE_FACTOR = 0.0001;
+
 
     /**
      * Enumerates the possible histogram matching modes.
@@ -60,6 +79,8 @@ public class ImageInfo implements Cloneable {
     private HistogramMatching histogramMatching;
     private String uncertaintyBandName;
     private boolean logScaled;
+    private ColorSchemeInfo colorSchemeInfo = null;
+    private Boolean zoomToHistLimits = null;
 
     /**
      * Enumerates the possible histogram matching modes.
@@ -313,6 +334,9 @@ public class ImageInfo implements Cloneable {
                                        boolean autoDistribute,
                                        ColorPaletteDef targetCPD) {
 
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
+
         if (autoDistribute || sourceCPD.isAutoDistribute()) {
             alignNumPoints(sourceCPD, targetCPD);
             double minDisplaySample = sourceCPD.getMinDisplaySample();
@@ -330,6 +354,106 @@ public class ImageInfo implements Cloneable {
             targetCPD.setPoints(sourceCPD.getPoints().clone());
         }
     }
+
+    public void setColorPaletteDefInvert(ColorPaletteDef colorPaletteDef) {
+        transferPointsInvert(colorPaletteDef, getColorPaletteDef());
+    }
+
+    private static void transferPointsInvert(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
+
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
+
+        alignNumPoints(sourceCPD, targetCPD);
+
+
+        Color[] targetColors = new Color[sourceCPD.getNumPoints()];
+        for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+            int targetPointIndex = sourceCPD.getNumPoints() - 1 - i;
+            targetColors[i] = sourceCPD.getPointAt(targetPointIndex).getColor();
+        }
+
+        for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+            targetCPD.getPointAt(i).setLabel(sourceCPD.getPointAt(i).getLabel());
+            targetCPD.getPointAt(i).setColor(targetColors[i]);
+        }
+
+        targetCPD.setLogScaled(sourceCPD.isLogScaled());
+        targetCPD.setDiscrete(sourceCPD.isDiscrete());
+        targetCPD.setAutoDistribute(sourceCPD.isAutoDistribute());
+    }
+
+
+    public void setColorPaletteDef(ColorPaletteDef colorPaletteDef,
+                                   double minSample,
+                                   double maxSample, boolean autoDistribute, boolean isSourceLogScaled, boolean isTargetLogScaled) {
+        setLogScaled(isTargetLogScaled);
+        transferPoints(colorPaletteDef, minSample, maxSample, autoDistribute, getColorPaletteDef(), isSourceLogScaled, isTargetLogScaled);
+    }
+
+
+    private static void transferPoints(ColorPaletteDef sourceCPD,
+                                       double minTargetValue,
+                                       double maxTargetValue,
+                                       boolean autoDistribute,
+                                       ColorPaletteDef targetCPD,
+                                       boolean isSourceLogScaled,
+                                       boolean isTargetLogScaled) {
+
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
+
+        if (autoDistribute || sourceCPD.isAutoDistribute()) {
+            alignNumPoints(sourceCPD, targetCPD);
+            double minSourceValue = sourceCPD.getMinDisplaySample();
+            double maxSourceValue = sourceCPD.getMaxDisplaySample();
+
+            // The target CPD log status needs to be set here to be effective
+            targetCPD.setLogScaled(isTargetLogScaled);
+
+            for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+
+                if (minTargetValue != maxTargetValue && minSourceValue != maxSourceValue) {
+
+                    double linearWeight;
+                    if (isSourceLogScaled) {
+                        double currentSourceLogValue = sourceCPD.getPointAt(i).getSample();
+                        linearWeight = LogLinearTransform.getLinearWeightFromLogValue(currentSourceLogValue, minSourceValue, maxSourceValue);
+
+                    } else {
+                        double currentSourceValue = sourceCPD.getPointAt(i).getSample();
+                        linearWeight = (currentSourceValue - minSourceValue) / (maxSourceValue - minSourceValue);
+                    }
+
+                    double currentLinearTargetValue = LogLinearTransform.getLinearValue(linearWeight, minTargetValue, maxTargetValue);
+
+                    if (isTargetLogScaled) {
+                        double currentLogTargetValue = LogLinearTransform.getLogarithmicValue(currentLinearTargetValue, minTargetValue, maxTargetValue);
+                        targetCPD.getPointAt(i).setSample(currentLogTargetValue);
+                    } else {
+                        targetCPD.getPointAt(i).setSample(currentLinearTargetValue);
+                    }
+
+
+                } else {
+                    // cant do much here so just set all to min value and let user fix either palette or bad entry
+                    targetCPD.getPointAt(i).setSample(minTargetValue);
+                }
+
+                Color currentSourceColor = sourceCPD.getPointAt(i).getColor();
+                targetCPD.getPointAt(i).setColor(currentSourceColor);
+                targetCPD.getPointAt(i).setLabel(sourceCPD.getPointAt(i).getLabel());
+            }
+
+        } else {
+            targetCPD.setPoints(sourceCPD.getPoints().clone());
+            targetCPD.setLogScaled(isTargetLogScaled);
+        }
+
+    }
+
+
+
 
     private static void alignNumPoints(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
         int deltaNumPoints = targetCPD.getNumPoints() - sourceCPD.getNumPoints();
@@ -349,16 +473,34 @@ public class ImageInfo implements Cloneable {
      *
      * @param mode the histogram matching string
      *
-     * @return the histogram matching. {@link ImageInfo.HistogramMatching#None} if {@code maode} is not "Equalize" or "Normalize".
+     * @return the histogram matching. {@link HistogramMatching#None} if {@code maode} is not "Equalize" or "Normalize".
      */
-    public static ImageInfo.HistogramMatching getHistogramMatching(String mode) {
-        ImageInfo.HistogramMatching histogramMatchingEnum = ImageInfo.HistogramMatching.None;
+    public static HistogramMatching getHistogramMatching(String mode) {
+        HistogramMatching histogramMatchingEnum = HistogramMatching.None;
         if ("Equalize".equalsIgnoreCase(mode)) {
-            histogramMatchingEnum = ImageInfo.HistogramMatching.Equalize;
+            histogramMatchingEnum = HistogramMatching.Equalize;
         } else if ("Normalize".equalsIgnoreCase(mode)) {
-            histogramMatchingEnum = ImageInfo.HistogramMatching.Normalize;
+            histogramMatchingEnum = HistogramMatching.Normalize;
         }
         return histogramMatchingEnum;
+    }
+
+
+    public ColorSchemeInfo getColorSchemeInfo() {
+        return colorSchemeInfo;
+    }
+
+    public void setColorSchemeInfo(ColorSchemeInfo colorSchemeInfo) {
+        this.colorSchemeInfo = colorSchemeInfo;
+    }
+
+
+    public Boolean getZoomToHistLimits() {
+        return zoomToHistLimits;
+    }
+
+    public void setZoomToHistLimits(Boolean zoomToHistLimits) {
+        this.zoomToHistLimits = zoomToHistLimits;
     }
 
 }
