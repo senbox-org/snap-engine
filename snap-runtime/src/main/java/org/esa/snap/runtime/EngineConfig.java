@@ -65,7 +65,7 @@ public class EngineConfig extends Config {
     public static final String PROPERTY_LOG_LEVEL = "snap.log.level";
 
 
-    public static final String USER_DIR_DEFAULT = ".seadas";
+    public static final String USER_DIR_DEFAULT = ".seadas8";
 
     static String[] DEFAULT_EXCLUDED_CLUSTER_NAMES = new String[]{
             "bin", "etc", "platform", "ide", "java"
