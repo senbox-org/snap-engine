@@ -9,13 +9,13 @@ import java.util.logging.Level;
  */
 public class EngineVersionCheckActivator implements Activator {
 
-    private static final String MSG_UPDATE_INFO = "A new SNAP version is available for download.\nCurrently installed %s, available is %s.\nPlease visit %s\n";
+    private static final String MSG_UPDATE_INFO = "A new SeaDAS version is available for download.\nCurrently installed %s, available is %s.\nPlease visit %s\n";
     private static final VersionChecker VERSION_CHECKER = VersionChecker.getInstance();
     private static boolean hasChecked = false;
 
     @Override
     public void start() {
-        SystemUtils.LOG.log(Level.INFO, "Please check regularly for new updates for the best SNAP experience.");
+        SystemUtils.LOG.log(Level.INFO, "Please check regularly for new SeaDAS updates");
         if (VERSION_CHECKER.mustCheck()) {
             hasChecked = true;
             if (VERSION_CHECKER.checkForNewRelease()) {
