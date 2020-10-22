@@ -337,6 +337,9 @@ public class BinningConfig {
             try {
                 if (planetaryGrid.toUpperCase().startsWith("EPSG:") && numRows > 0) {
                     return new CrsGrid(numRows, planetaryGrid);
+                } else if (planetaryGrid.toUpperCase().startsWith("EPSG:") && numRows < 0) {
+                    // negative values preliminarily used as marker for pixel size instead of number of rows (MB, sorry)
+                    return new CrsGrid((double) -numRows, planetaryGrid);
                 } else if (planetaryGrid.toUpperCase().startsWith("EPSG:")) {
                     return new CrsGrid(DEFAULT_NUM_ROWS, planetaryGrid);
                 } else if (numRows > 0) {

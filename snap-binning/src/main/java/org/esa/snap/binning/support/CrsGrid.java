@@ -16,9 +16,11 @@ import org.esa.snap.core.gpf.common.reproject.ReprojectionOp;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.FeatureUtils;
 import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.data.ows.CRSEnvelope;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -71,6 +73,32 @@ public class CrsGrid implements MosaickingGrid {
                 this.pixelSize = meterSpanGlobal / numRowsGlobal;
             }
 
+            System.out.println("pixelSize = " + this.pixelSize + " [" + units + "]");
+            this.numCols = (int)(envelopeCRS.getSpan(LON_DIM) / this.pixelSize);
+            this.easting = envelopeCRS.getMinimum(LON_DIM);
+            this.numRows = (int)(envelopeCRS.getSpan(LAT_DIM) / this.pixelSize);
+            this.northing = envelopeCRS.getMaximum(LAT_DIM);
+            this.crsGeoCoding = new CrsGeoCoding(this.crs, this.numCols, this.numRows, this.easting, this.northing, this.pixelSize, this.pixelSize, 0.0, 0.0);
+        } catch (FactoryException | TransformException var9) {
+            throw new IllegalArgumentException("Can not create crs for:" + crsCode, var9);
+        }
+
+        this.geometryFactory = new GeometryFactory();
+    }
+
+    public CrsGrid(double pixelSize, String crsCode) {
+        try {
+            this.crs = CRS.decode(crsCode, true);
+            Envelope envelopeCRS = CRS.getEnvelope(this.crs);
+            System.out.println("envelopeCRS = " + envelopeCRS);
+            envelopeCRS = new CRSEnvelope(crsCode,
+                                          Math.floor(envelopeCRS.getMinimum(0) / pixelSize) * pixelSize,
+                                          Math.floor(envelopeCRS.getMinimum(1) / pixelSize) * pixelSize,
+                                          Math.ceil(envelopeCRS.getMaximum(0) / pixelSize) * pixelSize,
+                                          Math.ceil(envelopeCRS.getMaximum(1) / pixelSize) * pixelSize);
+            System.out.println("gridded envelopeCRS = " + envelopeCRS);
+            String units = this.crs.getCoordinateSystem().getAxis(LON_DIM).getUnit().toString();
+            this.pixelSize = pixelSize;
             System.out.println("pixelSize = " + this.pixelSize + " [" + units + "]");
             this.numCols = (int)(envelopeCRS.getSpan(LON_DIM) / this.pixelSize);
             this.easting = envelopeCRS.getMinimum(LON_DIM);
@@ -184,7 +212,7 @@ public class CrsGrid implements MosaickingGrid {
 
     public GeoCoding getGeoCoding(Rectangle outputRegion) {
         try {
-            return new CrsGeoCoding(this.crs, outputRegion.width, outputRegion.height, this.easting + this.pixelSize * outputRegion.x, this.northing - this.pixelSize * outputRegion.y, this.pixelSize, this.pixelSize);
+            return new CrsGeoCoding(this.crs, outputRegion.width, outputRegion.height, this.easting + this.pixelSize * outputRegion.x, this.northing - this.pixelSize * outputRegion.y, this.pixelSize, this.pixelSize, 0.0, 0.0);
         } catch (TransformException | FactoryException e) {
             throw new IllegalArgumentException("Can not create geocoding for crs.", e);
         }
