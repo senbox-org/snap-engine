@@ -18,6 +18,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <tao.version>1.0.2</tao.version>
+    </properties>
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
@@ -34,7 +37,7 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
         </dependency>
@@ -42,11 +45,11 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-geotiff</artifactId>
             <version>${snap.version}</version>
@@ -56,7 +59,7 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -67,9 +70,49 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.gdal</groupId>
+            <artifactId>gdal</artifactId>
+            <version>2.1.0</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.19</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-utils</artifactId>
+            <version>${tao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-data-sources</artifactId>
+            <version>${tao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-datasources-scihub</artifactId>
+            <version>${tao.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-product-library-ui-v2</artifactId>
+            <version>8.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
 
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>

@@ -76,6 +76,8 @@
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
+        <module>snap-product-library</module>
+        <module>snap-product-library-v2</module>
         <module>snap-dem</module>
         <module>snap-envi-reader</module>
         <module>snap-envisat-reader</module>
@@ -89,8 +91,6 @@
         <module>snap-pconvert</module>
         <module>snap-pgx-reader</module>
         <module>snap-pixel-extraction</module>
-        <module>snap-product-library</module>
-        <module>snap-product-library-v2</module>
         <module>snap-python</module>
         <module>snap-raster</module>
         <module>snap-rtp-codec</module>
