@@ -1,6 +1,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.geotools.referencing.CRS;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.awt.geom.AffineTransform;
@@ -80,6 +81,7 @@ public class ImageGeometryTest {
 
 
     @Test
+    @Ignore("deprecated Class is tested and causes problem when executed with maven")
     public void testPixelSizeCalculationWithPixelGeoCoding() throws Exception {
         Product product = new Product("test", "T", 2, 2);
         Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
@@ -98,6 +100,7 @@ public class ImageGeometryTest {
     }
 
     @Test
+    @Ignore("deprecated Class is tested and causes problem when executed with maven")
     public void testMapBoundaryWithPixelGeoCoding() throws Exception {
         Product product = new Product("test", "T", 2, 2);
         Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
