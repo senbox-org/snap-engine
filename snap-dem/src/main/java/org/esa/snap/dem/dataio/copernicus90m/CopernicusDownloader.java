@@ -4,6 +4,7 @@ package org.esa.snap.dem.dataio.copernicus90m;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.*;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.esa.snap.core.gpf.Operator;
 import org.apache.http.auth.Credentials;
 import org.esa.snap.core.gpf.OperatorException;
@@ -67,12 +68,13 @@ public class CopernicusDownloader {
         FTPSClient client = new FTPSClient(true);
         client.setBufferSize(1024 * 1024);
         client.connect(server, port);
-        for(Credentials credential : credentialList){
+        for(int x = 0; x < credentialList.size(); x++){
+            //UsernamePasswordCredentials credential = (UsernamePasswordCredentials) credentialList.get(x);
             try{
-                boolean success = client.login(credential.getUserPrincipal().getName(), credential.getPassword());
+                boolean success = client.login( credentialList.get(x).getUserPrincipal().getName(),  credentialList.get(x).getPassword());
                 if(success){
-                    username = credential.getUserPrincipal().getName();
-                    password = credential.getPassword();
+                    username =  credentialList.get(x).getUserPrincipal().getName();
+                    password =  credentialList.get(x).getPassword();
                     break;
                 }
                 client.logout();
