@@ -6,6 +6,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dem.dataio.copernicus90m.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus90m.CopernicusFile;
 import org.esa.snap.dem.dataio.copernicus90m.CopernicusGeoTIFFReaderPlugIn;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -19,12 +20,12 @@ import static org.junit.Assert.assertTrue;
 public class TestOpenSearch {
 
 
-    @Test
+    @Test @Ignore
     public void testSearch() throws Exception {
         CopernicusDownloader d = new CopernicusDownloader(new File("C:/Users/Alex/.snap/auxdata/dem/Copernicus 90m Europe"));
 
     }
-    @Test
+    @Test @Ignore
     public void testReadFromTARFile() throws Exception {
         CopernicusGeoTIFFReaderPlugIn readerPlugIn = new CopernicusGeoTIFFReaderPlugIn();
 
