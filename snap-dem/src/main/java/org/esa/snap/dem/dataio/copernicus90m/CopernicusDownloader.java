@@ -50,20 +50,43 @@ public class CopernicusDownloader {
 
     public CopernicusDownloader(File installDir) throws Exception {
         this.installDir = installDir;
+        String [] credentials = validateCredentials();
+        username = credentials[0];
+        password = credentials[1];
+    }
 
+
+    public CopernicusDownloader(File installDir, String username, String password){
+        this.installDir = installDir;
+        this.username = username;
+        this.password = password;
+
+
+    }
+
+    // Call this method for SNAP to assess if the credentials stored in the Scientific Data Hub list of credentials are valid for
+    // accessing the Copernicus DEM FTP. Will also return back a String array with the valid username as the first index,
+    // and the password as the second index. If the credentials are not valid, it will throw an OperatorException.
+    public static String [] validateCredentials() throws IOException {
+        String server = "cdsdata.copernicus.eu";
+        String [] userPass = new String[2];
+        int port = 990;
+        String username = null;
+        String password = null;
+        List<Credentials> credentialList = null;
         // Get the credentials from the remote repository credentials manager.
         RepositoriesCredentialsController controller = RepositoriesCredentialsController.getInstance();
         List<RemoteRepositoryCredentials> credentials = controller.getRepositoriesCredentials();
         if(credentials.size() == 0){
-            throw new OperatorException("There are no credentials stored to authenticate the Copernicus Europe DEM. Please add your credentials to the credential manager under the Scientific Data Hub credentials list.");
+            throw new OperatorException("There are no credentials stored to authenticate the Copernicus Europe DEM. Please add your credentials to the credential manager under the Scientific Data Hub credentials list (Tools > Options > Product Library > Scientific Data Hub).");
         }
         for (RemoteRepositoryCredentials credential : credentials){
             if(credential.getRepositoryName().equals("Scientific Data Hub")){
-                this.credentialList =  credential.getCredentialsList();
+                credentialList =  credential.getCredentialsList();
             }
         }
         if(credentialList.size() == 0){
-            throw new OperatorException("There are no credentials stored to authenticate the Copernicus Europe DEM. Please add your credentials to the credential manager under the Scientific Data Hub credentials list.");
+            throw new OperatorException("There are no credentials stored to authenticate the Copernicus Europe DEM. Please add your credentials to the credential manager under the Scientific Data Hub credentials list (Tools > Options > Product Library > Scientific Data Hub).");
         }
         FTPSClient client = new FTPSClient(true);
         client.setBufferSize(1024 * 1024);
@@ -86,17 +109,11 @@ public class CopernicusDownloader {
         client = null;
 
         if(username == null){
-            throw new OperatorException("No valid credentials were found under the Scientific Data Hub list of credentials. Please ensure that your credentials are added correctly and try again.");
+            throw new OperatorException("No valid credentials were found under the Scientific Data Hub list of credentials (Tools > Options > Product Library > Scientific Data Hub). Please ensure that your credentials are added correctly and try again.");
         }
-    }
-
-
-    public CopernicusDownloader(File installDir, String username, String password){
-        this.installDir = installDir;
-        this.username = username;
-        this.password = password;
-
-
+        userPass[0] = username;
+        userPass[1] = password;
+        return userPass;
     }
 
     public CopernicusDownloader(File installDir, Credentials credential){
