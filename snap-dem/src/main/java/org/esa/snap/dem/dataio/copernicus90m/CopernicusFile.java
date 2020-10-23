@@ -31,6 +31,7 @@ public class CopernicusFile extends ElevationFile {
     public CopernicusFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) throws IOException {
         super(localFile, reader);
         demModel = copernicusElevationModel;
+        CopernicusDownloader.validateCredentials();
 
 
     }
