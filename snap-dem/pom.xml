@@ -105,9 +105,8 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-product-library-ui-v2</artifactId>
-            <version>8.0.0</version>
-            <scope>compile</scope>
+            <artifactId>snap-product-library-v2</artifactId>
+            <version>${snap.version}</version>
         </dependency>
 
 
