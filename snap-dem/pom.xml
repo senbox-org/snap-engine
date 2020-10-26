@@ -88,28 +88,15 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
-            <artifactId>tao-utils</artifactId>
-            <version>${tao.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ro.cs.tao</groupId>
-            <artifactId>tao-data-sources</artifactId>
-            <version>${tao.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ro.cs.tao</groupId>
-            <artifactId>tao-datasources-scihub</artifactId>
-            <version>${tao.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-product-library-v2</artifactId>
             <version>${snap.version}</version>
         </dependency>
-
-
+		<dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>snap-remote-products-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
