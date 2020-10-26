@@ -1,15 +1,12 @@
 package org.esa.snap.dem.dataio.copernicus90m;
 
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.*;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.esa.snap.core.gpf.Operator;
 import org.apache.http.auth.Credentials;
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.product.library.ui.v2.preferences.RepositoriesCredentialsController;
-import org.esa.snap.product.library.ui.v2.preferences.model.RemoteRepositoryCredentials;
+import org.esa.snap.product.library.v2.preferences.RepositoriesCredentialsController;
+import org.esa.snap.product.library.v2.preferences.model.RemoteRepositoryCredentials;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
