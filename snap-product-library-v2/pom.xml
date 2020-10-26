@@ -62,7 +62,6 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
-                        <publicPackage>org.esa.snap.productlibrary.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
