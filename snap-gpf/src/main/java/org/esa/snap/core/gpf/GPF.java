@@ -433,9 +433,24 @@ public class GPF {
       * @param pm          a monitor to inform the user about progress
       */
      public static void writeProduct(Product product, File file, String formatName, boolean clearCacheAfterRowWrite, boolean incremental, ProgressMonitor pm) {
+         writeProduct(product, file, formatName, true, clearCacheAfterRowWrite, incremental, pm);
+     }
+    /**
+      * Writes a product with the specified format to the given file.
+      *
+      * @param product     the product
+      * @param file        the product file
+      * @param formatName  the name of a supported product format, e.g. "HDF5". If {@code null}, the default format
+      *                    "BEAM-DIMAP" will be used
+      * @param writeEntireTileRows if true, the writer collects the data of a complete tile row before writing the tiles' data
+      * @param clearCacheAfterRowWrite if true, the internal tile cache is cleared after a tile row has been written.
+      * @param incremental switch the product writer in incremental mode or not.
+      * @param pm          a monitor to inform the user about progress
+      */
+     public static void writeProduct(Product product, File file, String formatName, boolean writeEntireTileRows, boolean clearCacheAfterRowWrite, boolean incremental, ProgressMonitor pm) {
          WriteOp writeOp = new WriteOp(product, file, formatName);
          writeOp.setDeleteOutputOnFailure(true);
-         writeOp.setWriteEntireTileRows(true);
+         writeOp.setWriteEntireTileRows(writeEntireTileRows);
          writeOp.setClearCacheAfterRowWrite(clearCacheAfterRowWrite);
          writeOp.setIncremental(incremental);
          writeOp.writeProduct(pm);
