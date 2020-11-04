@@ -33,7 +33,8 @@ public class H2DatabaseParameters {
 
     public String getUrl() {
         String databaseName = "products";
-        return "jdbc:h2:" + this.parentFolderPath.resolve(databaseName).toString();
+        //https://senbox.atlassian.net/browse/SNAP-1359
+        return "jdbc:h2:" + this.parentFolderPath.resolve(databaseName).toString() + ";AUTO_SERVER=TRUE";
     }
 
     public Path getParentFolderPath() {
