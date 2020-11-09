@@ -16,7 +16,7 @@ public class WriteCache {
         variableMap = new HashMap<>();
     }
 
-    public VariableCache get(Band band) {
+    public synchronized VariableCache get(Band band) {
         VariableCache variableCache = variableMap.get(band.getName());
         if (variableCache == null) {
             variableCache = new VariableCache(band);

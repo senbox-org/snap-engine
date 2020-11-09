@@ -417,12 +417,11 @@ public class WriteOp extends Operator {
         final ProductData productData = ProductData.createInstance(band.getDataType(), lineWidth * cacheLine[0].getHeight());
         final Object writeBuffer = productData.getElems();
         for (Tile tile : cacheLine) {
-            final Object tileBuffer = tile.getDataBuffer().getElems();
-            final int tileStride = tile.getScanlineStride();
+            final Object tileBuffer = tile.getRawSamples().getElems();
             final int tileWidth = tile.getWidth();
             final int minX = tile.getMinX();
             for (int line = 0; line < tile.getHeight(); line++) {
-                int srcPos = line * tileStride;
+                int srcPos = line * tileWidth;
                 int destPos = minX + line * lineWidth;
                 System.arraycopy(tileBuffer, srcPos, writeBuffer, destPos, tileWidth);
             }
