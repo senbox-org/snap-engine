@@ -193,6 +193,34 @@ public class TestUtils {
                 floatValues[increasing ? i : size-1-i] = i + 1.5f;
             }
             band.setData(ProductData.createInstance(floatValues));
+        } else if(dataType == ProductData.TYPE_INT8 || dataType == ProductData.TYPE_UINT8){
+            final byte[] intValues = new byte[size];
+            int val = 0;
+            for (int i = 0; i < size; i++) {
+                if(val > Byte.MAX_VALUE)
+                    val = 0;
+                intValues[increasing ? i : size-1-i] = (byte)val;
+                val += 1;
+            }
+            if(dataType == ProductData.TYPE_UINT8) {
+                band.setData(ProductData.createUnsignedInstance(intValues));
+            } else {
+                band.setData(ProductData.createInstance(intValues));
+            }
+        } else if(dataType == ProductData.TYPE_INT16 || dataType == ProductData.TYPE_UINT16){
+            final short[] intValues = new short[size];
+            int val = 0;
+            for (int i = 0; i < size; i++) {
+                if(val > Short.MAX_VALUE)
+                    val = 0;
+                intValues[increasing ? i : size-1-i] = (short)val;
+                val += 1;
+            }
+            if(dataType == ProductData.TYPE_UINT16) {
+                band.setData(ProductData.createUnsignedInstance(intValues));
+            } else {
+                band.setData(ProductData.createInstance(intValues));
+            }
         } else {
             final int[] intValues = new int[size];
             for (int i = 0; i < size; i++) {
