@@ -239,16 +239,16 @@ public class ImageInfo implements Cloneable {
         ComponentColorModel cm;
         if (getColorComponentCount() == 4) {
             cm = new ComponentColorModel(cs,
-                                         true, // hasAlpha,
-                                         false, //isAlphaPremultiplied,
-                                         Transparency.TRANSLUCENT, //  transparency,
-                                         DataBuffer.TYPE_BYTE); //transferType
+                    true, // hasAlpha,
+                    false, //isAlphaPremultiplied,
+                    Transparency.TRANSLUCENT, //  transparency,
+                    DataBuffer.TYPE_BYTE); //transferType
         } else {
             cm = new ComponentColorModel(cs,
-                                         false, // hasAlpha,
-                                         false, //isAlphaPremultiplied,
-                                         Transparency.OPAQUE, //  transparency,
-                                         DataBuffer.TYPE_BYTE); //transferType
+                    false, // hasAlpha,
+                    false, //isAlphaPremultiplied,
+                    Transparency.OPAQUE, //  transparency,
+                    DataBuffer.TYPE_BYTE); //transferType
 
         }
         return cm;
@@ -355,14 +355,14 @@ public class ImageInfo implements Cloneable {
         }
     }
 
-    public void setColorPaletteDefInvert(ColorPaletteDef colorPaletteDef) {
-        transferPointsInvert(colorPaletteDef, getColorPaletteDef());
+    public void setColorPaletteDefInvert(ColorPaletteDef colorPaletteDef, double min, double max) {
+        transferPointsInvert(colorPaletteDef, min, max, getColorPaletteDef());
     }
 
-    private static void transferPointsInvert(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
+    private static void transferPointsInvert(ColorPaletteDef sourceCPD, double min, double max, ColorPaletteDef targetCPD) {
 
-        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
-        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
+        targetCPD.setSourceFileMin(min);
+        targetCPD.setSourceFileMax(max);
 
         alignNumPoints(sourceCPD, targetCPD);
 
