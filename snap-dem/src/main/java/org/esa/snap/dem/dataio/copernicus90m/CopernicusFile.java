@@ -3,24 +3,12 @@ package org.esa.snap.dem.dataio.copernicus90m;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
-
 import java.io.*;
-
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.stream.Stream;
-import java.util.zip.*;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.esa.snap.core.dataop.dem.ElevationTile;
-import org.esa.snap.dem.dataio.srtm1_hgt.SRTM1HgtElevationModel;
-import org.esa.snap.dem.dataio.srtm1_hgt.SRTM1HgtElevationTile;
 
 public class CopernicusFile extends ElevationFile {
 

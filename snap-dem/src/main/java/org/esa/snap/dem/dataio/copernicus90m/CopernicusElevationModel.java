@@ -6,11 +6,9 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.dem.dataio.aster.AsterFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 public class CopernicusElevationModel extends BaseElevationModel {
     public CopernicusElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {

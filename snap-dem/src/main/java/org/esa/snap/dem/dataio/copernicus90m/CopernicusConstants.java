@@ -1,9 +1,5 @@
 package org.esa.snap.dem.dataio.copernicus90m;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class CopernicusConstants {
