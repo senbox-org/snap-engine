@@ -20,9 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//import com.thomas_bayer.shibboleth.*;
-
-
 public class CopernicusDownloader {
 
 
@@ -88,17 +85,17 @@ public class CopernicusDownloader {
         FTPSClient client = new FTPSClient(true);
         client.setBufferSize(1024 * 1024);
         client.connect(server, port);
-        for(int x = 0; x < credentialList.size(); x++){
+        for (Credentials value : credentialList) {
             //UsernamePasswordCredentials credential = (UsernamePasswordCredentials) credentialList.get(x);
-            try{
-                boolean success = client.login( credentialList.get(x).getUserPrincipal().getName(),  credentialList.get(x).getPassword());
-                if(success){
-                    username =  credentialList.get(x).getUserPrincipal().getName();
-                    password =  credentialList.get(x).getPassword();
+            try {
+                boolean success = client.login(value.getUserPrincipal().getName(), value.getPassword());
+                if (success) {
+                    username = value.getUserPrincipal().getName();
+                    password = value.getPassword();
                     break;
                 }
                 client.logout();
-            }catch (Exception e){
+            } catch (Exception e) {
                 client.logout();
             }
         }
@@ -171,7 +168,7 @@ public class CopernicusDownloader {
         //String s = IOUtils.toString(mapping, StandardCharsets.UTF_8.name());
         System.out.println(Paths.get("").toAbsolutePath().toString());
         String[] lines =  IOUtils.toString(mapping, StandardCharsets.UTF_8.name()).split("\n");
-        HashMap<String, String> pairing = new HashMap<String, String>();
+        HashMap<String, String> pairing = new HashMap<>();
 
         List<String> matchingFileNames = new ArrayList<>();
         for (String line : lines) {

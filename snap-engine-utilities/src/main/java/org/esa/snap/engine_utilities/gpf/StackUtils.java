@@ -99,10 +99,10 @@ public final class StackUtils {
                 String[] slvBandNames = new String[bandNames.size()];
                 Band[] tgtBands = targetProduct.getBands();
                 int cnt = 0;
-                for (int i = 0; i < tgtBands.length; i++) {
+                for (Band tgtBand : tgtBands) {
                     //System.out.println("StackUtils: tgt band i = " + i + " " + tgtBands[i].getName());
-                    if (bandNames.contains(tgtBands[i].getName())) {
-                        slvBandNames[cnt++] = tgtBands[i].getName();
+                    if (bandNames.contains(tgtBand.getName())) {
+                        slvBandNames[cnt++] = tgtBand.getName();
                     }
 
                     if (cnt >= slvBandNames.length) {

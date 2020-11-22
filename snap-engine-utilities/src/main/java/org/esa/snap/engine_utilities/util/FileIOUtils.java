@@ -16,7 +16,6 @@
 package org.esa.snap.engine_utilities.util;
 
 import org.apache.commons.io.IOUtils;
-import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.*;
 import java.nio.file.*;

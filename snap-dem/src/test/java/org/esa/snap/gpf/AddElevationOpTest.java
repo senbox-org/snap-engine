@@ -5,7 +5,6 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.gpf.GPF;
-import org.esa.snap.dem.gpf.AddElevationOp;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,8 +15,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 public class AddElevationOpTest {
 
