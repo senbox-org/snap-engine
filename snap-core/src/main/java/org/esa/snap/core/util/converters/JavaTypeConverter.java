@@ -18,6 +18,7 @@ package org.esa.snap.core.util.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.converters.ClassConverter;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 
 public class JavaTypeConverter extends ClassConverter {
@@ -42,6 +43,9 @@ public class JavaTypeConverter extends ClassConverter {
         if (getPointClass().getName().equals(fullClassName)) {
             return getPointClass();
         }
+        if (getGeometryClass().getName().equals(fullClassName)) {
+            return getGeometryClass();
+        }
         return super.parse(text);
     }
 
@@ -52,6 +56,10 @@ public class JavaTypeConverter extends ClassConverter {
 
     private static Class<?> getPointClass() {
         return Point.class;
+    }
+
+    private static Class<?> getGeometryClass() {
+        return Geometry.class;
     }
 
     private static String getPointPackageName() {
