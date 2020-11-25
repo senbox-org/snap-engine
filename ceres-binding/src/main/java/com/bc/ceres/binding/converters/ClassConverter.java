@@ -28,7 +28,7 @@ public class ClassConverter implements Converter<Class> {
 
     private static final String ARRAY_SUFFIX = "[]";
 
-    private static Map<String, Class<?>> primitiveTypes;
+    private static final Map<String, Class<?>> primitiveTypes;
 
     static {
         primitiveTypes = new HashMap<>();
@@ -43,19 +43,19 @@ public class ClassConverter implements Converter<Class> {
         primitiveTypes.put("void", Void.TYPE);
     }
 
-    private final ClassLoader classLoader;
 
     private final List<String> packageQualifiers = new ArrayList<>();
+    private final ClassLoader[] classLoaders;
 
     public ClassConverter() {
         this(Thread.currentThread().getContextClassLoader());
     }
 
     private ClassConverter(ClassLoader classLoader) {
-        this.classLoader = classLoader;
         addPackageQualifier("");
         addPackageQualifier("java.lang.");
         addPackageQualifier("java.util.");
+        classLoaders = new ClassLoader[]{getClass().getClassLoader(), classLoader};
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ClassConverter implements Converter<Class> {
     }
 
     @Override
-    public Class parse(String text) throws ConversionException {
+    public Class<?> parse(String text) throws ConversionException {
         if (text.isEmpty()) {
             return null;
         }
@@ -73,7 +73,7 @@ public class ClassConverter implements Converter<Class> {
             return aClass;
         }
 
-        Class type = null;
+        Class<?> type = null;
         for (String defaultPackageQualifier : packageQualifiers) {
             if (text.endsWith(ARRAY_SUFFIX)) {
                 String typeString = defaultPackageQualifier + text.subSequence(0, text.length() - ARRAY_SUFFIX.length());
@@ -92,14 +92,17 @@ public class ClassConverter implements Converter<Class> {
         return type;
     }
 
+
     private Class<?> loadClass(String typeString) {
         try {
             return Class.forName(typeString);
-        } catch (ClassNotFoundException e) {
-            try {
-                return classLoader.loadClass(typeString);
-            } catch (ClassNotFoundException cnfe2) {
-                // ok
+        } catch (ClassNotFoundException cnfe) {
+            for (ClassLoader loader : classLoaders) {
+                try {
+                    return loader.loadClass(typeString);
+                } catch (ClassNotFoundException cnfe2) {
+                    // ok
+                }
             }
         }
         return null;
