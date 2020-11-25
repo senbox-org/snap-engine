@@ -3,6 +3,8 @@ package org.esa.snap.binning.support;
 import com.bc.ceres.core.ProgressMonitor;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import org.esa.snap.binning.MosaickingGrid;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -20,7 +22,6 @@ import org.geotools.data.ows.CRSEnvelope;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -52,15 +53,31 @@ public class CrsGrid implements MosaickingGrid {
     private final int numRows;
     private final int numCols;
     private final double pixelSize;
+    private final double pixelSizeX;
     private final GeometryFactory geometryFactory;
 
     private final CrsGeoCoding crsGeoCoding;
     private final double easting;
     private final double northing;
+    private Geometry targetGeometryInCrsCoordinates = null;
 
     public CrsGrid(int numRowsGlobal, String crsCode) {
         try {
-            this.crs = CRS.decode(crsCode, true);
+            double pixelSizeRatio;
+            if (crsCode.contains(",")) {
+                String[] parts = crsCode.split(",");
+                this.crs = CRS.decode(parts[0], true);
+                if (parts[1].startsWith("POLYGON")) {
+                    String targetWKT = crsCode.substring(crsCode.indexOf(',') + 1);
+                    this.targetGeometryInCrsCoordinates = new WKTReader().read(targetWKT);
+                    pixelSizeRatio = 1.0;
+                } else {
+                    pixelSizeRatio = Double.parseDouble(parts[1]);
+                }
+            } else {
+                this.crs = CRS.decode(crsCode, true);
+                pixelSizeRatio = 1.0;
+            }
             Envelope envelopeCRS = CRS.getEnvelope(this.crs);
             System.out.println("envelopeCRS = " + envelopeCRS);
             String units = this.crs.getCoordinateSystem().getAxis(LON_DIM).getUnit().toString();
@@ -72,41 +89,72 @@ public class CrsGrid implements MosaickingGrid {
                 double meterSpanGlobal = semiMinorAxis * Math.PI;
                 this.pixelSize = meterSpanGlobal / numRowsGlobal;
             }
-
+            this.pixelSizeX = this.pixelSize / pixelSizeRatio;
             System.out.println("pixelSize = " + this.pixelSize + " [" + units + "]");
-            this.numCols = (int)(envelopeCRS.getSpan(LON_DIM) / this.pixelSize);
+            this.numCols = (int)(envelopeCRS.getSpan(LON_DIM) / this.pixelSizeX);
             this.easting = envelopeCRS.getMinimum(LON_DIM);
             this.numRows = (int)(envelopeCRS.getSpan(LAT_DIM) / this.pixelSize);
             this.northing = envelopeCRS.getMaximum(LAT_DIM);
-            this.crsGeoCoding = new CrsGeoCoding(this.crs, this.numCols, this.numRows, this.easting, this.northing, this.pixelSize, this.pixelSize, 0.0, 0.0);
-        } catch (FactoryException | TransformException var9) {
-            throw new IllegalArgumentException("Can not create crs for:" + crsCode, var9);
+            this.crsGeoCoding = new CrsGeoCoding(this.crs, this.numCols, this.numRows, this.easting, this.northing, this.pixelSizeX, this.pixelSize, 0.0, 0.0);
+        } catch (FactoryException | TransformException | ParseException e) {
+            throw new IllegalArgumentException("Can not create crs for:" + crsCode, e);
         }
 
         this.geometryFactory = new GeometryFactory();
     }
 
+    /**
+     * Constructor for metric grids and for geographic grids with non-rectangular pixels.
+     * <p/>
+     * WKT for projections usually support meters and degrees as units but not pixels.
+     * And there seem to be no example how to represent different resolutions in north and east.
+     * Therefore, the initial idea to use WKT to define the raster has been dropped.
+     * Instead, pixelsize is the size in y dimension, and EPSG:code[,pixelsizeydivx] contains the divisor,
+     * e.g. 0.7 suitable for ~45 degrees north.
+     * <p/>
+     * 60 and EPSG:32636 for an UTM grid in zone 36N in 60m.
+     * 0.1 and EPSG:4326 for a WGS84 geographic grid with 0.1 degree pixels
+     * any value and EPSG:4326,0.7 for a WGS84 geographic grid with rectangular pixels
+     * 100 and EPSG:3995,POLYGON((-300 -1200,9700 ...)) for a polar stereographic projection subset of 10000 m width ...
+     * @param pixelSize
+     * @param crsCode
+     */
     public CrsGrid(double pixelSize, String crsCode) {
         try {
-            this.crs = CRS.decode(crsCode, true);
+            if (crsCode.contains(",")) {
+                String[] parts = crsCode.split(",");
+                this.crs = CRS.decode(parts[0], true);
+                if (parts[1].startsWith("POLYGON")) {
+                    this.pixelSizeX = pixelSize;
+                    String targetWKT = crsCode.substring(crsCode.indexOf(',') + 1);
+                    this.targetGeometryInCrsCoordinates = new WKTReader().read(targetWKT);
+                } else {
+                    this.pixelSizeX = pixelSize / Double.parseDouble(parts[1]);
+                }
+            } else {
+                this.crs = CRS.decode(crsCode, true);
+                this.pixelSizeX = pixelSize;
+            }
             Envelope envelopeCRS = CRS.getEnvelope(this.crs);
             System.out.println("envelopeCRS = " + envelopeCRS);
+            // the envelope may be odd regarding any assumed resolution, minX for UTM is 166021.4430960772
             envelopeCRS = new CRSEnvelope(crsCode,
-                                          Math.floor(envelopeCRS.getMinimum(0) / pixelSize) * pixelSize,
-                                          Math.floor(envelopeCRS.getMinimum(1) / pixelSize) * pixelSize,
-                                          Math.ceil(envelopeCRS.getMaximum(0) / pixelSize) * pixelSize,
-                                          Math.ceil(envelopeCRS.getMaximum(1) / pixelSize) * pixelSize);
+                                          Math.floor(envelopeCRS.getMinimum(LON_DIM) / this.pixelSizeX) * this.pixelSizeX,
+                                          Math.floor(envelopeCRS.getMinimum(LAT_DIM) / pixelSize) * pixelSize,
+                                          Math.ceil(envelopeCRS.getMaximum(LON_DIM) / this.pixelSizeX) * this.pixelSizeX,
+                                          Math.ceil(envelopeCRS.getMaximum(LAT_DIM) / pixelSize) * pixelSize);
             System.out.println("gridded envelopeCRS = " + envelopeCRS);
             String units = this.crs.getCoordinateSystem().getAxis(LON_DIM).getUnit().toString();
             this.pixelSize = pixelSize;
             System.out.println("pixelSize = " + this.pixelSize + " [" + units + "]");
-            this.numCols = (int)(envelopeCRS.getSpan(LON_DIM) / this.pixelSize);
+            System.out.println("pixelSizeX= " + this.pixelSizeX + " [" + units + "]");
+            this.numCols = (int)Math.round(envelopeCRS.getSpan(LON_DIM) / this.pixelSizeX);
             this.easting = envelopeCRS.getMinimum(LON_DIM);
-            this.numRows = (int)(envelopeCRS.getSpan(LAT_DIM) / this.pixelSize);
+            this.numRows = (int)Math.round(envelopeCRS.getSpan(LAT_DIM) / this.pixelSize);
             this.northing = envelopeCRS.getMaximum(LAT_DIM);
-            this.crsGeoCoding = new CrsGeoCoding(this.crs, this.numCols, this.numRows, this.easting, this.northing, this.pixelSize, this.pixelSize, 0.0, 0.0);
-        } catch (FactoryException | TransformException var9) {
-            throw new IllegalArgumentException("Can not create crs for:" + crsCode, var9);
+            this.crsGeoCoding = new CrsGeoCoding(this.crs, this.numCols, this.numRows, this.easting, this.northing, this.pixelSizeX, this.pixelSize, 0.0, 0.0);
+        } catch (FactoryException | TransformException | ParseException e) {
+            throw new IllegalArgumentException("Can not create crs for:" + crsCode, e);
         }
 
         this.geometryFactory = new GeometryFactory();
@@ -170,15 +218,28 @@ public class CrsGrid implements MosaickingGrid {
         return targetProduct;
     }
 
-    public Geometry getImageGeometry(Geometry Geometry) {
+    public Geometry getImageGeometry(Geometry geometry) {
         Product gridProduct = new Product("ColocationGrid", "ColocationGrid", this.numCols, this.numRows);
         gridProduct.setSceneGeoCoding(this.crsGeoCoding);
         RasterDataNode rdn = gridProduct.addBand("dummy", ProductData.TYPE_UINT8);
+        if (this.targetGeometryInCrsCoordinates != null) {
+            try {
+                AffineTransform i2mTransform = rdn.getImageToModelTransform();
+                i2mTransform.invert();
+                GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
+                transformer.setMathTransform(new AffineTransform2D(i2mTransform));
+                Geometry targetGeometryInPixels = transformer.transform(this.targetGeometryInCrsCoordinates);
+                System.out.println("target subset of CRS grid: " + targetGeometryInPixels);
+                return targetGeometryInPixels;
+            } catch (TransformException | NoninvertibleTransformException e) {
+                throw new IllegalArgumentException("Could not invert model-to-image transformation.", e);
+            }
+        }
         SimpleFeatureType wktFeatureType = PlainFeatureFactory.createDefaultFeatureType(DefaultGeographicCRS.WGS84);
         ListFeatureCollection featureCollection = new ListFeatureCollection(wktFeatureType);
         SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(wktFeatureType);
         SimpleFeature wktFeature = featureBuilder.buildFeature("ID1");
-        wktFeature.setDefaultGeometry(Geometry);
+        wktFeature.setDefaultGeometry(geometry);
         featureCollection.add(wktFeature);
         FeatureCollection<SimpleFeatureType, SimpleFeature> productFeatures = FeatureUtils.clipFeatureCollectionToProductBounds(featureCollection, gridProduct,
                                                                                                                                 null, ProgressMonitor.NULL);
@@ -201,18 +262,21 @@ public class CrsGrid implements MosaickingGrid {
         }
     }
 
+    /** returns rectangle with integer bounds, allows for 1% margin to snap to grid,
+     * else snap to outside border of partially included column or row
+     */
     public Rectangle getBounds(Geometry pixelGeometry) {
         com.vividsolutions.jts.geom.Envelope envelopeInternal = pixelGeometry.getEnvelopeInternal();
-        int minX = (int)Math.floor(envelopeInternal.getMinX());
-        int minY = (int)Math.floor(envelopeInternal.getMinY());
-        int maxX = (int)Math.ceil(envelopeInternal.getMaxX());
-        int maxY = (int)Math.ceil(envelopeInternal.getMaxY());
+        int minX = (int)Math.floor(envelopeInternal.getMinX() + 0.01);
+        int minY = (int)Math.floor(envelopeInternal.getMinY() + 0.01);
+        int maxX = (int)Math.ceil(envelopeInternal.getMaxX() - 0.01);
+        int maxY = (int)Math.ceil(envelopeInternal.getMaxY() - 0.01);
         return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     public GeoCoding getGeoCoding(Rectangle outputRegion) {
         try {
-            return new CrsGeoCoding(this.crs, outputRegion.width, outputRegion.height, this.easting + this.pixelSize * outputRegion.x, this.northing - this.pixelSize * outputRegion.y, this.pixelSize, this.pixelSize, 0.0, 0.0);
+            return new CrsGeoCoding(this.crs, outputRegion.width, outputRegion.height, this.easting + this.pixelSizeX * outputRegion.x, this.northing - this.pixelSize * outputRegion.y, this.pixelSizeX, this.pixelSize, 0.0, 0.0);
         } catch (TransformException | FactoryException e) {
             throw new IllegalArgumentException("Can not create geocoding for crs.", e);
         }
