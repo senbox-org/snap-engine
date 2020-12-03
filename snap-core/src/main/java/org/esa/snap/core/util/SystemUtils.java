@@ -113,7 +113,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationHomepageUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", "http://step.esa.int");
+        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", "https://seadas.gsfc.nasa.gov");
     }
 
     /**
