@@ -74,6 +74,17 @@ public class InputProductValidator {
         }
     }
 
+    public void checkIfCollocatedStack() throws OperatorException {
+        if (!isCollocated()) {
+            throw new OperatorException(SHOULD_BE_COREGISTERED);
+        }
+    }
+
+    public boolean isCollocated() {
+        return (absRoot != null &&
+                absRoot.getAttribute(AbstractMetadata.collocated_stack).getData().getElemBoolean());
+    }
+
     public boolean isComplex() {
         if (absRoot != null) {
             final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, AbstractMetadata.NO_METADATA_STRING).trim();
