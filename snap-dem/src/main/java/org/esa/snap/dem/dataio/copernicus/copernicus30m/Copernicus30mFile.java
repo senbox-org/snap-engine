@@ -1,23 +1,15 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
-import java.util.Collection;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
-import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReader;
-import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReaderPlugIn;
 
 public class Copernicus30mFile extends ElevationFile {
 
-    private File tarFile;
-    private Product copernicusProduct;
     private final Copernicus30mElevationModel demModel;
 
     public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) throws IOException {
@@ -53,40 +45,6 @@ public class Copernicus30mFile extends ElevationFile {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }
-    }
-    protected void readData() throws IOException {
-        CopernicusGeoTIFFReaderPlugIn readerPlugin = new CopernicusGeoTIFFReaderPlugIn();
-        CopernicusGeoTIFFReader reader = (CopernicusGeoTIFFReader) readerPlugin.createReaderInstance();
-
-        copernicusProduct = reader.readProductNodes(localFile, null);
-    }
-
-    public static String getNameFromTarFile(final File tarFile) throws IOException {
-        String returnString = "";
-        TarArchiveInputStream tarInputStream  = new TarArchiveInputStream(new FileInputStream(tarFile));
-        ArchiveEntry e = tarInputStream.getNextEntry();
-        while( e != null){
-            if (e.getName().endsWith(".tif") && e.getName().contains("DEM/")){
-                returnString = e.getName().split("/")[e.getName().split("/").length - 1];
-                break;
-            }
-            e = tarInputStream.getNextEntry();
-        }
-        tarInputStream.close();
-        returnString = returnString.replace(".tif", ".tar");
-        return returnString;
-    }
-
-    //Renames a directory of copernicus tar files to the proper name for indexing
-    public static void renameDirectory(String directory) throws IOException {
-        Collection<File> files = FileUtils.listFiles(new File(directory), null, true);
-        for(File file2 : files){
-            if(file2.getName().endsWith(".tar")){
-                String newname = getNameFromTarFile(file2);
-                String oldname = file2.getName();
-                file2.renameTo(new File(file2.getAbsolutePath().replace(oldname, newname)));
-            }
         }
     }
 
