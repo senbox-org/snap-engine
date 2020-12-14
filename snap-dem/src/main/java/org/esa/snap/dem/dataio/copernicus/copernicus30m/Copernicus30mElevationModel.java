@@ -1,4 +1,4 @@
-package org.esa.snap.dem.dataio.copernicus90m;
+package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -6,12 +6,13 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
+import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReaderPlugIn;
 
 import java.io.File;
 import java.io.IOException;
 
-public class CopernicusElevationModel extends BaseElevationModel {
-    public CopernicusElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
+public class Copernicus30mElevationModel extends BaseElevationModel {
+    public Copernicus30mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
     }
 
@@ -42,7 +43,7 @@ public class CopernicusElevationModel extends BaseElevationModel {
         final File localFile = new File(demInstallDir, fileName);
         CopernicusGeoTIFFReaderPlugIn plugIn = new CopernicusGeoTIFFReaderPlugIn();
         try {
-            elevationFiles[x][NUM_Y_TILES - 1 - y] = new CopernicusFile(this, localFile, plugIn.createReaderInstance());
+            elevationFiles[x][NUM_Y_TILES - 1 - y] = new Copernicus30mFile(this, localFile, plugIn.createReaderInstance());
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -76,7 +77,7 @@ public class CopernicusElevationModel extends BaseElevationModel {
         return createTileFilename(lat, lon);
     }
     public static String createTileFilename(int minLat, int minLon) {
-        final StringBuilder name = new StringBuilder("Copernicus_DSM_30_");
+        final StringBuilder name = new StringBuilder("Copernicus_DSM_COG_10_");
         name.append(minLat < 0 ? "S" : "N");
         String latString = String.valueOf(Math.abs(minLat));
         while (latString.length() < 2) {
@@ -92,7 +93,7 @@ public class CopernicusElevationModel extends BaseElevationModel {
             lonString = '0' + lonString;
         }
         name.append(lonString);
-        name.append("_00_DEM.tar");
+        name.append("_00_DEM.tif");
 
         return name.toString();
     }

@@ -1,4 +1,4 @@
-package org.esa.snap.dem.dataio.copernicus90m;
+package org.esa.snap.dem.dataio.copernicus;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.BaseElevationTile;

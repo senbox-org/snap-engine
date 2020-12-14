@@ -1,4 +1,4 @@
-package org.esa.snap.dem.dataio.copernicus90m;
+package org.esa.snap.dem.dataio.copernicus;
 
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
@@ -11,13 +11,13 @@ import java.nio.file.Path;
 import java.util.Locale;
 
 
-//For reading Copernicus GeoTIFF DEM products stored in a tarball
+//For reading Copernicus GeoTIFF DEM products
 
 public class CopernicusGeoTIFFReaderPlugIn implements ProductReaderPlugIn {
 
     public final static String[] FORMAT_NAMES = {"DTED"};
-    private final static String[] FORMAT_FILE_EXTENSIONS = {".tif",".tar"};
-    private final static String PLUGIN_DESCRIPTION = "Copernicus Europe DEM";
+    private final static String[] FORMAT_FILE_EXTENSIONS = {".tif"};
+    private final static String PLUGIN_DESCRIPTION = "Copernicus TIF DEM";
     private final Class[] VALID_INPUT_TYPES = new Class[]{Path.class, File.class, String.class};
 
     @Override
@@ -51,7 +51,7 @@ public class CopernicusGeoTIFFReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public String[] getDefaultFileExtensions() {
-        return new String[]{".tif", ".TIF",  ".tar", ".TAR"};
+        return new String[]{".tif", ".TIF"};
     }
 
     @Override

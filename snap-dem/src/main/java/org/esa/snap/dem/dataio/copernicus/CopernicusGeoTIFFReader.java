@@ -1,9 +1,6 @@
-package org.esa.snap.dem.dataio.copernicus90m;
+package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -44,49 +41,10 @@ public class CopernicusGeoTIFFReader extends AbstractProductReader {
             }
             final String inputFileName = inputPath.getFileName().toString();
             final String ext = FileUtils.getExtension(inputFileName);
-            if (".tar".equalsIgnoreCase(ext)) {
-                if(Files.size(inputPath) == 0){
-                    // For the dummy blank tiles generated.
-                    Product blankProduct = new Product("elevation", null, 1201, 1201);
-                    Band b = new Band("elevation", ProductData.TYPE_FLOAT32, 1201, 1201);
-                    blankProduct.addBand(b);
-                    return blankProduct;
-                }
-                tarFile =inputPath.toFile();
-                TarArchiveInputStream tarInputStream  = new TarArchiveInputStream(new FileInputStream(tarFile));
-                ArchiveEntry e = tarInputStream.getNextEntry();
-                ArchiveEntry xml = null;
-                ArchiveEntry tiff = null;
-                int offset = 0;
-                byte [] content;
-                File tifFile = null;
-                while( e != null){
-                    if (e.getName().endsWith(".tif") && e.getName().contains("DEM/")){
-                        content = new byte[(int) e.getSize()];
-                        tarInputStream.read(content, offset, content.length - offset);
-                        // Write out the geotiff to the DEM folder TODO read in the geotiff as a stream from the TAR file in memory to save on disk space
-                        tifFile = new File(inputPath.toAbsolutePath().toString().replace(".tar", ".tif"));
-                        FileOutputStream outputFile=new FileOutputStream(tifFile);
-                        IOUtils.write(content,outputFile);
-                        break;
-                    }
-                    e = tarInputStream.getNextEntry();
-                }
-                tarInputStream.close();
-
-                ProductReader geotiffPR = geotiffReaderPlugin.createReaderInstance();
-                Product geotiffProduct = geotiffPR.readProductNodes(tifFile, null);
-                geotiffProduct.getBandAt(0).setName("elevation");
-                return geotiffProduct;
-
-
-
-            } else {
-                ProductReader geotiffPR = geotiffReaderPlugin.createReaderInstance();
-                Product geotiffProduct = geotiffPR.readProductNodes(inputPath.toFile(), null);
-                geotiffProduct.getBandAt(0).setName("elevation");
-                return geotiffProduct;
-            }
+            ProductReader geotiffPR = geotiffReaderPlugin.createReaderInstance();
+            Product geotiffProduct = geotiffPR.readProductNodes(inputPath.toFile(), null);
+            geotiffProduct.getBandAt(0).setName("elevation");
+            return geotiffProduct;
 
         }catch (IOException e ){
             try {
