@@ -9,8 +9,6 @@ public class CopernicusDownloader {
     private final String s3_prefix_30m = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
     private final String s3_prefix_90m = "https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com";
 
-    private Path[] demProductFiles;
-
     private final File installDir;
 
 
@@ -74,9 +72,6 @@ public class CopernicusDownloader {
             file.createNewFile();
         }
         return true;
-    }
-    public Path[] getDemProductFiles() {
-        return demProductFiles;
     }
 
 }

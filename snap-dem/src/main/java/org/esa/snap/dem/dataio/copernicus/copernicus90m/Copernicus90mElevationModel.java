@@ -6,8 +6,7 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReaderPlugIn;
-
+import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import java.io.File;
 import java.io.IOException;
 
@@ -41,32 +40,12 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
         final String fileName = createTileFilename(minLat, minLon);
         final File localFile = new File(demInstallDir, fileName);
-        CopernicusGeoTIFFReaderPlugIn plugIn = new CopernicusGeoTIFFReaderPlugIn();
+        GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         try {
             elevationFiles[x][NUM_Y_TILES - 1 - y] = new Copernicus90mFile(this, localFile, plugIn.createReaderInstance());
         } catch (Exception e){
             e.printStackTrace();
         }
-
-        /*
-        if(Files.exists(localFile.toPath())){
-            CopernicusGeoTIFFReaderPlugIn plugIn = new CopernicusGeoTIFFReaderPlugIn();
-            try {
-                elevationFiles[x][NUM_Y_TILES - 1 - y] = new CopernicusFile(this, localFile, plugIn.createReaderInstance());
-            } catch (IOException e){
-                e.printStackTrace();
-            }
-        } else if(minLon >= 2 && minLon <= 80 && minLat >= -69 && minLat <= 55  ) {
-            try {
-                //CopernicusDownloader downloader = new CopernicusDownloader(demInstallDir);
-                //downloader.downloadTiles(minLat, minLon);
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        */
 
 
 
