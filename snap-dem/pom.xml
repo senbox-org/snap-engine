@@ -18,9 +18,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <tao.version>1.0.2</tao.version>
-    </properties>
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
@@ -75,16 +72,6 @@
             <artifactId>commons-compress</artifactId>
             <version>1.19</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-product-library-v2</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-		<dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>snap-remote-products-repository</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

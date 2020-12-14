@@ -1,4 +1,4 @@
-package org.esa.snap.dem.dataio.copernicus90m;
+package org.esa.snap.dem.dataio.copernicus.copernicus90m;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -9,17 +9,21 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import java.util.Collection;
 import org.esa.snap.core.dataop.dem.ElevationTile;
+import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusGeoTIFFReaderPlugIn;
 
-public class CopernicusFile extends ElevationFile {
+public class Copernicus90mFile extends ElevationFile {
 
     private File tarFile;
     private Product copernicusProduct;
-    private final CopernicusElevationModel demModel;
+    private final Copernicus90mElevationModel demModel;
 
-    public CopernicusFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) throws IOException {
+    public Copernicus90mFile(Copernicus90mElevationModel copernicus90mElevationModel, File localFile, ProductReader reader) throws IOException {
         super(localFile, reader);
-        demModel = copernicusElevationModel;
-        CopernicusDownloader.validateCredentials();
+        demModel = copernicus90mElevationModel;
+        //CopernicusDownloader.validateCredentials();
 
 
     }
@@ -34,8 +38,9 @@ public class CopernicusFile extends ElevationFile {
     protected Boolean getRemoteFile() throws IOException {
         try {
             String [] fileNameSplit = localFile.getName().split("_");
-            String north = fileNameSplit[3];
-            String east =  fileNameSplit[5];
+            System.out.println(localFile.getName());
+            String north = fileNameSplit[4];
+            String east =  fileNameSplit[6];
             int lat = Integer.parseInt(north.substring(1));
             int lon = Integer.parseInt(east.substring(1));
             if(east.startsWith("W")){
@@ -47,7 +52,7 @@ public class CopernicusFile extends ElevationFile {
 
             CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParentFile());
 
-            return downloader.downloadTiles(lon, lat);
+            return downloader.downloadTiles(lat, lon, 90);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -60,7 +65,7 @@ public class CopernicusFile extends ElevationFile {
         copernicusProduct = reader.readProductNodes(localFile, null);
     }
 
-    protected static String getNameFromTarFile(final File tarFile) throws IOException {
+    public static String getNameFromTarFile(final File tarFile) throws IOException {
         String returnString = "";
         TarArchiveInputStream tarInputStream  = new TarArchiveInputStream(new FileInputStream(tarFile));
         ArchiveEntry e = tarInputStream.getNextEntry();
