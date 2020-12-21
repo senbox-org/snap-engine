@@ -8,7 +8,6 @@ import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import java.io.File;
-import java.io.IOException;
 
 public class Copernicus90mElevationModel extends BaseElevationModel {
     public Copernicus90mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
@@ -52,14 +51,14 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
             e.printStackTrace();
         }
 
-
-
     }
+
     public static String createTileFilename(double minLat, double minLon) {
         int lat = (int) minLat;
         int lon = (int) minLon;
         return createTileFilename(lat, lon);
     }
+
     public static String createTileFilename(int minLat, int minLon) {
         final StringBuilder name = new StringBuilder("Copernicus_DSM_COG_30_");
         name.append(minLat < 0 ? "S" : "N");
