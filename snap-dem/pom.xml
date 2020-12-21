@@ -67,12 +67,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.19</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>

@@ -1,6 +1,5 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
@@ -14,10 +13,11 @@ public class Copernicus30mFile extends ElevationFile {
 
     private final Copernicus30mElevationModel demModel;
 
-    public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) throws IOException {
+    public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
         demModel = copernicus30mElevationModel;
     }
+
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
         final CopernicusElevationTile tile ;
@@ -46,7 +46,7 @@ public class Copernicus30mFile extends ElevationFile {
     }
 
     @Override
-    protected Boolean getRemoteFile() throws IOException {
+    protected Boolean getRemoteFile() {
         try {
             String [] fileNameSplit = localFile.getName().split("_");
             System.out.println(localFile.getName());
