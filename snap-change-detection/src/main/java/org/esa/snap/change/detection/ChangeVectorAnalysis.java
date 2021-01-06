@@ -31,8 +31,6 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
 @OperatorMetadata(alias = "ChangeVectorAnalysis", category = "Raster/Change Detection", version = "1.0", internal = false, description = "The 'Change Vector Analysis' between two dual bands at two differents dates.", authors = "Douziech Florian", copyright = "2021")
 public class ChangeVectorAnalysis extends PixelOperator {
 
-    private boolean hasValidPixelExpression;
-
     @SourceProducts(count = 2, description = "The sources product.")
     private Product[] sourceProducts;
 
@@ -68,8 +66,8 @@ public class ChangeVectorAnalysis extends PixelOperator {
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurator) throws OperatorException {
         sampleConfigurator.defineSample(0, sourceBand1);
         sampleConfigurator.defineSample(1, sourceBand2);
-        sampleConfigurator.defineSample(2, sourceBand1);
-        sampleConfigurator.defineSample(3, sourceBand2);
+        sampleConfigurator.defineSample(2, sourceBand3);
+        sampleConfigurator.defineSample(3, sourceBand4);
     }
 
     /**
