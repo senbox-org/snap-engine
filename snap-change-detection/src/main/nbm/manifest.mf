@@ -5,5 +5,5 @@ AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: SNAP Core
-OpenIDE-Module-Long-Description: <p>This is an operator to compute change vector maps(magnitude and direction) between two dual
+OpenIDE-Module-Long-Description: <p>This is an operator to compute change vector maps(magnitude and direction) between two dual \
 bands at two differents dates.</p>

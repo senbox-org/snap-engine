@@ -34,21 +34,13 @@ public class ChangeVectorAnalysis extends PixelOperator {
     @SourceProducts(count = 2, description = "The sources product.")
     private Product[] sourceProducts;
 
-    @SourceProduct(description = "A product to be updated.", optional = true)
-    Product updateProduct;
-
     @TargetProduct
     private Product targetProduct;
-    // any 2 bands from the first date
-    @Parameter(label = "Band 1 at the first date", rasterDataNodeType = Band.class)
+    // any 2 bands from the same date
+    @Parameter(label = "Band 1 at the same date", rasterDataNodeType = Band.class)
     private String sourceBand1;
-    @Parameter(label = "Band 2 at the first date", rasterDataNodeType = Band.class)
+    @Parameter(label = "Band 2 at the same date", rasterDataNodeType = Band.class)
     private String sourceBand2;
-    // any 2 bands from the second date
-    @Parameter(label = "Band 3 at the second date", rasterDataNodeType = Band.class)
-    private String sourceBand3;
-    @Parameter(label = "Band 2 at the second date", rasterDataNodeType = Band.class)
-    private String sourceBand4;
 
     /**
      * Configures all source samples that this operator requires for the computation
@@ -64,10 +56,10 @@ public class ChangeVectorAnalysis extends PixelOperator {
      */
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurator) throws OperatorException {
-        sampleConfigurator.defineSample(0, sourceBand1);
-        sampleConfigurator.defineSample(1, sourceBand2);
-        sampleConfigurator.defineSample(2, sourceBand3);
-        sampleConfigurator.defineSample(3, sourceBand4);
+        sampleConfigurator.defineSample(0, sourceBand1, sourceProducts[0]);
+        sampleConfigurator.defineSample(1, sourceBand2, sourceProducts[0]);
+        sampleConfigurator.defineSample(2, sourceBand1, sourceProducts[1]);
+        sampleConfigurator.defineSample(3, sourceBand2, sourceProducts[1]);
     }
 
     /**
