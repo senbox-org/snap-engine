@@ -73,6 +73,7 @@
         <module>snap-bigtiff</module>
         <module>snap-binning</module>
         <module>snap-classification</module>
+        <module>snap-change-detection</module>
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
@@ -1204,5 +1205,4 @@
             </roles>
         </developer>
     </developers>
-
 </project>
