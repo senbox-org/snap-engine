@@ -21,9 +21,9 @@ import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 
 /**
- * The <code>WipeOP</code> is change vector analysis operation between two dual
+ * The <code>ChangeVectorAnalysis</code> is change vector analysis operation between two dual
  * bands at two differents dates.
- *
+ * Return two products magnitude and direction of change
  * @author Douziech Florian
  */
 
