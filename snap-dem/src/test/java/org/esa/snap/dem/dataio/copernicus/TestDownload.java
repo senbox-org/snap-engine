@@ -1,16 +1,9 @@
 package org.esa.snap.dem.dataio.copernicus;
 
-import org.esa.snap.core.dataio.DecodeQualification;
-import org.esa.snap.core.dataio.ProductReader;
-import org.esa.snap.core.datamodel.Product;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.util.Assert;
 
-import java.io.File;
-import java.nio.file.Path;
-
-import static org.junit.Assert.assertTrue;
+import java.nio.file.Files;
 
 
 public class TestDownload {
@@ -18,7 +11,7 @@ public class TestDownload {
 
     @Test
     public void testSearch() throws Exception {
-        CopernicusDownloader d = new CopernicusDownloader(new File("/tmp"));
+        CopernicusDownloader d = new CopernicusDownloader(Files.createTempDirectory(this.getClass().getSimpleName()).toFile());
         d.downloadTiles(-80, 43, 30);
         d.downloadTiles(-80, 43, 90);
         d.downloadTiles(0, 0, 90);
