@@ -1,21 +1,15 @@
 package org.esa.snap.change.detection;
 
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.SampleCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.pointop.PixelOperator;
-import org.esa.snap.core.gpf.pointop.ProductConfigurer;
 import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
@@ -32,8 +26,11 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
 @OperatorMetadata(alias = "ChangeVectorAnalysisOp", category = "Raster/Change Detection", version = "1.0", internal = false, description = "The 'Change Vector Analysis' between two dual bands at two differents dates.", authors = "Douziech Florian", copyright = "2021")
 public class ChangeVectorAnalysisOp extends PixelOperator {
 
-    @SourceProducts(count = 2, description = "The sources product.")
-    private Product[] sourceProducts;
+    
+    @SourceProduct(label = "Product t1", description = "The sources product at the first date.")
+    private Product sourceProduct1;
+    @SourceProduct(label = "Product t2", description = "The sources product at the second date.")
+    private Product sourceProduct2;
 
     @TargetProduct
     private Product targetProduct;
@@ -66,10 +63,10 @@ public class ChangeVectorAnalysisOp extends PixelOperator {
      */
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurator) throws OperatorException {
-        sampleConfigurator.defineSample(0, sourceBand1, sourceProducts[0]);
-        sampleConfigurator.defineSample(1, sourceBand2, sourceProducts[0]);
-        sampleConfigurator.defineSample(2, sourceBand1, sourceProducts[1]);
-        sampleConfigurator.defineSample(3, sourceBand2, sourceProducts[1]);
+        sampleConfigurator.defineSample(0, sourceBand1, sourceProduct1);
+        sampleConfigurator.defineSample(1, sourceBand2, sourceProduct1);
+        sampleConfigurator.defineSample(2, sourceBand1, sourceProduct2);
+        sampleConfigurator.defineSample(3, sourceBand2, sourceProduct2);
     }
 
     /**
@@ -160,7 +157,7 @@ public class ChangeVectorAnalysisOp extends PixelOperator {
         }
 
         // compute direction
-        double change_direction = Math.atan2(diff1, diff2) * Math.PI / 180.0;
+        double change_direction = Math.atan2(diff2, diff1) /Math.PI * 180.0;
         if (change_direction < 0)
             change_direction += 360;
 
