@@ -19,7 +19,6 @@ public class ChangeVectorAnalysisOpTest {
         final Product produit_t2 = createTestProduct("produit_t2", band1_t2_pixels, band2_t2_pixels);
         ChangeVectorAnalysisOp op = new ChangeVectorAnalysisOp();
         op.setParameterDefaultValues();
-        op.setParameter("magnitudeThreshold", "0.2");
         op.setSourceProduct("sourceProduct1", produit_t1);
         op.setSourceProduct("sourceProduct2", produit_t2);
         op.setParameter("sourceBand1", "band1");
@@ -30,15 +29,31 @@ public class ChangeVectorAnalysisOpTest {
         Band magnitude_result = targetProduct.getBand("magnitude");
         float[] magnitude_output = new float[5];
         magnitude_result.readPixels(0, 0, 5, 1, magnitude_output, ProgressMonitor.NULL);
-        
-        
-
         //test direction result
         Band direction_result = targetProduct.getBand("direction");
         float[] direction_output = new float[5];
         direction_result.readPixels(0, 0, 5, 1, direction_output, ProgressMonitor.NULL);
-        assertArrayEquals("Magnitude output test",new float[]{Float.NaN,0.0f,0.0f,1.0f,1.0f}, magnitude_output, 1e-4f);
-        assertArrayEquals("Direction output test",new float[]{Float.NaN,0.0f,0.0f,90.0f,270.0f}, direction_output, 1e-4f);
+        assertArrayEquals("Magnitude output test (no threshold)",new float[]{Float.NaN,0.0f,0.141421f,1.0f,1.0f}, magnitude_output, 1e-4f);
+        assertArrayEquals("Direction output test (no threshold)",new float[]{Float.NaN,0.0f,45.0f,90.0f,270.0f}, direction_output, 1e-4f);
+        ChangeVectorAnalysisOp op2 = new ChangeVectorAnalysisOp();
+        op2.setParameterDefaultValues();
+        op2.setParameter("magnitudeThreshold", "0.2");
+        op2.setSourceProduct("sourceProduct1", produit_t1);
+        op2.setSourceProduct("sourceProduct2", produit_t2);
+        op2.setParameter("sourceBand1", "band1");
+        op2.setParameter("sourceBand2", "band2");
+        op2.doExecute(ProgressMonitor.NULL);
+        Product targetProduct2 = op2.getTargetProduct();
+        //test magnitude result
+        Band magnitude_result2 = targetProduct2.getBand("magnitude");
+        float[] magnitude_output2 = new float[5];
+        magnitude_result2.readPixels(0, 0, 5, 1, magnitude_output2, ProgressMonitor.NULL);
+        //test direction result
+        Band direction_result2 = targetProduct2.getBand("direction");
+        float[] direction_output2 = new float[5];
+        direction_result2.readPixels(0, 0, 5, 1, direction_output2, ProgressMonitor.NULL);
+        assertArrayEquals("Magnitude output test2 (with threshold)",new float[]{Float.NaN,0.0f,0.0f,1.0f,1.0f}, magnitude_output2, 1e-4f);
+        assertArrayEquals("Direction output test2 (with threshold)",new float[]{Float.NaN,0.0f,0.0f,90.0f,270.0f}, direction_output2, 1e-4f);
 
     }
 
