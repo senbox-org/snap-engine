@@ -15,8 +15,7 @@
   ~ with this program; if not, see http://www.gnu.org/licenses/
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -73,6 +72,7 @@
         <module>snap-bigtiff</module>
         <module>snap-binning</module>
         <module>snap-classification</module>
+        <module>snap-change-detection</module>
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
@@ -735,7 +735,6 @@
                 <artifactId>jsoup</artifactId>
                 <version>1.11.3</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -957,27 +956,27 @@
                     <version>3.1.1</version>
                 </plugin>
 
-               
+
                 <plugin>
-                   <groupId>org.sonatype.plugins</groupId>
-                   <artifactId>nexus-staging-maven-plugin</artifactId>
-                   <version>1.5.1</version>
-                   <executions>
-                      <execution>
-                         <id>default-deploy</id>
-                         <phase>deploy</phase>
-                         <goals>
-                            <goal>deploy</goal>
-                         </goals>
-                      </execution>
-                   </executions>
-                   <configuration>
-                      <serverId>snap-repo-public</serverId>
-                      <nexusUrl>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</nexusUrl>
-                      <skipStaging>true</skipStaging>
-                   </configuration>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.5.1</version>
+                    <executions>
+                        <execution>
+                            <id>default-deploy</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>deploy</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <serverId>snap-repo-public</serverId>
+                        <nexusUrl>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</nexusUrl>
+                        <skipStaging>true</skipStaging>
+                    </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
@@ -1204,5 +1203,4 @@
             </roles>
         </developer>
     </developers>
-
 </project>
