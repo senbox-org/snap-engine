@@ -1460,15 +1460,12 @@ public class DimapProductHelpers {
                     final double subsY = Double.parseDouble(
                                 gridInfo.getChildTextTrim(DimapProductConstants.TAG_TIE_POINT_STEP_Y));
                     final float[] floats = new float[width * height];
-                    boolean cyclic = false;
-                    final String cyclicText = gridInfo.getChildTextTrim(DimapProductConstants.TAG_TIE_POINT_CYCLIC);
-                    if (cyclicText != null) {
-                        cyclic = Boolean.parseBoolean(cyclicText);
-                    }
                     final TiePointGrid tiePointGrid;
-                    if (cyclic) {
-                        tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats,
-                                                        TiePointGrid.DISCONT_AT_180);
+                    final Element cyclicElem = gridInfo.getChild(DimapProductConstants.TAG_TIE_POINT_CYCLIC);
+                    if (cyclicElem != null) {
+                        final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AUTO));
+                        final int discontinuity = Integer.parseInt(intVal);
+                        tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats, discontinuity);
                     } else {
                         tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats);
                     }
