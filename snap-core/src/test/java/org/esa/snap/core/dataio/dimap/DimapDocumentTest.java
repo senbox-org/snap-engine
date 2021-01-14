@@ -754,7 +754,7 @@ public class DimapDocumentTest {
         pw.println("            <OFFSET_Y>" + 14.2 + "</OFFSET_Y>");
         pw.println("            <STEP_X>" + 16.3 + "</STEP_X>");
         pw.println("            <STEP_Y>" + 32.004 + "</STEP_Y>");
-        pw.println("            <CYCLIC>false</CYCLIC>");
+        pw.println("            <CYCLIC discontinuity=\"0\">false</CYCLIC>");
         pw.println("        </Tie_Point_Grid_Info>");
         pw.println("        <Tie_Point_Grid_Info>");
         pw.println("            <TIE_POINT_GRID_INDEX>1</TIE_POINT_GRID_INDEX>");
@@ -768,7 +768,7 @@ public class DimapDocumentTest {
         pw.println("            <OFFSET_Y>" + 14.2 + "</OFFSET_Y>");
         pw.println("            <STEP_X>" + 16.3 + "</STEP_X>");
         pw.println("            <STEP_Y>" + 32.004 + "</STEP_Y>");
-        pw.println("            <CYCLIC>true</CYCLIC>");
+        pw.println("            <CYCLIC discontinuity=\"180\">true</CYCLIC>");
         pw.println("        </Tie_Point_Grid_Info>");
         pw.println("    </Tie_Point_Grids>");
         pw.println("    <Image_Display>");
