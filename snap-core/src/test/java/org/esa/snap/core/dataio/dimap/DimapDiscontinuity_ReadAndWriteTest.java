@@ -29,10 +29,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,18 +40,21 @@ import static org.hamcrest.CoreMatchers.*;
 public class DimapDiscontinuity_ReadAndWriteTest {
 
     private Product product;
-    private Path ioDir;
     private DimapProductWriterPlugIn writerPlugin;
     private DimapProductReaderPlugIn readerPlugIn;
     private File outDir;
 
     @Before
     public void setUp() throws Exception {
+        final float[] dataMinus180to180 = new float[10 * 15];
+        calculateDiscontinuityData(dataMinus180to180, 180);
+        final float[] data0to360 = new float[10 * 15];
+        calculateDiscontinuityData(data0to360, 360);
         product = new Product("name", "type", 20, 30);
         product.addBand("aBand", ProductData.TYPE_INT16);
         product.addTiePointGrid(new TiePointGrid("dis_no", 10, 15, .5f, .5f, 2, 2, new float[10 * 15], TiePointGrid.DISCONT_NONE));
-        product.addTiePointGrid(new TiePointGrid("dis180", 10, 15, .5f, .5f, 2, 2, new float[10 * 15], TiePointGrid.DISCONT_AT_180));
-        product.addTiePointGrid(new TiePointGrid("dis360", 10, 15, .5f, .5f, 2, 2, new float[10 * 15], TiePointGrid.DISCONT_AT_360));
+        product.addTiePointGrid(new TiePointGrid("dis180", 10, 15, .5f, .5f, 2, 2, dataMinus180to180, TiePointGrid.DISCONT_AT_180));
+        product.addTiePointGrid(new TiePointGrid("dis360", 10, 15, .5f, .5f, 2, 2, data0to360, TiePointGrid.DISCONT_AT_360));
         writerPlugin = new DimapProductWriterPlugIn();
         readerPlugIn = new DimapProductReaderPlugIn();
         outDir = GlobalTestConfig.getSnapTestDataOutputDirectory();
@@ -82,4 +83,13 @@ public class DimapDiscontinuity_ReadAndWriteTest {
         assertThat(product.getTiePointGrid("dis360").getDiscontinuity(), is(TiePointGrid.DISCONT_AT_360));
     }
 
+    private void calculateDiscontinuityData(float[] dataArray, float disStart) {
+        float disStartX = disStart - 15;
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 15; y++) {
+                final float value = disStartX - (y * 2) + (x * 3);
+                dataArray[y * 10 + x] = value > disStart ? value - 360 : value;
+            }
+        }
+    }
 }

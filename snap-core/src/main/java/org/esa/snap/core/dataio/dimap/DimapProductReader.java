@@ -224,6 +224,12 @@ public class DimapProductReader extends AbstractProductReader {
                 }
                 inputStream.close();
                 inputStream = null;
+                // See if we have a -180...+180 or a 0...360 degree discontinuity
+                if (tiePointGrid.getDiscontinuity() != TiePointGrid.DISCONT_NONE) {
+//                if (tiePointGrid.getDiscontinuity() == TiePointGrid.DISCONT_AT_180
+//                || tiePointGrid.getDiscontinuity() == TiePointGrid.DISCONT_AT_360) {
+                    tiePointGrid.setDiscontinuity(TiePointGrid.getDiscontinuity(gridData));
+                }
             } catch (Exception e) {
                 throw new IOException(
                         MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tiePointGridName), e);
