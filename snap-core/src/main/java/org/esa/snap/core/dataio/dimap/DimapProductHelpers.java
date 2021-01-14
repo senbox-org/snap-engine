@@ -1463,9 +1463,14 @@ public class DimapProductHelpers {
                     final TiePointGrid tiePointGrid;
                     final Element cyclicElem = gridInfo.getChild(DimapProductConstants.TAG_TIE_POINT_CYCLIC);
                     if (cyclicElem != null) {
-                        final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AUTO));
-                        final int discontinuity = Integer.parseInt(intVal);
-                        tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats, discontinuity);
+                        final boolean cyclic = Boolean.parseBoolean(cyclicElem.getTextTrim());
+                        if (cyclic) {
+                            final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AUTO));
+                            final int discontinuity = Integer.parseInt(intVal);
+                            tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats, discontinuity);
+                        } else {
+                            tiePointGrid = new TiePointGrid(name,width,height,offsX,offsY,subsX,subsY,floats, TiePointGrid.DISCONT_NONE);
+                        }
                     } else {
                         tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats);
                     }
