@@ -408,7 +408,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_STEP_Y, tiePointGrid.getSubSamplingY());
                 final int discontinuity = tiePointGrid.getDiscontinuity();
                 final boolean cyclic = discontinuity != TiePointGrid.DISCONT_NONE;
-                final String[][] attributes = new String[][]{new String[]{DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, "" + discontinuity}};
+                final String[][] attributes = new String[][]{new String[]{DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(discontinuity)}};
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_CYCLIC, attributes, String.valueOf(cyclic));
                 writeAncillaryInformation(tiePointGrid, indent);
                 writeImageToModelTransform(tiePointGrid, indent);
