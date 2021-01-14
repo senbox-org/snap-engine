@@ -120,6 +120,7 @@ public class XPathHandler {
         DOMImplementationLS domImplementationLS = (DOMImplementationLS) document.getImplementation();
         LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
         String string = lsSerializer.writeToString(document);
-        return string.replace("<?xml version=\"1.0\" encoding=\"UTF-16\"?>\n", "");
+        return string.replaceFirst("<\\?xml.*>\n?", "");
+
     }
 }
