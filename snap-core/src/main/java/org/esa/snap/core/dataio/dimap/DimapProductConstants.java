@@ -424,4 +424,5 @@ public final class DimapProductConstants {
     public static final String ATTRIB_ORDER = "order";
     public static final String ATTRIB_INDEX = "index";
     public static final String ATTRIB_BAND_TYPE = "bandType";
+    public static final String ATTRIB_TIE_POINT_DISCONTINUITY = "discontinuity";
 }
