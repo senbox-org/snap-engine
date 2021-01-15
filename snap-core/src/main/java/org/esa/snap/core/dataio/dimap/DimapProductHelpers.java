@@ -1459,20 +1459,15 @@ public class DimapProductHelpers {
                                 gridInfo.getChildTextTrim(DimapProductConstants.TAG_TIE_POINT_STEP_X));
                     final double subsY = Double.parseDouble(
                                 gridInfo.getChildTextTrim(DimapProductConstants.TAG_TIE_POINT_STEP_Y));
-                    final float[] floats = new float[width * height];
-                    final TiePointGrid tiePointGrid;
+                    final TiePointGrid tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY);
                     final Element cyclicElem = gridInfo.getChild(DimapProductConstants.TAG_TIE_POINT_CYCLIC);
                     if (cyclicElem != null) {
                         final boolean cyclic = Boolean.parseBoolean(cyclicElem.getTextTrim());
                         if (cyclic) {
-                            final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AUTO));
+                            final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AT_180));
                             final int discontinuity = Integer.parseInt(intVal);
-                            tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats, discontinuity);
-                        } else {
-                            tiePointGrid = new TiePointGrid(name,width,height,offsX,offsY,subsX,subsY,floats, TiePointGrid.DISCONT_NONE);
+                            tiePointGrid.setDiscontinuity(discontinuity);
                         }
-                    } else {
-                        tiePointGrid = new TiePointGrid(name, width, height, offsX, offsY, subsX, subsY, floats);
                     }
                     tiePointGrid.setDescription(
                             gridInfo.getChildTextTrim(DimapProductConstants.TAG_TIE_POINT_DESCRIPTION));
