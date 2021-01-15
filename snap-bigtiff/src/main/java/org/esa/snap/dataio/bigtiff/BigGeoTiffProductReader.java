@@ -266,7 +266,6 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         if (imageReader == null) {
             throw new IOException("GeoTiff imageReader not found");
         }
-        imageReader.setInput(stream);
 
         Product product = null;
 
