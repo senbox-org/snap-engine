@@ -97,6 +97,15 @@ public abstract class Operator {
     }
 
     /**
+     * Get the operator context
+     * @return operator context metadata like description, label alias ...
+     */
+    public OperatorContext getContext()
+    {
+        return context;
+    } 
+    
+    /**
      * Sets the operator parameters to their default values, if any.
      */
     public void setParameterDefaultValues() {
