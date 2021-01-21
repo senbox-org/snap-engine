@@ -400,7 +400,10 @@ public class SubsetOp extends Operator {
                 regionMap.put(rasterDataNode.getName(), region);
                 continue;
             }
-            Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
+            boolean usePixelCenter = true;
+            if(product.isMultiSize())
+                usePixelCenter = false;
+            Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, usePixelCenter);
             regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
         }
 
