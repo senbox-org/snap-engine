@@ -53,7 +53,7 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
             // the product is multisize
             if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {
                 Geometry productGeometryRegion = GeoUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, this.pixelRegion);
-                return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, roundPixelRegion);
+                return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, roundPixelRegion, false);
             }
             return computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
         } else {

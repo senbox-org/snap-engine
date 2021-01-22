@@ -673,9 +673,9 @@ public class GeoUtils {
     }
 
     public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion,
-                                                            int numBorderPixels, boolean roundPixelRegion) {
-
-        final Geometry rasterGeometry = computeRasterGeometry(rasterGeoCoding, rasterWidth, rasterHeight,roundPixelRegion);
+                                                            int numBorderPixels, boolean roundPixelRegion, boolean multiSize) {
+        
+        final Geometry rasterGeometry = computeRasterGeometry(rasterGeoCoding, rasterWidth, rasterHeight, roundPixelRegion, multiSize);
         final Geometry regionIntersection = geometryRegion.intersection(rasterGeometry);
         if (regionIntersection.isEmpty()) {
             return new Rectangle(); // the intersection is empty
@@ -720,9 +720,11 @@ public class GeoUtils {
         return peuckerSimplifier.getResultGeometry();
     }
 
-    public static Geometry computeRasterGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight,boolean usePixelCenter) {
+    public static Geometry computeRasterGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, boolean usePixelCenter, boolean multiSize) {
         final Rectangle rect = new Rectangle(0, 0, rasterWidth, rasterHeight);
         final int step = Math.min(rect.width, rect.height) / 8;
+        if(!multiSize)
+            usePixelCenter=true;
         final GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rect, step > 0 ? step : 1, usePixelCenter);
         final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
@@ -753,6 +755,7 @@ public class GeoUtils {
             if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
                 geoPoints.add(gcGeoPos);
             }
+
         }
         return geoPoints.toArray(new GeoPos[geoPoints.size()]);
     }
