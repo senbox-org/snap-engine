@@ -34,7 +34,13 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
     private static final String remoteHTTP1 = "https://download.esa.int/step/auxdata/dem/SRTM90/tiff/";
     private static final String remoteHTTP2 = "http://skywatch-auxdata.s3-us-west-2.amazonaws.com/dem/SRTM90/tiff/";
     
-    private static final String remoteHTTP = Settings.instance().get("DEM.srtm3GeoTiffDEM_HTTP", remoteHTTP1);
+    private static String remoteHTTP = Settings.instance().get("DEM.srtm3GeoTiffDEM_HTTP", remoteHTTP1);
+    static {
+        // if old property files still contain old bucket
+        if(remoteHTTP.startsWith("http://srtm.csi.cgiar.org") || remoteHTTP.startsWith("http://cgiar-csi-srtm")) {
+            remoteHTTP = remoteHTTP1;
+        }
+    }
 
     public SRTM3GeoTiffFile(final SRTM3GeoTiffElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile, reader);
