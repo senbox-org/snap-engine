@@ -68,6 +68,10 @@ public class InputProductValidator {
         }
     }
 
+    public boolean isCoregisteredStack() {
+        return StackUtils.isCoregisteredStack(product);
+    }
+
     public void checkIfCoregisteredStack() throws OperatorException {
         if (!StackUtils.isCoregisteredStack(product)) {
             throw new OperatorException(SHOULD_BE_COREGISTERED);
