@@ -11,9 +11,7 @@ import org.junit.Test;
 
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PixelQuadTreeInverseTest {
 
@@ -541,5 +539,22 @@ public class PixelQuadTreeInverseTest {
 
         final InverseCoding inverseCoding = plugin.create();
         assertTrue(inverseCoding instanceof PixelQuadTreeInverse);
+    }
+
+    @Test
+    public void testLongitudeEpsilonCreation() {
+        //preparation
+        final int epsilon = 20;
+
+        //execution
+        final double[] epsilonLongitude = PixelQuadTreeInverse.createEpsilonLongitude(epsilon);
+
+        //verification
+        assertEquals(901, epsilonLongitude.length);
+        assertEquals(epsilon, epsilonLongitude[0], 1e-8);
+        assertEquals(23.09401076758503, epsilonLongitude[300], 1e-8);
+        assertEquals(39.99999999999999, epsilonLongitude[600], 1e-8);
+        assertEquals(11459.161720383016, epsilonLongitude[899], 1e-8);
+        assertEquals(3.2662478706390739E17, epsilonLongitude[900], 1e-8);
     }
 }
