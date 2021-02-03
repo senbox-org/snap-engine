@@ -16,6 +16,8 @@
 
 package org.esa.snap.binning.aggregators;
 
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinContext;
 import org.esa.snap.binning.MyVariableContext;
 import org.esa.snap.binning.support.VectorImpl;
@@ -28,6 +30,8 @@ import static org.esa.snap.binning.aggregators.AggregatorTestUtils.obsNT;
 import static org.esa.snap.binning.aggregators.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class AggregatorMeanObsTest {
 
@@ -235,5 +239,78 @@ public class AggregatorMeanObsTest {
         assertEquals(2.5f, out.get(0), 1e-8);
         assertEquals(0.5f, out.get(1), 1e-8);
         assertEquals(2.f, out.get(2), 1e-8);
+    }
+
+    @Test
+    public void testDescriptor_createAggregator_standard() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final Aggregator aggregator = descriptor.createAggregator(new MyVariableContext(), new AggregatorMeanObs.Config("variable", null));
+        assertNotNull(aggregator);
+
+        assertEquals("variable_mean", aggregator.getTemporalFeatureNames()[0]);
+        assertEquals("variable_mean", aggregator.getOutputFeatureNames()[0]);
+    }
+
+    @Test
+    public void testDescriptor_createAggregator_withOutputNamed() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final Aggregator aggregator = descriptor.createAggregator(new MyVariableContext(), new AggregatorMeanObs.Config("variable", "Lena"));
+        assertNotNull(aggregator);
+
+        assertEquals("Lena_mean", aggregator.getTemporalFeatureNames()[0]);
+        assertEquals("Lena_mean", aggregator.getOutputFeatureNames()[0]);
+    }
+
+    @Test
+    public void testDescriptor_createConfig() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final AggregatorConfig aggregatorConfig = descriptor.createConfig();
+        assertNotNull(aggregatorConfig);
+
+        final AggregatorMeanObs.Config config = (AggregatorMeanObs.Config) aggregatorConfig;
+        assertNull(config.varName);
+        assertNull(config.targetName);
+        assertEquals("MEAN_OBS", config.getName());
+    }
+
+    @Test
+    public void testDescriptor_getSourceVarNames() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getSourceVarNames(new AggregatorMeanObs.Config("source", "target"));
+        assertEquals(1, sourceVarNames.length);
+        assertEquals("source", sourceVarNames[0]);
+    }
+
+    @Test
+    public void testDescriptor_getTargetVarNames_standard() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getTargetVarNames(new AggregatorMeanObs.Config("source", null));
+        assertEquals(3, sourceVarNames.length);
+        assertEquals("source_mean", sourceVarNames[0]);
+        assertEquals("source_sigma", sourceVarNames[1]);
+        assertEquals("source_counts", sourceVarNames[2]);
+    }
+
+    @Test
+    public void testDescriptor_getTargetVarNames_withOutputName() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getTargetVarNames(new AggregatorMeanObs.Config("source", "Klaus"));
+        assertEquals(3, sourceVarNames.length);
+        assertEquals("Klaus_mean", sourceVarNames[0]);
+        assertEquals("Klaus_sigma", sourceVarNames[1]);
+        assertEquals("Klaus_counts", sourceVarNames[2]);
+    }
+
+    @Test
+    public void testDescriptor_getName() {
+        final AggregatorMeanObs.Descriptor descriptor = new AggregatorMeanObs.Descriptor();
+
+        assertEquals("MEAN_OBS", descriptor.getName());
     }
 }

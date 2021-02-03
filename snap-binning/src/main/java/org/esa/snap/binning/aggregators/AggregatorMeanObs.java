@@ -17,11 +17,16 @@
 package org.esa.snap.binning.aggregators;
 
 import org.esa.snap.binning.AbstractAggregator;
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.AggregatorDescriptor;
 import org.esa.snap.binning.BinContext;
 import org.esa.snap.binning.Observation;
 import org.esa.snap.binning.VariableContext;
 import org.esa.snap.binning.Vector;
 import org.esa.snap.binning.WritableVector;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.util.StringUtils;
 
 import static java.lang.Float.NaN;
 
@@ -104,6 +109,63 @@ public class AggregatorMeanObs extends AbstractAggregator {
             outputVector.set(0, NaN);
             outputVector.set(1, NaN);
             outputVector.set(2, 0);
+        }
+    }
+
+    public static class Config extends AggregatorConfig {
+        @Parameter(label = "Source band name", notEmpty = true, notNull = true, description = "The source band used for aggregation.")
+        String varName;
+
+        @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
+        String targetName;
+
+        public Config() {
+            this(null, null);
+        }
+
+        public Config(String varName, String targetName) {
+            super(Descriptor.NAME);
+            this.varName = varName;
+            this.targetName = targetName;
+        }
+    }
+
+    public static class Descriptor implements AggregatorDescriptor {
+
+        public static final String NAME = "MEAN_OBS";
+
+        @Override
+        public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
+            final AggregatorMeanObs.Config config = (AggregatorMeanObs.Config) aggregatorConfig;
+            final String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
+            return new AggregatorMeanObs(varCtx, targetName);
+        }
+
+        @Override
+        public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
+            final Config config = (Config) aggregatorConfig;
+
+            return new String[]{config.varName};
+        }
+
+        @Override
+        public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
+            final Config config = (Config) aggregatorConfig;
+            if (StringUtils.isNullOrEmpty(config.targetName)) {
+                return createFeatureNames(config.varName, "mean", "sigma", "counts");
+            } else {
+                return createFeatureNames(config.targetName, "mean", "sigma", "counts");
+            }
+        }
+
+        @Override
+        public String getName() {
+            return NAME;
+        }
+
+        @Override
+        public AggregatorConfig createConfig() {
+            return new Config();
         }
     }
 }
