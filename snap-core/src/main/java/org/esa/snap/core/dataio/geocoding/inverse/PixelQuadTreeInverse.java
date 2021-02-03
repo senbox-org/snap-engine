@@ -25,6 +25,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     private int rasterWidth;
     private int rasterHeight;
     private double epsilon;
+    private double[] epsilonLon;
     private double offsetX;
     private double offsetY;
     private boolean isCrossingMeridian;
@@ -112,11 +113,19 @@ public class PixelQuadTreeInverse implements InverseCoding {
         if (pixelFound) {
             final GeoPos resultGeoPos = new GeoPos();
             getGeoPos(result.x, result.y, resultGeoPos);
-            final double absLon = Math.abs(resultGeoPos.lon - geoPos.lon);
-            final double absLat = Math.abs(resultGeoPos.lat - geoPos.lat);
-            final double distance = Math.max(absLat, absLon);
+            final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
+            final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
 
-            if (distance < epsilon) {
+            final boolean smallerThanEpsilon;
+            if (absLonDist > absLatDist) {
+                final double lat = geoPos.lat;
+                final int idx = (int) Math.floor(Math.abs(lat * 10));
+                smallerThanEpsilon = absLonDist < epsilonLon[idx];
+            } else {
+                smallerThanEpsilon = absLatDist < epsilon;
+            }
+
+            if (smallerThanEpsilon) {
                 if (fractionalAccuracy) {
                     final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
                     //noinspection ConstantConditions
@@ -140,6 +149,8 @@ public class PixelQuadTreeInverse implements InverseCoding {
         this.latitudes = geoRaster.getLatitudes();
 
         epsilon = getEpsilon(geoRaster.getRasterResolutionInKm());
+        epsilonLon = createEpsilonLongitude(epsilon);
+
         isCrossingMeridian = containsAntiMeridian;
 
         offsetX = geoRaster.getOffsetX();
@@ -147,6 +158,17 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         lonRange = Range.computeRangeDouble(longitudes, null);
         latRange = Range.computeRangeDouble(latitudes, null);
+    }
+
+    static double[] createEpsilonLongitude(double epsilon) {
+        final double[] d = new double[901];
+        for (int i = 0; i < d.length; i++) {
+            final double ang = i * 0.1;
+            final double rad = Math.toRadians(ang);
+            final double multiplier = 1 / Math.cos(rad);
+            d[i] = epsilon * multiplier;
+        }
+        return d;
     }
 
     @Override
@@ -179,6 +201,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
         clone.latRange = new Range(latRange.getMin(), latRange.getMax());
 
         clone.epsilon = epsilon;
+        clone.epsilonLon = epsilonLon;
         clone.isCrossingMeridian = isCrossingMeridian;
 
         clone.offsetX = offsetX;
@@ -282,8 +305,10 @@ public class PixelQuadTreeInverse implements InverseCoding {
                     lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
                 }
             } else {
-                lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsilon;
-                lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsilon;
+                final int idx = (int) Math.floor( (Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+                final double epsLon = epsilonLon[idx];
+                lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsLon;
+                lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsLon;
             }
         }
 
