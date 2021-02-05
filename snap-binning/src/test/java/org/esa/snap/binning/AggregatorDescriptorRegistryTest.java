@@ -2,6 +2,7 @@ package org.esa.snap.binning;
 
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorAverageOutlierAware;
+import org.esa.snap.binning.aggregators.AggregatorMeanObs;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;
 import org.esa.snap.binning.aggregators.AggregatorPercentile;
@@ -67,10 +68,18 @@ public class AggregatorDescriptorRegistryTest {
     }
 
     @Test
+    public void testDefaultAggregatorIsRegistered_MeanObs() {
+        AggregatorDescriptor descriptor = assertRegistered("MEAN_OBS");
+        Aggregator aggregator = descriptor.createAggregator(ctx, new AggregatorMeanObs.Config("x", "target"));
+        assertNotNull(aggregator);
+        assertEquals(AggregatorMeanObs.class, aggregator.getClass());
+    }
+
+    @Test
     public void testGetAllRegisteredAggregatorDescriptors() {
         TypedDescriptorsRegistry registry = TypedDescriptorsRegistry.getInstance();
         List<AggregatorDescriptor> aggregatorDescriptors = registry.getDescriptors(AggregatorDescriptor.class);
-        assertEquals(6, aggregatorDescriptors.size());
+        assertEquals(7, aggregatorDescriptors.size());
     }
 
     private AggregatorDescriptor assertRegistered(String name) {
