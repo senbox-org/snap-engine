@@ -30,6 +30,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.core.image.VirtualBandOpImage;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.dataio.DEMFactory;
@@ -80,6 +81,10 @@ public class CreateLandMaskOp extends Operator {
     @Parameter(label = "Extend shoreline by this many pixels", defaultValue = "0")
     private Integer shorelineExtension = 0;
 
+    @Parameter(description = "The band used to indicate the resampling size.", alias = "referenceBand" ,
+    rasterDataNodeType = Band.class, label = "Reference Band")
+    private String referenceBand = null;
+
     private ElevationModel dem = null;
     private final static int landThreshold = -10;
     private final static int seaThreshold = -10;
@@ -105,11 +110,13 @@ public class CreateLandMaskOp extends Operator {
     }
 
     /**
-     * Add the user selected bands to target product.
+     * Add the user selected bands to target product and the user resampling reference band (only to multi-size products case)
      *
      * @throws OperatorException The exceptions.
      */
     private void addSelectedBands() throws OperatorException {
+
+        
 
         boolean copyVirtualBands = false;
 
@@ -126,15 +133,37 @@ public class CreateLandMaskOp extends Operator {
         }
 
         final List<Band> sourceBandList = new ArrayList<>(sourceBandNames.length);
+        
+        boolean isMultisize = sourceProduct.isMultiSize();
         for (final String sourceBandName : sourceBandNames) {
             final Band sourceBand = sourceProduct.getBand(sourceBandName);
             if (sourceBand != null) {
                 sourceBandList.add(sourceBand);
             }
         }
+        //apply resampling by reference in case of multsize product
+        if(isMultisize)
+        {
+            final Band refBand = sourceProduct.getBand(referenceBand);
+            if (refBand != null) {
+                if(refBand.getRasterSize()!=null)
+                {
+                    ResamplingOp resampler = new ResamplingOp();
+                    resampler.setParameter("targetWidth", refBand.getRasterWidth());
+                    resampler.setParameter("targetHeight", refBand.getRasterHeight());
+                    resampler.setParameter("upsampling", "Nearest");
+                    resampler.setParameter("downsampling", "First");
+                    resampler.setParameter("flagDownsampling", "First");
+                    resampler.setSourceProduct(sourceProduct);
+                    sourceProduct = resampler.getTargetProduct();
+                }else
+                    throw new OperatorException("The resampling reference band dimension is not consistent.");
+            }else
+                throw new OperatorException("Multisize product need a resampling reference band.");
+        }
+        
+
         final Band[] sourceBands = sourceBandList.toArray(new Band[sourceBandList.size()]);
-
-
         for (Band srcBand : sourceBands) {
 
             if (srcBand instanceof VirtualBand && copyVirtualBands) {
@@ -171,13 +200,13 @@ public class CreateLandMaskOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         try {
-            if (dem == null) {
-                createDEM();
-            }
 
             final TileData[] trgTiles = getTargetTiles(targetTiles, targetRectangle, sourceProduct);
             final Tile targetTile = trgTiles[0].targetTile;
-
+            
+            if (dem == null) {
+                createDEM();
+            }
             final int minX = targetRectangle.x;
             final int minY = targetRectangle.y;
             final int maxX = targetRectangle.x + targetRectangle.width;
@@ -277,7 +306,6 @@ public class CreateLandMaskOp extends Operator {
         final List<TileData> trgTileList = new ArrayList<>();
         final Set<Band> keySet = targetTiles.keySet();
         for (Band targetBand : keySet) {
-
             trgTileList.add(new TileData(targetBand,
                                          targetTiles.get(targetBand),
                                          getSourceTile(srcProduct.getBand(targetBand.getName()), targetRectangle)));
