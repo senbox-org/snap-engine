@@ -1,5 +1,6 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
@@ -31,6 +32,9 @@ public class Copernicus30mFile extends ElevationFile {
             resampler.setParameter("flagDownsampling", "First");
             resampler.setSourceProduct(product);
             Product resampled = resampler.getTargetProduct();
+            product.getName();
+            resampled.getBandAt(0).readRasterDataFully();
+            ProductIO.writeProduct(resampled, localFile.getAbsolutePath(), "GeoTIFF");
 
 
             System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
@@ -65,7 +69,8 @@ public class Copernicus30mFile extends ElevationFile {
 
             return downloader.downloadTiles(lat, lon,30);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            remoteFileExists = false;
             return false;
         }
     }
