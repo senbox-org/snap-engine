@@ -30,7 +30,7 @@ public class GeometrySubsetRegion extends AbstractSubsetRegion {
         if (productDefaultGeoCoding == null) {
             throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
         }
-        return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+        return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion, false);
     }
 
     @Override
@@ -46,12 +46,12 @@ public class GeometrySubsetRegion extends AbstractSubsetRegion {
             if (bandDefaultGeoCoding == null) {
                 throw new NullPointerException("The pixel region cannot be computed because the band GeoCoding is missing of the multi size product.");
             }
-            return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+            return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, this.geometryRegion, this.borderPixels, roundPixelRegion, false);
         } else {
             if (productDefaultGeoCoding == null) {
                 throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
             }
-            return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+            return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion, false);
         }
     }
 }

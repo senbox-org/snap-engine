@@ -312,7 +312,7 @@ public class SubsetOp extends Operator {
      * Non-API (yet).
      */
     public static Rectangle computePixelRegion(Product product, Geometry geometryRegion, int numBorderPixels) {
-        return GeoUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false);
+        return GeoUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false,false);
     }
 
     public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
@@ -342,7 +342,7 @@ public class SubsetOp extends Operator {
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true,false);
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();
@@ -362,7 +362,7 @@ public class SubsetOp extends Operator {
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true,false);
             finalRegionMap.put(rasterDataNode.getName(), rect);
         }
 
@@ -400,7 +400,13 @@ public class SubsetOp extends Operator {
                 regionMap.put(rasterDataNode.getName(), region);
                 continue;
             }
-            Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
+            boolean usePixelCenter = true;
+            boolean multiSize = false;
+            if(product.isMultiSize()){
+                multiSize = true;
+                usePixelCenter = false;
+            }
+            Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, usePixelCenter, multiSize);
             regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
         }
 
@@ -424,7 +430,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
 
-            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true, false);
             regionMap.put(rasterDataNode.getName(), rect);
         }
 
