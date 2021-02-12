@@ -17,22 +17,23 @@ package org.esa.snap.core.util.math;
 
 /**
  * The class {@code IntervalPartition} is a representation of an interval partition,
- * i.e. a strictly increasing sequence of real numbers.
+ * i.e. a strictly monotonous sequence of real numbers.
  *
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
 public class IntervalPartition {
 
-    private double[] sequence;
+    private final double[] sequence;
+    private final int monotonicity;
 
     /**
      * Constructs an interval partition from a sequence of real numbers.
      *
-     * @param sequence the sequence. The sequence must increase strictly and
+     * @param sequence the sequence. The sequence must increase or decrease strictly and
      *                 consist of at least two real numbers.
      *
-     * @throws IllegalArgumentException if the sequence is not strictly increasing
+     * @throws IllegalArgumentException if the sequence is not strictly monotonous
      *                                  or consists of less than two real numbers.
      * @throws NullPointerException     if the sequence is {@code null}.
      */
@@ -43,10 +44,10 @@ public class IntervalPartition {
     /**
      * Constructs an interval partition from a sequence of real numbers.
      *
-     * @param sequence the sequence. The sequence must increase strictly and
+     * @param sequence the sequence. The sequence must increase or decrease strictly and
      *                 consist of at least two real numbers.
      *
-     * @throws IllegalArgumentException if the sequence is not strictly increasing
+     * @throws IllegalArgumentException if the sequence is not strictly monotonous
      *                                  or consists of less than two real numbers.
      * @throws NullPointerException     if the sequence is {@code null}.
      */
@@ -58,7 +59,7 @@ public class IntervalPartition {
         if (sequence.getLength() < 2) {
             throw new IllegalArgumentException("sequence.length < 2");
         }
-        ensureStrictIncrease(sequence);
+        monotonicity = ensureStrictMonotonicity(sequence);
 
         this.sequence = new double[sequence.getLength()];
         sequence.copyTo(0, this.sequence, 0, this.sequence.length);
@@ -67,13 +68,13 @@ public class IntervalPartition {
     /**
      * Creates an array of interval partitions from an array of sequences.
      *
-     * @param sequences the array of sequences. Each sequence must increase strictly
-     *                  and consist of at least two real numbers.
+     * @param sequences the array of sequences. Each sequence must increase or decrease
+     *                  strictly and consist of at least two real numbers.
      *
      * @return the created array of interval partitions.
      *
      * @throws IllegalArgumentException if the length of the sequence array is zero
-     *                                  or any sequence is not strictly increasing
+     *                                  or any sequence is not strictly monotonous
      *                                  or consists of less than two real numbers.
      * @throws NullPointerException     if the array of sequences or any sequence
      *                                  is {@code null}.
@@ -98,13 +99,13 @@ public class IntervalPartition {
     /**
      * Creates an array of interval partitions from an array of sequences.
      *
-     * @param sequences the array of sequences. Each sequence must increase strictly
-     *                  and consist of at least two real numbers.
+     * @param sequences the array of sequences. Each sequence must increase or decrease
+     *                  strictly and consist of at least two real numbers.
      *
      * @return the created array of interval partitions.
      *
      * @throws IllegalArgumentException if the length of the sequence array is zero
-     *                                  or any sequence is not strictly increasing
+     *                                  or any sequence is not strictly monotonous
      *                                  or consists of less than two real numbers.
      * @throws NullPointerException     if the array of sequences or any sequence
      *                                  is {@code null}.
@@ -161,7 +162,7 @@ public class IntervalPartition {
      * @return the maximum number in the partition.
      */
     public final double getMax() {
-        return sequence[sequence.length - 1];
+        return monotonicity > 0 ? sequence[sequence.length - 1] : sequence[0];
     }
 
     /**
@@ -170,7 +171,7 @@ public class IntervalPartition {
      * @return the minimum number in the partition.
      */
     public final double getMin() {
-        return sequence[0];
+        return monotonicity > 0 ? sequence[0] : sequence[sequence.length - 1];
     }
 
     /**
@@ -183,7 +184,7 @@ public class IntervalPartition {
         double mesh = 0.0;
 
         for (int i = 1; i < sequence.length; ++i) {
-            final double length = sequence[i] - sequence[i - 1];
+            final double length = Math.abs(sequence[i] - sequence[i - 1]);
             if (length > mesh) {
                 mesh = length;
             }
@@ -192,12 +193,28 @@ public class IntervalPartition {
         return mesh;
     }
 
-    private static void ensureStrictIncrease(final Array sequence) throws IllegalArgumentException {
+    private static int ensureStrictMonotonicity(final Array sequence) throws IllegalArgumentException {
+        int monotonicity = 0;
         for (int i = 1; i < sequence.getLength(); ++i) {
             if (sequence.getValue(i - 1) < sequence.getValue(i)) {
-                continue;
+                monotonicity += 1;
+            } else if (sequence.getValue(i - 1) > sequence.getValue(i)) {
+                monotonicity -= 1;
             }
-            throw new IllegalArgumentException("sequence is not strictly increasing");
         }
+        if (Math.abs(monotonicity) != sequence.getLength() - 1) {
+            throw new IllegalArgumentException("sequence is not strictly monotonous");
+        }
+        return monotonicity;
+    }
+
+    /**
+     * Returns the monotonicity of the interval partition. A positive (negative) value indicates
+     * a strictly increasing (decreasing) partition.
+     *
+     * @return the monotonicity.
+     */
+    public final int getMonotonicity() {
+        return monotonicity;
     }
 }

@@ -44,18 +44,31 @@ public class IntervalPartitionTest extends TestCase {
         } catch (IllegalArgumentException expected) {
         }
 
-        try {
-            new IntervalPartition(1.0, 0.0);
-            fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        final IntervalPartition decreasing = new IntervalPartition(1.0, 0.0);
 
-        IntervalPartition partition = new IntervalPartition(0.0, 1.0);
+        assertTrue(decreasing.getMonotonicity() < 0);
+        assertEquals(2, decreasing.getCardinal());
 
-        assertEquals(2, partition.getCardinal());
+        assertEquals(1.0, decreasing.get(0), 0.0);
+        assertEquals(0.0, decreasing.get(1), 0.0);
 
-        assertEquals(0.0, partition.get(0), 0.0);
-        assertEquals(1.0, partition.get(1), 0.0);
+        assertEquals(0.0, decreasing.getMin(), 0.0);
+        assertEquals(1.0, decreasing.getMax(), 1.0);
+
+        assertEquals(1.0, decreasing.getMesh(), 1.0);
+
+        final IntervalPartition increasing = new IntervalPartition(0.0, 1.0);
+
+        assertTrue(increasing.getMonotonicity() > 0);
+        assertEquals(2, increasing.getCardinal());
+
+        assertEquals(0.0, increasing.get(0), 0.0);
+        assertEquals(1.0, increasing.get(1), 0.0);
+
+        assertEquals(0.0, decreasing.getMin(), 0.0);
+        assertEquals(1.0, decreasing.getMax(), 1.0);
+
+        assertEquals(1.0, decreasing.getMesh(), 1.0);
     }
 
     public void testCreateArray() {
@@ -77,11 +90,16 @@ public class IntervalPartitionTest extends TestCase {
         } catch (IllegalArgumentException expected) {
         }
 
-        try {
-            IntervalPartition.createArray(new double[]{1.0, 0.0});
-            fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        IntervalPartition[] partitions;
+
+        partitions = IntervalPartition.createArray(new double[]{1.0, 0.0});
+
+        assertEquals(1, partitions.length);
+
+        assertEquals(2, partitions[0].getCardinal());
+
+        assertEquals(1.0, partitions[0].get(0), 0.0);
+        assertEquals(0.0, partitions[0].get(1), 0.0);
 
         try {
             IntervalPartition.createArray((double[][]) null);
@@ -107,13 +125,19 @@ public class IntervalPartitionTest extends TestCase {
         } catch (IllegalArgumentException expected) {
         }
 
-        try {
-            IntervalPartition.createArray(new double[]{0.0, 1.0}, new double[]{1.0, 0.0});
-            fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        partitions = IntervalPartition.createArray(new double[]{0.0, 1.0}, new double[]{1.0, 0.0});
 
-        final IntervalPartition[] partitions = IntervalPartition.createArray(new double[]{0.0, 1.0}, new double[]{2.0, 3.0});
+        assertEquals(2, partitions.length);
+
+        assertEquals(2, partitions[0].getCardinal());
+        assertEquals(2, partitions[1].getCardinal());
+
+        assertEquals(0.0, partitions[0].get(0), 0.0);
+        assertEquals(1.0, partitions[0].get(1), 0.0);
+        assertEquals(1.0, partitions[1].get(0), 0.0);
+        assertEquals(0.0, partitions[1].get(1), 0.0);
+
+        partitions = IntervalPartition.createArray(new double[]{0.0, 1.0}, new double[]{2.0, 3.0});
 
         assertEquals(2, partitions.length);
 
