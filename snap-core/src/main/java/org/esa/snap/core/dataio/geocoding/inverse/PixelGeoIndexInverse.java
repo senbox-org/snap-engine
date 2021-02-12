@@ -33,7 +33,7 @@ import java.util.TreeMap;
 public class PixelGeoIndexInverse implements InverseCoding {
 
     public static final String KEY = "INV_PIXEL_GEO_INDEX";
-    public static final String KEY_INTERPOLATING = "INV_PIXEL_GEO_INDEX_INTERPOLATING";
+    public static final String KEY_INTERPOLATING = KEY + KEY_SUFFIX_INTERPOLATING;
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;

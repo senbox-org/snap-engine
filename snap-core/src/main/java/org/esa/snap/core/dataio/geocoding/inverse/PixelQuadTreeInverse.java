@@ -32,7 +32,7 @@ import org.esa.snap.core.util.math.RsMathUtils;
 public class PixelQuadTreeInverse implements InverseCoding {
 
     public static final String KEY = "INV_PIXEL_QUAD_TREE";
-    public static final String KEY_INTERPOLATING = "INV_PIXEL_QUAD_TREE_INTERPOLATING";
+    public static final String KEY_INTERPOLATING = KEY + KEY_SUFFIX_INTERPOLATING;
 
     private static final double TO_DEG = 180.0 / Math.PI;
     private static final double ANGLE_THRESHOLD = 330.0;
