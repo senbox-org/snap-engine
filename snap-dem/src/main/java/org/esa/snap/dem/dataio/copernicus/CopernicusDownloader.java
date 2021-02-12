@@ -1,24 +1,25 @@
 package org.esa.snap.dem.dataio.copernicus;
 
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
+import org.esa.snap.core.util.SystemUtils;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.logging.Level;
 
 public class CopernicusDownloader {
 
-    private final String s3_prefix_30m = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
-    private final String s3_prefix_90m = "https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com";
+    private static final String S3_PREFIX_30M = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
+    private static final String S3_PREFIX_90M = "https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com";
 
     private final File installDir;
 
-
-    public CopernicusDownloader(File installDir) throws Exception {
-        this.installDir = installDir;
+    public CopernicusDownloader(File downloadDir) {
+        this.installDir = downloadDir;
     }
 
     public static String createTileFilename(int minLat, int minLon, String arcseconds) {
@@ -43,43 +44,42 @@ public class CopernicusDownloader {
         return name.toString();
     }
 
-    public boolean downloadTiles(double lat, double lon, int resolution) throws Exception{
+    public boolean downloadTiles(double lat, double lon, int resolution) throws Exception {
         String installDir = this.installDir.getAbsolutePath();
-        int downloaded = 0;
-        String download_path = "";
-        String target_filename = "";
+        String download_path;
+        String target_filename;
 
         int latRounded = (int) lat;
         int lonRounded = (int) lon;
 
-        if (resolution == 30){
+        if (resolution == 30) {
             String name = createTileFilename(latRounded, lonRounded, "10");
-            download_path = s3_prefix_30m + "/" + name + "/" + name + ".tif";
+            download_path = S3_PREFIX_30M + "/" + name + "/" + name + ".tif";
             target_filename = name + ".tif";
-        }else{
+        } else {
             String name = createTileFilename(latRounded, lonRounded, "30");
-            download_path = s3_prefix_90m + "/" + name + "/" + name + ".tif";
+            download_path = S3_PREFIX_90M + "/" + name + "/" + name + ".tif";
             target_filename = name + ".tif";
         }
-        System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
+        SystemUtils.LOG.log(Level.FINE, String.format("Requested %s by point %s, %s at specified resolution %d", download_path, lat, lon, resolution));
 
         try{
-            BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream());
+            InputStream is = createInputStream(download_path);
             FileOutputStream fileOutputStream = new FileOutputStream(installDir + "/" + target_filename);
-            byte dataBuffer[] = new byte[1024];
+            byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = is.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-            System.out.println("Downloaded file");
-        }catch (Exception e){
+            SystemUtils.LOG.log(Level.FINE, "Downloaded file");
+        } catch (Exception e) {
             throw new FileNotFoundException("Tile does not exist");
-
-
-
-
         }
         return true;
+    }
+
+    InputStream createInputStream(String download_path) throws IOException {
+        return new BufferedInputStream(new URL(download_path).openStream());
     }
 
 }
