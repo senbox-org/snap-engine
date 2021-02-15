@@ -206,7 +206,7 @@ public class BinningOp extends Operator {
     @Parameter(alias = "postProcessor", domConverter = CellProcessorConfigDomConverter.class)
     private CellProcessorConfig postProcessorConfig;
 
-    @Parameter(description = "The band used to indicate the resampling size.", alias = "referenceBand" ,
+    @Parameter(description = "The band used to indicate the resampling size. Only used if the source is multi-size", alias = "referenceBand" ,
     rasterDataNodeType = Band.class, label = "Reference Band")
     private String referenceBand = null;
 
@@ -729,26 +729,27 @@ public class BinningOp extends Operator {
     private void processSource(Product sourceProduct, SpatialBinner spatialBinner) throws IOException {
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        boolean isMultisize = sourceProduct.isMultiSize();
-        //apply resampling with selected reference band in case of multsize product
-        if(isMultisize)
-        {
-            final Band refBand = sourceProduct.getBand(referenceBand);
-            if (refBand != null) {
-                if(refBand.getRasterSize()!=null)
-                {
-                    ResamplingOp resampler = new ResamplingOp();
-                    resampler.setParameter("targetWidth", refBand.getRasterWidth());
-                    resampler.setParameter("targetHeight", refBand.getRasterHeight());
-                    resampler.setParameter("upsampling", "Nearest");
-                    resampler.setParameter("downsampling", "First");
-                    resampler.setParameter("flagDownsampling", "First");
-                    resampler.setSourceProduct(sourceProduct);
-                    sourceProduct = resampler.getTargetProduct();
+        if(sourceProduct!=null){
+            //apply resampling with selected reference band in case of multsize product
+            if(sourceProduct.isMultiSize())
+            {
+                final Band refBand = sourceProduct.getBand(referenceBand);
+                if (refBand != null) {
+                    if(refBand.getRasterSize()!=null)
+                    {
+                        ResamplingOp resampler = new ResamplingOp();
+                        resampler.setParameter("targetWidth", refBand.getRasterWidth());
+                        resampler.setParameter("targetHeight", refBand.getRasterHeight());
+                        resampler.setParameter("upsampling", "Nearest");
+                        resampler.setParameter("downsampling", "First");
+                        resampler.setParameter("flagDownsampling", "First");
+                        resampler.setSourceProduct(sourceProduct);
+                        sourceProduct = resampler.getTargetProduct();
+                    }else
+                        throw new OperatorException("The resampling reference band dimension is not consistent.");
                 }else
-                    throw new OperatorException("The resampling reference band dimension is not consistent.");
-            }else
-                throw new OperatorException("Multisize product need a resampling reference band.");
+                    throw new OperatorException("Multisize product need a resampling reference band.");
+            }
         }
         updateDateRangeUtc(sourceProduct);
         metadataAggregator.aggregateMetadata(sourceProduct);

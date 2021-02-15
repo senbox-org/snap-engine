@@ -1176,16 +1176,18 @@ public class OperatorContext {
         for (Property property : properties) {
             PropertyDescriptor descriptor = property.getDescriptor();
             if (descriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME) != null) {
-                Product sourceProduct = sourceProductList.get(0);
-                if (sourceProduct == null) {
-                    throw new OperatorException(formatExceptionMessage("No source product."));
+                if(!sourceProductList.isEmpty()){
+                    Product sourceProduct = sourceProductList.get(0);
+                    if (sourceProduct == null) {
+                        throw new OperatorException(formatExceptionMessage("No source product."));
+                    }
+                    Object object = descriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
+                    Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
+                    final boolean includeEmptyValue = !descriptor.isNotNull() && !descriptor.isNotEmpty() && !descriptor.getType().isArray();
+                    String[] names = RasterDataNodeValues.getNames(sourceProduct, rasterDataNodeType, includeEmptyValue);
+                    ValueSet valueSet = new ValueSet(names);
+                    descriptor.setValueSet(valueSet);
                 }
-                Object object = descriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
-                Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
-                final boolean includeEmptyValue = !descriptor.isNotNull() && !descriptor.isNotEmpty() && !descriptor.getType().isArray();
-                String[] names = RasterDataNodeValues.getNames(sourceProduct, rasterDataNodeType, includeEmptyValue);
-                ValueSet valueSet = new ValueSet(names);
-                descriptor.setValueSet(valueSet);
             }
         }
     }
