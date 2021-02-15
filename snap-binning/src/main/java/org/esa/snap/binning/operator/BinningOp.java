@@ -51,6 +51,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.common.SubsetOp;
+import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
 import org.esa.snap.core.gpf.graph.GraphIO;
@@ -204,6 +205,10 @@ public class BinningOp extends Operator {
 
     @Parameter(alias = "postProcessor", domConverter = CellProcessorConfigDomConverter.class)
     private CellProcessorConfig postProcessorConfig;
+
+    @Parameter(description = "The band used to indicate the resampling size.", alias = "referenceBand" ,
+    rasterDataNodeType = Band.class, label = "Reference Band")
+    private String referenceBand = null;
 
     @Parameter(valueSet = {"Product", "RGB", "Grey"}, defaultValue = "Product")
     private String outputType;
@@ -563,8 +568,6 @@ public class BinningOp extends Operator {
                                                           Geometry region) {
         BinningProductFilter productFilter = new GeoCodingProductFilter();
 
-        productFilter = new MultiSizeProductFilter(productFilter);
-
         if (dataPeriod != null) {
             if (dataPeriod instanceof SpatialDataPeriod) {
                 productFilter = new SpatialDataDaySourceProductFilter(productFilter, dataPeriod);
@@ -726,7 +729,27 @@ public class BinningOp extends Operator {
     private void processSource(Product sourceProduct, SpatialBinner spatialBinner) throws IOException {
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-
+        boolean isMultisize = sourceProduct.isMultiSize();
+        //apply resampling with selected reference band in case of multsize product
+        if(isMultisize)
+        {
+            final Band refBand = sourceProduct.getBand(referenceBand);
+            if (refBand != null) {
+                if(refBand.getRasterSize()!=null)
+                {
+                    ResamplingOp resampler = new ResamplingOp();
+                    resampler.setParameter("targetWidth", refBand.getRasterWidth());
+                    resampler.setParameter("targetHeight", refBand.getRasterHeight());
+                    resampler.setParameter("upsampling", "Nearest");
+                    resampler.setParameter("downsampling", "First");
+                    resampler.setParameter("flagDownsampling", "First");
+                    resampler.setSourceProduct(sourceProduct);
+                    sourceProduct = resampler.getTargetProduct();
+                }else
+                    throw new OperatorException("The resampling reference band dimension is not consistent.");
+            }else
+                throw new OperatorException("Multisize product need a resampling reference band.");
+        }
         updateDateRangeUtc(sourceProduct);
         metadataAggregator.aggregateMetadata(sourceProduct);
 
@@ -1009,23 +1032,6 @@ public class BinningOp extends Operator {
             result = 31 * result + (minValue != null ? minValue.hashCode() : 0);
             result = 31 * result + (maxValue != null ? maxValue.hashCode() : 0);
             return result;
-        }
-    }
-
-    private static class MultiSizeProductFilter extends BinningProductFilter {
-
-        public MultiSizeProductFilter(BinningProductFilter parent) {
-            setParent(parent);
-        }
-
-        @Override
-        protected boolean acceptForBinning(Product product) {
-            if (!product.isMultiSize()) {
-                return true;
-            } else {
-                setReason("Product with rasters of different size are not supported yet.");
-                return false;
-            }
         }
     }
 }
