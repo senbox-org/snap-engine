@@ -381,15 +381,22 @@ public class LookupTable {
      *                   value was equal to the partition minimum (maximum).
      * @param fracIndex  the {@link FracIndex}.
      */
-    public final static void computeFracIndex(final IntervalPartition partition, final double coordinate,
-                                 final FracIndex fracIndex) {
+    public static void computeFracIndex(final IntervalPartition partition, final double coordinate, final FracIndex fracIndex) {
         int lo = 0;
         int hi = partition.getCardinal() - 1;
 
+        final boolean isIncreasing = partition.getMonotonicity() > 0;
         while (hi > lo + 1) {
             final int m = (lo + hi) >> 1;
 
-            if (coordinate < partition.get(m)) {
+            boolean setHi;
+            if (isIncreasing) {
+                setHi = coordinate < partition.get(m);
+            } else {
+                setHi = coordinate > partition.get(m);
+            }
+
+            if (setHi) {
                 hi = m;
             } else {
                 lo = m;
@@ -436,9 +443,6 @@ public class LookupTable {
     }
 
     static <T> void ensureLegalArray(final T[] array) throws IllegalArgumentException, NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length == 0) {
             throw new IllegalArgumentException("array.length == 0");
         }
@@ -452,9 +456,6 @@ public class LookupTable {
     static void ensureLegalArray(final float[] array, final int length) throws
                                                                         IllegalArgumentException,
                                                                         NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.length, length));
@@ -464,9 +465,6 @@ public class LookupTable {
     static void ensureLegalArray(final double[] array, final int length) throws
                                                                          IllegalArgumentException,
                                                                          NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.length, length));
@@ -476,9 +474,6 @@ public class LookupTable {
     static void ensureLegalArray(Array array, final int length) throws
                                                                 IllegalArgumentException,
                                                                 NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.getLength() != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.getLength(), length));
