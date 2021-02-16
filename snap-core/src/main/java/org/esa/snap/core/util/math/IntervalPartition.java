@@ -20,7 +20,6 @@ package org.esa.snap.core.util.math;
  * i.e. a strictly monotonous sequence of real numbers.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
 public class IntervalPartition {
 

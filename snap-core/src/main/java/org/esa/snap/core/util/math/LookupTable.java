@@ -24,7 +24,6 @@ import java.text.MessageFormat;
  * todo - method for degrading a table (see C++ code below)
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
 public class LookupTable {
 
