@@ -381,30 +381,25 @@ public class LookupTable {
      *                   value was equal to the partition minimum (maximum).
      * @param fracIndex  the {@link FracIndex}.
      */
-    public static void computeFracIndex(final IntervalPartition partition, final double coordinate,
-                                        final FracIndex fracIndex) {
+    public static void computeFracIndex(final IntervalPartition partition, final double coordinate, final FracIndex fracIndex) {
         int lo = 0;
         int hi = partition.getCardinal() - 1;
 
-        if (partition.getMonotonicity() > 0) {  // partition is strictly increasing
-            while (hi > lo + 1) {
-                final int m = (lo + hi) >> 1;
+        final boolean isIncreasing = partition.getMonotonicity() > 0;
+        while (hi > lo + 1) {
+            final int m = (lo + hi) >> 1;
 
-                if (coordinate < partition.get(m)) {
-                    hi = m;
-                } else {
-                    lo = m;
-                }
+            boolean setHi;
+            if (isIncreasing) {
+                setHi = coordinate < partition.get(m);
+            } else {
+                setHi = coordinate > partition.get(m);
             }
-        } else {  // partition is strictly decreasing
-            while (hi > lo + 1) {
-                final int m = (lo + hi) >> 1;
 
-                if (coordinate > partition.get(m)) {
-                    hi = m;
-                } else {
-                    lo = m;
-                }
+            if (setHi) {
+                hi = m;
+            } else {
+                lo = m;
             }
         }
 
