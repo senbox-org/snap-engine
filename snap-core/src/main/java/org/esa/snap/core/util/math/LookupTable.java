@@ -443,9 +443,6 @@ public class LookupTable {
     }
 
     static <T> void ensureLegalArray(final T[] array) throws IllegalArgumentException, NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length == 0) {
             throw new IllegalArgumentException("array.length == 0");
         }
@@ -459,9 +456,6 @@ public class LookupTable {
     static void ensureLegalArray(final float[] array, final int length) throws
                                                                         IllegalArgumentException,
                                                                         NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.length, length));
@@ -471,9 +465,6 @@ public class LookupTable {
     static void ensureLegalArray(final double[] array, final int length) throws
                                                                          IllegalArgumentException,
                                                                          NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.length != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.length, length));
@@ -483,9 +474,6 @@ public class LookupTable {
     static void ensureLegalArray(Array array, final int length) throws
                                                                 IllegalArgumentException,
                                                                 NullPointerException {
-        if (array == null) {
-            throw new NullPointerException("array == null");
-        }
         if (array.getLength() != length) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.getLength(), length));

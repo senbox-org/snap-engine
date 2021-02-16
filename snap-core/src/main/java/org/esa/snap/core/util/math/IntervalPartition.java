@@ -76,9 +76,6 @@ public class IntervalPartition {
      *                                  is {@code null}.
      */
     public static IntervalPartition[] createArray(final double[]... sequences) {
-        if (sequences == null) {
-            throw new NullPointerException("sequences == null");
-        }
         if (sequences.length == 0) {
             throw new IllegalArgumentException("sequences.length == 0");
         }
@@ -105,9 +102,6 @@ public class IntervalPartition {
      *                                  is {@code null}.
      */
     public static IntervalPartition[] createArray(final float[]... sequences) {
-        if (sequences == null) {
-            throw new NullPointerException("sequences == null");
-        }
         if (sequences.length == 0) {
             throw new IllegalArgumentException("sequences.length == 0");
         }
