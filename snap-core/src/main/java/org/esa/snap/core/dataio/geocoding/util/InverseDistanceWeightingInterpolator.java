@@ -25,14 +25,14 @@ import org.esa.snap.core.util.math.SphericalDistance;
 
 public class InverseDistanceWeightingInterpolator implements XYInterpolator {
 
-    private static final double MIN_DISTANCE = 0.001;   // which is one millimeter tb 2020-01-10
+    private static final double MIN_DISTANCE = 0.001 / RsMathUtils.MEAN_EARTH_RADIUS;   // which is one millimeter tb 2020-01-10
 
     public PixelPos interpolate(GeoPos geoPos, PixelPos pixelPos, InterpolationContext context) {
         final SphericalDistance distance = new SphericalDistance(geoPos.lon, geoPos.lat);
         final double[] distances = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            distances[i] = distance.distance(context.lons[i], context.lats[i]) * RsMathUtils.MEAN_EARTH_RADIUS;
+            distances[i] = distance.distance(context.lons[i], context.lats[i]);
             if (distances[i] < MIN_DISTANCE) {
                 return new PixelPos(context.x[i], context.y[i]);
             } else {
