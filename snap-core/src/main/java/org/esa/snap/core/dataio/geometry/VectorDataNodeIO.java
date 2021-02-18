@@ -35,7 +35,7 @@ public class VectorDataNodeIO {
     public static final String ESCAPE_STRING = "\\t";
     public static final String NULL_TEXT = "[null]";
     public static final String FILENAME_EXTENSION = ".csv";
-    public static final String PROPERTY_NAME_DEFAULT_CSS = "defaultCSS";
+    static final String PROPERTY_NAME_DEFAULT_CSS = "defaultCSS";
 
     static {
         JtsGeometryConverter.registerConverter();
