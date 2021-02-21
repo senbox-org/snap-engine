@@ -1,0 +1,301 @@
+{
+  "id": "N201908000_MERRA2_1h",
+  "decodeQualification": "SUITABLE",
+  "expectedContent": {
+    "sceneWidth": 576,
+    "sceneHeight": 361,
+    "startTime": "21-MAR-2019 00:00:00.000000",
+    "endTime": "21-MAR-2019 00:00:00.000000",
+    "geoCoding": {
+      "coordinates": [
+        {
+          "x": 248.0,
+          "y": 194.0,
+          "lat": -6.75,
+          "lon": -25.3125
+        },
+        {
+          "x": 427.0,
+          "y": 234.0,
+          "lat": -26.75,
+          "lon": 86.5625
+        }
+      ],
+      "reverseAccuracy": 0.0
+    },
+    "bands": [
+      {
+        "name": "PS",
+        "description": "surface_pressure",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "Pa",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 30,
+            "y": 64,
+            "value": 98858.15
+          },
+          {
+            "x": 394,
+            "y": 307,
+            "value": 100082.15
+          }
+        ]
+      },
+      {
+        "name": "QV10M",
+        "description": "10-meter_specific_humidity",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "kg kg-1",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 167,
+            "y": 92,
+            "value": 0.0033501403
+          },
+          {
+            "x": 351,
+            "y": 131,
+            "value": 0.005516888
+          }
+        ]
+      },
+      {
+        "name": "SLP",
+        "description": "sea_level_pressure",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "Pa",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 316,
+            "y": 269,
+            "value": 100790.33
+          },
+          {
+            "x": 350,
+            "y": 335,
+            "value": 100741.83
+          }
+        ]
+      },
+      {
+        "name": "T10M",
+        "description": "10-meter_air_temperature",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "K",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 91,
+            "y": 240,
+            "value": 295.55853
+          },
+          {
+            "x": 299,
+            "y": 329,
+            "value": 227.2851
+          }
+        ]
+      },
+      {
+        "name": "TO3",
+        "description": "total_column_ozone",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "Dobsons",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 435,
+            "y": 174,
+            "value": 255.76404
+          },
+          {
+            "x": 547,
+            "y": 175,
+            "value": 257.4203
+          }
+        ]
+      },
+      {
+        "name": "TQV",
+        "description": "total_precipitable_water_vapor",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "kg m-2",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 196,
+            "y": 324,
+            "value": 4.422597
+          },
+          {
+            "x": 5,
+            "y": 169,
+            "value": 67.25268
+          }
+        ]
+      },
+      {
+        "name": "U10M",
+        "description": "10-meter_eastward_wind",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "m s-1",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 188,
+            "y": 71,
+            "value": 5.0095115
+          },
+          {
+            "x": 157,
+            "y": 15,
+            "value": -0.9038186
+          }
+        ]
+      },
+      {
+        "name": "V10M",
+        "description": "10-meter_northward_wind",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "m s-1",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 559,
+            "y": 218,
+            "value": 1.7660038
+          },
+          {
+            "x": 329,
+            "y": 258,
+            "value": -3.1929805
+          }
+        ]
+      },
+      {
+        "name": "FRSNO",
+        "description": "fractional_area_of_land_snowcover",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "1",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 133,
+            "y": 179,
+            "value": "NaN"
+          },
+          {
+            "x": 184,
+            "y": 260,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "name": "FRSEAICE",
+        "description": "ice_covered_fraction_of_tile",
+        "bandWidth": 576,
+        "bandHeight": 361,
+        "geophysicalUnit": "1",
+        "noDataValue": "9.99999986991104E14",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 206,
+            "y": 179,
+            "value": 0.0
+          },
+          {
+            "x": 232,
+            "y": 159,
+            "value": 0.0
+          }
+        ]
+      }
+    ],
+    "metadata": [
+      {
+        "path": "Variable_Attributes/lon/Values/data",
+        "value": "-180.0,-179.375,-178.75,-178.125,-177.5,-176.875,-176.25,-175.625,-175.0,-174.375,-173.75,-173.125,-172.5,-171.875,-171.25,-170.625,-170.0,-169.375,-168.75,-168.125,-167.5,-166.875,-166.25,-165.625,-165.0,-164.375,-163.75,-163.125,-162.5,-161.875,-161.25,-160.625,-160.0,-159.375,-158.75,-158.125,-157.5,-156.875,-156.25,-155.625,-155.0,-154.375,-153.75,-153.125,-152.5,-151.875,-151.25,-150.625,-150.0,-149.375,-148.75,-148.125,-147.5,-146.875,-146.25,-145.625,-145.0,-144.375,-143.75,-143.125,-142.5,-141.875,-141.25,-140.625,-140.0,-139.375,-138.75,-138.125,-137.5,-136.875,-136.25,-135.625,-135.0,-134.375,-133.75,-133.125,-132.5,-131.875,-131.25,-130.625,-130.0,-129.375,-128.75,-128.125,-127.5,-126.875,-126.25,-125.625,-125.0,-124.375,-123.75,-123.125,-122.5,-121.875,-121.25,-120.625,-120.0,-119.375,-118.75,-118.125"
+      },
+      {
+        "path": "Variable_Attributes/SLP/_ChunkSizes",
+        "value": "91,144"
+      },
+      {
+        "path": "Variable_Attributes/lon/Values/data",
+        "value": "-180.0,-179.375,-178.75,-178.125,-177.5,-176.875,-176.25,-175.625,-175.0,-174.375,-173.75,-173.125,-172.5,-171.875,-171.25,-170.625,-170.0,-169.375,-168.75,-168.125,-167.5,-166.875,-166.25,-165.625,-165.0,-164.375,-163.75,-163.125,-162.5,-161.875,-161.25,-160.625,-160.0,-159.375,-158.75,-158.125,-157.5,-156.875,-156.25,-155.625,-155.0,-154.375,-153.75,-153.125,-152.5,-151.875,-151.25,-150.625,-150.0,-149.375,-148.75,-148.125,-147.5,-146.875,-146.25,-145.625,-145.0,-144.375,-143.75,-143.125,-142.5,-141.875,-141.25,-140.625,-140.0,-139.375,-138.75,-138.125,-137.5,-136.875,-136.25,-135.625,-135.0,-134.375,-133.75,-133.125,-132.5,-131.875,-131.25,-130.625,-130.0,-129.375,-128.75,-128.125,-127.5,-126.875,-126.25,-125.625,-125.0,-124.375,-123.75,-123.125,-122.5,-121.875,-121.25,-120.625,-120.0,-119.375,-118.75,-118.125"
+      },
+      {
+        "path": "Variable_Attributes/TO3/long_name",
+        "value": "total_column_ozone"
+      },
+      {
+        "path": "Global_Attributes/keywords",
+        "value": "ATMOSPHERE>ATMOSPHERIC CHEMISTRY>OXYGEN COMPOUNDS>OZONE;ATMOSPHERE>ATMOSPHERIC PRESSURE>SURFACE PRESSURE"
+      },
+      {
+        "path": "Global_Attributes/software_version",
+        "value": "CVS tag: GEOSadas-5_12_4_p15_M2-OPS"
+      },
+      {
+        "path": "Global_Attributes/comment",
+        "value": "This file contains a subset of variables generated using the GMAO GEOS model (v5.12.4) for use as input to the OBPG Level 2 data processing stream"
+      },
+      {
+        "path": "Global_Attributes/project",
+        "value": "Ocean Biology Processing Group (NASA/GSFC/OBPG)"
+      },
+      {
+        "path": "Variable_Attributes/U10M/_ChunkSizes",
+        "value": "91,144"
+      },
+      {
+        "path": "Variable_Attributes/PS/long_name",
+        "value": "surface_pressure"
+      }
+    ]
+  }
+}
