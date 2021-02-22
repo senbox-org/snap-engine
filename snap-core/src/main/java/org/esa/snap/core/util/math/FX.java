@@ -19,7 +19,6 @@ package org.esa.snap.core.util.math;
  * Represents a function <i>f(x)</i>.
  *
  * @author Norman Fomferra
- * @version $Revision$ $Date$
  */
 public interface FX {
 

@@ -1,6 +1,11 @@
 {
   "testProducts": [
     {
+      "id": "N201908000_MERRA2_1h",
+      "relativePath": "applications/generic_reader/NetCDF/Merra/N201908000_MERRA2_1h.nc",
+      "description": "Merra data, SeaDAS has a need for this. They are vertically flipped and have an odd number of lines"
+    },
+    {
       "id": "S5P_NRTI_L2__NO2____20180729T113636",
       "relativePath": "sensors_platforms/SENTINEL-5p/S5P_NRTI_L2__NO2____20180729T113636_20180729T114136_04102_01_010100_20180729T122421.nc",
       "description": "Read Sentinel-5p, to ensure it's basic functionality"

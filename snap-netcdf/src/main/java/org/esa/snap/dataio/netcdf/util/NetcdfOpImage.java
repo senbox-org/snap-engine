@@ -48,7 +48,7 @@ public class NetcdfOpImage extends SingleBandedOpImage {
     private final int xIndex;
     private final int yIndex;
     private final int startIndexToCopy;
-    private int halfSourceWidth;
+    private final int halfSourceWidth;
 
 
     public static RenderedImage createLsbImage(Variable variable, int[] imageOrigin, boolean flipY,
@@ -130,12 +130,17 @@ public class NetcdfOpImage extends SingleBandedOpImage {
         }
         shape[yIndex] = sourceRect.height;
         shape[xIndex] = sourceRect.width;
-        if (imageOrigin.length >= 0) {
-            // todo: we need something for weird position of lat/lon in nc variables (e.g. bands data1, data2, lat, data3, lon, data4)
-            System.arraycopy(imageOrigin, 0, origin, startIndexToCopy, imageOrigin.length);
-        }
+
+        // todo: we need something for weird position of lat/lon in nc variables (e.g. bands data1, data2, lat, data3, lon, data4)
+        System.arraycopy(imageOrigin, 0, origin, startIndexToCopy, imageOrigin.length);
+
         origin[yIndex] = flipY ? sourceHeight - sourceRect.y - sourceRect.height : sourceRect.y;
+        if (origin[yIndex] < 0) {
+            shape[yIndex] += origin[yIndex];
+            origin[yIndex] = 0;
+        }
         origin[xIndex] = sourceRect.x;
+
         if (isGlobalShifted180()) {
             // special case!!
             if (sourceRect.x < halfSourceWidth && sourceRect.x + sourceRect.width > halfSourceWidth) {
@@ -189,11 +194,12 @@ public class NetcdfOpImage extends SingleBandedOpImage {
     }
 
     private boolean isGlobalShifted180() {
-        for (Attribute attribute : variable.getAttributes()) {
+        for (Attribute attribute : variable.attributes()) {
             // for the special case of a global image shifted by 180deg longitude, this attribute was added in CfGeocodingPart
             if (attribute.getShortName().equals("LONGITUDE_SHIFTED_180")) {
                 return true;
             }
+
         }
         return false;
     }
@@ -218,11 +224,9 @@ public class NetcdfOpImage extends SingleBandedOpImage {
         shapeRight[xIndex] = halfSourceWidth - sourceRect.x;
         shapeLeft[xIndex] = sourceRect.width - shapeRight[xIndex];
 
-        if (imageOrigin.length >= 0) {
-            // todo: we need something for weird position of lat/lon in nc variables (e.g. bands data1, data2, lat, data3, lon, data4)
-            System.arraycopy(imageOrigin, 0, originLeft, startIndexToCopy, imageOrigin.length);
-            System.arraycopy(imageOrigin, 0, originRight, startIndexToCopy, imageOrigin.length);
-        }
+        // todo: we need something for weird position of lat/lon in nc variables (e.g. bands data1, data2, lat, data3, lon, data4)
+        System.arraycopy(imageOrigin, 0, originLeft, startIndexToCopy, imageOrigin.length);
+        System.arraycopy(imageOrigin, 0, originRight, startIndexToCopy, imageOrigin.length);
 
         originLeft[yIndex] = flipY ? sourceHeight - sourceRect.y - sourceRect.height : sourceRect.y;
         originRight[yIndex] = flipY ? sourceHeight - sourceRect.y - sourceRect.height : sourceRect.y;
@@ -316,7 +320,7 @@ public class NetcdfOpImage extends SingleBandedOpImage {
 
     private static DimensionIndices computeDefaultDimensionIndices(Variable variable) {
         List<ucar.nc2.Dimension> variableDimensions = variable.getDimensions();
-        DimKey rasterDim = new DimKey(variableDimensions.toArray(new ucar.nc2.Dimension[variableDimensions.size()]));
+        DimKey rasterDim = new DimKey(variableDimensions.toArray(new ucar.nc2.Dimension[0]));
         int xDimensionIndex = rasterDim.findXDimensionIndex();
         int yDimensionIndex = rasterDim.findYDimensionIndex();
         int startIndexOfBandVariables = DimKey.findStartIndexOfBandVariables(variableDimensions);

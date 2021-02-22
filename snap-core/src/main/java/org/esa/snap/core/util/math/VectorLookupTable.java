@@ -23,7 +23,6 @@ package org.esa.snap.core.util.math;
  * todo - method for degrading a table (see {@link LookupTable})
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
 public class VectorLookupTable {
 
