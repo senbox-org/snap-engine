@@ -57,20 +57,20 @@ public class InverseDistanceWeightingInterpolatorTest {
         context.x = new int[]{192, 193, 192, 193};
         context.y = new int[]{430, 430, 431, 431};
 
-        final InverseDistanceWeightingInterpolator interpolated = new InverseDistanceWeightingInterpolator();
+        final InverseDistanceWeightingInterpolator interpolator = new InverseDistanceWeightingInterpolator();
 
         GeoPos geoPos = new GeoPos(73.652, 27.774);
-        PixelPos pixelPos = interpolated.interpolate(geoPos, null, context);
+        PixelPos pixelPos = interpolator.interpolate(geoPos, null, context);
         assertEquals(192.5, pixelPos.x, 1e-8);
         assertEquals(430.57586403503655, pixelPos.y, 1e-8);
 
         geoPos = new GeoPos(73.651, 27.775);
-        pixelPos = interpolated.interpolate(geoPos, null, context);
+        pixelPos = interpolator.interpolate(geoPos, null, context);
         assertEquals(192.5, pixelPos.x, 1e-8);
         assertEquals(430.8128151936594, pixelPos.y, 1e-8);
 
         geoPos = new GeoPos(73.653, 27.776);
-        pixelPos = interpolated.interpolate(geoPos, null, context);
+        pixelPos = interpolator.interpolate(geoPos, null, context);
         assertEquals(192.5, pixelPos.x, 1e-8);
         assertEquals(430.243454102032, pixelPos.y, 1e-8);
     }

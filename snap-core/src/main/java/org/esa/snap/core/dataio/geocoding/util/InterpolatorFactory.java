@@ -16,20 +16,20 @@
 
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.core.util.math.DistanceMeasure;
-import org.esa.snap.core.util.math.EuclideanDistance;
+import org.esa.snap.runtime.Config;
 
-class EuclidianRasterInterpolator extends DistanceWeightingInterpolator {
+import java.util.prefs.Preferences;
 
-    private static final double MIN_DISTANCE = 1e-12; // in squared degrees
+public class InterpolatorFactory {
 
-    @Override
-    DistanceMeasure getDistanceMeasure(double lon, double lat) {
-        return new EuclideanDistance(lon, lat);
-    }
+    final static String SYSPROP_INTERPOLATOR_GEODETIC = "snap.core.geocoding.interpolator.geodetic";
 
-    @Override
-    double getMinDistance() {
-        return MIN_DISTANCE;
+    public static DistanceWeightingInterpolator get() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        final boolean isGeodetic = preferences.getBoolean(SYSPROP_INTERPOLATOR_GEODETIC, false);
+        if (isGeodetic) {
+            return new InverseDistanceWeightingInterpolator();
+        }
+        return new EuclidianRasterInterpolator();
     }
 }
