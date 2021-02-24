@@ -5,8 +5,11 @@ import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.runtime.Config;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.prefs.Preferences;
 
 import static org.junit.Assert.*;
 
@@ -116,43 +119,97 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testGetPixelPos_AMSRE_interpolating() {
-        inverse = new PixelGeoIndexInverse(true);
+    public void testGetPixelPos_AMSRE_interpolating_geodetic_distance() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "true");
 
-        final GeoRaster geoRaster = TestData.get_AMSRE();
-        inverse.initialize(geoRaster, false, new PixelPos[0]);
+        try {
+            inverse = new PixelGeoIndexInverse(true);
 
-        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
-        assertEquals(3.5, pixelPos.x, 1e-8);
-        assertEquals(0.5, pixelPos.y, 1e-8);
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
-        assertEquals(4.5, pixelPos.x, 1e-8);
-        assertEquals(1.5, pixelPos.y, 1e-8);
+            PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
+            assertEquals(3.5, pixelPos.x, 1e-8);
+            assertEquals(0.5, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
-        assertEquals(3.9999678930515468, pixelPos.x, 1e-8);
-        assertEquals(1.0000318067920972, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
+            assertEquals(4.5, pixelPos.x, 1e-8);
+            assertEquals(1.5, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
-        assertEquals(5.5, pixelPos.x, 1e-8);
-        assertEquals(11.5, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
+            assertEquals(3.9999678930515468, pixelPos.x, 1e-8);
+            assertEquals(1.0000318067920972, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
-        assertEquals(6.089020455253739, pixelPos.x, 1e-8);
-        assertEquals(11.728944031938612, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
+            assertEquals(5.5, pixelPos.x, 1e-8);
+            assertEquals(11.5, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
-        assertEquals(6.019331641460078, pixelPos.x, 1e-8);
-        assertEquals(11.96583342011602, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
+            assertEquals(6.089020455253739, pixelPos.x, 1e-8);
+            assertEquals(11.728944031938612, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
-        assertEquals(5.898035553271856, pixelPos.x, 1e-8);
-        assertEquals(12.275567238309627, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
+            assertEquals(6.019331641460078, pixelPos.x, 1e-8);
+            assertEquals(11.96583342011602, pixelPos.y, 1e-8);
 
-        pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
-        assertEquals(6.5, pixelPos.x, 1e-8);
-        assertEquals(12.5, pixelPos.y, 1e-8);
+            pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
+            assertEquals(5.898035553271856, pixelPos.x, 1e-8);
+            assertEquals(12.275567238309627, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
+            assertEquals(6.5, pixelPos.x, 1e-8);
+            assertEquals(12.5, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
+    }
+
+    @Test
+    public void testGetPixelPos_AMSRE_interpolating_euclidian_distance() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "false");
+
+        try {
+            inverse = new PixelGeoIndexInverse(true);
+
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+            PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
+            assertEquals(3.5, pixelPos.x, 1e-8);
+            assertEquals(0.5, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
+            assertEquals(4.5, pixelPos.x, 1e-8);
+            assertEquals(1.5, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
+            assertEquals(3.9999229960689684, pixelPos.x, 1e-8);
+            assertEquals(1.0000770039310343, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
+            assertEquals(5.5, pixelPos.x, 1e-8);
+            assertEquals(11.5, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
+            assertEquals(6.235813880526195, pixelPos.x, 1e-8);
+            assertEquals(11.578498905965025, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
+            assertEquals(6.055665307086948, pixelPos.x, 1e-8);
+            assertEquals(11.927563349258604, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
+            assertEquals(5.740880542320658, pixelPos.x, 1e-8);
+            assertEquals(12.426339834063208, pixelPos.y, 1e-8);
+
+            pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
+            assertEquals(6.5, pixelPos.x, 1e-8);
+            assertEquals(12.5, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
     }
 
     @Test
@@ -204,43 +261,111 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testClone_interpolating() {
-        inverse = new PixelGeoIndexInverse(true);
+    public void testClone_interpolating_geodetic_distance() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "true");
 
-        final GeoRaster geoRaster = TestData.get_AMSRE();
-        inverse.initialize(geoRaster, false, new PixelPos[0]);
+        try {
+            inverse = new PixelGeoIndexInverse(true);
 
-        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-        final InverseCoding clone = inverse.clone();
-        pixelPos = clone.getPixelPos(geoPos, null);
-        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+
+            final InverseCoding clone = inverse.clone();
+            pixelPos = clone.getPixelPos(geoPos, null);
+            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
     }
 
     @Test
-    public void testClone_interpolating_disposeOriginal() {
-        inverse = new PixelGeoIndexInverse(true);
+    public void testClone_interpolating_euclidian_distance() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "false");
 
-        final GeoRaster geoRaster = TestData.get_AMSRE();
-        inverse.initialize(geoRaster, false, new PixelPos[0]);
+        try {
+            inverse = new PixelGeoIndexInverse(true);
 
-        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-        final InverseCoding clone = inverse.clone();
-        inverse.dispose();
+            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
 
-        pixelPos = clone.getPixelPos(geoPos, null);
-        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+            final InverseCoding clone = inverse.clone();
+            pixelPos = clone.getPixelPos(geoPos, null);
+            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
+    }
+
+    @Test
+    public void testClone_interpolating_geodetic_distance_disposeOriginal() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "true");
+
+        try {
+            inverse = new PixelGeoIndexInverse(true);
+
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+
+            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+
+            final InverseCoding clone = inverse.clone();
+            inverse.dispose();
+
+            pixelPos = clone.getPixelPos(geoPos, null);
+            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
+    }
+
+    @Test
+    public void testClone_interpolating_euclidian_distance_disposeOriginal() {
+        final Preferences preferences = Config.instance("snap").preferences();
+        preferences.put("snap.core.geocoding.interpolator.geodetic", "false");
+
+        try {
+            inverse = new PixelGeoIndexInverse(true);
+
+            final GeoRaster geoRaster = TestData.get_AMSRE();
+            inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+
+            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+
+            final InverseCoding clone = inverse.clone();
+            inverse.dispose();
+
+            pixelPos = clone.getPixelPos(geoPos, null);
+            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        } finally {
+            preferences.remove("snap.core.geocoding.interpolator.geodetic");
+        }
     }
 
     @Test
