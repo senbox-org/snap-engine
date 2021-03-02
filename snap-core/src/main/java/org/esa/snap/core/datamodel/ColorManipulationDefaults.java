@@ -200,6 +200,26 @@ public class ColorManipulationDefaults {
 
 
 
+
+
+    // Range Percentile Default Options
+
+    private static final String PROPERTY_RANGE_PERCENTILE_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".range.percentile";
+
+    public static final String PROPERTY_RANGE_PERCENTILE_SECTION_KEY = PROPERTY_RANGE_PERCENTILE_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_RANGE_PERCENTILE_SECTION_LABEL = "Percentile Range";
+    public static final String PROPERTY_RANGE_PERCENTILE_SECTION_TOOLTIP = "Default range percentile in the " + TOOLNAME_COLOR_MANIPULATION + " GUI";
+
+    public static final String PROPERTY_RANGE_PERCENTILE_KEY = PROPERTY_RANGE_PERCENTILE_KEY_SUFFIX + ".value";
+    public static final String PROPERTY_RANGE_PERCENTILE_LABEL = "Percentile Range Default";
+    public static final String PROPERTY_RANGE_PERCENTILE_TOOLTIP = "The percentile of the data to use for determining min, max range";
+    public static final double PROPERTY_RANGE_PERCENTILE_DEFAULT = 92.0;
+
+
+
+
+
+
     // Button Enablement Options
 
     private static final String PROPERTY_BUTTONS_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".button.enablement";
