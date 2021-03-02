@@ -2,7 +2,7 @@ package org.esa.snap.core.dataop.resamp;
 
 /**
  * Resampling decorator. Ensures that the decorated resampling yields non-negative values
- * by clipping any non-negative value to zero.
+ * by clipping any negative value to zero.
  *
  * @author Ralf Quast
  */
