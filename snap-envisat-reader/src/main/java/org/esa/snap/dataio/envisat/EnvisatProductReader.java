@@ -61,7 +61,6 @@ public class EnvisatProductReader extends AbstractProductReader {
      * @since BEAM 4.9
      */
     private static final String SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING = "snap.envisat.usePixelGeoCoding";
-    private static final String SYSPROP_ENVISAT_PIXEL_CODING_FORWARD = "snap.envisat.pixelGeoCoding.forward";
     private static final String SYSPROP_ENVISAT_PIXEL_CODING_INVERSE = "snap.envisat.pixelGeoCoding.inverse";
     private static final String SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD = "snap.envisat.tiePointGeoCoding.forward";
 
@@ -443,7 +442,7 @@ public class EnvisatProductReader extends AbstractProductReader {
             codingNames[0] = PixelInterpolatingForward.KEY;
             codingNames[1] = codingNames[1].concat(KEY_SUFFIX_INTERPOLATING);
         } else {
-            codingNames[0] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_FORWARD, PixelForward.KEY);
+            codingNames[0] = PixelForward.KEY;
         }
 
         return codingNames;
