@@ -26,6 +26,7 @@
 
     <artifactId>snap-gpf</artifactId>
     <packaging>nbm</packaging>
+    <version>8.0.3.1</version>
 
     <name>SNAP Graph Processing Framework (GPF)</name>
     <description>The basic framework for processing using Operators and the GPT.</description>
