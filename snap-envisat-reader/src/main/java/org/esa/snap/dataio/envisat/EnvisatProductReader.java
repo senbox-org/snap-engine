@@ -43,6 +43,9 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
+import static org.esa.snap.core.dataio.geocoding.InverseCoding.KEY_SUFFIX_INTERPOLATING;
+
 /**
  * The <code>EnvisatProductReader</code> class is an implementation of the <code>ProductReader</code> interface
  * exclusively for data products having the standard ESA/ENVISAT raw format.
@@ -58,8 +61,6 @@ public class EnvisatProductReader extends AbstractProductReader {
      * @since BEAM 4.9
      */
     private static final String SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING = "snap.envisat.usePixelGeoCoding";
-    // @todo 2 tb/** this is defined at least 3 times as private constant. Move to a common location 2020-01-16
-    private static final String SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
     private static final String SYSPROP_ENVISAT_PIXEL_CODING_FORWARD = "snap.envisat.pixelGeoCoding.forward";
     private static final String SYSPROP_ENVISAT_PIXEL_CODING_INVERSE = "snap.envisat.pixelGeoCoding.inverse";
     private static final String SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD = "snap.envisat.tiePointGeoCoding.forward";
@@ -437,13 +438,13 @@ public class EnvisatProductReader extends AbstractProductReader {
 
         final Preferences preferences = Config.instance("snap").preferences();
         final boolean useFractAccuracy = preferences.getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        codingNames[1] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_INVERSE, PixelQuadTreeInverse.KEY);
         if (useFractAccuracy) {
             codingNames[0] = PixelInterpolatingForward.KEY;
+            codingNames[1] = codingNames[1].concat(KEY_SUFFIX_INTERPOLATING);
         } else {
             codingNames[0] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_FORWARD, PixelForward.KEY);
         }
-
-        codingNames[1] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_INVERSE, PixelQuadTreeInverse.KEY);
 
         return codingNames;
     }
