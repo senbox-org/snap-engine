@@ -18,33 +18,31 @@
 
 package org.esa.snap.core.dataio.persistable;
 
+import org.esa.snap.core.datamodel.Product;
+
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Container extends Item implements AttributeContainer {
+public abstract class Persistable<ML, O> {
 
-    private final ArrayList<Attribute> attrs = new ArrayList<>();
-    private final ArrayList<Property> props = new ArrayList<>();
-    private final ArrayList<Container> conts = new ArrayList<>();
+    protected final MarkupLanguageSupport<ML> languageSupport;
 
-    public Container(String name) {
-        super(name);
+    protected Persistable(MarkupLanguageSupport<ML> languageSupport) {
+        this.languageSupport = languageSupport;
     }
 
-    @Override
-    public boolean isContainer() {
-        return true;
+    public final List<O> decode(List<ML> languageElements, Product product, Dimension regionRasterSize){
+        final List<Item> items = languageSupport.convertToItems(languageElements);
+        return convertItemsToObjects(items);
     }
 
-    public List<Attribute> getAttributes() {
-        return attrs;
+    protected abstract List<O> convertItemsToObjects(List<Item> items);
+
+    public final List<ML> encode(List<O> objects){
+        final List<Item> list = convertObjectsToItems(objects);
+        return languageSupport.toLanguageObjects(list);
     }
 
-    public List<Property> getProperties() {
-        return props;
-    }
-
-    public List<Container> getContainer() {
-        return conts;
-    }
+    protected abstract List<Item> convertObjectsToItems(List<O> objects);
 }

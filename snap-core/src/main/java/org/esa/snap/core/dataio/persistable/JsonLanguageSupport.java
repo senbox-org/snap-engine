@@ -19,11 +19,17 @@
 package org.esa.snap.core.dataio.persistable;
 
 import java.util.List;
+import java.util.Map;
 
-public interface MarkupLanguageSupport<E> {
+public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Object>> {
 
-    List<E> toLanguageObjects(List<Item> items);
+    @Override
+    public List<Map<String, Object>> toLanguageObjects(List<Item> items) {
+        return null;
+    }
 
-    List<Item> convertToItems(List<E> languageObjects);
-
+    @Override
+    public List<Item> convertToItems(List<Map<String, Object>> lang) {
+        return null;
+    }
 }

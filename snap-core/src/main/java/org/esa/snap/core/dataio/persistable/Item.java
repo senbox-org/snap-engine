@@ -18,6 +18,30 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-public interface Item {
-    String getName();
+public class Item {
+
+    private final String name;
+
+    public Item(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name must be not null and not empty");
+        }
+        this.name = name;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public boolean isAttribute() {
+        return false;
+    }
+
+    public boolean isProperty() {
+        return false;
+    }
+
+    public boolean isContainer() {
+        return false;
+    }
 }

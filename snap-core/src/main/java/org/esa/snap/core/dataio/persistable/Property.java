@@ -18,22 +18,23 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-public interface Property<E> extends Item {
-    Object getValue();
+import java.util.ArrayList;
+import java.util.List;
 
-    String getValueString();
+public class Property<E> extends ValueItem<E> implements AttributeContainer {
+    private final ArrayList<Attribute> attrs = new ArrayList<>();
 
-    Double getValueDouble();
+    public Property(String name, E value) {
+        super(name, value);
+    }
 
-    Float getValueFloat();
+    @Override
+    public List<Attribute> getAttributes() {
+        return attrs;
+    }
 
-    Long getValueLong();
-
-    Integer getValueInt();
-
-    Short getValueShort();
-
-    Byte getValueByte();
-
-    E get();
+    @Override
+    public boolean isProperty() {
+        return true;
+    }
 }

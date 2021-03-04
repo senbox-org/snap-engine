@@ -18,12 +18,14 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import java.util.List;
+public class Attribute<E> extends ValueItem<E> {
 
-public interface MarkupLanguageSupport<E> {
+    protected Attribute(String name, E value) {
+        super(name, value);
+    }
 
-    List<E> toLanguageObjects(List<Item> items);
-
-    List<Item> convertToItems(List<E> languageObjects);
-
+    @Override
+    public boolean isAttribute() {
+        return true;
+    }
 }

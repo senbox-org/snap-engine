@@ -20,10 +20,6 @@ package org.esa.snap.core.dataio.persistable;
 
 import java.util.List;
 
-public interface MarkupLanguageSupport<E> {
-
-    List<E> toLanguageObjects(List<Item> items);
-
-    List<Item> convertToItems(List<E> languageObjects);
-
+public interface AttributeContainer {
+    List<Attribute> getAttributes();
 }
