@@ -20,6 +20,9 @@ import org.esa.snap.runtime.Config;
 
 import java.util.prefs.Preferences;
 
+/**
+ *
+ */
 public class InterpolatorFactory {
 
     final public static String SYSPROP_INTERPOLATOR_GEODETIC = "snap.core.geocoding.interpolator.geodetic";
