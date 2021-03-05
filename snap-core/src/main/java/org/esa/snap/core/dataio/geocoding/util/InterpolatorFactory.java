@@ -29,10 +29,9 @@ public class InterpolatorFactory {
 
     public static DistanceWeightingInterpolator get() {
         final Preferences preferences = Config.instance("snap").preferences();
-        final boolean isGeodetic = preferences.getBoolean(SYSPROP_INTERPOLATOR_GEODETIC, false);
-        if (isGeodetic) {
-            return new InverseDistanceWeightingInterpolator();
-        }
-        return new EuclidianRasterInterpolator();
+        final String interpolatorTypeName = preferences.get(SYSPROP_INTERPOLATOR_GEODETIC, DistanceWeightingInterpolator.Type.EUCLIDIAN.name());
+        final DistanceWeightingInterpolator.Type interpolatorTypes = DistanceWeightingInterpolator.Type.valueOf(interpolatorTypeName);
+        return interpolatorTypes.get();
     }
+
 }

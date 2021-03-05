@@ -4,17 +4,17 @@ import org.esa.snap.core.dataio.geocoding.AMSR2;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.TestData;
+import org.esa.snap.core.dataio.geocoding.util.DistanceWeightingInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.runtime.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.prefs.Preferences;
-
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class PixelQuadTreeInverseTest {
 
@@ -123,11 +123,7 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPixelPos_OLCI_interpolating_geodetic_distance() {
-        final Preferences preferences = Config.instance("snap").preferences();
-        preferences.put("snap.core.geocoding.interpolator.geodetic", "true");
-
-        try {
-            inverse = new PixelQuadTreeInverse(true);
+        inverse = new PixelQuadTreeInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
 
             final GeoRaster geoRaster = TestData.get_OLCI();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -182,18 +178,11 @@ public class PixelQuadTreeInverseTest {
             pixelPos = inverse.getPixelPos(new GeoPos(66.44213, -24.21632), null);
             assertEquals(3.0, pixelPos.x, 1e-8);
             assertEquals(34.20636166925025, pixelPos.y, 1e-8);
-        } finally {
-            preferences.remove("snap.core.geocoding.interpolator.geodetic");
-        }
     }
 
     @Test
     public void testGetPixelPos_OLCI_interpolating_euclidian_distance() {
-        final Preferences preferences = Config.instance("snap").preferences();
-        preferences.put("snap.core.geocoding.interpolator.geodetic", "false");
-
-        try {
-            inverse = new PixelQuadTreeInverse(true);
+        inverse = new PixelQuadTreeInverse(true, DistanceWeightingInterpolator.Type.EUCLIDIAN);
 
             final GeoRaster geoRaster = TestData.get_OLCI();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -248,18 +237,11 @@ public class PixelQuadTreeInverseTest {
             pixelPos = inverse.getPixelPos(new GeoPos(66.44213, -24.21632), null);
             assertEquals(3.0, pixelPos.x, 1e-8);
             assertEquals(34.39030170084996, pixelPos.y, 1e-8);
-        } finally {
-            preferences.remove("snap.core.geocoding.interpolator.geodetic");
-        }
     }
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_geodetic_distance() {
-        final Preferences preferences = Config.instance("snap").preferences();
-        preferences.put("snap.core.geocoding.interpolator.geodetic", "true");
-
-        try {
-            inverse = new PixelQuadTreeInverse(true);
+        inverse = new PixelQuadTreeInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -276,18 +258,11 @@ public class PixelQuadTreeInverseTest {
             pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
             assertEquals(2.9929638622796446, pixelPos.x, 1e-8);
             assertEquals(1.7308288269813148, pixelPos.y, 1e-8);
-        } finally {
-            preferences.remove("snap.core.geocoding.interpolator.geodetic");
-        }
     }
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_euclidian_distance() {
-        final Preferences preferences = Config.instance("snap").preferences();
-        preferences.put("snap.core.geocoding.interpolator.geodetic", "false");
-
-        try {
-            inverse = new PixelQuadTreeInverse(true);
+        inverse = new PixelQuadTreeInverse(true, DistanceWeightingInterpolator.Type.EUCLIDIAN);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -304,9 +279,6 @@ public class PixelQuadTreeInverseTest {
             pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
             assertEquals(3.01067027735143, pixelPos.x, 1e-8);
             assertEquals(1.584114535168603, pixelPos.y, 1e-8);
-        } finally {
-            preferences.remove("snap.core.geocoding.interpolator.geodetic");
-        }
     }
 
     @Test

@@ -20,9 +20,8 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.util.DistanceWeightingInterpolator;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
-import org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory;
-import org.esa.snap.core.dataio.geocoding.util.InverseDistanceWeightingInterpolator;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -51,12 +50,12 @@ public class PixelGeoIndexInverse implements InverseCoding {
     }
 
     PixelGeoIndexInverse(boolean fractionalAccuracy) {
+        this(fractionalAccuracy, DistanceWeightingInterpolator.Type.EUCLIDIAN);
+    }
+
+    PixelGeoIndexInverse(boolean fractionalAccuracy, DistanceWeightingInterpolator.Type type) {
         this.fractionalAccuracy = fractionalAccuracy;
-        if (fractionalAccuracy) {
-            interpolator = InterpolatorFactory.get();
-        } else {
-            interpolator = null;
-        }
+        interpolator = type.get();
     }
 
     @Override

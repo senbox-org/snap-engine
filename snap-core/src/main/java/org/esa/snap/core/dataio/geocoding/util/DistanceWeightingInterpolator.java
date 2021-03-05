@@ -20,7 +20,7 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.DistanceMeasure;
 
-abstract class DistanceWeightingInterpolator implements XYInterpolator {
+public abstract class DistanceWeightingInterpolator implements XYInterpolator {
 
     abstract DistanceMeasure getDistanceMeasure(double lon, double lat);
 
@@ -59,5 +59,22 @@ abstract class DistanceWeightingInterpolator implements XYInterpolator {
         pixelPos.x = x_sum * inv_sum;
         pixelPos.y = y_sum * inv_sum;
         return pixelPos;
+    }
+
+    public enum Type {
+        EUCLIDIAN {
+            @Override
+            public DistanceWeightingInterpolator get() {
+                return new EuclidianRasterInterpolator();
+            }
+        },
+        GEODETIC {
+            @Override
+            public DistanceWeightingInterpolator get() {
+                return new InverseDistanceWeightingInterpolator();
+            }
+        };
+
+        public abstract DistanceWeightingInterpolator get();
     }
 }
