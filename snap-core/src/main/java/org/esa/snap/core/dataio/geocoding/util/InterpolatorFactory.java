@@ -22,7 +22,7 @@ import java.util.prefs.Preferences;
 
 public class InterpolatorFactory {
 
-    public final static String SYSPROP_INTERPOLATOR_GEODETIC = "snap.core.geocoding.interpolator.geodetic";
+    final public static String SYSPROP_INTERPOLATOR_GEODETIC = "snap.core.geocoding.interpolator.geodetic";
 
     public static DistanceWeightingInterpolator get() {
         final Preferences preferences = Config.instance("snap").preferences();
