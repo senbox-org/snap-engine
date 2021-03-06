@@ -21,6 +21,8 @@ package org.esa.snap.core.dataio.persistable;
 import org.esa.snap.core.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class ValueItem<E> extends Item {
     private final E value;
@@ -64,6 +66,11 @@ public abstract class ValueItem<E> extends Item {
             Object[] v = (Object[]) value;
             return Arrays.stream(v).map(ValueItem::getaDouble).toArray(Double[]::new);
         }
+        if(value instanceof List) {
+            final List list = (List) value;
+            final Stream<Double> stream = list.stream().map(ValueItem::getaDouble);
+            return stream.toArray(Double[]::new);
+        }
         if (value != null && value instanceof String) {
             final String str = (String) this.value;
             final String[] strings = StringUtils.csvToArray(str);
@@ -92,6 +99,11 @@ public abstract class ValueItem<E> extends Item {
         if (value != null && value.getClass().isArray()) {
             Object[] v = (Object[]) value;
             return Arrays.stream(v).map(ValueItem::getaLong).toArray(Long[]::new);
+        }
+        if(value instanceof List) {
+            final List list = (List) value;
+            final Stream<Long> stream = list.stream().map(ValueItem::getaLong);
+            return stream.toArray(Long[]::new);
         }
         if (value != null && value instanceof String) {
             final String str = (String) this.value;

@@ -23,9 +23,9 @@ import java.util.List;
 
 public class Container extends Item implements AttributeContainer {
 
-    private final ArrayList<Attribute> attrs = new ArrayList<>();
-    private final ArrayList<Property> props = new ArrayList<>();
-    private final ArrayList<Container> conts = new ArrayList<>();
+    private final ArrayList<Attribute> attributes = new ArrayList<>();
+    private final ArrayList<Property> properties = new ArrayList<>();
+    private final ArrayList<Container> containers = new ArrayList<>();
 
     public Container(String name) {
         super(name);
@@ -37,14 +37,40 @@ public class Container extends Item implements AttributeContainer {
     }
 
     public List<Attribute> getAttributes() {
-        return attrs;
+        return attributes;
+    }
+
+    public Attribute getAttribute(String name) {
+        for (Attribute attr : attributes) {
+            if (attr.getName().equals(name)) {
+                return attr;
+            }
+        }
+        return null;
     }
 
     public List<Property> getProperties() {
-        return props;
+        return properties;
+    }
+
+    public Property getProperty(String name) {
+        for (Property prop : properties) {
+            if (prop.getName().equals(name)) {
+                return prop;
+            }
+        }
+        return null;
     }
 
     public List<Container> getContainer() {
-        return conts;
+        return containers;
+    }
+    public Container getContainer(String name) {
+        for (Container prop : containers) {
+            if (prop.getName().equals(name)) {
+                return prop;
+            }
+        }
+        return null;
     }
 }

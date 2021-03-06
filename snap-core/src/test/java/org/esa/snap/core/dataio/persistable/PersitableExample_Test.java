@@ -18,11 +18,14 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import org.apache.commons.jxpath.xml.JDOMParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.hsqldb.lib.StringInputStream;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -41,7 +44,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IllegalFormatException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +74,7 @@ public class PersitableExample_Test {
     }
 
     @Test
-    public void testPersistable_Encode() {
+    public void testPersistable_Encode_XML() {
         // Writer initializing (Dimap or Zarr)
         // in this case we are simulating Dimap ... a JDOM use case
         final JdomLanguageSupport languageSupport = new JdomLanguageSupport();
@@ -133,7 +136,7 @@ public class PersitableExample_Test {
     }
 
     @Test
-    public void testPersistable_Decode() throws JDOMException, IOException, ParserConfigurationException, SAXException {
+    public void testPersistable_Decode_XML() throws JDOMException, IOException, ParserConfigurationException, SAXException {
         //preparation
         final Product product = new Product("B", "T", 50, 50);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
@@ -182,6 +185,125 @@ public class PersitableExample_Test {
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(4);
     }
 
+    @Test
+    public void testPersistable_Encode_JSON() throws JsonProcessingException {
+        // Writer initializing (Dimap or Zarr)
+        // in this case we are simulating e.g. SNAP-ZARR ... a JSON use case
+        final JsonLanguageSupport languageSupport = new JsonLanguageSupport();
+        // the language dependent node where the created nodes shall be added
+        // in this case a JSON node is a map
+        final Map<String, Object> root = new LinkedHashMap<>();
+        final Map<String, Object> mapToAddEntries = new LinkedHashMap<>();
+        root.put("masks", mapToAddEntries);
+
+
+        // detect if masks are to be persisted
+        final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+        if (maskGroup.getNodeCount() > 0) {
+            // fetch a markup language dependent persistable for Masks from registry
+            Persistable<Map<String, Object>, Mask> p = registry.createPersistableFor(Mask.class, languageSupport);
+            // ensure there exist a registered persistable for masks
+            if (p != null) {
+                final Mask[] masks = maskGroup.toArray(new Mask[0]);
+                // execution ... let the persistable create the language dependent elements
+                final List<Map<String, Object>> elements = p.encode(Arrays.asList(masks));
+                for (Map<String, Object> element : elements) {
+                    for (Map.Entry<String, Object> entry : element.entrySet()) {
+                        mapToAddEntries.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+
+        //verification
+        PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+                .withArrayIndenter(DefaultPrettyPrinter.FixedSpaceIndenter.instance);
+        final ObjectWriter writer = new ObjectMapper().writer(prettyPrinter);
+        final String out = writer.writeValueAsString(root);
+
+        assertThat(out).isEqualToIgnoringNewLines(
+                "{\n" +
+                "  \"masks\" : {\n" +  // node where the generated json should be added
+                "    \"mask\" : [ {\n" +
+                "      \"name\" : \"mask1\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 111\",\n" +
+                "      \"description\" : \"decr1\",\n" +
+                "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
+                "      \"image_transparency\" : 0.6\n" +
+                "    }, {\n" +
+                "      \"name\" : \"mask2\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 222\",\n" +
+                "      \"description\" : \"decr2\",\n" +
+                "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
+                "      \"image_transparency\" : 0.5\n" +
+                "    }, {\n" +
+                "      \"name\" : \"mask3\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 333\",\n" +
+                "      \"description\" : \"decr3\",\n" +
+                "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
+                "      \"image_transparency\" : 0.4\n" +
+                "    }, {\n" +
+                "      \"name\" : \"mask4\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 444\",\n" +
+                "      \"description\" : \"decr4\",\n" +
+                "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
+                "      \"image_transparency\" : 0.3\n" +
+                "    } ]\n" +
+                "  }\n" +
+                "}"
+        );
+    }
+
+    @Test
+    public void testPersistable_Decode_JSON() throws JDOMException, IOException, ParserConfigurationException, SAXException {
+        //preparation
+        final Product product = new Product("B", "T", 50, 50);
+        assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
+        final String xmlSnipped = "{" +
+                                  "  \"masks\" : {" +
+                                  "    \"mask\" : [ {" +
+                                  "      \"name\" : \"mask1\"," +
+                                  "      \"expression\" : \"(X * Y + X) > 111\"," +
+                                  "      \"description\" : \"decr1\"," +
+                                  "      \"color_rgb\" : [ 255, 0, 0 ]," +
+                                  "      \"image_transparency\" : 0.6" +
+                                  "    }, {" +
+                                  "      \"name\" : \"mask2\"," +
+                                  "      \"expression\" : \"(X * Y + X) > 222\"," +
+                                  "      \"description\" : \"decr2\"," +
+                                  "      \"color_rgb\" : [ 0, 255, 0 ]," +
+                                  "      \"image_transparency\" : 0.5" +
+                                  "    }, {" +
+                                  "      \"name\" : \"mask3\"," +
+                                  "      \"expression\" : \"(X * Y + X) > 333\"," +
+                                  "      \"description\" : \"decr3\"," +
+                                  "      \"color_rgb\" : [ 0, 0, 255 ]," +
+                                  "      \"image_transparency\" : 0.4" +
+                                  "    }, {" +
+                                  "      \"name\" : \"mask4\"," +
+                                  "      \"expression\" : \"(X * Y + X) > 444\"," +
+                                  "      \"description\" : \"decr4\"," +
+                                  "      \"color_rgb\" : [ 128, 128, 128 ]," +
+                                  "      \"image_transparency\" : 0.3" +
+                                  "    } ]" +
+                                  "  }" +
+                                  "}";
+
+
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final HashMap<String, Map<String, Object>> content = objectMapper.reader().readValue(new StringReader(xmlSnipped), HashMap.class);
+
+        //execution
+        final Persistable<Map<String, Object>, Mask> persistable = registry.createPersistableFor(Mask.class, new JsonLanguageSupport());
+        final ArrayList<Map<String, Object>> toDecode = new ArrayList<>();
+        toDecode.add(content.get("masks"));
+        final List<Mask> masks = persistable.decode(toDecode, product, product.getSceneRasterSize());
+
+        //verification
+        assertThat(masks.size()).isEqualTo(4);
+        assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(4);
+    }
+
     private static class PersistableRegistry {
 
         private final Map<Type, List<PersistableFactory>> registry = new HashMap<>();
@@ -210,20 +332,53 @@ public class PersitableExample_Test {
         }
 
         @Override
-        protected List<Mask> convertItemsToObjects(List<Item> items) {
+        protected List<Mask> decodeItems(List<Item> items, Product product, Dimension regionRasterSize) {
+            final ArrayList<Mask> masks = new ArrayList<>();
             for (Item item : items) {
+                if (!item.isContainer()) {
+                    throw new IllegalArgumentException("Container expected.");
+                }
                 final String itemName = item.getName();
                 if (!"mask".equals(itemName)) {
-                    throw new IllegalArgumentException("Item name 'mask' expected but was '" + itemName + "'");
+                    throw new IllegalArgumentException("Item with name 'mask' expected but was '" + itemName + "'.");
                 }
+                final Container container = (Container) item;
+                final String[] expectedProperties = {
+                        "name",
+                        "expression",
+                        "description",
+                        "color_rgb",
+                        "image_transparency"
+                };
+                final Property[] props = new Property[expectedProperties.length];
+                for (int i = 0; i < props.length; i++) {
+                    final String propName = expectedProperties[i];
+                    final Property property = container.getProperty(propName);
+                    if (property == null) {
+                        throw new IllegalArgumentException("Property '" + propName + "' expected.");
+                    }
+                    props[i] = property;
+                }
+                final String maskName = props[0].getValueString();
+                final String expression = props[1].getValueString();
+                final String description = props[2].getValueString();
+                final Integer[] rgb = props[3].getValueInts();
+                final Double transparency = props[4].getValueDouble();
+                final Mask mask = product.addMask(
+                        maskName,
+                        expression,
+                        description,
+                        new Color(rgb[0], rgb[1], rgb[2]),
+                        transparency);
+                masks.add(mask);
             }
-            return null;
+            return masks;
         }
 
         @Override
-        protected List<Item> convertObjectsToItems(List<Mask> objects) {
+        protected List<Item> encodeObjects(List<Mask> instances) {
             final ArrayList<Item> list = new ArrayList<>();
-            for (Mask mask : objects) {
+            for (Mask mask : instances) {
                 final Container cont = new Container("mask");
                 final List<Property> props = cont.getProperties();
                 props.add(new Property<>("name", mask.getName()));

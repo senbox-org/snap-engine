@@ -18,6 +18,11 @@
 
 package org.esa.snap.core.dataio.persistable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -27,22 +32,25 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JdomLanguageSupportTest {
+public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
 
-    private MarkupLanguageSupport<Element> support;
+    private MarkupLanguageSupport<Element> jdomSupport;
+    private MarkupLanguageSupport<Map<String, Object>> jsonSupport;
 
     @Before
     public void setUp() throws Exception {
-        support = new JdomLanguageSupport();
+        jdomSupport = new JdomLanguageSupport();
+        jsonSupport = new JsonLanguageSupport();
     }
 
     @Test
-    public void testSingleValueProperties() {
+    public void testSingleValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
                 new Property<>("pSt", "a string value"),
@@ -65,12 +73,13 @@ public class JdomLanguageSupportTest {
         );
 
         //execution
-        final List<Element> elements = support.toLanguageObjects(items1);
-        final List<Item> items2 = support.convertToItems(elements);
+        final List<Element> jdomElements = jdomSupport.toLanguageObjects(items1);
+        final List<Map<String, Object>> jsonElements = jsonSupport.toLanguageObjects(items1);
+        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElements);
+        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElements);
 
         //verification
-        final String out = xmlOut(elements);
-        assertThat(out).contains(
+        assertThat(xmlOut(jdomElements)).contains(
                 "<pSt>a string value</pSt>",
                 "<pBD1>111111111111111111111111111111.111111</pBD1>",
                 "<pBD2>111111111111111111111118888888.881111</pBD2>",
@@ -90,10 +99,29 @@ public class JdomLanguageSupportTest {
                 "<pBool3>null</pBool3>"
         );
 
-        assertThat(items2.size()).isEqualTo(items1.size());
+        assertThat(jsonOut(jsonElements)).contains(
+                "\"pSt\" : \"a string value\",",
+                "\"pBD1\" : 111111111111111111111111111111.111111,",
+                "\"pBD2\" : 111111111111111111111118888888.881111,",
+                "\"pDo1\" : 1.7976931348623157E308,",
+                "\"pDo2\" : 4.9E-324,",
+                "\"pDo3\" : \"NaN\",",
+                "\"pDo4\" : \"-Infinity\",",
+                "\"pDo5\" : \"Infinity\",",
+                "\"pFl\" : 3.4028235E38,",
+                "\"pLo\" : 9223372036854775807,",
+                "\"pIn\" : 2147483647,",
+                "\"pSh\" : 32767,",
+                "\"pBy1\" : 127,",
+                "\"pBy2\" : null,",
+                "\"pBool1\" : true,",
+                "\"pBool2\" : false,",
+                "\"pBool3\" : null"
+        );
 
-        final Map<String, Item> map1 = getPropertyMap(items1);
-        final Map<String, Item> map2 = getPropertyMap(items2);
+        assertThat(itemsFromXML.size()).isEqualTo(items1.size());
+        assertThat(itemsFromJson.size()).isEqualTo(items1.size());
+
         final List<TrippleForTest> tripples = Arrays.asList(
                 new TrippleForTest("pSt", 1, (GetterFactory<ValueItem, String>) item -> item::getValueString),
                 new TrippleForTest("pBD", 2, (GetterFactory<ValueItem, String>) item -> item::getValueString),
@@ -105,23 +133,32 @@ public class JdomLanguageSupportTest {
                 new TrippleForTest("pBy", 2, (GetterFactory<ValueItem, Byte>) item -> item::getValueByte),
                 new TrippleForTest("pBool", 3, (GetterFactory<ValueItem, Boolean>) item -> item::getValueBoolean)
         );
+
+        final Map<String, Item> map1 = getPropertyMap(items1);
+        final Map[] mapsToBeTested = new Map[]{
+                getPropertyMap(itemsFromXML),
+                getPropertyMap(itemsFromJson)
+        };
         for (TrippleForTest tripple : tripples) {
             int start = tripple.count == 1 ? 0 : 1;
             int end = start + tripple.count;
             final String pref = tripple.namePrefix;
             for (int i = start; i < end; i++) {
                 String name = i < 1 ? pref : pref + i;
-                final Getter<?> getter1 = tripple.getterFactory.create(map1.get(name));
-                final Getter<?> getter2 = tripple.getterFactory.create(map2.get(name));
-                assertThat(getter1.get())
-                        .isEqualTo(getter2.get())
-                        .withFailMessage(name);
+                for (int j = 0; j < mapsToBeTested.length; j++) {
+                    Map map2 = mapsToBeTested[j];
+                    final Getter<?> getter1 = tripple.getterFactory.create(map1.get(name));
+                    final Getter<?> getter2 = tripple.getterFactory.create(map2.get(name));
+                    assertThat(getter1.get())
+                            .withFailMessage("Items from " + (j == 0 ? "xml" : "json") + ":  property with name '" + name + "'")
+                            .isEqualTo(getter2.get());
+                }
             }
         }
     }
 
     @Test
-    public void testArrayValueProperties() {
+    public void testArrayValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
                 new Property<>("pStrings", new String[]{"A", "[", ",", "b"}),
@@ -136,12 +173,13 @@ public class JdomLanguageSupportTest {
         );
 
         //execution
-        final List<Element> elements = support.toLanguageObjects(items1);
-        final List<Item> items2 = support.convertToItems(elements);
+        final List<Element> jdomElements = jdomSupport.toLanguageObjects(items1);
+        final List<Map<String, Object>> jsonElements = jsonSupport.toLanguageObjects(items1);
+        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElements);
+        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElements);
 
         //verification
-        final String out = xmlOut(elements);
-        assertThat(out).contains(
+        assertThat(xmlOut(jdomElements)).contains(
                 "<pStrings>\"A\", \"[\", \",\", \"b\"</pStrings>",
                 "<pNumArr>16.2, -2.478344E-15, null, Infinity, -Infinity, NaN, 1234567890123456</pNumArr>",
                 "<pDoubles>16.2, -2.478344E-15, null, Infinity, -Infinity, NaN, 1.234567890123456E15</pDoubles>",
@@ -153,10 +191,21 @@ public class JdomLanguageSupportTest {
                 "<pBooleans>true, null, false</pBooleans>"
         );
 
-        assertThat(items2.size()).isEqualTo(items1.size());
+        assertThat(jsonOut(jsonElements)).contains(
+                "\"pStrings\" : [ \"A\", \"[\", \",\", \"b\" ]",
+                "\"pNumArr\" : [ 16.2, -2.478344E-15, null, \"Infinity\", \"-Infinity\", \"NaN\", 1234567890123456 ]",
+                "\"pDoubles\" : [ 16.2, -2.478344E-15, null, \"Infinity\", \"-Infinity\", \"NaN\", 1.234567890123456E15 ]",
+                "\"pFloats\" : [ 6.2, -4.78344E-16, null, \"Infinity\", \"-Infinity\", \"NaN\", 1.23456795E15 ]",
+                "\"pLongs\" : [ 9223372036854775807, null, 1, 2, 3, 4 ]",
+                "\"pInts\" : [ 2147483647, null, 1, 2, 3, 4 ]",
+                "\"pShorts\" : [ 32767, null, 1, 2, 3, 4 ]",
+                "\"pBytes\" : [ 127, null, 1, 2, 3, 4 ]",
+                "\"pBooleans\" : [ true, null, false ]"
+        );
 
-        final Map<String, Item> map1 = getPropertyMap(items1);
-        final Map<String, Item> map2 = getPropertyMap(items2);
+        assertThat(itemsFromXML.size()).isEqualTo(items1.size());
+        assertThat(itemsFromJson.size()).isEqualTo(items1.size());
+
         final TrippleForTest[] tripples = new TrippleForTest[]{
                 new TrippleForTest("pStrings", 1, (GetterFactory<ValueItem, String[]>) item -> item::getValueStrings),
                 new TrippleForTest("pNumArr", 1, (GetterFactory<ValueItem, Double[]>) item -> item::getValueDoubles),
@@ -169,23 +218,32 @@ public class JdomLanguageSupportTest {
                 new TrippleForTest("pBytes", 1, (GetterFactory<ValueItem, Byte[]>) item -> item::getValueBytes),
                 new TrippleForTest("pBooleans", 1, (GetterFactory<ValueItem, Boolean[]>) item -> item::getValueBooleans),
         };
+
+        final Map<String, Item> map1 = getPropertyMap(items1);
+        final Map[] toBeTested = {
+                getPropertyMap(itemsFromXML),
+                getPropertyMap(itemsFromJson)
+        };
         for (TrippleForTest tripple : tripples) {
             int start = tripple.count == 1 ? 0 : 1;
             int end = start + tripple.count;
             final String pref = tripple.namePrefix;
             for (int i = start; i < end; i++) {
                 String name = i < 1 ? pref : pref + i;
-                final Getter<?> getter1 = tripple.getterFactory.create(map1.get(name));
-                final Getter<?> getter2 = tripple.getterFactory.create(map2.get(name));
-                assertThat(getter1.get()).as(name)
-//                        .isEqualTo(new String[]{"a", "b", "c"});
-                        .isEqualTo(getter2.get());
+                for (int j = 0; j < toBeTested.length; j++) {
+                    Map map2 = toBeTested[j];
+                    final Getter<?> getter1 = tripple.getterFactory.create(map1.get(name));
+                    final Getter<?> getter2 = tripple.getterFactory.create(map2.get(name));
+                    assertThat(getter1.get()).as(name)
+                            .withFailMessage("Items from " + (j == 0 ? "xml" : "json") + ":  property with name '" + name + "'")
+                            .isEqualTo(getter2.get());
+                }
             }
         }
     }
 
     @Test
-    public void testContainer() {
+    public void testContainer() throws JsonProcessingException {
         //preparation
         final Container c1 = new Container("an invalid name");
         c1.getProperties().addAll(Arrays.asList(
@@ -201,14 +259,18 @@ public class JdomLanguageSupportTest {
         final List<Item> items1 = Arrays.asList(c1, c2);
 
         //execution
-        final List<Element> elems1 = support.toLanguageObjects(items1);
-        final List<Item> items2 = support.convertToItems(elems1);
-        final List<Element> elems2 = support.toLanguageObjects(items2);
+        final List<Element> jdomElems1 = jdomSupport.toLanguageObjects(items1);
+        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElems1);
+        final List<Element> jdomElems2 = jdomSupport.toLanguageObjects(itemsFromXML);
+
+        final List<Map<String, Object>> jsonElems1 = jsonSupport.toLanguageObjects(items1);
+        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElems1);
+        final List<Map<String, Object>> jsonElems2 = jsonSupport.toLanguageObjects(itemsFromJson);
 
         //verification
-        final String out1 = xmlOut(elems1);
-        final String out2 = xmlOut(elems2);
-        assertThat(out1).isEqualToIgnoringNewLines(
+        final String xmlOut1 = xmlOut(jdomElems1);
+        final String xmlOut2 = xmlOut(jdomElems2);
+        assertThat(xmlOut1).isEqualToIgnoringNewLines(
                 "<root>" +
                 "  <an_invalid_name ATTR___THE_UNCHANGED_NAME=\"an invalid name\">" +
                 "    <some>name</some>" +
@@ -222,8 +284,31 @@ public class JdomLanguageSupportTest {
                 "  </c2>" +
                 "</root>"
         );
-        assertThat(out2).isEqualTo(out1);
-        assertThat(items2.size()).isEqualTo(items1.size());
+        assertThat(xmlOut2).isEqualTo(xmlOut1);
+
+        final String jsonOut1 = jsonOut(jsonElems1);
+        final String jsonOut2 = jsonOut(jsonElems2);
+        assertThat(jsonOut1).isEqualToIgnoringNewLines(
+                "{\n" +
+                "  \"root\" : [ {\n" +
+                "    \"an invalid name\" : {\n" +
+                "      \"some\" : \"name\",\n" +
+                "      \"int\" : 42\n" +
+                "    },\n" +
+                "    \"c2\" : {\n" +
+                "      \"propC2\" : 3230523.41331,\n" +
+                "      \"c3\" : {\n" +
+                "        \"_$ATT$_name\" : \"att\",\n" +
+                "        \"propC3\" : [ 16, 176, 42, 8 ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  } ]\n" +
+                "}"
+        );
+        assertThat(jsonOut2).isEqualTo(jsonOut1);
+
+        assertThat(itemsFromXML.size()).isEqualTo(items1.size());
+        assertThat(itemsFromJson.size()).isEqualTo(items1.size());
     }
 
     private String xmlOut(List<Element> elements1) {
@@ -231,6 +316,15 @@ public class JdomLanguageSupportTest {
         root.addContent(elements1);
         final XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
         return xmlOutputter.outputString(root);
+    }
+
+    private String jsonOut(List<Map<String, Object>> objects) throws JsonProcessingException {
+        final Map root = new LinkedHashMap();
+        root.put("root", objects);
+        PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+                .withArrayIndenter(DefaultPrettyPrinter.FixedSpaceIndenter.instance);
+        final ObjectWriter writer = new ObjectMapper().writer(prettyPrinter);
+        return writer.writeValueAsString(root);
     }
 
     private static class TrippleForTest<P, T> {
