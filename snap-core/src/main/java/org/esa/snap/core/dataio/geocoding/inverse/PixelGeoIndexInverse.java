@@ -20,15 +20,18 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
-import org.esa.snap.core.dataio.geocoding.util.DistanceWeightingInterpolator;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.core.util.math.SphericalDistance;
+import org.esa.snap.runtime.Config;
 
 import java.util.TreeMap;
+import java.util.prefs.Preferences;
+
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 
 public class PixelGeoIndexInverse implements InverseCoding {
 
@@ -50,12 +53,16 @@ public class PixelGeoIndexInverse implements InverseCoding {
     }
 
     PixelGeoIndexInverse(boolean fractionalAccuracy) {
-        this(fractionalAccuracy, DistanceWeightingInterpolator.Type.EUCLIDIAN);
+        this(fractionalAccuracy, XYInterpolator.Type.EUCLIDIAN);
     }
 
-    PixelGeoIndexInverse(boolean fractionalAccuracy, DistanceWeightingInterpolator.Type type) {
+    PixelGeoIndexInverse(boolean fractionalAccuracy, XYInterpolator.Type type) {
+        this(fractionalAccuracy, type.get());
+    }
+
+    PixelGeoIndexInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
-        interpolator = type.get();
+        this.interpolator = interpolator;
     }
 
     @Override
@@ -87,7 +94,6 @@ public class PixelGeoIndexInverse implements InverseCoding {
         if (distance < epsilon) {
             if (fractionalAccuracy) {
                 final InterpolationContext context = InterpolationContext.extract((int) pixelPos.x, (int) pixelPos.y, longitudes, latitudes, geoRaster.getSceneWidth(), geoRaster.getSceneHeight());
-                //noinspection ConstantConditions
                 pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
             }
 
@@ -153,7 +159,7 @@ public class PixelGeoIndexInverse implements InverseCoding {
 
     @Override
     public InverseCoding clone() {
-        final PixelGeoIndexInverse clone = new PixelGeoIndexInverse(fractionalAccuracy);
+        final PixelGeoIndexInverse clone = new PixelGeoIndexInverse(fractionalAccuracy, interpolator);
 
         clone.regionIndex = (TreeMap<Long, RasterRegion>) regionIndex.clone();
         clone.multiplicator = multiplicator;
@@ -251,7 +257,9 @@ public class PixelGeoIndexInverse implements InverseCoding {
 
         @Override
         public InverseCoding create() {
-            return new PixelGeoIndexInverse(fractionalAccuracy);
+            final Preferences preferences = Config.instance("snap").preferences();
+            final String interpolatorTypeName = preferences.get(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.EUCLIDIAN.name());
+            return new PixelGeoIndexInverse(fractionalAccuracy, XYInterpolator.Type.valueOf(interpolatorTypeName));
         }
     }
 }

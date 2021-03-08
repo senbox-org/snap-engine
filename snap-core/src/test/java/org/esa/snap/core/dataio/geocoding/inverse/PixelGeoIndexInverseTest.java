@@ -3,7 +3,7 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.TestData;
-import org.esa.snap.core.dataio.geocoding.util.DistanceWeightingInterpolator;
+import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Before;
@@ -120,7 +120,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_geodetic_distance() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -160,7 +160,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_euclidian_distance() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -248,7 +248,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testClone_interpolating_geodetic_distance() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -267,7 +267,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testClone_interpolating_euclidian_distance() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.EUCLIDIAN);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -286,7 +286,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testClone_interpolating_geodetic_distance_disposeOriginal() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -307,7 +307,7 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testClone_interpolating_euclidian_distance_disposeOriginal() {
-        inverse = new PixelGeoIndexInverse(true, DistanceWeightingInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
 
             final GeoRaster geoRaster = TestData.get_AMSRE();
             inverse.initialize(geoRaster, false, new PixelPos[0]);

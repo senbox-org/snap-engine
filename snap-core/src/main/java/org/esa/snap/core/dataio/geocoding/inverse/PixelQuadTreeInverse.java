@@ -20,7 +20,6 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
-import org.esa.snap.core.dataio.geocoding.util.DistanceWeightingInterpolator;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -28,6 +27,11 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.core.util.math.Range;
 import org.esa.snap.core.util.math.RsMathUtils;
+import org.esa.snap.runtime.Config;
+
+import java.util.prefs.Preferences;
+
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 
 public class PixelQuadTreeInverse implements InverseCoding {
 
@@ -57,12 +61,16 @@ public class PixelQuadTreeInverse implements InverseCoding {
     }
 
     PixelQuadTreeInverse(boolean fractionalAccuracy) {
-        this(fractionalAccuracy, DistanceWeightingInterpolator.Type.EUCLIDIAN);
+        this(fractionalAccuracy, XYInterpolator.Type.EUCLIDIAN);
     }
 
-    PixelQuadTreeInverse(boolean fractionalAccuracy, DistanceWeightingInterpolator.Type type) {
+    PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator.Type type) {
+        this(fractionalAccuracy, type.get());
+    }
+
+    PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
-        interpolator = type.get();
+        this.interpolator = interpolator;
     }
 
     // package access for testing only tb 2019-12-16
@@ -146,7 +154,6 @@ public class PixelQuadTreeInverse implements InverseCoding {
             if (smallerThanEpsilon) {
                 if (fractionalAccuracy) {
                     final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
-                    //noinspection ConstantConditions
                     pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
                     pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
                 } else {
@@ -207,7 +214,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public InverseCoding clone() {
-        final PixelQuadTreeInverse clone = new PixelQuadTreeInverse(fractionalAccuracy);
+        final PixelQuadTreeInverse clone = new PixelQuadTreeInverse(fractionalAccuracy, interpolator);
 
         clone.rasterWidth = rasterWidth;
         clone.rasterHeight = rasterHeight;
@@ -323,7 +330,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
                     lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
                 }
             } else {
-                final int idx = (int) Math.floor( (Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+                final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
                 final double epsLon = epsilonLon[idx];
                 lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsLon;
                 lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsLon;
@@ -398,7 +405,9 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         @Override
         public InverseCoding create() {
-            return new PixelQuadTreeInverse(fractionalAccuracy);
+            final Preferences preferences = Config.instance("snap").preferences();
+            final String interpolatorTypeName = preferences.get(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.EUCLIDIAN.name());
+            return new PixelQuadTreeInverse(fractionalAccuracy, XYInterpolator.Type.valueOf(interpolatorTypeName));
         }
     }
 }

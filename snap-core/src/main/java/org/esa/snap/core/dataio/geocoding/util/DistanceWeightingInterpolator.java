@@ -61,20 +61,4 @@ public abstract class DistanceWeightingInterpolator implements XYInterpolator {
         return pixelPos;
     }
 
-    public enum Type {
-        EUCLIDIAN {
-            @Override
-            public DistanceWeightingInterpolator get() {
-                return new EuclidianRasterInterpolator();
-            }
-        },
-        GEODETIC {
-            @Override
-            public DistanceWeightingInterpolator get() {
-                return new InverseDistanceWeightingInterpolator();
-            }
-        };
-
-        public abstract DistanceWeightingInterpolator get();
-    }
 }
