@@ -43,6 +43,7 @@ import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import ucar.ma2.Array;
@@ -404,7 +405,13 @@ public class CfGeocodingPart extends ProfilePartIO {
                                                   width, height, resolutionInKm);
 
         final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
-        final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+        final InverseCoding inverse;
+        final boolean fractionalAccuracy = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
+        if (fractionalAccuracy) {
+            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING);
+        } else {
+            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+        }
 
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();

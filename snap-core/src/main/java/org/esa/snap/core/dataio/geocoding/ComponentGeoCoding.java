@@ -21,6 +21,8 @@ import java.util.stream.IntStream;
 
 public class ComponentGeoCoding extends AbstractGeoCoding {
 
+    public static final String SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
+
     private static final GeoPos INVALID_GEO_POS = new GeoPos(Double.NaN, Double.NaN);
     private static final PixelPos INVALID_PIXEL_POS = new PixelPos(Double.NaN, Double.NaN);
 
