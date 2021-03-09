@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.gpf.main;
 
+import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.SystemUtils;
 
 import java.util.Locale;
@@ -31,7 +32,11 @@ public class GPT {
 
     public static void main(String... args) {
         try {
+            final StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
             run(args);
+
+            stopWatch.stopAndTrace("GPT timing");
         } catch (Throwable e) {
             String message;
             if (e.getMessage() != null) {
@@ -53,5 +58,4 @@ public class GPT {
         final CommandLineTool commandLineTool = new CommandLineTool();
         commandLineTool.run(args);
     }
-
 }
