@@ -23,6 +23,8 @@ import org.esa.snap.core.datamodel.PixelPos;
 
 public interface InverseCoding {
 
+    String KEY_SUFFIX_INTERPOLATING = "_INTERPOLATING";
+
     /**
      * Returns the pixel coordinates as x/y for a given geographical position given as lat/lon.
      *
