@@ -9,8 +9,11 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Test;
 
+import java.util.Properties;
+
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -116,7 +119,8 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPixelPos_OLCI_interpolating_geodetic_distance() {
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, properties);
 
         final GeoRaster geoRaster = TestData.get_OLCI();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -175,7 +179,8 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPixelPos_OLCI_interpolating_euclidian_distance() {
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, XYInterpolator.Type.EUCLIDIAN);
+        final Properties properties = createProperties(XYInterpolator.Type.EUCLIDIAN);
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, properties);
 
         final GeoRaster geoRaster = TestData.get_OLCI();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -234,7 +239,8 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_geodetic_distance() {
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, properties);
 
         final GeoRaster geoRaster = TestData.get_AMSRE();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -255,7 +261,8 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_euclidian_distance() {
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, XYInterpolator.Type.EUCLIDIAN);
+        final Properties properties = createProperties(XYInterpolator.Type.EUCLIDIAN);
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, properties);
 
         final GeoRaster geoRaster = TestData.get_AMSRE();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -529,7 +536,8 @@ public class PixelQuadTreeInverseTest {
     @Test
     public void testClone() {
         final GeoRaster geoRaster = TestData.get_SYN_AOD();
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse(true, properties);
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         final GeoPos geoPos = new GeoPos(59.2431, -136.13505);
@@ -635,4 +643,11 @@ public class PixelQuadTreeInverseTest {
         assertEquals(11459.161720383016, epsilonLongitude[899], 1e-8);
         assertEquals(3.2662478706390739E17, epsilonLongitude[900], 1e-8);
     }
+
+    private Properties createProperties(XYInterpolator.Type type) {
+        final Properties properties = new Properties();
+        properties.setProperty(SYSPROP_GEOCODING_INTERPOLATOR, type.name());
+        return properties;
+    }
+
 }

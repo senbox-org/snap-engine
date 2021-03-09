@@ -12,24 +12,23 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ *
  */
 
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.core.util.math.DistanceMeasure;
-import org.esa.snap.core.util.math.EuclideanDistance;
+import java.util.Properties;
 
-class EuclidianRasterInterpolator extends DistanceWeightingInterpolator {
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 
-    private static final double MIN_DISTANCE = 1e-12; // in squared degrees
+/**
+ * @author Marco Peters, Sabine Embacher, Tom Block
+ */
+public class InterpolatorFactory {
 
-    @Override
-    DistanceMeasure getDistanceMeasure(double lon, double lat) {
-        return new EuclideanDistance(lon, lat);
-    }
-
-    @Override
-    double getMinDistance() {
-        return MIN_DISTANCE;
+    public static XYInterpolator create(Properties properties) {
+        final String interpolatorTypeName = properties.getProperty(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.EUCLIDIAN.name());
+        return XYInterpolator.Type.valueOf(interpolatorTypeName).get();
     }
 }

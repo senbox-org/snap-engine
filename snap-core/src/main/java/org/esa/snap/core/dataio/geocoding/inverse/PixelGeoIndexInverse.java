@@ -21,17 +21,17 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
+import org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.util.PreferencesPropertyMap;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.core.util.math.SphericalDistance;
 import org.esa.snap.runtime.Config;
 
+import java.util.Properties;
 import java.util.TreeMap;
-import java.util.prefs.Preferences;
-
-import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 
 public class PixelGeoIndexInverse implements InverseCoding {
 
@@ -53,11 +53,11 @@ public class PixelGeoIndexInverse implements InverseCoding {
     }
 
     PixelGeoIndexInverse(boolean fractionalAccuracy) {
-        this(fractionalAccuracy, XYInterpolator.Type.EUCLIDIAN);
+        this(fractionalAccuracy, new PreferencesPropertyMap(Config.instance("snap").preferences()).getProperties());
     }
 
-    PixelGeoIndexInverse(boolean fractionalAccuracy, XYInterpolator.Type type) {
-        this(fractionalAccuracy, type.get());
+    PixelGeoIndexInverse(boolean fractionalAccuracy, Properties properties) {
+        this(fractionalAccuracy, InterpolatorFactory.create(properties));
     }
 
     PixelGeoIndexInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
@@ -257,9 +257,7 @@ public class PixelGeoIndexInverse implements InverseCoding {
 
         @Override
         public InverseCoding create() {
-            final Preferences preferences = Config.instance("snap").preferences();
-            final String interpolatorTypeName = preferences.get(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.EUCLIDIAN.name());
-            return new PixelGeoIndexInverse(fractionalAccuracy, XYInterpolator.Type.valueOf(interpolatorTypeName));
+            return new PixelGeoIndexInverse(fractionalAccuracy);
         }
     }
 }

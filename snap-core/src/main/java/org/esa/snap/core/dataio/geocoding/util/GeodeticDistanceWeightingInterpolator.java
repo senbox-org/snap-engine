@@ -18,29 +18,21 @@
 
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.util.math.DistanceMeasure;
+import org.esa.snap.core.util.math.RsMathUtils;
+import org.esa.snap.core.util.math.SphericalDistance;
 
-public interface XYInterpolator {
+class GeodeticDistanceWeightingInterpolator extends DistanceWeightingInterpolator {
 
-    String SYSPROP_GEOCODING_INTERPOLATOR = "snap.core.geocoding.interpolator";
+    private static final double MIN_DISTANCE = 0.001 / RsMathUtils.MEAN_EARTH_RADIUS;   // which is one millimeter tb 2020-01-10
 
-    PixelPos interpolate(GeoPos geoPos, PixelPos pixelPos, InterpolationContext context);
+    @Override
+    DistanceMeasure getDistanceMeasure(double lon, double lat) {
+        return new SphericalDistance(lon, lat);
+    }
 
-    enum Type {
-        EUCLIDIAN {
-            @Override
-            public XYInterpolator get() {
-                return new EuclidianDistanceWeightingInterpolator();
-            }
-        },
-        GEODETIC {
-            @Override
-            public XYInterpolator get() {
-                return new GeodeticDistanceWeightingInterpolator();
-            }
-        };
-
-        public abstract XYInterpolator get();
+    @Override
+    double getMinDistance() {
+        return MIN_DISTANCE;
     }
 }

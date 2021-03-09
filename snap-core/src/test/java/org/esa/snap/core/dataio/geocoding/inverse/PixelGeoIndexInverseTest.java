@@ -9,6 +9,9 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Properties;
+
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -120,82 +123,84 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_geodetic_distance() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
-            assertEquals(3.5, pixelPos.x, 1e-8);
-            assertEquals(0.5, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
-            assertEquals(4.5, pixelPos.x, 1e-8);
-            assertEquals(1.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
+        assertEquals(4.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
-            assertEquals(3.9999678930515468, pixelPos.x, 1e-8);
-            assertEquals(1.0000318067920972, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
+        assertEquals(3.9999678930515468, pixelPos.x, 1e-8);
+        assertEquals(1.0000318067920972, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
-            assertEquals(5.5, pixelPos.x, 1e-8);
-            assertEquals(11.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
+        assertEquals(5.5, pixelPos.x, 1e-8);
+        assertEquals(11.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
-            assertEquals(6.089020455253739, pixelPos.x, 1e-8);
-            assertEquals(11.728944031938612, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
+        assertEquals(6.089020455253739, pixelPos.x, 1e-8);
+        assertEquals(11.728944031938612, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
-            assertEquals(6.019331641460078, pixelPos.x, 1e-8);
-            assertEquals(11.96583342011602, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
+        assertEquals(6.019331641460078, pixelPos.x, 1e-8);
+        assertEquals(11.96583342011602, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
-            assertEquals(5.898035553271856, pixelPos.x, 1e-8);
-            assertEquals(12.275567238309627, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
+        assertEquals(5.898035553271856, pixelPos.x, 1e-8);
+        assertEquals(12.275567238309627, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
-            assertEquals(6.5, pixelPos.x, 1e-8);
-            assertEquals(12.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
+        assertEquals(6.5, pixelPos.x, 1e-8);
+        assertEquals(12.5, pixelPos.y, 1e-8);
     }
 
     @Test
     public void testGetPixelPos_AMSRE_interpolating_euclidian_distance() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
+        final Properties properties = createProperties(XYInterpolator.Type.EUCLIDIAN);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
-            assertEquals(3.5, pixelPos.x, 1e-8);
-            assertEquals(0.5, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(-0.8298334, 18.600895), null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
-            assertEquals(4.5, pixelPos.x, 1e-8);
-            assertEquals(1.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(-0.7098208, 18.553856), null);
+        assertEquals(4.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
-            assertEquals(3.9999229960689684, pixelPos.x, 1e-8);
-            assertEquals(1.0000770039310343, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
+        assertEquals(3.9999229960689684, pixelPos.x, 1e-8);
+        assertEquals(1.0000770039310343, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
-            assertEquals(5.5, pixelPos.x, 1e-8);
-            assertEquals(11.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.220249, 18.332468), null);
+        assertEquals(5.5, pixelPos.x, 1e-8);
+        assertEquals(11.5, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
-            assertEquals(6.235813880526195, pixelPos.x, 1e-8);
-            assertEquals(11.578498905965025, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.249989, 18.321519), null);
+        assertEquals(6.235813880526195, pixelPos.x, 1e-8);
+        assertEquals(11.578498905965025, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
-            assertEquals(6.055665307086948, pixelPos.x, 1e-8);
-            assertEquals(11.927563349258604, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.277447, 18.310131), null);
+        assertEquals(6.055665307086948, pixelPos.x, 1e-8);
+        assertEquals(11.927563349258604, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
-            assertEquals(5.740880542320658, pixelPos.x, 1e-8);
-            assertEquals(12.426339834063208, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.310039, 18.296767), null);
+        assertEquals(5.740880542320658, pixelPos.x, 1e-8);
+        assertEquals(12.426339834063208, pixelPos.y, 1e-8);
 
-            pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
-            assertEquals(6.5, pixelPos.x, 1e-8);
-            assertEquals(12.5, pixelPos.y, 1e-8);
+        pixelPos = inverse.getPixelPos(new GeoPos(0.33992004, 18.284939), null);
+        assertEquals(6.5, pixelPos.x, 1e-8);
+        assertEquals(12.5, pixelPos.y, 1e-8);
     }
 
     @Test
@@ -248,82 +253,86 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testClone_interpolating_geodetic_distance() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
 
-            final InverseCoding clone = inverse.clone();
-            pixelPos = clone.getPixelPos(geoPos, null);
-            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
     }
 
     @Test
     public void testClone_interpolating_euclidian_distance() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
+        final Properties properties = createProperties(XYInterpolator.Type.EUCLIDIAN);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
-            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+        assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
 
-            final InverseCoding clone = inverse.clone();
-            pixelPos = clone.getPixelPos(geoPos, null);
-            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
-            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+        assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
     }
 
     @Test
     public void testClone_interpolating_geodetic_distance_disposeOriginal() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.GEODETIC);
+        final Properties properties = createProperties(XYInterpolator.Type.GEODETIC);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
 
-            final InverseCoding clone = inverse.clone();
-            inverse.dispose();
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
 
-            pixelPos = clone.getPixelPos(geoPos, null);
-            assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
-            assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
     }
 
     @Test
     public void testClone_interpolating_euclidian_distance_disposeOriginal() {
-        inverse = new PixelGeoIndexInverse(true, XYInterpolator.Type.EUCLIDIAN);
+        final Properties properties = createProperties(XYInterpolator.Type.EUCLIDIAN);
+        inverse = new PixelGeoIndexInverse(true, properties);
 
-            final GeoRaster geoRaster = TestData.get_AMSRE();
-            inverse.initialize(geoRaster, false, new PixelPos[0]);
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
 
-            final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
 
-            PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
-            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
-            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+        assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
 
-            final InverseCoding clone = inverse.clone();
-            inverse.dispose();
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
 
-            pixelPos = clone.getPixelPos(geoPos, null);
-            assertEquals(3.260397013190891, pixelPos.x, 1e-8);
-            assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.260397013190891, pixelPos.x, 1e-8);
+        assertEquals(0.5441815032869551, pixelPos.y, 1e-8);
     }
 
     @Test
@@ -340,7 +349,7 @@ public class PixelGeoIndexInverseTest {
     @Test
     public void testToIndex_50km() {
         final GeoRaster geoRaster = new GeoRaster(new double[0], new double[0], null, null, 0, 0,
-                50.0);
+                                                  50.0);
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         assertEquals(18000090L, inverse.toIndex(0.0, 0.0));
@@ -353,7 +362,7 @@ public class PixelGeoIndexInverseTest {
     @Test
     public void testToIndex_5km() {
         final GeoRaster geoRaster = new GeoRaster(new double[0], new double[0], null, null, 0, 0,
-                5.0);
+                                                  5.0);
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         assertEquals(120000600L, inverse.toIndex(0.0, 0.0));
@@ -366,7 +375,7 @@ public class PixelGeoIndexInverseTest {
     @Test
     public void testToIndex_300m() {
         final GeoRaster geoRaster = new GeoRaster(new double[0], new double[0], null, null, 0, 0,
-                0.3);
+                                                  0.3);
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         assertEquals(1800009000L, inverse.toIndex(0.0, 0.0));
@@ -439,7 +448,7 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testRasterRegion_isPoint(){
+    public void testRasterRegion_isPoint() {
         final PixelGeoIndexInverse.RasterRegion rasterRegion = new PixelGeoIndexInverse.RasterRegion(200, 270);
 
         assertTrue(rasterRegion.isPoint());
@@ -463,4 +472,11 @@ public class PixelGeoIndexInverseTest {
         final InverseCoding inverseCoding = plugin.create();
         assertTrue(inverseCoding instanceof PixelGeoIndexInverse);
     }
+
+    private Properties createProperties(XYInterpolator.Type type) {
+        final Properties properties = new Properties();
+        properties.setProperty(SYSPROP_GEOCODING_INTERPOLATOR, type.name());
+        return properties;
+    }
+
 }
