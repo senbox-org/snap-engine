@@ -1,9 +1,13 @@
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.core.util.math.SphericalDistance;
+import org.esa.snap.core.util.math.EuclideanDistance;
 
 public class InterpolationContext {
 
+    public double[] lons;
+    public double[] lats;
+    public int[] x;
+    public int[] y;
     public InterpolationContext() {
         lons = new double[4];
         lats = new double[4];
@@ -11,52 +15,50 @@ public class InterpolationContext {
         y = new int[4];
     }
 
-    public double[] lons;
-    public double[] lats;
-    public int[] x;
-    public int[] y;
-
     public static InterpolationContext extract(int x, int y, double[] longitudes, double[] latitudes, int rasterWidth, int rasterHeight) {
         // search for closest surrounding (3x3) quadrant center location
         final double[] center_lons = new double[4];
         final double[] center_lats = new double[4];
 
         // the reference geo-location
-        final int centerIndex = y * rasterWidth + x;
+        final int lineOffset = y * rasterWidth;
+        final int lineOffset_minus = (y - 1) * rasterWidth;
+        final int centerIndex = lineOffset + x;
         final double ref_lon = longitudes[centerIndex];
         final double ref_lat = latitudes[centerIndex];
 
-        final SphericalDistance distCalc = new SphericalDistance(ref_lon, ref_lat);
         if ((y - 1) >= 0 && (x - 1) >= 0) {
-            center_lons[0] = 0.25 * (longitudes[(y - 1) * rasterWidth + x - 1] + longitudes[(y - 1) * rasterWidth + x] + longitudes[y * rasterWidth + x - 1] + longitudes[y * rasterWidth + x]);
-            center_lats[0] = 0.25 * (latitudes[(y - 1) * rasterWidth + x - 1] + latitudes[(y - 1) * rasterWidth + x] + latitudes[y * rasterWidth + x - 1] + latitudes[y * rasterWidth + x]);
+            center_lons[0] = 0.25 * (longitudes[lineOffset_minus + x - 1] + longitudes[lineOffset_minus + x] + longitudes[lineOffset + x - 1] + longitudes[lineOffset + x]);
+            center_lats[0] = 0.25 * (latitudes[lineOffset_minus + x - 1] + latitudes[lineOffset_minus + x] + latitudes[lineOffset + x - 1] + latitudes[lineOffset + x]);
         } else {
             center_lons[0] = Double.NaN;
             center_lats[0] = Double.NaN;
         }
         if ((y - 1) >= 0 && (x + 1) < rasterWidth) {
-            center_lons[1] = 0.25 * (longitudes[(y - 1) * rasterWidth + x] + longitudes[(y - 1) * rasterWidth + x + 1] + longitudes[y * rasterWidth + x] + longitudes[y * rasterWidth + x + 1]);
-            center_lats[1] = 0.25 * (latitudes[(y - 1) * rasterWidth + x] + latitudes[(y - 1) * rasterWidth + x + 1] + latitudes[y * rasterWidth + x] + latitudes[y * rasterWidth + x + 1]);
+            center_lons[1] = 0.25 * (longitudes[lineOffset_minus + x] + longitudes[lineOffset_minus + x + 1] + longitudes[lineOffset + x] + longitudes[lineOffset + x + 1]);
+            center_lats[1] = 0.25 * (latitudes[lineOffset_minus + x] + latitudes[lineOffset_minus + x + 1] + latitudes[lineOffset + x] + latitudes[lineOffset + x + 1]);
         } else {
             center_lons[1] = Double.NaN;
             center_lats[1] = Double.NaN;
         }
         if ((y + 1) < rasterHeight && (x + 1) < rasterWidth) {
-            center_lons[2] = 0.25 * (longitudes[y * rasterWidth + x] + longitudes[y * rasterWidth + x + 1]+ longitudes[(y + 1) * rasterWidth + x + 1] + longitudes[(y + 1) * rasterWidth + x]);
-            center_lats[2] = 0.25 * (latitudes[y * rasterWidth + x] + latitudes[y * rasterWidth + x + 1]+ latitudes[(y + 1) * rasterWidth + x + 1] + latitudes[(y + 1) * rasterWidth + x]);
+            center_lons[2] = 0.25 * (longitudes[lineOffset + x] + longitudes[lineOffset + x + 1] + longitudes[(y + 1) * rasterWidth + x + 1] + longitudes[(y + 1) * rasterWidth + x]);
+            center_lats[2] = 0.25 * (latitudes[lineOffset + x] + latitudes[lineOffset + x + 1] + latitudes[(y + 1) * rasterWidth + x + 1] + latitudes[(y + 1) * rasterWidth + x]);
         } else {
             center_lons[2] = Double.NaN;
             center_lats[2] = Double.NaN;
         }
         if ((y + 1) < rasterHeight && (x - 1) >= 0) {
-            center_lons[3] = 0.25 * (longitudes[y * rasterWidth + x - 1] + longitudes[y * rasterWidth + x] + longitudes[(y +1) * rasterWidth + x] + longitudes[(y+1) * rasterWidth + x - 1]);
-            center_lats[3] = 0.25 * (latitudes[y * rasterWidth + x - 1] + latitudes[y * rasterWidth + x] + latitudes[(y +1) * rasterWidth + x] + latitudes[(y+1) * rasterWidth + x - 1]);
+            center_lons[3] = 0.25 * (longitudes[lineOffset + x - 1] + longitudes[lineOffset + x] + longitudes[(y + 1) * rasterWidth + x] + longitudes[(y + 1) * rasterWidth + x - 1]);
+            center_lats[3] = 0.25 * (latitudes[lineOffset + x - 1] + latitudes[lineOffset + x] + latitudes[(y + 1) * rasterWidth + x] + latitudes[(y + 1) * rasterWidth + x - 1]);
         } else {
             center_lons[3] = Double.NaN;
             center_lats[3] = Double.NaN;
         }
 
         int quadrant = -1;
+        // final SphericalDistance distCalc = new SphericalDistance(ref_lon, ref_lat);
+        final EuclideanDistance distCalc = new EuclideanDistance(ref_lon, ref_lat);
         double min_dist = Double.MAX_VALUE;
         for (int i = 0; i < 4; i++) {
             if (!Double.isNaN(center_lons[i])) {
