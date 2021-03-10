@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -73,10 +74,10 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         );
 
         //execution
-        final List<Element> jdomElements = jdomSupport.toLanguageObjects(items1);
-        final List<Map<String, Object>> jsonElements = jsonSupport.toLanguageObjects(items1);
-        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElements);
-        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElements);
+        final List<Element> jdomElements = toLanguageObjects(items1, jdomSupport);
+        final List<Map<String, Object>> jsonElements = toLanguageObjects(items1, jsonSupport);
+        final List<Item> itemsFromXML = convertToItems(jdomElements, jdomSupport);
+        final List<Item> itemsFromJson = convertToItems(jsonElements, jsonSupport);
 
         //verification
         assertThat(xmlOut(jdomElements)).contains(
@@ -173,10 +174,10 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         );
 
         //execution
-        final List<Element> jdomElements = jdomSupport.toLanguageObjects(items1);
-        final List<Map<String, Object>> jsonElements = jsonSupport.toLanguageObjects(items1);
-        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElements);
-        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElements);
+        final List<Element> jdomElements = toLanguageObjects(items1, jdomSupport);
+        final List<Map<String, Object>> jsonElements = toLanguageObjects(items1, jsonSupport);
+        final List<Item> itemsFromXML = convertToItems(jdomElements, jdomSupport);
+        final List<Item> itemsFromJson = convertToItems(jsonElements, jsonSupport);
 
         //verification
         assertThat(xmlOut(jdomElements)).contains(
@@ -259,13 +260,13 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         final List<Item> items1 = Arrays.asList(c1, c2);
 
         //execution
-        final List<Element> jdomElems1 = jdomSupport.toLanguageObjects(items1);
-        final List<Item> itemsFromXML = jdomSupport.convertToItems(jdomElems1);
-        final List<Element> jdomElems2 = jdomSupport.toLanguageObjects(itemsFromXML);
+        final List<Element> jdomElems1 = toLanguageObjects(items1, jdomSupport);
+        final List<Item> itemsFromXML = convertToItems(jdomElems1, jdomSupport);
+        final List<Element> jdomElems2 = toLanguageObjects(itemsFromXML, jdomSupport);
 
-        final List<Map<String, Object>> jsonElems1 = jsonSupport.toLanguageObjects(items1);
-        final List<Item> itemsFromJson = jsonSupport.convertToItems(jsonElems1);
-        final List<Map<String, Object>> jsonElems2 = jsonSupport.toLanguageObjects(itemsFromJson);
+        final List<Map<String, Object>> jsonElems1 = toLanguageObjects(items1, jsonSupport);
+        final List<Item> itemsFromJson = convertToItems(jsonElems1, jsonSupport);
+        final List<Map<String, Object>> jsonElems2 = toLanguageObjects(itemsFromJson, jsonSupport);
 
         //verification
         final String xmlOut1 = xmlOut(jdomElems1);
@@ -289,26 +290,42 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         final String jsonOut1 = jsonOut(jsonElems1);
         final String jsonOut2 = jsonOut(jsonElems2);
         assertThat(jsonOut1).isEqualToIgnoringNewLines(
-                "{\n" +
-                "  \"root\" : [ {\n" +
-                "    \"an invalid name\" : {\n" +
-                "      \"some\" : \"name\",\n" +
-                "      \"int\" : 42\n" +
-                "    },\n" +
-                "    \"c2\" : {\n" +
-                "      \"propC2\" : 3230523.41331,\n" +
-                "      \"c3\" : {\n" +
-                "        \"_$ATT$_name\" : \"att\",\n" +
-                "        \"propC3\" : [ 16, 176, 42, 8 ]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  } ]\n" +
+                "{" +
+                "  \"root\" : {" +
+                "    \"an invalid name\" : {" +
+                "      \"some\" : \"name\"," +
+                "      \"int\" : 42" +
+                "    }," +
+                "    \"c2\" : {" +
+                "      \"propC2\" : 3230523.41331," +
+                "      \"c3\" : {" +
+                "        \"_$ATT$_name\" : \"att\"," +
+                "        \"propC3\" : [ 16, 176, 42, 8 ]" +
+                "      }" +
+                "    }" +
+                "  }" +
                 "}"
         );
         assertThat(jsonOut2).isEqualTo(jsonOut1);
 
         assertThat(itemsFromXML.size()).isEqualTo(items1.size());
         assertThat(itemsFromJson.size()).isEqualTo(items1.size());
+    }
+
+    private <E> List<Item> convertToItems(List<E> jdomElements, MarkupLanguageSupport<E> support) {
+        final List<Item> items = new ArrayList<>();
+        for (E element : jdomElements) {
+            items.add(support.convertToItem(element));
+        }
+        return items;
+    }
+
+    private <E> List<E> toLanguageObjects(List<Item> items1, MarkupLanguageSupport<E> support) {
+        final List<E> languageObjects = new ArrayList<>();
+        for (Item item : items1) {
+            languageObjects.add(support.toLanguageObject(item));
+        }
+        return languageObjects;
     }
 
     private String xmlOut(List<Element> elements1) {
@@ -320,7 +337,13 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
 
     private String jsonOut(List<Map<String, Object>> objects) throws JsonProcessingException {
         final Map root = new LinkedHashMap();
-        root.put("root", objects);
+        final LinkedHashMap<String, Object> mlElements = new LinkedHashMap<>();
+        root.put("root", mlElements);
+        for (Map<String, Object> mlElement : objects) {
+            final Map.Entry<String, Object> entry = mlElement.entrySet().iterator().next();
+            mlElements.put(entry.getKey(), entry.getValue());
+        }
+
         PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
                 .withArrayIndenter(DefaultPrettyPrinter.FixedSpaceIndenter.instance);
         final ObjectWriter writer = new ObjectMapper().writer(prettyPrinter);

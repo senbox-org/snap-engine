@@ -31,38 +31,25 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     public static final String ATT_PREFIX = "_$ATT$_";
 
     @Override
-    public List<Map<String, Object>> toLanguageObjects(List<Item> items) {
-        final ArrayList<Map<String, Object>> maps = new ArrayList<>();
+    public Map<String, Object> toLanguageObject(Item item) {
         final Map<String, Object> map = new LinkedHashMap<>();
-        maps.add(map);
-        for (Item item : items) {
-            if (item.isProperty()) {
-                addProperty(map, (Property) item);
-            } else {
-                addContainer(map, (Container) item);
-            }
+        if (item.isProperty()) {
+            addProperty(map, (Property) item);
+        } else {
+            addContainer(map, (Container) item);
         }
-        return maps;
+        return map;
     }
 
     @Override
-    public List<Item> convertToItems(List<Map<String, Object>> lang) {
-        final ArrayList<Item> items = new ArrayList<>();
-        for (Map<String, Object> objects : lang) {
-            for (Map.Entry<String, Object> entry : objects.entrySet()) {
-                final String name = entry.getKey();
-                final Object value = entry.getValue();
-                if (isListOfMaps(value)) {
-                    final List list = (List) value;
-                    for (Object obj : list) {
-                        items.add(createItem(name, obj));
-                    }
-                } else {
-                    items.add(createItem(name, value));
-                }
-            }
+    public Item convertToItem(Map<String, Object> objects) {
+        if (objects.entrySet().size() != 1) {
+            // TODO: 09.03.2021 SE -- talk with marko about the error message.
+            // shall this explanation also be part of the method documetnation of the JsonLanguageSupport?
+            throw new IllegalArgumentException("The map may only contain one entry, which would then correspond to the Language Representation of an object.");
         }
-        return items;
+        Map.Entry<String, Object> entry = objects.entrySet().iterator().next();
+        return createItem(entry.getKey(), entry.getValue());
     }
 
     private void addContainer(Map<String, Object> map, Container cont) {

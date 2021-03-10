@@ -21,7 +21,6 @@ package org.esa.snap.core.dataio.persistable;
 import org.esa.snap.core.datamodel.Product;
 
 import java.awt.Dimension;
-import java.util.List;
 
 public abstract class Persistable<ML, O> {
 
@@ -31,17 +30,17 @@ public abstract class Persistable<ML, O> {
         this.languageSupport = languageSupport;
     }
 
-    public final List<ML> encode(List<O> objects){
-        final List<Item> list = encodeObjects(objects);
-        return languageSupport.toLanguageObjects(list);
+    public final ML encode(O objects){
+        final Item item = encodeObject(objects);
+        return languageSupport.toLanguageObject(item);
     }
 
-    protected abstract List<Item> encodeObjects(List<O> instances);
+    protected abstract Item encodeObject(O instances);
 
-    public final List<O> decode(List<ML> languageElements, Product product, Dimension regionRasterSize){
-        final List<Item> items = languageSupport.convertToItems(languageElements);
-        return decodeItems(items, product, regionRasterSize);
+    public final O decode(ML languageElement, Product product, Dimension regionRasterSize){
+        final Item item = languageSupport.convertToItem(languageElement);
+        return decodeItem(item, product, regionRasterSize);
     }
 
-    protected abstract List<O> decodeItems(List<Item> items, Product product, Dimension regionRasterSize);
+    protected abstract O decodeItem(Item item, Product product, Dimension regionRasterSize);
 }

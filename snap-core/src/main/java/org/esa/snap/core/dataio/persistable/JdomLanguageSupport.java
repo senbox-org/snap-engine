@@ -21,42 +21,29 @@ package org.esa.snap.core.dataio.persistable;
 import org.esa.snap.core.util.StringUtils;
 import org.jdom.Element;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
 
     @Override
-    public List<Element> toLanguageObjects(List<Item> items) {
-        final List<Element> elements = new ArrayList<>();
-        for (Item item : items) {
-            if (item.isProperty()) {
-                final Property p = (Property) item;
-                elements.add(createPropertyElem(p));
-            } else if (item.isContainer()) {
-                final Container c = (Container) item;
-                elements.add(createContainerElem(c));
-            } else {
-                throw new IllegalArgumentException("Item must be type of Container or type of Property");
-            }
+    public Element toLanguageObject(Item item) {
+        if (item.isProperty()) {
+            final Property p = (Property) item;
+            return createPropertyElem(p);
+        } else if (item.isContainer()) {
+            final Container c = (Container) item;
+            return createContainerElem(c);
+        } else {
+            throw new IllegalArgumentException("Item must be type of Container or type of Property");
         }
-        return elements;
     }
 
     @Override
-    public List<Item> convertToItems(List<Element> languageObjects) {
-        final ArrayList<Item> items = new ArrayList<>();
-        for (Element element : languageObjects) {
-            items.add(createItem(element));
+    public Item convertToItem(Element languageObject) {
+        if (languageObject.getChildren().size() == 0) {
+            return createProperty(languageObject);
         }
-        return items;
-    }
-
-    private Item createItem(Element element) {
-        if (element.getChildren().size() == 0) {
-            return createProperty(element);
-        }
-        return createContainer(element);
+        return createContainer(languageObject);
     }
 
     private Property createProperty(Element element) {

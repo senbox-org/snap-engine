@@ -91,9 +91,8 @@ public class PersitableExample_Test {
             if (p != null) {
                 final Mask[] masks = maskGroup.toArray(new Mask[0]);
                 // execution ... let the persistable create the language dependent elements
-                final List<Element> elements = p.encode(Arrays.asList(masks));
-                for (Element element : elements) {
-                    root.addContent(element);
+                for (Mask mask : masks) {
+                    root.addContent(p.encode(mask));
                 }
             }
         }
@@ -102,35 +101,35 @@ public class PersitableExample_Test {
         final XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
         final String out = xmlOutputter.outputString(root);
         assertThat(out).isEqualToIgnoringNewLines(
-                "<nodeWhereTheGeneratedElementsShouldBeAdded>" +
-                "  <mask>" +
-                "    <name>mask1</name>" +
-                "    <expression>(X * Y + X) &gt; 111</expression>" +
-                "    <description>decr1</description>" +
-                "    <color_rgb>255, 0, 0</color_rgb>" +
-                "    <image_transparency>0.6</image_transparency>" +
-                "  </mask>" +
-                "  <mask>" +
-                "    <name>mask2</name>" +
-                "    <expression>(X * Y + X) &gt; 222</expression>" +
-                "    <description>decr2</description>" +
-                "    <color_rgb>0, 255, 0</color_rgb>" +
-                "    <image_transparency>0.5</image_transparency>" +
-                "  </mask>" +
-                "  <mask>" +
-                "    <name>mask3</name>" +
-                "    <expression>(X * Y + X) &gt; 333</expression>" +
-                "    <description>decr3</description>" +
-                "    <color_rgb>0, 0, 255</color_rgb>" +
-                "    <image_transparency>0.4</image_transparency>" +
-                "  </mask>" +
-                "  <mask>" +
-                "    <name>mask4</name>" +
-                "    <expression>(X * Y + X) &gt; 444</expression>" +
-                "    <description>decr4</description>" +
-                "    <color_rgb>128, 128, 128</color_rgb>" +
-                "    <image_transparency>0.3</image_transparency>" +
-                "  </mask>" +
+                "<nodeWhereTheGeneratedElementsShouldBeAdded>\n" +
+                "  <mask>\n" +
+                "    <name>mask1</name>\n" +
+                "    <expression>(X * Y + X) &gt; 111</expression>\n" +
+                "    <description>decr1</description>\n" +
+                "    <color_rgb>255, 0, 0</color_rgb>\n" +
+                "    <image_transparency>0.6</image_transparency>\n" +
+                "  </mask>\n" +
+                "  <mask>\n" +
+                "    <name>mask2</name>\n" +
+                "    <expression>(X * Y + X) &gt; 222</expression>\n" +
+                "    <description>decr2</description>\n" +
+                "    <color_rgb>0, 255, 0</color_rgb>\n" +
+                "    <image_transparency>0.5</image_transparency>\n" +
+                "  </mask>\n" +
+                "  <mask>\n" +
+                "    <name>mask3</name>\n" +
+                "    <expression>(X * Y + X) &gt; 333</expression>\n" +
+                "    <description>decr3</description>\n" +
+                "    <color_rgb>0, 0, 255</color_rgb>\n" +
+                "    <image_transparency>0.4</image_transparency>\n" +
+                "  </mask>\n" +
+                "  <mask>\n" +
+                "    <name>mask4</name>\n" +
+                "    <expression>(X * Y + X) &gt; 444</expression>\n" +
+                "    <description>decr4</description>\n" +
+                "    <color_rgb>128, 128, 128</color_rgb>\n" +
+                "    <image_transparency>0.3</image_transparency>\n" +
+                "  </mask>\n" +
                 "</nodeWhereTheGeneratedElementsShouldBeAdded>"
         );
     }
@@ -141,33 +140,33 @@ public class PersitableExample_Test {
         final Product product = new Product("B", "T", 50, 50);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped = "<root-element>" +
-                                  "  <mask>\n" +
-                                  "    <name>mask1</name>\n" +
-                                  "    <expression>(X * Y + X) &gt; 111</expression>\n" +
-                                  "    <description>decr1</description>\n" +
-                                  "    <color_rgb>255, 0, 0</color_rgb>\n" +
-                                  "    <image_transparency>0.6</image_transparency>\n" +
-                                  "  </mask>\n" +
-                                  "  <mask>\n" +
-                                  "    <name>mask2</name>\n" +
-                                  "    <expression>(X * Y + X) &gt; 222</expression>\n" +
-                                  "    <description>decr2</description>\n" +
-                                  "    <color_rgb>0, 255, 0</color_rgb>\n" +
-                                  "    <image_transparency>0.5</image_transparency>\n" +
-                                  "  </mask>\n" +
-                                  "  <mask>\n" +
-                                  "    <name>mask3</name>\n" +
-                                  "    <expression>(X * Y + X) &gt; 333</expression>\n" +
-                                  "    <description>decr3</description>\n" +
-                                  "    <color_rgb>0, 0, 255</color_rgb>\n" +
-                                  "    <image_transparency>0.4</image_transparency>\n" +
-                                  "  </mask>\n" +
-                                  "  <mask>\n" +
-                                  "    <name>mask4</name>\n" +
-                                  "    <expression>(X * Y + X) &gt; 444</expression>\n" +
-                                  "    <description>decr4</description>\n" +
-                                  "    <color_rgb>128, 128, 128</color_rgb>\n" +
-                                  "    <image_transparency>0.3</image_transparency>\n" +
+                                  "  <mask>" +
+                                  "    <name>mask1</name>" +
+                                  "    <expression>(X * Y + X) &gt; 111</expression>" +
+                                  "    <description>decr1</description>" +
+                                  "    <color_rgb>255, 0, 0</color_rgb>" +
+                                  "    <image_transparency>0.6</image_transparency>" +
+                                  "  </mask>" +
+                                  "  <mask>" +
+                                  "    <name>mask2</name>" +
+                                  "    <expression>(X * Y + X) &gt; 222</expression>" +
+                                  "    <description>decr2</description>" +
+                                  "    <color_rgb>0, 255, 0</color_rgb>" +
+                                  "    <image_transparency>0.5</image_transparency>" +
+                                  "  </mask>" +
+                                  "  <mask>" +
+                                  "    <name>mask3</name>" +
+                                  "    <expression>(X * Y + X) &gt; 333</expression>" +
+                                  "    <description>decr3</description>" +
+                                  "    <color_rgb>0, 0, 255</color_rgb>" +
+                                  "    <image_transparency>0.4</image_transparency>" +
+                                  "  </mask>" +
+                                  "  <mask>" +
+                                  "    <name>mask4</name>" +
+                                  "    <expression>(X * Y + X) &gt; 444</expression>" +
+                                  "    <description>decr4</description>" +
+                                  "    <color_rgb>128, 128, 128</color_rgb>" +
+                                  "    <image_transparency>0.3</image_transparency>" +
                                   "  </mask>" +
                                   "</root-element>";
 
@@ -178,10 +177,11 @@ public class PersitableExample_Test {
 
         //execution
         final Persistable<Element, Mask> persistable = registry.createPersistableFor(Mask.class, new JdomLanguageSupport());
-        final List<Mask> masks = persistable.decode(content, product, product.getSceneRasterSize());
+        for (Element element : content) {
+            persistable.decode(element, product, product.getSceneRasterSize());
+        }
 
         //verification
-        assertThat(masks.size()).isEqualTo(4);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(4);
     }
 
@@ -193,8 +193,8 @@ public class PersitableExample_Test {
         // the language dependent node where the created nodes shall be added
         // in this case a JSON node is a map
         final Map<String, Object> root = new LinkedHashMap<>();
-        final Map<String, Object> mapToAddEntries = new LinkedHashMap<>();
-        root.put("masks", mapToAddEntries);
+        final List<Map<String, Object>> mlEntryList = new ArrayList<>();
+        root.put("masks", mlEntryList);
 
 
         // detect if masks are to be persisted
@@ -206,11 +206,8 @@ public class PersitableExample_Test {
             if (p != null) {
                 final Mask[] masks = maskGroup.toArray(new Mask[0]);
                 // execution ... let the persistable create the language dependent elements
-                final List<Map<String, Object>> elements = p.encode(Arrays.asList(masks));
-                for (Map<String, Object> element : elements) {
-                    for (Map.Entry<String, Object> entry : element.entrySet()) {
-                        mapToAddEntries.put(entry.getKey(), entry.getValue());
-                    }
+                for (Mask mask : masks) {
+                    mlEntryList.add(p.encode(mask));
                 }
             }
         }
@@ -223,33 +220,39 @@ public class PersitableExample_Test {
 
         assertThat(out).isEqualToIgnoringNewLines(
                 "{\n" +
-                "  \"masks\" : {\n" +  // node where the generated json should be added
-                "    \"mask\" : [ {\n" +
+                "  \"masks\" : [ {\n" +  // node where the generated json should be added
+                "    \"mask\" : {\n" +
                 "      \"name\" : \"mask1\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 111\",\n" +
                 "      \"description\" : \"decr1\",\n" +
                 "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
                 "      \"image_transparency\" : 0.6\n" +
-                "    }, {\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
                 "      \"name\" : \"mask2\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 222\",\n" +
                 "      \"description\" : \"decr2\",\n" +
                 "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
                 "      \"image_transparency\" : 0.5\n" +
-                "    }, {\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
                 "      \"name\" : \"mask3\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 333\",\n" +
                 "      \"description\" : \"decr3\",\n" +
                 "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
                 "      \"image_transparency\" : 0.4\n" +
-                "    }, {\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
                 "      \"name\" : \"mask4\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 444\",\n" +
                 "      \"description\" : \"decr4\",\n" +
                 "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
                 "      \"image_transparency\" : 0.3\n" +
-                "    } ]\n" +
-                "  }\n" +
+                "    }\n" +
+                "  } ]\n" +
                 "}"
         );
     }
@@ -259,48 +262,54 @@ public class PersitableExample_Test {
         //preparation
         final Product product = new Product("B", "T", 50, 50);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
-        final String xmlSnipped = "{" +
-                                  "  \"masks\" : {" +
-                                  "    \"mask\" : [ {" +
-                                  "      \"name\" : \"mask1\"," +
-                                  "      \"expression\" : \"(X * Y + X) > 111\"," +
-                                  "      \"description\" : \"decr1\"," +
-                                  "      \"color_rgb\" : [ 255, 0, 0 ]," +
-                                  "      \"image_transparency\" : 0.6" +
-                                  "    }, {" +
-                                  "      \"name\" : \"mask2\"," +
-                                  "      \"expression\" : \"(X * Y + X) > 222\"," +
-                                  "      \"description\" : \"decr2\"," +
-                                  "      \"color_rgb\" : [ 0, 255, 0 ]," +
-                                  "      \"image_transparency\" : 0.5" +
-                                  "    }, {" +
-                                  "      \"name\" : \"mask3\"," +
-                                  "      \"expression\" : \"(X * Y + X) > 333\"," +
-                                  "      \"description\" : \"decr3\"," +
-                                  "      \"color_rgb\" : [ 0, 0, 255 ]," +
-                                  "      \"image_transparency\" : 0.4" +
-                                  "    }, {" +
-                                  "      \"name\" : \"mask4\"," +
-                                  "      \"expression\" : \"(X * Y + X) > 444\"," +
-                                  "      \"description\" : \"decr4\"," +
-                                  "      \"color_rgb\" : [ 128, 128, 128 ]," +
-                                  "      \"image_transparency\" : 0.3" +
-                                  "    } ]" +
-                                  "  }" +
-                                  "}";
+        final String xmlSnipped =
+                "{\n" +
+                "  \"masks\" : [ {\n" +  // node where the generated json should be added
+                "    \"mask\" : {\n" +
+                "      \"name\" : \"mask1\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 111\",\n" +
+                "      \"description\" : \"decr1\",\n" +
+                "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
+                "      \"image_transparency\" : 0.6\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
+                "      \"name\" : \"mask2\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 222\",\n" +
+                "      \"description\" : \"decr2\",\n" +
+                "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
+                "      \"image_transparency\" : 0.5\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
+                "      \"name\" : \"mask3\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 333\",\n" +
+                "      \"description\" : \"decr3\",\n" +
+                "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
+                "      \"image_transparency\" : 0.4\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"mask\" : {\n" +
+                "      \"name\" : \"mask4\",\n" +
+                "      \"expression\" : \"(X * Y + X) > 444\",\n" +
+                "      \"description\" : \"decr4\",\n" +
+                "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
+                "      \"image_transparency\" : 0.3\n" +
+                "    }\n" +
+                "  } ]\n" +
+                "}";
 
 
         final ObjectMapper objectMapper = new ObjectMapper();
-        final HashMap<String, Map<String, Object>> content = objectMapper.reader().readValue(new StringReader(xmlSnipped), HashMap.class);
+        final HashMap<String, List<Map<String, Object>>> content = objectMapper.reader().readValue(new StringReader(xmlSnipped), HashMap.class);
 
         //execution
         final Persistable<Map<String, Object>, Mask> persistable = registry.createPersistableFor(Mask.class, new JsonLanguageSupport());
-        final ArrayList<Map<String, Object>> toDecode = new ArrayList<>();
-        toDecode.add(content.get("masks"));
-        final List<Mask> masks = persistable.decode(toDecode, product, product.getSceneRasterSize());
+        for (Map<String, Object> toDecode : content.get("masks")) {
+            persistable.decode(toDecode, product, product.getSceneRasterSize());
+        }
 
         //verification
-        assertThat(masks.size()).isEqualTo(4);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(4);
     }
 
@@ -332,65 +341,57 @@ public class PersitableExample_Test {
         }
 
         @Override
-        protected List<Mask> decodeItems(List<Item> items, Product product, Dimension regionRasterSize) {
-            final ArrayList<Mask> masks = new ArrayList<>();
-            for (Item item : items) {
-                if (!item.isContainer()) {
-                    throw new IllegalArgumentException("Container expected.");
-                }
-                final String itemName = item.getName();
-                if (!"mask".equals(itemName)) {
-                    throw new IllegalArgumentException("Item with name 'mask' expected but was '" + itemName + "'.");
-                }
-                final Container container = (Container) item;
-                final String[] expectedProperties = {
-                        "name",
-                        "expression",
-                        "description",
-                        "color_rgb",
-                        "image_transparency"
-                };
-                final Property[] props = new Property[expectedProperties.length];
-                for (int i = 0; i < props.length; i++) {
-                    final String propName = expectedProperties[i];
-                    final Property property = container.getProperty(propName);
-                    if (property == null) {
-                        throw new IllegalArgumentException("Property '" + propName + "' expected.");
-                    }
-                    props[i] = property;
-                }
-                final String maskName = props[0].getValueString();
-                final String expression = props[1].getValueString();
-                final String description = props[2].getValueString();
-                final Integer[] rgb = props[3].getValueInts();
-                final Double transparency = props[4].getValueDouble();
-                final Mask mask = product.addMask(
-                        maskName,
-                        expression,
-                        description,
-                        new Color(rgb[0], rgb[1], rgb[2]),
-                        transparency);
-                masks.add(mask);
+        protected Mask decodeItem(Item item, Product product, Dimension regionRasterSize) {
+            if (!item.isContainer()) {
+                throw new IllegalArgumentException("Container expected.");
             }
-            return masks;
+            final String itemName = item.getName();
+            if (!"mask".equals(itemName)) {
+                throw new IllegalArgumentException("Item with name 'mask' expected but was '" + itemName + "'.");
+            }
+            final Container container = (Container) item;
+            final String[] expectedProperties = {
+                    "name",
+                    "expression",
+                    "description",
+                    "color_rgb",
+                    "image_transparency"
+            };
+            final Property[] props = new Property[expectedProperties.length];
+            for (int i = 0; i < props.length; i++) {
+                final String propName = expectedProperties[i];
+                final Property property = container.getProperty(propName);
+                if (property == null) {
+                    throw new IllegalArgumentException("Property '" + propName + "' expected.");
+                }
+                props[i] = property;
+            }
+            final String maskName = props[0].getValueString();
+            final String expression = props[1].getValueString();
+            final String description = props[2].getValueString();
+            final Integer[] rgb = props[3].getValueInts();
+            final Double transparency = props[4].getValueDouble();
+
+            return product.addMask(
+                    maskName,
+                    expression,
+                    description,
+                    new Color(rgb[0], rgb[1], rgb[2]),
+                    transparency);
         }
 
         @Override
-        protected List<Item> encodeObjects(List<Mask> instances) {
-            final ArrayList<Item> list = new ArrayList<>();
-            for (Mask mask : instances) {
-                final Container cont = new Container("mask");
-                final List<Property> props = cont.getProperties();
-                props.add(new Property<>("name", mask.getName()));
-                props.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
-                props.add(new Property<>("description", mask.getDescription()));
-                final Color cl = mask.getImageColor();
-                final int[] rgb = new int[]{cl.getRed(), cl.getGreen(), cl.getBlue()};
-                props.add(new Property<>("color_rgb", rgb));
-                props.add(new Property<>("image_transparency", mask.getImageTransparency()));
-                list.add(cont);
-            }
-            return list;
+        protected Item encodeObject(Mask mask) {
+            final Container cont = new Container("mask");
+            final List<Property> props = cont.getProperties();
+            props.add(new Property<>("name", mask.getName()));
+            props.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
+            props.add(new Property<>("description", mask.getDescription()));
+            final Color cl = mask.getImageColor();
+            final int[] rgb = new int[]{cl.getRed(), cl.getGreen(), cl.getBlue()};
+            props.add(new Property<>("color_rgb", rgb));
+            props.add(new Property<>("image_transparency", mask.getImageTransparency()));
+            return cont;
         }
     }
 }

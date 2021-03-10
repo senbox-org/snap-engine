@@ -22,8 +22,8 @@ import java.util.List;
 
 public interface MarkupLanguageSupport<E> {
 
-    List<E> toLanguageObjects(List<Item> items);
+    E toLanguageObject(Item item);
 
-    List<Item> convertToItems(List<E> languageObjects);
+    Item convertToItem(E languageObject);
 
 }
