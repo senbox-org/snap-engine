@@ -55,7 +55,7 @@ public class BandDescriptorDomConverter implements DomConverter {
             }
 
             DomElement noDataValue = targetBand.getChild("noDataValue");
-            if (noDataValue != null) {
+            if (noDataValue != null && noDataValue.getValue() != null) {
                 desc.noDataValue = Double.parseDouble(noDataValue.getValue());
             }
 

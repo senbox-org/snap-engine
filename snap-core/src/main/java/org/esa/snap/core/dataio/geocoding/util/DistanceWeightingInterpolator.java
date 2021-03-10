@@ -16,11 +16,12 @@
 
 package org.esa.snap.core.dataio.geocoding.util;
 
+<<<<<<<< HEAD:snap-core/src/main/java/org/esa/snap/core/dataio/geocoding/util/DistanceWeightingInterpolator.java
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.DistanceMeasure;
 
-abstract class DistanceWeightingInterpolator implements XYInterpolator {
+public abstract class DistanceWeightingInterpolator implements XYInterpolator {
 
     abstract DistanceMeasure getDistanceMeasure(double lon, double lat);
 
@@ -52,12 +53,24 @@ abstract class DistanceWeightingInterpolator implements XYInterpolator {
             y_sum += context.y[i] * distances[i];
         }
         inv_sum = 1.0 / inv_sum;
+========
+import org.esa.snap.core.util.math.DistanceMeasure;
+import org.esa.snap.core.util.math.RsMathUtils;
+import org.esa.snap.core.util.math.SphericalDistance;
 
-        if (pixelPos == null) {
-            pixelPos = new PixelPos();
-        }
-        pixelPos.x = x_sum * inv_sum;
-        pixelPos.y = y_sum * inv_sum;
-        return pixelPos;
+public class InverseDistanceWeightingInterpolator extends DistanceWeightingInterpolator {
+
+    private static final double MIN_DISTANCE = 0.001 / RsMathUtils.MEAN_EARTH_RADIUS;   // which is one millimeter tb 2020-01-10
+
+    @Override
+    DistanceMeasure getDistanceMeasure(double lon, double lat) {
+        return new SphericalDistance(lon, lat);
     }
+>>>>>>>> master:snap-core/src/main/java/org/esa/snap/core/dataio/geocoding/util/InverseDistanceWeightingInterpolator.java
+
+    @Override
+    double getMinDistance() {
+        return MIN_DISTANCE;
+    }
+
 }

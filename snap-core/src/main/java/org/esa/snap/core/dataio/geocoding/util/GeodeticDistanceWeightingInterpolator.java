@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -13,22 +14,25 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  *
- *
  */
 
 package org.esa.snap.core.dataio.geocoding.util;
 
-import java.util.Properties;
+import org.esa.snap.core.util.math.DistanceMeasure;
+import org.esa.snap.core.util.math.RsMathUtils;
+import org.esa.snap.core.util.math.SphericalDistance;
 
-import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
+class GeodeticDistanceWeightingInterpolator extends DistanceWeightingInterpolator {
 
-/**
- * @author Marco Peters, Sabine Embacher, Tom Block
- */
-public class InterpolatorFactory {
+    private static final double MIN_DISTANCE = 0.001 / RsMathUtils.MEAN_EARTH_RADIUS;   // which is one millimeter tb 2020-01-10
 
-    public static XYInterpolator create(Properties properties) {
-        final String interpolatorTypeName = properties.getProperty(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.EUCLIDIAN.name());
-        return XYInterpolator.Type.valueOf(interpolatorTypeName).get();
+    @Override
+    DistanceMeasure getDistanceMeasure(double lon, double lat) {
+        return new SphericalDistance(lon, lat);
+    }
+
+    @Override
+    double getMinDistance() {
+        return MIN_DISTANCE;
     }
 }

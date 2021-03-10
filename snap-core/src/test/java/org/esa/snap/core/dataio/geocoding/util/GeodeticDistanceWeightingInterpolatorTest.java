@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class InverseDistanceWeightingInterpolatorTest {
+public class GeodeticDistanceWeightingInterpolatorTest {
 
     @Test
     public void testInterpolate() {
@@ -16,7 +16,7 @@ public class InverseDistanceWeightingInterpolatorTest {
         context.x = new int[]{273, 274, 273, 274};
         context.y = new int[]{435, 435, 436, 436};
 
-        final InverseDistanceWeightingInterpolator interpolator = new InverseDistanceWeightingInterpolator();
+        final GeodeticDistanceWeightingInterpolator interpolator = new GeodeticDistanceWeightingInterpolator();
 
         GeoPos geoPos = new GeoPos(64.372, 16.013);
         PixelPos pixelPos = interpolator.interpolate(geoPos, null, context);
@@ -57,7 +57,7 @@ public class InverseDistanceWeightingInterpolatorTest {
         context.x = new int[]{192, 193, 192, 193};
         context.y = new int[]{430, 430, 431, 431};
 
-        final InverseDistanceWeightingInterpolator interpolator = new InverseDistanceWeightingInterpolator();
+        final GeodeticDistanceWeightingInterpolator interpolator = new GeodeticDistanceWeightingInterpolator();
 
         GeoPos geoPos = new GeoPos(73.652, 27.774);
         PixelPos pixelPos = interpolator.interpolate(geoPos, null, context);

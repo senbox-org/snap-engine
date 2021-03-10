@@ -12,34 +12,36 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ *
  */
 
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.runtime.Config;
 import org.junit.Test;
 
-import java.util.prefs.Preferences;
+import java.util.Properties;
 
-import static org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory.SYSPROP_INTERPOLATOR_GEODETIC;
+import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class InterpolatorFactoryTest {
 
     @Test
-    public void testGet() {
-        DistanceWeightingInterpolator interpolator = InterpolatorFactory.get();
-        assertTrue(interpolator instanceof EuclidianRasterInterpolator);
+    public void testFactory_WithDefaults() {
+        final Properties properties = new Properties();
+        final XYInterpolator xyInterpolator = InterpolatorFactory.create(properties);
+        assertNotNull(xyInterpolator);
+        assertTrue(xyInterpolator instanceof EuclidianDistanceWeightingInterpolator);
+    }
 
-        final Preferences preferences = Config.instance("snap").preferences();
-        preferences.put(SYSPROP_INTERPOLATOR_GEODETIC, "true");
-
-        interpolator = InterpolatorFactory.get();
-        assertTrue(interpolator instanceof InverseDistanceWeightingInterpolator);
-
-        preferences.put(SYSPROP_INTERPOLATOR_GEODETIC, "false");
-
-        interpolator = InterpolatorFactory.get();
-        assertTrue(interpolator instanceof EuclidianRasterInterpolator);
+    @Test
+    public void testFactory_WithPropertySet() {
+        final Properties properties = new Properties();
+        properties.setProperty(SYSPROP_GEOCODING_INTERPOLATOR, XYInterpolator.Type.GEODETIC.name());
+        final XYInterpolator xyInterpolator = InterpolatorFactory.create(properties);
+        assertNotNull(xyInterpolator);
+        assertTrue(xyInterpolator instanceof GeodeticDistanceWeightingInterpolator);
     }
 }
