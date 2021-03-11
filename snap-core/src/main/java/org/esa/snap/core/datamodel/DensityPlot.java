@@ -26,6 +26,7 @@ import javax.media.jai.PixelAccessor;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.UnpackedImageData;
 import javax.media.jai.operator.MinDescriptor;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -133,13 +134,17 @@ public class DensityPlot {
             if (dataType1 != maxDataType) {
                 dataImage1 = ImageManager.createFormatOp(dataImage1, maxDataType);
             }
-            if (dataType2 != maxDataType) {
-                dataImage2 = ImageManager.createFormatOp(dataImage2, maxDataType);
+            final Dimension commonTileSize = new Dimension(dataImage1.getTileWidth(), dataImage1.getTileHeight());
+            final Dimension image2TileSize = new Dimension(dataImage2.getTileWidth(), dataImage2.getTileHeight());
+
+            if (dataType2 != maxDataType || !image2TileSize.equals(commonTileSize)) {
+                dataImage2 = ImageManager.createFormatOp(dataImage2, maxDataType, new ImageLayout(dataImage1));
             }
+
+            RenderedImage maskImage = getApplicableMaskImage(raster1, raster2, roiImage);
             PixelAccessor dataAccessor1 = new PixelAccessor(dataImage1.getSampleModel(), null);
             PixelAccessor dataAccessor2 = new PixelAccessor(dataImage2.getSampleModel(), null);
 
-            RenderedImage maskImage = getApplicableMaskImage(raster1, raster2, roiImage);
             Shape validShape1 = raster1.getValidShape();
             Shape validShape2 = raster2.getValidShape();
             Shape effectiveShape = validShape1;
@@ -160,12 +165,15 @@ public class DensityPlot {
 
             PixelAccessor maskAccessor;
             if (maskImage != null) {
+                final Dimension maskTileSize = new Dimension(maskImage.getTileWidth(), maskImage.getTileHeight());
+                if (!maskTileSize.equals(commonTileSize)) {
+                    maskImage = ImageManager.createFormatOp(maskImage, maskImage.getSampleModel().getDataType(), new ImageLayout(dataImage1));
+                }
+
                 SampleModel maskSampleModel = maskImage.getSampleModel();
                 checkSampleModelForOneBand(maskSampleModel);
                 checkSampleModelForTypeByte(maskSampleModel);
                 maskAccessor = new PixelAccessor(maskSampleModel, null);
-                // todo - assert dataImage x0,y0,w,h properties equal those of
-                // maskImage (nf)
             } else {
                 maskAccessor = null;
             }
