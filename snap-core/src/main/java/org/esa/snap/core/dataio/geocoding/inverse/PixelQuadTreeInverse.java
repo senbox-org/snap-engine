@@ -20,7 +20,6 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
-import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
 import org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -31,9 +30,15 @@ import org.esa.snap.core.util.math.Range;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.runtime.Config;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
-public class PixelQuadTreeInverse implements InverseCoding {
+import static org.esa.snap.core.dataio.geocoding.inverse.Segment.MIN_DIMENSION;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ACROSS;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ALONG;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.INSIDE;
+
+public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
     public static final String KEY = "INV_PIXEL_QUAD_TREE";
     public static final String KEY_INTERPOLATING = KEY + KEY_SUFFIX_INTERPOLATING;
@@ -55,6 +60,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     private double[] latitudes;
     private Range lonRange;
     private Range latRange;
+    private ArrayList<Segment> segmentList;
 
     PixelQuadTreeInverse() {
         this(false);
@@ -122,45 +128,363 @@ public class PixelQuadTreeInverse implements InverseCoding {
         return dx * dx + dy * dy;
     }
 
+    static double[] createEpsilonLongitude(double epsilon) {
+        final double[] d = new double[901];
+        for (int i = 0; i < d.length; i++) {
+            final double ang = i * 0.1;
+            final double rad = Math.toRadians(ang);
+            final double multiplier = 1 / Math.cos(rad);
+            d[i] = epsilon * multiplier;
+        }
+        return d;
+    }
+
+    private ArrayList<Segment> calculateSegmentation(int rasterWidth, int rasterHeight, PixelPos[] poleLocations) {
+        final ArrayList<Segment> segmentList = new ArrayList<>();
+
+        final Segment fullProductSegment = new Segment(0, rasterWidth - 1, 0, rasterHeight - 1);
+
+        if (poleLocations.length == 0) {
+            // start segmentation at full product
+            calculateSegmentation(fullProductSegment, segmentList);
+        } else {
+            // run pre-segmentation to cut out pole
+
+            final Segment poleSegment = getPoleSegment(poleLocations);
+            //segmentList.add(poleSegment);
+
+            // split
+            // @todo 1 tb/tb extract method for splitting
+            // @todo 1 tb/tb check if we're at the upper border
+            final Segment[] upperSplit = fullProductSegment.split_y(poleSegment.y_min);
+
+            final Segment upper = upperSplit[0];
+
+            // @todo 1 tb/tb check if we're at the lower border
+            final Segment[] lowerSplit = upperSplit[1].split_y(poleSegment.y_max + 1);
+            final Segment lower = lowerSplit[1];
+
+            // @todo 1 tb/tb check if we're at the left border
+            final Segment[] leftSplit = lowerSplit[0].split_x(poleSegment.x_min);
+            final Segment left = leftSplit[0];
+
+            final Segment[] rightSplit = leftSplit[1].split_x(poleSegment.x_max + 1);
+            final Segment right = rightSplit[1];
+
+//            upper.calculateGeoPoints(this);
+//            segmentList.add(upper);
+//
+//            left.calculateGeoPoints(this);
+//            segmentList.add(left);
+//
+//            right.calculateGeoPoints(this);
+//            segmentList.add(right);
+//
+//            lower.calculateGeoPoints(this);
+//            segmentList.add(lower);
+
+            calculateSegmentation(upper, segmentList);
+            calculateSegmentation(lower, segmentList);
+            calculateSegmentation(left, segmentList);
+            calculateSegmentation(right, segmentList);
+
+//            for(final Segment segment : segmentList) {
+//                segment.printWkt();
+//            }
+
+
+
+        }
+
+        for (final Segment segment : segmentList) {
+            segment.printBounds(this);
+            segment.printWktBoundingRect();
+            System.out.println("------");
+        }
+
+        return segmentList;
+    }
+
+    // @todo 1 tb/tb make static and add tests 2021-03-11
+    private Segment getPoleSegment(PixelPos[] poleLocations) {
+        int x_min = Integer.MAX_VALUE;
+        int x_max = Integer.MIN_VALUE;
+        int y_min = Integer.MAX_VALUE;
+        int y_max = Integer.MIN_VALUE;
+        for (PixelPos location : poleLocations) {
+            if (location.x > x_max) {
+                x_max = (int) location.x;
+            }
+            if (location.x < x_min) {
+                x_min = (int) location.x;
+            }
+            if (location.y > y_max) {
+                y_max = (int) location.y;
+            }
+            if (location.y < y_min) {
+                y_min = (int) location.y;
+            }
+        }
+
+        // ensure that we're inside the product and if pole is closer to border that MIN_DIMENSION -> etend to border
+        // this avoids too-small segments
+        x_min = x_min - 1;
+        if (x_min <= MIN_DIMENSION) {
+            x_min = 0;
+        }
+
+        x_max = x_max + 1;
+        if (x_max > rasterWidth - 1 - MIN_DIMENSION) {
+            x_max = rasterWidth - 1;
+        }
+
+        y_min = y_min - 1;
+        if (y_min < MIN_DIMENSION) {
+            y_min = 0;
+        }
+
+        y_max = y_max + 1;
+        if (y_max > rasterHeight - 1 - MIN_DIMENSION) {
+            y_max = rasterHeight - 1;
+        }
+
+        return new Segment(x_min, x_max, y_min, y_max);
+    }
+
+    private ArrayList<Segment> calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
+        // calculate border geometry
+        segment.calculateGeoPoints(this);
+        //segment.printWkt();
+
+        final SegmentCoverage segmentCoverage = hasGeoCoverage(segment);
+        if (segmentCoverage == INSIDE) {
+            // all test-points are inside the lon/lat segment
+            segmentList.add(segment);
+            // @todo 1 tb/tb debug code - remove this 2021-03-11
+//            segment.printWkt();
+        } else {
+//            segment.printBounds(this);
+//            segment.printWktBoundingRect();
+
+            Segment[] splits = new Segment[0];
+            if (segment.containsAntiMeridian) {
+                splits = splitAtAntiMeridian(segment, segmentCoverage);
+            }
+
+            if (splits.length == 0) {
+                splits = splitAtOutsidePoint(segment, segmentCoverage);
+            }
+
+            if (splits.length == 0) {
+                // cannot divide further
+                segmentList.add(segment);
+            } else if (splits.length == 1) {
+                // cannot divide further
+                segmentList.add(splits[0]);
+            } else {
+                calculateSegmentation(splits[0], segmentList);
+                calculateSegmentation(splits[1], segmentList);
+            }
+        }
+
+        return segmentList;
+    }
+
+    private Segment[] splitAtOutsidePoint(Segment segment, SegmentCoverage segmentCoverage) {
+        if (segmentCoverage == ACROSS) {
+            final GeoPos geoPos = new GeoPos();
+            // check left
+            int y_l = Integer.MIN_VALUE;
+
+            for (int y = segment.y_min + 1; y < segment.y_max; y++) {
+                getGeoPos(segment.x_min, y, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    y_l = y;
+                    break;
+                }
+            }
+            // check right
+            int y_r = Integer.MIN_VALUE;
+            for (int y = segment.y_min + 1; y < segment.y_max; y++) {
+                getGeoPos(segment.x_max, y, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    y_r = y;
+                    break;
+                }
+            }
+            if (y_l < 0 && y_r < 0) {
+                // no suitable split-points found - as a last idea, we split at half
+                return segment.split(true);
+            }
+            final int center = segment.y_min + segment.getWidth() / 2;
+            final int delta_l = Math.abs(center - y_l);
+            final int delta_r = Math.abs(center - y_r);
+            if (delta_l < delta_r) {
+                return segment.split_y(y_l);
+            } else {
+                return segment.split_y(y_r);
+            }
+        } else {
+            // split at x_out
+            throw new IllegalStateException("not implemented");
+        }
+    }
+
+    private Segment[] splitAtAntiMeridian(Segment segment, SegmentCoverage segmentCoverage) {
+        if (segmentCoverage == ACROSS) {
+            // find y with anti-meridian jump
+            final GeoPos geoPos = new GeoPos();
+            getGeoPos(segment.x_min, segment.y_min, geoPos);
+            double lon_l = geoPos.lon;
+
+            getGeoPos(segment.x_max, segment.y_min, geoPos);
+            double lon_r = geoPos.lon;
+
+            int y_l = Integer.MIN_VALUE;
+            int y_r = Integer.MIN_VALUE;
+            for (int y = segment.y_min + 1; y <= segment.y_max; y++) {
+                getGeoPos(segment.x_min, y, geoPos);
+                double delta = Math.abs(lon_l - geoPos.lon);
+                if (delta > 270) {
+                    y_l = y;
+                }
+                lon_l = geoPos.lon;
+
+                getGeoPos(segment.x_max, y, geoPos);
+                delta = Math.abs(lon_r - geoPos.lon);
+                lon_r = geoPos.lon;
+                if (delta > 270) {
+                    y_r = y;
+                }
+            }
+
+            if (y_l < 0 && y_r < 0) {
+                // antimeridian not passing through segment in a way that enables across-swath splitting
+                return new Segment[0];
+            }
+
+            final int center = segment.y_min + segment.getWidth() / 2;
+            final int delta_l = Math.abs(center - y_l);
+            final int delta_r = Math.abs(center - y_r);
+            if (delta_l < delta_r) {
+                return segment.split_y(y_l);
+            } else {
+                return segment.split_y(y_r);
+            }
+        } else {
+            // split at x_antimeridian
+            throw new IllegalStateException("not implemented");
+        }
+    }
+
+    private SegmentCoverage hasGeoCoverage(Segment segment) {
+        final GeoPos geoPos = new GeoPos();
+        final int xOffset = segment.getWidth() / 2;
+        final int yOffset = segment.getHeight() / 2;
+
+        getGeoPos(segment.x_min + xOffset, segment.y_min, geoPos);
+        final boolean b1 = segment.isInside(geoPos.lon, geoPos.lat);
+        // printPointWkt(geoPos);
+
+        getGeoPos(segment.x_max, segment.y_min + yOffset, geoPos);
+        final boolean b2 = segment.isInside(geoPos.lon, geoPos.lat);
+        //printPointWkt(geoPos);
+
+        getGeoPos(segment.x_min + xOffset, segment.y_max, geoPos);
+        final boolean b3 = segment.isInside(geoPos.lon, geoPos.lat);
+        //printPointWkt(geoPos);
+
+        getGeoPos(segment.x_min, segment.y_min + yOffset, geoPos);
+        final boolean b4 = segment.isInside(geoPos.lon, geoPos.lat);
+        //printPointWkt(geoPos);
+
+        if (!(b2 && b4)) {
+            return ACROSS;
+        }
+
+        if (!(b1 && b3)) {
+            return ALONG;
+        }
+
+        return INSIDE;
+    }
+
+    private void printPointWkt(GeoPos geoPos) {
+        System.out.println("POINT( " + geoPos.lon + " " + geoPos.lat + ")");
+    }
+
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
         if (pixelPos == null) {
             pixelPos = new PixelPos();
         }
         pixelPos.setInvalid();
-
-        final Result result = new Result();
-        boolean pixelFound = quadTreeSearch(0,
-                                            geoPos.lat, geoPos.lon,
-                                            0, 0,
-                                            rasterWidth, rasterHeight,
-                                            result);
-
-        if (pixelFound) {
-            final GeoPos resultGeoPos = new GeoPos();
-            getGeoPos(result.x, result.y, resultGeoPos);
-            final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
-            final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
-
-            final boolean smallerThanEpsilon;
-            if (absLonDist > absLatDist) {
-                final double lat = geoPos.lat;
-                final int idx = (int) Math.floor(Math.abs(lat * 10));
-                smallerThanEpsilon = absLonDist < epsilonLon[idx];
-            } else {
-                smallerThanEpsilon = absLatDist < epsilon;
-            }
-
-            if (smallerThanEpsilon) {
-                if (fractionalAccuracy) {
-                    final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
-                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
-                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
-                } else {
-                    pixelPos.setLocation(result.x + offsetX, result.y + offsetY);
+// --------------------------------------------------------------------------------------------------
+        final ArrayList<Result> results = new ArrayList<>();
+        for (final Segment segment : segmentList) {
+            if (segment.isInside(geoPos.lon, geoPos.lat)) {
+                final Result result = new Result();
+                final boolean found = segmentSearch(geoPos.lon, geoPos.lat, segment, result);
+                if (found) {
+                    results.add(result);
                 }
             }
         }
+
+        if (results.size() > 0) {
+            Result minDeltaResult = null;
+            double minDelta = Double.MAX_VALUE;
+            for (Result result : results) {
+                final GeoPos resultGeoPos = new GeoPos();
+                getGeoPos(result.x, result.y, resultGeoPos);
+                final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
+                final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
+                final double delta = absLonDist * absLonDist + absLatDist * absLatDist;
+                if (delta < minDelta) {
+                    minDelta = delta;
+                    minDeltaResult = result;
+                }
+            }
+
+            if (minDelta < epsilon && minDeltaResult != null) {
+                pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
+            }
+        }
+// --------------------------------------------------------------------------------------------------
+//        final Result result = new Result();
+//        boolean pixelFound = quadTreeSearch(0,
+//                                            geoPos.lat, geoPos.lon,
+//                                            0, 0,
+//                                            rasterWidth, rasterHeight,
+//                                            result);
+//
+//        if (pixelFound) {
+//            final GeoPos resultGeoPos = new GeoPos();
+//            getGeoPos(result.x, result.y, resultGeoPos);
+//            final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
+//            final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
+//
+//            final boolean smallerThanEpsilon;
+//            if (absLonDist > absLatDist) {
+//                final double lat = geoPos.lat;
+//                final int idx = (int) Math.floor(Math.abs(lat * 10));
+//                smallerThanEpsilon = absLonDist < epsilonLon[idx];
+//            } else {
+//                smallerThanEpsilon = absLatDist < epsilon;
+//            }
+//
+//            if (smallerThanEpsilon) {
+//                if (fractionalAccuracy) {
+//                    final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
+//                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
+//                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
+//                } else {
+//                    pixelPos.setLocation(result.x + offsetX, result.y + offsetY);
+//                }
+//            }
+//        }
+// --------------------------------------------------------------------------------------------------
+
 
         return pixelPos;
     }
@@ -181,19 +505,11 @@ public class PixelQuadTreeInverse implements InverseCoding {
         offsetX = geoRaster.getOffsetX();
         offsetY = geoRaster.getOffsetY();
 
+        // @todo 1 tb/tb this might be not necessary anymore 2021-03-09
         lonRange = Range.computeRangeDouble(longitudes, null);
         latRange = Range.computeRangeDouble(latitudes, null);
-    }
 
-    static double[] createEpsilonLongitude(double epsilon) {
-        final double[] d = new double[901];
-        for (int i = 0; i < d.length; i++) {
-            final double ang = i * 0.1;
-            final double rad = Math.toRadians(ang);
-            final double multiplier = 1 / Math.cos(rad);
-            d[i] = epsilon * multiplier;
-        }
-        return d;
+        segmentList = calculateSegmentation(rasterWidth, rasterHeight, poleLocations);
     }
 
     @Override
@@ -232,11 +548,13 @@ public class PixelQuadTreeInverse implements InverseCoding {
         clone.offsetX = offsetX;
         clone.offsetY = offsetY;
 
+        // @todo 1 tb/tb clone segmentation 2021-03-09
+
         return clone;
     }
 
     // package access for testing only tb 2019-12-16
-    void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
+    public void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
         final int index = pixelY * rasterWidth + pixelX;
 
         geoPos.setLocation(latitudes[index], longitudes[index]);
@@ -246,6 +564,14 @@ public class PixelQuadTreeInverse implements InverseCoding {
     double getEpsilon(double resolutionInKm) {
         final double angle = 2.0 * Math.asin((resolutionInKm * 1000.0) / (2 * RsMathUtils.MEAN_EARTH_RADIUS));
         return TO_DEG * angle * 2.0;
+    }
+
+    private boolean segmentSearch(final double lon,
+                                  final double lat,
+                                  Segment segment,
+                                  final Result result) {
+
+        return quadTreeSearch(0, lat, lon, segment.x_min, segment.y_min, segment.getWidth(), segment.getHeight(), result);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -259,6 +585,8 @@ public class PixelQuadTreeInverse implements InverseCoding {
         if (w < 2 || h < 2) {
             return false;
         }
+
+        // @todo 1 tb/tb detect enclosing segments 2021-03-09
 
         final int x_1 = x;
         final int x_2 = x_1 + w - 1;
@@ -280,6 +608,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
         double lat_3;
         double lon_3;
 
+        // @todo 1 tb/tb remove level 0 condition 2021-03-09
         if (depth == 0) {
             lonMin = lonRange.getMin();
             lonMax = lonRange.getMax();
