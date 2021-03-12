@@ -101,22 +101,22 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         );
 
         assertThat(jsonOut(jsonElements)).contains(
-                "\"pSt\" : \"a string value\",",
-                "\"pBD1\" : 111111111111111111111111111111.111111,",
-                "\"pBD2\" : 111111111111111111111118888888.881111,",
-                "\"pDo1\" : 1.7976931348623157E308,",
-                "\"pDo2\" : 4.9E-324,",
-                "\"pDo3\" : \"NaN\",",
-                "\"pDo4\" : \"-Infinity\",",
-                "\"pDo5\" : \"Infinity\",",
-                "\"pFl\" : 3.4028235E38,",
-                "\"pLo\" : 9223372036854775807,",
-                "\"pIn\" : 2147483647,",
-                "\"pSh\" : 32767,",
-                "\"pBy1\" : 127,",
-                "\"pBy2\" : null,",
-                "\"pBool1\" : true,",
-                "\"pBool2\" : false,",
+                "\"pSt\" : \"a string value\"",
+                "\"pBD1\" : 111111111111111111111111111111.111111",
+                "\"pBD2\" : 111111111111111111111118888888.881111",
+                "\"pDo1\" : 1.7976931348623157E308",
+                "\"pDo2\" : 4.9E-324",
+                "\"pDo3\" : \"NaN\"",
+                "\"pDo4\" : \"-Infinity\"",
+                "\"pDo5\" : \"Infinity\"",
+                "\"pFl\" : 3.4028235E38",
+                "\"pLo\" : 9223372036854775807",
+                "\"pIn\" : 2147483647",
+                "\"pSh\" : 32767",
+                "\"pBy1\" : 127",
+                "\"pBy2\" : null",
+                "\"pBool1\" : true",
+                "\"pBool2\" : false",
                 "\"pBool3\" : null"
         );
 
@@ -124,15 +124,15 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         assertThat(itemsFromJson.size()).isEqualTo(items1.size());
 
         final List<TrippleForTest> tripples = Arrays.asList(
-                new TrippleForTest("pSt", 1, (GetterFactory<ValueItem, String>) item -> item::getValueString),
-                new TrippleForTest("pBD", 2, (GetterFactory<ValueItem, String>) item -> item::getValueString),
-                new TrippleForTest("pDo", 5, (GetterFactory<ValueItem, Double>) item -> item::getValueDouble),
-                new TrippleForTest("pFl", 1, (GetterFactory<ValueItem, Float>) item -> item::getValueFloat),
-                new TrippleForTest("pLo", 1, (GetterFactory<ValueItem, Long>) item -> item::getValueLong),
-                new TrippleForTest("pIn", 1, (GetterFactory<ValueItem, Integer>) item -> item::getValueInt),
-                new TrippleForTest("pSh", 1, (GetterFactory<ValueItem, Short>) item -> item::getValueShort),
-                new TrippleForTest("pBy", 2, (GetterFactory<ValueItem, Byte>) item -> item::getValueByte),
-                new TrippleForTest("pBool", 3, (GetterFactory<ValueItem, Boolean>) item -> item::getValueBoolean)
+                new TrippleForTest<>("pSt", 1, (GetterFactory<ValueItem<?>, String>) item -> item::getValueString),
+                new TrippleForTest<>("pBD", 2, (GetterFactory<ValueItem<?>, String>) item -> item::getValueString),
+                new TrippleForTest<>("pDo", 5, (GetterFactory<ValueItem<?>, Double>) item -> item::getValueDouble),
+                new TrippleForTest<>("pFl", 1, (GetterFactory<ValueItem<?>, Float>) item -> item::getValueFloat),
+                new TrippleForTest<>("pLo", 1, (GetterFactory<ValueItem<?>, Long>) item -> item::getValueLong),
+                new TrippleForTest<>("pIn", 1, (GetterFactory<ValueItem<?>, Integer>) item -> item::getValueInt),
+                new TrippleForTest<>("pSh", 1, (GetterFactory<ValueItem<?>, Short>) item -> item::getValueShort),
+                new TrippleForTest<>("pBy", 2, (GetterFactory<ValueItem<?>, Byte>) item -> item::getValueByte),
+                new TrippleForTest<>("pBool", 3, (GetterFactory<ValueItem<?>, Boolean>) item -> item::getValueBoolean)
         );
 
         final Map<String, Item> map1 = getPropertyMap(items1);
@@ -247,16 +247,14 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     public void testContainer() throws JsonProcessingException {
         //preparation
         final Container c1 = new Container("an invalid name");
-        c1.getProperties().addAll(Arrays.asList(
-                new Property<>("some", "name"),
-                new Property<>("int", 42)
-        ));
+        c1.add(new Property<>("some", "name"));
+        c1.add(new Property<>("int", 42));
         final Container c2 = new Container("c2");
         final Container c3 = new Container("c3");
-        c3.getAttributes().add(new Attribute("name", "att"));
-        c3.getProperties().add(new Property("propC3", new Integer[]{16, 176, 42, 8}));
-        c2.getContainer().add(c3);
-        c2.getProperties().add(new Property("propC2", 3230523.41331));
+        c3.add(new Attribute<>("name", "att"));
+        c3.add(new Property<>("propC3", new Integer[]{16, 176, 42, 8}));
+        c2.add(c3);
+        c2.add(new Property<>("propC2", 3230523.41331));
         final List<Item> items1 = Arrays.asList(c1, c2);
 
         //execution
@@ -290,20 +288,21 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         final String jsonOut1 = jsonOut(jsonElems1);
         final String jsonOut2 = jsonOut(jsonElems2);
         assertThat(jsonOut1).isEqualToIgnoringNewLines(
-                "{" +
-                "  \"root\" : {" +
-                "    \"an invalid name\" : {" +
-                "      \"some\" : \"name\"," +
-                "      \"int\" : 42" +
-                "    }," +
-                "    \"c2\" : {" +
-                "      \"propC2\" : 3230523.41331," +
-                "      \"c3\" : {" +
-                "        \"_$ATT$_name\" : \"att\"," +
-                "        \"propC3\" : [ 16, 176, 42, 8 ]" +
-                "      }" +
-                "    }" +
-                "  }" +
+                "{\n" +
+                "  \"root\" : [ {\n" +
+                "    \"an invalid name\" : {\n" + // this name is invalid in XML case only
+                "      \"some\" : \"name\",\n" +
+                "      \"int\" : 42\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"c2\" : {\n" +
+                "      \"propC2\" : 3230523.41331,\n" +
+                "      \"c3\" : {\n" +
+                "        \"_$ATT$_name\" : \"att\",\n" +
+                "        \"propC3\" : [ 16, 176, 42, 8 ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  } ]\n" +
                 "}"
         );
         assertThat(jsonOut2).isEqualTo(jsonOut1);
@@ -337,13 +336,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
 
     private String jsonOut(List<Map<String, Object>> objects) throws JsonProcessingException {
         final Map root = new LinkedHashMap();
-        final LinkedHashMap<String, Object> mlElements = new LinkedHashMap<>();
-        root.put("root", mlElements);
-        for (Map<String, Object> mlElement : objects) {
-            final Map.Entry<String, Object> entry = mlElement.entrySet().iterator().next();
-            mlElements.put(entry.getKey(), entry.getValue());
-        }
-
+        root.put("root", objects);
         PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
                 .withArrayIndenter(DefaultPrettyPrinter.FixedSpaceIndenter.instance);
         final ObjectWriter writer = new ObjectMapper().writer(prettyPrinter);

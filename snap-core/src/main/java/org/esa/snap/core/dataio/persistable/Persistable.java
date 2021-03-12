@@ -22,7 +22,7 @@ import org.esa.snap.core.datamodel.Product;
 
 import java.awt.Dimension;
 
-public abstract class Persistable<ML, O> {
+public abstract class Persistable<ML, T> {
 
     protected final MarkupLanguageSupport<ML> languageSupport;
 
@@ -30,17 +30,17 @@ public abstract class Persistable<ML, O> {
         this.languageSupport = languageSupport;
     }
 
-    public final ML encode(O objects){
+    public final ML encode(T objects){
         final Item item = encodeObject(objects);
         return languageSupport.toLanguageObject(item);
     }
 
-    protected abstract Item encodeObject(O instances);
+    protected abstract Item encodeObject(T instances);
 
-    public final O decode(ML languageElement, Product product, Dimension regionRasterSize){
+    public final T decode(ML languageElement, Product product, Dimension regionRasterSize){
         final Item item = languageSupport.convertToItem(languageElement);
         return decodeItem(item, product, regionRasterSize);
     }
 
-    protected abstract O decodeItem(Item item, Product product, Dimension regionRasterSize);
+    protected abstract T decodeItem(Item item, Product product, Dimension regionRasterSize);
 }

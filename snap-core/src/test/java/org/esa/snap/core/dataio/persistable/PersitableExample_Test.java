@@ -86,13 +86,13 @@ public class PersitableExample_Test {
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
         if (maskGroup.getNodeCount() > 0) {
             // fetch a markup language dependent persistable for Masks from registry
-            Persistable<Element, Mask> p = registry.createPersistableFor(Mask.class, languageSupport);
+            Persistable<Element, Mask> persistable = registry.createPersistableFor(Mask.class, languageSupport);
             // ensure there exist a registered persistable for masks
-            if (p != null) {
+            if (persistable != null) {
                 final Mask[] masks = maskGroup.toArray(new Mask[0]);
                 // execution ... let the persistable create the language dependent elements
                 for (Mask mask : masks) {
-                    root.addContent(p.encode(mask));
+                    root.addContent(persistable.encode(mask));
                 }
             }
         }
@@ -201,13 +201,13 @@ public class PersitableExample_Test {
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
         if (maskGroup.getNodeCount() > 0) {
             // fetch a markup language dependent persistable for Masks from registry
-            Persistable<Map<String, Object>, Mask> p = registry.createPersistableFor(Mask.class, languageSupport);
+            Persistable<Map<String, Object>, Mask> persistable = registry.createPersistableFor(Mask.class, languageSupport);
             // ensure there exist a registered persistable for masks
-            if (p != null) {
+            if (persistable != null) {
                 final Mask[] masks = maskGroup.toArray(new Mask[0]);
                 // execution ... let the persistable create the language dependent elements
                 for (Mask mask : masks) {
-                    mlEntryList.add(p.encode(mask));
+                    mlEntryList.add(persistable.encode(mask));
                 }
             }
         }
@@ -382,16 +382,15 @@ public class PersitableExample_Test {
 
         @Override
         protected Item encodeObject(Mask mask) {
-            final Container cont = new Container("mask");
-            final List<Property> props = cont.getProperties();
-            props.add(new Property<>("name", mask.getName()));
-            props.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
-            props.add(new Property<>("description", mask.getDescription()));
+            final Container container = new Container("mask");
+            container.add(new Property<>("name", mask.getName()));
+            container.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
+            container.add(new Property<>("description", mask.getDescription()));
             final Color cl = mask.getImageColor();
             final int[] rgb = new int[]{cl.getRed(), cl.getGreen(), cl.getBlue()};
-            props.add(new Property<>("color_rgb", rgb));
-            props.add(new Property<>("image_transparency", mask.getImageTransparency()));
-            return cont;
+            container.add(new Property<>("color_rgb", rgb));
+            container.add(new Property<>("image_transparency", mask.getImageTransparency()));
+            return container;
         }
     }
 }

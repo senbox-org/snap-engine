@@ -18,23 +18,38 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 public class Property<E> extends ValueItem<E> implements AttributeContainer {
-    private final ArrayList<Attribute> attrs = new ArrayList<>();
+
+    private final LinkedHashMap<String, Attribute<?>> attributes = new LinkedHashMap<>();
 
     public Property(String name, E value) {
         super(name, value);
     }
 
     @Override
-    public List<Attribute> getAttributes() {
-        return attrs;
+    public boolean isProperty() {
+        return true;
     }
 
     @Override
-    public boolean isProperty() {
-        return true;
+    public Attribute<?>[] getAttributes() {
+        return attributes.values().toArray(new Attribute[0]);
+    }
+
+    public Attribute<?> getAttribute(String name) {
+        return attributes.get(name);
+    }
+
+    public void add(Attribute<?> attribute) {
+        if (attribute == null) {
+            return;
+        }
+        final String name = attribute.getName();
+        if (attributes.containsKey(name)) {
+            throw new IllegalArgumentException("Already contains an attribute with the name '" + name + "'.");
+        }
+        attributes.put(name, attribute);
     }
 }

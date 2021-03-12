@@ -18,12 +18,10 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import java.util.List;
+public interface MarkupLanguageSupport<T> {
 
-public interface MarkupLanguageSupport<E> {
+    T toLanguageObject(Item item);
 
-    E toLanguageObject(Item item);
-
-    Item convertToItem(E languageObject);
+    Item convertToItem(T languageObject);
 
 }

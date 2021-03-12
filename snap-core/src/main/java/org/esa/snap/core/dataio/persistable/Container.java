@@ -18,14 +18,13 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 public class Container extends Item implements AttributeContainer {
 
-    private final ArrayList<Attribute> attributes = new ArrayList<>();
-    private final ArrayList<Property> properties = new ArrayList<>();
-    private final ArrayList<Container> containers = new ArrayList<>();
+    private final LinkedHashMap<String, Attribute<?>> attributes = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Property<?>> properties = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Container> containers = new LinkedHashMap<>();
 
     public Container(String name) {
         super(name);
@@ -36,41 +35,60 @@ public class Container extends Item implements AttributeContainer {
         return true;
     }
 
-    public List<Attribute> getAttributes() {
-        return attributes;
+    public Attribute<?>[] getAttributes() {
+        return attributes.values().toArray(new Attribute[0]);
     }
 
-    public Attribute getAttribute(String name) {
-        for (Attribute attr : attributes) {
-            if (attr.getName().equals(name)) {
-                return attr;
-            }
+    public Attribute<?> getAttribute(String name) {
+        return attributes.get(name);
+    }
+
+    public void add(Attribute<?> attribute) {
+        if (attribute == null) {
+            return;
         }
-        return null;
-    }
-
-    public List<Property> getProperties() {
-        return properties;
-    }
-
-    public Property getProperty(String name) {
-        for (Property prop : properties) {
-            if (prop.getName().equals(name)) {
-                return prop;
-            }
+        final String name = attribute.getName();
+        if (attributes.containsKey(name)) {
+            throw new IllegalArgumentException("Already contains an attribute with the name '" + name + ".");
         }
-        return null;
+        attributes.put(name, attribute);
     }
 
-    public List<Container> getContainer() {
-        return containers;
+    public Property<?>[] getProperties() {
+        return properties.values().toArray(new Property[0]);
     }
+
+    public Property<?> getProperty(String name) {
+        return properties.get(name);
+    }
+
+    public void add(Property<?> property) {
+        if (property == null) {
+            return;
+        }
+        final String name = property.getName();
+        if (properties.containsKey(name)) {
+            throw new IllegalArgumentException("Already contains a property with the name '" + name + "'.");
+        }
+        properties.put(name, property);
+    }
+
+    public Container[] getContainers() {
+        return containers.values().toArray(new Container[0]);
+    }
+
     public Container getContainer(String name) {
-        for (Container prop : containers) {
-            if (prop.getName().equals(name)) {
-                return prop;
-            }
+        return containers.get(name);
+    }
+
+    public void add(Container container) {
+        if (container == null) {
+            return;
         }
-        return null;
+        final String name = container.getName();
+        if (containers.containsKey(name)) {
+            throw new IllegalArgumentException("Already contains a container with the name '" + name + "'.");
+        }
+        containers.put(name, container);
     }
 }

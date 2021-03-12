@@ -18,8 +18,7 @@
 
 package org.esa.snap.core.dataio.persistable;
 
-import java.util.List;
-
 public interface AttributeContainer {
-    List<Attribute> getAttributes();
+    Attribute<?>[] getAttributes();
+    void add(Attribute<?> attribute);
 }

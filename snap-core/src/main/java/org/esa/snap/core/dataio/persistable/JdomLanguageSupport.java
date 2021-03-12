@@ -28,7 +28,7 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
     @Override
     public Element toLanguageObject(Item item) {
         if (item.isProperty()) {
-            final Property p = (Property) item;
+            final Property<?> p = (Property<?>) item;
             return createPropertyElem(p);
         } else if (item.isContainer()) {
             final Container c = (Container) item;
@@ -46,10 +46,10 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
         return createContainer(languageObject);
     }
 
-    private Property createProperty(Element element) {
+    private Property<?> createProperty(Element element) {
         final String name = fetchNameFrom(element);
         final String value = element.getValue();
-        final Property item;
+        final Property<?> item;
         final Property<String> property = new Property<>(name, value);
         addAttributes(property, element.getAttributes());
         item = property;
@@ -67,9 +67,9 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
     private void addChildren(Container container, List<Element> children) {
         for (Element child : children) {
             if (child.getChildren().size() == 0) {
-                container.getProperties().add(createProperty(child));
+                container.add(createProperty(child));
             } else {
-                container.getContainer().add(createContainer(child));
+                container.add(createContainer(child));
             }
         }
     }
@@ -80,20 +80,20 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
             if (ATTR___THE_UNCHANGED_NAME.equals(name)) {
                 continue;
             }
-            final Attribute attribute = new Attribute(name, jdomA.getValue());
-            attCon.getAttributes().add(attribute);
+            final Attribute<?> attribute = new Attribute<>(name, jdomA.getValue());
+            attCon.add(attribute);
         }
     }
 
     private Element createContainerElem(Container c) {
         final Element element = createElementWitValidName(c.getName());
         addJdomAttributes(element, c.getAttributes());
-        addChildElems(element, c.getContainer());
+        addChildElems(element, c.getContainers());
         addPropertieyElems(element, c.getProperties());
         return element;
     }
 
-    private Element createPropertyElem(Property p) {
+    private Element createPropertyElem(Property<?> p) {
         final Element element = createElementWitValidName(p.getName());
         final Object value = p.getValue();
         if (value == null || !value.getClass().isArray()) {
@@ -109,20 +109,20 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
         return element;
     }
 
-    private void addJdomAttributes(Element element, List<Attribute> attributes) {
-        for (Attribute attribute : attributes) {
+    private void addJdomAttributes(Element element, Attribute<?>[] attributes) {
+        for (Attribute<?> attribute : attributes) {
             element.setAttribute(attribute.getName(), attribute.getValueString());
         }
     }
 
-    private void addPropertieyElems(Element element, List<Property> properties) {
-        for (Property property : properties) {
+    private void addPropertieyElems(Element element, Property<?>[] properties) {
+        for (Property<?> property : properties) {
             element.addContent(createPropertyElem(property));
         }
     }
 
-    private void addChildElems(Element element, List<Container> cList) {
-        for (Container container : cList) {
+    private void addChildElems(Element element, Container[] containers) {
+        for (Container container : containers) {
             element.addContent(createContainerElem(container));
         }
     }
@@ -148,9 +148,9 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
 
 
     static String ensureValidName(String name) {
-        if (name != null) {
-            return name.trim().replace(" ", "_");
+        if (name == null) {
+            return null;
         }
-        return name;
+        return name.trim().replace(" ", "_");
     }
 }
