@@ -60,6 +60,7 @@ import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
@@ -1735,10 +1736,12 @@ public class DimapProductHelpers {
             } else if (isFilterBand(element)) {
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
                 if (persistable != null) {
-                    band = (Band) persistable.createObjectFromXml(element, product, regionRasterSize);
+                    Band origBand = (Band) persistable.createObjectFromXml(element, product, null);
                     // currently it can be null if the operator of filtered band is of type
                     // GeneralFilterBand.STDDEV or GeneralFilterBand.RMS
-                    if (band != null) {
+                    if (origBand != null) {
+                        band = new Band(origBand.getName(), origBand.getDataType(), bandSize.width, bandSize.height);
+                        ProductUtils.copyRasterDataNodeProperties(origBand, band);
                         product.addBand(band);
                     }
                 }
