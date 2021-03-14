@@ -74,11 +74,4 @@ public class Copernicus30mFile extends ElevationFile {
             return false;
         }
     }
-
-
-
-
-
-
-
 }

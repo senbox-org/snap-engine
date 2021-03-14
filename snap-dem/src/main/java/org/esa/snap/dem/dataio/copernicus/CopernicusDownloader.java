@@ -1,11 +1,5 @@
 package org.esa.snap.dem.dataio.copernicus;
 
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
-
 import java.io.*;
 import java.net.URL;
 
@@ -17,7 +11,7 @@ public class CopernicusDownloader {
     private final File installDir;
 
 
-    public CopernicusDownloader(File installDir) throws Exception {
+    public CopernicusDownloader(File installDir) {
         this.installDir = installDir;
     }
 
@@ -74,10 +68,6 @@ public class CopernicusDownloader {
             System.out.println("Downloaded file");
         }catch (Exception e){
             throw new FileNotFoundException("Tile does not exist");
-
-
-
-
         }
         return true;
     }

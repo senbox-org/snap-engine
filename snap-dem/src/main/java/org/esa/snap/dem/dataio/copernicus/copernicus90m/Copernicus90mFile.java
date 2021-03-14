@@ -14,7 +14,7 @@ public class Copernicus90mFile extends ElevationFile {
 
     private final Copernicus90mElevationModel demModel;
 
-    public Copernicus90mFile(Copernicus90mElevationModel copernicus90mElevationModel, File localFile, ProductReader reader) throws IOException {
+    public Copernicus90mFile(Copernicus90mElevationModel copernicus90mElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
         demModel = copernicus90mElevationModel;
     }
