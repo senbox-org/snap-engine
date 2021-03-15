@@ -56,7 +56,6 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.vfs.*</publicPackage>
-                        <publicPackage>org.jetbrains.annotations.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
