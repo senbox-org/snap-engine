@@ -92,11 +92,11 @@
             <artifactId>snap-engine-utilities</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-product-library</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-product-library-v2</artifactId>
