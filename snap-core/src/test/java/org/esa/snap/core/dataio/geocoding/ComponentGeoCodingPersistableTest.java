@@ -6,10 +6,29 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_FORWARD_CODING_KEY;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CHECKS;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CRS;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_INVERSE_CODING_KEY;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LAT_VARIABLE_NAME;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LON_VARIABLE_NAME;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_X;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_Y;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_RASTER_RESOLUTION_KM;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_X;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_Y;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithTiePoints;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThat;
 
 public class ComponentGeoCodingPersistableTest {
 
@@ -77,7 +96,7 @@ public class ComponentGeoCodingPersistableTest {
         product.setSceneGeoCoding(null);
         assertThat(product.getSceneGeoCoding(), is(nullValue()));
 
-        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product, null);
+        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product);
 
         assertThat(objectFromXml, is(instanceOf(ComponentGeoCoding.class)));
         final ComponentGeoCoding newGeoCoding = (ComponentGeoCoding) objectFromXml;
@@ -152,7 +171,7 @@ public class ComponentGeoCodingPersistableTest {
         product.setSceneGeoCoding(null);
         assertThat(product.getSceneGeoCoding(), is(nullValue()));
 
-        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product, null);
+        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product);
 
         assertThat(objectFromXml, is(instanceOf(ComponentGeoCoding.class)));
         final ComponentGeoCoding newGeoCoding = (ComponentGeoCoding) objectFromXml;

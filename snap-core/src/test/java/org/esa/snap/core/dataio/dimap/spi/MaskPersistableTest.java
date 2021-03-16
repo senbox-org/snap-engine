@@ -29,8 +29,22 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
-import static org.junit.Assert.*;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_ALPHA;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_BLUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_GREEN;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_RED;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_TYPE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_COLOR;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_DESCRIPTION;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK_RASTER_HEIGHT;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK_RASTER_WIDTH;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_NAME;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_TRANSPARENCY;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class MaskPersistableTest {
 
@@ -85,7 +99,7 @@ public class MaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("TestMask.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
 
         assertNotNull(maskFromXml);
         assertEquals(TestImageType.class, maskFromXml.getImageType().getClass());
@@ -103,7 +117,7 @@ public class MaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("TestMask_WithSize.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
 
         assertNotNull(maskFromXml);
         assertEquals(TestImageType.class, maskFromXml.getImageType().getClass());

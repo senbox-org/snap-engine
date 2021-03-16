@@ -28,7 +28,6 @@ import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.awt.Dimension;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCodingPersistable implements DimapPersistable {
@@ -47,7 +46,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
     public static final String TAG_SUBSAMPLING_Y = "SubsamplingY";
 
     @Override
-    public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
+    public Object createObjectFromXml(Element element, Product product) {
         final String gcElemName = element.getName();
 
         final Element codingMain = element.getChild(TAG_COMPONENT_GEO_CODING);
