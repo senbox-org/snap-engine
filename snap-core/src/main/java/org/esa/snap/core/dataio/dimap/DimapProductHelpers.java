@@ -315,7 +315,7 @@ public class DimapProductHelpers {
                     } else {
                         final DimapPersistable persistable = DimapPersistence.getPersistable(geoPosElem);
                         if (persistable != null) {
-                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product, null);
+                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product);
                         }
                     }
                 }
@@ -1543,7 +1543,7 @@ public class DimapProductHelpers {
                 for (final Element child : children) {
                     final DimapPersistable persistable = DimapPersistence.getPersistable(child);
                     if (persistable != null) {
-                        final Object object = persistable.createObjectFromXml(child, product, null);
+                        final Object object = persistable.createObjectFromXml(child, product);
                         if (object instanceof Mask) {
                             product.getMaskGroup().add((Mask) object);
                         }
@@ -1736,7 +1736,7 @@ public class DimapProductHelpers {
             } else if (isFilterBand(element)) {
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
                 if (persistable != null) {
-                    Band origBand = (Band) persistable.createObjectFromXml(element, product, null);
+                    Band origBand = (Band) persistable.createObjectFromXml(element, product);
                     // currently it can be null if the operator of filtered band is of type
                     // GeneralFilterBand.STDDEV or GeneralFilterBand.RMS
                     if (origBand != null) {

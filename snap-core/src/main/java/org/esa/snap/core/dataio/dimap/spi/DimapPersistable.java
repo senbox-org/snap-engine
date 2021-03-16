@@ -27,9 +27,32 @@ import java.awt.Dimension;
  * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  *
  * @author Marco Peters
- * @version $Revision$ $Date$
  */
 public interface DimapPersistable {
-    Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize);
+
+    /**
+     * Creates an object for the provided {@link Product} based on the data provided by the {@link Element element}.
+     *
+     * @param element The XML element containing the information to create the object
+     * @param product The product the created object is intended for
+     * @return the created object
+     */
+    Object createObjectFromXml(Element element, Product product);
+
+    /**
+     * Converts the object into an XML element.
+     *
+     * @param object The object to convert
+     * @return The converted XML element
+     */
     Element createXmlFromObject(Object object);
+
+    /**
+     * @deprecated since SNAP 9.0.0, use {@link #createObjectFromXml(Element, Product)} instead
+     */
+    @Deprecated()
+    default Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
+        return createObjectFromXml(element, product);
+    }
+
 }
