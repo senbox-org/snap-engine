@@ -20,7 +20,7 @@ import org.esa.snap.core.datamodel.GeoPos;
 
 class Segment {
 
-    public static final int MIN_DIMENSION = 4;
+    static final int MIN_DIMENSION = 4;
 
     final int x_min;
     final int x_max;
@@ -104,7 +104,6 @@ class Segment {
         return segments;
     }
 
-    // @todo 1 tb/tb think about testability here 2021-03-09
     void calculateGeoPoints(GeoPosCalculator calculator) {
         final GeoPos ul = new GeoPos();
         final GeoPos ur = new GeoPos();
@@ -128,6 +127,7 @@ class Segment {
         }
     }
 
+    // @todo 2 tb/tb this is debug code, remove it 2021-03-16
     void printWktBoundingRect() {
         final StringBuilder builder = new StringBuilder();
         if (containsAntiMeridian) {
@@ -157,6 +157,7 @@ class Segment {
         System.out.println(builder.toString());
     }
 
+    // @todo 2 tb/tb this is debug code, remove it 2021-03-16
     void printBounds(GeoPosCalculator calc) {
         final StringBuilder builder = new StringBuilder();
         final int step = 30;
@@ -211,5 +212,16 @@ class Segment {
 
     int getHeight() {
         return y_max - y_min + 1;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    public Segment clone() {
+        final Segment clone = new Segment(x_min, x_max, y_min, y_max);
+        clone.lon_min = lon_min;
+        clone.lon_max = lon_max;
+        clone.lat_min = lat_min;
+        clone.lat_max = lat_max;
+        clone.containsAntiMeridian = containsAntiMeridian;
+        return clone;
     }
 }

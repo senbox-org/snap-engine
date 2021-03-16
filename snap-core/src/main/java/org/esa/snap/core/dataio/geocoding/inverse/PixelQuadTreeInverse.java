@@ -20,6 +20,7 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
 import org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -77,6 +78,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
     PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
         this.interpolator = interpolator;
+        segmentList = new ArrayList<>();
     }
 
     // package access for testing only tb 2019-12-16
@@ -129,6 +131,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
     }
 
     static double[] createEpsilonLongitude(double epsilon) {
+        // @todo 1 tb/tb rethink this algo 2021-03-16
         final double[] d = new double[901];
         for (int i = 0; i < d.length; i++) {
             final double ang = i * 0.1;
@@ -150,7 +153,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         } else {
             // run pre-segmentation to cut out pole
 
-            final Segment poleSegment = getPoleSegment(poleLocations);
+            final Segment poleSegment = getPoleSegment(poleLocations, rasterWidth, rasterHeight);
             //segmentList.add(poleSegment);
 
             // split
@@ -206,7 +209,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
     }
 
     // @todo 1 tb/tb make static and add tests 2021-03-11
-    private Segment getPoleSegment(PixelPos[] poleLocations) {
+    static Segment getPoleSegment(PixelPos[] poleLocations, int rasterWidth, int rasterHeight) {
         int x_min = Integer.MAX_VALUE;
         int x_max = Integer.MIN_VALUE;
         int y_min = Integer.MAX_VALUE;
@@ -226,7 +229,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
         }
 
-        // ensure that we're inside the product and if pole is closer to border that MIN_DIMENSION -> etend to border
+        // ensure that we're inside the product and if pole is closer to border that MIN_DIMENSION -> extend to border
         // this avoids too-small segments
         x_min = x_min - 1;
         if (x_min <= MIN_DIMENSION) {
@@ -260,8 +263,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         if (segmentCoverage == INSIDE) {
             // all test-points are inside the lon/lat segment
             segmentList.add(segment);
-            // @todo 1 tb/tb debug code - remove this 2021-03-11
-//            segment.printWkt();
         } else {
 //            segment.printBounds(this);
 //            segment.printWktBoundingRect();
@@ -447,7 +448,13 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
 
             if (minDelta < epsilon && minDeltaResult != null) {
-                pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
+                if (fractionalAccuracy) {
+                    final InterpolationContext context = InterpolationContext.extract(minDeltaResult.x, minDeltaResult.y, longitudes, latitudes, rasterWidth, rasterHeight);
+                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
+                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
+                } else {
+                    pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
+                }
             }
         }
 // --------------------------------------------------------------------------------------------------
@@ -548,7 +555,9 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         clone.offsetX = offsetX;
         clone.offsetY = offsetY;
 
-        // @todo 1 tb/tb clone segmentation 2021-03-09
+        for (Segment segment : segmentList) {
+            clone.segmentList.add(segment.clone());
+        }
 
         return clone;
     }
@@ -586,8 +595,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             return false;
         }
 
-        // @todo 1 tb/tb detect enclosing segments 2021-03-09
-
         final int x_1 = x;
         final int x_2 = x_1 + w - 1;
 
@@ -608,7 +615,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         double lat_3;
         double lon_3;
 
-        // @todo 1 tb/tb remove level 0 condition 2021-03-09
         if (depth == 0) {
             lonMin = lonRange.getMin();
             lonMax = lonRange.getMax();

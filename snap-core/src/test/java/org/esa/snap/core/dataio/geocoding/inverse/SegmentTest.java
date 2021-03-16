@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.dataio.geocoding.inverse;
 
+import org.esa.snap.core.datamodel.GeoPos;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -53,6 +54,20 @@ public class SegmentTest {
         assertEquals(10, lower.x_max);
         assertEquals(11, lower.y_min);
         assertEquals(20, lower.y_max);
+    }
+
+    @Test
+    public void testSplit_acrossTrack_segmentTooSmall() {
+        final Segment segment = new Segment(0, 3, 0, 20);
+
+        final Segment[] splits = segment.split(true);
+        assertEquals(1, splits.length);
+
+        final Segment split = splits[0];
+        assertEquals(0, split.x_min);
+        assertEquals(3, split.x_max);
+        assertEquals(0, split.y_min);
+        assertEquals(20, split.y_max);
     }
 
     @Test
@@ -296,5 +311,66 @@ public class SegmentTest {
         assertFalse(segment.isInside(-174.8, 13));
         assertFalse(segment.isInside(177, 10.926));
         assertFalse(segment.isInside(-178, 14.003));
+    }
+
+    @Test
+    public void testCalculateGeoPoints() {
+        final Segment segment = new Segment(20, 40, 280, 390);
+
+        segment.calculateGeoPoints(new MockCalculator());
+
+        assertEquals(0.2, segment.lon_min, 1e-8);
+        assertEquals(0.4, segment.lon_max, 1e-8);
+        assertEquals(2.8, segment.lat_min, 1e-8);
+        assertEquals(3.9, segment.lat_max, 1e-8);
+
+        assertFalse(segment.containsAntiMeridian);
+    }
+
+    @Test
+    public void testCalculateGeoPoints_antiMeridian() {
+        // this because the mock just divides rasterpositiony by 100 to create geolocations tb 2021-03-16
+        final Segment segment = new Segment(-17000, 17000, 280, 390);
+
+        segment.calculateGeoPoints(new MockCalculator());
+
+        assertEquals(-170.0, segment.lon_min, 1e-8);
+        assertEquals(170.0, segment.lon_max, 1e-8);
+        assertEquals(2.8, segment.lat_min, 1e-8);
+        assertEquals(3.9, segment.lat_max, 1e-8);
+
+        assertTrue(segment.containsAntiMeridian);
+    }
+
+    @Test
+    public void testClone() {
+        final Segment segment = new Segment(1, 2, 3, 4);
+        segment.lon_min = 5;
+        segment.lon_max = 6;
+        segment.lat_min = 7;
+        segment.lat_max = 8;
+        segment.containsAntiMeridian = true;
+
+        final Segment clone = segment.clone();
+
+        assertEquals(segment.x_min, clone.x_min);
+        assertEquals(segment.x_max, clone.x_max);
+        assertEquals(segment.y_min, clone.y_min);
+        assertEquals(segment.y_max, clone.y_max);
+
+        assertEquals(segment.lon_min, clone.lon_min, 1e-8);
+        assertEquals(segment.lon_max, clone.lon_max, 1e-8);
+        assertEquals(segment.lat_min, clone.lat_min, 1e-8);
+        assertEquals(segment.lat_max, clone.lat_max, 1e-8);
+
+        assertEquals(segment.containsAntiMeridian, clone.containsAntiMeridian);
+    }
+
+    private class MockCalculator implements GeoPosCalculator {
+        @Override
+        public void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
+            geoPos.lon = (double) pixelX / 100.0;
+            geoPos.lat = (double) pixelY / 100.0;
+        }
     }
 }

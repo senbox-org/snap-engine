@@ -275,7 +275,6 @@ public class PixelQuadTreeInverseTest {
         assertEquals(4.5, pixelPos.x, 1e-8);
         assertEquals(1.5, pixelPos.y, 1e-8);
 
-        // @todo 1 tb/tb this is suspicious! 2020-01-10
         pixelPos = inverse.getPixelPos(new GeoPos(-0.7698271, 18.5773755), null);
         assertEquals(3.01067027735143, pixelPos.x, 1e-8);
         assertEquals(1.584114535168603, pixelPos.y, 1e-8);
