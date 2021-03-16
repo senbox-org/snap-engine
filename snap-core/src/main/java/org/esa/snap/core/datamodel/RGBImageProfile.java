@@ -23,7 +23,6 @@ import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.core.util.math.Range;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,7 +99,6 @@ public class RGBImageProfile implements ConfigurableExtension {
     private String name;
     private boolean internal;
     private String[] rgbaExpressions;
-    private Range[] rgbRanges;
     private String[] pattern;
 
     public RGBImageProfile() {
