@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import org.esa.snap.core.util.StringUtils;
 

@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
@@ -34,67 +34,64 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class PersitableExample_Test {
+public class PersistenceExample_Test {
 
+    public static final int RASTER_WIDTH = 200;
+    public static final int RASTER_HEIGHT = 200;
     private Product product;
-    private PersistableRegistry registry;
+    private Persistence persistence;
 
     @Before
     public void setUp() throws Exception {
-        product = new Product("p", "t", 200, 200);
+        product = new Product("p", "t", RASTER_WIDTH, RASTER_HEIGHT);
         product.addMask("mask1", "(X * Y + X) > 111", "decr1", Color.RED, 0.6);
         product.addMask("mask2", "(X * Y + X) > 222", "decr2", Color.GREEN, 0.5);
         product.addMask("mask3", "(X * Y + X) > 333", "decr3", Color.BLUE, 0.4);
         product.addMask("mask4", "(X * Y + X) > 444", "decr4", Color.GRAY, 0.3);
 
-        final PersistableFactory factory = new PersistableFactory() {
-            @Override
-            public <ML, O> Persistable<ML, O> create(MarkupLanguageSupport<ML> support) {
-                return (Persistable<ML, O>) new MyMaskPersistable<ML>(support);
-            }
-        };
-        registry = new PersistableRegistry();
-        registry.register(Mask.class, factory);
+        final ArrayList<PersistenceSpi> spiList = new ArrayList<>();
+        spiList.add(new TestMaskPersistenceSpi());
+
+        PersistenceSpiRegistry registry = mock(PersistenceSpiRegistry.class);
+        when(registry.getPersistenceSpis()).then(invocation -> spiList.listIterator());
+        persistence = new Persistence(registry);
     }
 
     @Test
-    public void testPersistable_Encode_XML() {
+    public void test_Encode_XML() {
         // Writer initializing (Dimap or Zarr)
         // in this case we are simulating Dimap ... a JDOM use case
         final JdomLanguageSupport languageSupport = new JdomLanguageSupport();
+
         // the language dependent node where the created nodes shall be added
         // in this case a JDOM node
         final Element root = new Element("nodeWhereTheGeneratedElementsShouldBeAdded");
 
-        // detect if masks are to be persisted
+        // iterate over the masks to be persisted
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-        if (maskGroup.getNodeCount() > 0) {
-            // fetch a markup language dependent persistable for Masks from registry
-            Persistable<Element, Mask> persistable = registry.createPersistableFor(Mask.class, languageSupport);
-            // ensure there exist a registered persistable for masks
-            if (persistable != null) {
-                final Mask[] masks = maskGroup.toArray(new Mask[0]);
-                // execution ... let the persistable create the language dependent elements
-                for (Mask mask : masks) {
-                    root.addContent(persistable.encode(mask));
-                }
-            }
+        final Mask[] masks = maskGroup.toArray(new Mask[0]);
+        for (Mask mask : masks) {
+            // fetch a markup language independent persistence converter for this mask from registry
+            final PersistenceEncoder<Object> converter = persistence.getEncoder(mask);
+            // encode the object to markup independent language model
+            final Item item = converter.encode(mask);
+            // convert them to the Markup you need
+            final Element mlObj = languageSupport.translateToLanguageObject(item);
+            root.addContent(mlObj);
         }
 
         //verification
@@ -103,6 +100,7 @@ public class PersitableExample_Test {
         assertThat(out).isEqualToIgnoringNewLines(
                 "<nodeWhereTheGeneratedElementsShouldBeAdded>\n" +
                 "  <mask>\n" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
                 "    <name>mask1</name>\n" +
                 "    <expression>(X * Y + X) &gt; 111</expression>\n" +
                 "    <description>decr1</description>\n" +
@@ -110,6 +108,7 @@ public class PersitableExample_Test {
                 "    <image_transparency>0.6</image_transparency>\n" +
                 "  </mask>\n" +
                 "  <mask>\n" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
                 "    <name>mask2</name>\n" +
                 "    <expression>(X * Y + X) &gt; 222</expression>\n" +
                 "    <description>decr2</description>\n" +
@@ -117,6 +116,7 @@ public class PersitableExample_Test {
                 "    <image_transparency>0.5</image_transparency>\n" +
                 "  </mask>\n" +
                 "  <mask>\n" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
                 "    <name>mask3</name>\n" +
                 "    <expression>(X * Y + X) &gt; 333</expression>\n" +
                 "    <description>decr3</description>\n" +
@@ -124,6 +124,7 @@ public class PersitableExample_Test {
                 "    <image_transparency>0.4</image_transparency>\n" +
                 "  </mask>\n" +
                 "  <mask>\n" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
                 "    <name>mask4</name>\n" +
                 "    <expression>(X * Y + X) &gt; 444</expression>\n" +
                 "    <description>decr4</description>\n" +
@@ -135,12 +136,17 @@ public class PersitableExample_Test {
     }
 
     @Test
-    public void testPersistable_Decode_XML() throws JDOMException, IOException, ParserConfigurationException, SAXException {
+    public void test_Decode_XML() throws JDOMException, IOException {
+        // Reader initializing (Dimap or Zarr)
+        // in this case we are simulating Dimap ... a JDOM use case
+        final JdomLanguageSupport languageSupport = new JdomLanguageSupport();
+
         //preparation
-        final Product product = new Product("B", "T", 50, 50);
+        final Product product = new Product("B", "T", RASTER_WIDTH, RASTER_HEIGHT);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped = "<root-element>" +
                                   "  <mask>" +
+                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
                                   "    <name>mask1</name>" +
                                   "    <expression>(X * Y + X) &gt; 111</expression>" +
                                   "    <description>decr1</description>" +
@@ -148,6 +154,7 @@ public class PersitableExample_Test {
                                   "    <image_transparency>0.6</image_transparency>" +
                                   "  </mask>" +
                                   "  <mask>" +
+                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
                                   "    <name>mask2</name>" +
                                   "    <expression>(X * Y + X) &gt; 222</expression>" +
                                   "    <description>decr2</description>" +
@@ -155,6 +162,7 @@ public class PersitableExample_Test {
                                   "    <image_transparency>0.5</image_transparency>" +
                                   "  </mask>" +
                                   "  <mask>" +
+                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
                                   "    <name>mask3</name>" +
                                   "    <expression>(X * Y + X) &gt; 333</expression>" +
                                   "    <description>decr3</description>" +
@@ -162,6 +170,7 @@ public class PersitableExample_Test {
                                   "    <image_transparency>0.4</image_transparency>" +
                                   "  </mask>" +
                                   "  <mask>" +
+                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
                                   "    <name>mask4</name>" +
                                   "    <expression>(X * Y + X) &gt; 444</expression>" +
                                   "    <description>decr4</description>" +
@@ -173,12 +182,16 @@ public class PersitableExample_Test {
         final SAXBuilder builder = new SAXBuilder();
         final Document document = builder.build(new StringReader(xmlSnipped));
         final Element root = document.getRootElement();
-        final List<Element> content = root.getChildren();
+        final List<Element> mlObjects = root.getChildren();
 
         //execution
-        final Persistable<Element, Mask> persistable = registry.createPersistableFor(Mask.class, new JdomLanguageSupport());
-        for (Element element : content) {
-            persistable.decode(element, product, product.getSceneRasterSize());
+        for (Element mlObj : mlObjects) {
+            // convert the markup to markup independent language model
+            final Item item = languageSupport.translateToItem(mlObj);
+            // fetch a markup language independent persistence converter for this item representing a mask from registry
+            final PersistenceDecoder<Mask> converter = persistence.getDecoder(item);
+            // decode the item to a mask and add it to the product
+            final Mask mask = converter.decode(item, product);
         }
 
         //verification
@@ -186,30 +199,28 @@ public class PersitableExample_Test {
     }
 
     @Test
-    public void testPersistable_Encode_JSON() throws JsonProcessingException {
+    public void test_Encode_JSON() throws JsonProcessingException {
         // Writer initializing (Dimap or Zarr)
         // in this case we are simulating e.g. SNAP-ZARR ... a JSON use case
         final JsonLanguageSupport languageSupport = new JsonLanguageSupport();
+
         // the language dependent node where the created nodes shall be added
         // in this case a JSON node is a map
         final Map<String, Object> root = new LinkedHashMap<>();
-        final List<Map<String, Object>> mlEntryList = new ArrayList<>();
-        root.put("masks", mlEntryList);
+        final List<Map<String, Object>> mlObjects = new ArrayList<>();
+        root.put("masks", mlObjects);
 
-
-        // detect if masks are to be persisted
+        // iterate over the masks to be persisted
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-        if (maskGroup.getNodeCount() > 0) {
-            // fetch a markup language dependent persistable for Masks from registry
-            Persistable<Map<String, Object>, Mask> persistable = registry.createPersistableFor(Mask.class, languageSupport);
-            // ensure there exist a registered persistable for masks
-            if (persistable != null) {
-                final Mask[] masks = maskGroup.toArray(new Mask[0]);
-                // execution ... let the persistable create the language dependent elements
-                for (Mask mask : masks) {
-                    mlEntryList.add(persistable.encode(mask));
-                }
-            }
+        final Mask[] masks = maskGroup.toArray(new Mask[0]);
+        for (Mask mask : masks) {
+            // fetch a markup language independent persistence converter for this mask from registry
+            final PersistenceEncoder<Object> converter = persistence.getEncoder(mask);
+            // encode the object to markup independent language model
+            final Item item = converter.encode(mask);
+            // convert them to the Markup you need
+            final Map<String, Object> mlObj = languageSupport.translateToLanguageObject(item);
+            mlObjects.add(mlObj);
         }
 
         //verification
@@ -222,6 +233,7 @@ public class PersitableExample_Test {
                 "{\n" +
                 "  \"masks\" : [ {\n" +  // node where the generated json should be added
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask1\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 111\",\n" +
                 "      \"description\" : \"decr1\",\n" +
@@ -230,6 +242,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask2\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 222\",\n" +
                 "      \"description\" : \"decr2\",\n" +
@@ -238,6 +251,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask3\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 333\",\n" +
                 "      \"description\" : \"decr3\",\n" +
@@ -246,6 +260,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask4\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 444\",\n" +
                 "      \"description\" : \"decr4\",\n" +
@@ -258,14 +273,19 @@ public class PersitableExample_Test {
     }
 
     @Test
-    public void testPersistable_Decode_JSON() throws JDOMException, IOException, ParserConfigurationException, SAXException {
+    public void test_Decode_JSON() throws IOException {
+        // Reader initializing (Dimap or Zarr)
+        // in this case we are simulating Zarr ... a JSON use case
+        final JsonLanguageSupport languageSupport = new JsonLanguageSupport();
+
         //preparation
-        final Product product = new Product("B", "T", 50, 50);
+        final Product product = new Product("B", "T", RASTER_WIDTH, RASTER_HEIGHT);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped =
                 "{\n" +
                 "  \"masks\" : [ {\n" +  // node where the generated json should be added
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask1\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 111\",\n" +
                 "      \"description\" : \"decr1\",\n" +
@@ -274,6 +294,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask2\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 222\",\n" +
                 "      \"description\" : \"decr2\",\n" +
@@ -282,6 +303,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask3\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 333\",\n" +
                 "      \"description\" : \"decr3\",\n" +
@@ -290,6 +312,7 @@ public class PersitableExample_Test {
                 "    }\n" +
                 "  }, {\n" +
                 "    \"mask\" : {\n" +
+                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
                 "      \"name\" : \"mask4\",\n" +
                 "      \"expression\" : \"(X * Y + X) > 444\",\n" +
                 "      \"description\" : \"decr4\",\n" +
@@ -299,98 +322,76 @@ public class PersitableExample_Test {
                 "  } ]\n" +
                 "}";
 
-
         final ObjectMapper objectMapper = new ObjectMapper();
         final HashMap<String, List<Map<String, Object>>> content = objectMapper.reader().readValue(new StringReader(xmlSnipped), HashMap.class);
 
         //execution
-        final Persistable<Map<String, Object>, Mask> persistable = registry.createPersistableFor(Mask.class, new JsonLanguageSupport());
-        for (Map<String, Object> toDecode : content.get("masks")) {
-            persistable.decode(toDecode, product, product.getSceneRasterSize());
+        for (Map<String, Object> mlObj : content.get("masks")) {
+            // convert the markup to markup independent language model
+            final Item item = languageSupport.translateToItem(mlObj);
+            // fetch a markup language independent translator for this item representing a mask from registry
+            final PersistenceDecoder<Mask> converter = persistence.getDecoder(item);
+            // decode the item to a mask and add it to the product
+            final Mask mask = converter.decode(item, product);
         }
 
         //verification
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(4);
     }
 
-    private static class PersistableRegistry {
+    @Test
+    public void testHistoricalDecoding() throws JDOMException, IOException {
+        // Reader initializing (Dimap or Zarr)
+        // in this case we are simulating Dimap ... a JDOM use case
+        final JdomLanguageSupport languageSupport = new JdomLanguageSupport();
 
-        private final Map<Type, List<PersistableFactory>> registry = new HashMap<>();
+        //preparation
+        final Product product = new Product("B", "T", RASTER_WIDTH, RASTER_HEIGHT);
+        assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
+        final String xmlSnipped =
+                "<root-element>" +
+                "  <mask>" +
+                //                                                                                       no persistence ID
+                "    <name>mask1</name>" +
+                "    <expr>(X * Y + X) &gt; 111</expr>" +                                             // old expression tag
+                "    <description>decr1</description>" +
+                "    <color_rgb>255, 0, 0</color_rgb>" +
+                "    <image_transparency>0.6</image_transparency>" +
+                "  </mask>" +
+                "  <mask>" +
+                "    <___persistence_id___>MyMaskPersistenceConverter:1</___persistence_id___>" +     // old persistence ID
+                "    <name>mask2</name>" +
+                "    <expr>(X * Y + X) &gt; 222</expr>" +                                             // old expression tag
+                "    <description>decr2</description>" +
+                "    <color_rgb>0, 255, 0</color_rgb>" +
+                "    <image_transparency>0.5</image_transparency>" +
+                "  </mask>" +
+                "  <mask>" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +   // new persistence ID
+                "    <name>mask3</name>" +
+                "    <expression>(X * Y + X) &gt; 333</expression>" +                                  // new expression tag
+                "    <description>decr3</description>" +
+                "    <color_rgb>0, 0, 255</color_rgb>" +
+                "    <image_transparency>0.4</image_transparency>" +
+                "  </mask>" +
+                "</root-element>";
 
-        public void register(Type type, PersistableFactory factory) {
-            if (!registry.containsKey(type)) {
-                registry.put(type, new ArrayList<>());
-            }
-            registry.get(type).add(factory);
+        final SAXBuilder builder = new SAXBuilder();
+        final Document document = builder.build(new StringReader(xmlSnipped));
+        final Element root = document.getRootElement();
+        final List<Element> mlObjects = root.getChildren();
+
+        //execution
+        for (Element mlObj : mlObjects) {
+            // convert the markup to markup independent language model
+            final Item item = languageSupport.translateToItem(mlObj);
+            // fetch a markup language independent persistence converter for this item representing a mask from registry
+            final PersistenceDecoder<Mask> converter = persistence.getDecoder(item);
+            // decode the item to a mask and add it to the product
+            final Mask mask = converter.decode(item, product);
         }
 
-        public <ML, T> Persistable<ML, T> createPersistableFor(Class<? extends T> aClass, MarkupLanguageSupport<ML> support) {
-            final List<PersistableFactory> persistableFactories = registry.get(aClass);
-            final PersistableFactory persistableFactory = persistableFactories.get(0);
-            return persistableFactory.create(support);
-        }
-    }
-
-    private interface PersistableFactory {
-        <ML, O> Persistable<ML, O> create(MarkupLanguageSupport<ML> support);
-    }
-
-    private static class MyMaskPersistable<ML> extends Persistable<ML, Mask> {
-        public MyMaskPersistable(MarkupLanguageSupport<ML> support) {
-            super(support);
-        }
-
-        @Override
-        protected Mask decodeItem(Item item, Product product, Dimension regionRasterSize) {
-            if (!item.isContainer()) {
-                throw new IllegalArgumentException("Container expected.");
-            }
-            final String itemName = item.getName();
-            if (!"mask".equals(itemName)) {
-                throw new IllegalArgumentException("Item with name 'mask' expected but was '" + itemName + "'.");
-            }
-            final Container container = (Container) item;
-            final String[] expectedProperties = {
-                    "name",
-                    "expression",
-                    "description",
-                    "color_rgb",
-                    "image_transparency"
-            };
-            final Property[] props = new Property[expectedProperties.length];
-            for (int i = 0; i < props.length; i++) {
-                final String propName = expectedProperties[i];
-                final Property property = container.getProperty(propName);
-                if (property == null) {
-                    throw new IllegalArgumentException("Property '" + propName + "' expected.");
-                }
-                props[i] = property;
-            }
-            final String maskName = props[0].getValueString();
-            final String expression = props[1].getValueString();
-            final String description = props[2].getValueString();
-            final Integer[] rgb = props[3].getValueInts();
-            final Double transparency = props[4].getValueDouble();
-
-            return product.addMask(
-                    maskName,
-                    expression,
-                    description,
-                    new Color(rgb[0], rgb[1], rgb[2]),
-                    transparency);
-        }
-
-        @Override
-        protected Item encodeObject(Mask mask) {
-            final Container container = new Container("mask");
-            container.add(new Property<>("name", mask.getName()));
-            container.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
-            container.add(new Property<>("description", mask.getDescription()));
-            final Color cl = mask.getImageColor();
-            final int[] rgb = new int[]{cl.getRed(), cl.getGreen(), cl.getBlue()};
-            container.add(new Property<>("color_rgb", rgb));
-            container.add(new Property<>("image_transparency", mask.getImageTransparency()));
-            return container;
-        }
+        //verification
+        assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(3);
     }
 }

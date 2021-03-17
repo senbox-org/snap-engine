@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import org.esa.snap.core.util.StringUtils;
 import org.jdom.Element;
@@ -26,7 +26,7 @@ import java.util.List;
 public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
 
     @Override
-    public Element toLanguageObject(Item item) {
+    public Element translateToLanguageObject(Item item) {
         if (item.isProperty()) {
             final Property<?> p = (Property<?>) item;
             return createPropertyElem(p);
@@ -39,7 +39,7 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
     }
 
     @Override
-    public Item convertToItem(Element languageObject) {
+    public Item translateToItem(Element languageObject) {
         if (languageObject.getChildren().size() == 0) {
             return createProperty(languageObject);
         }
@@ -81,7 +81,7 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
                 continue;
             }
             final Attribute<?> attribute = new Attribute<>(name, jdomA.getValue());
-            attCon.add(attribute);
+            attCon.set(attribute);
         }
     }
 

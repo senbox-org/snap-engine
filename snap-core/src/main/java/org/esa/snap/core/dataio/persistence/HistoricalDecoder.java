@@ -16,16 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
-public class Attribute<E> extends ValueItem<E> {
-
-    protected Attribute(String name, E value) {
-        super(name, value);
-    }
-
-    @Override
-    public boolean isAttribute() {
-        return true;
-    }
+public interface HistoricalDecoder extends PersistenceDecoder<Item> {
 }

@@ -16,9 +16,13 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
-public interface AttributeContainer {
-    Attribute<?>[] getAttributes();
-    void add(Attribute<?> attribute);
+import org.esa.snap.core.datamodel.Product;
+
+public interface PersistenceDecoder<T> {
+
+    boolean canDecode(Item item);
+
+    T decode(Item item, Product product);
 }

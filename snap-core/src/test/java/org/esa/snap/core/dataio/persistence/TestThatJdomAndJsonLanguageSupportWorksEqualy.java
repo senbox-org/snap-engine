@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
@@ -251,7 +251,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         c1.add(new Property<>("int", 42));
         final Container c2 = new Container("c2");
         final Container c3 = new Container("c3");
-        c3.add(new Attribute<>("name", "att"));
+        c3.set(new Attribute<>("name", "att"));
         c3.add(new Property<>("propC3", new Integer[]{16, 176, 42, 8}));
         c2.add(c3);
         c2.add(new Property<>("propC2", 3230523.41331));
@@ -314,7 +314,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     private <E> List<Item> convertToItems(List<E> jdomElements, MarkupLanguageSupport<E> support) {
         final List<Item> items = new ArrayList<>();
         for (E element : jdomElements) {
-            items.add(support.convertToItem(element));
+            items.add(support.translateToItem(element));
         }
         return items;
     }
@@ -322,7 +322,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     private <E> List<E> toLanguageObjects(List<Item> items1, MarkupLanguageSupport<E> support) {
         final List<E> languageObjects = new ArrayList<>();
         for (Item item : items1) {
-            languageObjects.add(support.toLanguageObject(item));
+            languageObjects.add(support.translateToLanguageObject(item));
         }
         return languageObjects;
     }

@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,7 +31,7 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     public static final String ATT_PREFIX = "_$ATT$_";
 
     @Override
-    public Map<String, Object> toLanguageObject(Item item) {
+    public Map<String, Object> translateToLanguageObject(Item item) {
         final Map<String, Object> map = new LinkedHashMap<>();
         if (item.isProperty()) {
             addProperty(map, (Property<?>) item);
@@ -42,7 +42,7 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     }
 
     @Override
-    public Item convertToItem(Map<String, Object> objects) {
+    public Item translateToItem(Map<String, Object> objects) {
         if (objects.entrySet().size() != 1) {
             // TODO: 09.03.2021 SE -- talk with marko about the error message.
             // shall this explanation also be part of the method documetnation of the JsonLanguageSupport?
@@ -121,7 +121,7 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
             final String key = entry.getKey();
             final Object value = entry.getValue();
             if (key.startsWith(ATT_PREFIX)) {
-                container.add(new Attribute<>(getAttName(key), value));
+                container.set(new Attribute<>(getAttName(key), value));
             } else if (value instanceof Map) {
                 container.add(createContainer(key, (Map) value));
             } else {
@@ -137,7 +137,7 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
             if (key.startsWith(ATT_PREFIX)) {
                 final String attName = getAttName(key);
                 final Object attValue = map.get(key);
-                property.add(new Attribute<>(attName, attValue));
+                property.set(new Attribute<>(attName, attValue));
             }
         }
         return property;

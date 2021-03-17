@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
 import java.util.LinkedHashMap;
 
@@ -43,14 +43,17 @@ public class Container extends Item implements AttributeContainer {
         return attributes.get(name);
     }
 
-    public void add(Attribute<?> attribute) {
+    @Override
+    public Attribute<?> removeAttribute(String name) {
+        return attributes.remove(name);
+    }
+
+    public void set(Attribute<?> attribute) {
         if (attribute == null) {
             return;
         }
         final String name = attribute.getName();
-        if (attributes.containsKey(name)) {
-            throw new IllegalArgumentException("Already contains an attribute with the name '" + name + ".");
-        }
+        attributes.remove(name);
         attributes.put(name, attribute);
     }
 
@@ -60,6 +63,10 @@ public class Container extends Item implements AttributeContainer {
 
     public Property<?> getProperty(String name) {
         return properties.get(name);
+    }
+
+    public Property<?> removeProperty(String name) {
+        return properties.remove(name);
     }
 
     public void add(Property<?> property) {
@@ -79,6 +86,10 @@ public class Container extends Item implements AttributeContainer {
 
     public Container getContainer(String name) {
         return containers.get(name);
+    }
+
+    public Container removeContainer(String name) {
+        return containers.remove(name);
     }
 
     public void add(Container container) {

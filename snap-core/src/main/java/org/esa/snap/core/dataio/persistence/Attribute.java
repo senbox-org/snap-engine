@@ -16,12 +16,16 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistable;
+package org.esa.snap.core.dataio.persistence;
 
-public interface MarkupLanguageSupport<T> {
+public class Attribute<E> extends ValueItem<E> {
 
-    T toLanguageObject(Item item);
+    protected Attribute(String name, E value) {
+        super(name, value);
+    }
 
-    Item convertToItem(T languageObject);
-
+    @Override
+    public boolean isAttribute() {
+        return true;
+    }
 }
