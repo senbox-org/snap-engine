@@ -44,9 +44,7 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     @Override
     public Item translateToItem(Map<String, Object> objects) {
         if (objects.entrySet().size() != 1) {
-            // TODO: 09.03.2021 SE -- talk with marko about the error message.
-            // shall this explanation also be part of the method documetnation of the JsonLanguageSupport?
-            throw new IllegalArgumentException("The map may only contain one entry, which would then correspond to the Language Representation of an object.");
+            throw new IllegalArgumentException("The map must contain only one entry, which corresponds to the language representation of one object.");
         }
         Map.Entry<String, Object> entry = objects.entrySet().iterator().next();
         return createItem(entry.getKey(), entry.getValue());
