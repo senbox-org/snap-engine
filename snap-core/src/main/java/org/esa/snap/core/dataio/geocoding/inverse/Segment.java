@@ -18,6 +18,8 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.datamodel.GeoPos;
 
+import java.util.ArrayList;
+
 class Segment {
 
     static final int MIN_DIMENSION = 4;
@@ -105,25 +107,68 @@ class Segment {
     }
 
     void calculateGeoPoints(GeoPosCalculator calculator) {
-        final GeoPos ul = new GeoPos();
-        final GeoPos ur = new GeoPos();
-        final GeoPos lr = new GeoPos();
-        final GeoPos ll = new GeoPos();
+        final ArrayList<GeoPos> geoPosList = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            geoPosList.add(new GeoPos());
+        }
 
-        calculator.getGeoPos(x_min, y_min, ul);
-        calculator.getGeoPos(x_max, y_min, ur);
-        calculator.getGeoPos(x_max, y_max, lr);
-        calculator.getGeoPos(x_min, y_max, ll);
+        calculator.getGeoPos(x_min, y_min, geoPosList.get(0));
+        calculator.getGeoPos(x_max, y_min, geoPosList.get(1));
+        calculator.getGeoPos(x_max, y_max, geoPosList.get(2));
+        calculator.getGeoPos(x_min, y_max, geoPosList.get(3));
 
-        lon_min = Math.min(ul.lon, Math.min(ur.lon, Math.min(lr.lon, ll.lon)));
-        lon_max = Math.max(ul.lon, Math.max(ur.lon, Math.max(lr.lon, ll.lon)));
+        double minItLon = 180.0;
+        double maxItLon = -180.0;
+        double minItLat = 90.0;
+        double maxItLat = -90.0;
 
-        lat_min = Math.min(ul.lat, Math.min(ur.lat, Math.min(lr.lat, ll.lat)));
-        lat_max = Math.max(ul.lat, Math.max(ur.lat, Math.max(lr.lat, ll.lat)));
+        for (int i = 0; i < 4; i++) {
+            final GeoPos geoPos = geoPosList.get(i);
+            if (geoPos.lon < minItLon) {
+                minItLon = geoPos.lon;
+            }
+            if (geoPos.lon > maxItLon) {
+                maxItLon = geoPos.lon;
+            }
+            if (geoPos.lat < minItLat) {
+                minItLat = geoPos.lat;
+            }
+            if (geoPos.lat > maxItLat) {
+                maxItLat = geoPos.lat;
+            }
+        }
+
+        lon_min = minItLon;
+        lon_max = maxItLon;
+        lat_min = minItLat;
+        lat_max = maxItLat;
 
         // @todo 1 tb/tb check if this constant is OK - we're not comparing neighbouring pixels here 2021-03-11
-        if (Math.abs(lon_max - lon_min) > 270) {
+        if (Math.abs(maxItLon - minItLon) > 270) {
             containsAntiMeridian = true;
+        }
+
+        if (containsAntiMeridian) {
+            // we need to re-calculate the longitude boundaries so that lon_min is the largest negative longitude
+            // and lon_max is the smallest positive longitude
+            minItLon = -180.0;
+            maxItLon = 180.0;
+            for (int i = 0; i < 4; i++) {
+                final GeoPos geoPos = geoPosList.get(i);
+
+                if (geoPos.lon > 0) {
+                    if (geoPos.lon < maxItLon) {
+                        maxItLon = geoPos.lon;
+                    }
+                } else {
+                    if (geoPos.lon > minItLon) {
+                        minItLon = geoPos.lon;
+                    }
+                }
+            }
+
+            lon_min = minItLon;
+            lon_max = maxItLon;
         }
     }
 
@@ -160,7 +205,7 @@ class Segment {
     // @todo 2 tb/tb this is debug code, remove it 2021-03-16
     void printBounds(GeoPosCalculator calc) {
         final StringBuilder builder = new StringBuilder();
-        final int step = 30;
+        final int step = 3;
         final GeoPos geoPos = new GeoPos();
 
         builder.append("MULTIPOINT(");

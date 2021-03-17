@@ -142,6 +142,90 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return d;
     }
 
+    static Segment getPoleSegment(PixelPos[] poleLocations, int rasterWidth, int rasterHeight) {
+        int x_min = Integer.MAX_VALUE;
+        int x_max = Integer.MIN_VALUE;
+        int y_min = Integer.MAX_VALUE;
+        int y_max = Integer.MIN_VALUE;
+        for (PixelPos location : poleLocations) {
+            if (location.x > x_max) {
+                x_max = (int) location.x;
+            }
+            if (location.x < x_min) {
+                x_min = (int) location.x;
+            }
+            if (location.y > y_max) {
+                y_max = (int) location.y;
+            }
+            if (location.y < y_min) {
+                y_min = (int) location.y;
+            }
+        }
+
+        // ensure that we're inside the product and if pole is closer to border than MIN_DIMENSION -> extend to border
+        // this avoids too-small segments
+        int minDimHalf = MIN_DIMENSION / 2;
+        x_min = x_min - minDimHalf;
+        if (x_min <= MIN_DIMENSION) {
+            x_min = 0;
+        }
+
+        x_max = x_max + minDimHalf;
+        if (x_max > rasterWidth - 1 - MIN_DIMENSION) {
+            x_max = rasterWidth - 1;
+        }
+
+        y_min = y_min - minDimHalf;
+        if (y_min < MIN_DIMENSION) {
+            y_min = 0;
+        }
+
+        y_max = y_max + minDimHalf;
+        if (y_max > rasterHeight - 1 - MIN_DIMENSION) {
+            y_max = rasterHeight - 1;
+        }
+
+        return new Segment(x_min, x_max, y_min, y_max);
+    }
+
+    static Segment[] removeSegment(Segment toRemove, Segment origin) {
+        final ArrayList<Segment> segmentList = new ArrayList<>();
+        // @todo 1 tb/tb check if we`re at the upper edge 2021-03-21
+        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
+        // cut out segment that is above the pole (upper split[0])
+        // the remainder contains the pole and a lot of data
+        final Segment[] upperSplit = origin.split_y(toRemove.y_min);
+        segmentList.add(upperSplit[0]);
+
+        final Segment lowerPart = upperSplit[1];
+
+        // @todo 1 tb/tb check if we're at the lower border
+        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
+        // cut out segment that is below the pole
+        // the remainder is the stripe containing the pole and other data
+        final Segment[] lowerSplit = lowerPart.split_y(toRemove.y_max + 1);
+        segmentList.add(lowerSplit[1]);
+
+        final Segment poleRows = lowerSplit[0];
+
+        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
+        if (toRemove.x_min > 0) {
+            // we need to cut that row into three pieces, one of the the segment to remove
+            final Segment[] leftSplit = poleRows.split_x(toRemove.x_min);
+            segmentList.add(leftSplit[0]);
+
+            // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
+            final Segment[] rightSplit = poleRows.split_x(toRemove.x_max + 1);
+            segmentList.add(rightSplit[1]);
+        } else {
+            // segment to remove is on the left border - cut out and keep the remainder
+            final Segment[] rightSplit = poleRows.split_x(toRemove.x_max + 1);
+            segmentList.add(rightSplit[1]);
+        }
+
+        return segmentList.toArray(new Segment[0]);
+    }
+
     private ArrayList<Segment> calculateSegmentation(int rasterWidth, int rasterHeight, PixelPos[] poleLocations) {
         final ArrayList<Segment> segmentList = new ArrayList<>();
 
@@ -151,8 +235,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             // start segmentation at full product
             calculateSegmentation(fullProductSegment, segmentList);
         } else {
-            // run pre-segmentation to cut out pole
-
+            // create segment containing the pole
             final Segment poleSegment = getPoleSegment(poleLocations, rasterWidth, rasterHeight);
             //segmentList.add(poleSegment);
 
@@ -190,82 +273,28 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             calculateSegmentation(lower, segmentList);
             calculateSegmentation(left, segmentList);
             calculateSegmentation(right, segmentList);
-
-//            for(final Segment segment : segmentList) {
-//                segment.printWkt();
-//            }
-
-
-
         }
 
-        for (final Segment segment : segmentList) {
-            segment.printBounds(this);
-            segment.printWktBoundingRect();
-            System.out.println("------");
-        }
+//        for (final Segment segment : segmentList) {
+//            segment.printBounds(this);
+//            segment.printWktBoundingRect();
+//            System.out.println("------");
+//        }
 
         return segmentList;
-    }
-
-    // @todo 1 tb/tb make static and add tests 2021-03-11
-    static Segment getPoleSegment(PixelPos[] poleLocations, int rasterWidth, int rasterHeight) {
-        int x_min = Integer.MAX_VALUE;
-        int x_max = Integer.MIN_VALUE;
-        int y_min = Integer.MAX_VALUE;
-        int y_max = Integer.MIN_VALUE;
-        for (PixelPos location : poleLocations) {
-            if (location.x > x_max) {
-                x_max = (int) location.x;
-            }
-            if (location.x < x_min) {
-                x_min = (int) location.x;
-            }
-            if (location.y > y_max) {
-                y_max = (int) location.y;
-            }
-            if (location.y < y_min) {
-                y_min = (int) location.y;
-            }
-        }
-
-        // ensure that we're inside the product and if pole is closer to border that MIN_DIMENSION -> extend to border
-        // this avoids too-small segments
-        x_min = x_min - 1;
-        if (x_min <= MIN_DIMENSION) {
-            x_min = 0;
-        }
-
-        x_max = x_max + 1;
-        if (x_max > rasterWidth - 1 - MIN_DIMENSION) {
-            x_max = rasterWidth - 1;
-        }
-
-        y_min = y_min - 1;
-        if (y_min < MIN_DIMENSION) {
-            y_min = 0;
-        }
-
-        y_max = y_max + 1;
-        if (y_max > rasterHeight - 1 - MIN_DIMENSION) {
-            y_max = rasterHeight - 1;
-        }
-
-        return new Segment(x_min, x_max, y_min, y_max);
     }
 
     private ArrayList<Segment> calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
         // calculate border geometry
         segment.calculateGeoPoints(this);
-        //segment.printWkt();
 
         final SegmentCoverage segmentCoverage = hasGeoCoverage(segment);
         if (segmentCoverage == INSIDE) {
             // all test-points are inside the lon/lat segment
             segmentList.add(segment);
         } else {
-//            segment.printBounds(this);
-//            segment.printWktBoundingRect();
+            segment.printBounds(this);
+            segment.printWktBoundingRect();
 
             Segment[] splits = new Segment[0];
             if (segment.containsAntiMeridian) {
@@ -385,19 +414,19 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
         getGeoPos(segment.x_min + xOffset, segment.y_min, geoPos);
         final boolean b1 = segment.isInside(geoPos.lon, geoPos.lat);
-        // printPointWkt(geoPos);
+//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_max, segment.y_min + yOffset, geoPos);
         final boolean b2 = segment.isInside(geoPos.lon, geoPos.lat);
-        //printPointWkt(geoPos);
+//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_min + xOffset, segment.y_max, geoPos);
         final boolean b3 = segment.isInside(geoPos.lon, geoPos.lat);
-        //printPointWkt(geoPos);
+//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_min, segment.y_min + yOffset, geoPos);
         final boolean b4 = segment.isInside(geoPos.lon, geoPos.lat);
-        //printPointWkt(geoPos);
+//        printPointWkt(geoPos);
 
         if (!(b2 && b4)) {
             return ACROSS;
@@ -512,7 +541,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         offsetX = geoRaster.getOffsetX();
         offsetY = geoRaster.getOffsetY();
 
-        // @todo 1 tb/tb this might be not necessary anymore 2021-03-09
         lonRange = Range.computeRangeDouble(longitudes, null);
         latRange = Range.computeRangeDouble(latitudes, null);
 
