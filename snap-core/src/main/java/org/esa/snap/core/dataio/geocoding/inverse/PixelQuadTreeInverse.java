@@ -243,27 +243,24 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
         }
 
-//        for (final Segment segment : segmentList) {
-//            segment.printBounds(this);
-//            segment.printWktBoundingRect();
-//            System.out.println("------");
-//        }
+        for (final Segment segment : segmentList) {
+            segment.printBounds(this);
+            segment.printWktBoundingRect();
+            System.out.println("------");
+        }
 
         return segmentList;
     }
 
     private void calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
-        // calculate border geometry
         segment.calculateGeoPoints(this);
-
         final SegmentCoverage segmentCoverage = hasGeoCoverage(segment);
+
         if (segmentCoverage == INSIDE) {
             // all test-points are inside the lon/lat segment
             segmentList.add(segment);
         } else {
-            segment.printBounds(this);
-            segment.printWktBoundingRect();
-
+            // we need to divide further down
             Segment[] splits = new Segment[0];
             if (segment.containsAntiMeridian) {
                 splits = splitAtAntiMeridian(segment, segmentCoverage);
@@ -308,7 +305,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                     break;
                 }
             }
-            if (y_l < 0 && y_r < 0) {
+            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
                 // no suitable split-points found - as a last idea, we split at half
                 return segment.split(true);
             }
@@ -354,7 +351,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
             }
 
-            if (y_l < 0 && y_r < 0) {
+            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
                 // antimeridian not passing through segment in a way that enables across-swath splitting
                 return new Segment[0];
             }
@@ -647,6 +644,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
             latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
 
+            // @todo 1 tb/tb something is not correct either here or
             if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lon_0, lon_1, lon_2, lon_3)) {
                 final double signumLon = Math.signum(lon);
                 if (signumLon > 0f) {
@@ -666,6 +664,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
         }
 
+        // @todo 1 tb/tb something is not correct here when crossing antimeridian ....
         final boolean definitelyOutside = lat < latMin || lat > latMax || lon < lonMin || lon > lonMax;
         if (definitelyOutside) {
             return false;
