@@ -75,7 +75,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         this(fractionalAccuracy, InterpolatorFactory.create(properties));
     }
 
-    PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
+    private PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
         this.interpolator = interpolator;
         segmentList = new ArrayList<>();
@@ -188,39 +188,37 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return new Segment(x_min, x_max, y_min, y_max);
     }
 
-    static Segment[] removeSegment(Segment toRemove, Segment origin) {
+    static Segment[] removeSegment(Segment toRemove, Segment origin, int rasterWidth, int rasterHeight) {
         final ArrayList<Segment> segmentList = new ArrayList<>();
-        // @todo 1 tb/tb check if we`re at the upper edge 2021-03-21
-        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
-        // cut out segment that is above the pole (upper split[0])
-        // the remainder contains the pole and a lot of data
-        final Segment[] upperSplit = origin.split_y(toRemove.y_min);
-        segmentList.add(upperSplit[0]);
 
-        final Segment lowerPart = upperSplit[1];
-
-        // @todo 1 tb/tb check if we're at the lower border
-        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
-        // cut out segment that is below the pole
-        // the remainder is the stripe containing the pole and other data
-        final Segment[] lowerSplit = lowerPart.split_y(toRemove.y_max + 1);
-        segmentList.add(lowerSplit[1]);
-
-        final Segment poleRows = lowerSplit[0];
-
-        // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
-        if (toRemove.x_min > 0) {
-            // we need to cut that row into three pieces, one of the the segment to remove
-            final Segment[] leftSplit = poleRows.split_x(toRemove.x_min);
-            segmentList.add(leftSplit[0]);
-
-            // @todo 1 tb/tb check if we really get two segmemts back edge 2021-03-21
-            final Segment[] rightSplit = poleRows.split_x(toRemove.x_max + 1);
-            segmentList.add(rightSplit[1]);
+        Segment remaining;
+        if (toRemove.y_min > 0) {
+            // cut out segment that is above the pole (upper split[0])
+            // the remainder contains the pole and a lot of data
+            final Segment[] splits = origin.split_y(toRemove.y_min);
+            segmentList.add(splits[0]);
+            remaining = splits[1];
         } else {
-            // segment to remove is on the left border - cut out and keep the remainder
-            final Segment[] rightSplit = poleRows.split_x(toRemove.x_max + 1);
-            segmentList.add(rightSplit[1]);
+            // pole region touches top of product - nothing to cut out
+            remaining = origin;
+        }
+
+        if (toRemove.y_max < rasterHeight - 1) {
+            final Segment[] splits = remaining.split_y(toRemove.y_max + 1);
+            remaining = splits[0];
+            segmentList.add(splits[1]);
+        }
+
+        if (toRemove.x_min > 0) {
+            final Segment[] splits = remaining.split_x(toRemove.x_min);
+            segmentList.add(splits[0]);
+            remaining = splits[1];
+        }
+
+        if (toRemove.x_max < rasterWidth - 1) {
+            final Segment[] splits = remaining.split_x(toRemove.x_max + 1);
+            // splits[0] must be the pole segment at this point
+            segmentList.add(splits[1]);
         }
 
         return segmentList.toArray(new Segment[0]);
@@ -237,42 +235,12 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         } else {
             // create segment containing the pole
             final Segment poleSegment = getPoleSegment(poleLocations, rasterWidth, rasterHeight);
-            //segmentList.add(poleSegment);
 
-            // split
-            // @todo 1 tb/tb extract method for splitting
-            // @todo 1 tb/tb check if we're at the upper border
-            final Segment[] upperSplit = fullProductSegment.split_y(poleSegment.y_min);
-
-            final Segment upper = upperSplit[0];
-
-            // @todo 1 tb/tb check if we're at the lower border
-            final Segment[] lowerSplit = upperSplit[1].split_y(poleSegment.y_max + 1);
-            final Segment lower = lowerSplit[1];
-
-            // @todo 1 tb/tb check if we're at the left border
-            final Segment[] leftSplit = lowerSplit[0].split_x(poleSegment.x_min);
-            final Segment left = leftSplit[0];
-
-            final Segment[] rightSplit = leftSplit[1].split_x(poleSegment.x_max + 1);
-            final Segment right = rightSplit[1];
-
-//            upper.calculateGeoPoints(this);
-//            segmentList.add(upper);
-//
-//            left.calculateGeoPoints(this);
-//            segmentList.add(left);
-//
-//            right.calculateGeoPoints(this);
-//            segmentList.add(right);
-//
-//            lower.calculateGeoPoints(this);
-//            segmentList.add(lower);
-
-            calculateSegmentation(upper, segmentList);
-            calculateSegmentation(lower, segmentList);
-            calculateSegmentation(left, segmentList);
-            calculateSegmentation(right, segmentList);
+            // cut it from full orbit raster and calculate segmentation
+            final Segment[] segments = removeSegment(poleSegment, fullProductSegment, rasterWidth, rasterHeight);
+            for (final Segment segment : segments){
+                calculateSegmentation(segment, segmentList);
+            }
         }
 
 //        for (final Segment segment : segmentList) {
@@ -284,7 +252,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return segmentList;
     }
 
-    private ArrayList<Segment> calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
+    private void calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
         // calculate border geometry
         segment.calculateGeoPoints(this);
 
@@ -316,8 +284,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 calculateSegmentation(splits[1], segmentList);
             }
         }
-
-        return segmentList;
     }
 
     private Segment[] splitAtOutsidePoint(Segment segment, SegmentCoverage segmentCoverage) {

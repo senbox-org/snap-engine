@@ -724,7 +724,7 @@ public class PixelQuadTreeInverseTest {
         final Segment poleSegment = new Segment(10, 19, 100, 110);
         final Segment orbitSegment = new Segment(0, 999, 0, 1499);
 
-        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment);
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
         assertEquals(4, remaining.length);
 
         final Segment upper = remaining[0];
@@ -757,7 +757,7 @@ public class PixelQuadTreeInverseTest {
         final Segment poleSegment = new Segment(0, 9, 110, 119);
         final Segment orbitSegment = new Segment(0, 999, 0, 1499);
 
-        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment);
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
         assertEquals(3, remaining.length);
 
         final Segment upper = remaining[0];
@@ -779,5 +779,168 @@ public class PixelQuadTreeInverseTest {
         assertEquals(119, right.y_max);
     }
 
-    // @todo 1 tb/tb continue here 2021-03-17
+    @Test
+    public void testRemoveSegment_atTopBorder() {
+        final Segment poleSegment = new Segment(400, 409, 0, 9);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(3, remaining.length);
+
+        final Segment lower = remaining[0];
+        assertEquals(0, lower.x_min);
+        assertEquals(999, lower.x_max);
+        assertEquals(10, lower.y_min);
+        assertEquals(1499, lower.y_max);
+
+        final Segment left = remaining[1];
+        assertEquals(0, left.x_min);
+        assertEquals(399, left.x_max);
+        assertEquals(0, left.y_min);
+        assertEquals(9, left.y_max);
+
+        final Segment right = remaining[2];
+        assertEquals(410, right.x_min);
+        assertEquals(999, right.x_max);
+        assertEquals(0, right.y_min);
+        assertEquals(9, right.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atRightBorder() {
+        final Segment poleSegment = new Segment(990, 999, 120, 129);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(3, remaining.length);
+
+        final Segment upper = remaining[0];
+        assertEquals(0, upper.x_min);
+        assertEquals(999, upper.x_max);
+        assertEquals(0, upper.y_min);
+        assertEquals(119, upper.y_max);
+
+        final Segment lower = remaining[1];
+        assertEquals(0, lower.x_min);
+        assertEquals(999, lower.x_max);
+        assertEquals(130, lower.y_min);
+        assertEquals(1499, lower.y_max);
+
+        final Segment left = remaining[2];
+        assertEquals(0, left.x_min);
+        assertEquals(989, left.x_max);
+        assertEquals(120, left.y_min);
+        assertEquals(129, left.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atBottomBorder() {
+        final Segment poleSegment = new Segment(410, 419, 1489, 1499);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(3, remaining.length);
+
+        final Segment upper = remaining[0];
+        assertEquals(0, upper.x_min);
+        assertEquals(999, upper.x_max);
+        assertEquals(0, upper.y_min);
+        assertEquals(1488, upper.y_max);
+
+        final Segment left = remaining[1];
+        assertEquals(0, left.x_min);
+        assertEquals(409, left.x_max);
+        assertEquals(1489, left.y_min);
+        assertEquals(1499, left.y_max);
+
+        final Segment right = remaining[2];
+        assertEquals(420, right.x_min);
+        assertEquals(999, right.x_max);
+        assertEquals(1489, right.y_min);
+        assertEquals(1499, right.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atTopLeftCorner() {
+        final Segment poleSegment = new Segment(0, 9, 0, 9);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(2, remaining.length);
+
+        final Segment bottom = remaining[0];
+        assertEquals(0, bottom.x_min);
+        assertEquals(999, bottom.x_max);
+        assertEquals(10, bottom.y_min);
+        assertEquals(1499, bottom.y_max);
+
+        final Segment right = remaining[1];
+        assertEquals(10, right.x_min);
+        assertEquals(999, right.x_max);
+        assertEquals(0, right.y_min);
+        assertEquals(9, right.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atTopRightCorner() {
+        final Segment poleSegment = new Segment(990, 999, 0, 9);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(2, remaining.length);
+
+        final Segment bottom = remaining[0];
+        assertEquals(0, bottom.x_min);
+        assertEquals(999, bottom.x_max);
+        assertEquals(10, bottom.y_min);
+        assertEquals(1499, bottom.y_max);
+
+        final Segment left = remaining[1];
+        assertEquals(0, left.x_min);
+        assertEquals(989, left.x_max);
+        assertEquals(0, left.y_min);
+        assertEquals(9, left.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atBottomRightCorner() {
+        final Segment poleSegment = new Segment(990, 999, 1490, 1499);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(2, remaining.length);
+
+        final Segment top = remaining[0];
+        assertEquals(0, top.x_min);
+        assertEquals(999, top.x_max);
+        assertEquals(0, top.y_min);
+        assertEquals(1489, top.y_max);
+
+        final Segment right = remaining[1];
+        assertEquals(0, right.x_min);
+        assertEquals(989, right.x_max);
+        assertEquals(1490, right.y_min);
+        assertEquals(1499, right.y_max);
+    }
+
+    @Test
+    public void testRemoveSegment_atBottomLeftCorner() {
+        final Segment poleSegment = new Segment(0, 9, 1490, 1499);
+        final Segment orbitSegment = new Segment(0, 999, 0, 1499);
+
+        final Segment[] remaining = PixelQuadTreeInverse.removeSegment(poleSegment, orbitSegment, 1000, 1500);
+        assertEquals(2, remaining.length);
+
+        final Segment top = remaining[0];
+        assertEquals(0, top.x_min);
+        assertEquals(999, top.x_max);
+        assertEquals(0, top.y_min);
+        assertEquals(1489, top.y_max);
+
+        final Segment left = remaining[1];
+        assertEquals(10, left.x_min);
+        assertEquals(999, left.x_max);
+        assertEquals(1490, left.y_min);
+        assertEquals(1499, left.y_max);
+    }
 }
