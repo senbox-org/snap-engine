@@ -2,7 +2,7 @@ package org.esa.snap.jp2.reader.internal;
 
 import org.esa.snap.jp2.reader.JP2ImageFile;
 import org.esa.snap.lib.openjpeg.jp2.TileLayout;
-
+import org.esa.snap.core.image.BandMatrixCell;
 import java.nio.file.Path;
 
 /**
