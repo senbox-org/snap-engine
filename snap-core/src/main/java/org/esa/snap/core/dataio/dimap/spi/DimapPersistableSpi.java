@@ -25,7 +25,9 @@ import org.jdom.Element;
  *
  * @author Marco Peters
  * @version $Revision$ $Date$
+ * @deprecated implement {@link org.esa.snap.core.dataio.persistence.PersistenceSpi PersistenceSpi} instead
  */
+@Deprecated
 public interface DimapPersistableSpi {
 
     boolean canDecode(Element element);

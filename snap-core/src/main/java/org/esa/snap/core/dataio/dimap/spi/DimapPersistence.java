@@ -23,7 +23,9 @@ import java.util.Iterator;
  * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  * 
  * @author Marco Peters
+ * @deprecated use {@link org.esa.snap.core.dataio.persistence.Persistence Persistence} instead.
  */
+@Deprecated
 public class DimapPersistence {
 
     public static DimapPersistable getPersistable(Element element) {
