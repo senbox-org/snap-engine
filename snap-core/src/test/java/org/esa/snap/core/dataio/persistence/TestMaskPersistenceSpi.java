@@ -22,17 +22,11 @@ import org.esa.snap.core.datamodel.Mask;
 
 class TestMaskPersistenceSpi implements PersistenceSpi {
 
+    public static final TestMaskPersistenceConverter CONVERTER = new TestMaskPersistenceConverter();
+
     @Override
     public boolean canDecode(Item item) {
-        if (TestMaskPersistenceConverter.isCurrentVersion(item)) {
-            return true;
-        }
-        final PersistenceConverter<?> converter = createConverter();
-        final HistoricalDecoder[] historicalDecoders = converter.getHistoricalDecoders();
-        for (HistoricalDecoder decoder : historicalDecoders) {
-            if (decoder.canDecode(item)) return true;
-        }
-        return false;
+        return CONVERTER.canDecode(item);
     }
 
     @Override
@@ -46,6 +40,6 @@ class TestMaskPersistenceSpi implements PersistenceSpi {
 
     @Override
     public PersistenceConverter<?> createConverter() {
-        return new TestMaskPersistenceConverter();
+        return CONVERTER;
     }
 }

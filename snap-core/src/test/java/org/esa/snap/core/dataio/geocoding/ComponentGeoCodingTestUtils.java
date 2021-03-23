@@ -143,10 +143,10 @@ public class ComponentGeoCodingTestUtils {
         return new float[][]{lon, lat};
     }
 
-    public static double[] toD(float[] lons) {
-        final double[] doubles = new double[lons.length];
-        for (int i = 0; i < lons.length; i++) {
-            doubles[i] = lons[i];
+    public static double[] toD(float[] floats) {
+        final double[] doubles = new double[floats.length];
+        for (int i = 0; i < floats.length; i++) {
+            doubles[i] = floats[i];
         }
         return doubles;
     }

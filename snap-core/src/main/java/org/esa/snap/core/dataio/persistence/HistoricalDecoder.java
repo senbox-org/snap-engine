@@ -19,4 +19,19 @@
 package org.esa.snap.core.dataio.persistence;
 
 public interface HistoricalDecoder extends PersistenceDecoder<Item> {
+    @Override
+    default HistoricalDecoder[] getHistoricalDecoders() {
+        return new HistoricalDecoder[0];
+    }
+
+    interface PreHistoricalDecoder extends HistoricalDecoder {
+
+        @Override
+        default String getID() {
+            return null;
+        }
+
+        @Override
+        boolean canDecode(Item item);
+    }
 }

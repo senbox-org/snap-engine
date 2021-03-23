@@ -18,54 +18,58 @@
 
 package org.esa.snap.core.dataio.geocoding;
 
-import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.persistence.Container;
+import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
+import org.esa.snap.core.dataio.persistence.Item;
+import org.esa.snap.core.dataio.persistence.PersistenceConverter;
+import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.CRS;
-import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.stream.IntStream;
 
-/**
- * @deprecated dont further use this class. Now it is wrapped by {@link ComponentGeoCodingPersistenceConverter}
- */
-@Deprecated
-public class ComponentGeoCodingPersistable implements DimapPersistable {
+public class ComponentGeoCodingPersistenceConverter implements PersistenceConverter<ComponentGeoCoding> {
 
-    public static final String TAG_COMPONENT_GEO_CODING = "ComponentGeoCoding";
-    public static final String TAG_FORWARD_CODING_KEY = "ForwardCodingKey";
-    public static final String TAG_INVERSE_CODING_KEY = "InverseCodingKey";
-    public static final String TAG_GEO_CHECKS = "GeoChecks";
-    public static final String TAG_GEO_CRS = "GeoCRS";
-    public static final String TAG_LON_VARIABLE_NAME = "LonVariableName";
-    public static final String TAG_LAT_VARIABLE_NAME = "LatVariableName";
-    public static final String TAG_RASTER_RESOLUTION_KM = "RasterResolutionKm";
-    public static final String TAG_OFFSET_X = "OffsetX";
-    public static final String TAG_OFFSET_Y = "OffsetY";
-    public static final String TAG_SUBSAMPLING_X = "SubsamplingX";
-    public static final String TAG_SUBSAMPLING_Y = "SubsamplingY";
+    public static final String NAME_COMPONENT_GEO_CODING = "ComponentGeoCoding";
+    public static final String NAME_FORWARD_CODING_KEY = "ForwardCodingKey";
+    public static final String NAME_INVERSE_CODING_KEY = "InverseCodingKey";
+    public static final String NAME_GEO_CHECKS = "GeoChecks";
+    public static final String NAME_GEO_CRS = "GeoCRS";
+    public static final String NAME_LON_VARIABLE_NAME = "LonVariableName";
+    public static final String NAME_LAT_VARIABLE_NAME = "LatVariableName";
+    public static final String NAME_RASTER_RESOLUTION_KM = "RasterResolutionKm";
+    public static final String NAME_OFFSET_X = "OffsetX";
+    public static final String NAME_OFFSET_Y = "OffsetY";
+    public static final String NAME_SUBSAMPLING_X = "SubsamplingX";
+    public static final String NAME_SUBSAMPLING_Y = "SubsamplingY";
+
+    private final static String ID = "ComponentGeoCoding:1";
 
     @Override
-    public Object createObjectFromXml(Element element, Product product) {
-        final String gcElemName = element.getName();
+    public String getID() {
+        return ID;
+    }
 
-        final Element codingMain = element.getChild(TAG_COMPONENT_GEO_CODING);
-        if (codingMain == null) {
-            SystemUtils.LOG.warning("Child element <" + TAG_COMPONENT_GEO_CODING + "> expected in element <" + gcElemName + ">");
+    @Override
+    public ComponentGeoCoding decode(Item item, Product product) {
+        if (item == null || !item.isContainer() || !NAME_COMPONENT_GEO_CODING.equals(item.getName())) {
+            SystemUtils.LOG.warning("For decoding a container with name '" + NAME_COMPONENT_GEO_CODING + "' is expected.");
             return null;
         }
+        final Container codingMain = (Container) item;
 
-        final String forwardKey = codingMain.getChildTextTrim(TAG_FORWARD_CODING_KEY);
-        final String inverseKey = codingMain.getChildTextTrim(TAG_INVERSE_CODING_KEY);
-        final String geoChecksName = codingMain.getChildTextTrim(TAG_GEO_CHECKS);
-        final String geoCrsWKT = codingMain.getChildTextTrim(TAG_GEO_CRS);
-        final String lonVarName = codingMain.getChildTextTrim(TAG_LON_VARIABLE_NAME);
-        final String latVarName = codingMain.getChildTextTrim(TAG_LAT_VARIABLE_NAME);
-        final String resolutionKmStr = codingMain.getChildTextTrim(TAG_RASTER_RESOLUTION_KM);
+        final String forwardKey = codingMain.getProperty(NAME_FORWARD_CODING_KEY).getValueString();
+        final String inverseKey = codingMain.getProperty(NAME_INVERSE_CODING_KEY).getValueString();
+        final String geoChecksName = codingMain.getProperty(NAME_GEO_CHECKS).getValueString();
+        final String geoCrsWKT = codingMain.getProperty(NAME_GEO_CRS).getValueString();
+        final String lonVarName = codingMain.getProperty(NAME_LON_VARIABLE_NAME).getValueString();
+        final String latVarName = codingMain.getProperty(NAME_LAT_VARIABLE_NAME).getValueString();
+        final String resolutionKmStr = codingMain.getProperty(NAME_RASTER_RESOLUTION_KM).getValueString();
 
         final boolean forwardInvalid = forwardKey == null;
         final boolean inverseInvalid = inverseKey == null;
@@ -76,25 +80,25 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         final boolean resolutionKmInvalid = resolutionKmStr == null;
 
         if (forwardInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_FORWARD_CODING_KEY + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_FORWARD_CODING_KEY + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (inverseInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_INVERSE_CODING_KEY + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_INVERSE_CODING_KEY + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (geoChecksInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_GEO_CHECKS + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_GEO_CHECKS + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (geoCrsWKTInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_GEO_CRS + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_GEO_CRS + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (lonVarNameInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_LON_VARIABLE_NAME + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_LON_VARIABLE_NAME + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (latVarNameInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_LAT_VARIABLE_NAME + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_LAT_VARIABLE_NAME + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
         if (resolutionKmInvalid) {
-            SystemUtils.LOG.warning("Child element <" + TAG_RASTER_RESOLUTION_KM + "> expected in element <" + TAG_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Child element <" + NAME_RASTER_RESOLUTION_KM + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
         }
 
         Double resolutionInKm = null;
@@ -102,7 +106,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             resolutionInKm = Double.parseDouble(resolutionKmStr);
         } catch (NumberFormatException e) {
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value of tag <" + TAG_RASTER_RESOLUTION_KM + "> is not a parseable text representation of a double value.");
+            SystemUtils.LOG.warning("The value of tag <" + NAME_RASTER_RESOLUTION_KM + "> is not a parseable text representation of a double value.");
         }
 
         boolean invalidValueGeoChecks = false;
@@ -111,7 +115,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         } catch (IllegalArgumentException e) {
             invalidValueGeoChecks = true;
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value '" + geoChecksName + "' of tag <" + TAG_GEO_CHECKS + "> is not valid.");
+            SystemUtils.LOG.warning("The value '" + geoChecksName + "' of tag <" + NAME_GEO_CHECKS + "> is not valid.");
         }
 
         CoordinateReferenceSystem geoCRS = null;
@@ -119,7 +123,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             geoCRS = CRS.parseWKT(geoCrsWKT);
         } catch (FactoryException e) {
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The WKT value '" + geoCrsWKT + "' of tag <" + TAG_GEO_CRS + "> is not valid.");
+            SystemUtils.LOG.warning("The WKT value '" + geoCrsWKT + "' of tag <" + NAME_GEO_CRS + "> is not valid.");
         }
 
         if (forwardInvalid
@@ -132,7 +136,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             || geoChecksName == null
             || invalidValueGeoChecks
             || geoCRS == null) {
-            SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ".");
+            SystemUtils.LOG.warning("Unable to create " + NAME_COMPONENT_GEO_CODING + ".");
             return null;
         }
 
@@ -146,7 +150,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             if (latRaster == null) {
                 SystemUtils.LOG.warning("Unable to find expected latitude raster '" + lonVarName + "' in product.");
             }
-            SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ".");
+            SystemUtils.LOG.warning("Unable to create " + NAME_COMPONENT_GEO_CODING + ".");
             return null;
         }
 
@@ -194,11 +198,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
     }
 
     @Override
-    public Element createXmlFromObject(Object object) {
-        if (!(object instanceof ComponentGeoCoding)) {
-            return null;
-        }
-        final ComponentGeoCoding geoCoding = (ComponentGeoCoding) object;
+    public Item encode(ComponentGeoCoding geoCoding) {
         final String forwardKey = geoCoding.getForwardCoding().getKey();
         final String inverseKey = geoCoding.getInverseCoding().getKey();
         final GeoChecks geoChecks = geoCoding.getGeoChecks();
@@ -212,44 +212,41 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         final double subsamplingX = geoRaster.getSubsamplingX();
         final double subsamplingY = geoRaster.getSubsamplingY();
 
-        final Element codingMain = new Element(TAG_COMPONENT_GEO_CODING);
-        final Element forwardKeyElem = new Element(TAG_FORWARD_CODING_KEY);
-        final Element inverseKeyElem = new Element(TAG_INVERSE_CODING_KEY);
-        final Element geoChecksElem = new Element(TAG_GEO_CHECKS);
-        final Element geoCRSElem = new Element(TAG_GEO_CRS);
-        final Element lonVarNameElem = new Element(TAG_LON_VARIABLE_NAME);
-        final Element latVarNameElem = new Element(TAG_LAT_VARIABLE_NAME);
-        final Element resolutionKmElem = new Element(TAG_RASTER_RESOLUTION_KM);
-        final Element offsetXElem = new Element(TAG_OFFSET_X);
-        final Element offsetYElem = new Element(TAG_OFFSET_Y);
-        final Element subsamplingXElem = new Element(TAG_SUBSAMPLING_X);
-        final Element subsamplingYElem = new Element(TAG_SUBSAMPLING_Y);
-
-        codingMain.addContent(forwardKeyElem);
-        codingMain.addContent(inverseKeyElem);
-        codingMain.addContent(geoChecksElem);
-        codingMain.addContent(geoCRSElem);
-        codingMain.addContent(lonVarNameElem);
-        codingMain.addContent(latVarNameElem);
-        codingMain.addContent(resolutionKmElem);
-        codingMain.addContent(offsetXElem);
-        codingMain.addContent(offsetYElem);
-        codingMain.addContent(subsamplingXElem);
-        codingMain.addContent(subsamplingYElem);
-
-        forwardKeyElem.setText(forwardKey);
-        inverseKeyElem.setText(inverseKey);
-        geoChecksElem.setText(geoChecks.name());
-        geoCRSElem.setText(geoCRS.toWKT());
-        lonVarNameElem.setText(lonVarName);
-        latVarNameElem.setText(latVarName);
-        resolutionKmElem.setText(String.valueOf(resolutionKm));
-        offsetXElem.setText(String.valueOf(offsetX));
-        offsetYElem.setText(String.valueOf(offsetY));
-        subsamplingXElem.setText(String.valueOf(subsamplingX));
-        subsamplingYElem.setText(String.valueOf(subsamplingY));
+        final Container codingMain = createRootContainer(NAME_COMPONENT_GEO_CODING);
+        codingMain.add(new Property<>(NAME_FORWARD_CODING_KEY, forwardKey));
+        codingMain.add(new Property<>(NAME_INVERSE_CODING_KEY, inverseKey));
+        codingMain.add(new Property<>(NAME_GEO_CHECKS, geoChecks.name()));
+        codingMain.add(new Property<>(NAME_GEO_CRS, geoCRS.toWKT()));
+        codingMain.add(new Property<>(NAME_LON_VARIABLE_NAME, lonVarName));
+        codingMain.add(new Property<>(NAME_LAT_VARIABLE_NAME, latVarName));
+        codingMain.add(new Property<>(NAME_RASTER_RESOLUTION_KM, resolutionKm)); // String.valueOf()
+        codingMain.add(new Property<>(NAME_OFFSET_X, offsetX)); // String.valueOf()
+        codingMain.add(new Property<>(NAME_OFFSET_Y, offsetY)); // String.valueOf()
+        codingMain.add(new Property<>(NAME_SUBSAMPLING_X, subsamplingX)); // String.valueOf()
+        codingMain.add(new Property<>(NAME_SUBSAMPLING_Y, subsamplingY)); // String.valueOf()
 
         return codingMain;
     }
-}
 
+    @Override
+    public HistoricalDecoder[] getHistoricalDecoders() {
+        return new HistoricalDecoder[]{
+                new HistoricalDecoder0()
+        };
+    }
+
+    private static class HistoricalDecoder0 implements HistoricalDecoder.PreHistoricalDecoder {
+
+        @Override
+        public boolean canDecode(Item item) {
+            return item != null && item.isContainer() && NAME_COMPONENT_GEO_CODING.equals(item.getName());
+        }
+
+        @Override
+        public Item decode(Item item, Product product) {
+            final Container container = (Container) item;
+            container.add(new Property<>(KEY_PERSISTENCE_ID, ComponentGeoCodingPersistenceConverter.ID));
+            return container;
+        }
+    }
+}

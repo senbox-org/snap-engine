@@ -22,7 +22,36 @@ import org.esa.snap.core.datamodel.Product;
 
 public interface PersistenceDecoder<T> {
 
-    boolean canDecode(Item item);
+    String KEY_PERSISTENCE_ID = "___persistence_id___";
+
+    HistoricalDecoder[] getHistoricalDecoders();
+
+    String getID();
 
     T decode(Item item, Product product);
+
+    default boolean canDecode(Item item) {
+        if (isCurrentVersion(item)) {
+            return true;
+        }
+        final HistoricalDecoder[] decoders = getHistoricalDecoders();
+        for (int i = decoders.length - 1; i >= 0; i--) { // reverse order !
+            HistoricalDecoder decoder = decoders[i];
+            if (decoder.canDecode(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    default boolean isCurrentVersion(Item item) {
+        if (item == null || !item.isContainer()) {
+            return false;
+        }
+        final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
+        if (property == null) {
+            return false;
+        }
+        return getID().equals(property.getValueString());
+    }
 }

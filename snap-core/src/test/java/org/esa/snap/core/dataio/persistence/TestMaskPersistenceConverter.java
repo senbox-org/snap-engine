@@ -27,6 +27,10 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
 
     private final static String ID = "TestMaskPersistenceConverter:2";
 
+    public String getID() {
+        return ID;
+    }
+
     private static final String[] EXPECTED_PROP_NAMES = new String[]{
             "name",
             "expression",
@@ -35,21 +39,10 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
             "image_transparency"
     };
 
-
-    @Override
-    public boolean canDecode(Item item) {
-        if (isCurrentVersion(item)) {
-            return true;
-        }
-        final HistoricalDecoder[] decoders = getHistoricalDecoders();
-        for (int i = decoders.length - 1; i >= 0; i--) { // reverse order !
-            HistoricalDecoder decoder = decoders[i];
-            if (decoder.canDecode(item)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    public static final HistoricalDecoder[] HISTORICAL_DECODERS = {
+            new HistoricalDecoder0(),
+            new HistoricalDecoder1(),
+    };
 
     @Override
     public Mask decode(Item item, Product product) {
@@ -74,7 +67,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
     @Override
     public Item encode(Mask mask) {
         final Container container = new Container("mask");
-        container.add(new Property<>(KEY_PERSISTENCE_ID, ID));
+        container.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
         container.add(new Property<>("name", mask.getName()));
         container.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
         container.add(new Property<>("description", mask.getDescription()));
@@ -87,10 +80,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
 
     @Override
     public HistoricalDecoder[] getHistoricalDecoders() {
-        return new HistoricalDecoder[]{
-                new HistoricalDecoder0(),
-                new HistoricalDecoder1(),
-        };
+        return HISTORICAL_DECODERS;
     }
 
     private static Property<?>[] getPropertiesValidated(Item item) {
@@ -99,17 +89,6 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
             throw new IllegalArgumentException(message);
         }
         return getProperties(item);
-    }
-
-    static boolean isCurrentVersion(Item item) {
-        if (!item.isContainer()) {
-            return false;
-        }
-        final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
-        if (property == null) {
-            return false;
-        }
-        return ID.equals(property.getValueString());
     }
 
     public static String validate(Item item) {
@@ -141,11 +120,11 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
         return props;
     }
 
-    private static class HistoricalDecoder0 implements HistoricalDecoder {
+    private static class HistoricalDecoder0 implements HistoricalDecoder.PreHistoricalDecoder {
 
         @Override
         public boolean canDecode(Item item) {
-            if (!item.isContainer()) {
+            if (item == null || !item.isContainer()) {
                 return false;
             }
             final String itemName = item.getName();
@@ -177,18 +156,12 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
     }
 
     private static class HistoricalDecoder1 implements HistoricalDecoder {
-        private final static String ID = "MyMaskPersistenceConverter:1";
+
+        public static final String ID = "MyMaskPersistenceConverter:1";
 
         @Override
-        public boolean canDecode(Item item) {
-            if (!item.isContainer()) {
-                return false;
-            }
-            final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
-            if (property == null) {
-                return false;
-            }
-            return ID.equals(property.getValueString());
+        public String getID() {
+            return ID;
         }
 
         @Override

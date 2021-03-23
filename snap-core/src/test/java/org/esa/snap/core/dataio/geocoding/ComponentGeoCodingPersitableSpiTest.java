@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
-import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ComponentGeoCodingPersitableSpiTest {
 
