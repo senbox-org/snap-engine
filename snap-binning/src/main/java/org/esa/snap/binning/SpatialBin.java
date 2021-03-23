@@ -31,12 +31,14 @@ import java.util.Arrays;
  */
 public class SpatialBin extends Bin {
 
+    private static GrowableVector[] NULL_VECTOR = new GrowableVector[0];
+
     protected GrowableVector[] vectors;
 
     // this constructor is only public because it is used in Calvalus - undocumented API! tb 2018-03-26
     public SpatialBin() {
         super();
-        vectors = new GrowableVector[0];
+        vectors = NULL_VECTOR;
     }
 
     public SpatialBin(long index, int numFeatures) {
@@ -51,7 +53,7 @@ public class SpatialBin extends Bin {
                 vectors[i] = new GrowableVector(256);   // @todo 2 tb/tb check if this is a meaningful default value 2018-03-12
             }
         } else {
-            vectors = new GrowableVector[0];
+            vectors = NULL_VECTOR;
         }
     }
 
@@ -83,13 +85,17 @@ public class SpatialBin extends Bin {
             featureValues[i] = dataInput.readFloat();
         }
         final int numVectors = dataInput.readInt();
-        vectors = new GrowableVector[numVectors];
-        for (int i = 0; i < numVectors; i++) {
-            final int vectorLength = dataInput.readInt();
-            final GrowableVector vector = new GrowableVector(vectorLength);
-            vectors[i] = vector;
-            for (int k = 0; k < vectorLength; k++) {
-                vector.add(dataInput.readFloat());
+        if (numVectors == 0) {
+            vectors = NULL_VECTOR;
+        } else {
+            vectors = new GrowableVector[numVectors];
+            for (int i = 0; i < numVectors; i++) {
+                final int vectorLength = dataInput.readInt();
+                final GrowableVector vector = new GrowableVector(vectorLength);
+                vectors[i] = vector;
+                for (int k = 0; k < vectorLength; k++) {
+                    vector.add(dataInput.readFloat());
+                }
             }
         }
     }
