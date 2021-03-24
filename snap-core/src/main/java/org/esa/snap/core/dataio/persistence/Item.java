@@ -37,11 +37,23 @@ public class Item {
         return false;
     }
 
+    public Attribute<?> asAttribute() {
+        return null;
+    }
+
     public boolean isProperty() {
         return false;
     }
 
+    public Property<?> asProperty() {
+        return null;
+    }
+
     public boolean isContainer() {
         return false;
+    }
+
+    public Container asContainer() {
+        return null;
     }
 }

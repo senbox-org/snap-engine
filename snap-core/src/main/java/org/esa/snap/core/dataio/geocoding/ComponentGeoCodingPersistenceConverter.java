@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,6 +19,7 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.persistence.Container;
+import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
@@ -33,6 +34,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.stream.IntStream;
 
+/**
+ * @author Sabine Embacher
+ */
 public class ComponentGeoCodingPersistenceConverter implements PersistenceConverter<ComponentGeoCoding> {
 
     public static final String NAME_COMPONENT_GEO_CODING = "ComponentGeoCoding";
@@ -48,11 +52,14 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
     public static final String NAME_SUBSAMPLING_X = "SubsamplingX";
     public static final String NAME_SUBSAMPLING_Y = "SubsamplingY";
 
-    private final static String ID = "ComponentGeoCoding:1";
+    // Never change this constant! Instead, create a new one with the
+    // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
+    // And so on ...
+    public static final String ID_VERSION_1 = "ComponentGeoCoding:1";
 
     @Override
     public String getID() {
-        return ID;
+        return ID_VERSION_1;
     }
 
     @Override
@@ -61,15 +68,15 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             SystemUtils.LOG.warning("For decoding a container with name '" + NAME_COMPONENT_GEO_CODING + "' is expected.");
             return null;
         }
-        final Container codingMain = (Container) item;
+        final Container container = item.asContainer();
 
-        final String forwardKey = codingMain.getProperty(NAME_FORWARD_CODING_KEY).getValueString();
-        final String inverseKey = codingMain.getProperty(NAME_INVERSE_CODING_KEY).getValueString();
-        final String geoChecksName = codingMain.getProperty(NAME_GEO_CHECKS).getValueString();
-        final String geoCrsWKT = codingMain.getProperty(NAME_GEO_CRS).getValueString();
-        final String lonVarName = codingMain.getProperty(NAME_LON_VARIABLE_NAME).getValueString();
-        final String latVarName = codingMain.getProperty(NAME_LAT_VARIABLE_NAME).getValueString();
-        final String resolutionKmStr = codingMain.getProperty(NAME_RASTER_RESOLUTION_KM).getValueString();
+        final String forwardKey = container.getProperty(NAME_FORWARD_CODING_KEY).getValueString();
+        final String inverseKey = container.getProperty(NAME_INVERSE_CODING_KEY).getValueString();
+        final String geoChecksName = container.getProperty(NAME_GEO_CHECKS).getValueString();
+        final String geoCrsWKT = container.getProperty(NAME_GEO_CRS).getValueString();
+        final String lonVarName = container.getProperty(NAME_LON_VARIABLE_NAME).getValueString();
+        final String latVarName = container.getProperty(NAME_LAT_VARIABLE_NAME).getValueString();
+        final String resolutionKmStr = container.getProperty(NAME_RASTER_RESOLUTION_KM).getValueString();
 
         final boolean forwardInvalid = forwardKey == null;
         final boolean inverseInvalid = inverseKey == null;
@@ -80,25 +87,25 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         final boolean resolutionKmInvalid = resolutionKmStr == null;
 
         if (forwardInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_FORWARD_CODING_KEY + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_FORWARD_CODING_KEY + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (inverseInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_INVERSE_CODING_KEY + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_INVERSE_CODING_KEY + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (geoChecksInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_GEO_CHECKS + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_GEO_CHECKS + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (geoCrsWKTInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_GEO_CRS + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_GEO_CRS + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (lonVarNameInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_LON_VARIABLE_NAME + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_LON_VARIABLE_NAME + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (latVarNameInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_LAT_VARIABLE_NAME + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_LAT_VARIABLE_NAME + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
         if (resolutionKmInvalid) {
-            SystemUtils.LOG.warning("Child element <" + NAME_RASTER_RESOLUTION_KM + "> expected in element <" + NAME_COMPONENT_GEO_CODING + ">.");
+            SystemUtils.LOG.warning("Property with name '" + NAME_RASTER_RESOLUTION_KM + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
 
         Double resolutionInKm = null;
@@ -106,7 +113,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             resolutionInKm = Double.parseDouble(resolutionKmStr);
         } catch (NumberFormatException e) {
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value of tag <" + NAME_RASTER_RESOLUTION_KM + "> is not a parseable text representation of a double value.");
+            SystemUtils.LOG.warning("The value '"+resolutionKmStr+"' of property '" + NAME_RASTER_RESOLUTION_KM + "' cannot be parsed to double.");
         }
 
         boolean invalidValueGeoChecks = false;
@@ -115,7 +122,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         } catch (IllegalArgumentException e) {
             invalidValueGeoChecks = true;
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value '" + geoChecksName + "' of tag <" + NAME_GEO_CHECKS + "> is not valid.");
+            SystemUtils.LOG.warning("The value '" + geoChecksName + "' of property '" + NAME_GEO_CHECKS + "' is not valid.");
         }
 
         CoordinateReferenceSystem geoCRS = null;
@@ -123,8 +130,10 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             geoCRS = CRS.parseWKT(geoCrsWKT);
         } catch (FactoryException e) {
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The WKT value '" + geoCrsWKT + "' of tag <" + NAME_GEO_CRS + "> is not valid.");
+            SystemUtils.LOG.warning("The WKT value '" + geoCrsWKT + "' of property '" + NAME_GEO_CRS + "' is not valid.");
         }
+
+        final String msg_unable_to_create = "Unable to create " + NAME_COMPONENT_GEO_CODING + ".";
 
         if (forwardInvalid
             || inverseInvalid
@@ -136,7 +145,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             || geoChecksName == null
             || invalidValueGeoChecks
             || geoCRS == null) {
-            SystemUtils.LOG.warning("Unable to create " + NAME_COMPONENT_GEO_CODING + ".");
+            SystemUtils.LOG.warning(msg_unable_to_create);
             return null;
         }
 
@@ -148,9 +157,9 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
                 SystemUtils.LOG.warning("Unable to find expected longitude raster '" + lonVarName + "' in product.");
             }
             if (latRaster == null) {
-                SystemUtils.LOG.warning("Unable to find expected latitude raster '" + lonVarName + "' in product.");
+                SystemUtils.LOG.warning("Unable to find expected latitude raster '" + latVarName + "' in product.");
             }
-            SystemUtils.LOG.warning("Unable to create " + NAME_COMPONENT_GEO_CODING + ".");
+            SystemUtils.LOG.warning(msg_unable_to_create);
             return null;
         }
 
@@ -235,17 +244,17 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         };
     }
 
-    private static class HistoricalDecoder0 implements HistoricalDecoder.PreHistoricalDecoder {
+    private static class HistoricalDecoder0 extends DimapHistoricalDecoder {
 
         @Override
         public boolean canDecode(Item item) {
-            return item != null && item.isContainer() && NAME_COMPONENT_GEO_CODING.equals(item.getName());
+            return item != null && item.isContainer() && "ComponentGeoCoding".equals(item.getName());
         }
 
         @Override
         public Item decode(Item item, Product product) {
-            final Container container = (Container) item;
-            container.add(new Property<>(KEY_PERSISTENCE_ID, ComponentGeoCodingPersistenceConverter.ID));
+            final Container container = item.asContainer();
+            container.add(new Property<>(KEY_PERSISTENCE_ID, ID_VERSION_1));
             return container;
         }
     }

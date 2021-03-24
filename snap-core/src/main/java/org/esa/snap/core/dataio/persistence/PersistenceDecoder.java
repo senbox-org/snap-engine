@@ -24,11 +24,11 @@ public interface PersistenceDecoder<T> {
 
     String KEY_PERSISTENCE_ID = "___persistence_id___";
 
-    HistoricalDecoder[] getHistoricalDecoders();
-
     String getID();
 
     T decode(Item item, Product product);
+
+    HistoricalDecoder[] getHistoricalDecoders();
 
     default boolean canDecode(Item item) {
         if (isCurrentVersion(item)) {
@@ -48,7 +48,7 @@ public interface PersistenceDecoder<T> {
         if (item == null || !item.isContainer()) {
             return false;
         }
-        final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
+        final Property<?> property = item.asContainer().getProperty(KEY_PERSISTENCE_ID);
         if (property == null) {
             return false;
         }

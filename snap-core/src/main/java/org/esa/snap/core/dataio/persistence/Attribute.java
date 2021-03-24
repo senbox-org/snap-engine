@@ -28,4 +28,9 @@ public class Attribute<E> extends ValueItem<E> {
     public boolean isAttribute() {
         return true;
     }
+
+    @Override
+    public Attribute<?> asAttribute() {
+        return this;
+    }
 }

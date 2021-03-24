@@ -17,7 +17,6 @@ package org.esa.snap.core.dataio.dimap;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
@@ -77,6 +76,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private final Product product;
     private final String dataDirectory;
+    private final JdomLanguageSupport jdomLanguageSupport= new JdomLanguageSupport();
 
     public DimapHeaderWriter(Product product, File file, String dataDirectory) throws IOException {
         super(file);
@@ -173,8 +173,8 @@ public final class DimapHeaderWriter extends XmlWriter {
                 xmlAttribs.add(new String[]{DimapProductConstants.ATTRIB_MODE, "rw"});
             }
             if (attribute.getNumDataElems() > 1 &&
-                !ProductData.TYPESTRING_ASCII.equals(dataTypeString) &&
-                !ProductData.TYPESTRING_UTC.equals(dataTypeString)) {
+                    !ProductData.TYPESTRING_ASCII.equals(dataTypeString) &&
+                    !ProductData.TYPESTRING_UTC.equals(dataTypeString)) {
                 xmlAttribs.add(
                         new String[]{DimapProductConstants.ATTRIB_ELEMS, String.valueOf(attribute.getNumDataElems())});
             }
@@ -529,30 +529,16 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private void writeGeoCoding(final GeoCoding geoCoding, final int indent, final int bandIndex) {
         if (geoCoding != null) {
-            final DimapPersistable persistable;
-            final PersistenceEncoder<Object> encoder;
-            if (geoCoding instanceof ComponentGeoCoding
-                && "true".equalsIgnoreCase(System.getProperty("useNewPersistenceFramework"))) {
-                encoder = new Persistence().getEncoder(geoCoding);
-                persistable = null;
-            } else {
-                persistable = DimapPersistence.getPersistable(geoCoding);
-                encoder = null;
+            final PersistenceEncoder<Object> encoder = new Persistence().getEncoder(geoCoding);
+            if (encoder != null) {
+                final Item encoded = encoder.encode(geoCoding);
+                printGeoCodingXmlFromObject(indent, bandIndex, toXML(encoded));
+                return;
             }
-            if (encoder != null || persistable != null) {
-                final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
-                println(geopositionTags[0]);
-                writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
-                final Element xmlFromObject;
-                if (encoder != null) {
-                    final Item encoded = encoder.encode(geoCoding);
-                    final JdomLanguageSupport ls = new JdomLanguageSupport();
-                    xmlFromObject = ls.translateToLanguageObject(encoded);
-                } else {
-                    xmlFromObject = persistable.createXmlFromObject(geoCoding);
-                }
-                printElement(indent + 1, xmlFromObject);
-                println(geopositionTags[1]);
+            DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
+            if (persistable != null) {
+                final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
+                printGeoCodingXmlFromObject(indent, bandIndex, xmlFromObject);
             } else if (geoCoding instanceof TiePointGeoCoding) {
                 writeGeoCoding((TiePointGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof MapGeoCoding) {
@@ -567,6 +553,19 @@ public final class DimapHeaderWriter extends XmlWriter {
                 writeGeoCoding((CrsGeoCoding) geoCoding, indent, bandIndex);
             }
         }
+    }
+
+    private Element toXML(Item encoded) {
+        final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);
+        return xmlFromObject;
+    }
+
+    private void printGeoCodingXmlFromObject(int indent, int bandIndex, Element xmlFromObject) {
+        final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
+        println(geopositionTags[0]);
+        writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
+        printElement(indent + 1, xmlFromObject);
+        println(geopositionTags[1]);
     }
 
     private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent, int bandIndex) {
