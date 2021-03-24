@@ -31,8 +31,7 @@ import java.util.Arrays;
  */
 public class SpatialBin extends Bin {
 
-    private static GrowableVector[] NULL_VECTOR = new GrowableVector[0];
-
+    protected static final GrowableVector[] NULL_VECTOR = new GrowableVector[0];
     protected GrowableVector[] vectors;
 
     // this constructor is only public because it is used in Calvalus - undocumented API! tb 2018-03-26
