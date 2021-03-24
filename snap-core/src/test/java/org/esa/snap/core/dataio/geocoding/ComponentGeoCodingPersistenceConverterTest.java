@@ -1,6 +1,7 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.persistence.Container;
+import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.Property;
@@ -62,7 +63,7 @@ public class ComponentGeoCodingPersistenceConverterTest {
 
         assertThat(historicalDecoders, isNotNull());
         assertThat(historicalDecoders.length, is(1));
-        assertThat(historicalDecoders[0], is(instanceOf(HistoricalDecoder.PreHistoricalDecoder.class)));
+        assertThat(historicalDecoders[0], is(instanceOf(DimapHistoricalDecoder.class)));
     }
 
     @Test
@@ -78,7 +79,7 @@ public class ComponentGeoCodingPersistenceConverterTest {
         assertThat(itemFromObject, isNotNull());
         assertThat(itemFromObject.getName(), is(equalTo(NAME_COMPONENT_GEO_CODING)));
         assertThat(itemFromObject.isContainer(), is(true));
-        Container container = (Container) itemFromObject;
+        Container container = itemFromObject.asContainer();
         assertThat(container.getAttributes().length, is(0));
         assertThat(container.getProperties().length, is(12));
 
@@ -117,7 +118,7 @@ public class ComponentGeoCodingPersistenceConverterTest {
         assertThat(container.getProperty(KEY_PERSISTENCE_ID), isNull());
         final HistoricalDecoder preHistoricalDecoder = converter.getHistoricalDecoders()[0];
         assertThat(preHistoricalDecoder.canDecode(container), is(true));
-        container = (Container) preHistoricalDecoder.decode(container, null);
+        container = preHistoricalDecoder.decode(container, null).asContainer();
         final Property<?> persistenceIdProp = container.getProperty(KEY_PERSISTENCE_ID);
         assertThat(persistenceIdProp, isNotNull());
         assertThat(persistenceIdProp.getValueString(), is(converter.getID()));
@@ -164,7 +165,7 @@ public class ComponentGeoCodingPersistenceConverterTest {
         assertThat(itemFromObject, isNotNull());
         assertThat(itemFromObject.getName(), is(equalTo(NAME_COMPONENT_GEO_CODING)));
         assertThat(itemFromObject.isContainer(), is(true));
-        Container container = (Container) itemFromObject;
+        Container container = itemFromObject.asContainer();
         assertThat(container.getAttributes().length, is(0));
         assertThat(container.getProperties().length, is(12));
 
@@ -203,7 +204,7 @@ public class ComponentGeoCodingPersistenceConverterTest {
         assertThat(container.getProperty(KEY_PERSISTENCE_ID), isNull());
         final HistoricalDecoder preHistoricalDecoder = converter.getHistoricalDecoders()[0];
         assertThat(preHistoricalDecoder.canDecode(container), is(true));
-        container = (Container) preHistoricalDecoder.decode(container, null);
+        container = preHistoricalDecoder.decode(container, null).asContainer();
         final Property<?> persistenceIdProp = container.getProperty(KEY_PERSISTENCE_ID);
         assertThat(persistenceIdProp, isNotNull());
         assertThat(persistenceIdProp.getValueString(), is(converter.getID()));

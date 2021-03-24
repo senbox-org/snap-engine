@@ -16,12 +16,18 @@
  *
  */
 
-package org.esa.snap.core.dataio.persistence;
+package org.esa.snap.core.dataio.dimap.spi;
 
-public interface HistoricalDecoder extends PersistenceDecoder<Item> {
+import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
+import org.esa.snap.core.dataio.persistence.Item;
+
+public abstract class DimapHistoricalDecoder implements HistoricalDecoder {
+
     @Override
-    default HistoricalDecoder[] getHistoricalDecoders() {
-        return new HistoricalDecoder[0];
+    public final String getID() {
+        return null;
     }
 
+    @Override
+    public abstract boolean canDecode(Item item);
 }

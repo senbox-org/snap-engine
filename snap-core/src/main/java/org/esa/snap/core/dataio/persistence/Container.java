@@ -35,6 +35,11 @@ public class Container extends Item implements AttributeContainer {
         return true;
     }
 
+    @Override
+    public Container asContainer() {
+        return this;
+    }
+
     public Attribute<?>[] getAttributes() {
         return attributes.values().toArray(new Attribute[0]);
     }

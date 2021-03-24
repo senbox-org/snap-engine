@@ -25,7 +25,7 @@ import org.esa.snap.core.dataio.persistence.PersistenceSpi;
  */
 public class ComponentGeoCodingPersistenceSpi implements PersistenceSpi {
 
-    public static final ComponentGeoCodingPersistenceConverter CONVERTER = new ComponentGeoCodingPersistenceConverter();
+    private static final ComponentGeoCodingPersistenceConverter CONVERTER = new ComponentGeoCodingPersistenceConverter();
 
     @Override
     public boolean canDecode(Item item) {
