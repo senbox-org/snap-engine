@@ -339,175 +339,97 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testGetPositiveLonMin() {
-        double lon0 = 160.0;
-        double lon1 = 150.0;
-        double lon2 = -169.0;
-        double lon3 = 165.0;
-        double result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
+        final double[] lons = new double[4];
+        lons[0] = 160.0;
+        lons[1] = 150.0;
+        lons[2] = -169.0;
+        lons[3] = 165.0;
+        double result = PixelQuadTreeInverse.getPositiveLonMin(lons);
         assertEquals(150.0, result, 0.0);
 
-        lon0 = -175.0;
-        lon1 = 170.0;
-        lon2 = -169.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
+        lons[0] = -175.0;
+        lons[1] = 170.0;
+        lons[2] = -169.0;
+        lons[3] = -170.0;
+        result = PixelQuadTreeInverse.getPositiveLonMin(lons);
         assertEquals(170.0, result, 0.0);
 
-        lon0 = 170.0;
-        lon1 = 160.0;
-        lon2 = -175.0;
-        lon3 = -165.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
+        lons[0] = 170.0;
+        lons[1] = 160.0;
+        lons[2] = -175.0;
+        lons[3] = -165.0;
+        result = PixelQuadTreeInverse.getPositiveLonMin(lons);
         assertEquals(160.0, result, 0.0);
 
-        lon0 = -150.0;
-        lon1 = +160.0;
-        lon2 = -140.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
+        final double[] lonsLong = new double[8];
+        lonsLong[0] = -150.0;
+        lonsLong[1] = 160.0;
+        lonsLong[2] = -140.0;
+        lonsLong[3] = -170.0;
+        lonsLong[4] = -180.0;
+        lonsLong[5] = 170.0;
+        lonsLong[6] = -140.0;
+        lonsLong[7] = 180.0;
+        result = PixelQuadTreeInverse.getPositiveLonMin(lonsLong);
         assertEquals(160.0, result, 0.0);
 
-        lon0 = 170.0;
-        lon1 = -175.0;
-        lon2 = -165.0;
-        lon3 = -150.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(170.0, result, 0.0);
-
-        lon0 = 140.0;
-        lon1 = 150.0;
-        lon2 = 160.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(140.0, result, 0.0);
-
-        lon0 = -175.0;
-        lon1 = -165.0;
-        lon2 = 170.0;
-        lon3 = 160.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(160.0, result, 0.0);
-
-        lon0 = 170.0;
-        lon1 = -140.0;
-        lon2 = 160.0;
-        lon3 = -150.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(160.0, result, 0.0);
-
-        lon0 = -160.0;
-        lon1 = -150.0;
-        lon2 = 170.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(170.0, result, 0.0);
-
-        lon0 = 170.0;
-        lon1 = -170.0;
-        lon2 = 150.0;
-        lon3 = 160.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(150.0, result, 0.0);
-
-        lon0 = -170.0;
-        lon1 = 150.0;
-        lon2 = 160.0;
-        lon3 = 140.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(140.0, result, 0.0);
-
-        lon0 = -150.0;
-        lon1 = -170.0;
-        lon2 = -160.0;
-        lon3 = 170.0;
-        result = PixelQuadTreeInverse.getPositiveLonMin(lon0, lon1, lon2, lon3);
-        assertEquals(170.0, result, 0.0);
+        lonsLong[0] = 140.0;
+        lonsLong[1] = 160.0;
+        lonsLong[2] = -150.0;
+        lonsLong[3] = -170.0;
+        lonsLong[4] = -163.0;
+        lonsLong[5] = 170.0;
+        lonsLong[6] = -155.0;
+        lonsLong[7] = 138.0;
+        result = PixelQuadTreeInverse.getPositiveLonMin(lonsLong);
+        assertEquals(138.0, result, 0.0);
     }
 
     @Test
     public void testGetNegativeLonMax() {
-        double lon0 = 160.0;
-        double lon1 = 150.0;
-        double lon2 = -169.0;
-        double lon3 = 165.0;
-        double result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-169.0, result, 0.0);
-
-        lon0 = -175.0;
-        lon1 = 170.0;
-        lon2 = -169.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-169.0, result, 0.0);
-
-        lon0 = 170.0;
-        lon1 = 160.0;
-        lon2 = -175.0;
-        lon3 = -165.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-165.0, result, 0.0);
-
-        lon0 = -150.0;
-        lon1 = +160.0;
-        lon2 = -140.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-140.0, result, 0.0);
-
-        lon0 = 170.0;
-        lon1 = -175.0;
-        lon2 = -165.0;
-        lon3 = -150.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
+        final double[] lons = new double[4];
+        lons[0] = 160.0;
+        lons[1] = -150.0;
+        lons[2] = -169.0;
+        lons[3] = 165.0;
+        double result = PixelQuadTreeInverse.getNegativeLonMax(lons);
         assertEquals(-150.0, result, 0.0);
 
-        lon0 = 140.0;
-        lon1 = 150.0;
-        lon2 = 160.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-170.0, result, 0.0);
+        lons[0] = -175.0;
+        lons[1] = 170.0;
+        lons[2] = -169.0;
+        lons[3] = -170.0;
+        result = PixelQuadTreeInverse.getNegativeLonMax(lons);
+        assertEquals(-169.0, result, 0.0);
 
-        lon0 = -175.0;
-        lon1 = -165.0;
-        lon2 = 170.0;
-        lon3 = 160.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
+        lons[0] = 170.0;
+        lons[1] = 160.0;
+        lons[2] = -175.0;
+        lons[3] = -165.0;
+        result = PixelQuadTreeInverse.getNegativeLonMax(lons);
         assertEquals(-165.0, result, 0.0);
 
-        lon0 = 170.0;
-        lon1 = -140.0;
-        lon2 = 160.0;
-        lon3 = -150.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
+        final double[] lonsLong = new double[8];
+        lonsLong[0] = -150.0;
+        lonsLong[1] = 160.0;
+        lonsLong[2] = -140.0;
+        lonsLong[3] = -170.0;
+        lonsLong[4] = -180.0;
+        lonsLong[5] = 170.0;
+        lonsLong[6] = -140.0;
+        lonsLong[7] = 180.0;
+        result = PixelQuadTreeInverse.getNegativeLonMax(lonsLong);
         assertEquals(-140.0, result, 0.0);
 
-        lon0 = -160.0;
-        lon1 = -150.0;
-        lon2 = 170.0;
-        lon3 = -170.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-150.0, result, 0.0);
-
-        lon0 = 170.0;
-        lon1 = -170.0;
-        lon2 = 150.0;
-        lon3 = 160.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-170.0, result, 0.0);
-
-        lon0 = -170.0;
-        lon1 = 150.0;
-        lon2 = 160.0;
-        lon3 = 140.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
-        assertEquals(-170.0, result, 0.0);
-
-        lon0 = -150.0;
-        lon1 = -170.0;
-        lon2 = -160.0;
-        lon3 = 170.0;
-        result = PixelQuadTreeInverse.getNegativeLonMax(lon0, lon1, lon2, lon3);
+        lonsLong[0] = 140.0;
+        lonsLong[1] = 160.0;
+        lonsLong[2] = -150.0;
+        lonsLong[3] = -170.0;
+        lonsLong[4] = -163.0;
+        lonsLong[5] = 170.0;
+        lonsLong[6] = -155.0;
+        lonsLong[7] = 138.0;
+        result = PixelQuadTreeInverse.getNegativeLonMax(lonsLong);
         assertEquals(-150.0, result, 0.0);
     }
 
@@ -520,8 +442,58 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testIsCrossingAntiMeridianInsideQuad() {
-        assertTrue(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(176.0, 174.44, -172.98, -174.88));
-        assertFalse(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(176.0, 174.44, 172.98, 174.88));
+        final double[] longitudes = new double[4];
+        longitudes[0] = 176.0;
+        longitudes[1] = 174.44;
+        longitudes[2] = -172.98;
+        longitudes[3] = -174.88;
+        assertTrue(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(longitudes));
+
+        longitudes[0] = 176.0;
+        longitudes[1] = 174.44;
+        longitudes[2] = 172.98;
+        longitudes[3] = 174.88;
+        assertFalse(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(longitudes));
+    }
+
+    @Test
+    public void testGetMin() {
+        final double[] latitudes = new double[4];
+        latitudes[0] = -74.0;
+        latitudes[1] = -71.0;
+        latitudes[2] = -82.0;
+        latitudes[3] = -79.0;
+
+        double min = PixelQuadTreeInverse.getMin(latitudes, 0.02);
+        assertEquals(-82.02, min, 1e-8);
+
+        latitudes[0] = 23.0;
+        latitudes[1] = 27.0;
+        latitudes[2] = 19.0;
+        latitudes[3] = 22.0;
+
+         min = PixelQuadTreeInverse.getMin(latitudes, 0.02);
+        assertEquals(18.98, min, 1e-8);
+    }
+
+    @Test
+    public void testGetMax() {
+        final double[] latitudes = new double[4];
+        latitudes[0] = -75.0;
+        latitudes[1] = -72.0;
+        latitudes[2] = -81.0;
+        latitudes[3] = -80.0;
+
+        double min = PixelQuadTreeInverse.getMax(latitudes, 0.02);
+        assertEquals(-71.98, min, 1e-8);
+
+        latitudes[0] = 22.0;
+        latitudes[1] = 26.0;
+        latitudes[2] = 18.0;
+        latitudes[3] = 21.0;
+
+        min = PixelQuadTreeInverse.getMax(latitudes, 0.02);
+        assertEquals(26.02, min, 1e-8);
     }
 
     @Test

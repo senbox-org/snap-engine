@@ -21,6 +21,7 @@ package org.esa.snap.core.dataio.geocoding.util;
 import org.esa.snap.core.dataio.geocoding.Discontinuity;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -252,6 +253,10 @@ public class RasterUtils {
         final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
 
         return distanceMeanRadian * meanEarthRadiusKm;
+    }
+
+    public static void printPointWkt(GeoPos geoPos) {
+        System.out.println("POINT( " + geoPos.lon + " " + geoPos.lat + ")");
     }
 
     private static Rectangle getCenterExtractWindow(int width, int height) {

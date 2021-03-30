@@ -45,7 +45,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
     public static final String KEY_INTERPOLATING = KEY + KEY_SUFFIX_INTERPOLATING;
 
     private static final double TO_DEG = 180.0 / Math.PI;
-    private static final double ANGLE_THRESHOLD = 330.0;
+    private static final double ANGLE_THRESHOLD = 270.0;
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;
@@ -81,48 +81,45 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         segmentList = new ArrayList<>();
     }
 
-    // package access for testing only tb 2019-12-16
-    static double getPositiveLonMin(double lon0, double lon1, double lon2, double lon3) {
-        double lonMin = 180.0f;
-        if (lon0 >= 0.0) {
-            lonMin = lon0;
-        }
-        if (lon1 >= 0.0) {
-            lonMin = Math.min(lon1, lonMin);
-        }
-        if (lon2 >= 0.0) {
-            lonMin = Math.min(lon2, lonMin);
-        }
-        if (lon3 >= 0.0) {
-            lonMin = Math.min(lon3, lonMin);
+    static double getPositiveLonMin(double[] longitudes) {
+        double lonMin = Double.MAX_VALUE;
+        for (final double lon : longitudes) {
+            if (lon >= 0.0 && lon < lonMin) {
+                lonMin = lon;
+            }
         }
         return lonMin;
     }
 
-    // package access for testing only tb 2019-12-16
-    static double getNegativeLonMax(double lon0, double lon1, double lon2, double lon3) {
-        double lonMax = -180.0f;
-        if (lon0 < 0.0f) {
-            lonMax = lon0;
+    static double getNegativeLonMax(double[] longitudes) {
+        double lonMax = -Double.MAX_VALUE;
+        for (final double lon : longitudes) {
+            if (lon < 0 && lon > lonMax) {
+                lonMax = lon;
+            }
         }
-        if (lon1 < 0.0f) {
-            lonMax = Math.max(lon1, lonMax);
-        }
-        if (lon2 < 0.0f) {
-            lonMax = Math.max(lon2, lonMax);
-        }
-        if (lon3 < 0.0f) {
-            lonMax = Math.max(lon3, lonMax);
-        }
+
         return lonMax;
     }
 
-    static boolean isCrossingAntiMeridianInsideQuad(double lon0, double lon1,
-                                                    double lon2, double lon3) {
-        double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
-        double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
+    static boolean isCrossingAntiMeridianInsideQuad(double[] longitudes) {
+        final int numLons = longitudes.length;
 
-        return Math.abs(lonMax - lonMin) > ANGLE_THRESHOLD;
+        double maxDelta = -1.0;
+        double delta;
+        for (int i = 1; i < numLons; i++) {
+            delta = Math.abs(longitudes[i] - longitudes[i - 1]);
+            if (delta > maxDelta) {
+                maxDelta = delta;
+            }
+        }
+
+        delta = Math.abs(longitudes[numLons - 1] - longitudes[0]);
+        if (delta > maxDelta) {
+            maxDelta = delta;
+        }
+
+        return maxDelta > ANGLE_THRESHOLD;
     }
 
     // package access for testing only tb 2019-12-16
@@ -238,15 +235,9 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
             // cut it from full orbit raster and calculate segmentation
             final Segment[] segments = removeSegment(poleSegment, fullProductSegment, rasterWidth, rasterHeight);
-            for (final Segment segment : segments){
+            for (final Segment segment : segments) {
                 calculateSegmentation(segment, segmentList);
             }
-        }
-
-        for (final Segment segment : segmentList) {
-            segment.printBounds(this);
-            segment.printWktBoundingRect();
-            System.out.println("------");
         }
 
         return segmentList;
@@ -377,19 +368,15 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
         getGeoPos(segment.x_min + xOffset, segment.y_min, geoPos);
         final boolean b1 = segment.isInside(geoPos.lon, geoPos.lat);
-//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_max, segment.y_min + yOffset, geoPos);
         final boolean b2 = segment.isInside(geoPos.lon, geoPos.lat);
-//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_min + xOffset, segment.y_max, geoPos);
         final boolean b3 = segment.isInside(geoPos.lon, geoPos.lat);
-//        printPointWkt(geoPos);
 
         getGeoPos(segment.x_min, segment.y_min + yOffset, geoPos);
         final boolean b4 = segment.isInside(geoPos.lon, geoPos.lat);
-//        printPointWkt(geoPos);
 
         if (!(b2 && b4)) {
             return ACROSS;
@@ -402,17 +389,13 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return INSIDE;
     }
 
-    private void printPointWkt(GeoPos geoPos) {
-        System.out.println("POINT( " + geoPos.lon + " " + geoPos.lat + ")");
-    }
-
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
         if (pixelPos == null) {
             pixelPos = new PixelPos();
         }
         pixelPos.setInvalid();
-// --------------------------------------------------------------------------------------------------
+
         final ArrayList<Result> results = new ArrayList<>();
         for (final Segment segment : segmentList) {
             if (segment.isInside(geoPos.lon, geoPos.lat)) {
@@ -449,41 +432,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
             }
         }
-// --------------------------------------------------------------------------------------------------
-//        final Result result = new Result();
-//        boolean pixelFound = quadTreeSearch(0,
-//                                            geoPos.lat, geoPos.lon,
-//                                            0, 0,
-//                                            rasterWidth, rasterHeight,
-//                                            result);
-//
-//        if (pixelFound) {
-//            final GeoPos resultGeoPos = new GeoPos();
-//            getGeoPos(result.x, result.y, resultGeoPos);
-//            final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
-//            final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
-//
-//            final boolean smallerThanEpsilon;
-//            if (absLonDist > absLatDist) {
-//                final double lat = geoPos.lat;
-//                final int idx = (int) Math.floor(Math.abs(lat * 10));
-//                smallerThanEpsilon = absLonDist < epsilonLon[idx];
-//            } else {
-//                smallerThanEpsilon = absLatDist < epsilon;
-//            }
-//
-//            if (smallerThanEpsilon) {
-//                if (fractionalAccuracy) {
-//                    final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
-//                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
-//                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
-//                } else {
-//                    pixelPos.setLocation(result.x + offsetX, result.y + offsetY);
-//                }
-//            }
-//        }
-// --------------------------------------------------------------------------------------------------
-
 
         return pixelPos;
     }
@@ -523,6 +471,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
     public void dispose() {
         longitudes = null;
         latitudes = null;
+        segmentList.clear();
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
@@ -592,103 +541,111 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         final int y_1 = y;
         final int y_2 = y_1 + h - 1;
 
-        double lonMin;
-        double lonMax;
-        double latMin;
-        double latMax;
+        final boolean closeToPole = Math.abs(lon) > 70.0;
 
-        double lat_0;
-        double lon_0;
-        double lat_1;
-        double lon_1;
-        double lat_2;
-        double lon_2;
-        double lat_3;
-        double lon_3;
-
-        if (depth == 0) {
-            lonMin = lonRange.getMin();
-            lonMax = lonRange.getMax();
-            latMin = latRange.getMin();
-            latMax = latRange.getMax();
-
-            lon_0 = lonMin;
-            lat_0 = latMin;
-
-            lon_1 = lonMax;
-            lat_1 = latMin;
-
-            lon_2 = lonMax;
-            lat_2 = latMax;
-
-            lon_3 = lonMin;
-            lat_3 = latMax;
+        final double[] lonArray;
+        final double[] latArray;
+        if (closeToPole) {
+            lonArray = new double[8];
+            latArray = new double[8];
         } else {
-            final GeoPos geoPos = new GeoPos();
-            getGeoPos(x_1, y_1, geoPos);
-            lat_0 = geoPos.lat;
-            lon_0 = geoPos.lon;
-
-            getGeoPos(x_1, y_2, geoPos);
-            lat_1 = geoPos.lat;
-            lon_1 = geoPos.lon;
-
-            getGeoPos(x_2, y_1, geoPos);
-            lat_2 = geoPos.lat;
-            lon_2 = geoPos.lon;
-
-            getGeoPos(x_2, y_2, geoPos);
-            lat_3 = geoPos.lat;
-            lon_3 = geoPos.lon;
-
-            latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
-            latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
-
-            // @todo 1 tb/tb something is not correct either here or
-            if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lon_0, lon_1, lon_2, lon_3)) {
-                final double signumLon = Math.signum(lon);
-                if (signumLon > 0f) {
-                    // position is in a region with positive longitudes, so cut negative longitudes from quad area
-                    lonMax = 180.0f;
-                    lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
-                } else {
-                    // position is in a region with negative longitudes, so cut positive longitudes from quad area
-                    lonMin = -180.0f;
-                    lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
-                }
-            } else {
-                final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
-                final double epsLon = epsilonLon[idx];
-                lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsLon;
-                lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsLon;
-            }
+            lonArray = new double[4];
+            latArray = new double[4];
         }
 
-        // @todo 1 tb/tb something is not correct here when crossing antimeridian ....
-        final boolean definitelyOutside = lat < latMin || lat > latMax || lon < lonMin || lon > lonMax;
-        if (definitelyOutside) {
+        final GeoPos geoPos = new GeoPos();
+        getGeoPos(x_1, y_1, geoPos);
+        lonArray[0] = geoPos.lon;
+        latArray[0] = geoPos.lat;
+
+        getGeoPos(x_1, y_2, geoPos);
+        lonArray[1] = geoPos.lon;
+        latArray[1] = geoPos.lat;
+
+        getGeoPos(x_2, y_1, geoPos);
+        lonArray[2] = geoPos.lon;
+        latArray[2] = geoPos.lat;
+
+        getGeoPos(x_2, y_2, geoPos);
+        lonArray[3] = geoPos.lon;
+        latArray[3] = geoPos.lat;
+
+        if (closeToPole) {
+            // add more points to compensate extreme curvature close to pole tb 2021-03-29
+            final int xOffset = w / 2;
+            final int yOffset = h / 2;
+
+            getGeoPos(x_1 + xOffset, y_1, geoPos);
+            lonArray[4] = geoPos.lon;
+            latArray[4] = geoPos.lat;
+
+            getGeoPos(x_2, y_1 + yOffset, geoPos);
+            lonArray[5] = geoPos.lon;
+            latArray[5] = geoPos.lat;
+
+            getGeoPos(x_1 + xOffset, y_2, geoPos);
+            lonArray[6] = geoPos.lon;
+            latArray[6] = geoPos.lat;
+
+            getGeoPos(x_1, y_1 + yOffset, geoPos);
+            lonArray[7] = geoPos.lon;
+            latArray[7] = geoPos.lat;
+        }
+
+        final double latMin = getMin(latArray, epsilon);
+        final double latMax = getMax(latArray, epsilon);
+
+        if (lat < latMin || lat > latMax) {
             return false;
+        }
+
+        final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+        final double epsLon = epsilonLon[idx];
+        if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lonArray)) {
+            boolean lonOutside = false;
+            if (lon > 0f) {
+                // position is in a region with positive longitudes, so cut negative longitudes from quad area tb 2021-03-29
+                final double lonMin = getPositiveLonMin(lonArray);
+                if (lon + epsLon < lonMin) {
+                    lonOutside = true;
+                }
+            } else {
+                // position is in a region with negative longitudes, so cut positive longitudes from quad area tb 2021-03-29
+               final double lonMax = getNegativeLonMax(lonArray);
+                if (lon - epsLon > lonMax) {
+                    lonOutside = true;
+                }
+            }
+            if (lonOutside) {
+                return false;
+            }
+        } else {
+            final double lonMin = getMin(lonArray, epsLon);
+            final double lonMax = getMax(lonArray, epsLon);
+
+            if (lon < lonMin || lon > lonMax) {
+                return false;
+            }
         }
 
         boolean pixelFound = false;
         if (w == 2 && h == 2) {
             final double f = Math.cos(lat * MathUtils.DTOR);
-            if (result.update(x_1, y_1, sq(lat - lat_0, f * (lon - lon_0)))) {
+            if (result.update(x_1, y_1, sq(lat - latArray[0], f * (lon - lonArray[0])))) {
                 pixelFound = true;
             }
-            if (result.update(x_1, y_2, sq(lat - lat_1, f * (lon - lon_1)))) {
+            if (result.update(x_1, y_2, sq(lat - latArray[1], f * (lon - lonArray[1])))) {
                 pixelFound = true;
             }
-            if (result.update(x_2, y_1, sq(lat - lat_2, f * (lon - lon_2)))) {
+            if (result.update(x_2, y_1, sq(lat - latArray[2], f * (lon - lonArray[2])))) {
                 pixelFound = true;
             }
-            if (result.update(x_2, y_2, sq(lat - lat_3, f * (lon - lon_3)))) {
+            if (result.update(x_2, y_2, sq(lat - latArray[3], f * (lon - lonArray[3])))) {
                 pixelFound = true;
             }
         } else {
             pixelFound = quadTreeRecursion(depth, lat, lon, x_1, y_1, w, h, result);
         }
-
 
         return pixelFound;
     }
@@ -721,6 +678,28 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         final boolean b4 = quadTreeSearch(increasedDepth, lat, lon, i2, j2, w2r, h2r, result);
 
         return b1 || b2 || b3 || b4;
+    }
+
+    static double getMin(double[] values, double epsilon) {
+        double min = Double.MAX_VALUE;
+        for (double value : values) {
+            if (value < min) {
+                min = value;
+            }
+        }
+
+        return min - epsilon;
+    }
+
+    static double getMax(double[] values, double epsilon) {
+        double max = -Double.MAX_VALUE;
+        for (double value : values) {
+            if (value > max) {
+                max = value;
+            }
+        }
+
+        return max + epsilon;
     }
 
     public static class Plugin implements InversePlugin {
