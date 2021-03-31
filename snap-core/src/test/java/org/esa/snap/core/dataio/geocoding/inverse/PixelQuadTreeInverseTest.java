@@ -18,6 +18,7 @@ import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEO
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PixelQuadTreeInverseTest {
 
@@ -472,7 +473,7 @@ public class PixelQuadTreeInverseTest {
         latitudes[2] = 19.0;
         latitudes[3] = 22.0;
 
-         min = PixelQuadTreeInverse.getMin(latitudes, 0.02);
+        min = PixelQuadTreeInverse.getMin(latitudes, 0.02);
         assertEquals(18.98, min, 1e-8);
     }
 
@@ -914,5 +915,160 @@ public class PixelQuadTreeInverseTest {
         assertEquals(999, left.x_max);
         assertEquals(1490, left.y_min);
         assertEquals(1499, left.y_max);
+    }
+
+    @Test
+    public void testGetKey() {
+        final PixelQuadTreeInverse nonInterpolating = new PixelQuadTreeInverse(false);
+        assertEquals("INV_PIXEL_QUAD_TREE", nonInterpolating.getKey());
+
+        final PixelQuadTreeInverse interpolating = new PixelQuadTreeInverse(true);
+        assertEquals("INV_PIXEL_QUAD_TREE_INTERPOLATING", interpolating.getKey());
+    }
+
+    @Test
+    public void testSplitAtOutsidePoint_AcrossTrack() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+        segment.lon_min = 0.0;
+        segment.lon_max = 30.0;
+        segment.lat_min = 0.0;
+        segment.lat_max = 16.0;
+
+        final Segment[] segments = PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.ACROSS, new MockCalculator());
+        assertEquals(2, segments.length);
+
+        assertEquals(0, segments[0].x_min);
+        assertEquals(99, segments[0].x_max);
+        assertEquals(0, segments[0].y_min);
+        assertEquals(160, segments[0].y_max);
+
+        assertEquals(0, segments[1].x_min);
+        assertEquals(99, segments[1].x_max);
+        assertEquals(161, segments[1].y_min);
+        assertEquals(399, segments[1].y_max);
+    }
+
+    @Test
+    public void testSplitAtOutsidePoint_AcrossTrack_distanceTooSmall() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+        segment.lon_min = 0.0;
+        segment.lon_max = 30.0;
+        segment.lat_min = 0.0;
+        segment.lat_max = 0.2;
+
+        // first segment would be too small, so split at half of the segment height
+        final Segment[] segments = PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.ACROSS, new MockCalculator());
+        assertEquals(2, segments.length);
+
+        assertEquals(0, segments[0].x_min);
+        assertEquals(99, segments[0].x_max);
+        assertEquals(0, segments[0].y_min);
+        assertEquals(200, segments[0].y_max);
+
+        assertEquals(0, segments[1].x_min);
+        assertEquals(99, segments[1].x_max);
+        assertEquals(201, segments[1].y_min);
+        assertEquals(399, segments[1].y_max);
+    }
+
+    @Test
+    public void testSplitAtOutsidePoint_AlongTrack() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+        segment.lon_min = 0.0;
+        segment.lon_max = 4.0;
+        segment.lat_min = -10.0;
+        segment.lat_max = 45.0;
+
+        final Segment[] segments = PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.ALONG, new MockCalculator());
+        assertEquals(2, segments.length);
+
+        assertEquals(0, segments[0].x_min);
+        assertEquals(40, segments[0].x_max);
+        assertEquals(0, segments[0].y_min);
+        assertEquals(399, segments[0].y_max);
+
+        assertEquals(41, segments[1].x_min);
+        assertEquals(99, segments[1].x_max);
+        assertEquals(0, segments[1].y_min);
+        assertEquals(399, segments[1].y_max);
+    }
+
+    @Test
+    public void testSplitAtOutsidePoint_AlongTrack_distanceTooSmall() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+        segment.lon_min = 0.0;
+        segment.lon_max = 0.2;
+        segment.lat_min = -10.0;
+        segment.lat_max = 45.0;
+
+        // first segment would be too small, so split at half of the segment width
+        final Segment[] segments = PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.ALONG, new MockCalculator());
+        assertEquals(2, segments.length);
+
+        assertEquals(0, segments[0].x_min);
+        assertEquals(50, segments[0].x_max);
+        assertEquals(0, segments[0].y_min);
+        assertEquals(399, segments[0].y_max);
+
+        assertEquals(51, segments[1].x_min);
+        assertEquals(99, segments[1].x_max);
+        assertEquals(0, segments[1].y_min);
+        assertEquals(399, segments[1].y_max);
+    }
+
+    @Test
+    public void testSplitAtOutsidePoint_Invalid() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+
+        try {
+            PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.INSIDE, new MockCalculator());
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected){
+        }
+    }
+
+    @Test
+    public void testSplitAtAntMeridian_AlongTrack() {
+        final Segment segment = new Segment(0, 199, 0, 399);
+        segment.lon_min = 170.0;
+        segment.lon_max = 30.0;
+        segment.lat_min = 0.0;
+        segment.lat_max = 60.0;
+
+        final Segment[] segments = PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.ALONG, new MockCalculator(170.0));
+        assertEquals(2, segments.length);
+
+        assertEquals(0, segments[0].x_min);
+        assertEquals(100, segments[0].x_max);
+        assertEquals(0, segments[0].y_min);
+        assertEquals(399, segments[0].y_max);
+
+        assertEquals(101, segments[1].x_min);
+        assertEquals(199, segments[1].x_max);
+        assertEquals(0, segments[1].y_min);
+        assertEquals(399, segments[1].y_max);
+    }
+
+    @Test
+    public void testSplitAtAntiMeridian_AlongTrack_tooSmallSegment() {
+        final Segment segment = new Segment(0, 199, 0, 399);
+        segment.lon_min = 170.0;
+        segment.lon_max = 30.0;
+        segment.lat_min = 0.0;
+        segment.lat_max = 60.0;
+
+        final Segment[] segments = PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.ALONG, new MockCalculator(179.8));
+        assertEquals(0, segments.length);
+    }
+
+    @Test
+    public void testSplitAtAntiMeridian_Invalid() {
+        final Segment segment = new Segment(0, 99, 0, 399);
+
+        try {
+            PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.INSIDE, new MockCalculator());
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected){
+        }
     }
 }

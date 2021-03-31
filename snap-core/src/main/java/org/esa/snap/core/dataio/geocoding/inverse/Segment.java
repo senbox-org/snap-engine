@@ -143,7 +143,6 @@ class Segment {
         lat_min = minItLat;
         lat_max = maxItLat;
 
-        // @todo 1 tb/tb check if this constant is OK - we're not comparing neighbouring pixels here 2021-03-11
         if (Math.abs(maxItLon - minItLon) > 270) {
             containsAntiMeridian = true;
         }
@@ -170,71 +169,6 @@ class Segment {
             lon_min = minItLon;
             lon_max = maxItLon;
         }
-    }
-
-    // @todo 2 tb/tb this is debug code, remove it 2021-03-16
-    void printWktBoundingRect() {
-        final StringBuilder builder = new StringBuilder();
-        if (containsAntiMeridian) {
-            builder.append("MULTIPOLYGON(((");
-            builder.append("-180 " + lat_max + ",");
-            builder.append(lon_min + " " + lat_max + ",");
-            builder.append(lon_min + " " + lat_min + ",");
-            builder.append("-180 " + lat_min + ",");
-            builder.append("-180 " + lat_max);
-            builder.append(")),((");
-            builder.append(lon_max + " " + lat_max + ",");
-            builder.append("180 " + lat_max + ",");
-            builder.append("180 " + lat_min + ",");
-            builder.append(lon_max + " " + lat_min + ",");
-            builder.append(lon_max + " " + lat_max);
-            builder.append(")))");
-        } else {
-            builder.append("POLYGON((");
-            builder.append(lon_min + " " + lat_max + ",");
-            builder.append(lon_max + " " + lat_max + ",");
-            builder.append(lon_max + " " + lat_min + ",");
-            builder.append(lon_min + " " + lat_min + ",");
-            builder.append(lon_min + " " + lat_max);
-            builder.append("))");
-        }
-
-        System.out.println(builder.toString());
-    }
-
-    // @todo 2 tb/tb this is debug code, remove it 2021-03-16
-    void printBounds(GeoPosCalculator calc) {
-        final StringBuilder builder = new StringBuilder();
-        final int step = 3;
-        final GeoPos geoPos = new GeoPos();
-
-        builder.append("MULTIPOINT(");
-
-        // upper
-        for (int x = x_min; x < x_max; x+= step) {
-            calc.getGeoPos(x, y_min, geoPos);
-            builder.append(geoPos.lon + " " + geoPos.lat + ",");
-        }
-        // right
-        for (int y = y_min; y < y_max; y+= step) {
-            calc.getGeoPos(x_max, y, geoPos);
-            builder.append(geoPos.lon + " " + geoPos.lat + ",");
-        }
-        // lower
-        for (int x = x_max; x > x_min; x-= step) {
-            calc.getGeoPos(x, y_max, geoPos);
-            builder.append(geoPos.lon + " " + geoPos.lat + ",");
-        }
-        // left
-        for (int y = y_max; y > y_min; y-= step) {
-            calc.getGeoPos(x_min, y, geoPos);
-            builder.append(geoPos.lon + " " + geoPos.lat + ",");
-        }
-
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append(")");
-
-        System.out.println(builder.toString());
     }
 
     boolean isInside(double lon, double lat) {

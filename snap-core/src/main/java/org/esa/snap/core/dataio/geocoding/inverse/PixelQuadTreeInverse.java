@@ -221,6 +221,28 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return segmentList.toArray(new Segment[0]);
     }
 
+    static double getMin(double[] values, double epsilon) {
+        double min = Double.MAX_VALUE;
+        for (double value : values) {
+            if (value < min) {
+                min = value;
+            }
+        }
+
+        return min - epsilon;
+    }
+
+    static double getMax(double[] values, double epsilon) {
+        double max = -Double.MAX_VALUE;
+        for (double value : values) {
+            if (value > max) {
+                max = value;
+            }
+        }
+
+        return max + epsilon;
+    }
+
     private ArrayList<Segment> calculateSegmentation(int rasterWidth, int rasterHeight, PixelPos[] poleLocations) {
         final ArrayList<Segment> segmentList = new ArrayList<>();
 
@@ -254,11 +276,11 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             // we need to divide further down
             Segment[] splits = new Segment[0];
             if (segment.containsAntiMeridian) {
-                splits = splitAtAntiMeridian(segment, segmentCoverage);
+                splits = splitAtAntiMeridian(segment, segmentCoverage, this);
             }
 
             if (splits.length == 0) {
-                splits = splitAtOutsidePoint(segment, segmentCoverage);
+                splits = splitAtOutsidePoint(segment, segmentCoverage, this);
             }
 
             if (splits.length == 0) {
@@ -274,23 +296,23 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         }
     }
 
-    private Segment[] splitAtOutsidePoint(Segment segment, SegmentCoverage segmentCoverage) {
+    static Segment[] splitAtOutsidePoint(Segment segment, SegmentCoverage segmentCoverage, GeoPosCalculator calculator) {
+        final GeoPos geoPos = new GeoPos();
         if (segmentCoverage == ACROSS) {
-            final GeoPos geoPos = new GeoPos();
             // check left
             int y_l = Integer.MIN_VALUE;
-
             for (int y = segment.y_min + 1; y < segment.y_max; y++) {
-                getGeoPos(segment.x_min, y, geoPos);
+                calculator.getGeoPos(segment.x_min, y, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
                     y_l = y;
                     break;
                 }
             }
+
             // check right
             int y_r = Integer.MIN_VALUE;
             for (int y = segment.y_min + 1; y < segment.y_max; y++) {
-                getGeoPos(segment.x_max, y, geoPos);
+                calculator.getGeoPos(segment.x_max, y, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
                     y_r = y;
                     break;
@@ -300,7 +322,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 // no suitable split-points found - as a last idea, we split at half
                 return segment.split(true);
             }
-            final int center = segment.y_min + segment.getWidth() / 2;
+            final int center = segment.y_min + segment.getHeight() / 2;
             final int delta_l = Math.abs(center - y_l);
             final int delta_r = Math.abs(center - y_r);
             if (delta_l < delta_r) {
@@ -308,38 +330,68 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             } else {
                 return segment.split_y(y_r);
             }
+        } else if (segmentCoverage == ALONG) {
+            // check top
+            int x_t = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x < segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_min, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    x_t = x;
+                    break;
+                }
+            }
+            // check bottom
+            int x_b = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x < segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_max, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    x_b = x;
+                    break;
+                }
+            }
+            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+                // no suitable split-points found - as a last idea, we split at half
+                return segment.split(false);
+            }
+            final int center = segment.x_min + segment.getWidth() / 2;
+            final int delta_t = Math.abs(center - x_t);
+            final int delta_b = Math.abs(center - x_b);
+            if (delta_t < delta_b) {
+                return segment.split_x(x_t);
+            } else {
+                return segment.split_x(x_b);
+            }
         } else {
-            // split at x_out
-            throw new IllegalStateException("not implemented");
+            throw new IllegalStateException("should not come here");
         }
     }
 
-    private Segment[] splitAtAntiMeridian(Segment segment, SegmentCoverage segmentCoverage) {
+    static Segment[] splitAtAntiMeridian(Segment segment, SegmentCoverage segmentCoverage, GeoPosCalculator calculator) {
+        final GeoPos geoPos = new GeoPos();
         if (segmentCoverage == ACROSS) {
             // find y with anti-meridian jump
-            final GeoPos geoPos = new GeoPos();
-            getGeoPos(segment.x_min, segment.y_min, geoPos);
+            calculator.getGeoPos(segment.x_min, segment.y_min, geoPos);
             double lon_l = geoPos.lon;
 
-            getGeoPos(segment.x_max, segment.y_min, geoPos);
+            calculator.getGeoPos(segment.x_max, segment.y_min, geoPos);
             double lon_r = geoPos.lon;
 
             int y_l = Integer.MIN_VALUE;
             int y_r = Integer.MIN_VALUE;
             for (int y = segment.y_min + 1; y <= segment.y_max; y++) {
-                getGeoPos(segment.x_min, y, geoPos);
+                calculator.getGeoPos(segment.x_min, y, geoPos);
                 double delta = Math.abs(lon_l - geoPos.lon);
-                if (delta > 270) {
+                if (delta > ANGLE_THRESHOLD) {
                     y_l = y;
                 }
                 lon_l = geoPos.lon;
 
-                getGeoPos(segment.x_max, y, geoPos);
+                calculator.getGeoPos(segment.x_max, y, geoPos);
                 delta = Math.abs(lon_r - geoPos.lon);
-                lon_r = geoPos.lon;
-                if (delta > 270) {
+                if (delta > ANGLE_THRESHOLD) {
                     y_r = y;
                 }
+                lon_r = geoPos.lon;
             }
 
             if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
@@ -347,13 +399,50 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 return new Segment[0];
             }
 
-            final int center = segment.y_min + segment.getWidth() / 2;
+            final int center = segment.y_min + segment.getHeight() / 2;
             final int delta_l = Math.abs(center - y_l);
             final int delta_r = Math.abs(center - y_r);
             if (delta_l < delta_r) {
                 return segment.split_y(y_l);
             } else {
                 return segment.split_y(y_r);
+            }
+        } else if (segmentCoverage == ALONG) {
+            // find x with anti-meridian jump
+            calculator.getGeoPos(segment.x_min, segment.y_min, geoPos);
+            double lon_t = geoPos.lon;
+
+            calculator.getGeoPos(segment.x_min, segment.y_max, geoPos);
+            double lon_b = geoPos.lon;
+
+            int x_t = Integer.MIN_VALUE;
+            int x_b = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x <= segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_min, geoPos);
+                double delta = Math.abs(lon_t - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    x_t = x;
+                }
+                lon_t = geoPos.lon;
+
+                calculator.getGeoPos(x, segment.y_max, geoPos);
+                delta = Math.abs(lon_b - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    x_b = x;
+                }
+                lon_b = geoPos.lon;
+            }
+            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+                // antimeridian not passing through segment in a way that enables across-swath splitting
+                return new Segment[0];
+            }
+            final int center = segment.x_min + segment.getWidth() / 2;
+            final int delta_t = Math.abs(center - x_t);
+            final int delta_b = Math.abs(center - x_b);
+            if (delta_t < delta_b) {
+                return segment.split_x(x_t);
+            } else {
+                return segment.split_x(x_b);
             }
         } else {
             // split at x_antimeridian
@@ -611,7 +700,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
             } else {
                 // position is in a region with negative longitudes, so cut positive longitudes from quad area tb 2021-03-29
-               final double lonMax = getNegativeLonMax(lonArray);
+                final double lonMax = getNegativeLonMax(lonArray);
                 if (lon - epsLon > lonMax) {
                     lonOutside = true;
                 }
@@ -678,28 +767,6 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         final boolean b4 = quadTreeSearch(increasedDepth, lat, lon, i2, j2, w2r, h2r, result);
 
         return b1 || b2 || b3 || b4;
-    }
-
-    static double getMin(double[] values, double epsilon) {
-        double min = Double.MAX_VALUE;
-        for (double value : values) {
-            if (value < min) {
-                min = value;
-            }
-        }
-
-        return min - epsilon;
-    }
-
-    static double getMax(double[] values, double epsilon) {
-        double max = -Double.MAX_VALUE;
-        for (double value : values) {
-            if (value > max) {
-                max = value;
-            }
-        }
-
-        return max + epsilon;
     }
 
     public static class Plugin implements InversePlugin {

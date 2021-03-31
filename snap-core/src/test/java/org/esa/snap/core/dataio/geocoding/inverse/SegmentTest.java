@@ -16,7 +16,6 @@
 
 package org.esa.snap.core.dataio.geocoding.inverse;
 
-import org.esa.snap.core.datamodel.GeoPos;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -315,7 +314,7 @@ public class SegmentTest {
 
     @Test
     public void testCalculateGeoPoints() {
-        final Segment segment = new Segment(20, 40, 280, 390);
+        final Segment segment = new Segment(2, 4, 28, 39);
 
         segment.calculateGeoPoints(new MockCalculator());
 
@@ -329,8 +328,8 @@ public class SegmentTest {
 
     @Test
     public void testCalculateGeoPoints_antiMeridian() {
-        // this because the mock just divides rasterpositiony by 100 to create geolocations tb 2021-03-16
-        final Segment segment = new Segment(-17000, 17000, 280, 390);
+        // this because the mock just divides rasterpositiony by 10 to create geolocations tb 2021-03-16
+        final Segment segment = new Segment(-1700, 1700, 28, 39);
 
         segment.calculateGeoPoints(new MockCalculator());
 
@@ -364,13 +363,5 @@ public class SegmentTest {
         assertEquals(segment.lat_max, clone.lat_max, 1e-8);
 
         assertEquals(segment.containsAntiMeridian, clone.containsAntiMeridian);
-    }
-
-    private class MockCalculator implements GeoPosCalculator {
-        @Override
-        public void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
-            geoPos.lon = (double) pixelX / 100.0;
-            geoPos.lat = (double) pixelY / 100.0;
-        }
     }
 }
