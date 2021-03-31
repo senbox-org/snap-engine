@@ -487,10 +487,10 @@ public class ToolAdapterOp extends Operator {
                 }
             } else {
                 Object paramValue = getParameter(paramName);
-                if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName)) {
+                if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName) && paramValue!=null) {
                     paramValue = getNextFileName(this.descriptor.resolveVariables((File) paramValue));
                 }
-                if (param.getDataType().isArray()) {
+                if (param.getDataType().isArray() && paramValue!=null) {
                     paramValue = StringUtils.arrayToString(paramValue, "\n");
                 }
                 if (paramDescriptor.isNotEmpty() || paramDescriptor.isNotNull() || (paramValue != null && !paramValue.toString().isEmpty())) {
@@ -520,10 +520,10 @@ public class ToolAdapterOp extends Operator {
         for (ParameterDescriptor param : params) {
             String paramName = param.getName();
             Object paramValue = getParameter(paramName);
-            if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName)) {
+            if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName) && paramValue!=null) {
                 paramValue = getNextFileName(this.descriptor.resolveVariables((File) paramValue));
             }
-            if (param.getDataType().isArray()) {
+            if (param.getDataType().isArray() && paramValue!=null) {
                 paramValue = StringUtils.arrayToString(paramValue, "\n");
             }
             parameters.put(paramName, paramValue);
