@@ -279,16 +279,8 @@ public class ColorBarLayer extends Layer {
         double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
         double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLocationShift() / 100) : -(colorBarImageHeight * getLocationShift() / 100);
 
-        double defaultOffset = 0;
-        double defaultShift;
-
-        if (getOrientation() == ImageLegend.HORIZONTAL) {
-            defaultShift = (rasterWidth - colorBarImageWidth) / 2;
-        } else {
-            defaultShift = (rasterHeight - colorBarImageHeight) / 2;
-        }
-
-
+        double offsetAdjust = 0;
+        double shiftAdjust = 0;
 
 
         if (getOrientation() == ImageLegend.HORIZONTAL) {
@@ -296,43 +288,40 @@ public class ColorBarLayer extends Layer {
                 switch (getColorBarLocationPlacement()) {
 
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
-                        defaultOffset = -colorBarImageHeight;
-                        defaultShift = 0;
-                        offset = -offset;
+                        offsetAdjust = -colorBarImageHeight;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_CENTER:
-                        defaultOffset = -colorBarImageHeight;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
-                        offset = -offset;
+                        offsetAdjust = -colorBarImageHeight;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_RIGHT:
-                        defaultOffset = -colorBarImageHeight;
-                        defaultShift = rasterWidth - colorBarImageWidth;
-                        offset = -offset;
+                        offsetAdjust = -colorBarImageHeight;
+                        shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
-                        defaultOffset = -rasterHeight;
-                        defaultShift = 0;
+                        offsetAdjust = -rasterHeight;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_CENTER:
-                        defaultOffset = -rasterHeight;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offsetAdjust = -rasterHeight;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_RIGHT:
-                        defaultOffset = -rasterHeight;
-                        defaultShift = rasterWidth - colorBarImageWidth;
+                        offsetAdjust = -rasterHeight;
+                        shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_LEFT_CENTER:
-                        defaultOffset = -(rasterHeight + colorBarImageHeight) / 2;;
-                        defaultShift = 0;
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_RIGHT_CENTER:
-                        defaultOffset = -(rasterHeight + colorBarImageHeight) / 2;;
-                        defaultShift = rasterWidth - colorBarImageWidth;
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;;
+                        shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     default:
-                        defaultOffset = -colorBarImageHeight;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offsetAdjust = -colorBarImageHeight;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                 }
 
 
@@ -340,35 +329,40 @@ public class ColorBarLayer extends Layer {
                 switch (getColorBarLocationPlacement()) {
 
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
-                        defaultOffset = 0;
-                        defaultShift = 0;
+                        offsetAdjust = 0;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_CENTER:
-                        defaultOffset = 0;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offsetAdjust = 0;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_RIGHT:
-                        defaultOffset = 0;
-                        defaultShift = rasterWidth - colorBarImageWidth;
+                        offsetAdjust = 0;
+                        shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
-                        defaultOffset = -rasterHeight - colorBarImageHeight;
-                        defaultShift = 0;
-                        offset = -offset;
+                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_CENTER:
-                        defaultOffset = -rasterHeight - colorBarImageHeight;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
-                        offset = -offset;
+                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_RIGHT:
-                        defaultOffset = -rasterHeight - colorBarImageHeight;
-                        defaultShift = rasterWidth - colorBarImageWidth;
-                        offset = -offset;
+                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        shiftAdjust = rasterWidth - colorBarImageWidth;
+                        break;
+                    case ColorBarLayerType.LOCATION_LEFT_CENTER:
+                        offsetAdjust = - (rasterHeight + colorBarImageHeight) / 2 ;
+                        shiftAdjust = -colorBarImageWidth;
+                        break;
+                    case ColorBarLayerType.LOCATION_RIGHT_CENTER:
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;
+                        shiftAdjust = rasterWidth;
                         break;
                     default:
-                        defaultOffset = 0;
-                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offsetAdjust = 0;
+                        shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                 }
             }
 
@@ -378,68 +372,84 @@ public class ColorBarLayer extends Layer {
 
                 switch (getColorBarLocationPlacement()) {
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
-                        defaultOffset = -rasterWidth;
-                        defaultShift = 0;
+                        offsetAdjust = -rasterWidth;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_LEFT_CENTER:
-                        defaultOffset = -rasterWidth;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = -rasterWidth;
+                        shiftAdjust = (rasterHeight - colorBarImageHeight) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
-                        defaultOffset = -rasterWidth;
-                        defaultShift = rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -rasterWidth;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_RIGHT:
-                        defaultOffset = -colorBarImageWidth;
-                        defaultShift = 0;
+                        offsetAdjust = -colorBarImageWidth;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_RIGHT_CENTER:
-                        defaultOffset = -colorBarImageWidth;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = -colorBarImageWidth;
+                        shiftAdjust = (rasterHeight - colorBarImageHeight) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_RIGHT:
-                        defaultOffset = -colorBarImageWidth;
-                        defaultShift = rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -colorBarImageWidth;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
+                        break;
+                    case ColorBarLayerType.LOCATION_UPPER_CENTER:
+                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        shiftAdjust = 0;
+                        break;
+                    case ColorBarLayerType.LOCATION_LOWER_CENTER:
+                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     default:
-                        defaultOffset = -colorBarImageWidth;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = -colorBarImageWidth;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
                 }
             } else {
                 switch (getColorBarLocationPlacement()) {
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
-                        defaultOffset = -rasterWidth - colorBarImageWidth;
-                        defaultShift = 0;
+                        offsetAdjust = -rasterWidth - colorBarImageWidth;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_LEFT_CENTER:
-                        defaultOffset = -rasterWidth - colorBarImageWidth;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = -rasterWidth - colorBarImageWidth;
+                        shiftAdjust = (rasterHeight - colorBarImageHeight) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
-                        defaultOffset = -rasterWidth - colorBarImageWidth;
-                        defaultShift = rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -rasterWidth - colorBarImageWidth;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_RIGHT:
-                        defaultOffset = 0;
-                        defaultShift = 0;
+                        offsetAdjust = 0;
+                        shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_RIGHT_CENTER:
-                        defaultOffset = 0;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = 0;
+                        shiftAdjust = (rasterHeight - colorBarImageHeight) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_RIGHT:
-                        defaultOffset = 0;
-                        defaultShift = rasterHeight - colorBarImageHeight;
+                        offsetAdjust = 0;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
+                        break;
+                    case ColorBarLayerType.LOCATION_UPPER_CENTER:
+                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        shiftAdjust = -colorBarImageHeight;
+                        break;
+                    case ColorBarLayerType.LOCATION_LOWER_CENTER:
+                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        shiftAdjust = rasterHeight;
                         break;
                     default:
-                        defaultOffset = 0;
-                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        offsetAdjust = 0;
+                        shiftAdjust = rasterHeight - colorBarImageHeight;
                 }
             }
         }
 
-        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + defaultOffset : shift + defaultShift;
-        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + defaultShift : rasterWidth + offset + defaultOffset;
+        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + offsetAdjust : shift + shiftAdjust;
+        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + shiftAdjust : rasterWidth + offset + offsetAdjust;
         //double[] flatmatrix = {scaleX, 0.0, 0.0, scaleY, x_axis_translation, y_axis_translation};
 
 

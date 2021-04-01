@@ -715,11 +715,22 @@ public class ImageLegend {
     }
 
     public boolean isAlphaUsed() {
-        return transparencyEnabled && backdropTransparency > 0.0f && backdropTransparency <= 1.0f;
+        return transparencyEnabled;
+//        return transparencyEnabled && (backdropTransparency > 0.0f && backdropTransparency <= 1.0f);
     }
 
     public int getBackgroundAlpha() {
-        return isAlphaUsed() ? Math.round(255f * (1f - backdropTransparency)) : 255;
+            if (transparencyEnabled) {
+                if (isBackdropShow()) {
+                    return Math.round(255f * (1f - backdropTransparency));
+                } else {
+                    return Math.round(0f);
+                }
+            } else {
+                return 255;
+            }
+
+//        return isAlphaUsed() ? Math.round(255f * (1f - backdropTransparency)) : 255;
     }
 
 
@@ -1202,9 +1213,9 @@ public class ImageLegend {
     }
 
     private void draw(Graphics2D g2d) {
-        if (isBackdropShow()) {
+//        if (isBackdropShow()) {
             fillBackground(g2d);
-        }
+//        }
 
 
         drawPalette(g2d);
