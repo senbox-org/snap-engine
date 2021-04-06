@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.geocoding.GeoChecks;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Band;
@@ -404,12 +405,14 @@ public class CfGeocodingPart extends ProfilePartIO {
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                   width, height, resolutionInKm);
 
-        final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
+        final ForwardCoding forward;
         final InverseCoding inverse;
         final boolean fractionalAccuracy = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
         if (fractionalAccuracy) {
+            forward = ComponentFactory.getForward(PixelInterpolatingForward.KEY);
             inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING);
         } else {
+            forward = ComponentFactory.getForward(PixelForward.KEY);
             inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
         }
 

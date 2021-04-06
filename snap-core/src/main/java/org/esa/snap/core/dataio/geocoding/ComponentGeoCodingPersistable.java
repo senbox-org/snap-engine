@@ -1,6 +1,9 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -38,8 +41,8 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             return null;
         }
 
-        final String forwardKey = codingMain.getChildTextTrim(TAG_FORWARD_CODING_KEY);
-        final String inverseKey = codingMain.getChildTextTrim(TAG_INVERSE_CODING_KEY);
+        String forwardKey = codingMain.getChildTextTrim(TAG_FORWARD_CODING_KEY);
+        String inverseKey = codingMain.getChildTextTrim(TAG_INVERSE_CODING_KEY);
         final String geoChecksName = codingMain.getChildTextTrim(TAG_GEO_CHECKS);
         final String geoCrsWKT = codingMain.getChildTextTrim(TAG_GEO_CRS);
         final String lonVarName = codingMain.getChildTextTrim(TAG_LON_VARIABLE_NAME);
@@ -165,6 +168,14 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
                                       resolutionInKm);
         }
 
+        // TODO preliminary location to overwrite non-interpolating spec of input product e.g. for binning with supersampling, mb, 2021-03-31
+        // Tom, please find a better solution.
+        if (Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY) && PixelForward.KEY.equals(forwardKey)) {
+             forwardKey = PixelInterpolatingForward.KEY;
+        }
+        if (Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY) && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
+             inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
+        }
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
         final InverseCoding inverseCoding = ComponentFactory.getInverse(inverseKey);
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
