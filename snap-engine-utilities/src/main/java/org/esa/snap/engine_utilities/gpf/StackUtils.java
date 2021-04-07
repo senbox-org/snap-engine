@@ -239,7 +239,8 @@ public final class StackUtils {
                 return StringUtils.stringToArray(slvBandNames, " ");
             }
         }
-        String dateSuffix = slvProductName.substring(slvProductName.lastIndexOf('_'), slvProductName.length()).toLowerCase();
+        String dateSuffix = slvProductName.contains("_") ?
+                slvProductName.substring(slvProductName.lastIndexOf('_'), slvProductName.length()).toLowerCase() : "";
         final List<String> bandNames = new ArrayList<>();
         for(String bandName : sourceProduct.getBandNames()) {
             final String name = bandName.toLowerCase();
