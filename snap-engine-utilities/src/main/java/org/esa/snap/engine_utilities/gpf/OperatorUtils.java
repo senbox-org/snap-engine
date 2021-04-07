@@ -52,6 +52,13 @@ public final class OperatorUtils {
     public static final String TPG_LATITUDE = "latitude";
     public static final String TPG_LONGITUDE = "longitude";
 
+    public static String createProductName(final String productName, final String suffix) {
+        if(!productName.endsWith(suffix)) {
+            return productName + suffix;
+        }
+        return productName;
+    }
+
     /**
      * Get incidence angle tie point grid.
      *
@@ -158,21 +165,6 @@ public final class OperatorUtils {
             throw new OperatorException("Band name contains multiple polarizations: " + pol);
         }
         return null;
-    }
-
-    public static String getSubswathFromBandName(final String bandName) {
-
-        String ss = "";
-        final String bandNameU = bandName.toUpperCase();
-        if (bandNameU.contains("_IW")) {
-            int idx = bandNameU.indexOf("_IW")+1;
-            return bandNameU.substring(idx, idx + 3);
-        } else if (bandNameU.contains("_EW")) {
-            int idx = bandNameU.indexOf("_EW")+1;
-            return bandNameU.substring(idx, idx + 3);
-        }
-
-        return "";
     }
 
     /**
