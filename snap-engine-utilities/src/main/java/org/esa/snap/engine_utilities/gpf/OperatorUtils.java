@@ -740,6 +740,14 @@ public final class OperatorUtils {
                 subSamplingX, subSamplingY, lonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
+        if (product.getTiePointGrid(latGrid.getName()) != null) {
+            product.removeTiePointGrid(product.getTiePointGrid(latGrid.getName()));
+        }
+
+        if (product.getTiePointGrid(lonGrid.getName()) != null) {
+            product.removeTiePointGrid(product.getTiePointGrid(lonGrid.getName()));
+        }
+
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
