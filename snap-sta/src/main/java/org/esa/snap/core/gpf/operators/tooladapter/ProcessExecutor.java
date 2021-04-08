@@ -34,7 +34,8 @@ public class ProcessExecutor {
     private List<String>[] arguments;
     private File workingDirectory;
     private ProcessOutputConsumer consumer;
-    private Logger logger = Logger.getLogger(ProcessExecutor.class.getName());
+    private final Logger logger = Logger.getLogger(ProcessExecutor.class.getName());
+    private Process process;
 
     public void setConsumer(ProcessOutputConsumer consumer) {
         this.consumer = consumer;
@@ -56,7 +57,6 @@ public class ProcessExecutor {
     }
 
     public int execute(List<String> arguments, Map<String, String> envVars, File workingDirectory) throws IOException {
-        Process process = null;
         BufferedReader outReader = null;
         int ret = -1;
         try {
@@ -71,9 +71,9 @@ public class ProcessExecutor {
                 pb.environment().putAll(envVars);
             }
             //start the process
-            process = pb.start();
+            this.process = pb.start();
             //get the process output
-            outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            outReader = new BufferedReader(new InputStreamReader(this.process.getInputStream()));
             while (!isStopped()) {
                 while (!isStopped && outReader.ready()) {
                     //read the process output line by line
@@ -84,7 +84,7 @@ public class ProcessExecutor {
                     }
                 }
                 // check if the project finished execution
-                if (!process.isAlive()) {
+                if (!this.process.isAlive()) {
                     //isStopped the loop
                     stop();
                 } else {
@@ -92,28 +92,28 @@ public class ProcessExecutor {
                     Thread.yield();
                 }
             }
-            while (process.isAlive()) {
+            while (this.process.isAlive()) {
                 Thread.yield();
             }
-            ret = process.exitValue();
+            ret = this.process.exitValue();
         } finally {
-            if (process != null) {
+            if (this.process != null) {
                 // if the process is still running, force it to isStopped
-                if (process.isAlive()) {
+                if (this.process.isAlive()) {
                     //destroy the process
-                    process.destroyForcibly();
+                    this.process.destroyForcibly();
                 }
                 try {
                     //wait for the project to end.
-                    ret = process.waitFor();
+                    ret = this.process.waitFor();
                 } catch (InterruptedException ignored) {
                 }
                 //close the reader
                 closeStream(outReader);
                 //close all streams
-                closeStream(process.getErrorStream());
-                closeStream(process.getInputStream());
-                closeStream(process.getOutputStream());
+                closeStream(this.process.getErrorStream());
+                closeStream(this.process.getInputStream());
+                closeStream(this.process.getOutputStream());
             }
         }
 
@@ -125,6 +125,9 @@ public class ProcessExecutor {
      */
     public void stop() {
         this.isStopped = true;
+        if (this.process != null) {
+            ProcessHelper.terminate(this.process);
+        }
     }
 
     /**
