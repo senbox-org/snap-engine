@@ -19,10 +19,19 @@ package com.bc.ceres.core.runtime.internal;
 import com.bc.ceres.core.runtime.ProxyConfig;
 
 import java.io.File;
-import java.net.*;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.Base64;
 
-import static com.bc.ceres.core.runtime.Constants.*;
+import static com.bc.ceres.core.runtime.Constants.MODULE_MANIFEST_NAME;
 
 public class UrlHelper {
 
@@ -65,11 +74,9 @@ public class UrlHelper {
         // from http://floatingsun.net/articles/java-proxy.html
         String s = proxyConfig.getUsername() + ':' + new String(proxyConfig.getPassword());
         byte[] bytes = s.getBytes();
-        // todo - this encoder might not be available on Mac OS X!!!
-        sun.misc.BASE64Encoder base64Encoder = new sun.misc.BASE64Encoder();
         urlConnection.setRequestProperty("Proxy-Authorization",
                                          "Basic " +
-                                                 base64Encoder.encode(bytes));
+                                                 Arrays.toString(Base64.getEncoder().encode(bytes)));
     }
 
     private static Proxy createProxy(ProxyConfig proxyConfig) {
@@ -103,9 +110,7 @@ public class UrlHelper {
                     && uri.getQuery() == null) {
                 return new File(uri);
             }
-        } catch (MalformedURLException e) {
-            // ignored
-        } catch (URISyntaxException e) {
+        } catch (MalformedURLException | URISyntaxException e) {
             // ignored
         }
         return null;
