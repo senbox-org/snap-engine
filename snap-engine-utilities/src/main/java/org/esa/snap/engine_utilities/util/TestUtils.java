@@ -32,6 +32,7 @@ import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
+import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.runtime.Config;
 
 import java.io.File;
@@ -166,13 +167,18 @@ public class TestUtils {
     public static Product createProduct(final String type, final int w, final int h) {
         final Product product = new Product("name", type, w, h);
 
-        product.setStartTime(AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
-        product.setEndTime(AbstractMetadata.parseUTC("10-MAY-2008 20:35:46.890683"));
+        final ProductData.UTC startTime = AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683");
+        final ProductData.UTC endTime = AbstractMetadata.parseUTC("10-MAY-2008 20:35:46.890683");
+        product.setStartTime(startTime);
+        product.setEndTime(endTime);
         product.setDescription("description");
 
         addGeoCoding(product);
 
-        AbstractMetadata.addAbstractedMetadataHeader(product.getMetadataRoot());
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(product.getMetadataRoot());
+        absRoot.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
+        absRoot.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
+        absRoot.setAttributeDouble(AbstractMetadata.line_time_interval, ReaderUtils.getLineTimeInterval(startTime, endTime, h));
 
         return product;
     }
