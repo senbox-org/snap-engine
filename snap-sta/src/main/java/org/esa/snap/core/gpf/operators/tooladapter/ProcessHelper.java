@@ -23,126 +23,123 @@ import org.esa.snap.core.gpf.operators.tooladapter.win.Win32Api;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
+ * Helper class to terminate/suspend/resume processes on Windows, Linux and MacOS.
+ *
  * @author Cosmin Cara
  */
 public final class ProcessHelper {
 
     private static final String WIN_KILL = "taskkill /PID %s /F /T";
-    private static final String LINUX_KILL = "kill -9 %s";
-    private static final String LINUX_SUSPEND = "kill -STOP %s";
-    private static final String LINUX_RESUME = "kill -CONT %s";
+    private static final String LINUX_KILL = "kill -9 -- -%d";
+    private static final String LINUX_SUSPEND = "kill -STOP %d";
+    private static final String LINUX_RESUME = "kill -CONT %d";
 
-    public static List<String> tokenizeCommands(String commandString) {
-        return tokenize(commandString, "'");
-    }
-
-    public static List<String> tokenizeCommands(String commandString, Object...args) {
-        return tokenize(commandString, "'", args);
-    }
-
-    private static List<String> tokenize(String commandString, String quoteChar, Object... replacements) {
-        //'([^']*)'|(;)|([^;\s]+)
-        String regex = quoteChar + "([^']*)" + quoteChar + "|(;)|([^;\\s]+)";
-        final List<String> tokens = new ArrayList<>();
-        String cmd = replacements != null && replacements.length > 0 ? String.format(commandString, replacements) : commandString;
-        Matcher m = Pattern.compile(regex).matcher(String.format(cmd, replacements));
-        while (m.find()) {
-            if (m.group(1) != null) {
-                tokens.add(quoteChar + m.group(1) + quoteChar);
-            } else if (m.group(2) != null) {
-                tokens.add(m.group(2));
-            } else if (m.group(3) != null) {
-                tokens.add(m.group(3));
-            }
-        }
-        return tokens;
-    }
-
+    /**
+     * Returns the OS-specific PID of the given process
+     */
     public static int getPID(Process process) {
         int retVal = -1;
-        if (ToolAdapterIO.getOsFamily().equals(OSFamily.windows.name())) {
-            try {
-                Field field = process.getClass().getDeclaredField("handle");
-                field.setAccessible(true);
-                long handle = field.getLong(process);
-                Kernel32 kernel = Kernel32.INSTANCE;
-                Win32Api.HANDLE h = new Win32Api.HANDLE();
-                h.setPointer(Pointer.createConstant(handle));
-                retVal = kernel.GetProcessId(h);
-            } catch (Throwable ignored) { }
-        } else if (ToolAdapterIO.getOsFamily().equals(OSFamily.linux.name())) {
-            try {
-                Field field = process.getClass().getDeclaredField("pid");
-                field.setAccessible(true);
-                retVal = field.getInt(process);
-            } catch (Throwable ignored) { }
-        } else {
-            throw new UnsupportedOperationException();
+        final OSFamily os = OSFamily.valueOf(ToolAdapterIO.getOsFamily());
+        switch (os) {
+            case windows:
+                try {
+                    final Win32Api.HANDLE h = getWinProcessHandle(process);
+                    retVal = Kernel32.INSTANCE.GetProcessId(h);
+                } catch (Throwable ignored) { }
+                break;
+            case linux:
+            case macosx:
+                try {
+                    Field field = process.getClass().getDeclaredField("pid");
+                    field.setAccessible(true);
+                    retVal = field.getInt(process);
+                } catch (Throwable ignored) { }
+                break;
+            default:
+                throw new UnsupportedOperationException();
         }
         return retVal;
     }
 
+    /**
+     * Suspends (pauses) the given process.
+     */
     public static void suspend(Process process) {
-        if (ToolAdapterIO.getOsFamily().equals(OSFamily.windows.name())) {
-            try {
-                Field field = process.getClass().getDeclaredField("handle");
-                field.setAccessible(true);
-                long handle = field.getLong(process);
-                NtDll ntDll = NtDll.INSTANCE;
-                Win32Api.HANDLE h = new Win32Api.HANDLE();
-                h.setPointer(Pointer.createConstant(handle));
-                ntDll.NtSuspendProcess(h);
-            } catch (Throwable ignored) {
-                ignored.printStackTrace();
-            }
-        } else if (ToolAdapterIO.getOsFamily().equals(OSFamily.linux.name())) {
-            try {
-                Runtime.getRuntime().exec(String.format(LINUX_SUSPEND, getPID(process)));
-            } catch (IOException ignored) { }
-        } else {
-            throw new UnsupportedOperationException();
+        final OSFamily os = OSFamily.valueOf(ToolAdapterIO.getOsFamily());
+        switch (os) {
+            case windows:
+                try {
+                    NtDll.INSTANCE.NtSuspendProcess(getWinProcessHandle(process));
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                break;
+            case linux:
+            case macosx:
+                try {
+                    Runtime.getRuntime().exec(String.format(LINUX_SUSPEND, getPID(process)));
+                } catch (IOException ignored) { }
+                break;
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 
+    /**
+     * Resumes the given process.
+     */
     public static void resume(Process process) {
-        if (ToolAdapterIO.getOsFamily().equals(OSFamily.windows.name())) {
-            try {
-                Field field = process.getClass().getDeclaredField("handle");
-                field.setAccessible(true);
-                long handle = field.getLong(process);
-                NtDll ntDll = NtDll.INSTANCE;
-                Win32Api.HANDLE h = new Win32Api.HANDLE();
-                h.setPointer(Pointer.createConstant(handle));
-                ntDll.NtResumeProcess(h);
-            } catch (Throwable ignored) { }
-        } else if (ToolAdapterIO.getOsFamily().equals(OSFamily.linux.name())) {
-            try {
-                Runtime.getRuntime().exec(String.format(LINUX_RESUME, getPID(process)));
-            } catch (IOException ignored) { }
-        } else {
-            throw new UnsupportedOperationException();
+        final OSFamily os = OSFamily.valueOf(ToolAdapterIO.getOsFamily());
+        switch (os) {
+            case windows:
+                try {
+                    NtDll.INSTANCE.NtResumeProcess(getWinProcessHandle(process));
+                } catch (Throwable ignored) {
+                }
+                break;
+            case linux:
+            case macosx:
+                try {
+                    Runtime.getRuntime().exec(String.format(LINUX_RESUME, getPID(process)));
+                } catch (IOException ignored) {
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 
+    /**
+     * Terminates the given process and its subprocesses (if any).
+     */
     public static void terminate(Process process) {
         int pid = getPID(process);
-        if (ToolAdapterIO.getOsFamily().equals(OSFamily.windows.name())) {
-            try {
-                Runtime.getRuntime().exec(String.format(WIN_KILL, pid));
-            } catch (IOException ignored) { }
-        } else if (ToolAdapterIO.getOsFamily().equals(OSFamily.linux.name())) {
-            try {
-                Runtime.getRuntime().exec(String.format(LINUX_KILL, pid));
-            } catch (IOException ignored) { }
-        } else {
-            throw new UnsupportedOperationException();
+        final OSFamily os = OSFamily.valueOf(ToolAdapterIO.getOsFamily());
+        switch (os) {
+            case windows:
+                try {
+                    Runtime.getRuntime().exec(String.format(WIN_KILL, pid));
+                } catch (IOException ignored) { }
+                break;
+            case linux:
+            case macosx:
+                try {
+                    Runtime.getRuntime().exec(String.format(LINUX_KILL, pid));
+                } catch (IOException ignored) { }
+                break;
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 
+    private static Win32Api.HANDLE getWinProcessHandle(Process process) throws NoSuchFieldException, IllegalAccessException {
+        final Field field = process.getClass().getDeclaredField("handle");
+        field.setAccessible(true);
+        final long handle = field.getLong(process);
+        final Win32Api.HANDLE h = new Win32Api.HANDLE();
+        h.setPointer(Pointer.createConstant(handle));
+        return h;
+    }
 }
