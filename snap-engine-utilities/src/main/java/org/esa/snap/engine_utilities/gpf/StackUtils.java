@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2021 SkyWatch. https://www.skywatch.com
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,8 +19,8 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 
 import java.util.ArrayList;
@@ -43,6 +43,11 @@ public final class StackUtils {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         return absRoot != null && absRoot.getAttributeInt(AbstractMetadata.coregistered_stack, 0) == 1;
+    }
+
+    public static boolean isBiStaticStack(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        return absRoot != null && absRoot.getAttributeInt(AbstractMetadata.bistatic_stack, 0) == 1;
     }
 
     public static String createBandTimeStamp(final Product product) {
@@ -70,7 +75,7 @@ public final class StackUtils {
     }
 
     public static void saveSlaveProductNames(final Product[] sourceProducts, final Product targetProduct,
-                                             final Product masterProduct, final Map<Band, Band> sourceRasterMap) {
+                                             final Product masterProduct, final Map<Band, Band> sourceRasterMap) throws Exception {
 
         for (Product prod : sourceProducts) {
             if (prod != masterProduct) {
@@ -123,18 +128,16 @@ public final class StackUtils {
     }
 
     public static void saveSlaveProductBandNames(final Product targetProduct, final String slvProductName,
-                                                 final String[] bandNames) {
-        if (bandNames.length == 0) {
-            SystemUtils.LOG.warning("saveSlaveProductBandNames: bandNames is empty");
-            return;
-        }
-        if(slvProductName == null) {
-            SystemUtils.LOG.warning("saveSlaveProductBandNames: slvProductName is null");
-            return;
-        }
+                                                 final String[] bandNames) throws Exception {
+        Guardian.assertNotNull("targetProduct", targetProduct);
+        Guardian.assertNotNull("slvProductName", slvProductName);
+        Guardian.assertNotNullOrEmpty("bandNames", bandNames);
 
         final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct.getMetadataRoot());
         final MetadataElement elem = targetSlaveMetadataRoot.getElement(slvProductName);
+        if(elem == null) {
+            throw new Exception(slvProductName + " metadata not found");
+        }
         StringBuilder value = new StringBuilder(255);
         for (String name : bandNames) {
             value.append(name);
@@ -178,11 +181,41 @@ public final class StackUtils {
                 bandNames.add(bandName);
             }
         }
-        return bandNames.toArray(new String[bandNames.size()]);
+        return bandNames.toArray(new String[0]);
     }
 
-    public static boolean isMasterBand(final Band band, final Product sourceProduct) {
-        return isMasterBand(band.getName(), sourceProduct);
+    public static MetadataElement getSlaveMetadata(final Product sourceProduct, final String slvProductName) {
+        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
+                AbstractMetadata.SLAVE_METADATA_ROOT);
+        if (slaveMetadataRoot != null) {
+            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
+            return elem.createDeepClone();
+        }
+        return null;
+    }
+
+    public static String[] getSlaveBandNames(final Product sourceProduct, final String slvProductName) {
+        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
+                AbstractMetadata.SLAVE_METADATA_ROOT);
+        if (slaveMetadataRoot != null) {
+            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
+            if(elem != null) {
+                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
+                if (!slvBandNames.isEmpty()) {
+                    return StringUtils.stringToArray(slvBandNames, " ");
+                }
+            }
+        }
+        String dateSuffix = slvProductName.contains("_") ?
+                slvProductName.substring(slvProductName.lastIndexOf('_')).toLowerCase() : "";
+        final List<String> bandNames = new ArrayList<>();
+        for(String bandName : sourceProduct.getBandNames()) {
+            final String name = bandName.toLowerCase();
+            if(name.contains(SLV) && name.endsWith(dateSuffix)) {
+                bandNames.add(bandName);
+            }
+        }
+        return bandNames.toArray(new String[0]);
     }
 
     public static boolean isMasterBand(final String bandName, final Product sourceProduct) {
@@ -203,58 +236,6 @@ public final class StackUtils {
         return false;
     }
 
-    /**
-     * Returns all master band names including virtual intensity bands
-     * @param sourceProduct coregistered product
-     * @return master band names
-     */
-    public static String[] getAllMasterBandNames(final Product sourceProduct) {
-
-        String suffix = null;
-        final String[] srcBandNames = sourceProduct.getBandNames();
-        for(String bandName : srcBandNames) {
-            if (bandName.contains(MST)) {
-                suffix = bandName.substring(bandName.lastIndexOf(MST)+4);
-                break;
-            }
-        }
-        final List<String> names = new ArrayList<>();
-        if(suffix != null) {
-            for (String bandName : srcBandNames) {
-                if (bandName.endsWith(suffix)) {
-                    names.add(bandName);
-                }
-            }
-        }
-        return names.toArray(new String[names.size()]);
-    }
-
-    public static String[] getSlaveBandNames(final Product sourceProduct, final String slvProductName) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
-            final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-            if(!slvBandNames.isEmpty()) {
-                return StringUtils.stringToArray(slvBandNames, " ");
-            }
-        }
-        String dateSuffix = slvProductName.contains("_") ?
-                slvProductName.substring(slvProductName.lastIndexOf('_'), slvProductName.length()).toLowerCase() : "";
-        final List<String> bandNames = new ArrayList<>();
-        for(String bandName : sourceProduct.getBandNames()) {
-            final String name = bandName.toLowerCase();
-            if(name.contains(SLV) && name.endsWith(dateSuffix)) {
-                bandNames.add(bandName);
-            }
-        }
-        return bandNames.toArray(new String[bandNames.size()]);
-    }
-
-    public static boolean isSlaveBand(final Band band, final Product sourceProduct) {
-        return isSlaveBand(band.getName(), sourceProduct);
-    }
-
     public static boolean isSlaveBand(final String bandName, final Product sourceProduct) {
 
         final String[] slvProductNames = StackUtils.getSlaveProductNames(sourceProduct);
@@ -264,10 +245,6 @@ public final class StackUtils {
             }
         }
         return false;
-    }
-
-    public static boolean isSlaveBand(final Band band, final Product sourceProduct, final String slvProductName) {
-        return isSlaveBand(band.getName(), sourceProduct, slvProductName);
     }
 
     public static boolean isSlaveBand(final String bandName, final Product sourceProduct, final String slvProductName) {
@@ -283,7 +260,7 @@ public final class StackUtils {
             }
         }
 
-        String dateSuffix = slvProductName.substring(slvProductName.lastIndexOf('_'), slvProductName.length()).toLowerCase();
+        String dateSuffix = slvProductName.substring(slvProductName.lastIndexOf('_')).toLowerCase();
         for(String srcBandName : sourceProduct.getBandNames()) {
             final String name = srcBandName.toLowerCase();
             if(name.contains(SLV) && name.endsWith(dateSuffix) && srcBandName.contains(bandName)) {
@@ -318,17 +295,17 @@ public final class StackUtils {
         for(Band b : bands) {
             suffixSet.add(getBandSuffix(b.getName()));
         }
-        return suffixSet.toArray(new String[suffixSet.size()]);
+        return suffixSet.toArray(new String[0]);
     }
 
     public static String getBandSuffix(final String bandName) {
         final String suffix;
         if (bandName.contains(MST)) {
-            suffix = bandName.substring(bandName.lastIndexOf(MST), bandName.length());
+            suffix = bandName.substring(bandName.lastIndexOf(MST));
         } else if (bandName.contains(SLV)) {
-            suffix = bandName.substring(bandName.lastIndexOf(SLV), bandName.length());
+            suffix = bandName.substring(bandName.lastIndexOf(SLV));
         } else if (bandName.contains("_")) {
-            suffix = bandName.substring(bandName.lastIndexOf('_'), bandName.length());
+            suffix = bandName.substring(bandName.lastIndexOf('_'));
         } else {
             suffix = bandName;
         }
@@ -365,20 +342,6 @@ public final class StackUtils {
         return null;
     }
 
-    public static ProductData.UTC getSlaveTime(final Product sourceProduct, final Band slvBand) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final String slvBandName = slvBand.getName();
-            for (MetadataElement elem : slaveMetadataRoot.getElements()) {
-                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-                if (slvBandNames.contains(slvBandName))
-                    return elem.getAttributeUTC(AbstractMetadata.first_line_time);
-            }
-        }
-        return null;
-    }
-
     public static ProductData.UTC[] getProductTimes(final Product sourceProduct) {
         final List<ProductData.UTC> utcList = new ArrayList<>();
         // add master time
@@ -395,7 +358,7 @@ public final class StackUtils {
                 }
             }
         }
-        return utcList.toArray(new ProductData.UTC[utcList.size()]);
+        return utcList.toArray(new ProductData.UTC[0]);
     }
 
     public static String[] bandsToStringArray(final Band[] bands) {
@@ -406,10 +369,4 @@ public final class StackUtils {
         }
         return names;
     }
-
-    public static boolean isBiStaticStack(final Product product) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        return absRoot != null && absRoot.getAttributeInt(AbstractMetadata.bistatic_stack, 0) == 1;
-    }
-
 }
