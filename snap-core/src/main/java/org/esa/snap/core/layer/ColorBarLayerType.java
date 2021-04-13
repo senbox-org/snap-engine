@@ -42,7 +42,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String DISTRIB_EXACT_STR = "Palette Values";
     public static final String DISTRIB_MANUAL_STR = "Entered Values";
 
-    public static final String NULL_SPECIAL = "-1";  // a null value that the user might not enter just in case the user wants to enter ""
+    public static final String NULL_SPECIAL = "-1";  // a null value to use for string cases where an empty string would be valid
 
 
     //--------------------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_TITLE_TEXT_TYPE = String.class;
 
-    public static final String PROPERTY_UNITS_TEXT_KEY = PROPERTY_TITLE_TEXT_ROOT_KEY + ".text";
+    public static final String PROPERTY_UNITS_TEXT_KEY = PROPERTY_TITLE_TEXT_ROOT_KEY + ".units.text";
     public static final String PROPERTY_UNITS_TEXT_LABEL = "Units Text";
     public static final String PROPERTY_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
     public static final String PROPERTY_UNITS_TEXT_ALIAS = PROPERTY_TITLE_TEXT_ROOT_ALIAS + "Text";
@@ -743,7 +743,47 @@ public class ColorBarLayerType extends LayerType {
         final PropertyContainer vc = new PropertyContainer();
 
 
-        // Label Values
+        // Title Section
+//
+//        final Property titleSectionModel = Property.create(PROPERTY_TITLE_TEXT_SECTION_KEY, Boolean.class, true, true);
+//        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_SECTION_ALIAS);
+//        vc.addProperty(titleSectionModel);
+
+        final Property titleParameterTextModel = Property.create(PROPERTY_TITLE_TEXT_KEY,
+                PROPERTY_TITLE_TEXT_TYPE,
+                PROPERTY_TITLE_TEXT_DEFAULT,
+                true);
+        titleParameterTextModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_ALIAS);
+        vc.addProperty(titleParameterTextModel);
+
+
+        final Property titleUnitsTextModel = Property.create(PROPERTY_UNITS_TEXT_KEY,
+                PROPERTY_UNITS_TEXT_TYPE,
+                PROPERTY_UNITS_TEXT_DEFAULT,
+                true);
+        titleUnitsTextModel.getDescriptor().setAlias(PROPERTY_UNITS_TEXT_ALIAS);
+        vc.addProperty(titleUnitsTextModel);
+
+
+
+
+        // Orientation Section
+
+        final Property formattingSectionModel = Property.create(PROPERTY_ORIENTATION_SECTION_KEY, Boolean.class, true, true);
+        formattingSectionModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_SECTION_ALIAS);
+        vc.addProperty(formattingSectionModel);
+
+        final Property formattingOrientationModel = Property.create(PROPERTY_ORIENTATION_KEY, PROPERTY_ORIENTATION_TYPE, true, true);
+        formattingOrientationModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_ALIAS);
+        vc.addProperty(formattingOrientationModel);
+
+        final Property reversePaletteModel = Property.create(PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY, PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE, true, true);
+        reversePaletteModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS);
+        vc.addProperty(reversePaletteModel);
+
+
+
+        // Tick Label Values
 
         final Property labelValuesSectionModel = Property.create(PROPERTY_LABEL_VALUES_SECTION_KEY, Boolean.class, true, true);
         labelValuesSectionModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SECTION_ALIAS);
@@ -752,7 +792,6 @@ public class ColorBarLayerType extends LayerType {
         final Property labelValuesModeModel = Property.create(PROPERTY_LABEL_VALUES_MODE_KEY, String.class, PROPERTY_LABEL_VALUES_MODE_DEFAULT, true);
         labelValuesModeModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_MODE_ALIAS);
         vc.addProperty(labelValuesModeModel);
-
 
         final Property labelValuesCountModel = Property.create(PROPERTY_LABEL_VALUES_COUNT_KEY, Integer.class, PROPERTY_LABEL_VALUES_COUNT_DEFAULT, true);
         labelValuesCountModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_COUNT_ALIAS);
@@ -777,46 +816,7 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-
-
-
-
-
-
-
-        // Title Section
-
-        final Property titleSectionModel = Property.create(PROPERTY_TITLE_TEXT_SECTION_KEY, Boolean.class, true, true);
-        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_SECTION_ALIAS);
-        vc.addProperty(titleSectionModel);
-
-
-
-
-
-
-        // Formatting Section
-
-        final Property formattingSectionModel = Property.create(PROPERTY_ORIENTATION_SECTION_KEY, Boolean.class, true, true);
-        formattingSectionModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_SECTION_ALIAS);
-        vc.addProperty(formattingSectionModel);
-
-        final Property formattingOrientationModel = Property.create(PROPERTY_ORIENTATION_KEY, PROPERTY_ORIENTATION_TYPE, true, true);
-        formattingOrientationModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_ALIAS);
-        vc.addProperty(formattingOrientationModel);
-
-        final Property reversePaletteModel = Property.create(PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY, PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE, true, true);
-        reversePaletteModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS);
-        vc.addProperty(reversePaletteModel);
-
-
-
-
-
-
-
-
-        // ColorBar Location Section
+        // Placement Section
 
         final Property locationSectionModel = Property.create(PROPERTY_LOCATION_SECTION_KEY, Boolean.class, true, true);
         locationSectionModel.getDescriptor().setAlias(PROPERTY_LOCATION_SECTION_ALIAS);
@@ -831,15 +831,6 @@ public class ColorBarLayerType extends LayerType {
         locationEdgeModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_ALIAS);
         vc.addProperty(locationEdgeModel);
 
-        final Property titleVerticalAnchorModel = Property.create(PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
-                PROPERTY_LOCATION_TITLE_VERTICAL_TYPE, true, true);
-        titleVerticalAnchorModel.getDescriptor().setAlias(PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS);
-        vc.addProperty(titleVerticalAnchorModel);
-
-
-
-
-
         final Property locationOffsetModel = Property.create(PROPERTY_LOCATION_OFFSET_KEY, PROPERTY_LOCATION_OFFSET_TYPE, true, true);
         locationOffsetModel.getDescriptor().setAlias(PROPERTY_LOCATION_OFFSET_ALIAS);
         vc.addProperty(locationOffsetModel);
@@ -848,11 +839,14 @@ public class ColorBarLayerType extends LayerType {
         locationShiftModel.getDescriptor().setAlias(PROPERTY_LOCATION_SHIFT_ALIAS);
         vc.addProperty(locationShiftModel);
 
+        final Property titleVerticalAnchorModel = Property.create(PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
+                PROPERTY_LOCATION_TITLE_VERTICAL_TYPE, true, true);
+        titleVerticalAnchorModel.getDescriptor().setAlias(PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS);
+        vc.addProperty(titleVerticalAnchorModel);
 
 
 
-
-
+        // Size & Scaling Section
 
         final Property scalingSectionModel = Property.create(PROPERTY_IMAGE_SCALING_SECTION_KEY, Boolean.class, true, true);
         scalingSectionModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SECTION_ALIAS);
@@ -877,12 +871,7 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-
-
-
-
-
-        // Title Parameter Section
+        // Title Format Section
 
         final Property titleParameterSectionModel = Property.create(PROPERTY_TITLE_SECTION_KEY,
                 Boolean.class,
@@ -900,13 +889,12 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(titleParameterShowModel);
 
 
-        final Property titleParameterTextModel = Property.create(PROPERTY_TITLE_TEXT_KEY,
-                PROPERTY_TITLE_TEXT_TYPE,
-                PROPERTY_TITLE_TEXT_DEFAULT,
+        final Property titleParameterFontSizeModel = Property.create(PROPERTY_TITLE_FONT_SIZE_KEY,
+                PROPERTY_TITLE_FONT_SIZE_TYPE,
+                PROPERTY_TITLE_FONT_SIZE_DEFAULT,
                 true);
-        titleParameterTextModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_ALIAS);
-        vc.addProperty(titleParameterTextModel);
-
+        titleParameterFontSizeModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_SIZE_ALIAS);
+        vc.addProperty(titleParameterFontSizeModel);
 
         final Property titleParameterBoldModel = Property.create(PROPERTY_TITLE_FONT_BOLD_KEY,
                 PROPERTY_TITLE_FONT_BOLD_TYPE,
@@ -940,18 +928,12 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(titleParameterColorModel);
 
 
-        final Property titleParameterFontSizeModel = Property.create(PROPERTY_TITLE_FONT_SIZE_KEY,
-                PROPERTY_TITLE_FONT_SIZE_TYPE,
-                PROPERTY_TITLE_FONT_SIZE_DEFAULT,
-                true);
-        titleParameterFontSizeModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_SIZE_ALIAS);
-        vc.addProperty(titleParameterFontSizeModel);
 
 
 
 
 
-        // Title Units Section
+        // Units Section
 
         final Property titleUnitsSectionModel = Property.create(PROPERTY_UNITS_SECTION_KEY,
                 Boolean.class,
@@ -969,12 +951,12 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(titleUnitsShowModel);
 
 
-        final Property titleUnitsTextModel = Property.create(PROPERTY_UNITS_TEXT_KEY,
-                PROPERTY_UNITS_TEXT_TYPE,
-                PROPERTY_UNITS_TEXT_DEFAULT,
+        final Property titleUnitsFontSizeModel = Property.create(PROPERTY_UNITS_FONT_SIZE_KEY,
+                PROPERTY_UNITS_FONT_SIZE_TYPE,
+                PROPERTY_UNITS_FONT_SIZE_DEFAULT,
                 true);
-        titleUnitsTextModel.getDescriptor().setAlias(PROPERTY_UNITS_TEXT_ALIAS);
-        vc.addProperty(titleUnitsTextModel);
+        titleUnitsFontSizeModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_SIZE_ALIAS);
+        vc.addProperty(titleUnitsFontSizeModel);
 
 
         final Property titleUnitsBoldModel = Property.create(PROPERTY_UNITS_FONT_BOLD_KEY,
@@ -1009,34 +991,43 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(titleUnitsColorModel);
 
 
-        final Property titleUnitsFontSizeModel = Property.create(PROPERTY_UNITS_FONT_SIZE_KEY,
-                PROPERTY_UNITS_FONT_SIZE_TYPE,
-                PROPERTY_UNITS_FONT_SIZE_DEFAULT,
+
+
+        // Tick Label Format Section
+
+        final Property labelsSectionModel = Property.create(PROPERTY_LABELS_SECTION_KEY, Boolean.class, true, true);
+        labelsSectionModel.getDescriptor().setAlias(PROPERTY_LABELS_SECTION_ALIAS);
+        vc.addProperty(labelsSectionModel);
+
+        final Property labelsShowModel = Property.create(PROPERTY_LABELS_SHOW_KEY,
+                PROPERTY_LABELS_SHOW_TYPE,
+                PROPERTY_LABELS_SHOW_DEFAULT,
                 true);
-        titleUnitsFontSizeModel.getDescriptor().setAlias(PROPERTY_UNITS_FONT_SIZE_ALIAS);
-        vc.addProperty(titleUnitsFontSizeModel);
+        labelsShowModel.getDescriptor().setAlias(PROPERTY_LABELS_SHOW_ALIAS);
+        vc.addProperty(labelsShowModel);
+
+        final Property textFontSizeModel = Property.create(PROPERTY_LABELS_FONT_SIZE_KEY, Integer.class, PROPERTY_LABELS_FONT_SIZE_DEFAULT, true);
+        textFontSizeModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_SIZE_ALIAS);
+        vc.addProperty(textFontSizeModel);
+
+        final Property textFontBoldModel = Property.create(PROPERTY_LABELS_FONT_BOLD_KEY, Boolean.class, PROPERTY_LABELS_FONT_BOLD_DEFAULT, true);
+        textFontBoldModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_BOLD_ALIAS);
+        vc.addProperty(textFontBoldModel);
+        final Property textFontItalicModel = Property.create(PROPERTY_LABELS_FONT_ITALIC_KEY, Boolean.class, PROPERTY_LABELS_FONT_ITALIC_DEFAULT, true);
+        textFontItalicModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_ITALIC_ALIAS);
+        vc.addProperty(textFontItalicModel);
+
+        final Property textFontModel = Property.create(PROPERTY_LABELS_FONT_NAME_KEY, String.class, PROPERTY_LABELS_FONT_NAME_DEFAULT, true);
+        textFontModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_NAME_ALIAS);
+        vc.addProperty(textFontModel);
+
+        final Property textFgColorModel = Property.create(PROPERTY_LABELS_FONT_COLOR_KEY, Color.class, PROPERTY_LABELS_FONT_COLOR_DEFAULT, true);
+        textFgColorModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_COLOR_ALIAS);
+        vc.addProperty(textFgColorModel);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // Tickmarks Section
+        // Tick Marks Section
 
         final Property tickmarksSectionModel = Property.create(PROPERTY_TICKMARKS_SECTION_KEY, Boolean.class, true, true);
         tickmarksSectionModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SECTION_ALIAS);
@@ -1046,10 +1037,6 @@ public class ColorBarLayerType extends LayerType {
         tickMarkEnabledModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SHOW_ALIAS);
         vc.addProperty(tickMarkEnabledModel);
 
-        final Property tickmarkColorModel = Property.create(PROPERTY_TICKMARKS_COLOR_KEY, PROPERTY_TICKMARKS_COLOR_TYPE, PROPERTY_TICKMARKS_COLOR_DEFAULT, true);
-        tickmarkColorModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_COLOR_ALIAS);
-        vc.addProperty(tickmarkColorModel);
-
         final Property tickMarkLengthModel = Property.create(PROPERTY_TICKMARKS_LENGTH_KEY, PROPERTY_TICKMARKS_LENGTH_TYPE, PROPERTY_TICKMARKS_LENGTH_DEFAULT, true);
         tickMarkLengthModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_LENGTH_ALIAS);
         vc.addProperty(tickMarkLengthModel);
@@ -1058,9 +1045,12 @@ public class ColorBarLayerType extends LayerType {
         tickMarkWidthModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_WIDTH_ALIAS);
         vc.addProperty(tickMarkWidthModel);
 
+        final Property tickmarkColorModel = Property.create(PROPERTY_TICKMARKS_COLOR_KEY, PROPERTY_TICKMARKS_COLOR_TYPE, PROPERTY_TICKMARKS_COLOR_DEFAULT, true);
+        tickmarkColorModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_COLOR_ALIAS);
+        vc.addProperty(tickmarkColorModel);
 
 
-        // Border Section
+        // Palette Border Section
 
         final Property borderSectionModel = Property.create(PROPERTY_PALETTE_BORDER_SECTION_KEY, Boolean.class, true, true);
         borderSectionModel.getDescriptor().setAlias(PROPERTY_PALETTE_BORDER_SECTION_ALIAS);
@@ -1091,16 +1081,17 @@ public class ColorBarLayerType extends LayerType {
         backdropShowModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SHOW_ALIAS);
         vc.addProperty(backdropShowModel);
 
-        final Property backdropColorModel = Property.create(PROPERTY_BACKDROP_COLOR_KEY, Color.class, PROPERTY_BACKDROP_COLOR_DEFAULT, true);
-        backdropColorModel.getDescriptor().setAlias(PROPERTY_BACKDROP_COLOR_ALIAS);
-        vc.addProperty(backdropColorModel);
-
         final Property backdropTransparencyModel = Property.create(PROPERTY_BACKDROP_TRANSPARENCY_KEY, Double.class, PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT, true);
         backdropTransparencyModel.getDescriptor().setAlias(PROPERTY_BACKDROP_TRANSPARENCY_ALIAS);
         vc.addProperty(backdropTransparencyModel);
 
+        final Property backdropColorModel = Property.create(PROPERTY_BACKDROP_COLOR_KEY, Color.class, PROPERTY_BACKDROP_COLOR_DEFAULT, true);
+        backdropColorModel.getDescriptor().setAlias(PROPERTY_BACKDROP_COLOR_ALIAS);
+        vc.addProperty(backdropColorModel);
 
-        // Backdrop Border Section
+
+
+        // Legend Border Section
 
         final Property backdropBorderSectionModel = Property.create(PROPERTY_LEGEND_BORDER_SECTION_KEY, Boolean.class, true, true);
         backdropBorderSectionModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_SECTION_ALIAS);
@@ -1110,21 +1101,17 @@ public class ColorBarLayerType extends LayerType {
         backdropBorderShowModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_SHOW_ALIAS);
         vc.addProperty(backdropBorderShowModel);
 
-        final Property backdropBorderColorModel = Property.create(PROPERTY_LEGEND_BORDER_COLOR_KEY, Color.class, PROPERTY_LEGEND_BORDER_COLOR_DEFAULT, true);
-        backdropBorderColorModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_COLOR_ALIAS);
-        vc.addProperty(backdropBorderColorModel);
-
         final Property backdropBorderWidthModel = Property.create(PROPERTY_LEGEND_BORDER_WIDTH_KEY, Integer.class, PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT, true);
         backdropBorderWidthModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_WIDTH_ALIAS);
         vc.addProperty(backdropBorderWidthModel);
 
+        final Property backdropBorderColorModel = Property.create(PROPERTY_LEGEND_BORDER_COLOR_KEY, Color.class, PROPERTY_LEGEND_BORDER_COLOR_DEFAULT, true);
+        backdropBorderColorModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_COLOR_ALIAS);
+        vc.addProperty(backdropBorderColorModel);
 
 
 
-
-
-
-
+        // Other
 
         final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);
@@ -1133,56 +1120,6 @@ public class ColorBarLayerType extends LayerType {
         final Property transformModel = Property.create(PROPERTY_NAME_TRANSFORM, new AffineTransform());
         transformModel.getDescriptor().setTransient(true);
         vc.addProperty(transformModel);
-
-
-
-
-
-
-
-
-
-
-        // Labels Section
-
-        final Property labelsSectionModel = Property.create(PROPERTY_LABELS_SECTION_KEY, Boolean.class, true, true);
-        labelsSectionModel.getDescriptor().setAlias(PROPERTY_LABELS_SECTION_ALIAS);
-        vc.addProperty(labelsSectionModel);
-
-
-        final Property labelsShowModel = Property.create(PROPERTY_LABELS_SHOW_KEY,
-                PROPERTY_LABELS_SHOW_TYPE,
-                PROPERTY_LABELS_SHOW_DEFAULT,
-                true);
-        labelsShowModel.getDescriptor().setAlias(PROPERTY_LABELS_SHOW_ALIAS);
-        vc.addProperty(labelsShowModel);
-
-
-        final Property textFgColorModel = Property.create(PROPERTY_LABELS_FONT_COLOR_KEY, Color.class, PROPERTY_LABELS_FONT_COLOR_DEFAULT, true);
-        textFgColorModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_COLOR_ALIAS);
-        vc.addProperty(textFgColorModel);
-
-
-
-
-
-
-        final Property textFontSizeModel = Property.create(PROPERTY_LABELS_FONT_SIZE_KEY, Integer.class, PROPERTY_LABELS_FONT_SIZE_DEFAULT, true);
-        textFontSizeModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_SIZE_ALIAS);
-        vc.addProperty(textFontSizeModel);
-
-
-        final Property textFontItalicModel = Property.create(PROPERTY_LABELS_FONT_ITALIC_KEY, Boolean.class, PROPERTY_LABELS_FONT_ITALIC_DEFAULT, true);
-        textFontItalicModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_ITALIC_ALIAS);
-        vc.addProperty(textFontItalicModel);
-
-        final Property textFontBoldModel = Property.create(PROPERTY_LABELS_FONT_BOLD_KEY, Boolean.class, PROPERTY_LABELS_FONT_BOLD_DEFAULT, true);
-        textFontBoldModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_BOLD_ALIAS);
-        vc.addProperty(textFontBoldModel);
-
-        final Property textFontModel = Property.create(PROPERTY_LABELS_FONT_NAME_KEY, String.class, PROPERTY_LABELS_FONT_NAME_DEFAULT, true);
-        textFontModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_NAME_ALIAS);
-        vc.addProperty(textFontModel);
 
 
 
