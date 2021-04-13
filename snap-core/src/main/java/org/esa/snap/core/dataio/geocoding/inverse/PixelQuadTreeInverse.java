@@ -13,15 +13,21 @@ import org.esa.snap.core.util.math.Range;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.runtime.Config;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
-public class PixelQuadTreeInverse implements InverseCoding {
+import static org.esa.snap.core.dataio.geocoding.inverse.Segment.MIN_DIMENSION;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ACROSS;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ALONG;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.INSIDE;
+
+public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
     public static final String KEY = "INV_PIXEL_QUAD_TREE";
     public static final String KEY_INTERPOLATING = KEY + KEY_SUFFIX_INTERPOLATING;
 
     private static final double TO_DEG = 180.0 / Math.PI;
-    private static final double ANGLE_THRESHOLD = 330.0;
+    private static final double ANGLE_THRESHOLD = 270.0;
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;
@@ -37,6 +43,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     private double[] latitudes;
     private Range lonRange;
     private Range latRange;
+    private ArrayList<Segment> segmentList;
 
     PixelQuadTreeInverse() {
         this(false);
@@ -50,58 +57,407 @@ public class PixelQuadTreeInverse implements InverseCoding {
         this(fractionalAccuracy, InterpolatorFactory.create(properties));
     }
 
-    PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
+    private PixelQuadTreeInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
         this.interpolator = interpolator;
+        segmentList = new ArrayList<>();
     }
 
-    // package access for testing only tb 2019-12-16
-    static double getPositiveLonMin(double lon0, double lon1, double lon2, double lon3) {
-        double lonMin = 180.0f;
-        if (lon0 >= 0.0) {
-            lonMin = lon0;
-        }
-        if (lon1 >= 0.0) {
-            lonMin = Math.min(lon1, lonMin);
-        }
-        if (lon2 >= 0.0) {
-            lonMin = Math.min(lon2, lonMin);
-        }
-        if (lon3 >= 0.0) {
-            lonMin = Math.min(lon3, lonMin);
+    static double getPositiveLonMin(double[] longitudes) {
+        double lonMin = Double.MAX_VALUE;
+        for (final double lon : longitudes) {
+            if (lon >= 0.0 && lon < lonMin) {
+                lonMin = lon;
+            }
         }
         return lonMin;
     }
 
-    // package access for testing only tb 2019-12-16
-    static double getNegativeLonMax(double lon0, double lon1, double lon2, double lon3) {
-        double lonMax = -180.0f;
-        if (lon0 < 0.0f) {
-            lonMax = lon0;
+    static double getNegativeLonMax(double[] longitudes) {
+        double lonMax = -Double.MAX_VALUE;
+        for (final double lon : longitudes) {
+            if (lon < 0 && lon > lonMax) {
+                lonMax = lon;
+            }
         }
-        if (lon1 < 0.0f) {
-            lonMax = Math.max(lon1, lonMax);
-        }
-        if (lon2 < 0.0f) {
-            lonMax = Math.max(lon2, lonMax);
-        }
-        if (lon3 < 0.0f) {
-            lonMax = Math.max(lon3, lonMax);
-        }
+
         return lonMax;
     }
 
-    static boolean isCrossingAntiMeridianInsideQuad(double lon0, double lon1,
-                                                    double lon2, double lon3) {
-        double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
-        double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
+    static boolean isCrossingAntiMeridianInsideQuad(double[] longitudes) {
+        final int numLons = longitudes.length;
 
-        return Math.abs(lonMax - lonMin) > ANGLE_THRESHOLD;
+        double maxDelta = -1.0;
+        double delta;
+        for (int i = 1; i < numLons; i++) {
+            delta = Math.abs(longitudes[i] - longitudes[i - 1]);
+            if (delta > maxDelta) {
+                maxDelta = delta;
+            }
+        }
+
+        delta = Math.abs(longitudes[numLons - 1] - longitudes[0]);
+        if (delta > maxDelta) {
+            maxDelta = delta;
+        }
+
+        return maxDelta > ANGLE_THRESHOLD;
     }
 
     // package access for testing only tb 2019-12-16
     static double sq(final double dx, final double dy) {
         return dx * dx + dy * dy;
+    }
+
+    static double[] createEpsilonLongitude(double epsilon) {
+        // @todo 1 tb/tb rethink this algo 2021-03-16
+        final double[] d = new double[901];
+        for (int i = 0; i < d.length; i++) {
+            final double ang = i * 0.1;
+            final double rad = Math.toRadians(ang);
+            final double multiplier = 1 / Math.cos(rad);
+            d[i] = epsilon * multiplier;
+        }
+        return d;
+    }
+
+    static Segment getPoleSegment(PixelPos[] poleLocations, int rasterWidth, int rasterHeight) {
+        int x_min = Integer.MAX_VALUE;
+        int x_max = Integer.MIN_VALUE;
+        int y_min = Integer.MAX_VALUE;
+        int y_max = Integer.MIN_VALUE;
+        for (PixelPos location : poleLocations) {
+            if (location.x > x_max) {
+                x_max = (int) location.x;
+            }
+            if (location.x < x_min) {
+                x_min = (int) location.x;
+            }
+            if (location.y > y_max) {
+                y_max = (int) location.y;
+            }
+            if (location.y < y_min) {
+                y_min = (int) location.y;
+            }
+        }
+
+        // ensure that we're inside the product and if pole is closer to border than MIN_DIMENSION -> extend to border
+        // this avoids too-small segments
+        int minDimHalf = MIN_DIMENSION / 2;
+        x_min = x_min - minDimHalf;
+        if (x_min <= MIN_DIMENSION) {
+            x_min = 0;
+        }
+
+        x_max = x_max + minDimHalf;
+        if (x_max > rasterWidth - 1 - MIN_DIMENSION) {
+            x_max = rasterWidth - 1;
+        }
+
+        y_min = y_min - minDimHalf;
+        if (y_min < MIN_DIMENSION) {
+            y_min = 0;
+        }
+
+        y_max = y_max + minDimHalf;
+        if (y_max > rasterHeight - 1 - MIN_DIMENSION) {
+            y_max = rasterHeight - 1;
+        }
+
+        return new Segment(x_min, x_max, y_min, y_max);
+    }
+
+    static Segment[] removeSegment(Segment toRemove, Segment origin, int rasterWidth, int rasterHeight) {
+        final ArrayList<Segment> segmentList = new ArrayList<>();
+
+        Segment remaining;
+        if (toRemove.y_min > 0) {
+            // cut out segment that is above the pole (upper split[0])
+            // the remainder contains the pole and a lot of data
+            final Segment[] splits = origin.split_y(toRemove.y_min);
+            segmentList.add(splits[0]);
+            remaining = splits[1];
+        } else {
+            // pole region touches top of product - nothing to cut out
+            remaining = origin;
+        }
+
+        if (toRemove.y_max < rasterHeight - 1) {
+            final Segment[] splits = remaining.split_y(toRemove.y_max + 1);
+            remaining = splits[0];
+            segmentList.add(splits[1]);
+        }
+
+        if (toRemove.x_min > 0) {
+            final Segment[] splits = remaining.split_x(toRemove.x_min);
+            segmentList.add(splits[0]);
+            remaining = splits[1];
+        }
+
+        if (toRemove.x_max < rasterWidth - 1) {
+            final Segment[] splits = remaining.split_x(toRemove.x_max + 1);
+            // splits[0] must be the pole segment at this point
+            segmentList.add(splits[1]);
+        }
+
+        return segmentList.toArray(new Segment[0]);
+    }
+
+    static double getMin(double[] values, double epsilon) {
+        double min = Double.MAX_VALUE;
+        for (double value : values) {
+            if (value < min) {
+                min = value;
+            }
+        }
+
+        return min - epsilon;
+    }
+
+    static double getMax(double[] values, double epsilon) {
+        double max = -Double.MAX_VALUE;
+        for (double value : values) {
+            if (value > max) {
+                max = value;
+            }
+        }
+
+        return max + epsilon;
+    }
+
+    private ArrayList<Segment> calculateSegmentation(int rasterWidth, int rasterHeight, PixelPos[] poleLocations) {
+        final ArrayList<Segment> segmentList = new ArrayList<>();
+
+        final Segment fullProductSegment = new Segment(0, rasterWidth - 1, 0, rasterHeight - 1);
+
+        if (poleLocations.length == 0) {
+            // start segmentation at full product
+            calculateSegmentation(fullProductSegment, segmentList);
+        } else {
+            // create segment containing the pole
+            final Segment poleSegment = getPoleSegment(poleLocations, rasterWidth, rasterHeight);
+
+            // cut it from full orbit raster and calculate segmentation
+            final Segment[] segments = removeSegment(poleSegment, fullProductSegment, rasterWidth, rasterHeight);
+            for (final Segment segment : segments) {
+                calculateSegmentation(segment, segmentList);
+            }
+        }
+
+        return segmentList;
+    }
+
+    private void calculateSegmentation(Segment segment, ArrayList<Segment> segmentList) {
+        segment.calculateGeoPoints(this);
+        final SegmentCoverage segmentCoverage = hasGeoCoverage(segment);
+
+        if (segmentCoverage == INSIDE) {
+            // all test-points are inside the lon/lat segment
+            segmentList.add(segment);
+        } else {
+            // we need to divide further down
+            Segment[] splits = new Segment[0];
+            if (segment.containsAntiMeridian) {
+                splits = splitAtAntiMeridian(segment, segmentCoverage, this);
+            }
+
+            if (splits.length == 0) {
+                splits = splitAtOutsidePoint(segment, segmentCoverage, this);
+            }
+
+            if (splits.length == 0) {
+                // cannot divide further
+                segmentList.add(segment);
+            } else if (splits.length == 1) {
+                // cannot divide further
+                segmentList.add(splits[0]);
+            } else {
+                calculateSegmentation(splits[0], segmentList);
+                calculateSegmentation(splits[1], segmentList);
+            }
+        }
+    }
+
+    static Segment[] splitAtOutsidePoint(Segment segment, SegmentCoverage segmentCoverage, GeoPosCalculator calculator) {
+        final GeoPos geoPos = new GeoPos();
+        if (segmentCoverage == ACROSS) {
+            // check left
+            int y_l = Integer.MIN_VALUE;
+            for (int y = segment.y_min + 1; y < segment.y_max; y++) {
+                calculator.getGeoPos(segment.x_min, y, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    y_l = y;
+                    break;
+                }
+            }
+
+            // check right
+            int y_r = Integer.MIN_VALUE;
+            for (int y = segment.y_min + 1; y < segment.y_max; y++) {
+                calculator.getGeoPos(segment.x_max, y, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    y_r = y;
+                    break;
+                }
+            }
+            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
+                // no suitable split-points found - as a last idea, we split at half
+                return segment.split(true);
+            }
+            final int center = segment.y_min + segment.getHeight() / 2;
+            final int delta_l = Math.abs(center - y_l);
+            final int delta_r = Math.abs(center - y_r);
+            if (delta_l < delta_r) {
+                return segment.split_y(y_l);
+            } else {
+                return segment.split_y(y_r);
+            }
+        } else if (segmentCoverage == ALONG) {
+            // check top
+            int x_t = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x < segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_min, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    x_t = x;
+                    break;
+                }
+            }
+            // check bottom
+            int x_b = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x < segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_max, geoPos);
+                if (!segment.isInside(geoPos.lon, geoPos.lat)) {
+                    x_b = x;
+                    break;
+                }
+            }
+            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+                // no suitable split-points found - as a last idea, we split at half
+                return segment.split(false);
+            }
+            final int center = segment.x_min + segment.getWidth() / 2;
+            final int delta_t = Math.abs(center - x_t);
+            final int delta_b = Math.abs(center - x_b);
+            if (delta_t < delta_b) {
+                return segment.split_x(x_t);
+            } else {
+                return segment.split_x(x_b);
+            }
+        } else {
+            throw new IllegalStateException("should not come here");
+        }
+    }
+
+    static Segment[] splitAtAntiMeridian(Segment segment, SegmentCoverage segmentCoverage, GeoPosCalculator calculator) {
+        final GeoPos geoPos = new GeoPos();
+        if (segmentCoverage == ACROSS) {
+            // find y with anti-meridian jump
+            calculator.getGeoPos(segment.x_min, segment.y_min, geoPos);
+            double lon_l = geoPos.lon;
+
+            calculator.getGeoPos(segment.x_max, segment.y_min, geoPos);
+            double lon_r = geoPos.lon;
+
+            int y_l = Integer.MIN_VALUE;
+            int y_r = Integer.MIN_VALUE;
+            for (int y = segment.y_min + 1; y <= segment.y_max; y++) {
+                calculator.getGeoPos(segment.x_min, y, geoPos);
+                double delta = Math.abs(lon_l - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    y_l = y;
+                }
+                lon_l = geoPos.lon;
+
+                calculator.getGeoPos(segment.x_max, y, geoPos);
+                delta = Math.abs(lon_r - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    y_r = y;
+                }
+                lon_r = geoPos.lon;
+            }
+
+            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
+                // antimeridian not passing through segment in a way that enables across-swath splitting
+                return new Segment[0];
+            }
+
+            final int center = segment.y_min + segment.getHeight() / 2;
+            final int delta_l = Math.abs(center - y_l);
+            final int delta_r = Math.abs(center - y_r);
+            if (delta_l < delta_r) {
+                return segment.split_y(y_l);
+            } else {
+                return segment.split_y(y_r);
+            }
+        } else if (segmentCoverage == ALONG) {
+            // find x with anti-meridian jump
+            calculator.getGeoPos(segment.x_min, segment.y_min, geoPos);
+            double lon_t = geoPos.lon;
+
+            calculator.getGeoPos(segment.x_min, segment.y_max, geoPos);
+            double lon_b = geoPos.lon;
+
+            int x_t = Integer.MIN_VALUE;
+            int x_b = Integer.MIN_VALUE;
+            for (int x = segment.x_min + 1; x <= segment.x_max; x++) {
+                calculator.getGeoPos(x, segment.y_min, geoPos);
+                double delta = Math.abs(lon_t - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    x_t = x;
+                }
+                lon_t = geoPos.lon;
+
+                calculator.getGeoPos(x, segment.y_max, geoPos);
+                delta = Math.abs(lon_b - geoPos.lon);
+                if (delta > ANGLE_THRESHOLD) {
+                    x_b = x;
+                }
+                lon_b = geoPos.lon;
+            }
+            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+                // antimeridian not passing through segment in a way that enables across-swath splitting
+                return new Segment[0];
+            }
+            final int center = segment.x_min + segment.getWidth() / 2;
+            final int delta_t = Math.abs(center - x_t);
+            final int delta_b = Math.abs(center - x_b);
+            if (delta_t < delta_b) {
+                return segment.split_x(x_t);
+            } else {
+                return segment.split_x(x_b);
+            }
+        } else {
+            // split at x_antimeridian
+            throw new IllegalStateException("not implemented");
+        }
+    }
+
+    private SegmentCoverage hasGeoCoverage(Segment segment) {
+        final GeoPos geoPos = new GeoPos();
+        final int xOffset = segment.getWidth() / 2;
+        final int yOffset = segment.getHeight() / 2;
+
+        getGeoPos(segment.x_min + xOffset, segment.y_min, geoPos);
+        final boolean b1 = segment.isInside(geoPos.lon, geoPos.lat);
+
+        getGeoPos(segment.x_max, segment.y_min + yOffset, geoPos);
+        final boolean b2 = segment.isInside(geoPos.lon, geoPos.lat);
+
+        getGeoPos(segment.x_min + xOffset, segment.y_max, geoPos);
+        final boolean b3 = segment.isInside(geoPos.lon, geoPos.lat);
+
+        getGeoPos(segment.x_min, segment.y_min + yOffset, geoPos);
+        final boolean b4 = segment.isInside(geoPos.lon, geoPos.lat);
+
+        if (!(b2 && b4)) {
+            return ACROSS;
+        }
+
+        if (!(b1 && b3)) {
+            return ALONG;
+        }
+
+        return INSIDE;
     }
 
     @Override
@@ -111,35 +467,39 @@ public class PixelQuadTreeInverse implements InverseCoding {
         }
         pixelPos.setInvalid();
 
-        final Result result = new Result();
-        boolean pixelFound = quadTreeSearch(0,
-                                            geoPos.lat, geoPos.lon,
-                                            0, 0,
-                                            rasterWidth, rasterHeight,
-                                            result);
+        final ArrayList<Result> results = new ArrayList<>();
+        for (final Segment segment : segmentList) {
+            if (segment.isInside(geoPos.lon, geoPos.lat)) {
+                final Result result = new Result();
+                final boolean found = segmentSearch(geoPos.lon, geoPos.lat, segment, result);
+                if (found) {
+                    results.add(result);
+                }
+            }
+        }
 
-        if (pixelFound) {
-            final GeoPos resultGeoPos = new GeoPos();
-            getGeoPos(result.x, result.y, resultGeoPos);
-            final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
-            final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
-
-            final boolean smallerThanEpsilon;
-            if (absLonDist > absLatDist) {
-                final double lat = geoPos.lat;
-                final int idx = (int) Math.floor(Math.abs(lat * 10));
-                smallerThanEpsilon = absLonDist < epsilonLon[idx];
-            } else {
-                smallerThanEpsilon = absLatDist < epsilon;
+        if (results.size() > 0) {
+            Result minDeltaResult = null;
+            double minDelta = Double.MAX_VALUE;
+            for (Result result : results) {
+                final GeoPos resultGeoPos = new GeoPos();
+                getGeoPos(result.x, result.y, resultGeoPos);
+                final double absLonDist = Math.abs(resultGeoPos.lon - geoPos.lon);
+                final double absLatDist = Math.abs(resultGeoPos.lat - geoPos.lat);
+                final double delta = absLonDist * absLonDist + absLatDist * absLatDist;
+                if (delta < minDelta) {
+                    minDelta = delta;
+                    minDeltaResult = result;
+                }
             }
 
-            if (smallerThanEpsilon) {
+            if (minDelta < epsilon && minDeltaResult != null) {
                 if (fractionalAccuracy) {
-                    final InterpolationContext context = InterpolationContext.extract(result.x, result.y, longitudes, latitudes, rasterWidth, rasterHeight);
+                    final InterpolationContext context = InterpolationContext.extract(minDeltaResult.x, minDeltaResult.y, longitudes, latitudes, rasterWidth, rasterHeight);
                     pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
                     pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
                 } else {
-                    pixelPos.setLocation(result.x + offsetX, result.y + offsetY);
+                    pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
                 }
             }
         }
@@ -165,17 +525,8 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         lonRange = Range.computeRangeDouble(longitudes, null);
         latRange = Range.computeRangeDouble(latitudes, null);
-    }
 
-    static double[] createEpsilonLongitude(double epsilon) {
-        final double[] d = new double[901];
-        for (int i = 0; i < d.length; i++) {
-            final double ang = i * 0.1;
-            final double rad = Math.toRadians(ang);
-            final double multiplier = 1 / Math.cos(rad);
-            d[i] = epsilon * multiplier;
-        }
-        return d;
+        segmentList = calculateSegmentation(rasterWidth, rasterHeight, poleLocations);
     }
 
     @Override
@@ -191,6 +542,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     public void dispose() {
         longitudes = null;
         latitudes = null;
+        segmentList.clear();
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
@@ -214,11 +566,15 @@ public class PixelQuadTreeInverse implements InverseCoding {
         clone.offsetX = offsetX;
         clone.offsetY = offsetY;
 
+        for (Segment segment : segmentList) {
+            clone.segmentList.add(segment.clone());
+        }
+
         return clone;
     }
 
     // package access for testing only tb 2019-12-16
-    void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
+    public void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
         final int index = pixelY * rasterWidth + pixelX;
 
         geoPos.setLocation(latitudes[index], longitudes[index]);
@@ -228,6 +584,14 @@ public class PixelQuadTreeInverse implements InverseCoding {
     double getEpsilon(double resolutionInKm) {
         final double angle = 2.0 * Math.asin((resolutionInKm * 1000.0) / (2 * RsMathUtils.MEAN_EARTH_RADIUS));
         return TO_DEG * angle * 2.0;
+    }
+
+    private boolean segmentSearch(final double lon,
+                                  final double lat,
+                                  Segment segment,
+                                  final Result result) {
+
+        return quadTreeSearch(0, lat, lon, segment.x_min, segment.y_min, segment.getWidth(), segment.getHeight(), result);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -248,101 +612,111 @@ public class PixelQuadTreeInverse implements InverseCoding {
         final int y_1 = y;
         final int y_2 = y_1 + h - 1;
 
-        double lonMin;
-        double lonMax;
-        double latMin;
-        double latMax;
+        final boolean closeToPole = Math.abs(lon) > 70.0;
 
-        double lat_0;
-        double lon_0;
-        double lat_1;
-        double lon_1;
-        double lat_2;
-        double lon_2;
-        double lat_3;
-        double lon_3;
-
-        if (depth == 0) {
-            lonMin = lonRange.getMin();
-            lonMax = lonRange.getMax();
-            latMin = latRange.getMin();
-            latMax = latRange.getMax();
-
-            lon_0 = lonMin;
-            lat_0 = latMin;
-
-            lon_1 = lonMax;
-            lat_1 = latMin;
-
-            lon_2 = lonMax;
-            lat_2 = latMax;
-
-            lon_3 = lonMin;
-            lat_3 = latMax;
+        final double[] lonArray;
+        final double[] latArray;
+        if (closeToPole) {
+            lonArray = new double[8];
+            latArray = new double[8];
         } else {
-            final GeoPos geoPos = new GeoPos();
-            getGeoPos(x_1, y_1, geoPos);
-            lat_0 = geoPos.lat;
-            lon_0 = geoPos.lon;
-
-            getGeoPos(x_1, y_2, geoPos);
-            lat_1 = geoPos.lat;
-            lon_1 = geoPos.lon;
-
-            getGeoPos(x_2, y_1, geoPos);
-            lat_2 = geoPos.lat;
-            lon_2 = geoPos.lon;
-
-            getGeoPos(x_2, y_2, geoPos);
-            lat_3 = geoPos.lat;
-            lon_3 = geoPos.lon;
-
-            latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
-            latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
-
-            if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lon_0, lon_1, lon_2, lon_3)) {
-                final double signumLon = Math.signum(lon);
-                if (signumLon > 0f) {
-                    // position is in a region with positive longitudes, so cut negative longitudes from quad area
-                    lonMax = 180.0f;
-                    lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
-                } else {
-                    // position is in a region with negative longitudes, so cut positive longitudes from quad area
-                    lonMin = -180.0f;
-                    lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
-                }
-            } else {
-                final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
-                final double epsLon = epsilonLon[idx];
-                lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsLon;
-                lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsLon;
-            }
+            lonArray = new double[4];
+            latArray = new double[4];
         }
 
-        final boolean definitelyOutside = lat < latMin || lat > latMax || lon < lonMin || lon > lonMax;
-        if (definitelyOutside) {
+        final GeoPos geoPos = new GeoPos();
+        getGeoPos(x_1, y_1, geoPos);
+        lonArray[0] = geoPos.lon;
+        latArray[0] = geoPos.lat;
+
+        getGeoPos(x_1, y_2, geoPos);
+        lonArray[1] = geoPos.lon;
+        latArray[1] = geoPos.lat;
+
+        getGeoPos(x_2, y_1, geoPos);
+        lonArray[2] = geoPos.lon;
+        latArray[2] = geoPos.lat;
+
+        getGeoPos(x_2, y_2, geoPos);
+        lonArray[3] = geoPos.lon;
+        latArray[3] = geoPos.lat;
+
+        if (closeToPole) {
+            // add more points to compensate extreme curvature close to pole tb 2021-03-29
+            final int xOffset = w / 2;
+            final int yOffset = h / 2;
+
+            getGeoPos(x_1 + xOffset, y_1, geoPos);
+            lonArray[4] = geoPos.lon;
+            latArray[4] = geoPos.lat;
+
+            getGeoPos(x_2, y_1 + yOffset, geoPos);
+            lonArray[5] = geoPos.lon;
+            latArray[5] = geoPos.lat;
+
+            getGeoPos(x_1 + xOffset, y_2, geoPos);
+            lonArray[6] = geoPos.lon;
+            latArray[6] = geoPos.lat;
+
+            getGeoPos(x_1, y_1 + yOffset, geoPos);
+            lonArray[7] = geoPos.lon;
+            latArray[7] = geoPos.lat;
+        }
+
+        final double latMin = getMin(latArray, epsilon);
+        final double latMax = getMax(latArray, epsilon);
+
+        if (lat < latMin || lat > latMax) {
             return false;
+        }
+
+        final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+        final double epsLon = epsilonLon[idx];
+        if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lonArray)) {
+            boolean lonOutside = false;
+            if (lon > 0f) {
+                // position is in a region with positive longitudes, so cut negative longitudes from quad area tb 2021-03-29
+                final double lonMin = getPositiveLonMin(lonArray);
+                if (lon + epsLon < lonMin) {
+                    lonOutside = true;
+                }
+            } else {
+                // position is in a region with negative longitudes, so cut positive longitudes from quad area tb 2021-03-29
+                final double lonMax = getNegativeLonMax(lonArray);
+                if (lon - epsLon > lonMax) {
+                    lonOutside = true;
+                }
+            }
+            if (lonOutside) {
+                return false;
+            }
+        } else {
+            final double lonMin = getMin(lonArray, epsLon);
+            final double lonMax = getMax(lonArray, epsLon);
+
+            if (lon < lonMin || lon > lonMax) {
+                return false;
+            }
         }
 
         boolean pixelFound = false;
         if (w == 2 && h == 2) {
             final double f = Math.cos(lat * MathUtils.DTOR);
-            if (result.update(x_1, y_1, sq(lat - lat_0, f * (lon - lon_0)))) {
+            if (result.update(x_1, y_1, sq(lat - latArray[0], f * (lon - lonArray[0])))) {
                 pixelFound = true;
             }
-            if (result.update(x_1, y_2, sq(lat - lat_1, f * (lon - lon_1)))) {
+            if (result.update(x_1, y_2, sq(lat - latArray[1], f * (lon - lonArray[1])))) {
                 pixelFound = true;
             }
-            if (result.update(x_2, y_1, sq(lat - lat_2, f * (lon - lon_2)))) {
+            if (result.update(x_2, y_1, sq(lat - latArray[2], f * (lon - lonArray[2])))) {
                 pixelFound = true;
             }
-            if (result.update(x_2, y_2, sq(lat - lat_3, f * (lon - lon_3)))) {
+            if (result.update(x_2, y_2, sq(lat - latArray[3], f * (lon - lonArray[3])))) {
                 pixelFound = true;
             }
         } else {
             pixelFound = quadTreeRecursion(depth, lat, lon, x_1, y_1, w, h, result);
         }
-
 
         return pixelFound;
     }
