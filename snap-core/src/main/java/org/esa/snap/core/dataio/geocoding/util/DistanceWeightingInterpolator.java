@@ -20,7 +20,7 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.DistanceMeasure;
 
-public abstract class DistanceWeightingInterpolator implements XYInterpolator {
+abstract class DistanceWeightingInterpolator implements XYInterpolator {
 
     abstract DistanceMeasure getDistanceMeasure(double lon, double lat);
 
@@ -60,5 +60,4 @@ public abstract class DistanceWeightingInterpolator implements XYInterpolator {
         pixelPos.y = y_sum * inv_sum;
         return pixelPos;
     }
-
 }
