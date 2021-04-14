@@ -46,6 +46,8 @@ import java.util.regex.Pattern;
  * @author Norman Fomferra
  * @since 0.6
  */
+// MAR2020 - Knowles - Add setEnabled so that some properties can be initially disabled
+
 public class PropertyDescriptor {
 
     private final String name;
@@ -79,6 +81,7 @@ public class PropertyDescriptor {
         if (type.isEnum() && getValueSet() == null)  {
             setValueSet(new ValueSet(type.getEnumConstants()));
         }
+        setEnabled(true);
     }
 
     public String getName() {
@@ -120,6 +123,14 @@ public class PropertyDescriptor {
 
     public void setDescription(String description) {
         setAttribute("description", description);
+    }
+
+    public boolean getEnabled() {
+        return getBooleanProperty("enabled");
+    }
+
+    public void setEnabled(boolean enabled) {
+        setAttribute("enabled", enabled);
     }
 
     public boolean isNotNull() {
