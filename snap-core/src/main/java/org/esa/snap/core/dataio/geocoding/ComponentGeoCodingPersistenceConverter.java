@@ -25,6 +25,9 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductNode;
+import org.esa.snap.core.datamodel.ProductNodeEvent;
+import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
@@ -32,6 +35,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.util.HashMap;
 import java.util.stream.IntStream;
 
 /**
@@ -56,6 +60,8 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
     // And so on ...
     public static final String ID_VERSION_1 = "ComponentGeoCoding:1";
+
+    private final HashMap<Product, HashMap<RasterDataNode, double[]>> dataReference = new HashMap<>();
 
     @Override
     public String getID() {
@@ -113,7 +119,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             resolutionInKm = Double.parseDouble(resolutionKmStr);
         } catch (NumberFormatException e) {
             SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value '"+resolutionKmStr+"' of property '" + NAME_RASTER_RESOLUTION_KM + "' cannot be parsed to double.");
+            SystemUtils.LOG.warning("The value '" + resolutionKmStr + "' of property '" + NAME_RASTER_RESOLUTION_KM + "' cannot be parsed to double.");
         }
 
         boolean invalidValueGeoChecks = false;
@@ -164,6 +170,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         }
 
         final GeoRaster geoRaster;
+        final HashMap<RasterDataNode, double[]> dataMap = getDataMap(product);
         if (lonRaster instanceof TiePointGrid) {
             final int sceneWidth = product.getSceneRasterWidth();
             final int sceneHeight = product.getSceneRasterHeight();
@@ -173,11 +180,20 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             final int gridWidth = lonTPG.getGridWidth();
             final int gridHeight = lonTPG.getGridHeight();
 
-            final float[] lons = (float[]) lonTPG.getGridData().getElems();
-            final double[] longitudes = IntStream.range(0, lons.length).mapToDouble(i -> lons[i]).toArray();
+            final double[] longitudes;
+            final double[] latitudes;
+            if (dataMap.containsKey(lonRaster)) {
+                longitudes = dataMap.get(lonRaster);
+                latitudes = dataMap.get(latRaster);
+            } else {
+                final float[] lons = (float[]) lonTPG.getGridData().getElems();
+                longitudes = IntStream.range(0, lons.length).mapToDouble(i -> lons[i]).toArray();
+                dataMap.put(lonRaster, longitudes);
 
-            final float[] lats = (float[]) latTPG.getGridData().getElems();
-            final double[] latitudes = IntStream.range(0, lats.length).mapToDouble(i -> lats[i]).toArray();
+                final float[] lats = (float[]) latTPG.getGridData().getElems();
+                latitudes = IntStream.range(0, lats.length).mapToDouble(i -> lats[i]).toArray();
+                dataMap.put(latRaster, latitudes);
+            }
 
             final double offsetX = lonTPG.getOffsetX();
             final double offsetY = lonTPG.getOffsetY();
@@ -191,10 +207,22 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
             final int size = rasterWidth * rasterHeight;
-            final double[] longitudes = lonRaster.getGeophysicalImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-            final double[] latitudes = latRaster.getGeophysicalImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+
+            final double[] longitudes;
+            final double[] latitudes;
+            if (dataMap.containsKey(lonRaster)) {
+                longitudes = dataMap.get(lonRaster);
+                latitudes = dataMap.get(latRaster);
+            } else {
+                longitudes = lonRaster.getGeophysicalImage().getImage(0).getData()
+                        .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+                dataMap.put(lonRaster, longitudes);
+
+                latitudes = latRaster.getGeophysicalImage().getImage(0).getData()
+                        .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+                dataMap.put(latRaster, latitudes);
+            }
+
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
                                       resolutionInKm);
         }
@@ -204,6 +232,26 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+    private HashMap<RasterDataNode, double[]> getDataMap(Product product) {
+        if (!dataReference.containsKey(product)) {
+            product.addProductNodeListener(new ProductNodeListenerAdapter() {
+                @Override
+                public void nodeStartDisposal(ProductNodeEvent event) {
+                    freeDataFor(event.getSourceNode());
+                }
+            });
+            dataReference.put(product, new HashMap<>());
+        }
+        return dataReference.get(product);
+    }
+
+    private void freeDataFor(ProductNode sourceNode) {
+        final HashMap<RasterDataNode, double[]> dataMap = dataReference.remove(sourceNode);
+        if (dataMap != null) {
+            dataMap.clear();
+        }
     }
 
     @Override

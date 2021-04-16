@@ -32,6 +32,7 @@ public class ProductNodeEvent extends EventObject {
     public final static int NODE_ADDED = 1;
     public final static int NODE_REMOVED = 2;
     public final static int NODE_DATA_CHANGED = 3;
+    public final static int NODE_START_DISPOSAL = 4;
 
     private final ProductNodeGroup nodeGroup;
     private final int type;
