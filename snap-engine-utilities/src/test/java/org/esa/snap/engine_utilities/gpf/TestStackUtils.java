@@ -147,7 +147,15 @@ public class TestStackUtils {
         final Product product = createStackProduct(4);
 
         String[] suffixes = StackUtils.getBandSuffixes(product.getBands());
-        assertArrayEquals(new String[] {"_mst1_01Jan21", "_slv3_01Feb21", "_slv2_01Feb21"}, suffixes);
+        assertArrayEquals(new String[] {"_mst1_01Jan21", "_slv2_01Feb21", "_slv3_01Feb21"}, suffixes);
+    }
+
+    @Test
+    public void testGetBandDates() throws Exception {
+        final Product product = createStackProduct(4);
+
+        String[] suffixes = StackUtils.getBandDates(product.getBands());
+        assertArrayEquals(new String[] {"_01Feb21", "_01Jan21"}, suffixes);
     }
 
     @Test
