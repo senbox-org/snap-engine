@@ -23,11 +23,7 @@ import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Helper methods for working with Stack products
@@ -291,9 +287,19 @@ public final class StackUtils {
     }
 
     public static String[] getBandSuffixes(final Band[] bands) {
-        final Set<String> suffixSet = new HashSet<>(bands.length);
+        final Set<String> suffixSet = new TreeSet<>();
         for(Band b : bands) {
             suffixSet.add(getBandSuffix(b.getName()));
+        }
+        return suffixSet.toArray(new String[0]);
+    }
+
+    public static String[] getBandDates(final Band[] bands) {
+        final Set<String> suffixSet = new TreeSet<>();
+        for(Band b : bands) {
+            if (b.getName().contains("_")) {
+                suffixSet.add(b.getName().substring(b.getName().lastIndexOf("_")));
+            }
         }
         return suffixSet.toArray(new String[0]);
     }
