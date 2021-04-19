@@ -75,6 +75,8 @@ import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.DOMBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
@@ -265,6 +267,8 @@ public class DimapProductHelpers {
         }
         final Datum datum = createDatum(dom);
         if (geoPosElems.size() > 0) {
+            final XMLOutputter xmlOutputter = new XMLOutputter(Format.getCompactFormat());
+            final HashMap<String, GeoCoding> geoCodingInstatnces = new HashMap<>();
             Map<String, GeoCoding> wktToCrsGeocodingMap = new HashMap<>();
             final GeoCoding[] geoCodings = new GeoCoding[geoPosElems.size()];
 
@@ -310,33 +314,37 @@ public class DimapProductHelpers {
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_SEARCH_RADIUS) != null
                            && geoPosElem.getChild(DimapProductConstants.TAG_LATITUDE_BAND) != null) {
                     geoCodings[bandIndex] = createPixelGeoCoding(product, datum, geoPosElem);
+                } else if (geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS) != null) {
+                    final Element geoPositionPointsElement = geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS);
+                    geoCodings[bandIndex] = createGeoCodingFromGeoPositionPointsElement(product,
+                                                                                        datum,
+                                                                                        geoPositionPointsElement);
                 } else {
-                    final Element geopositionPointsElement
-                            = geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS);
-                    if (geopositionPointsElement != null) {
-                        geoCodings[bandIndex] = createGeoCodingFromGeoPositionPointsElement(product,
-                                                                                            datum,
-                                                                                            geopositionPointsElement);
-                    } else {
-                        final List<Element> children = geoPosElem.getChildren();
-                        for (Element child : children) {
-                            if (DimapProductConstants.TAG_BAND_INDEX.equals(child.getName())) {
-                                continue;
-                            }
-                            final Item item = languageSupport.translateToItem(child);
-                            final PersistenceDecoder<GeoCoding> decoder = persistence.getDecoder(item);
-                            if (decoder != null) {
-                                geoCodings[bandIndex] = decoder.decode(item, product);
-                            }
-                            if (geoCodings[bandIndex] != null) {
-                                break;
+                    final List<Element> children = geoPosElem.getChildren();
+                    for (Element child : children) {
+                        if (DimapProductConstants.TAG_BAND_INDEX.equals(child.getName())) {
+                            continue;
+                        }
+                        final Item item = languageSupport.translateToItem(child);
+                        final PersistenceDecoder<GeoCoding> decoder = persistence.getDecoder(item);
+                        if (decoder != null) {
+                            final String string = xmlOutputter.outputString(child);
+                            if (geoCodingInstatnces.containsKey(string)) {
+                                geoCodings[bandIndex] = geoCodingInstatnces.get(string);
+                            } else {
+                                final GeoCoding geoCoding = decoder.decode(item, product);
+                                geoCodings[bandIndex] = geoCoding;
+                                geoCodingInstatnces.put(string, geoCoding);
                             }
                         }
-                        if (geoCodings[bandIndex] == null) {
-                            final DimapPersistable persistable = DimapPersistence.getPersistable(geoPosElem);
-                            if (persistable != null) {
-                                geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product);
-                            }
+                        if (geoCodings[bandIndex] != null) {
+                            break;
+                        }
+                    }
+                    if (geoCodings[bandIndex] == null) {
+                        final DimapPersistable persistable = DimapPersistence.getPersistable(geoPosElem);
+                        if (persistable != null) {
+                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product);
                         }
                     }
                 }
