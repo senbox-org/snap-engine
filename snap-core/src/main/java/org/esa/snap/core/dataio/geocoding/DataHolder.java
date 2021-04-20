@@ -64,7 +64,7 @@ public class DataHolder {
         if (!dataReference.containsKey(product)) {
             product.addProductNodeListener(new ProductNodeListenerAdapter() {
                 @Override
-                public void nodeStartDisposal(ProductNodeEvent event) {
+                public void nodeDisposing(ProductNodeEvent event) {
                     freeDataFor(event.getSourceNode());
                 }
             });
@@ -73,7 +73,7 @@ public class DataHolder {
         return dataReference.get(product);
     }
 
-    public void freeDataFor(ProductNode sourceNode) {
+    private void freeDataFor(ProductNode sourceNode) {
         final HashMap<RasterDataNode, double[]> dataMap = dataReference.remove(sourceNode);
         if (dataMap != null) {
             dataMap.clear();

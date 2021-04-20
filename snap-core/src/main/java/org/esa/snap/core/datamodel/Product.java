@@ -413,8 +413,8 @@ public class Product extends ProductNode {
             case ProductNodeEvent.NODE_REMOVED:
                 listener.nodeRemoved(event);
                 break;
-            case ProductNodeEvent.NODE_START_DISPOSAL:
-                listener.nodeStartDisposal(event);
+            case ProductNodeEvent.NODE_DISPOSING:
+                listener.nodeDisposing(event);
                 break;
         }
     }
@@ -708,7 +708,7 @@ public class Product extends ProductNode {
      */
     @Override
     public void dispose() {
-        fireEvent(this, ProductNodeEvent.NODE_START_DISPOSAL, null);
+        fireEvent(this, ProductNodeEvent.NODE_DISPOSING, null);
         try {
             closeIO();
         } catch (IOException ignore) {

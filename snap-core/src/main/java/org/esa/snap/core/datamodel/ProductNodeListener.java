@@ -53,12 +53,12 @@ public interface ProductNodeListener {
     void nodeRemoved(ProductNodeEvent event);
 
     /**
-     * Notified when a node starts disposal.
+     * Notified when a node starts its disposal.
      * Overwrite this method if you want to be notified when a node starts disposal.
      *
      * @param event the product node which the listener to be notified
      */
-    default void nodeStartDisposal(ProductNodeEvent event) {
+    default void nodeDisposing(ProductNodeEvent event) {
     }
 }
 
