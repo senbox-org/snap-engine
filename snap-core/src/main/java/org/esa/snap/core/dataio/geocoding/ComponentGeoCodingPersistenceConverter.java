@@ -61,8 +61,6 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
     // And so on ...
     public static final String ID_VERSION_1 = "ComponentGeoCoding:1";
 
-    private final HashMap<Product, HashMap<RasterDataNode, double[]>> dataReference = new HashMap<>();
-
     @Override
     public String getID() {
         return ID_VERSION_1;
@@ -170,7 +168,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         }
 
         final GeoRaster geoRaster;
-        final HashMap<RasterDataNode, double[]> dataMap = getDataMap(product);
+        final HashMap<RasterDataNode, double[]> dataMap = DataHolder.getInstance().getDataMap(product);
         if (lonRaster instanceof TiePointGrid) {
             final int sceneWidth = product.getSceneRasterWidth();
             final int sceneHeight = product.getSceneRasterHeight();
@@ -232,26 +230,6 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
         geoCoding.initialize();
         return geoCoding;
-    }
-
-    private HashMap<RasterDataNode, double[]> getDataMap(Product product) {
-        if (!dataReference.containsKey(product)) {
-            product.addProductNodeListener(new ProductNodeListenerAdapter() {
-                @Override
-                public void nodeStartDisposal(ProductNodeEvent event) {
-                    freeDataFor(event.getSourceNode());
-                }
-            });
-            dataReference.put(product, new HashMap<>());
-        }
-        return dataReference.get(product);
-    }
-
-    private void freeDataFor(ProductNode sourceNode) {
-        final HashMap<RasterDataNode, double[]> dataMap = dataReference.remove(sourceNode);
-        if (dataMap != null) {
-            dataMap.clear();
-        }
     }
 
     @Override

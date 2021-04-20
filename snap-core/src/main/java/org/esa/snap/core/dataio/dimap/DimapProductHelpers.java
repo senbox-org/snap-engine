@@ -328,13 +328,13 @@ public class DimapProductHelpers {
                         final Item item = languageSupport.translateToItem(child);
                         final PersistenceDecoder<GeoCoding> decoder = persistence.getDecoder(item);
                         if (decoder != null) {
-                            final String string = xmlOutputter.outputString(child);
-                            if (geoCodingInstatnces.containsKey(string)) {
-                                geoCodings[bandIndex] = geoCodingInstatnces.get(string);
+                            final String xmlKey = xmlOutputter.outputString(child);
+                            if (geoCodingInstatnces.containsKey(xmlKey)) {
+                                geoCodings[bandIndex] = geoCodingInstatnces.get(xmlKey);
                             } else {
                                 final GeoCoding geoCoding = decoder.decode(item, product);
                                 geoCodings[bandIndex] = geoCoding;
-                                geoCodingInstatnces.put(string, geoCoding);
+                                geoCodingInstatnces.put(xmlKey, geoCoding);
                             }
                         }
                         if (geoCodings[bandIndex] != null) {

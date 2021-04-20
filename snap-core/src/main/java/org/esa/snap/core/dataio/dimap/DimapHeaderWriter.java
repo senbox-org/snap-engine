@@ -532,7 +532,8 @@ public final class DimapHeaderWriter extends XmlWriter {
             final PersistenceEncoder<Object> encoder = new Persistence().getEncoder(geoCoding);
             if (encoder != null) {
                 final Item encoded = encoder.encode(geoCoding);
-                printGeoCodingXmlFromObject(indent, bandIndex, toXML(encoded));
+                final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);
+                printGeoCodingXmlFromObject(indent, bandIndex, xmlFromObject);
                 return;
             }
             DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
@@ -555,16 +556,11 @@ public final class DimapHeaderWriter extends XmlWriter {
         }
     }
 
-    private Element toXML(Item encoded) {
-        final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);
-        return xmlFromObject;
-    }
-
-    private void printGeoCodingXmlFromObject(int indent, int bandIndex, Element xmlFromObject) {
+    private void printGeoCodingXmlFromObject(int indent, int bandIndex, Element element) {
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
         writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
-        printElement(indent + 1, xmlFromObject);
+        printElement(indent + 1, element);
         println(geopositionTags[1]);
     }
 
