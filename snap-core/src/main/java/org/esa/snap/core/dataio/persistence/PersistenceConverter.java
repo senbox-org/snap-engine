@@ -22,10 +22,6 @@ import org.esa.snap.core.datamodel.Product;
 
 public interface PersistenceConverter<T> extends PersistenceDecoder<T>, PersistenceEncoder<T> {
 
-    String KEY_PERSISTENCE_ID = "___persistence_id___";
-
-    HistoricalDecoder[] getHistoricalDecoders();
-
     default Item convertToCurrentVersion(Item item, Product product) {
         final HistoricalDecoder[] decoders = getHistoricalDecoders();
         int startIndex = -1;
@@ -44,4 +40,9 @@ public interface PersistenceConverter<T> extends PersistenceDecoder<T>, Persiste
         return item;
     }
 
+    default Container createRootContainer(String name) {
+        final Container codingMain = new Container(name);
+        codingMain.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
+        return codingMain;
+    }
 }

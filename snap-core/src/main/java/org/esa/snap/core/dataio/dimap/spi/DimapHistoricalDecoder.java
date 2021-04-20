@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -12,27 +13,21 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import org.jdom.Element;
+import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
+import org.esa.snap.core.dataio.persistence.Item;
 
-/**
- * The service provider interface (SPI) for <code>DimapPersistable</code>s.
- *
- * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i>
- *
- * @author Marco Peters
- * @version $Revision$ $Date$
- * @deprecated implement {@link org.esa.snap.core.dataio.persistence.PersistenceSpi PersistenceSpi} instead
- */
-@Deprecated
-public interface DimapPersistableSpi {
+public abstract class DimapHistoricalDecoder implements HistoricalDecoder {
 
-    boolean canDecode(Element element);
+    @Override
+    public final String getID() {
+        return null;
+    }
 
-    boolean canPersist(Object object);
-
-    DimapPersistable createPersistable();
+    @Override
+    public abstract boolean canDecode(Item item);
 }

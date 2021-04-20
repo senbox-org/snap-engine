@@ -30,6 +30,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.stream.IntStream;
 
+/**
+ * @deprecated dont further use this class. Now it is wrapped by {@link ComponentGeoCodingPersistenceConverter}
+ */
+@Deprecated
 public class ComponentGeoCodingPersistable implements DimapPersistable {
 
     public static final String TAG_COMPONENT_GEO_CODING = "ComponentGeoCoding";
@@ -248,3 +252,4 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         return codingMain;
     }
 }
+

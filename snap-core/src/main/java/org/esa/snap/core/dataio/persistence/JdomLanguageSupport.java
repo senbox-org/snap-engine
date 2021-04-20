@@ -28,10 +28,10 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
     @Override
     public Element translateToLanguageObject(Item item) {
         if (item.isProperty()) {
-            final Property<?> p = (Property<?>) item;
+            final Property<?> p = item.asProperty();
             return createPropertyElem(p);
         } else if (item.isContainer()) {
-            final Container c = (Container) item;
+            final Container c = item.asContainer();
             return createContainerElem(c);
         } else {
             throw new IllegalArgumentException("Item must be type of Container or type of Property");

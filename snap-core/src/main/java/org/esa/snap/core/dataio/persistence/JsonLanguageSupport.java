@@ -34,9 +34,9 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     public Map<String, Object> translateToLanguageObject(Item item) {
         final Map<String, Object> map = new LinkedHashMap<>();
         if (item.isProperty()) {
-            addProperty(map, (Property<?>) item);
+            addProperty(map, item.asProperty());
         } else {
-            addContainer(map, (Container) item);
+            addContainer(map, item.asContainer());
         }
         return map;
     }

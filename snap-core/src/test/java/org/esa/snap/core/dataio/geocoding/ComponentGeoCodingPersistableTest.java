@@ -26,9 +26,9 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
 
 public class ComponentGeoCodingPersistableTest {
 
@@ -36,7 +36,7 @@ public class ComponentGeoCodingPersistableTest {
     private Product product;
 
     private static final String LS = System.lineSeparator();
-    private static String EXPECTED_GEO_CRS = "GEOGCS[\"WGS84(DD)\", " + LS +
+    private static final String EXPECTED_GEO_CRS = "GEOGCS[\"WGS84(DD)\", " + LS +
             "  DATUM[\"WGS84\", " + LS +
             "    SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], " + LS +
             "  PRIMEM[\"Greenwich\", 0.0], " + LS +

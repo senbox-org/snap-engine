@@ -18,6 +18,7 @@
 
 package org.esa.snap.core.dataio.persistence;
 
+import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 
@@ -27,6 +28,10 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
 
     private final static String ID = "TestMaskPersistenceConverter:2";
 
+    public String getID() {
+        return ID;
+    }
+
     private static final String[] EXPECTED_PROP_NAMES = new String[]{
             "name",
             "expression",
@@ -35,21 +40,10 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
             "image_transparency"
     };
 
-
-    @Override
-    public boolean canDecode(Item item) {
-        if (isCurrentVersion(item)) {
-            return true;
-        }
-        final HistoricalDecoder[] decoders = getHistoricalDecoders();
-        for (int i = decoders.length - 1; i >= 0; i--) { // reverse order !
-            HistoricalDecoder decoder = decoders[i];
-            if (decoder.canDecode(item)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    public static final HistoricalDecoder[] HISTORICAL_DECODERS = {
+            new HistoricalDecoder0(),
+            new HistoricalDecoder1(),
+    };
 
     @Override
     public Mask decode(Item item, Product product) {
@@ -74,7 +68,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
     @Override
     public Item encode(Mask mask) {
         final Container container = new Container("mask");
-        container.add(new Property<>(KEY_PERSISTENCE_ID, ID));
+        container.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
         container.add(new Property<>("name", mask.getName()));
         container.add(new Property<>("expression", Mask.BandMathsType.getExpression(mask)));
         container.add(new Property<>("description", mask.getDescription()));
@@ -87,10 +81,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
 
     @Override
     public HistoricalDecoder[] getHistoricalDecoders() {
-        return new HistoricalDecoder[]{
-                new HistoricalDecoder0(),
-                new HistoricalDecoder1(),
-        };
+        return HISTORICAL_DECODERS;
     }
 
     private static Property<?>[] getPropertiesValidated(Item item) {
@@ -101,17 +92,6 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
         return getProperties(item);
     }
 
-    static boolean isCurrentVersion(Item item) {
-        if (!item.isContainer()) {
-            return false;
-        }
-        final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
-        if (property == null) {
-            return false;
-        }
-        return ID.equals(property.getValueString());
-    }
-
     public static String validate(Item item) {
         if (!item.isContainer()) {
             return "Container expected.";
@@ -120,7 +100,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
         if (!"mask".equals(itemName)) {
             return "Item with name 'mask' expected but was '" + itemName + "'.";
         }
-        final Container container = (Container) item;
+        final Container container = item.asContainer();
         for (String propName : EXPECTED_PROP_NAMES) {
             final Property property = container.getProperty(propName);
             if (property == null) {
@@ -131,7 +111,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
     }
 
     public static Property[] getProperties(Item item) {
-        final Container container = (Container) item;
+        final Container container = item.asContainer();
         final Property[] props = new Property[EXPECTED_PROP_NAMES.length];
         for (int i = 0; i < EXPECTED_PROP_NAMES.length; i++) {
             final String propName = EXPECTED_PROP_NAMES[i];
@@ -141,18 +121,18 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
         return props;
     }
 
-    private static class HistoricalDecoder0 implements HistoricalDecoder {
+    private static class HistoricalDecoder0 extends DimapHistoricalDecoder {
 
         @Override
         public boolean canDecode(Item item) {
-            if (!item.isContainer()) {
+            if (item == null || !item.isContainer()) {
                 return false;
             }
             final String itemName = item.getName();
             if (!"mask".equals(itemName)) {
                 return false;
             }
-            final Container container = (Container) item;
+            final Container container = item.asContainer();
             for (String propName : new String[]{
                     "name",
                     "expr",
@@ -170,30 +150,24 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
 
         @Override
         public Item decode(Item item, Product product) {
-            final Container container = (Container) item;
+            final Container container = item.asContainer();
             container.add(new Property<>(KEY_PERSISTENCE_ID, HistoricalDecoder1.ID));
             return item;
         }
     }
 
     private static class HistoricalDecoder1 implements HistoricalDecoder {
-        private final static String ID = "MyMaskPersistenceConverter:1";
+
+        public static final String ID = "MyMaskPersistenceConverter:1";
 
         @Override
-        public boolean canDecode(Item item) {
-            if (!item.isContainer()) {
-                return false;
-            }
-            final Property<?> property = ((Container) item).getProperty(KEY_PERSISTENCE_ID);
-            if (property == null) {
-                return false;
-            }
-            return ID.equals(property.getValueString());
+        public String getID() {
+            return ID;
         }
 
         @Override
         public Item decode(Item item, Product product) {
-            final Container container = (Container) item;
+            final Container container = item.asContainer();
             container.removeProperty(KEY_PERSISTENCE_ID);
             container.add(new Property<>(KEY_PERSISTENCE_ID, TestMaskPersistenceConverter.ID));
             Property<?> property = container.removeProperty("expr");

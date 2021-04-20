@@ -408,6 +408,12 @@ import java.util.Set;
  * <td> Since SNAP 2.0, crs geocodings can be written per band.
  * </td>
  * </tr>
+ * <tr>
+ * <td valign="top">2.13.0</td>
+ * <td>The use of XML based DimapPersistables was replaced by a new markup language independent Persistence framework.<br>
+ * See the interface {@link org.esa.snap.core.dataio.persistence.PersistenceConverter PersistenceConverter} its implementations.
+ * </td>
+ * </tr>
  * </table>
  *
  * @author Sabine Embacher

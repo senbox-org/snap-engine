@@ -43,7 +43,7 @@ public final class DimapProductConstants {
      * <p>
      * Important note: If you change this number, update the BEAM-DIMAP version history given at {@link DimapProductWriterPlugIn}.
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.12.1";
+    public static final String DIMAP_CURRENT_VERSION = "2.13.0";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";

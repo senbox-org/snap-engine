@@ -34,6 +34,11 @@ public class Property<E> extends ValueItem<E> implements AttributeContainer {
     }
 
     @Override
+    public Property<?> asProperty() {
+        return this;
+    }
+
+    @Override
     public Attribute<?>[] getAttributes() {
         return attributes.values().toArray(new Attribute[0]);
     }

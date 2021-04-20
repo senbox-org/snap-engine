@@ -1,6 +1,5 @@
 /*
- *
- *  Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *  Copyright (C) 2021 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms of the GNU General Public License as published by the Free
@@ -13,34 +12,33 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, see http://www.gnu.org/licenses/
- *
  */
 
 package org.esa.snap.core.dataio.geocoding;
 
-import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
-import org.esa.snap.core.dataio.dimap.spi.DimapPersistableSpi;
-import org.jdom.Element;
-
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
+import org.esa.snap.core.dataio.persistence.Item;
+import org.esa.snap.core.dataio.persistence.PersistenceConverter;
+import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 
 /**
- * @deprecated use {@link ComponentGeoCodingPersistenceSpi} instead
+ * @author Sabine Embacher
  */
-@Deprecated
-public class ComponentGeoCodingPersistableSpi implements DimapPersistableSpi {
+public class ComponentGeoCodingPersistenceSpi implements PersistenceSpi {
+
+    private static final ComponentGeoCodingPersistenceConverter CONVERTER = new ComponentGeoCodingPersistenceConverter();
+
     @Override
-    public boolean canDecode(Element element) {
-        return element != null && element.getChild(TAG_COMPONENT_GEO_CODING) != null;
+    public boolean canDecode(Item item) {
+        return CONVERTER.canDecode(item);
     }
 
     @Override
-    public boolean canPersist(Object object) {
+    public boolean canEncode(Object object) {
         return object instanceof ComponentGeoCoding;
     }
 
     @Override
-    public DimapPersistable createPersistable() {
-        return new ComponentGeoCodingPersistable();
+    public PersistenceConverter<?> createConverter() {
+        return CONVERTER;
     }
 }
