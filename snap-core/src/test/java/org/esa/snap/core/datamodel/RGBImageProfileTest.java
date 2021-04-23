@@ -300,7 +300,21 @@ public class RGBImageProfileTest {
     }
 
     @Test
-    public void testSetProperties() throws Exception {
+    public void testEqualExpressions_deprecatedVersion() {
+        final RGBImageProfile infoWithoutAlpha = new RGBImageProfile("testing", new String[]{"winnie", "Ferkelchen", "Heffalump"});
+
+        assertTrue(infoWithoutAlpha.equalExpressions(new String[]{"winnie", "Ferkelchen", "Heffalump"}));
+        assertFalse(infoWithoutAlpha.equalExpressions(new String[]{"I-Ah", "Ferkelchen", "Heffalump"}));
+        assertFalse(infoWithoutAlpha.equalExpressions(new String[]{"winnie", "Ferkelchen", "Heffalump", "alpha"}));
+
+        final RGBImageProfile infoWithAlpha = new RGBImageProfile("testing_2", new String[]{"beta", "gamma", "lametta", "alpha"});
+        assertTrue(infoWithAlpha.equalExpressions(new String[]{"beta", "gamma", "lametta", "alpha"}));
+        assertFalse(infoWithAlpha.equalExpressions(new String[]{"delta", "gamma", "lametta", "alpha"}));
+
+    }
+
+    @Test
+    public void testSetProperties() {
         RGBImageProfile profile = new RGBImageProfile();
         Properties properties = new Properties();
         properties.setProperty(RGBImageProfile.PROPERTY_KEY_NAME, "name");
@@ -315,4 +329,77 @@ public class RGBImageProfileTest {
         assertTrue(profile.isInternal());
         assertTrue(Arrays.equals(new String[] {"red", "green", "blue", "alpha"}, profile.getRgbaExpressions()));
     }
+
+    @Test
+    public void testIsValid() {
+        final RGBImageProfile imageProfile = new RGBImageProfile("whatever", new String[]{"een", "twee", "drei", "veer"});
+
+        assertTrue(imageProfile.isValid());
+
+        // must be valid no matter what the alpha channel is defined for
+        imageProfile.setAlphaExpression("");
+        assertTrue(imageProfile.isValid());
+
+        // should return false only if ALL channels are empty
+        imageProfile.setRedExpression("");
+        assertTrue(imageProfile.isValid());
+
+        imageProfile.setGreenExpression("");
+        assertTrue(imageProfile.isValid());
+
+        imageProfile.setBlueExpression("");
+        assertFalse(imageProfile.isValid());
+    }
+
+    @Test
+    public void testSetGetRgbExpressions() {
+        final RGBImageProfile imageProfile = new RGBImageProfile("whatever", new String[]{"een", "twee", "drei", "veer"});
+        final String[] expected = {"alma", "bert", "charlotte"};
+
+        imageProfile.setRgbExpressions(expected);
+
+        final String[] rgbExpressions = imageProfile.getRgbExpressions();
+        assertArrayEquals(expected, rgbExpressions);
+    }
+
+    @Test
+    public void testSetRgbExpressions_arrayLengthMismatch() {
+        final RGBImageProfile imageProfile = new RGBImageProfile("whatever", new String[]{"een", "twee", "drei", "veer"});
+
+        try {
+            imageProfile.setRgbExpressions(new String[] {"hoppla", "short"});
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            imageProfile.setRgbExpressions(new String[] {"oops", "way", "too", "many"});
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testSetGetRgbaExpressions() {
+        final RGBImageProfile imageProfile = new RGBImageProfile("whatever", new String[]{"een", "twee", "drei", "veer"});
+        final String[] expected = {"alma", "bert", "charlotte", "Alpher"};
+
+        imageProfile.setRgbaExpressions(expected);
+
+        final String[] rgbaExpressions = imageProfile.getRgbaExpressions();
+        assertArrayEquals(expected, rgbaExpressions);
+    }
+    @Test
+    public void testSetRgbaExpressions_arrayLengthMismatch() {
+        final RGBImageProfile imageProfile = new RGBImageProfile("whatever", new String[]{"een", "twee", "drei", "veer"});
+
+        try {
+            imageProfile.setRgbaExpressions(new String[] {"hoppla", "short", "list"});
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            imageProfile.setRgbaExpressions(new String[] {"oops", "way", "too", "many", "args"});
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
 }
