@@ -22,7 +22,9 @@ import com.bc.ceres.core.runtime.ConfigurationElement;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.math.Range;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +38,7 @@ import java.util.Properties;
 
 /**
  * A profile used for the creation of RGB images. The profile comprises the band arithmetic expressions
- * for the computation of red, gree, blue and alpha (optional) channels of the resulting image.
+ * for the computation of red, green, blue and alpha (optional) channels of the resulting image.
  */
 public class RGBImageProfile implements ConfigurableExtension {
 
@@ -78,13 +80,18 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     public static final String FILENAME_EXTENSION = ".rgb";
 
-
     public static final String PROPERTY_KEY_NAME = "name";
     public static final String PROPERTY_KEY_RED = "red";
     public static final String PROPERTY_KEY_GREEN = "green";
     public static final String PROPERTY_KEY_BLUE = "blue";
     public static final String PROPERTY_KEY_ALPHA = "alpha";
     public static final String PROPERTY_KEY_INTERNAL = "internal";
+    static final String PROPERTY_KEY_RED_MIN = "red_min";
+    static final String PROPERTY_KEY_RED_MAX = "red_max";
+    static final String PROPERTY_KEY_GREEN_MIN = "green_min";
+    static final String PROPERTY_KEY_GREEN_MAX = "green_max";
+    static final String PROPERTY_KEY_BLUE_MIN = "blue_min";
+    static final String PROPERTY_KEY_BLUE_MAX = "blue_max";
 
     /**
      * Preferences key for RGB profile entries
@@ -98,8 +105,7 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     private String name;
     private boolean internal;
-    private RGBChannelDef rgbChannelDef;
-    private String[] rgbaExpressions;
+    private final RGBChannelDef rgbChannelDef;
     private String[] pattern;
 
     public RGBImageProfile() {
@@ -138,12 +144,14 @@ public class RGBImageProfile implements ConfigurableExtension {
         }
 
         this.rgbChannelDef = new RGBChannelDef(rgbaExpressions);
+        this.rgbChannelDef.setMinDisplaySample(R, Double.NaN);
+        this.rgbChannelDef.setMaxDisplaySample(R, Double.NaN);
+        this.rgbChannelDef.setMinDisplaySample(G, Double.NaN);
+        this.rgbChannelDef.setMaxDisplaySample(G, Double.NaN);
+        this.rgbChannelDef.setMinDisplaySample(B, Double.NaN);
+        this.rgbChannelDef.setMaxDisplaySample(B, Double.NaN);
+
         this.name = name;
-        this.rgbaExpressions = new String[4];
-        this.rgbaExpressions[R] = rgbaExpressions[R];
-        this.rgbaExpressions[G] = rgbaExpressions[G];
-        this.rgbaExpressions[B] = rgbaExpressions[B];
-        this.rgbaExpressions[A] = rgbaExpressions.length == 4 ? rgbaExpressions[A] : "";
         this.pattern = pattern;
     }
 
@@ -343,7 +351,7 @@ public class RGBImageProfile implements ConfigurableExtension {
                 }
             }
         }
-        profile.setRgbExpressions(rgbaExpressions);
+        profile.setRgbaExpressions(rgbaExpressions);
         return profile;
     }
 
@@ -380,9 +388,9 @@ public class RGBImageProfile implements ConfigurableExtension {
             properties.load(inStream);
         }
         String urlExtForm = url.toExternalForm();
-        int lastPathSeperatorIndex = urlExtForm.lastIndexOf('/');
+        int lastPathSeparatorIndex = urlExtForm.lastIndexOf('/');
         int extensionDotIndex = urlExtForm.lastIndexOf('.');
-        final String defaultName = urlExtForm.substring(lastPathSeperatorIndex + 1, extensionDotIndex);
+        final String defaultName = urlExtForm.substring(lastPathSeparatorIndex + 1, extensionDotIndex);
         final RGBImageProfile profile = new RGBImageProfile(defaultName);
         profile.setProperties(properties);
         return profile;
@@ -404,7 +412,7 @@ public class RGBImageProfile implements ConfigurableExtension {
     }
 
     /**
-     * Sets profile properties and accoringly sets them in the given property map.
+     * Sets profile properties and accordingly sets them in the given property map.
      *
      * @param properties the property map which receives the properties of this profiles
      */
@@ -423,6 +431,21 @@ public class RGBImageProfile implements ConfigurableExtension {
         } else {
             properties.remove(PROPERTY_KEY_INTERNAL);
         }
+
+        setRangeProperty(properties, getRedMinMax(), PROPERTY_KEY_RED_MIN, PROPERTY_KEY_RED_MAX);
+        setRangeProperty(properties, getGreenMinMax(), PROPERTY_KEY_GREEN_MIN, PROPERTY_KEY_GREEN_MAX);
+        setRangeProperty(properties, getBlueMinMax(), PROPERTY_KEY_BLUE_MIN, PROPERTY_KEY_BLUE_MAX);
+    }
+
+    private void setRangeProperty(Properties properties, Range redMinMax, String minKey, String maxKey) {
+        final double min = redMinMax.getMin();
+        if (!Double.isNaN(min)) {
+            properties.put(minKey, Double.toString(min));
+        }
+        final double max = redMinMax.getMax();
+        if (!Double.isNaN(max)) {
+            properties.put(maxKey, Double.toString(max));
+        }
     }
 
     /**
@@ -430,7 +453,6 @@ public class RGBImageProfile implements ConfigurableExtension {
      *
      * @param properties the property map which provides the properties for this profiles
      */
-    @SuppressWarnings("LocalVariableHidesMemberVariable")
     public void setProperties(Properties properties) {
         final String name = properties.getProperty(PROPERTY_KEY_NAME);
         final String[] rgbaExpressions = new String[]{
@@ -445,6 +467,22 @@ public class RGBImageProfile implements ConfigurableExtension {
         }
         setInternal(internal);
         setRgbaExpressions(rgbaExpressions);
+
+        rgbChannelDef.setMinDisplaySample(R, getDoubleProperty(properties, PROPERTY_KEY_RED_MIN));
+        rgbChannelDef.setMaxDisplaySample(R, getDoubleProperty(properties, PROPERTY_KEY_RED_MAX));
+        rgbChannelDef.setMinDisplaySample(G, getDoubleProperty(properties, PROPERTY_KEY_GREEN_MIN));
+        rgbChannelDef.setMaxDisplaySample(G, getDoubleProperty(properties, PROPERTY_KEY_GREEN_MAX));
+        rgbChannelDef.setMinDisplaySample(B, getDoubleProperty(properties, PROPERTY_KEY_BLUE_MIN));
+        rgbChannelDef.setMaxDisplaySample(B, getDoubleProperty(properties, PROPERTY_KEY_BLUE_MAX));
+    }
+
+    private double getDoubleProperty(Properties properties, String propertyName) {
+        double value = Double.NaN;
+        final String numberProperty = properties.getProperty(propertyName);
+        if (StringUtils.isNotNullAndNotEmpty(numberProperty)) {
+            value = Double.parseDouble(numberProperty);
+        }
+        return value;
     }
 
     public static void storeRgbaExpressions(final Product product, final String[] rgbaExpressions) {
@@ -509,10 +547,10 @@ public class RGBImageProfile implements ConfigurableExtension {
     public String toString() {
         return getClass().getName() + "[" +
                 "name=" + name + ", " +
-                "r=" + rgbaExpressions[0] + ", " +
-                "g=" + rgbaExpressions[1] + ", " +
-                "b=" + rgbaExpressions[2] + ", " +
-                "a=" + rgbaExpressions[3] +
+                "r=" + rgbChannelDef.getSourceName(R) + ", " +
+                "g=" + rgbChannelDef.getSourceName(G) + ", " +
+                "b=" + rgbChannelDef.getSourceName(B) + ", " +
+                "a=" + rgbChannelDef.getSourceName(A) +
                 "]";
     }
 
@@ -535,15 +573,16 @@ public class RGBImageProfile implements ConfigurableExtension {
         return value != null ? value : defaultValue;
     }
 
+    // @todo 1 extend to min/max ranges tb 2021-04-26
     public void configure(ConfigurationElement config) throws CoreException {
 
         name = getChildValue(config, "name");
         internal = true;
-        rgbaExpressions[R] = getChildValue(config, "red");
-        rgbaExpressions[G] = getChildValue(config, "green");
-        rgbaExpressions[B] = getChildValue(config, "blue");
+        rgbChannelDef.setSourceName(R, getChildValue(config, "red"));
+        rgbChannelDef.setSourceName(G, getChildValue(config, "green"));
+        rgbChannelDef.setSourceName(B, getChildValue(config, "blue"));
 
-        ConfigurationElement child = config.getChild("alpha");
+        final ConfigurationElement child = config.getChild("alpha");
         String alpha = null;
         if (child != null) {
             alpha = child.getValue();
@@ -551,7 +590,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         if (alpha == null) {
             alpha = "";
         }
-        rgbaExpressions[A] = alpha;
+        rgbChannelDef.setSourceName(A, alpha);
         ConfigurationElement patternConfig = config.getChild("pattern");
         if (patternConfig != null) {
             pattern = new String[3];
@@ -577,5 +616,38 @@ public class RGBImageProfile implements ConfigurableExtension {
         } else {
             throw new CoreException("Configuration element [" + childName + "] does not exist");
         }
+    }
+
+    public void setRedMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(R, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(R, range.getMax());
+    }
+
+    public Range getRedMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(R);
+        final double max = rgbChannelDef.getMaxDisplaySample(R);
+        return new Range(min, max);
+    }
+
+    public void setGreenMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(G, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(G, range.getMax());
+    }
+
+    public Range getGreenMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(G);
+        final double max = rgbChannelDef.getMaxDisplaySample(G);
+        return new Range(min, max);
+    }
+
+    public void setBlueMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(B, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(B, range.getMax());
+    }
+
+    public Range getBlueMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(B);
+        final double max = rgbChannelDef.getMaxDisplaySample(B);
+        return new Range(min, max);
     }
 }
