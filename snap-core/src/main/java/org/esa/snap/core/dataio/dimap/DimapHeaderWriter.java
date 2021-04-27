@@ -76,7 +76,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private final Product product;
     private final String dataDirectory;
-    private final JdomLanguageSupport jdomLanguageSupport= new JdomLanguageSupport();
+    private final JdomLanguageSupport jdomLanguageSupport = new JdomLanguageSupport();
 
     public DimapHeaderWriter(Product product, File file, String dataDirectory) throws IOException {
         super(file);
@@ -529,22 +529,28 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private void writeGeoCoding(final GeoCoding geoCoding, final int indent, final int bandIndex) {
         if (geoCoding != null) {
-            final PersistenceEncoder<Object> encoder = new Persistence().getEncoder(geoCoding);
-            if (encoder != null) {
-                final Item encoded = encoder.encode(geoCoding);
-                final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);
-                printGeoCodingXmlFromObject(indent, bandIndex, xmlFromObject);
-                return;
+
+            final boolean isTiePointGeoCoding = geoCoding instanceof TiePointGeoCoding;
+            final boolean isBasicPixelGeoCoding = geoCoding instanceof BasicPixelGeoCoding;
+
+            if (!isTiePointGeoCoding && !isBasicPixelGeoCoding) {
+                final PersistenceEncoder<Object> encoder = new Persistence().getEncoder(geoCoding);
+                if (encoder != null) {
+                    final Item encoded = encoder.encode(geoCoding);
+                    final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);
+                    printGeoCodingXmlFromObject(indent, bandIndex, xmlFromObject);
+                    return;
+                }
             }
             DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
             if (persistable != null) {
                 final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
                 printGeoCodingXmlFromObject(indent, bandIndex, xmlFromObject);
-            } else if (geoCoding instanceof TiePointGeoCoding) {
+            } else if (isTiePointGeoCoding) {
                 writeGeoCoding((TiePointGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof MapGeoCoding) {
                 writeGeoCoding((MapGeoCoding) geoCoding, indent);
-            } else if (geoCoding instanceof BasicPixelGeoCoding) {
+            } else if (isBasicPixelGeoCoding) {
                 writeGeoCoding((BasicPixelGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof FXYGeoCoding) {
                 writeGeoCoding((FXYGeoCoding) geoCoding, indent, bandIndex);

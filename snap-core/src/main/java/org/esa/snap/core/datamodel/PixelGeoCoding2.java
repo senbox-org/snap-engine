@@ -25,7 +25,7 @@ import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Dimension2D;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -73,6 +73,13 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
      * @param maskExpression the expression defining a valid-pixel mask, may be {@code null}
      */
     PixelGeoCoding2(final Band latBand, final Band lonBand, String maskExpression, int searchRadius) {
+        this(latBand, lonBand, maskExpression, searchRadius, null);
+    }
+
+    /*
+     * This constructor is used by BasicPixelGeoCodingPersistenceConverter
+     */
+    PixelGeoCoding2(final Band latBand, final Band lonBand, String maskExpression, int searchRadius, GeoCoding estimator) {
         Guardian.assertNotNull("latBand", latBand);
         Guardian.assertNotNull("lonBand", lonBand);
         final Product product = latBand.getProduct();
@@ -83,7 +90,6 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
         if (lonBand.getProduct() == null) {
             throw new IllegalArgumentException("lonBand.getProduct() == null");
         }
-        // Note that if two bands are of the same product, they also have the same raster size
         if (product != lonBand.getProduct()) {
             throw new IllegalArgumentException("latBand.getProduct() != lonBand.getProduct()");
         }
@@ -91,12 +97,25 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
             throw new IllegalArgumentException(
                     "latBand.getProduct().getSceneRasterWidth() < 2 || latBand.getProduct().getSceneRasterHeight() < 2");
         }
+        final Dimension latDim = latBand.getRasterSize();
+        final Dimension lonDim = lonBand.getRasterSize();
+        if (!lonDim.equals(latDim)) {
+            throw new IllegalArgumentException(
+                    "The raster size of latBand and lonBand must be equal but was:" +
+                    "latBand(w/h) = ("+latDim.width+"/" + latDim.height+ ") | " +
+                    "lonBand(w/h) = ("+lonDim.width+"/" + lonDim.height+ ")"
+            );
+        }
 
         this.searchRadius = searchRadius;
         fractionAccuracy = Config.instance().preferences().getBoolean(SYSPROP_PIXEL_GEO_CODING_FRACTION_ACCURACY, false);
         this.latBand = latBand;
         this.lonBand = lonBand;
-        formerGeocoding = product.getSceneGeoCoding();
+        if (estimator != null) {
+            formerGeocoding = estimator;
+        } else {
+            formerGeocoding = product.getSceneGeoCoding();
+        }
 
         this.rasterW = latBand.getRasterWidth();
         this.rasterH = latBand.getRasterHeight();
@@ -239,6 +258,7 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
      * @param pixelPos the pixel's co-ordinates given as x,y
      * @param geoPos   an instance of <code>GeoPos</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
+     *
      * @return the geographical position as lat/lon.
      */
     @Override
@@ -285,7 +305,7 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
 
     private boolean isInPixelCenter(PixelPos pixelPos) {
         return Math.abs(pixelPos.getX() - Math.floor(pixelPos.getX()) - 0.5) < 1e-8 &&
-                Math.abs(pixelPos.getY() - Math.floor(pixelPos.getY()) - 0.5) < 1e-8;
+               Math.abs(pixelPos.getY() - Math.floor(pixelPos.getY()) - 0.5) < 1e-8;
     }
 
     private boolean pixelPosIsInsideRasterWH(PixelPos pixelPos) {

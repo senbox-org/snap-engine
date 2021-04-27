@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -13,24 +12,29 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
- *
  */
 
-package org.esa.snap.core.dataio.persistence;
+package org.esa.snap.core.datamodel;
 
-public class Attribute<E> extends ValueItem<E> {
+import org.esa.snap.core.dataio.persistence.Item;
+import org.esa.snap.core.dataio.persistence.PersistenceConverter;
+import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 
-    public Attribute(String name, E value) {
-        super(name, value);
+public class TiePointGeoCodingPersistenceSpi implements PersistenceSpi {
+
+    private static final TiePointGeoCodingPersistenceConverter CONVERTER = new TiePointGeoCodingPersistenceConverter();
+    @Override
+    public boolean canDecode(Item item) {
+        return CONVERTER.canDecode(item);
     }
 
     @Override
-    public boolean isAttribute() {
-        return true;
+    public boolean canEncode(Object object) {
+        return object instanceof TiePointGeoCoding;
     }
 
     @Override
-    public Attribute<?> asAttribute() {
-        return this;
+    public PersistenceConverter createConverter() {
+        return CONVERTER;
     }
 }

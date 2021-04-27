@@ -146,6 +146,10 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
      *                     if the source product is not geo-coded.
      */
     public PixelGeoCoding(final Band latBand, final Band lonBand, final String validMask, final int searchRadius) {
+        this(latBand, lonBand, validMask, searchRadius, (GeoCoding) null);
+    }
+
+    PixelGeoCoding(final Band latBand, final Band lonBand, final String validMask, final int searchRadius, GeoCoding estimator) {
         Guardian.assertNotNull("latBand", latBand);
         Guardian.assertNotNull("lonBand", lonBand);
         if (latBand.getProduct() == null) {
@@ -154,7 +158,6 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         if (lonBand.getProduct() == null) {
             throw new IllegalArgumentException("lonBand.getProduct() == null");
         }
-        // Note that if two bands are of the same product, they also have the same raster size
         if (latBand.getProduct() != lonBand.getProduct()) {
             throw new IllegalArgumentException("latBand.getProduct() != lonBand.getProduct()");
         }
@@ -162,6 +165,16 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             throw new IllegalArgumentException(
                     "latBand.getProduct().getSceneRasterWidth() < 2 || latBand.getProduct().getSceneRasterHeight() < 2");
         }
+        final Dimension latDim = latBand.getRasterSize();
+        final Dimension lonDim = lonBand.getRasterSize();
+        if (!lonDim.equals(latDim)) {
+            throw new IllegalArgumentException(
+                    "The raster size of latBand and lonBand must be equal but was:" +
+                    "latBand(w/h) = ("+latDim.width+"/" + latDim.height+ ") | " +
+                    "lonBand(w/h) = ("+lonDim.width+"/" + lonDim.height+ ")"
+            );
+        }
+
         this.latBand = latBand;
         this.lonBand = lonBand;
         validMaskExpression = validMask;
@@ -176,7 +189,11 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         // fraction accuracy is only implemented in tiling mode (because tiling mode will be the default soon)
         fractionAccuracy = useTiling && Config.instance().preferences().getBoolean(SYSPROP_PIXEL_GEO_CODING_FRACTION_ACCURACY, false);
 
-        pixelPosEstimator = latBand.getProduct().getSceneGeoCoding();
+        if (estimator != null) {
+            pixelPosEstimator = estimator;
+        } else {
+            pixelPosEstimator = latBand.getProduct().getSceneGeoCoding();
+        }
 
         final int subSampling = 30;
         if (pixelPosEstimator == null && useTiling && rasterWidth / subSampling > 1 && rasterHeight / subSampling > 1) {
