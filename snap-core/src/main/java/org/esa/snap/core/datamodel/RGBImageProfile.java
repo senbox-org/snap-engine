@@ -108,17 +108,24 @@ public class RGBImageProfile implements ConfigurableExtension {
     private final RGBChannelDef rgbChannelDef;
     private String[] pattern;
 
-    public RGBImageProfile() {
+    // only for testing 2021-04-27 tb
+    RGBImageProfile() {
         this("");
     }
 
-    public RGBImageProfile(final String name) {
+    // only for testing 2021-04-27 tb
+    RGBImageProfile(final String name) {
         this(name, new String[]{"", "", ""}, null);
     }
 
     public RGBImageProfile(final String name, String[] rgbaExpressions) {
         this(name, rgbaExpressions, null);
     }
+
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern){
+        this(name, rgbaExpressions, pattern, null);
+    }
+
 
     /**
      * Creates a new RGB profile.
@@ -134,7 +141,7 @@ public class RGBImageProfile implements ConfigurableExtension {
      *                        2. Will be matched against the product name
      *                        3. Will be matched against the description of the product
      */
-    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern) {
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern, Range[] valueRanges) {
         Assert.argument(name != null, "name != null");
         Assert.argument(rgbaExpressions != null, "rgbaExpressions != null");
         Assert.argument(rgbaExpressions.length == 3 || rgbaExpressions.length == 4,
@@ -142,14 +149,26 @@ public class RGBImageProfile implements ConfigurableExtension {
         if (pattern != null) {
             Assert.argument(pattern.length == 3, "pattern.length == 3");
         }
+        if (valueRanges != null) {
+            Assert.argument(valueRanges.length == 3, "valueRanges.length == 3");
+        }
 
         this.rgbChannelDef = new RGBChannelDef(rgbaExpressions);
-        this.rgbChannelDef.setMinDisplaySample(R, Double.NaN);
-        this.rgbChannelDef.setMaxDisplaySample(R, Double.NaN);
-        this.rgbChannelDef.setMinDisplaySample(G, Double.NaN);
-        this.rgbChannelDef.setMaxDisplaySample(G, Double.NaN);
-        this.rgbChannelDef.setMinDisplaySample(B, Double.NaN);
-        this.rgbChannelDef.setMaxDisplaySample(B, Double.NaN);
+        if (valueRanges == null) {
+            this.rgbChannelDef.setMinDisplaySample(R, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(R, Double.NaN);
+            this.rgbChannelDef.setMinDisplaySample(G, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(G, Double.NaN);
+            this.rgbChannelDef.setMinDisplaySample(B, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(B, Double.NaN);
+        } else {
+            this.rgbChannelDef.setMinDisplaySample(R, valueRanges[R].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(R, valueRanges[R].getMax());
+            this.rgbChannelDef.setMinDisplaySample(G, valueRanges[G].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(G, valueRanges[G].getMax());
+            this.rgbChannelDef.setMinDisplaySample(B, valueRanges[B].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(B, valueRanges[B].getMax());
+        }
 
         this.name = name;
         this.pattern = pattern;
@@ -573,7 +592,6 @@ public class RGBImageProfile implements ConfigurableExtension {
         return value != null ? value : defaultValue;
     }
 
-    // @todo 1 extend to min/max ranges tb 2021-04-26
     public void configure(ConfigurationElement config) throws CoreException {
 
         name = getChildValue(config, "name");
