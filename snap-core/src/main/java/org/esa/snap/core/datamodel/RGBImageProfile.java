@@ -592,6 +592,10 @@ public class RGBImageProfile implements ConfigurableExtension {
         return value != null ? value : defaultValue;
     }
 
+    /**
+     * @deprecated Not in use anymore. Was used in BEAM. Might be removed in the future. Deprecated since SNAP 9.
+     */
+    @Deprecated()
     public void configure(ConfigurationElement config) throws CoreException {
 
         name = getChildValue(config, "name");
