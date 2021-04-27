@@ -120,8 +120,18 @@ public class OpenJpegUtils {
         int yTiles = sizMarkerSegment.computeNumTilesY();
         int resolutions = codMarkerSegment.getNumberOfLevels() + 1;
         int precision = sizMarkerSegment.getComponentOriginBitDepthAt(0);
+        // SNAP-1427 - retrieve also if signed/unsigned
+        boolean isSigned = sizMarkerSegment.isComponentOriginSignedAt(0);
+        int dataType = getDataType(precision, isSigned);
 
-        return new TileLayout(imageWidth, imageHeight, tileWidth, tileHeight, xTiles, yTiles, resolutions, DATA_TYPE_MAP.get(precision));
+        return new TileLayout(imageWidth, imageHeight, tileWidth, tileHeight, xTiles, yTiles, resolutions, dataType);
+    }
+
+    public static int getDataType (int precision, boolean isSigned) {
+        if (!isSigned && precision == 16) {
+            return DATA_TYPE_MAP.get(precision - 1);
+        }
+        return DATA_TYPE_MAP.get(precision);
     }
 
     public static String convertStreamToString(java.io.InputStream is) {
