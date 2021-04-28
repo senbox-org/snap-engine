@@ -37,6 +37,7 @@ public class GPT {
             run(args);
 
             stopWatch.stopAndTrace("GPT timing");
+            System.exit(0);
         } catch (Throwable e) {
             String message;
             if (e.getMessage() != null) {
