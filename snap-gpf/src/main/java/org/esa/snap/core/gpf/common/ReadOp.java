@@ -21,6 +21,7 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
@@ -42,6 +43,7 @@ import org.locationtech.jts.geom.Geometry;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Reads the specified file as product. This operator may serve as a source node in processing graphs,
@@ -96,6 +98,12 @@ public class ReadOp extends Operator {
     private Geometry geometryRegion;
 
     /**
+     * The default value for use the advanced options is false, to not use them if the flag is not specified.
+     */
+    @Parameter(defaultValue = "false", description = "Whether to use advanced options for reading of the source product.")
+    private boolean useAdvancedOptions;
+
+    /**
      * The default value for copy metadata is true, to copy them if the flag is not specified.
      */
     @Parameter(defaultValue = "true", description = "Whether to copy the metadata of the source product.")
@@ -118,7 +126,7 @@ public class ReadOp extends Operator {
         boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
         boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
         ProductSubsetDef subsetDef = null;
-        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata) {
+        if (useAdvancedOptions && (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata)) {
             subsetDef = new ProductSubsetDef();
             subsetDef.setIgnoreMetadata(!this.copyMetadata);
             AbstractSubsetRegion subsetRegion = null;
@@ -128,12 +136,6 @@ public class ReadOp extends Operator {
                 subsetRegion = new PixelSubsetRegion(this.pixelRegion, 0);
             }
             subsetDef.setSubsetRegion(subsetRegion);
-            if (hasBandNames) {
-                subsetDef.addNodeNames(this.bandNames);
-            }
-            if (hasMaskNames) {
-                subsetDef.addNodeNames(this.maskNames);
-            }
         }
 
         try {
@@ -166,7 +168,29 @@ public class ReadOp extends Operator {
                     }
                 }
                 this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
-                this.targetProduct.setFileLocation(this.file);
+                if (subsetDef != null) {
+                    if (this.bandNames != null && this.bandNames.length > 0) {
+                        java.util.List<String> targetBandNames = Arrays.asList(this.bandNames);
+                        Band[] currentBands = this.targetProduct.getBandGroup().toArray(new Band[0]);
+                        this.targetProduct.getBandGroup().removeAll();
+                        for (Band band : currentBands) {
+                            if (targetBandNames.contains(band.getName())) {
+                                this.targetProduct.getBandGroup().add(band);
+                            }
+                        }
+                    }
+                    if (this.maskNames != null && this.maskNames.length > 0) {
+                        java.util.List<String> targetMaskNames = Arrays.asList(this.maskNames);
+                        Mask[] currentBands = this.targetProduct.getMaskGroup().toArray(new Mask[0]);
+                        this.targetProduct.getMaskGroup().removeAll();
+                        for (Mask mask : currentBands) {
+                            if (targetMaskNames.contains(mask.getName())) {
+                                this.targetProduct.getMaskGroup().add(mask);
+                            }
+                        }
+                    }
+                }
+
             }
         } catch (IOException e) {
             throw new OperatorException(e);
