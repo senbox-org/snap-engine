@@ -182,6 +182,10 @@ public class RGBImageProfile implements ConfigurableExtension {
         this.name = name;
     }
 
+    public RGBChannelDef getRgbChannelDef() {
+        return rgbChannelDef;
+    }
+
     public boolean isInternal() {
         return internal;
     }
@@ -522,6 +526,7 @@ public class RGBImageProfile implements ConfigurableExtension {
                 if (rgbBand instanceof VirtualBand) {
                     VirtualBand virtualBand = (VirtualBand) rgbBand;
                     virtualBand.setExpression(rgbaExpression);
+
                 } else {
                     product.removeBand(rgbBand);
                     product.addBand(new VirtualBand(rgbBandName,
