@@ -120,7 +120,6 @@ public class GraphProcessor {
             graphContext.dispose();
         } finally {
             pm.done();
-            System.out.println("graph is done");
         }
     }
 
