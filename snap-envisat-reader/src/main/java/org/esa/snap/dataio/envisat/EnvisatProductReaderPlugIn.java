@@ -222,11 +222,6 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
                         "MER_*_1*",
                         "MER_*_1*",
                         "",
-                },
-                new Range[]{
-                        new Range(3.7, 6.9),
-                        new Range(3.7, 6.9),
-                        new Range(4.7, 7.1)
                 }
         ));
         manager.addProfile(new RGBImageProfile("MERIS L2 - Tristimulus",
