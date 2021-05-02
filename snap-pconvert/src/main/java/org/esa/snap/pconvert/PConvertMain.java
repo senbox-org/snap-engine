@@ -35,6 +35,7 @@ import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
+import org.esa.snap.core.util.math.Range;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
@@ -553,13 +554,14 @@ public class PConvertMain {
         assert outputFile != null;
 
         RenderedImage image = null;
+        RGBImageProfile rgbImageProfile = null;
 
         // maybe load RGB profile
         if (_rgbProfile != null) {
             try {
                 // to replace getAbsolutPath() replaced by getPath()?
                 log("loading RGB profile from '" + _rgbProfile.getAbsolutePath() + "'...");
-                final RGBImageProfile rgbImageProfile = RGBImageProfile.loadProfile(_rgbProfile);
+                rgbImageProfile = RGBImageProfile.loadProfile(_rgbProfile);
                 _bandIndices = createRGBBands(product, rgbImageProfile);
             } catch (IOException e) {
                 error("failed to load RGB profile: " + e.getMessage());
@@ -620,6 +622,9 @@ public class PConvertMain {
                 }
             }
             imageInfo.setHistogramMatching(ImageInfo.getHistogramMatching(_histogramMatching));
+            if (rgbImageProfile != null) {
+                mergeMinMax(rgbImageProfile, imageInfo);
+            }
             image = ProductUtils.createRgbImage(bands, imageInfo, ProgressMonitor.NULL);
             if (image.getColorModel().hasAlpha() && "BMP".equalsIgnoreCase(_formatName)) {
                 error("failed to write image: BMP does not support transparency");
@@ -649,6 +654,36 @@ public class PConvertMain {
         } catch (Exception e) {
             Debug.trace(e);
             error("failed to write image: " + e.getMessage());
+        }
+    }
+
+    private void mergeMinMax(RGBImageProfile rgbImageProfile, ImageInfo imageInfo) {
+        final Range redMinMax = rgbImageProfile.getRedMinMax();
+        final double redMin = redMinMax.getMin();
+        if (!Double.isNaN(redMin)) {
+            imageInfo.getRgbChannelDef().setMinDisplaySample(0, redMin);
+        }
+        final double redMax = redMinMax.getMax();
+        if (!Double.isNaN(redMax)) {
+            imageInfo.getRgbChannelDef().setMaxDisplaySample(0, redMax);
+        }
+        final Range greenMinMax = rgbImageProfile.getGreenMinMax();
+        final double greenMin = greenMinMax.getMin();
+        if (!Double.isNaN(greenMin)) {
+            imageInfo.getRgbChannelDef().setMinDisplaySample(1, greenMin);
+        }
+        final double greenMax = greenMinMax.getMax();
+        if (!Double.isNaN(greenMax)) {
+            imageInfo.getRgbChannelDef().setMaxDisplaySample(1, greenMax);
+        }
+        final Range blueMinMax = rgbImageProfile.getBlueMinMax();
+        final double blueMin = blueMinMax.getMin();
+        if (!Double.isNaN(blueMin)) {
+            imageInfo.getRgbChannelDef().setMinDisplaySample(2, blueMin);
+        }
+        final double blueMax = blueMinMax.getMax();
+        if (!Double.isNaN(blueMax)) {
+            imageInfo.getRgbChannelDef().setMaxDisplaySample(2, blueMax);
         }
     }
 
