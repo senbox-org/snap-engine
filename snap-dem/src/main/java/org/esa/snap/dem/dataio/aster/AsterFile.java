@@ -54,11 +54,11 @@ public final class AsterFile extends ElevationFile {
         } else {
             final String name = FileUtils.getFilenameWithoutExtension(localFile.getName());
             // check for version 3 (see https://lpdaac.usgs.gov/products/astgtmv002/)
-            final String v3Name = name.replace("ASTGTM", "ASTGTMV003");
-            final File v3File = new File(localFile.getParentFile(), v3Name + ".zip");
-            if (v3File.exists()) {
-                localFile = new File(localFile.getParentFile(), v3Name + "_dem.tif");
-                localZipFile = v3File;
+            final String versionName = name.replace("ASTGTM", "ASTGTMV003");
+            final File versionFile = new File(localFile.getParentFile(), versionName + ".zip");
+            if (versionFile.exists()) {
+                localFile = new File(localFile.getParentFile(), versionName + "_dem.tif");
+                localZipFile = versionFile;
                 return true;
             } else {
                 // check if unzipped
@@ -67,9 +67,9 @@ public final class AsterFile extends ElevationFile {
                     localFile = unzipFile;
                     return true;
                 } else {
-                    final File v3UnzipFile = new File(localFile.getParentFile(), v3Name + "_dem.tif");
-                    if (v3UnzipFile.exists()) {
-                        localFile = v3UnzipFile;
+                    final File versionUnzipFile = new File(localFile.getParentFile(), versionName + "_dem.tif");
+                    if (versionUnzipFile.exists()) {
+                        localFile = versionUnzipFile;
                         return true;
                     }
                 }
@@ -80,8 +80,8 @@ public final class AsterFile extends ElevationFile {
 
     protected InputStream getZipInputStream(File dataFile) throws IOException {
         if (!dataFile.exists()) {
-            final String v3Name = dataFile.getName().replace("ASTGTM", "ASTGTMV003");
-            dataFile = new File(dataFile.getParentFile(), v3Name);
+            final String versionName = dataFile.getName().replace("ASTGTM", "ASTGTMV003");
+            dataFile = new File(dataFile.getParentFile(), versionName);
         }
         return super.getZipInputStream(dataFile);
     }
