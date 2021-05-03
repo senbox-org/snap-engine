@@ -222,7 +222,7 @@ public class RasterUtils {
 
             // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
             dataNode.unloadRasterData();
-            dataNode.setSourceImage(null);
+            dataNode.removeCachedImageData();
 
             return values;
         }
