@@ -534,6 +534,14 @@ public class SystemUtils {
         System.gc();
     }
 
+    public static double getMemoryUsed() {
+        final Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+
+        double deltaBytes = runtime.totalMemory() - runtime.freeMemory();
+        return deltaBytes / 1048576.0;
+    }
+
     /**
      * tell tileCache that some old tiles can be removed
      */

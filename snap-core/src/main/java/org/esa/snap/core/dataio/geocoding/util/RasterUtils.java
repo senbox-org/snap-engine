@@ -20,10 +20,8 @@ package org.esa.snap.core.dataio.geocoding.util;
 
 import org.esa.snap.core.dataio.geocoding.Discontinuity;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.math.RsMathUtils;
@@ -31,10 +29,14 @@ import org.esa.snap.core.util.math.SphericalDistance;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.datum.Ellipsoid;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.image.DataBufferDouble;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static java.awt.image.DataBuffer.TYPE_DOUBLE;
 
 public class RasterUtils {
 
@@ -197,6 +199,33 @@ public class RasterUtils {
             values[i] = data.getElemDoubleAt(i);
         }
         return values;
+    }
+
+    /**
+     * loads geo-location data as an array of doubles ready to use by ComponentGeoCoding.
+     * This method optimises the memory impact by disposing whatever is possible after the
+     * reading operation. Please do not use from a context where this is not desired.
+     *
+     * @param dataNode the raster data node providing the geolocation data
+     * @return the scaled array of geo-lcation values
+     * @throws IOException on disk-access errors
+     */
+    public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
+        final Raster dataRaster = dataNode.getGeophysicalImage().getData();
+        final SampleModel sampleModel = dataRaster.getSampleModel();
+        if (sampleModel.getDataType() == TYPE_DOUBLE && sampleModel.getNumBands() == 1) {
+            return ((DataBufferDouble) dataRaster.getDataBuffer()).getData();
+        } else {
+            final Dimension rasterSize = dataNode.getRasterSize();
+            final double[] values = new double[rasterSize.width * rasterSize.height];
+            dataRaster.getSamples(0, 0, rasterSize.width, rasterSize.height, 0, values);
+
+            // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
+            dataNode.unloadRasterData();
+            dataNode.setSourceImage(null);
+
+            return values;
+        }
     }
 
     // returns al (x/y) positions that have a latitude above the defined pole-angle threshold

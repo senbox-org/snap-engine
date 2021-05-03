@@ -84,9 +84,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
         assertNotSame(expGeoRaster, actGeoRaster);
         assertEquals(expGeoRaster.getLonVariableName(), actGeoRaster.getLonVariableName());
         assertEquals(expGeoRaster.getLatVariableName(), actGeoRaster.getLatVariableName());
-        assertNotSame(expGeoRaster.getLongitudes(), actGeoRaster.getLongitudes());
         assertArrayEquals(expGeoRaster.getLongitudes(), actGeoRaster.getLongitudes(), Double.MIN_VALUE);
-        assertNotSame(expGeoRaster.getLatitudes(), actGeoRaster.getLatitudes());
         assertArrayEquals(expGeoRaster.getLatitudes(), actGeoRaster.getLatitudes(), Double.MIN_VALUE);
         assertEquals(expGeoRaster.getRasterResolutionInKm(), actGeoRaster.getRasterResolutionInKm(), Double.MIN_VALUE);
         assertEquals(expGeoRaster.getRasterWidth(), actGeoRaster.getRasterWidth());

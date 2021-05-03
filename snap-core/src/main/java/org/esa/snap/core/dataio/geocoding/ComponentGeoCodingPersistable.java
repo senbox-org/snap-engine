@@ -19,6 +19,7 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -28,6 +29,7 @@ import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 /**
@@ -177,11 +179,17 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         } else {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
-            final int size = rasterWidth * rasterHeight;
-            final double[] longitudes = lonRaster.getGeophysicalImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-            final double[] latitudes = latRaster.getGeophysicalImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+            final double[] longitudes;
+            final double[] latitudes;
+
+            try {
+                longitudes = RasterUtils.loadGeoData(lonRaster);
+                latitudes = RasterUtils.loadGeoData(latRaster);
+            } catch (IOException e) {
+                SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ". Reading geo-data failed.");
+                SystemUtils.LOG.severe(e.getMessage());
+                return null;
+            }
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
                                       resolutionInKm);
         }

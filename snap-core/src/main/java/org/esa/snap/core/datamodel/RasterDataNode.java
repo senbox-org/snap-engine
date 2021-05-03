@@ -2322,7 +2322,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     private void resetGeophysicalImage() {
-        geophysicalImage = null;
+        if (geophysicalImage != null) {
+            geophysicalImage.dispose();
+            geophysicalImage = null;
+        }
     }
 
     /**
