@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ForwardCoding;
@@ -361,7 +362,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelBasedGeoCoding(Product product) {
+    private static GeoCoding readPixelBasedGeoCoding(Product product) throws IOException {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -383,21 +384,8 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final int fullSize = width * height;
-
-        // These call seems to violate the encapsulation principle. At this point in code
-        // - I have a band object
-        // - I want the geophysical data
-        //
-        // - I DO NOT want to be forced to know that I require a source image which exposes a getData() method which
-        //   I'm forced to understand the parametrisation  etc ...
-        // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
-        // tb 2020-04-14
-        final double[] longitudes = lonBand.getGeophysicalImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        lonBand.unloadRasterData();
-
-        final double[] latitudes = latBand.getGeophysicalImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        latBand.unloadRasterData();
+        final double[] longitudes = RasterUtils.loadGeoData(lonBand);
+        final double[] latitudes = RasterUtils.loadGeoData(latBand);
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
 

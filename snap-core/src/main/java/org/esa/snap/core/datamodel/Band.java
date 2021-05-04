@@ -425,18 +425,6 @@ public class Band extends AbstractBand {
         return size;
     }
 
-    private void removeCachedImageData() {
-        if (isSourceImageSet()) {
-            getSourceImage().reset();
-        }
-        if (isGeophysicalImageSet()) {
-            getGeophysicalImage().reset();
-        }
-        if (isValidMaskImageSet()) {
-            getValidMaskImage().reset();
-        }
-    }
-
     //////////////////////////////////////////////////////////////////////////
     // 'Visitor' pattern support
 
