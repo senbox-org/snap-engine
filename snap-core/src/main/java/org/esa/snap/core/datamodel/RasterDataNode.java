@@ -981,6 +981,18 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     public void unloadRasterData() {
     }
 
+    public void removeCachedImageData() {
+        if (isSourceImageSet()) {
+            getSourceImage().reset();
+        }
+        if (isGeophysicalImageSet()) {
+            getGeophysicalImage().reset();
+        }
+        if (isValidMaskImageSet()) {
+            getValidMaskImage().reset();
+        }
+    }
+
     /**
      * Releases all of the resources used by this object instance and all of its owned children. Its primary use is to
      * allow the garbage collector to perform a vanilla job.
@@ -2322,7 +2334,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     private void resetGeophysicalImage() {
-        geophysicalImage = null;
+        if (geophysicalImage != null) {
+            geophysicalImage.dispose();
+            geophysicalImage = null;
+        }
     }
 
     /**

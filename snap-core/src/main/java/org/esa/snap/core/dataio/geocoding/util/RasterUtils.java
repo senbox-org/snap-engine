@@ -1,10 +1,27 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding.util;
 
 import org.esa.snap.core.dataio.geocoding.Discontinuity;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.math.RsMathUtils;
@@ -12,10 +29,14 @@ import org.esa.snap.core.util.math.SphericalDistance;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.datum.Ellipsoid;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.image.DataBufferDouble;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static java.awt.image.DataBuffer.TYPE_DOUBLE;
 
 public class RasterUtils {
 
@@ -180,6 +201,33 @@ public class RasterUtils {
         return values;
     }
 
+    /**
+     * loads geo-location data as an array of doubles ready to use by ComponentGeoCoding.
+     * This method optimises the memory impact by disposing whatever is possible after the
+     * reading operation. Please do not use from a context where this is not desired.
+     *
+     * @param dataNode the raster data node providing the geolocation data
+     * @return the scaled array of geo-lcation values
+     * @throws IOException on disk-access errors
+     */
+    public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
+        final Raster dataRaster = dataNode.getGeophysicalImage().getData();
+        final SampleModel sampleModel = dataRaster.getSampleModel();
+        if (sampleModel.getDataType() == TYPE_DOUBLE && sampleModel.getNumBands() == 1) {
+            return ((DataBufferDouble) dataRaster.getDataBuffer()).getData();
+        } else {
+            final Dimension rasterSize = dataNode.getRasterSize();
+            final double[] values = new double[rasterSize.width * rasterSize.height];
+            dataRaster.getSamples(0, 0, rasterSize.width, rasterSize.height, 0, values);
+
+            // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
+            dataNode.unloadRasterData();
+            dataNode.removeCachedImageData();
+
+            return values;
+        }
+    }
+
     // returns al (x/y) positions that have a latitude above the defined pole-angle threshold
     private static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {
         final ArrayList<PixelPos> poleCandidates = new ArrayList<>();
@@ -234,6 +282,10 @@ public class RasterUtils {
         final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
 
         return distanceMeanRadian * meanEarthRadiusKm;
+    }
+
+    public static void printPointWkt(GeoPos geoPos) {
+        System.out.println("POINT( " + geoPos.lon + " " + geoPos.lat + ")");
     }
 
     private static Rectangle getCenterExtractWindow(int width, int height) {

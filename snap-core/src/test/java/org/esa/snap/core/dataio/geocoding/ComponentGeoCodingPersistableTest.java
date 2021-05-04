@@ -101,9 +101,7 @@ public class ComponentGeoCodingPersistableTest {
         assertThat(newGeoRaster.getSubsamplingY(), is(equalTo(initialGeoRaster.getSubsamplingY())));
         assertThat(newGeoRaster.getOffsetX(), is(equalTo(initialGeoRaster.getOffsetX())));
         assertThat(newGeoRaster.getOffsetY(), is(equalTo(initialGeoRaster.getOffsetY())));
-        assertNotSame(newGeoRaster.getLongitudes(), initialGeoRaster.getLongitudes());
         assertArrayEquals(newGeoRaster.getLongitudes(), initialGeoRaster.getLongitudes(), Double.MIN_VALUE);
-        assertNotSame(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes());
         assertArrayEquals(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes(), Double.MIN_VALUE);
     }
 
