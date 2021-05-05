@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -504,23 +504,21 @@ public class ProductIO {
 
     private static void writeBandsConcurrent(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
         final int numBands = bandsToWrite.size();
-        final int numThreads = Runtime.getRuntime().availableProcessors();
-        final int threadsPerBand = numThreads / numBands;
-        final int executorSize = threadsPerBand == 0 ? 1 : threadsPerBand;
-        Semaphore semaphore = new Semaphore(numThreads);
+        final CountDownLatch bandsCountDown = new CountDownLatch(numBands);
+
+        final int numThreads = Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
+        final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         List<IOException> ioExceptionCollector = Collections.unmodifiableList(new ArrayList<>());
         for (Band band : bandsToWrite) {
             if (pm.isCanceled()) {
+                bandsCountDown.countDown();
                 break;
             }
-            ExecutorService executor = null;
-            semaphore.acquireUninterruptibly();
-            executor = Executors.newFixedThreadPool(executorSize);
             pm.setSubTaskName("Writing band '" + band.getName() + "'");
             ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
-            writeRasterDataFully(subPM, band, executor, semaphore, ioExceptionCollector);
+            writeRasterDataFully(subPM, band, executor, bandsCountDown, ioExceptionCollector);
         }
-        while (semaphore.availablePermits() < numThreads) {
+        while (bandsCountDown.getCount() > 0) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -528,6 +526,7 @@ public class ProductIO {
                                                      "Method ProductIO.writeAllBands(...)' unexpected termination", e);
             }
         }
+        executor.shutdown();
         for (IOException e : ioExceptionCollector) {
             SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -554,11 +553,15 @@ public class ProductIO {
     private ProductIO() {
     }
 
-    private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
+    private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, CountDownLatch bandsCountDown, List<IOException> ioExceptionCollector) throws IOException {
         if (band.hasRasterData()) {
-            band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
-            if (semaphore != null) {
-                semaphore.release();
+            try {
+                band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+            } finally {
+                pm.done();
+                if (bandsCountDown != null) {
+                    bandsCountDown.countDown();
+                }
             }
         } else {
             final PlanarImage sourceImage = band.getSourceImage();
@@ -567,8 +570,7 @@ public class ProductIO {
             int numTiles = tileIndices.length;
             pm.beginTask("Writing raster data...", numTiles);
             if (executor != null) {
-//                Finisher finisher = new Finisher(band.getName(), pm, semaphore, executor, numTiles);
-                Finisher finisher = new Finisher(pm, semaphore, executor, numTiles);
+                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles);
                 for (Point tileIndex : tileIndices) {
                     executor.execute(() -> {
                         try {
@@ -621,6 +623,7 @@ public class ProductIO {
      * @param lvlSupport defines the level (resolution) within the level image pyramid which shall be read
      * @param destRect   the rectangular area which shall be filled with data
      * @param destBuffer the buffer where to put the data
+     *
      * @throws IOException in case an error occurs during reading
      */
     // Todo mp 2020-07-03 - https://senbox.atlassian.net/browse/SNAP-1134
@@ -640,15 +643,13 @@ public class ProductIO {
     private static class Finisher {
 
         private final ProgressMonitor pm;
-        private final Semaphore semaphore;
-        private final ExecutorService executor;
+        private final CountDownLatch bandsCountDown;
         private final int work;
         private int counter;
 
-        public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
+        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter) {
             this.pm = pm;
-            this.semaphore = semaphore;
-            this.executor = executor;
+            this.bandsCountDown = bandsCountDown;
             this.work = counter;
 
         }
@@ -659,8 +660,7 @@ public class ProductIO {
             } finally {
                 counter++;
                 if (counter == work) {
-                    semaphore.release();
-                    executor.shutdown();
+                    bandsCountDown.countDown();
                     pm.done();
                 }
             }
