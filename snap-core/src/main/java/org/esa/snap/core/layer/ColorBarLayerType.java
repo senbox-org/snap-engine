@@ -652,6 +652,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_PALETTE_BORDER_COLOR_TYPE = Color.class;
 
 
+    // Legend Border Section
 
 
     private static final String PROPERTY_LEGEND_BORDER_ROOT_KEY = PROPERTY_ROOT_KEY + ".legend.border";
@@ -685,7 +686,22 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+    //  Legend Export Section
 
+    private static final String PROPERTY_LEGEND_EXPORT_ROOT_KEY = PROPERTY_ROOT_KEY + ".legend.export";
+    private static final String PROPERTY_LEGEND_EXPORT_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "LegendExport";
+
+    public static final String PROPERTY_LEGEND_EXPORT_SECTION_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".section";
+    public static final String PROPERTY_LEGEND_EXPORT_SECTION_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_LEGEND_EXPORT_SECTION_LABEL = "Color Bar Export Tool";
+    public static final String PROPERTY_LEGEND_EXPORT_SECTION_TOOLTIP = "Configuration options for the color bar legend export tool";
+
+    public static final String PROPERTY_EXPORT_EDITOR_SHOW_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".editor.show";
+    public static final String PROPERTY_EXPORT_EDITOR_SHOW_LABEL = "Show Editor";
+    public static final String PROPERTY_EXPORT_EDITOR_SHOW_TOOLTIP = "Display editor for color bar export tool";
+    private static final String PROPERTY_EXPORT_EDITOR_SHOW_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "EditorShow";
+    public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_EXPORT_EDITOR_SHOW_TYPE = Boolean.class;
 
 
 
@@ -1108,6 +1124,23 @@ public class ColorBarLayerType extends LayerType {
         final Property backdropBorderColorModel = Property.create(PROPERTY_LEGEND_BORDER_COLOR_KEY, Color.class, PROPERTY_LEGEND_BORDER_COLOR_DEFAULT, true);
         backdropBorderColorModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_COLOR_ALIAS);
         vc.addProperty(backdropBorderColorModel);
+
+
+
+
+        // Legend Border Section
+
+        final Property exportSectionModel = Property.create(PROPERTY_LEGEND_EXPORT_SECTION_KEY, Boolean.class, true, true);
+        backdropBorderSectionModel.getDescriptor().setAlias(PROPERTY_LEGEND_EXPORT_SECTION_ALIAS);
+        vc.addProperty(backdropBorderSectionModel);
+
+        final Property exportEditorShowModel = Property.create(PROPERTY_EXPORT_EDITOR_SHOW_KEY, Boolean.class, PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT, true);
+        backdropBorderShowModel.getDescriptor().setAlias(PROPERTY_EXPORT_EDITOR_SHOW_ALIAS);
+        vc.addProperty(backdropBorderShowModel);
+
+
+
+
 
 
 
