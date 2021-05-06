@@ -18,7 +18,6 @@
 
 package org.esa.snap.core.datamodel;
 
-import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.persistence.Attribute;
 import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
@@ -27,8 +26,6 @@ import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.jdom.Document;
-import org.jdom.Element;
 
 public class TiePointGeoCodingPersistenceConverter implements PersistenceConverter<TiePointGeoCoding> {
 
@@ -37,7 +34,7 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
     // And so on ...
     public static final String ID_VERSION_1 = "TPGC:1";
 
-    private static final String NAME_GEO_CODING = "TiePointGeoCoding";
+    private static final String NAME_TIE_POINT_GEO_CODING = "TiePointGeoCoding";
 
     private static final String NAME_COORDINATE_REF_SYS = "Coordinate_Reference_System";
     private static final String NAME_HORIZONTAL_CS = "Horizontal_CS";
@@ -63,8 +60,6 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
 
     @Override
     public Item encode(TiePointGeoCoding gc) {
-        final Container root = createRootContainer(NAME_GEO_CODING);
-
         final Datum datum = gc.getDatum();
         final Ellipsoid ellipsoid = datum.getEllipsoid();
 
@@ -89,6 +84,7 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
         final Container coordRefSys = new Container(NAME_COORDINATE_REF_SYS);
         coordRefSys.add(horCS_Cont);
 
+        final Container root = createRootContainer(NAME_TIE_POINT_GEO_CODING);
         root.add(coordRefSys);
 
         final Container geoPosPoints = new Container(NAME_GEOPOSITION_POINTS);
