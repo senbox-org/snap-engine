@@ -17,6 +17,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCoding extends AbstractGeoCoding {
@@ -150,7 +151,12 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final String lonVariableName = this.geoRaster.getLonVariableName();
         final String latVariableName = this.geoRaster.getLatVariableName();
 
-        final GeoRaster geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        final GeoRaster geoRaster;
+        try {
+            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        } catch (IOException e) {
+            return false;
+        }
         ForwardCoding forwardCoding = null;
         if (this.forwardCoding != null) {
             forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
@@ -304,7 +310,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         return geoRaster;
     }
 
-    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) {
+    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) throws IOException {
         GeoRaster geoRaster;
         final Product destProduct = destScene.getProduct();
         final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);
@@ -338,8 +344,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
-            longitudes = lonRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-            latitudes = latRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            longitudes = RasterUtils.loadGeoData(lonRaster);
+            latitudes = RasterUtils.loadGeoData(latRaster);
 
             offsetX = 0.5;
             offsetY = 0.5;
