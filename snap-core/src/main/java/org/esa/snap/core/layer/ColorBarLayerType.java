@@ -703,7 +703,12 @@ public class ColorBarLayerType extends LayerType {
     public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = true;
     public static final Class PROPERTY_EXPORT_EDITOR_SHOW_TYPE = Boolean.class;
 
-
+    public static final String PROPERTY_EXPORT_USE_BW_COLOR_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".use.blackwhite.color";
+    public static final String PROPERTY_EXPORT_USE_BW_COLOR_LABEL = "Black/White Color Override";
+    public static final String PROPERTY_EXPORT_USE_BW_COLOR_TOOLTIP = "Overrides colors and uses black & white";
+    private static final String PROPERTY_EXPORT_USE_BW_COLOR_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseBlackWhiteColor";
+    public static final boolean PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT = true;
+    public static final Class PROPERTY_EXPORT_USE_BW_COLOR_TYPE = Boolean.class;
 
 
 
@@ -1131,14 +1136,16 @@ public class ColorBarLayerType extends LayerType {
         // Legend Border Section
 
         final Property exportSectionModel = Property.create(PROPERTY_LEGEND_EXPORT_SECTION_KEY, Boolean.class, true, true);
-        backdropBorderSectionModel.getDescriptor().setAlias(PROPERTY_LEGEND_EXPORT_SECTION_ALIAS);
-        vc.addProperty(backdropBorderSectionModel);
+        exportSectionModel.getDescriptor().setAlias(PROPERTY_LEGEND_EXPORT_SECTION_ALIAS);
+        vc.addProperty(exportSectionModel);
 
         final Property exportEditorShowModel = Property.create(PROPERTY_EXPORT_EDITOR_SHOW_KEY, Boolean.class, PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT, true);
-        backdropBorderShowModel.getDescriptor().setAlias(PROPERTY_EXPORT_EDITOR_SHOW_ALIAS);
-        vc.addProperty(backdropBorderShowModel);
+        exportEditorShowModel.getDescriptor().setAlias(PROPERTY_EXPORT_EDITOR_SHOW_ALIAS);
+        vc.addProperty(exportEditorShowModel);
 
-
+        final Property exportBWColorShowModel = Property.create(PROPERTY_EXPORT_USE_BW_COLOR_KEY, Boolean.class, PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT, true);
+        exportBWColorShowModel.getDescriptor().setAlias(PROPERTY_EXPORT_USE_BW_COLOR_ALIAS);
+        vc.addProperty(exportBWColorShowModel);
 
 
 
