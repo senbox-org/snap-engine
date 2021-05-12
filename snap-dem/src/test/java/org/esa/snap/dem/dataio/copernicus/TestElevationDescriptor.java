@@ -21,7 +21,7 @@ public class TestElevationDescriptor {
         assert descriptor.getTileWidthInDegrees() == 1;
         assert descriptor.getTileWidth() == 1200;
         assert descriptor.getNumXTiles() == 360;
-        assert descriptor.getNumYTiles() == 120;
+        assert descriptor.getNumYTiles() == 180;
         assert descriptor.canBeDownloaded();
 
     }
@@ -39,7 +39,7 @@ public class TestElevationDescriptor {
         assert descriptor.getTileWidthInDegrees() == 1;
         assert descriptor.getTileWidth() == 3600;
         assert descriptor.getNumXTiles() == 360;
-        assert descriptor.getNumYTiles() == 120;
+        assert descriptor.getNumYTiles() == 180;
         assert descriptor.canBeDownloaded();
 
     }
