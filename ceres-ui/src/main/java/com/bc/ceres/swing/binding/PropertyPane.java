@@ -43,15 +43,13 @@ import static com.bc.ceres.swing.TableLayout.cell;
  * @version $Revision$ $Date$
  * @
  */
-// JAN2019 - Daniel Knowles - Added method to return property pane as a JScrollPane
-
-
-// JAN2019 - Daniel Knowles - Moved some of the logic for adding components to a public method which can also be called by
+// JAN2019 - Knowles - Added method to return property pane as a JScrollPane
+// JAN2019 - Knowles - Moved some of the logic for adding components to a public method which can also be called by
 //                            the preferences GUIs.
 //                          - Added tooltips: NOTE: actual tooltips values will be added in the future.
 //                            NOTE: this does not contain section breaks which may be added in the future for a future
 //                                  revision of map gridlines and other tools.
-// MAR2020 - Knowles - Add setEnabled so that some properties can be initially disabled
+// MAR2020 - Knowles - Added setEnabled so that some properties can be initially disabled
 
 
 public class PropertyPane {

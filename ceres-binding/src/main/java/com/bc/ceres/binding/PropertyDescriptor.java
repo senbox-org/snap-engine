@@ -44,9 +44,10 @@ import java.util.regex.Pattern;
  * to instances of this class.
  *
  * @author Norman Fomferra
+ * @author Daniel Knowles
  * @since 0.6
  */
-// MAR2020 - Knowles - Add setEnabled so that some properties can be initially disabled
+// MAR2020 - Knowles - Added setEnabled so that some properties can be initially disabled
 
 public class PropertyDescriptor {
 
