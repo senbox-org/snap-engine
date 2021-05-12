@@ -17,6 +17,8 @@ import java.awt.geom.AffineTransform;
 /**
  * @author Daniel Knowles
  */
+//MAY2020 - Daniel Knowles - Major revision to color bar and color bar layer tools
+
 
 
 @LayerTypeMetadata(name = "ColorBarLayerType", aliasNames = {"org.esa.snap.core.layer.ColorBarLayerType"})
