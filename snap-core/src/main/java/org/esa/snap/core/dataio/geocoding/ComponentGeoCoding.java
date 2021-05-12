@@ -362,6 +362,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             subsamplingX = lonTPG.getSubSamplingX();
             subsamplingY = lonTPG.getSubSamplingY();
         } else {
+            // this is based on already subsetted geo-location data, we take
+            // the subset in full resolution of the subset here tb 2021-05-12
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
