@@ -65,23 +65,12 @@ public class ImageLegend {
 
 
     public static final int DEFAULT_COLOR_BAR_LENGTH = 1200;
-    public static final double DEFAULT_LAYER_OFFSET = 0.0;
-    public static final double DEFAULT_LAYER_SHIFT = 0.0;
-    public static final int DEFAULT_COLOR_BAR_THICKNESS = 48;
-    public static final double DEFAULT_LAYER_SCALING = 75;
-    public static final double DEFAULT_SCALING_FACTOR = 1;
-    public static final int DEFAULT_TITLE_FONT_SIZE = 36;
-    public static final int DEFAULT_TITLE_UNITS_FONT_SIZE = 28;
-    public static final int DEFAULT_LABELS_FONT_SIZE = 28;
     public static final int DEFAULT_PREVIEW_LENGTH_PIXELS = 750;
-    public static final int DEFAULT_FILE_LENGTH_PIXELS = DEFAULT_COLOR_BAR_LENGTH; // we could set this differently in the future if we wish to scale to a different size for the file export mode
-    public static final boolean DEFAULT_CENTER_ON_LAYER = Boolean.TRUE;
+
 
     public static final double HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
-    public static final double VERTICAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
-    public static final int DEFAULT_TICKMARK_WIDTH = 3;
 
 
     public static final double WEIGHT_TOLERANCE = 0.0001;  // machine error can make calculated weight slightly outside of range 0-1
@@ -104,7 +93,6 @@ public class ImageLegend {
 
     // Independent attributes (Properties)
     private final ImageInfo imageInfo;
-    private boolean initialized = false;
     private final RasterDataNode raster;
     private boolean showTitle;
     private boolean showUnits;
@@ -241,9 +229,6 @@ public class ImageLegend {
         imageLegendCopy.setUnitsColor(getUnitsColor());
         imageLegendCopy.setUnitsFontName(getUnitsFontName());
         imageLegendCopy.setUnitsFontType(getUnitsFontType());
-
-
-
 
 
 
@@ -553,7 +538,7 @@ public class ImageLegend {
     }
 
 
-    // todo Danny tmp edit
+    // todo This block may contain useful info for later implementing a scheme
 //    public void initDefaults(PropertyMap configuration) {
 //
 //
@@ -565,7 +550,6 @@ public class ImageLegend {
 //            final double min = getImageInfo().getColorPaletteDef().getMinDisplaySample();
 //            final double max = getImageInfo().getColorPaletteDef().getMaxDisplaySample();
 //
-//            // todo Danny changed this to get it to work in SNAP
 //            final boolean logScaled = getImageInfo().isLogScaled();
 //
 //            String labels = colorPaletteSourcesInfo.getColorBarLabels();
@@ -736,12 +720,12 @@ public class ImageLegend {
 
     public BufferedImage createImage(Dimension imageLayerDimension, boolean scaleToDimension) {
 
+        double scalingFactor = 1.0;
 
-//        if (scaleToDimension) {
+        if (scaleToDimension) {
 
             createColorBarInfos();
             initDrawing();
-
 
             double oneHundredPercentScalingFactor;
             if (orientation == HORIZONTAL) {
@@ -752,16 +736,11 @@ public class ImageLegend {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
             }
 
-            double scalingFactor = getLayerScaling() / 100.0;
+            scalingFactor = getLayerScaling() / 100.0;
             scalingFactor = scalingFactor * oneHundredPercentScalingFactor;
 
-//        }
-//
-//        else {
-//
-//            scalingFactor = DEFAULT_FILE_LENGTH_PIXELS / (double) getColorBarLength();
-//            // todo DANNY
-//        }
+        }
+
 
         int tmpLabelsFontSize = getLabelsFontSize();
         int tmpTickmarkLength = getTickmarkLength();
