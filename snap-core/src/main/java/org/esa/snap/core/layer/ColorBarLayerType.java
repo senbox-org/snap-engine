@@ -712,8 +712,19 @@ public class ColorBarLayerType extends LayerType {
     public static final boolean PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT = true;
     public static final Class PROPERTY_EXPORT_USE_BW_COLOR_TYPE = Boolean.class;
 
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + "use.legend.width";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_LABEL = "Use Legend Width";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_TOOLTIP = "Resize to desired legend image";
+    private static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseLegendWidth";
+    public static final boolean PROPERTY_EXPORT_USE_LEGEND_WIDTH_DEFAULT = true;
+    public static final Class PROPERTY_EXPORT_USE_LEGEND_WIDTH_TYPE = Boolean.class;
 
-
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".legend.width";
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_LABEL = "Legend Width";
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_TOOLTIP = "Width of legend image (height if vertical image)";
+    private static final String PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "LegendWidth";
+    public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1200;
+    public static final Class PROPERTY_EXPORT_LEGEND_WIDTH_TYPE = Integer.class;
 
     // ---------------------------------------------------------
 
@@ -1148,6 +1159,16 @@ public class ColorBarLayerType extends LayerType {
         final Property exportBWColorShowModel = Property.create(PROPERTY_EXPORT_USE_BW_COLOR_KEY, Boolean.class, PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT, true);
         exportBWColorShowModel.getDescriptor().setAlias(PROPERTY_EXPORT_USE_BW_COLOR_ALIAS);
         vc.addProperty(exportBWColorShowModel);
+
+        final Property exportUseLegendWidthModel = Property.create(PROPERTY_EXPORT_USE_LEGEND_WIDTH_KEY, Boolean.class, PROPERTY_EXPORT_USE_LEGEND_WIDTH_DEFAULT, true);
+        exportUseLegendWidthModel.getDescriptor().setAlias(PROPERTY_EXPORT_USE_LEGEND_WIDTH_ALIAS);
+        vc.addProperty(exportUseLegendWidthModel);
+
+        final Property exportLegendWidthModel = Property.create(PROPERTY_EXPORT_LEGEND_WIDTH_KEY, Integer.class, PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT, true);
+        exportLegendWidthModel.getDescriptor().setAlias(PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS);
+        vc.addProperty(exportLegendWidthModel);
+
+
 
 
 

@@ -291,9 +291,9 @@ public class ImageLegend {
     }
 
 
-    public void updateWithProperties(PropertyMap configuration, RasterDataNode raster) {
 
 
+    public void initLegendWithPreferences(PropertyMap configuration, RasterDataNode raster) {
 
 
         // Orientation Parameters
@@ -309,8 +309,6 @@ public class ImageLegend {
 
         setReversePalette(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT));
-
-
 
 
         // Label Distribution and Values
@@ -334,9 +332,6 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT));
 
 
-
-
-
         // Sizing and Location
         setColorBarLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT));
@@ -346,8 +341,6 @@ public class ImageLegend {
 
         setTitleVerticalAnchor(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT));
-
-
 
 
         // Title parameters
@@ -389,16 +382,6 @@ public class ImageLegend {
         setTitleFontType(titleFontType);
 
 
-
-
-
-
-
-
-
-
-
-
         // Units parameters
 
         setShowUnits(
@@ -406,13 +389,23 @@ public class ImageLegend {
                         ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT));
 
 
-        String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
+        String unitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
 
 
-        String titleUnitsText = (ColorBarLayerType.NULL_SPECIAL.equals(titleUnitsTextDefault)) ? "(" + raster.getUnit() + ")" : titleUnitsTextDefault;
 
-        setUnitsText(titleUnitsText);
+        String unitsText = "";
+        if (ColorBarLayerType.NULL_SPECIAL.equals(unitsTextDefault)) {
+            String unit = raster.getUnit();
+            if (unit != null && unit.length() > 0) {
+                unitsText = "(" + raster.getUnit() + ")";
+            }
+        } else {
+            unitsText = unitsTextDefault;
+        }
+
+
+        setUnitsText(unitsText);
 
 
         setUnitsFontSize(
@@ -428,19 +421,15 @@ public class ImageLegend {
                         ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_DEFAULT));
 
 
-        boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
+        boolean unitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
 
-        boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
+        boolean unitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
 
-        int titleUnitsFontType = ColorBarLayer.getFontType(titleUnitsItalic, titleUnitsBold);
+        int unitsFontType = ColorBarLayer.getFontType(unitsItalic, unitsBold);
 
-        setUnitsFontType(titleUnitsFontType);
-
-
-
-
+        setUnitsFontType(unitsFontType);
 
 
 
@@ -469,9 +458,6 @@ public class ImageLegend {
 
 
 
-
-
-
         // Tick Marks Section
 
         setTickmarkShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_KEY,
@@ -485,8 +471,6 @@ public class ImageLegend {
 
         setTickmarkColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT));
-
-
 
 
 
@@ -504,9 +488,6 @@ public class ImageLegend {
         setBackdropTransparency(((Number) backdropTrans).floatValue());
 
 
-
-
-
         // Palette Border Section
 
         setBorderShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_KEY,
@@ -517,9 +498,6 @@ public class ImageLegend {
 
         setBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_DEFAULT));
-
-
-
 
 
         // Legend Border Section
@@ -534,8 +512,18 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
 
 
+        setLayerScaling(100.0);
 
+
+        setAntialiasing((Boolean) true);
+
+        //  imageLegend.setBackgroundTransparencyEnabled(true);
     }
+
+
+
+
+
 
 
     // todo This block may contain useful info for later implementing a scheme
@@ -713,8 +701,6 @@ public class ImageLegend {
             } else {
                 return 255;
             }
-
-//        return isAlphaUsed() ? Math.round(255f * (1f - backdropTransparency)) : 255;
     }
 
 
@@ -729,10 +715,8 @@ public class ImageLegend {
 
             double oneHundredPercentScalingFactor;
             if (orientation == HORIZONTAL) {
-//                oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) getColorBarLength();
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
             } else {
-//                oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) getColorBarLength();
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
             }
 
@@ -772,33 +756,7 @@ public class ImageLegend {
     }
 
 
-    public BufferedImage createPreviewImage() {
 
-        double scalingFactor = DEFAULT_PREVIEW_LENGTH_PIXELS / (double) getColorBarLength();
-
-        int originalLabelsFontSize = getLabelsFontSize();
-        int originalTitleFontSize = getTitleFontSize();
-        int originalTitleUnitsFontSize = getUnitsFontSize();
-        int originalColorBarLength = getColorBarLength();
-        int originalColorBarThickness = getColorBarThickness();
-
-        setLabelsFontSize((int) Math.round(scalingFactor * getLabelsFontSize()));
-        setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
-        setUnitsFontSize((int) Math.round(scalingFactor * getUnitsFontSize()));
-        setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
-        setColorBarThickness((int) Math.round(scalingFactor * getColorBarThickness()));
-
-
-        BufferedImage bufferedImage = createImage();
-
-        setLabelsFontSize(originalLabelsFontSize);
-        setTitleFontSize(originalTitleFontSize);
-        setUnitsFontSize(originalTitleUnitsFontSize);
-        setColorBarLength(originalColorBarLength);
-        setColorBarThickness(originalColorBarThickness);
-
-        return bufferedImage;
-    }
 
 
     public BufferedImage createImage() {
