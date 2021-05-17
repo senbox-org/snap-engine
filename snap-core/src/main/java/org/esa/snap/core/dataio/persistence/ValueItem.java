@@ -63,10 +63,19 @@ public abstract class ValueItem<E> extends Item {
 
     public Double[] getValueDoubles() {
         if (value != null && value.getClass().isArray()) {
-            Object[] v = (Object[]) value;
-            return Arrays.stream(v).map(ValueItem::getaDouble).toArray(Double[]::new);
+            if (value.getClass().getComponentType().getName() == "double") {
+                final double[] doubles = (double[]) this.value;
+                final Double[] Doubles = new Double[doubles.length];
+                for (int i = 0; i < doubles.length; i++) {
+                    Doubles[i] = doubles[i];
+                }
+                return Doubles;
+            } else {
+                Object[] v = (Object[]) value;
+                return Arrays.stream(v).map(ValueItem::getaDouble).toArray(Double[]::new);
+            }
         }
-        if(value instanceof List) {
+        if (value instanceof List) {
             final List list = (List) value;
             final Stream<Double> stream = list.stream().map(ValueItem::getaDouble);
             return stream.toArray(Double[]::new);
@@ -100,7 +109,7 @@ public abstract class ValueItem<E> extends Item {
             Object[] v = (Object[]) value;
             return Arrays.stream(v).map(ValueItem::getaLong).toArray(Long[]::new);
         }
-        if(value instanceof List) {
+        if (value instanceof List) {
             final List list = (List) value;
             final Stream<Long> stream = list.stream().map(ValueItem::getaLong);
             return stream.toArray(Long[]::new);

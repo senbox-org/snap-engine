@@ -121,13 +121,11 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
                                                    "                  \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
                                                    "                  \"Ellipsoid_Parameters\" : {\n" +
                                                    "                    \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6378137.0\"\n" +
                                                    "                    },\n" +
                                                    "                    \"ELLIPSOID_MIN_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6356752.3\"\n" +
                                                    "                    }\n" +
                                                    "                  }\n" +
@@ -192,13 +190,11 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
                                                    "                  \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
                                                    "                  \"Ellipsoid_Parameters\" : {\n" +
                                                    "                    \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6378137.0\"\n" +
                                                    "                    },\n" +
                                                    "                    \"ELLIPSOID_MIN_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6356752.3\"\n" +
                                                    "                    }\n" +
                                                    "                  }\n" +

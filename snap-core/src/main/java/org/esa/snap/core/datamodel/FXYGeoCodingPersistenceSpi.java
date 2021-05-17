@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,6 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
 package org.esa.snap.core.datamodel;
@@ -20,9 +22,9 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 
-public class TiePointGeoCodingPersistenceSpi implements PersistenceSpi {
+public class FXYGeoCodingPersistenceSpi implements PersistenceSpi {
 
-    private static final TiePointGeoCodingPersistenceConverter CONVERTER = new TiePointGeoCodingPersistenceConverter();
+    private static final FXYGeoCodingPersistenceConverter CONVERTER = new FXYGeoCodingPersistenceConverter();
 
     @Override
     public boolean canDecode(Item item) {
@@ -31,7 +33,7 @@ public class TiePointGeoCodingPersistenceSpi implements PersistenceSpi {
 
     @Override
     public boolean canEncode(Object object) {
-        return object instanceof TiePointGeoCoding;
+        return object instanceof FXYGeoCoding;
     }
 
     @Override
