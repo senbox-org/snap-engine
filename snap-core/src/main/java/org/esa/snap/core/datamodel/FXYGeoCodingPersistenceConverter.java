@@ -52,8 +52,13 @@ public class FXYGeoCodingPersistenceConverter implements PersistenceConverter<FX
     private static final String NAME_PC_LIST = "pc_List";
     private static final String NAME_IC_LIST = "ic_List";
     private static final String NAME_JC_LIST = "jc_List";
+    private static final String NAME_LC = "lc";
+    private static final String NAME_PC = "pc";
+    private static final String NAME_IC = "ic";
+    private static final String NAME_JC = "jc";
 
     private static final String ATTRIBUTE_NAME_ORDER = "order";
+    private static final String ATTRIBUTE_NAME_INDEX = "index";
 
     @Override
     public String getID() {

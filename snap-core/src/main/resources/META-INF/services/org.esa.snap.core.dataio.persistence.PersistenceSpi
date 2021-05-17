@@ -2,6 +2,3 @@ org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.BasicPixelGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.TiePointGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.FXYGeoCodingPersistenceSpi
-org.esa.snap.core.datamodel.GcpGeoCodingPersistenceSpi
-org.esa.snap.core.datamodel.RangeTypeMaskPersistenceSpi
-org.esa.snap.core.datamodel.BandMathsMaskPersistenceSpi
