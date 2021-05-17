@@ -212,7 +212,6 @@ public class ImageLegend {
         ImageLegend imageLegendCopy = new ImageLegend(raster.getImageInfo(), raster);
 
 
-
         imageLegendCopy.setOrientation(getOrientation());
         imageLegendCopy.setReversePalette(isReversePalette());
 
@@ -231,7 +230,6 @@ public class ImageLegend {
         imageLegendCopy.setUnitsFontType(getUnitsFontType());
 
 
-
         imageLegendCopy.setTickMarkCount(getTickMarkCount());
         imageLegendCopy.setDistributionType(getDistributionType());
         imageLegendCopy.setCustomLabelValues(getCustomLabelValues());
@@ -240,12 +238,9 @@ public class ImageLegend {
         imageLegendCopy.setDecimalPlacesForce(isDecimalPlacesForce());
 
 
-
         imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
         imageLegendCopy.setColorBarLength(getColorBarLength());
         imageLegendCopy.setColorBarThickness(getColorBarThickness());
-
-
 
 
         // todo start
@@ -258,7 +253,6 @@ public class ImageLegend {
         imageLegendCopy.setAntialiasing((Boolean) true);
 
         // todo end
-
 
 
         imageLegendCopy.setLabelsShow(isLabelsShow());
@@ -285,12 +279,8 @@ public class ImageLegend {
         imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
 
 
-
-
         return imageLegendCopy;
     }
-
-
 
 
     public void initLegendWithPreferences(PropertyMap configuration, RasterDataNode raster) {
@@ -393,7 +383,6 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
 
 
-
         String unitsText = "";
         if (ColorBarLayerType.NULL_SPECIAL.equals(unitsTextDefault)) {
             String unit = raster.getUnit();
@@ -432,8 +421,6 @@ public class ImageLegend {
         setUnitsFontType(unitsFontType);
 
 
-
-
         // Labels Parameters
 
         setLabelsShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
@@ -457,7 +444,6 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT));
 
 
-
         // Tick Marks Section
 
         setTickmarkShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_KEY,
@@ -471,7 +457,6 @@ public class ImageLegend {
 
         setTickmarkColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT));
-
 
 
         // Backdrop Section
@@ -519,11 +504,6 @@ public class ImageLegend {
 
         //  imageLegend.setBackgroundTransparencyEnabled(true);
     }
-
-
-
-
-
 
 
     // todo This block may contain useful info for later implementing a scheme
@@ -692,15 +672,15 @@ public class ImageLegend {
     }
 
     public int getBackgroundAlpha() {
-            if (transparencyEnabled) {
-                if (isBackdropShow()) {
-                    return Math.round(255f * (1f - backdropTransparency));
-                } else {
-                    return Math.round(0f);
-                }
+        if (transparencyEnabled) {
+            if (isBackdropShow()) {
+                return Math.round(255f * (1f - backdropTransparency));
             } else {
-                return 255;
+                return Math.round(0f);
             }
+        } else {
+            return 255;
+        }
     }
 
 
@@ -756,9 +736,6 @@ public class ImageLegend {
     }
 
 
-
-
-
     public BufferedImage createImage() {
         createColorBarInfos();
         initDrawing();
@@ -812,9 +789,7 @@ public class ImageLegend {
 //        }
 
 
-        if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
-            distributeEvenly();
-        } else if (DISTRIB_EXACT_STR.equals(getDistributionType())) {
+        if (DISTRIB_EXACT_STR.equals(getDistributionType()) || imageInfo.getColorPaletteDef().isDiscrete()) {
             final int numPointsInCpdFile = getNumGradationCurvePoints();
             int stepSize = 1;
             //    int stepSize = numPointsInCpdFile / getNumberOfTicks();
@@ -844,57 +819,61 @@ public class ImageLegend {
                 String manualPoints = StringUtils.join(manualPointsArrayList, ", ");
                 setCustomLabelValues(manualPoints);
             }
-        } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
-            if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
-                // this will initialize the points
+
+        } else if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
                 distributeEvenly();
-                colorBarInfos.clear();
-            }
 
-            String addThese = getCustomLabelValues();
+        } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
+                if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
+                    // this will initialize the points
+                    distributeEvenly();
+                    colorBarInfos.clear();
+                }
 
-            if (addThese != null && addThese.length() > 0) {
-                String[] formattedValues = addThese.split(",");
+                String addThese = getCustomLabelValues();
 
-
-                for (String formattedValue : formattedValues) {
-                    if (formattedValue != null) {
-                        formattedValue.trim();
-                        if (formattedValue.length() > 0 && scalingFactor != 0) {
-
-                            String[] valueAndString = formattedValue.split(":");
-                            if (valueAndString.length == 2) {
-                                value = Double.valueOf(valueAndString[0]) / getScalingFactor();
-                                formattedValue = valueAndString[1];
-                            } else {
-                                value = Double.valueOf(formattedValue) / getScalingFactor();
-                            }
+                if (addThese != null && addThese.length() > 0) {
+                    String[] formattedValues = addThese.split(",");
 
 
-                            if (imageInfo.isLogScaled()) {
-                                if (value == min) {
-                                    weight = 0;
-                                } else if (value == max) {
-                                    weight = 1;
+                    for (String formattedValue : formattedValues) {
+                        if (formattedValue != null) {
+                            formattedValue.trim();
+                            if (formattedValue.length() > 0 && scalingFactor != 0) {
+
+                                String[] valueAndString = formattedValue.split(":");
+                                if (valueAndString.length == 2) {
+                                    value = Double.valueOf(valueAndString[0]) / getScalingFactor();
+                                    formattedValue = valueAndString[1];
                                 } else {
-                                    weight = getLinearWeightFromLogValue(value, min, max);
+                                    value = Double.valueOf(formattedValue) / getScalingFactor();
                                 }
-                            } else {
-                                weight = getLinearWeightFromLinearValue(value, min, max);
-                            }
 
-                            weight = getValidWeight(weight);
-                            if (weight != INVALID_WEIGHT) {
+
+                                if (imageInfo.isLogScaled()) {
+                                    if (value == min) {
+                                        weight = 0;
+                                    } else if (value == max) {
+                                        weight = 1;
+                                    } else {
+                                        weight = getLinearWeightFromLogValue(value, min, max);
+                                    }
+                                } else {
+                                    weight = getLinearWeightFromLinearValue(value, min, max);
+                                }
+
+                                weight = getValidWeight(weight);
+                                if (weight != INVALID_WEIGHT) {
 //                                System.out.println("TEST formattedValue=" + formattedValue);
 //                                System.out.println("TEST weight=" + weight);
-                                ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
-                                colorBarInfos.add(colorBarInfo);
+                                    ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
+                                    colorBarInfos.add(colorBarInfo);
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
     }
 
@@ -1151,7 +1130,7 @@ public class ImageLegend {
 
     private void draw(Graphics2D g2d) {
 //        if (isBackdropShow()) {
-            fillBackground(g2d);
+        fillBackground(g2d);
 //        }
 
 
@@ -1632,7 +1611,7 @@ public class ImageLegend {
 
 
     private void drawLineInHorizontalPalette(Graphics2D g2d, Color[] palette, int index, int x, int y1, int y2) {
-        forceIndexInBounds(palette, index);
+        index = forceIndexInBounds(palette, index);
 
         g2d.setColor(palette[index]);
         g2d.drawLine(x, y1, x, y2);
@@ -1640,7 +1619,7 @@ public class ImageLegend {
 
 
     private void drawLineInVerticalPalette(Graphics2D g2d, Color[] palette, int index, int x1, int x2, int y) {
-        forceIndexInBounds(palette, index);
+        index = forceIndexInBounds(palette, index);
 
         g2d.setColor(palette[index]);
         g2d.drawLine(x1, y, x2, y);
