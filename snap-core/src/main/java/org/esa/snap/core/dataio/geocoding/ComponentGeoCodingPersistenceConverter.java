@@ -61,7 +61,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
     // Never change this constant! Instead, create a new one with the
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
     // And so on ...
-    public static final String ID_VERSION_1 = "ComponentGeoCoding:1";
+    public static final String ID_VERSION_1 = "ComponentGC:1";
 
     @Override
     public String getID() {

@@ -66,30 +66,27 @@ public class GeoCodingPersistenceHelper {
         return coordRefSysCont;
     }
 
-    public static Datum createDatum(Container datumRoot) {
-        final Container crsCont = datumRoot.getContainer(NAME_COORDINATE_REF_SYS);
-        if (crsCont != null) {
-            final Container hcsCont = crsCont.getContainer(NAME_HORIZONTAL_CS);
-            if (hcsCont != null) {
-                final Container gcsCont = hcsCont.getContainer(NAME_GEOGRAPHIC_CS);
-                if (gcsCont != null) {
-                    final Container horizontalDatumCont = gcsCont.getContainer(NAME_HORIZONTAL_DATUM);
-                    if (horizontalDatumCont != null) {
-                        final String datumName = horizontalDatumCont.getProperty(NAME_HORIZONTAL_DATUM_NAME).getValueString();
-                        final Container ellipsoidCont = horizontalDatumCont.getContainer(NAME_ELLIPSOID);
-                        if (ellipsoidCont != null) {
-                            final String ellipsoidName = ellipsoidCont.getProperty(NAME_ELLIPSOID_NAME).getValueString();
-                            final Container ellipsoidParamCont = ellipsoidCont.getContainer(NAME_ELLIPSOID_PARAMETERS);
-                            if (ellipsoidParamCont != null) {
-                                final Container majorAxisCont = ellipsoidParamCont.getContainer(NAME_ELLIPSOID_MAJ_AXIS);
-                                final Container minorAxisCont = ellipsoidParamCont.getContainer(NAME_ELLIPSOID_MIN_AXIS);
-                                if (majorAxisCont != null && minorAxisCont != null) {
-                                    final double majorAxis = majorAxisCont.getProperty("value").getValueDouble();
-                                    final double minorAxis = minorAxisCont.getProperty("value").getValueDouble();
+    public static Datum createDatum(Container crsCont) {
+        final Container hcsCont = crsCont.getContainer(NAME_HORIZONTAL_CS);
+        if (hcsCont != null) {
+            final Container gcsCont = hcsCont.getContainer(NAME_GEOGRAPHIC_CS);
+            if (gcsCont != null) {
+                final Container horizontalDatumCont = gcsCont.getContainer(NAME_HORIZONTAL_DATUM);
+                if (horizontalDatumCont != null) {
+                    final String datumName = horizontalDatumCont.getProperty(NAME_HORIZONTAL_DATUM_NAME).getValueString();
+                    final Container ellipsoidCont = horizontalDatumCont.getContainer(NAME_ELLIPSOID);
+                    if (ellipsoidCont != null) {
+                        final String ellipsoidName = ellipsoidCont.getProperty(NAME_ELLIPSOID_NAME).getValueString();
+                        final Container ellipsoidParamCont = ellipsoidCont.getContainer(NAME_ELLIPSOID_PARAMETERS);
+                        if (ellipsoidParamCont != null) {
+                            final Container majorAxisCont = ellipsoidParamCont.getContainer(NAME_ELLIPSOID_MAJ_AXIS);
+                            final Container minorAxisCont = ellipsoidParamCont.getContainer(NAME_ELLIPSOID_MIN_AXIS);
+                            if (majorAxisCont != null && minorAxisCont != null) {
+                                final double majorAxis = majorAxisCont.getProperty("value").getValueDouble();
+                                final double minorAxis = minorAxisCont.getProperty("value").getValueDouble();
 
-                                    final Ellipsoid ellipsoid = new Ellipsoid(ellipsoidName, minorAxis, majorAxis);
-                                    return new Datum(datumName, ellipsoid, 0, 0, 0);
-                                }
+                                final Ellipsoid ellipsoid = new Ellipsoid(ellipsoidName, minorAxis, majorAxis);
+                                return new Datum(datumName, ellipsoid, 0, 0, 0);
                             }
                         }
                     }
