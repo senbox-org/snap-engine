@@ -33,7 +33,7 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
     // Never change this constant! Instead, create a new one with the
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
     // And so on ...
-    public static final String ID_VERSION_1 = "TPGC:1";
+    public static final String ID_VERSION_1 = "TiePointGC:1";
 
     private static final String NAME_TIE_POINT_GEO_CODING = "TiePointGeoCoding";
     private static final String NAME_GEOPOSITION = "Geoposition";
@@ -66,7 +66,8 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
     public TiePointGeoCoding decode(Item item, Product product) {
         final Container root = item.asContainer();
 
-        final Datum datum = createDatum(root.getContainer(GeoCodingPersistenceHelper.NAME_COORDINATE_REF_SYS));
+        final Container CRS = root.getContainer(GeoCodingPersistenceHelper.NAME_COORDINATE_REF_SYS);
+        final Datum datum = createDatum(CRS);
 
         final Container geoPosContainer = root.getContainer(NAME_GEOPOSITION);
         final Container geoPointsContainer = geoPosContainer.getContainer(NAME_GEOPOSITION_POINTS);
