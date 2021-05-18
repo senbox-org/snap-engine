@@ -33,7 +33,6 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.stream.IntStream;
 
@@ -258,7 +257,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     @Override
     @Deprecated
     public Datum getDatum() {
-        throw new NotImplementedException();
+        throw new IllegalStateException("Method not implemented!");
     }
 
     @Override
