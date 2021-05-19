@@ -49,7 +49,7 @@ import static com.bc.ceres.swing.TableLayout.cell;
 //                          - Added tooltips: NOTE: actual tooltips values will be added in the future.
 //                            NOTE: this does not contain section breaks which may be added in the future for a future
 //                                  revision of map gridlines and other tools.
-// MAR2020 - Knowles - Added setEnabled so that some properties can be initially disabled
+// MAR2021 - Knowles - Added setEnabled so that some properties can be initially disabled
 
 
 public class PropertyPane {

@@ -17,7 +17,6 @@ import java.awt.geom.AffineTransform;
 /**
  * @author Daniel Knowles
  */
-//MAY2020 - Daniel Knowles - Major revision to color bar and color bar layer tools
 
 
 
@@ -31,14 +30,11 @@ public class ColorBarLayerType extends LayerType {
     public static final String OPTION_HORIZONTAL = "Horizontal";
     public static final String OPTION_VERTICAL = "Vertical";
 
-
     public static final String FONT_NAME_SANSERIF = "SanSerif";
     public static final String FONT_NAME_SERIF = "Serif";
     public static final String FONT_NAME_COURIER = "Courier";
     public static final String FONT_NAME_MONOSPACED = "Monospaced";
     public static final Object FONT_NAME_VALUE_SET[] = {FONT_NAME_SANSERIF, FONT_NAME_SERIF, FONT_NAME_COURIER, FONT_NAME_MONOSPACED};
-
-
 
     public static final String DISTRIB_EVEN_STR = "Generated Values";
     public static final String DISTRIB_EXACT_STR = "Palette Values";

@@ -55,11 +55,10 @@ import java.util.Map;
  * A context used to bind Swing components to properties in a value container.
  *
  * @author Norman Fomferra
- * @author Daniel Knowles
  * @version $Revision$ $Date$
  * @since Ceres 0.6
  */
-// MAR2020 - Knowles - Added setEnabled so that some properties can be initially disabled
+// MAR2020 - Daniel Knowles - Added setEnabled so that some properties can be initially enabled/disabled
 
 public class BindingContext {
 

@@ -29,20 +29,17 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
-// @todo 2 nf/** - if orientation is vertical, sample values should increase from bottom to top
-// @todo 1 nf/** - make PALETTE_HEIGHT a fixed value, fill space into gaps instead
-// @todo 2 nf/** - draw header text vertically for vertical orientations
-// @todo 3 nf/** - also draw legend into product scene view
-//                 make "color legend properties" dialog a preferences page
 
+/**
+ * The <code>ImageLegend</code> class is used to generate an image legend from a <code>{@link
+ * ImageInfo}</code> instance.
+ *
+ * @author Norman Fomferra
+ * @author Daniel Knowles
+ * @version $Revision$ $Date$
+ */
+// MAY2021 - Daniel Knowles - Major revisions to Color Bar
 
-///**
-// * The <code>ImageLegend</code> class is used to generate an image legend from a <code>{@link
-// * ImageInfo}</code> instance.
-// *
-// * @author Norman Fomferra
-// * @version $Revision$ $Date$
-// */
 public class ImageLegend {
 
     public static final String PROPERTY_NAME_COLORBAR_TITLE_OVERRIDE = "palettes.colorbar.Title.Override";
@@ -52,10 +49,8 @@ public class ImageLegend {
     public static final String PROPERTY_NAME_COLORBAR_ALLOW_RESET = "palettes.colorbar.Allow.Reset";
     public static final boolean DEFAULT_COLORBAR_ALLOW_RESET = false;
 
-
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
-
 
     public static final int NULL_INT = -999;
 
@@ -63,20 +58,16 @@ public class ImageLegend {
     public static final String DISTRIB_EXACT_STR = ColorBarLayerType.DISTRIB_EXACT_STR;
     public static final String DISTRIB_MANUAL_STR = ColorBarLayerType.DISTRIB_MANUAL_STR;
 
-
     public static final int DEFAULT_COLOR_BAR_LENGTH = 1200;
     public static final int DEFAULT_PREVIEW_LENGTH_PIXELS = 750;
-
 
     public static final double HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
 
-
     public static final double WEIGHT_TOLERANCE = 0.0001;  // machine error can make calculated weight slightly outside of range 0-1
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
     public static final double INVALID_WEIGHT = -1.0;
-
 
     private double titleToUnitsVerticalGap;
     private double titleToUnitsHorizontalGap;
@@ -104,7 +95,6 @@ public class ImageLegend {
 
 
     private String titleVerticalAnchor;
-
     private boolean reversePalette = true;
 
     private Color tickmarkColor;
@@ -112,11 +102,9 @@ public class ImageLegend {
     private int tickmarkWidth = NULL_INT;
     private boolean tickmarkShow;
 
-
     private int borderWidth = 5;
     private Color borderColor = Color.RED;
     private boolean borderShow = true;
-
 
     private Color backdropColor;
     private boolean transparencyEnabled;
@@ -127,10 +115,8 @@ public class ImageLegend {
     private int backdropBorderWidth;
     private boolean backdropBorderShow;
 
-
     private String labelsFontName;
     private int labelsFontType;
-
 
     private String titleFontName;
     private int titleFontType;
@@ -157,11 +143,9 @@ public class ImageLegend {
 
     private String titleOverRide = null;
 
-
     private int borderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP9
     private int titleGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
-
 
     // Dependent, internal attributes
     private Rectangle paletteRect;
@@ -193,7 +177,6 @@ public class ImageLegend {
         setLabelsFontSize((Integer) 35);
         setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
 
-
         backdropTransparency = 1.0f;
         antialiasing = true;
         setDecimalPlaces(2);
@@ -201,16 +184,12 @@ public class ImageLegend {
 
         setDecimalPlacesForce(false);
         setCustomLabelValues("");
-
-
     }
 
 
     public ImageLegend getCopyOfImageLegend() {
 
-
         ImageLegend imageLegendCopy = new ImageLegend(raster.getImageInfo(), raster);
-
 
         imageLegendCopy.setOrientation(getOrientation());
         imageLegendCopy.setReversePalette(isReversePalette());
@@ -229,7 +208,6 @@ public class ImageLegend {
         imageLegendCopy.setUnitsFontName(getUnitsFontName());
         imageLegendCopy.setUnitsFontType(getUnitsFontType());
 
-
         imageLegendCopy.setTickMarkCount(getTickMarkCount());
         imageLegendCopy.setDistributionType(getDistributionType());
         imageLegendCopy.setCustomLabelValues(getCustomLabelValues());
@@ -237,14 +215,12 @@ public class ImageLegend {
         imageLegendCopy.setDecimalPlaces(getDecimalPlaces());
         imageLegendCopy.setDecimalPlacesForce(isDecimalPlacesForce());
 
-
         imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
         imageLegendCopy.setColorBarLength(getColorBarLength());
         imageLegendCopy.setColorBarThickness(getColorBarThickness());
 
         imageLegendCopy.setLayerScaling(getLayerScaling());
         //            imageLegend.setBackgroundTransparencyEnabled(true);
-
 
         imageLegendCopy.setAntialiasing((Boolean) true);
 
@@ -270,7 +246,6 @@ public class ImageLegend {
         imageLegendCopy.setBackdropBorderColor(getBackdropBorderColor());
         imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
         imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
-
 
         return imageLegendCopy;
     }
@@ -504,7 +479,7 @@ public class ImageLegend {
     }
 
 
-    // todo This block may contain useful info for later implementing a scheme
+    // todo This block from SeaDAS 7 may contain useful info for later implementing a color bar scheme
 //    public void initDefaults(PropertyMap configuration) {
 //
 //
@@ -565,6 +540,7 @@ public class ImageLegend {
 
     public String getTitleText() {
         return (titleText == null) ? "null-test" : titleText;
+        // todo possible Color Bar Scheme could go here in the future
 //        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
 //            return titleOverRide;
 //        } else {
@@ -748,13 +724,12 @@ public class ImageLegend {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         }
-//        if (font != null) {
-//            g2d.setFont(font);
-//        }
+
         draw(g2d);
         return bi;
     }
 
+    // todo Color Bar Scheme can possibly be added in the future
 //    private File getColorPalettesAuxdataDir() {
 //        return new File(SystemUtils.getApplicationDataDir(), "beam-ui/auxdata/color-palettes");
 //    }
@@ -767,6 +742,8 @@ public class ImageLegend {
         double value, weight;
         double roundedValue, adjustedWeight;
         colorBarInfos.clear();
+
+        // todo Color Bar Scheme can possibly be added in the future
 //
 //        String schemeName = imageInfo.getColorPaletteSourcesInfo().getSchemeName();
 //        boolean isDefault = false;
@@ -952,15 +929,11 @@ public class ImageLegend {
 
             requiredWidth = getBorderGap() + requiredWidth + getBorderGap();
 
-            // todo isDiscrete goes here
 
             if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
                 discreteBooster = labelsRequiredDimension.getWidth() / (n - 1);
                 requiredWidth += discreteBooster;
             }
-
-            //todo Danny changed this to make legend size stable
-//            requiredWidth = getColorBarLength();
 
 
             int requiredHeaderHeight = (int) Math.ceil(headerRequiredDimension.getHeight());
@@ -1024,8 +997,6 @@ public class ImageLegend {
                         headerRequiredDimension.getHeight()
                         + getBorderGap();
 
-
-                //todo Danny changed this to make legend size stable
 
                 if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
                     discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
@@ -1102,11 +1073,6 @@ public class ImageLegend {
 
 
             }
-
-
-//            int paletteGap = 0;
-//            palettePosStart = paletteRect.y + paletteGap;
-//            palettePosEnd = paletteRect.y + paletteRect.height - paletteGap;
 
             palettePosStart = paletteRect.y + paletteRect.height;
             palettePosEnd = paletteRect.y + (int) discreteBooster;

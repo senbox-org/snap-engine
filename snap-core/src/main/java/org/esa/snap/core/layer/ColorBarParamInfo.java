@@ -5,6 +5,10 @@ import org.esa.snap.core.datamodel.ImageLegend;
 
 import java.awt.*;
 
+/**
+ * @author Daniel Knowles
+ */
+
 public class ColorBarParamInfo {
 
     public static final String HORIZONTAL_STR = "Horizontal";
