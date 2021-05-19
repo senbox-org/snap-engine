@@ -61,7 +61,12 @@ public class ZipUtils {
         return inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
     }
 
+    @Deprecated
     public static boolean findInZip(final File file, final String prefix, final String suffix) {
+        return findInZip(file, prefix, suffix, "") != null;
+    }
+
+    public static ZipEntry findInZip(final File file, final String prefix, final String suffix, final String contains) {
         try {
             final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
 
@@ -69,12 +74,15 @@ public class ZipUtils {
                     .filter(ze -> !ze.isDirectory())
                     .filter(ze -> ze.getName().toLowerCase().endsWith(suffix.toLowerCase()))
                     .filter(ze -> ze.getName().toLowerCase().startsWith(prefix.toLowerCase()))
+                    .filter(ze -> ze.getName().toLowerCase().contains(contains.toLowerCase()))
                     .findFirst();
-            return result.isPresent();
+            if(result.isPresent()) {
+                return (ZipEntry)result.get();
+            }
         } catch (Exception e) {
             SystemUtils.LOG.warning("unable to read zip file " + file + ": " + e.getMessage());
         }
-        return false;
+        return null;
     }
 
     public static String getRootFolder(final File file, final String headerFileName) throws IOException {
@@ -177,11 +185,9 @@ public class ZipUtils {
 
             final byte[] readBuffer = new byte[2048];
             int amountRead;
-            int written = 0;
 
             while ((amountRead = inputStream.read(readBuffer)) > 0) {
                 zipStream.write(readBuffer, 0, amountRead);
-                written += amountRead;
             }
         } catch (Exception e) {
             SystemUtils.LOG.severe("Unable to zip " + file);
