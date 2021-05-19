@@ -242,18 +242,11 @@ public class ImageLegend {
         imageLegendCopy.setColorBarLength(getColorBarLength());
         imageLegendCopy.setColorBarThickness(getColorBarThickness());
 
-
-        // todo start
-
-        // todo this applies only to layers and not image export
         imageLegendCopy.setLayerScaling(getLayerScaling());
         //            imageLegend.setBackgroundTransparencyEnabled(true);
 
 
         imageLegendCopy.setAntialiasing((Boolean) true);
-
-        // todo end
-
 
         imageLegendCopy.setLabelsShow(isLabelsShow());
         imageLegendCopy.setLabelsFontName(getLabelsFontName());
@@ -306,8 +299,13 @@ public class ImageLegend {
         setTickMarkCount(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT));
 
-        setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
-                ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
+        if (imageInfo.getColorPaletteDef().isDiscrete()) {
+            setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                    ColorBarLayerType.DISTRIB_EXACT_STR));
+        } else {
+            setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                    ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
+        }
 
         setCustomLabelValues(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT));
