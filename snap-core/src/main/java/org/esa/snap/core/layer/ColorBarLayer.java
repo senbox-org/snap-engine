@@ -55,7 +55,6 @@ public class ColorBarLayer extends Layer {
     private boolean discrete;
 
 
-
     public ColorBarLayer(RasterDataNode raster) {
         this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
     }
@@ -71,7 +70,6 @@ public class ColorBarLayer extends Layer {
         setTransparency(0.0);
 
         discrete = raster.getImageInfo().getColorPaletteDef().isDiscrete();
-
 
 
     }
@@ -92,18 +90,16 @@ public class ColorBarLayer extends Layer {
 
     @Override
     public void renderLayer(Rendering rendering) {
-        System.out.println("Rendering Layer");
+//        System.out.println("Rendering Layer");
 
-        getUserValues();
+        if (allowImageLegendReset == true) {
+            allowImageLegendReset = false;
 
-
-
-        if (imageLegend == null) {
-            System.out.println("imageLegend == null  so creating new image");
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
             String title = (ColorBarLayerType.NULL_SPECIAL.equals(getTitle())) ? raster.getName() : getTitle();
+
 
             String unitsText = "";
             if (ColorBarLayerType.NULL_SPECIAL.equals(getUnits())) {
@@ -117,8 +113,6 @@ public class ColorBarLayer extends Layer {
 
 
             imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
-
-
 
             imageLegend.setShowTitle(isShowTitle());
             imageLegend.setTitleText(title);
@@ -134,34 +128,27 @@ public class ColorBarLayer extends Layer {
             imageLegend.setUnitsFontName(getUnitsFontName());
             imageLegend.setUnitsFontType(getUnitsFontType());
 
-
             imageLegend.setTickMarkCount(getLabelValuesCount());
             imageLegend.setDistributionType(getLabelValuesMode());
             imageLegend.setCustomLabelValues(getLabelValuesActual());
 
-
             imageLegend.setOrientation(getOrientation());
             imageLegend.setReversePalette(isReversePalette());
-
-
 
             imageLegend.setScalingFactor(getLabelValuesScalingFactor());
             imageLegend.setDecimalPlaces(getDecimalPlaces());
             imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
-
 
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength(getColorBarLength());
             imageLegend.setColorBarThickness(getColorBarWidth());
             imageLegend.setLayerScaling(getLayerScaling());
 
-
             imageLegend.setLabelsShow(isLabelsShow());
             imageLegend.setLabelsFontName(getLabelsFontName());
             imageLegend.setLabelsFontType(getLabelsFontType());
             imageLegend.setLabelsFontSize(getLablesFontSize());
             imageLegend.setLabelsColor(getLabelsColor());
-
 
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
@@ -180,42 +167,12 @@ public class ColorBarLayer extends Layer {
             imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
             imageLegend.setBackdropBorderShow(isBackdropBorderShow());
 
-
-
-
-
             imageLegend.setTransparencyEnabled(true);
 
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
 
-
-            bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
-
-
-            // Update the properties with some calculated/looked-up values
-
-            allowImageLegendReset = false;
-
-            if (!discrete) {
-                setLabelValuesActual(imageLegend.getCustomLabelValues());
-            }
-
-            setTitle(imageLegend.getTitleText());
-
-            setUnits(unitsText);
-
-            allowImageLegendReset = true;
-
-        }
-
-
-        if (imageLegend != null && bufferedImage != null) {
-
-
-            int imageHeight = raster.getRasterHeight();
-            int imageWidth = raster.getRasterWidth();
-
+            
             if (applySizeScaling()) {
                 bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
             } else {
@@ -223,38 +180,49 @@ public class ColorBarLayer extends Layer {
             }
 
 
+            // Update the properties with some calculated/looked-up values
 
-            final Graphics2D g2d = rendering.getGraphics();
-            // added this to improve text
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            setLabelValuesActual(imageLegend.getCustomLabelValues());
 
-            final Viewport vp = rendering.getViewport();
-            final AffineTransform transformSave = g2d.getTransform();
-            try {
-                final AffineTransform transform = new AffineTransform();
-                transform.concatenate(transformSave);
-                transform.concatenate(vp.getModelToViewTransform());
-  //              transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
+            setTitle(imageLegend.getTitleText());
+
+            setUnits(unitsText);
+
+
+            if (imageLegend != null && bufferedImage != null) {
+
+
+                final Graphics2D g2d = rendering.getGraphics();
+                // added this to improve text
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                final Viewport vp = rendering.getViewport();
+                final AffineTransform transformSave = g2d.getTransform();
+                try {
+                    final AffineTransform transform = new AffineTransform();
+                    transform.concatenate(transformSave);
+                    transform.concatenate(vp.getModelToViewTransform());
+                    //              transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
 //
 //                transform.concatenate(createTransform(raster, bufferedImage));
 //                g2d.drawRenderedImage(bufferedImage, transform);
 
 
-                g2d.setTransform(transform);
-                drawImage(g2d, raster, bufferedImage);
+                    g2d.setTransform(transform);
+                    drawImage(g2d, raster, bufferedImage);
 
-            } finally {
-                g2d.setTransform(transformSave);
+                } finally {
+                    g2d.setTransform(transformSave);
+                }
+
             }
+
+            allowImageLegendReset = true;
         }
     }
-
-
-
-
 
 
     private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {
@@ -269,7 +237,7 @@ public class ColorBarLayer extends Layer {
         AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
         transform.concatenate(createTransform(raster, image));
         return transform;
-     //   return createTransform(raster, image);
+        //   return createTransform(raster, image);
     }
 
     private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
@@ -318,11 +286,13 @@ public class ColorBarLayer extends Layer {
                         shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_LEFT_CENTER:
-                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;;
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;
+                        ;
                         shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_RIGHT_CENTER:
-                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;;
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;
+                        ;
                         shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     default:
@@ -347,19 +317,19 @@ public class ColorBarLayer extends Layer {
                         shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
-                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -rasterHeight - colorBarImageHeight;
                         shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_CENTER:
-                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -rasterHeight - colorBarImageHeight;
                         shiftAdjust = (rasterWidth - colorBarImageWidth) / 2;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_RIGHT:
-                        offsetAdjust = - rasterHeight - colorBarImageHeight;
+                        offsetAdjust = -rasterHeight - colorBarImageHeight;
                         shiftAdjust = rasterWidth - colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_LEFT_CENTER:
-                        offsetAdjust = - (rasterHeight + colorBarImageHeight) / 2 ;
+                        offsetAdjust = -(rasterHeight + colorBarImageHeight) / 2;
                         shiftAdjust = -colorBarImageWidth;
                         break;
                     case ColorBarLayerType.LOCATION_RIGHT_CENTER:
@@ -402,11 +372,11 @@ public class ColorBarLayer extends Layer {
                         shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_CENTER:
-                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        offsetAdjust = -rasterWidth / 2.0 - colorBarImageWidth / 2.0;
                         shiftAdjust = 0;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_CENTER:
-                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        offsetAdjust = -rasterWidth / 2.0 - colorBarImageWidth / 2.0;
                         shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     default:
@@ -440,11 +410,11 @@ public class ColorBarLayer extends Layer {
                         shiftAdjust = rasterHeight - colorBarImageHeight;
                         break;
                     case ColorBarLayerType.LOCATION_UPPER_CENTER:
-                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        offsetAdjust = -rasterWidth / 2.0 - colorBarImageWidth / 2.0;
                         shiftAdjust = -colorBarImageHeight;
                         break;
                     case ColorBarLayerType.LOCATION_LOWER_CENTER:
-                        offsetAdjust = -rasterWidth / 2.0 -colorBarImageWidth/2.0;
+                        offsetAdjust = -rasterWidth / 2.0 - colorBarImageWidth / 2.0;
                         shiftAdjust = rasterHeight;
                         break;
                     default:
@@ -467,18 +437,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
-    private void getUserValues() {
-
-
-    }
-
-
-
-
-
     private AlphaComposite getAlphaComposite(double itemTransparancy) {
         double combinedAlpha = (1.0 - getTransparency()) * (1.0 - itemTransparancy);
         return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) combinedAlpha);
@@ -498,15 +456,6 @@ public class ColorBarLayer extends Layer {
     protected void fireLayerPropertyChanged(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();
 
-//        if (
-//                propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
-//                        propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
-//                        propertyName.equals(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
-//                        propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME)
-//                ) {
-//            imageLegend = null;
-//
-//        }
 
         if (allowImageLegendReset) {
             imageLegend = null;
@@ -521,13 +470,10 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
     private boolean isLabelsShow() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
                 ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT);
     }
-
 
 
     private Color getLabelsColor() {
@@ -547,8 +493,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
     private int getLabelValuesCount() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT);
@@ -562,10 +506,7 @@ public class ColorBarLayer extends Layer {
 
     private void setLabelValuesActual(String value) {
         try {
-            String valueCurrent = getTitle();
-            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) value);
-            }
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) value);
         } catch (ValidationException v) {
         }
     }
@@ -586,7 +527,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT);
     }
-
 
 
     private int getLablesFontSize() {
@@ -630,7 +570,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private boolean isReversePalette() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT);
@@ -659,7 +598,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
     }
-
 
 
     // Border Section
@@ -698,9 +636,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
     private boolean isBackdropBorderShow() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_DEFAULT);
@@ -715,11 +650,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT);
     }
-
-
-
-
-
 
 
     private String getLabelsFontName() {
@@ -755,9 +685,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
     private boolean isColorBarLocationInside() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_INSIDE_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_INSIDE_DEFAULT);
@@ -776,9 +703,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
     private Double getLocationOffset() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_OFFSET_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_OFFSET_DEFAULT);
@@ -788,9 +712,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_SHIFT_DEFAULT);
     }
-
-
-
 
 
     private boolean isShowTitle() {
@@ -845,15 +766,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
-
-
-
-
-
-
     private boolean isShowTitleUnits() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_SHOW_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT);
@@ -877,13 +789,10 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private Color getUnitsColor() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT);
     }
-
-
 
 
     private Boolean isTitleUnitsFontItalic() {
@@ -906,16 +815,10 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-
-
-
     private String getUnits() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
     }
-
 
 
     private boolean applySizeScaling() {
@@ -940,15 +843,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT);
     }
-
-
-
-
-
-
-
-
-
 
 
     private class ProductNodeHandler extends ProductNodeListenerAdapter {
