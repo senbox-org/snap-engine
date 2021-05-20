@@ -780,13 +780,23 @@ public class ImageLegend {
                 } else {
                     weight = getLinearWeightFromLinearValue(value, min, max);
                 }
+
                 weight = getValidWeight(weight);
                 if (weight != INVALID_WEIGHT) {
                     if (getScalingFactor() != 0) {
                         value = value * getScalingFactor();
                         ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
-                        colorBarInfos.add(colorBarInfo);
-                        manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+
+                        // only add if formatted value is in valid range of bar
+                        // todo add tolerance
+                        // todo also add scaling which isn't being done in this mode
+                        double formattedValue = Double.valueOf(colorBarInfo.getFormattedValue());
+
+                        if (formattedValue >= min && formattedValue <= max) {
+                            colorBarInfos.add(colorBarInfo);
+                            manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+                        }
+
                     }
                 }
             }
@@ -2059,6 +2069,8 @@ public class ImageLegend {
 //                        adjustedWeight = getLinearWeightFromLinearValue(roundedValue, min, max);
                 }
 
+                System.out.println("weight="+weight);
+                System.out.println("value="+value);
 
                 // todo try to make some kind of rounding thing work
                 roundedValue = value;
@@ -2071,6 +2083,8 @@ public class ImageLegend {
                         ColorBarInfo colorBarInfo = new ColorBarInfo(roundedValue, adjustedWeight, getDecimalPlaces(), isDecimalPlacesForce());
 
                         double newValue = Double.valueOf(colorBarInfo.getFormattedValue()) / getScalingFactor();
+
+
                         double newWeight;
                         if (imageInfo.isLogScaled()) {
                             newWeight = getLinearWeightFromLogValue(newValue, min, max);
@@ -2082,8 +2096,24 @@ public class ImageLegend {
                         colorBarInfo.setLocationWeight(newWeight);
 
 
-                        colorBarInfos.add(colorBarInfo);
-                        manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+
+//                        System.out.println("newWeight=" +newWeight );
+//                        System.out.println("newValue=" +newValue  );
+//                        System.out.println("min=" +min );
+//                        System.out.println("max=" + max );
+//                        System.out.println("" );
+
+
+                        // allow close tick values to appear on color bar which would otherwise not appear due to decimal formatting.
+                        // If the color palette is defined by statistics of the band then this tolerance can be useful
+                        // Otherwise if the palette is defined with sensible min/max number then the tolerance shouldn't be needed
+                        double tolerance = .01;
+
+                        if (newWeight > 0 - tolerance && newWeight < 1 + tolerance) {
+                            colorBarInfos.add(colorBarInfo);
+                            manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+                        }
+
                     }
                 }
             }
