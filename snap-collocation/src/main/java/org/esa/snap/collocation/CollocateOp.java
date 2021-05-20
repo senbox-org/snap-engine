@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -415,6 +416,17 @@ public class CollocateOp extends Operator {
         }
 
         setAutoGrouping();
+
+        // Add heading angles
+        final MetadataElement slavesHeadingAnglesElem = new MetadataElement("Slaves_Heading_Angles");
+        final MetadataElement abstractedMetadataTarget = targetProduct.getMetadataRoot().getElement("Abstracted_Metadata");
+        abstractedMetadataTarget.addElement(slavesHeadingAnglesElem);
+        for (int i = 0; i < slaveProducts.length; i++) {
+            final Product slaveProduct = slaveProducts[i];
+            final MetadataElement abstractedMetadataSource = slaveProduct.getMetadataRoot().getElement("Abstracted_Metadata");
+            final double centreHeading = abstractedMetadataSource.getAttributeDouble("centre_heading");
+            slavesHeadingAnglesElem.setAttributeDouble(String.format("centre_heading_%d", i), centreHeading);
+        }
     }
 
     private String getTargetBandName(RasterDataNode rasterDataNode, int productIndex) {
