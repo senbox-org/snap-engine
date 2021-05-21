@@ -28,7 +28,7 @@ public interface RemoteProductsRepositoryProvider {
 
     public List<RepositoryQueryParameter> getMissionParameters(String mission);
 
-    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
+    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, int pageSize, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                        throws Exception;
 

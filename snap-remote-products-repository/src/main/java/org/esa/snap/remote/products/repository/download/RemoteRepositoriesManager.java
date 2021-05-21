@@ -5,7 +5,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.HTTPServerException;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
+import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.geometry.GeometryUtils;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
@@ -40,7 +49,17 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -337,7 +356,7 @@ public class RemoteRepositoriesManager {
         return parameters;
     }
 
-    public static List<RepositoryProduct> downloadProductList(String dataSourceName, String mission, Credentials credentials, Map<String, Object> parameterValues,
+    public static List<RepositoryProduct> downloadProductList(String dataSourceName, String mission, int pageSize, Credentials credentials, Map<String, Object> parameterValues,
                                                               ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                               throws Exception {
 
@@ -378,7 +397,6 @@ public class RemoteRepositoriesManager {
         } else if (totalProductCount > 0) {
             downloaderListener.notifyProductCount(totalProductCount);
 
-            int pageSize = 100;
             long totalPageNumber = totalProductCount / pageSize;
             if (totalProductCount % pageSize != 0) {
                 totalPageNumber++;

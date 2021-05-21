@@ -66,6 +66,15 @@ public class RepositoriesCredentialsController {
     }
 
     /**
+     * Gets whether downloading all pages of search results is enabled
+     *
+     * @return {@code true} if downloading all pages of search results is enabled
+     */
+    public boolean downloadsAllPages() {
+        return this.repositoriesCredentialsConfigurations.downloadsAllPages();
+    }
+
+    /**
      * Gets the number of products on search results page
      *
      * @return the number of products on search results page

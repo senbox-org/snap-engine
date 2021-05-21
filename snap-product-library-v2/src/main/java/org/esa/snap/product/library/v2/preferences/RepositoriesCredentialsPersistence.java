@@ -27,6 +27,8 @@ public final class RepositoriesCredentialsPersistence {
 
     public static final boolean UNCOMPRESSED_DOWNLOADED_PRODUCTS = false;
 
+    public static final boolean DOWNLOAD_ALL_PAGES = true;
+
     /**
      * The pattern for remote repository.
      */
@@ -43,6 +45,10 @@ public final class RepositoriesCredentialsPersistence {
      * The preference key for remote repositories auto-uncompress setting.
      */
     private static final String PREFERENCE_KEY_AUTO_UNCOMPRESS = "auto_uncompress";
+    /**
+     * The preference key for remote repositories download all pages setting.
+     */
+    private static final String PREFERENCE_KEY_DOWNLOAD_ALL_PAGES = "download_all_pages";
     /**
      * The preference key for remote repositories records on page setting.
      */
@@ -142,6 +148,14 @@ public final class RepositoriesCredentialsPersistence {
         properties.setProperty(PREFERENCE_KEY_AUTO_UNCOMPRESS, autoUncompressVal);
     }
 
+    private static void saveDownloadAllPages(Properties properties, boolean downloadAllPages) {
+        String downloadAllPagesVal = "false";
+        if (downloadAllPages) {
+            downloadAllPagesVal = "true";
+        }
+        properties.setProperty(PREFERENCE_KEY_DOWNLOAD_ALL_PAGES, downloadAllPagesVal);
+    }
+
     private static void saveRecordsOnPage(Properties properties, int recordsOnPageToSave) {
         String recordsOnPageVal = "" + recordsOnPageToSave;
         properties.setProperty(PREFERENCE_KEY_RECORDS_ON_PAGE, recordsOnPageVal);
@@ -154,6 +168,7 @@ public final class RepositoriesCredentialsPersistence {
         Properties properties = new Properties();
         saveCredentials(properties, repositoriesCredentialsConfigurations.getRepositoriesCredentials());
         saveAutoUncompress(properties, repositoriesCredentialsConfigurations.isAutoUncompress());
+        saveDownloadAllPages(properties, repositoriesCredentialsConfigurations.downloadsAllPages());
         saveRecordsOnPage(properties, repositoriesCredentialsConfigurations.getNrRecordsOnPage());
         if (!Files.exists(destFile)) {
             Files.createDirectories(destFile.getParent());
@@ -217,6 +232,17 @@ public final class RepositoriesCredentialsPersistence {
     }
 
     /**
+     * Reads the Remote Repositories Credentials auto-uncompress setting from SNAP configuration file.
+     */
+    private static boolean loadDownloadAllPages(Properties properties) {
+        String downloadAllPagesVal = properties.getProperty(PREFERENCE_KEY_DOWNLOAD_ALL_PAGES);
+        if (downloadAllPagesVal != null && !downloadAllPagesVal.isEmpty()) {
+            return downloadAllPagesVal.contentEquals("true");
+        }
+        return DOWNLOAD_ALL_PAGES;
+    }
+
+    /**
      * Reads the Remote Repositories Credentials nr repositories on page setting from SNAP configuration file.
      */
     private static int loadRecordsOnPage(Properties properties) {
@@ -232,7 +258,7 @@ public final class RepositoriesCredentialsPersistence {
      */
     static RepositoriesCredentialsConfigurations load(Path destFile) throws IOException {
         if (destFile == null || !Files.exists(destFile)) {
-            return new RepositoriesCredentialsConfigurations(new ArrayList<>(), false, 20);
+            return new RepositoriesCredentialsConfigurations(new ArrayList<>(), UNCOMPRESSED_DOWNLOADED_PRODUCTS, DOWNLOAD_ALL_PAGES, VISIBLE_PRODUCTS_PER_PAGE);
         }
         Properties properties = new Properties();
         try (InputStream inputStream = Files.newInputStream(destFile)) {
@@ -240,8 +266,9 @@ public final class RepositoriesCredentialsPersistence {
         }
         List<RemoteRepositoryCredentials> repositoriesCredentials = loadCredentials(properties);
         boolean autoUncompress = loadAutoUncompress(properties);
+        boolean downloadAllPages = loadDownloadAllPages(properties);
         int recordsOnPage = loadRecordsOnPage(properties);
-        return new RepositoriesCredentialsConfigurations(repositoriesCredentials, autoUncompress, recordsOnPage);
+        return new RepositoriesCredentialsConfigurations(repositoriesCredentials, autoUncompress, downloadAllPages, recordsOnPage);
     }
 
 
@@ -260,15 +287,17 @@ public final class RepositoriesCredentialsPersistence {
         itemsToSave.add(repositoryCredentials2);
 
         boolean autoUncompressToSave = false;
+        boolean downloadAllPagesToSave = true;
         int recordsOnPageToSave = 20;
 
         Path credsFile = Paths.get("D:/Temp/test_pl.properties");
 
-        save(credsFile, new RepositoriesCredentialsConfigurations(itemsToSave, autoUncompressToSave, recordsOnPageToSave));
+        save(credsFile, new RepositoriesCredentialsConfigurations(itemsToSave, autoUncompressToSave, downloadAllPagesToSave, recordsOnPageToSave));
 
         RepositoriesCredentialsConfigurations repositoriesCredentialsConfigurations = load(credsFile);
         List<RemoteRepositoryCredentials> itemsLoaded = repositoriesCredentialsConfigurations.getRepositoriesCredentials();
         boolean autoUncompressLoaded = repositoriesCredentialsConfigurations.isAutoUncompress();
+        boolean downloadAllPagesLoaded = repositoriesCredentialsConfigurations.downloadsAllPages();
         int recordsOnPageLoaded = repositoriesCredentialsConfigurations.getNrRecordsOnPage();
 
         if (itemsToSave != itemsLoaded) {
@@ -276,6 +305,9 @@ public final class RepositoriesCredentialsPersistence {
         }
         if (autoUncompressToSave != autoUncompressLoaded) {
             throw new IllegalStateException("auto uncompress mismatch");
+        }
+        if (downloadAllPagesToSave != downloadAllPagesLoaded) {
+            throw new IllegalStateException("download all pages mismatch");
         }
         if (recordsOnPageToSave != recordsOnPageLoaded) {
             throw new IllegalStateException("records on page mismatch");

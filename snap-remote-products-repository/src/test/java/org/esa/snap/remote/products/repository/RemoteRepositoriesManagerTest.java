@@ -154,7 +154,7 @@ public class RemoteRepositoriesManagerTest {
             assertNotNull(missionParameters);
             assertEquals(true, missionParameters.size() > 0);
 
-            List<RepositoryProduct> remoteProducts = repositoryProvider.downloadProductList(credentials, missions[i], parameterValues, downloaderListener, threadStatus);
+            List<RepositoryProduct> remoteProducts = repositoryProvider.downloadProductList(credentials, missions[i], 100, parameterValues, downloaderListener, threadStatus);
             assertNotNull(remoteProducts);
             //assertEquals(true, remoteProducts.size() > 0);
 
