@@ -263,6 +263,11 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
             ImageReader reader = imageReaders.next();
             if (reader instanceof TIFFImageReader) {
                 TIFFImageReader imageReader = (TIFFImageReader) reader;
+                try {
+                    imageInputStream.reset();
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("could not initialise GeoTIFF image reader.");
+                }
                 imageReader.setInput(imageInputStream);
                 return imageReader;
             }
