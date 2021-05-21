@@ -234,28 +234,39 @@ public class RemoteRepositoriesManager {
             additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
             additionalProperties.put("progress.interval", "1500");
 
-            dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
+            int waitTime = 10000;
+            do {
+                dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
 
-            if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
-                // the product has been downloaded
-                String productPath = product.getLocation();
-                if (productPath == null) {
-                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getRemoteMission().getName()+"' mission.");
-                }
-                URI uri = new URI(productPath);
-                return Paths.get(uri);
-            } else {
-                // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
-                boolean downloadingProductCancelled;
-                synchronized (this.downloadingProducts) {
-                    DataSourceComponent previousDataSource = this.downloadingProducts.remove(key);
-                    downloadingProductCancelled = (previousDataSource == null);
-                }
-                if (downloadingProductCancelled) {
-                    throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
+                if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
+                    // the product has been downloaded
+                    String productPath = product.getLocation();
+                    if (productPath == null) {
+                        throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName + "' remote repository using the '" + repositoryProduct.getRemoteMission().getName() + "' mission.");
+                    }
+                    URI uri = new URI(productPath);
+                    return Paths.get(uri);
                 } else {
-                    throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
+                    if (product.getProductStatus() == ProductStatus.QUEUED) {
+                        progressListener.notifyProductStatus(product.getProductStatus().friendlyName());
+                    }
                 }
+                synchronized (this.downloadingProducts) {
+                    this.downloadingProducts.wait(waitTime);
+                }
+                waitTime += 10000;
+            } while (product.getProductStatus() == ProductStatus.QUEUED && !this.downloadingProducts.isEmpty());
+
+            // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
+            boolean downloadingProductCancelled;
+            synchronized (this.downloadingProducts) {
+                DataSourceComponent previousDataSource = this.downloadingProducts.remove(key);
+                downloadingProductCancelled = (previousDataSource == null);
+            }
+            if (downloadingProductCancelled) {
+                throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
+            } else {
+                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
             }
         } finally {
             if (dataSourceComponent != null) {
