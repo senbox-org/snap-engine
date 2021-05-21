@@ -8,12 +8,14 @@ import java.util.List;
 public class RepositoriesCredentialsConfigurations {
 
     private List<RemoteRepositoryCredentials> repositoriesCredentials;
+    private List<RemoteRepositoryCollectionsCredentials> remoteRepositoryCollectionsCredentials;
     private boolean autoUncompress;
     private boolean downloadAllPages;
     private int nrRecordsOnPage;
 
-    public RepositoriesCredentialsConfigurations(List<RemoteRepositoryCredentials> repositoriesCredentials, boolean autoUncompress, boolean downloadAllPages, int nrRecordsOnPage) {
+    public RepositoriesCredentialsConfigurations(List<RemoteRepositoryCredentials> repositoriesCredentials, List<RemoteRepositoryCollectionsCredentials> remoteRepositoryCollectionsCredentials, boolean autoUncompress, boolean downloadAllPages, int nrRecordsOnPage) {
         this.repositoriesCredentials = repositoriesCredentials;
+        this.remoteRepositoryCollectionsCredentials = remoteRepositoryCollectionsCredentials;
         this.autoUncompress = autoUncompress;
         this.downloadAllPages = downloadAllPages;
         this.nrRecordsOnPage = nrRecordsOnPage;
@@ -21,6 +23,10 @@ public class RepositoriesCredentialsConfigurations {
 
     public List<RemoteRepositoryCredentials> getRepositoriesCredentials() {
         return repositoriesCredentials;
+    }
+
+    public List<RemoteRepositoryCollectionsCredentials> getRemoteRepositoryCollectionsCredentials() {
+        return remoteRepositoryCollectionsCredentials;
     }
 
     public boolean isAutoUncompress() {
