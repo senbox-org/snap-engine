@@ -97,6 +97,16 @@
             <version>${tao.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-datasources-eocat</artifactId>
+            <version>${tao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-datasources-fedeo</artifactId>
+            <version>${tao.version}</version>
+        </dependency>
         <!-- JUnit -->
         <dependency>
             <groupId>junit</groupId>
