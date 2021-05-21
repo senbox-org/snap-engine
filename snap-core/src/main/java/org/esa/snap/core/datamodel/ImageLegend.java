@@ -787,19 +787,21 @@ public class ImageLegend {
                         value = value * getScalingFactor();
                         ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        // only add if formatted value is in valid range of bar
-                        // todo add tolerance
-                        // todo also add scaling which isn't being done in this mode
                         double formattedValue = Double.valueOf(colorBarInfo.getFormattedValue());
 
-                        if (formattedValue >= min && formattedValue <= max) {
+                        if ((formattedValue >= min *getScalingFactor()) && (formattedValue *getScalingFactor()) <= max) {
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+                        } else {
+                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
+                            colorBarInfo.setFormattedValue(newFormattedValue);
+                            colorBarInfos.add(colorBarInfo);
+                            manualPointsArrayList.add(newFormattedValue);
                         }
-
                     }
                 }
             }
+
             if (manualPointsArrayList.size() > 0) {
                 String manualPoints = StringUtils.join(manualPointsArrayList, ", ");
                 setCustomLabelValues(manualPoints);

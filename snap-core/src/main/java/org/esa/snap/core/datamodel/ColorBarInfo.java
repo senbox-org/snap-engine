@@ -50,7 +50,7 @@ public class ColorBarInfo {
     }
 
 
-    private void setFormattedValue(String formattedValue) {
+    public void setFormattedValue(String formattedValue) {
         this.formattedValue = formattedValue;
     }
 
