@@ -30,8 +30,8 @@ import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
 import java.awt.*;
 import java.awt.image.Raster;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -95,7 +95,7 @@ public class GraphProcessor {
      * @return the observers
      */
     public GraphProcessingObserver[] getObservers() {
-        return observerList.toArray(new GraphProcessingObserver[observerList.size()]);
+        return observerList.toArray(new GraphProcessingObserver[0]);
     }
 
     /**
@@ -158,11 +158,6 @@ public class GraphProcessor {
             return area1.compareTo(area2);
         });
 
-        int numPmTicks = graphContext.getGraph().getNodeCount();
-        for (Dimension dimension : dimList) {
-            numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
-        }
-
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
 
@@ -179,6 +174,11 @@ public class GraphProcessor {
             if (!nodeContext.isOutput()) {
                 canComputeTileStack |= nodeContext.canComputeTileStack();
             }
+        }
+
+        int numPmTicks = graphContext.getGraph().getNodeCount();
+        for (Dimension dimension : dimList) {
+            numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
         }
 
         try {
@@ -241,6 +241,7 @@ public class GraphProcessor {
                 } else {
                     for (NodeContext nodeContext : nodeContextList) {
                         Product targetProduct = nodeContext.getTargetProduct();
+                        boolean monitorProgress = true;
                         for (Band band : targetProduct.getBands()) {
                             PlanarImage image = nodeContext.getTargetImage(band);
                             for (int tileY = 0; tileY < numYTiles; tileY++) {
@@ -266,7 +267,13 @@ public class GraphProcessor {
                                                 tileScheduler, listeners, parallelism);
                                     }
                                     fireTileStopped(graphContext, tileRectangle);
-                                    pm.worked(1);
+                                    if (monitorProgress) {
+                                        pm.worked(1);
+                                        // as a consequence of inverting the loop, progressMonitor ticks must only be increased
+                                        // once per product processed. This crude boolean logic ensures that. Nevertheless,
+                                        // this class needs refactoring! tb 2021-05-21
+                                        monitorProgress = false;
+                                    }
                                 }
                             }
                         }
