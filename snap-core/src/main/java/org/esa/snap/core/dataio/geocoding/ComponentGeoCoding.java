@@ -2,17 +2,9 @@ package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.AbstractGeoCoding;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -155,6 +147,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         try {
             geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
         } catch (IOException e) {
+            SystemUtils.LOG.warning("error loading geolocation data: " + e.getMessage());
             return false;
         }
         ForwardCoding forwardCoding = null;
