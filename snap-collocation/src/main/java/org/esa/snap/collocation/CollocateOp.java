@@ -417,15 +417,19 @@ public class CollocateOp extends Operator {
 
         setAutoGrouping();
 
-        // Add heading angles
-        final MetadataElement slavesHeadingAnglesElem = new MetadataElement("Slaves_Heading_Angles");
+        // Add heading angles (if "Abstract_Metadata" element is present)
         final MetadataElement abstractedMetadataTarget = targetProduct.getMetadataRoot().getElement("Abstracted_Metadata");
-        abstractedMetadataTarget.addElement(slavesHeadingAnglesElem);
-        for (int i = 0; i < slaveProducts.length; i++) {
-            final Product slaveProduct = slaveProducts[i];
-            final MetadataElement abstractedMetadataSource = slaveProduct.getMetadataRoot().getElement("Abstracted_Metadata");
-            final double centreHeading = abstractedMetadataSource.getAttributeDouble("centre_heading");
-            slavesHeadingAnglesElem.setAttributeDouble(String.format("centre_heading_%d", i), centreHeading);
+        if (abstractedMetadataTarget != null) {
+            final MetadataElement slavesHeadingAnglesElem = new MetadataElement("Slaves_Heading_Angles");
+            abstractedMetadataTarget.addElement(slavesHeadingAnglesElem);
+            for (int i = 0; i < slaveProducts.length; i++) {
+                final Product slaveProduct = slaveProducts[i];
+                final MetadataElement abstractedMetadataSource = slaveProduct.getMetadataRoot().getElement("Abstracted_Metadata");
+                if (abstractedMetadataSource != null) {
+                    final double centreHeading = abstractedMetadataSource.getAttributeDouble("centre_heading");
+                    slavesHeadingAnglesElem.setAttributeDouble(String.format("centre_heading_%d", i), centreHeading);
+                }
+            }
         }
     }
 
