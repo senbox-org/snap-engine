@@ -26,12 +26,21 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.*;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.TileComputationListener;
+import javax.media.jai.TileRequest;
+import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -153,8 +162,8 @@ public class GraphProcessor {
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
         dimList.sort((d1, d2) -> {
-            Long area1 = (long) (d1.width * d1.height);
-            Long area2 = (long) (d2.width * d2.height);
+            Long area1 = ((long) d1.width) * d1.height;
+            Long area2 = ((long) d2.width) * d2.height;
             return area1.compareTo(area2);
         });
 
