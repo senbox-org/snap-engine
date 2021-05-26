@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
+import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT;
+
 
 /**
  * The <code>ImageLegend</code> class is used to generate an image legend from a <code>{@link
@@ -174,7 +176,7 @@ public class ImageLegend {
         setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
         setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
 
-        setLabelsFontSize((Integer) 35);
+        setLabelsFontSize(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
         setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
 
         backdropTransparency = 1.0f;
@@ -274,13 +276,8 @@ public class ImageLegend {
         setTickMarkCount(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT));
 
-        if (imageInfo.getColorPaletteDef().isDiscrete()) {
-            setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
-                    ColorBarLayerType.DISTRIB_EXACT_STR));
-        } else {
-            setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
-                    ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
-        }
+        setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
 
         setCustomLabelValues(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT));
@@ -411,7 +408,7 @@ public class ImageLegend {
         setLabelsFontType(ColorBarLayer.getFontType(labelsFontItalic, labelsFontBold));
 
         setLabelsFontSize(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT));
+                PROPERTY_LABELS_FONT_SIZE_DEFAULT));
 
         setLabelsColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT));
@@ -764,7 +761,15 @@ public class ImageLegend {
 //        }
 
 
-        if (DISTRIB_EXACT_STR.equals(getDistributionType()) || imageInfo.getColorPaletteDef().isDiscrete()) {
+//        if (DISTRIB_EXACT_STR.equals(getDistributionType()) || imageInfo.getColorPaletteDef().isDiscrete()) {
+
+//        if (DISTRIB_EVEN_STR.equals(getDistributionType()) && imageInfo.getColorPaletteDef().isDiscrete()) {
+//            setDistributionType(DISTRIB_EXACT_STR);
+//        }
+
+        if (DISTRIB_EXACT_STR.equals(getDistributionType()) ||
+                (DISTRIB_EVEN_STR.equals(getDistributionType()) && imageInfo.getColorPaletteDef().isDiscrete())
+        ) {
             final int numPointsInCpdFile = getNumGradationCurvePoints();
             int stepSize = 1;
             //    int stepSize = numPointsInCpdFile / getNumberOfTicks();
@@ -787,19 +792,21 @@ public class ImageLegend {
                         value = value * getScalingFactor();
                         ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        // only add if formatted value is in valid range of bar
-                        // todo add tolerance
-                        // todo also add scaling which isn't being done in this mode
                         double formattedValue = Double.valueOf(colorBarInfo.getFormattedValue());
 
-                        if (formattedValue >= min && formattedValue <= max) {
+                        if ((formattedValue >= min *getScalingFactor()) && (formattedValue *getScalingFactor()) <= max) {
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
+                        } else {
+                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
+                            colorBarInfo.setFormattedValue(newFormattedValue);
+                            colorBarInfos.add(colorBarInfo);
+                            manualPointsArrayList.add(newFormattedValue);
                         }
-
                     }
                 }
             }
+
             if (manualPointsArrayList.size() > 0) {
                 String manualPoints = StringUtils.join(manualPointsArrayList, ", ");
                 setCustomLabelValues(manualPoints);
@@ -926,6 +933,11 @@ public class ImageLegend {
         double firstLabelHeight = getSingleLabelRequiredDimension(g2dTmp, 0).getHeight();
         int labelOverhangHeight = (int) Math.ceil(firstLabelHeight / 2.0);
 
+        int tickOffset = 0;
+
+        if (getTickmarkLength() > 0) {
+            tickOffset = getTickmarkLength();
+        }
 
         if (orientation == HORIZONTAL) {
 
@@ -955,6 +967,7 @@ public class ImageLegend {
                     + getTitleGap()
                     + getColorBarThickness()
                     + getLabelGap()
+                    + tickOffset
                     + requiredLabelsHeight
                     + getBorderGap();
 
@@ -991,7 +1004,7 @@ public class ImageLegend {
                     ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
 
 
-                double colorBarAndLabelsRequiredWidth = getColorBarThickness() + getLabelGap() + labelsRequiredDimension.getWidth();
+                double colorBarAndLabelsRequiredWidth = getColorBarThickness() + getLabelGap() + tickOffset + labelsRequiredDimension.getWidth();
 
                 requiredWidth = Math.max(headerRequiredDimension.getWidth(), colorBarAndLabelsRequiredWidth);
 
@@ -1022,7 +1035,7 @@ public class ImageLegend {
                 requiredWidth = getBorderGap()
                         + getTitleHeight()
                         + getColorBarThickness()
-                        + getTickmarkLength()
+                        + tickOffset
                         + getLabelGap()
                         + getLongestLabelWidth(g2dTmp)
                         + getTitleGap()
@@ -1081,12 +1094,10 @@ public class ImageLegend {
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
-
             }
 
             palettePosStart = paletteRect.y + paletteRect.height;
             palettePosEnd = paletteRect.y + (int) discreteBooster;
-
         }
 
 
@@ -1677,11 +1688,19 @@ public class ImageLegend {
             int labelHeight = fontMetrics.getHeight();
 
             float x0, y0;
+            int tickOffset = 0;
+
+            if (getTickmarkLength() > 0) {
+                tickOffset = getTickmarkLength();
+            }
+
+
+
             if (orientation == HORIZONTAL) {
                 x0 = -0.5f * labelWidth;
-                y0 = getLabelGap() + fontMetrics.getMaxAscent();
+                y0 = getLabelGap() + tickOffset + fontMetrics.getMaxAscent();
             } else {
-                x0 = getLabelGap();
+                x0 = getLabelGap() + tickOffset;
                 y0 = -0.5f * labelHeight + fontMetrics.getMaxAscent();
             }
 
@@ -1870,11 +1889,11 @@ public class ImageLegend {
     private Shape createTickMarkShape() {
         GeneralPath path = new GeneralPath();
         if (orientation == HORIZONTAL) {
-            path.moveTo(0.0F, 0.7F * getTickmarkLength());
+            path.moveTo(0.0F, 1.0F * getTickmarkLength());
             path.lineTo(0.0F, 0.0F);
         } else {
             path.moveTo(0.0F, 0.0F);
-            path.lineTo(0.7F * getTickmarkLength(), 0.0F);
+            path.lineTo(1.0F * getTickmarkLength(), 0.0F);
         }
         path.closePath();
         return path;

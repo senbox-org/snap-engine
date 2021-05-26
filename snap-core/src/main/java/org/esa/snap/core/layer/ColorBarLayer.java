@@ -52,7 +52,6 @@ public class ColorBarLayer extends Layer {
     private double ptsToPixelsMultiplier = NULL_DOUBLE;
 
     private boolean allowImageLegendReset = true;
-    private boolean discrete;
 
 
     public ColorBarLayer(RasterDataNode raster) {
@@ -68,10 +67,6 @@ public class ColorBarLayer extends Layer {
         raster.getProduct().addProductNodeListener(productNodeHandler);
 
         setTransparency(0.0);
-
-        discrete = raster.getImageInfo().getColorPaletteDef().isDiscrete();
-
-
     }
 
 
@@ -483,13 +478,8 @@ public class ColorBarLayer extends Layer {
 
 
     private String getLabelValuesMode() {
-        if (discrete) {
-            return getConfigurationProperty(ColorBarLayerType.DISTRIB_EXACT_STR,
-                    ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT);
-        } else {
             return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
                     ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT);
-        }
     }
 
 
