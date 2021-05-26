@@ -23,7 +23,7 @@ public class Copernicus90mFile extends ElevationFile {
     protected ElevationTile createTile(final Product product) throws IOException {
         final CopernicusElevationTile tile ;
         if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
-            System.out.println("Rescaling the raster");
+
             ResamplingOp resampler = new ResamplingOp();
             resampler.setParameter("targetWidth", 1200);
             resampler.setParameter("targetHeight", 1200);
@@ -37,9 +37,7 @@ public class Copernicus90mFile extends ElevationFile {
             resampled.getBandAt(0).readRasterDataFully();
             ProductIO.writeProduct(resampled, localFile.getAbsolutePath(), "GeoTIFF");
 
-
-            System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
-
+            //System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
 
             tile = new CopernicusElevationTile(demModel, resampled);
 
@@ -75,5 +73,4 @@ public class Copernicus90mFile extends ElevationFile {
             return false;
         }
     }
-
 }

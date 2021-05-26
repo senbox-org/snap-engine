@@ -26,21 +26,12 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
+import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -104,7 +95,7 @@ public class GraphProcessor {
      * @return the observers
      */
     public GraphProcessingObserver[] getObservers() {
-        return observerList.toArray(new GraphProcessingObserver[observerList.size()]);
+        return observerList.toArray(new GraphProcessingObserver[0]);
     }
 
     /**
@@ -162,15 +153,10 @@ public class GraphProcessor {
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
         dimList.sort((d1, d2) -> {
-            Long area1 = ((long) d1.width) * d1.height;
-            Long area2 = ((long) d2.width) * d2.height;
+            Long area1 = (long) (d1.width) * (long)(d1.height);
+            Long area2 = (long) (d2.width) * (long)(d2.height);
             return area1.compareTo(area2);
         });
-
-        int numPmTicks = graphContext.getGraph().getNodeCount();
-        for (Dimension dimension : dimList) {
-            numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
-        }
 
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
@@ -190,6 +176,11 @@ public class GraphProcessor {
             }
         }
 
+        int numPmTicks = graphContext.getGraph().getNodeCount();
+        for (Dimension dimension : dimList) {
+            numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
+        }
+
         try {
             pm.beginTask("Executing operators...", numPmTicks);
             for (NodeContext outputNodeContext : outputNodeContexts) {
@@ -203,20 +194,21 @@ public class GraphProcessor {
                 final int numXTiles = dimension.width;
                 final int numYTiles = dimension.height;
                 Dimension tileSize = nodeContextList.get(0).getTargetProduct().getPreferredTileSize();
-                for (int tileY = 0; tileY < numYTiles; tileY++) {
-                    for (int tileX = 0; tileX < numXTiles; tileX++) {
-                        if (pm.isCanceled()) {
-                            // todo - check: throw exception here? (nf, 2010.10.21)
-                            return graphContext.getOutputProducts();
-                        }
-                        Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                tileY * tileSize.height,
-                                tileSize.width,
-                                tileSize.height);
-                        fireTileStarted(graphContext, tileRectangle);
-                        for (NodeContext nodeContext : nodeContextList) {
-                            Product targetProduct = nodeContext.getTargetProduct();
-                            if (canComputeTileStack) {
+                if (canComputeTileStack) {
+                    for (int tileY = 0; tileY < numYTiles; tileY++) {
+                        for (int tileX = 0; tileX < numXTiles; tileX++) {
+                            if (pm.isCanceled()) {
+                                // todo - check: throw exception here? (nf, 2010.10.21)
+                                return graphContext.getOutputProducts();
+                            }
+                            Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                    tileY * tileSize.height,
+                                    tileSize.width,
+                                    tileSize.height);
+                            fireTileStarted(graphContext, tileRectangle);
+                            for (NodeContext nodeContext : nodeContextList) {
+                                Product targetProduct = nodeContext.getTargetProduct();
+
                                 // (1) Pull tile from first OperatorImage we find. This will trigger pulling
                                 // tiles of all other OperatorImage computed stack-wise.
                                 //
@@ -241,11 +233,32 @@ public class GraphProcessor {
                                         }
                                     }
                                 }
-                            } else {
-                                // Simply pull tile from source images of regular bands.
-                                //
-                                for (Band band : targetProduct.getBands()) {
-                                    PlanarImage image = nodeContext.getTargetImage(band);
+                            }
+                            fireTileStopped(graphContext, tileRectangle);
+                            pm.worked(1);
+                        }
+                    }
+                } else {
+                    for (NodeContext nodeContext : nodeContextList) {
+                        Product targetProduct = nodeContext.getTargetProduct();
+                        boolean monitorProgress = true;
+                        for (Band band : targetProduct.getBands()) {
+                            PlanarImage image = nodeContext.getTargetImage(band);
+                            for (int tileY = 0; tileY < numYTiles; tileY++) {
+                                for (int tileX = 0; tileX < numXTiles; tileX++) {
+                                    if (pm.isCanceled()) {
+                                        // todo - check: throw exception here? (nf, 2010.10.21)
+                                        return graphContext.getOutputProducts();
+                                    }
+
+                                    Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                            tileY * tileSize.height,
+                                            tileSize.width,
+                                            tileSize.height);
+                                    fireTileStarted(graphContext, tileRectangle);
+
+                                    // Simply pull tile from source images of regular bands.
+                                    //
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
                                                 parallelism);
@@ -253,15 +266,21 @@ public class GraphProcessor {
                                         forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
                                                 tileScheduler, listeners, parallelism);
                                     }
+                                    fireTileStopped(graphContext, tileRectangle);
+                                    if (monitorProgress) {
+                                        pm.worked(1);
+                                        // as a consequence of inverting the loop, progressMonitor ticks must only be increased
+                                        // once per product processed. This crude boolean logic ensures that. Nevertheless,
+                                        // this class needs refactoring! tb 2021-05-21
+                                        monitorProgress = false;
+                                    }
                                 }
                             }
-
-                            pm.worked(1);
                         }
-                        fireTileStopped(graphContext, tileRectangle);
                     }
                 }
             }
+
             acquirePermits(semaphore, parallelism);
             if (error != null) {
                 throw error;

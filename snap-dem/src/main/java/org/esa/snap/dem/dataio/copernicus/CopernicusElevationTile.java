@@ -22,7 +22,6 @@ public class CopernicusElevationTile extends BaseElevationTile  implements Resam
 
     @Override
     public int getWidth() {
-        System.out.println(product != null ? product.getSceneRasterWidth() : 0);
         return product != null ? product.getSceneRasterWidth() : 0;
     }
 
