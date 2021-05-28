@@ -19,12 +19,16 @@ import com.bc.ceres.core.Assert;
 import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.PropertyMap;
-import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.core.util.math.LogLinearTransform;
-
+import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.Color;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -486,7 +490,7 @@ public class ColorPaletteDef implements Cloneable {
             propertyMap.setPropertyColor(_PROPERTY_KEY_COLOR + i, points[i].getColor());
             propertyMap.setPropertyDouble(_PROPERTY_KEY_SAMPLE + i, points[i].getSample());
         }
-        propertyMap.store(file.toPath(), "BEAM Colour Palette Definition File"); /*I18N*/
+        propertyMap.store(file.toPath(), "SNAP Colour Palette Definition File"); /*I18N*/
     }
 
     /**
