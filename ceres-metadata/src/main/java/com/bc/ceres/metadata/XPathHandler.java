@@ -120,7 +120,12 @@ public class XPathHandler {
         DOMImplementationLS domImplementationLS = (DOMImplementationLS) document.getImplementation();
         LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
         String string = lsSerializer.writeToString(document);
-        return string.replaceFirst("<\\?xml.*>\n?", "");
+        // till Java 8 the xml header was delimited with a '\n'.
+        // At least in 11 not anymore. So now considering both cases
+        // remove the xml header
+        final String textDoc = string.replaceFirst("<\\?xml.*\\?>", "");
+        // remove whitespaces
+        return textDoc.trim();
 
     }
 }

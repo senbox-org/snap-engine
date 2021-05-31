@@ -136,7 +136,7 @@ public class PixelQuadTreeInverseTest {
         // interpolate in y direction between replicated pixels
         pixelPos = inverse.getPixelPos(new GeoPos(66.49456, -24.169599), null);
         assertEquals(6, pixelPos.x, 1e-8);
-        assertEquals(13.750093939267787, pixelPos.y, 1e-8);
+        assertEquals(13.750093939267787, pixelPos.y, 1e-7);
 
         // interpolate in lat-direction
         pixelPos = inverse.getPixelPos(new GeoPos(66.44213, -24.22587), null);

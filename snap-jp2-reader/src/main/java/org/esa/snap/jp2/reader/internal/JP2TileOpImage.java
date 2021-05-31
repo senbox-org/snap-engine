@@ -173,7 +173,9 @@ public class JP2TileOpImage extends SourcelessOpImage {
     private Path decompressTile(int level) throws InterruptedException, IOException {
         Path localImageFile = getLocalImageFile();
         Path localCacheFolder = this.bandData.getLocalCacheFolder();
-        String imageFileName = PathUtils.getFileNameWithoutExtension(localImageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
+        // SNAP-1436: JP2 reader - use shorter file names for decompressed tiles
+        //String imageFileName = PathUtils.getFileNameWithoutExtension(localImageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
+        String imageFileName = "tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
         Path tileFile = PathUtils.get(localCacheFolder, imageFileName);
         if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), localImageFile.toFile()) < 0L)) {
             String tileFileName;

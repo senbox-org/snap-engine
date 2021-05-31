@@ -60,7 +60,7 @@ public class RemoteRepositoriesManager {
 
     private RemoteRepositoriesManager() {
         ConfigurationManager.setConfigurationProvider(new RemoteConfigurationProvider());
-        Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
+        Set<DataSource<?, ?>> services = DataSourceManager.getInstance().getRegisteredDataSources();
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
         for (DataSource dataSource : services) {
@@ -584,7 +584,7 @@ public class RemoteRepositoriesManager {
     }
 
     private static DataSource findDataSource(String dataSourceName) {
-        Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
+        Set<DataSource<?, ?>> services = DataSourceManager.getInstance().getRegisteredDataSources();
         for (DataSource dataSource : services) {
             if (dataSource.getId().equals(dataSourceName)) {
                 return dataSource;

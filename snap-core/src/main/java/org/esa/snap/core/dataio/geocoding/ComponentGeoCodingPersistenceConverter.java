@@ -18,6 +18,7 @@
 
 package org.esa.snap.core.dataio.geocoding;
 
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
@@ -35,6 +36,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
@@ -204,7 +206,6 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         } else {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
-            final int size = rasterWidth * rasterHeight;
 
             final double[] longitudes;
             final double[] latitudes;
@@ -212,13 +213,16 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
                 longitudes = dataMap.get(lonRaster);
                 latitudes = dataMap.get(latRaster);
             } else {
-                longitudes = lonRaster.getGeophysicalImage().getImage(0).getData()
-                        .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-                dataMap.put(lonRaster, longitudes);
+                try {
+                    longitudes = RasterUtils.loadGeoData(lonRaster);
+                    dataMap.put(lonRaster, longitudes);
 
-                latitudes = latRaster.getGeophysicalImage().getImage(0).getData()
-                        .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-                dataMap.put(latRaster, latitudes);
+                    latitudes = RasterUtils.loadGeoData(latRaster);
+                    dataMap.put(latRaster, latitudes);
+                } catch (IOException e) {
+                    SystemUtils.LOG.warning("error loading geo-data: " + e.getMessage());
+                    return null;
+                }
             }
 
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
