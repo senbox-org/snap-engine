@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.persistence.Property;
 
 import java.awt.geom.AffineTransform;
+import java.util.TreeSet;
 
 
 public class RasterDataNodePersistenceHelper {

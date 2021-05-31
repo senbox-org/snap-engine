@@ -22,8 +22,6 @@ import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.persistence.Property;
 
-import static org.esa.snap.core.datamodel.Mask.BandMathsType.PROPERTY_NAME_EXPRESSION;
-
 /**
  * @author Marco Peters
  * @author Sabine Embacher
@@ -36,29 +34,29 @@ class BandMathsMaskPersistenceConverter extends AbstractMaskPersistenceConverter
     // And so on ...
     public static final String ID_VERSION_1 = "BM_MASK:1";
 
+    private static final String NAME_EXPRESSION = "EXPRESSION";
+
     @Override
     public String getID() {
         return ID_VERSION_1;
     }
 
     @Override
-    protected Mask.ImageType createImageType() {
+    protected Mask.BandMathsType createImageType() {
         return Mask.BandMathsType.INSTANCE;
     }
 
     @Override
     protected void configureMask(Mask mask, Container root) {
-        final String expression = root.getProperty(PROPERTY_NAME_EXPRESSION).getValueString();
-
+        final String expression = root.getProperty(NAME_EXPRESSION).getValueString();
         final PropertyContainer imageConfig = mask.getImageConfig();
-        imageConfig.setValue(PROPERTY_NAME_EXPRESSION, expression);
+        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, expression);
     }
 
     @Override
     protected void configureContainer(Container root, Mask mask) {
-        final PropertyContainer config = mask.getImageConfig();
-        final String expression = config.getValue(PROPERTY_NAME_EXPRESSION).toString();
-
-        root.add(new Property<>(PROPERTY_NAME_EXPRESSION, expression));
+        final String expression = mask.getImageConfig().getValue(
+                Mask.BandMathsType.PROPERTY_NAME_EXPRESSION).toString();
+        root.add(new Property<>(NAME_EXPRESSION, expression));
     }
 }

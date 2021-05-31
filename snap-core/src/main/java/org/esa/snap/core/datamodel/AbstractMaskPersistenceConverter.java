@@ -27,11 +27,7 @@ import org.esa.snap.core.dataio.persistence.Property;
 
 import java.awt.Color;
 
-import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.addAncillaryElements;
-import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.addImageToModelTransformElement;
-import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.setAncillaryRelations;
-import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.setAncillaryVariables;
-import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.setImageToModelTransform;
+import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.*;
 
 /**
  * @author Marco Peters
