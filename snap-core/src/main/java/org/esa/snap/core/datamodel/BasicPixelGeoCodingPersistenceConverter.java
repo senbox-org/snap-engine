@@ -40,7 +40,7 @@ public class BasicPixelGeoCodingPersistenceConverter implements PersistenceConve
     // Never change this constant! Instead, create a new one with the
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
     // And so on ...
-    public static final String ID_VERSION_1 = "BPGC:1";
+    public static final String ID_VERSION_1 = "BasicPixelGC:1";
 
     @Override
     public String getID() {
