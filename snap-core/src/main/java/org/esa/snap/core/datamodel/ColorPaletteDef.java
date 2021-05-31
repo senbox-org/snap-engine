@@ -292,7 +292,7 @@ public class ColorPaletteDef implements Cloneable {
      * @return the color palette definition, never null
      * @throws IOException if an I/O error occurs
      */
-    private static ColorPaletteDef loadColorPaletteDef(Path path) throws IOException {
+    public static ColorPaletteDef loadColorPaletteDef(Path path) throws IOException {
         final PropertyMap propertyMap = new DefaultPropertyMap();
         propertyMap.load(path); // Overwrite existing values
         final int numPoints = propertyMap.getPropertyInt(_PROPERTY_KEY_NUM_POINTS);
