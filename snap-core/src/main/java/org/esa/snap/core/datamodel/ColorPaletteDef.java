@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -281,12 +282,23 @@ public class ColorPaletteDef implements Cloneable {
      * @throws IOException if an I/O error occurs
      */
     public static ColorPaletteDef loadColorPaletteDef(File file) throws IOException {
+        return loadColorPaletteDef(file.toPath());
+    }
+
+    /**
+     * Loads a color palette definition from the given file path
+     *
+     * @param path the file path
+     * @return the color palette definition, never null
+     * @throws IOException if an I/O error occurs
+     */
+    private static ColorPaletteDef loadColorPaletteDef(Path path) throws IOException {
         final PropertyMap propertyMap = new DefaultPropertyMap();
-        propertyMap.load(file.toPath()); // Overwrite existing values
+        propertyMap.load(path); // Overwrite existing values
         final int numPoints = propertyMap.getPropertyInt(_PROPERTY_KEY_NUM_POINTS);
         if (numPoints < 2) {
             throw new IOException("The selected file contains less than\n" +
-                    "two colour points.");
+                                          "two colour points.");
         }
         final Point[] points = new Point[numPoints];
         double lastSample = 0;
@@ -299,7 +311,7 @@ public class ColorPaletteDef implements Cloneable {
             }
             point.setColor(color);
             point.setSample(sample);
-            point.setLabel(file.getName());
+            point.setLabel(path.getFileName().toString());
             points[i] = point;
             lastSample = sample;
         }
@@ -310,8 +322,6 @@ public class ColorPaletteDef implements Cloneable {
         paletteDef.setSourceFileMax(paletteDef.getMaxDisplaySample());
         return paletteDef;
     }
-
-
 
 
     /**
