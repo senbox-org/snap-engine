@@ -22,6 +22,11 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 
+/**
+ * @author Marco Peters
+ * @author Sabine Embacher
+ * @since SNAP 9.0
+ */
 public class BandMathsMaskPersistenceSpi implements PersistenceSpi {
 
     private static final BandMathsMaskPersistenceConverter CONVERTER = new BandMathsMaskPersistenceConverter();

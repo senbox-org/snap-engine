@@ -38,10 +38,6 @@ public class RangeTypeMaskPersistenceConverter extends AbstractMaskPersistenceCo
     // And so on ...
     public static final String ID_VERSION_1 = "RT_MASK:1";
 
-    private static final String NAME_MINIMUM = "MINIMUM";
-    private static final String NAME_MAXIMUM = "MAXIMUM";
-    private static final String NAME_RASTER = "RASTER";
-
     @Override
     public String getID() {
         return ID_VERSION_1;
@@ -54,9 +50,9 @@ public class RangeTypeMaskPersistenceConverter extends AbstractMaskPersistenceCo
 
     @Override
     protected void configureMask(Mask mask, Container root) {
-        final double minimum = root.getProperty(NAME_MINIMUM).getValueDouble();
-        final double maximum = root.getProperty(NAME_MAXIMUM).getValueDouble();
-        final String raster =  root.getProperty(NAME_RASTER).getValueString();
+        final double minimum = root.getProperty(PROPERTY_NAME_MINIMUM).getValueDouble();
+        final double maximum = root.getProperty(PROPERTY_NAME_MAXIMUM).getValueDouble();
+        final String raster =  root.getProperty(PROPERTY_NAME_RASTER).getValueString();
 
         final PropertyContainer imageConfig = mask.getImageConfig();
         imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, minimum);
@@ -70,8 +66,9 @@ public class RangeTypeMaskPersistenceConverter extends AbstractMaskPersistenceCo
         Object minValue = config.getValue(PROPERTY_NAME_MINIMUM);
         Object maxValue = config.getValue(PROPERTY_NAME_MAXIMUM);
         Object rasterValue = config.getValue(PROPERTY_NAME_RASTER);
-        root.add(new Property<>(NAME_MINIMUM, String.valueOf(minValue)));
-        root.add(new Property<>(NAME_MAXIMUM, String.valueOf(maxValue)));
-        root.add(new Property<>(NAME_RASTER, String.valueOf(rasterValue)));
+
+        root.add(new Property<>(PROPERTY_NAME_MINIMUM, String.valueOf(minValue)));
+        root.add(new Property<>(PROPERTY_NAME_MAXIMUM, String.valueOf(maxValue)));
+        root.add(new Property<>(PROPERTY_NAME_RASTER, String.valueOf(rasterValue)));
     }
 }
