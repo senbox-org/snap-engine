@@ -67,8 +67,8 @@ public class RangeTypeMaskPersistenceConverter extends AbstractMaskPersistenceCo
         Object maxValue = config.getValue(PROPERTY_NAME_MAXIMUM);
         Object rasterValue = config.getValue(PROPERTY_NAME_RASTER);
 
-        root.add(new Property<>(PROPERTY_NAME_MINIMUM, String.valueOf(minValue)));
-        root.add(new Property<>(PROPERTY_NAME_MAXIMUM, String.valueOf(maxValue)));
-        root.add(new Property<>(PROPERTY_NAME_RASTER, String.valueOf(rasterValue)));
+        root.add(new Property<>(PROPERTY_NAME_MINIMUM, minValue));
+        root.add(new Property<>(PROPERTY_NAME_MAXIMUM, maxValue));
+        root.add(new Property<>(PROPERTY_NAME_RASTER, rasterValue));
     }
 }
