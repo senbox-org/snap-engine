@@ -38,6 +38,9 @@ public class StringConverterTest extends AbstractConverterTest {
         testParseSuccess("Ballamann!", "Ballamann!");
         testParseSuccess("", "");
 
+        testParseSuccess("Heffalump", "\n   Heffalump");
+        testParseSuccess("Nasenmann", "Nasenmann\t");
+
         testFormatSuccess("Ballamann!", "Ballamann!");
         testFormatSuccess("", null);
 

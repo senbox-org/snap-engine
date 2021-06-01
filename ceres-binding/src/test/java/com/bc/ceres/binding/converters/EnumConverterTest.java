@@ -39,7 +39,7 @@ public class EnumConverterTest extends AbstractConverterTest {
     @Override
     public Converter getConverter() {
         if (converter == null) {
-            converter = new EnumConverter<Tests>(Tests.class);
+            converter = new EnumConverter<>(Tests.class);
         }
         return converter;
     }
@@ -52,6 +52,7 @@ public class EnumConverterTest extends AbstractConverterTest {
         testParseSuccess(Tests.TEST1, "TEST1");
         testParseSuccess(Tests.TEST2, "TEST2");
         testParseSuccess(Tests.TEST3, "TEST3");
+        testParseSuccess(Tests.TEST3, "\nTEST3");
         testParseSuccess(null, "");
 
         testParseFailed("test1");
