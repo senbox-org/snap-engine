@@ -35,6 +35,7 @@ public class IntArrayConverterTest extends AbstractConverterTest {
     public void testConverter() throws ConversionException {
         testValueType(int[].class);
         testParseSuccess(new int[]{-2, -1, 0, 1, 2, 3, 4}, "-2,  -1,0  ,1,\t2,3,4");
+        testParseSuccess(new int[]{5, 6, 7}, "   5,\n 6, 7\t");
         testFormatSuccess("-2,-1,0,1,2,3,4", new int[]{-2, -1, 0, 1, 2, 3, 4});
         assertNullCorrectlyHandled();
     }
