@@ -38,6 +38,7 @@ public class ShortConverterTest extends AbstractConverterTest {
         testParseSuccess((short) 234, "234");
         testParseSuccess((short) -45, "-45");
         testParseSuccess((short) 45, "+45");
+        testParseSuccess((short) 56, "56     \t");
         testParseSuccess(null, "");
 
         testFormatSuccess("235", (short) 235);

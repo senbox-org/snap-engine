@@ -39,6 +39,7 @@ public class ByteConverterTest extends AbstractConverterTest {
         testParseSuccess((byte) 124, "124");
         testParseSuccess((byte) -45, "-45");
         testParseSuccess((byte) 45, "+45");
+        testParseSuccess((byte) 56, "\n   56");
         testParseSuccess(null, "");
 
         testFormatSuccess("124", (byte) 124);
