@@ -60,9 +60,6 @@ public class ImageLegend {
     public static final String DISTRIB_EXACT_STR = ColorBarLayerType.DISTRIB_EXACT_STR;
     public static final String DISTRIB_MANUAL_STR = ColorBarLayerType.DISTRIB_MANUAL_STR;
 
-    public static final int DEFAULT_COLOR_BAR_LENGTH = 1200;
-    public static final int DEFAULT_PREVIEW_LENGTH_PIXELS = 750;
-
     public static final double HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
@@ -104,9 +101,9 @@ public class ImageLegend {
     private int tickmarkWidth = NULL_INT;
     private boolean tickmarkShow;
 
-    private int borderWidth = 5;
-    private Color borderColor = Color.RED;
-    private boolean borderShow = true;
+    private int borderWidth;
+    private Color borderColor;
+    private boolean borderShow;
 
     private Color backdropColor;
     private boolean transparencyEnabled;
@@ -146,7 +143,7 @@ public class ImageLegend {
     private String titleOverRide = null;
 
     private int borderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
-    private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP9
+    private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP
     private int titleGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
 
     // Dependent, internal attributes
@@ -162,30 +159,36 @@ public class ImageLegend {
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
         this.imageInfo = imageInfo;
         this.raster = raster;
-        showTitle = true;
-        titleText = "";
 
-        orientation = HORIZONTAL;
-        backdropColor = Color.white;
-        tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
-        labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
-        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
-        unitsColor = ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT;
-
-        setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
-        setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
-        setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
-
-        setLabelsFontSize(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
-        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
-
-        backdropTransparency = 1.0f;
         antialiasing = true;
-        setDecimalPlaces(2);
-        scalingFactor = 1;
 
-        setDecimalPlacesForce(false);
-        setCustomLabelValues("");
+        // todo Most of these following parameters get initialized/set later so most can likely be deleted
+
+//        showTitle = true;
+//        titleText = "";
+//
+//        orientation = HORIZONTAL;
+//        backdropColor = Color.white;
+//        tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
+//        labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
+//        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
+//        unitsColor = ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT;
+//
+//        setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
+//        setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
+//        setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
+//
+//        setLabelsFontSize(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
+//        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
+//
+//        backdropTransparency = 1.0f;
+//
+//        setDecimalPlaces(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT);
+//        scalingFactor = 1;
+//
+//        setDecimalPlacesForce(false);
+//        setCustomLabelValues("");
+
     }
 
 
@@ -2088,8 +2091,8 @@ public class ImageLegend {
 //                        adjustedWeight = getLinearWeightFromLinearValue(roundedValue, min, max);
                 }
 
-                System.out.println("weight="+weight);
-                System.out.println("value="+value);
+//                System.out.println("weight="+weight);
+//                System.out.println("value="+value);
 
                 // todo try to make some kind of rounding thing work
                 roundedValue = value;
