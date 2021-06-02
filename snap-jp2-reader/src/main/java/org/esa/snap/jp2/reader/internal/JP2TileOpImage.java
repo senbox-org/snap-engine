@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 /**
  * A JAI operator for handling JP2 tiles.
@@ -50,6 +52,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
     private int tileOffsetFromDecompressedImageY;
     private int tileOffsetFromImageX;
     private int tileOffsetFromImageY;
+    private String tileFilePrefix;
 
     public JP2TileOpImage(JP2BandSource bandSource, JP2BandData bandData, DecompressedImageSupport decompressedImageSupport,
                           int tileWidth, int tileHeight, int tileOffsetFromDecompressedImageX, int tileOffsetFromDecompressedImageY,
@@ -70,6 +73,14 @@ public class JP2TileOpImage extends SourcelessOpImage {
 
         String openJp2 = OpenJpegExecRetriever.getOpenJp2();
         this.useOpenJp2Jna = openJp2 != null && this.bandData.getBandCount() == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
+        try {
+            final Checksum checksum = new CRC32();
+            final byte[] bytes = PathUtils.getFileNameWithoutExtension(getLocalImageFile()).toLowerCase().getBytes();
+            checksum.update(bytes, 0, bytes.length);
+            this.tileFilePrefix = Long.toHexString(checksum.getValue());
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+        }
     }
 
     private JP2TileOpImage(ImageLayout layout) {
@@ -171,12 +182,11 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private Path decompressTile(int level) throws InterruptedException, IOException {
-        Path localImageFile = getLocalImageFile();
-        Path localCacheFolder = this.bandData.getLocalCacheFolder();
+        final Path localImageFile = getLocalImageFile();
         // SNAP-1436: JP2 reader - use shorter file names for decompressed tiles
         //String imageFileName = PathUtils.getFileNameWithoutExtension(localImageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
-        String imageFileName = "tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
-        Path tileFile = PathUtils.get(localCacheFolder, imageFileName);
+        final String imageFileName = this.tileFilePrefix + "_" + this.decompressTileIndex + "_" + level + ".tif";
+        Path tileFile = PathUtils.get(this.bandData.getLocalCacheFolder(), imageFileName);
         if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), localImageFile.toFile()) < 0L)) {
             String tileFileName;
             if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
@@ -185,7 +195,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
                 tileFileName = tileFile.toString();
             }
 
-            Map<String, String> params = new HashMap<String, String>();
+            final Map<String, String> params = new HashMap<>();
             params.put("-i", Utils.GetIterativeShortPathNameW(localImageFile.toString()));
             params.put("-r", String.valueOf(level));
             params.put("-l", Byte.toString(LAYER));
@@ -194,12 +204,12 @@ public class JP2TileOpImage extends SourcelessOpImage {
             params.put("-p", String.valueOf(DataBuffer.getDataTypeSize(getSampleModel().getDataType())));
             params.put("-threads", "ALL_CPUS");
 
-            OpjExecutor decompress = new OpjExecutor(OpenJpegExecRetriever.getOpjDecompress());
+            final OpjExecutor decompress = new OpjExecutor(OpenJpegExecRetriever.getOpjDecompress());
             if (decompress.execute(params) != 0) {
                 logger.severe(decompress.getLastError());
                 tileFile = null;
             } else {
-                logger.fine("Decompressed tile #" + String.valueOf(this.decompressTileIndex) + " @ resolution " + String.valueOf(level));
+                logger.fine("Decompressed tile #" + this.decompressTileIndex + " @ resolution " + level);
             }
         }
         return tileFile;
@@ -253,7 +263,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
     private static class ImageReader implements AutoCloseable {
 
         private TIFFImageReader imageReader;
-        private ImageInputStream inputStream;
+        private final ImageInputStream inputStream;
 
         ImageReader(Path input) throws IOException {
             Iterator<javax.imageio.ImageReader> imageReaders = ImageIO.getImageReadersByFormatName("tiff");
