@@ -22,8 +22,6 @@ import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.persistence.Property;
 
 import java.awt.geom.AffineTransform;
-import java.util.TreeSet;
-
 
 public class RasterDataNodePersistenceHelper {
     public static final String NAME_ANCILLARY_RELATIONS = "ANCILLARY_RELATIONS";
@@ -32,18 +30,28 @@ public class RasterDataNodePersistenceHelper {
 
     public static void addAncillaryElements(Container root, RasterDataNode rasterDataNode) {
         String[] ancillaryRelations = rasterDataNode.getAncillaryRelations();
-        root.add(new Property<>(NAME_ANCILLARY_RELATIONS, ancillaryRelations));
-        RasterDataNode[] ancillaryVariables = rasterDataNode.getAncillaryVariables();
-        final String[] variableNames = new String[ancillaryVariables.length];
-        for (int i = 0; i < ancillaryVariables.length; i++) {
-            variableNames[i] = ancillaryVariables[i].getName();
+        if (ancillaryRelations != null && ancillaryRelations.length > 0) {
+            root.add(new Property<>(NAME_ANCILLARY_RELATIONS, ancillaryRelations));
         }
-        root.add(new Property(NAME_ANCILLARY_VARIABLES, variableNames));
+        RasterDataNode[] ancillaryVariables = rasterDataNode.getAncillaryVariables();
+        if (ancillaryVariables != null && ancillaryVariables.length > 0) {
+            final String[] variableNames = new String[ancillaryVariables.length];
+            for (int i = 0; i < ancillaryVariables.length; i++) {
+                variableNames[i] = ancillaryVariables[i].getName();
+            }
+            root.add(new Property(NAME_ANCILLARY_VARIABLES, variableNames));
+        }
     }
 
     public static void setAncillaryVariables(Container container, RasterDataNode rasterDataNode, Product product) {
         final Property<?> ancVars = container.getProperty(NAME_ANCILLARY_VARIABLES);
+        if (ancVars == null) {
+            return;
+        }
         final String[] variableNames = ancVars.getValueStrings();
+        if (variableNames == null || variableNames.length == 0) {
+            return;
+        }
         for (String variableName : variableNames) {
             final RasterDataNode variable = product.getRasterDataNode(variableName);
             if (variable != null) {
@@ -69,10 +77,15 @@ public class RasterDataNodePersistenceHelper {
     }
 
     public static void setAncillaryRelations(Container element, RasterDataNode rasterDataNode) {
-        final String[] relations = element.getProperty(NAME_ANCILLARY_RELATIONS).getValueStrings();
-        if (relations.length > 0) {
-            rasterDataNode.setAncillaryRelations(relations);
+        final Property<?> relationsProp = element.getProperty(NAME_ANCILLARY_RELATIONS);
+        if (relationsProp == null) {
+            return;
         }
+        final String[] relations = relationsProp.getValueStrings();
+        if (relations == null || relations.length == 0) {
+            return;
+        }
+        rasterDataNode.setAncillaryRelations(relations);
     }
 
     public static void addImageToModelTransformElement(Container root, RasterDataNode rasterDataNode) {
