@@ -40,7 +40,7 @@ public class RangeTypeMaskPersistenceSpi implements PersistenceSpi {
     public boolean canEncode(Object object) {
         if (object instanceof Mask) {
             final Mask mask = (Mask) object;
-            return mask.getImageType() == Mask.BandMathsType.INSTANCE;
+            return mask.getImageType() == Mask.RangeType.INSTANCE;
         }
         return false;
     }
