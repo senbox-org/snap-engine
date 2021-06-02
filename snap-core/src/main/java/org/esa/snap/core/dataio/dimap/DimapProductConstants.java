@@ -369,6 +369,8 @@ public final class DimapProductConstants {
     public static final String TAG_MINIMUM = "MINIMUM";
     public static final String TAG_MAXIMUM = "MAXIMUM";
     public static final String TAG_RASTER = "RASTER";
+    // VectorDataMask
+    public static final String TAG_VECTOR_DATA_NODE = "VECTOR_DATA_NODE";
 
     // BEAM-Dimap bitmask definition tags
     public static final String TAG_BITMASK_DEFINITIONS = "Bitmask_Definitions";

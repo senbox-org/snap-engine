@@ -63,7 +63,7 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
         setImageToModelTransform(element, mask);
         setAncillaryRelations(element, mask);
         setAncillaryVariables(element, mask, product);
-        configureMask(mask, element);
+        configureMask(mask, element, product);
         return mask;
     }
 
@@ -107,7 +107,7 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
 
     protected abstract Mask.ImageType createImageType();
 
-    protected abstract void configureMask(Mask mask, Element element);
+    protected abstract void configureMask(Mask mask, Element element, Product product);
 
     protected abstract void configureElement(Element root, Mask mask);
 

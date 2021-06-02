@@ -74,7 +74,7 @@ public abstract class AbstractMaskPersistenceConverter implements PersistenceCon
         setImageToModelTransform(root, mask);
         setAncillaryRelations(root, mask);
         setAncillaryVariables(root, mask, product);
-        configureMask(mask, root);
+        configureMask(mask, root, product);
         return mask;
     }
 
@@ -121,7 +121,7 @@ public abstract class AbstractMaskPersistenceConverter implements PersistenceCon
 
     protected abstract Mask.ImageType createImageType();
 
-    protected abstract void configureMask(Mask mask, Container root);
+    protected abstract void configureMask(Mask mask, Container root, Product product);
 
     protected abstract void configureContainer(Container root, Mask mask);
 }

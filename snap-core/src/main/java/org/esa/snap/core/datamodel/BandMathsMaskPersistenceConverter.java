@@ -47,7 +47,7 @@ class BandMathsMaskPersistenceConverter extends AbstractMaskPersistenceConverter
     }
 
     @Override
-    protected void configureMask(Mask mask, Container root) {
+    protected void configureMask(Mask mask, Container root, Product product) {
         final String expression = root.getProperty(PROPERTY_NAME_EXPRESSION).getValueString();
 
         final PropertyContainer imageConfig = mask.getImageConfig();

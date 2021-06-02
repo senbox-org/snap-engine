@@ -76,6 +76,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private final Product product;
     private final String dataDirectory;
+    private final Persistence persistence = new Persistence();
     private final JdomLanguageSupport jdomLanguageSupport = new JdomLanguageSupport();
 
     public DimapHeaderWriter(Product product, File file, String dataDirectory) throws IOException {
@@ -535,7 +536,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             final boolean isFXYGeoCoding = geoCoding instanceof FXYGeoCoding;
 
             if (!isTiePointGeoCoding && !isBasicPixelGeoCoding && !isFXYGeoCoding) {
-                final PersistenceEncoder<Object> encoder = new Persistence().getEncoder(geoCoding);
+                final PersistenceEncoder<Object> encoder = persistence.getEncoder(geoCoding);
                 if (encoder != null) {
                     final Item encoded = encoder.encode(geoCoding);
                     final Element xmlFromObject = jdomLanguageSupport.translateToLanguageObject(encoded);

@@ -1573,7 +1573,13 @@ public class DimapProductHelpers {
                     if (persistable != null) {
                         final Object object = persistable.createObjectFromXml(child, product);
                         if (object instanceof Mask) {
-                            product.getMaskGroup().add((Mask) object);
+                            final Mask mask = (Mask) object;
+                            final String maskName = mask.getName();
+                            final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+                            if (maskGroup.contains(maskName)) {
+                                maskGroup.remove(maskGroup.get(maskName));
+                            }
+                            maskGroup.add(mask);
                         }
                     }
                 }
