@@ -32,6 +32,9 @@ import java.awt.image.RenderedImage;
  *
  * @author Norman Fomferra
  */
+// Feb 2020 - Daniel Knowles
+//          - Added method findRangeForPercent() to enable retrieval of any range between 0% and 100%
+
 public class Histogram extends Range {
 
     public static final float LEFT_AREA_SKIPPED_95 = 0.025F;
@@ -120,6 +123,30 @@ public class Histogram extends Range {
     public Range findRangeFor95Percent() {
         return findRange(LEFT_AREA_SKIPPED_95, RIGHT_AREA_SKIPPED_95);
     }
+
+
+
+
+    /**
+     * Returns the value range for any threshold of 0% to 100% where the sum of all bin values are skipped from the the lower and
+     * upper bounds of this histogram.
+     *
+     * @return the skipped value range, that include given percent of the sum of all bin values
+     */
+    public Range findRangeForPercent(double threshold) {
+        if (threshold >0 && threshold <= 100) {
+            double limits = (100 - threshold) / (100 * 2);
+            return findRange(limits, limits);
+        }
+
+        return null;
+    }
+
+
+
+
+
+
 
     /**
      * Returns the value range for the case that the given ratios of the sum of all bin values are skipped from the

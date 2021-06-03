@@ -18,7 +18,6 @@
 
 package org.esa.snap.core.datamodel;
 
-import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.persistence.Attribute;
 import org.esa.snap.core.dataio.persistence.Container;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
@@ -27,8 +26,6 @@ import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.jdom.Document;
-import org.jdom.Element;
 
 public class TiePointGeoCodingPersistenceConverter implements PersistenceConverter<TiePointGeoCoding> {
 

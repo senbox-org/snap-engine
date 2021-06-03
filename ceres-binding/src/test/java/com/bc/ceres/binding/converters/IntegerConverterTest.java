@@ -39,6 +39,7 @@ public class IntegerConverterTest extends AbstractConverterTest {
         testParseSuccess(234, "234");
         testParseSuccess(-45, "-45");
         testParseSuccess(45, "+45");
+        testParseSuccess(56, "\n56");
         testParseSuccess(null, "");
 
         testFormatSuccess("2353465", 2353465);

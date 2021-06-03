@@ -16,8 +16,8 @@
 
 package com.bc.ceres.binding.converters;
 
-import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.Converter;
 
 /**
  * Class for converting enumeration types.
@@ -43,7 +43,7 @@ public class EnumConverter<T extends Enum<T>> implements Converter<T> {
             return null;
         }
         try {
-            return Enum.valueOf(type, text);
+            return Enum.valueOf(type, text.trim());
         } catch (Exception e) {
             throw new ConversionException(e);
         }

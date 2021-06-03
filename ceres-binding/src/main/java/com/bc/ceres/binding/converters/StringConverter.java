@@ -29,7 +29,7 @@ public class StringConverter implements com.bc.ceres.binding.Converter<String> {
         if (text == null) {
             throw new NullPointerException("text");
         }
-        return text;
+        return text.trim();
     }
 
     @Override
