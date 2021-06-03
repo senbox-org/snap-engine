@@ -45,7 +45,7 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
 
     @Override
     public final Mask createObjectFromXml(Element element, Product product) {
-        final String name = getChildAttributeValue(element, TAG_NAME, ATTRIB_VALUE);
+        final String maskName = getChildAttributeValue(element, TAG_NAME, ATTRIB_VALUE);
         final int width;
         final int height;
         if (element.getChild(TAG_MASK_RASTER_WIDTH) != null && element.getChild(TAG_MASK_RASTER_HEIGHT) != null) {
@@ -56,7 +56,7 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
             height = product.getSceneRasterHeight();
         }
 
-        final Mask mask = new Mask(name, width, height, createImageType());
+        final Mask mask = new Mask(maskName, width, height, createImageType());
         mask.setDescription(getChildAttributeValue(element, TAG_DESCRIPTION, ATTRIB_VALUE));
         mask.setImageTransparency(Double.parseDouble(getChildAttributeValue(element, TAG_TRANSPARENCY, ATTRIB_VALUE)));
         setImageColor(element, mask);

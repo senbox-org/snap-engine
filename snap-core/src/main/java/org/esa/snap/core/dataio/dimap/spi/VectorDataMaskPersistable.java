@@ -42,23 +42,23 @@ class VectorDataMaskPersistable extends MaskPersistable {
     @Override
     protected void configureMask(Mask mask, Element element, Product product) {
         final PropertyContainer imageConfig = mask.getImageConfig();
-        final String nodeName = getChildAttributeValue(element, TAG_VECTOR_DATA_NODE, ATTRIB_VALUE);
-        final VectorDataNode vectorDataNode = product.getVectorDataGroup().get(nodeName);
         final String propertyName = Mask.VectorDataType.PROPERTY_NAME_VECTOR_DATA;
-        if (vectorDataNode != null) {
-            imageConfig.setValue(propertyName, vectorDataNode);
-        } else {
-            product.addProductNodeListener(new ProductNodeListenerAdapter(){
+        final String vectorDataNodeName = getChildAttributeValue(element, TAG_VECTOR_DATA_NODE, ATTRIB_VALUE);
+        final VectorDataNode vectorDataNode = product.getVectorDataGroup().get(vectorDataNodeName);
+        if (vectorDataNode == null) {
+            product.addProductNodeListener(new ProductNodeListenerAdapter() {
                 @Override
                 public void nodeAdded(ProductNodeEvent event) {
                     final ProductNode sourceNode = event.getSourceNode();
                     final String sourceNodeName = sourceNode.getName();
-                    if (!nodeName.equals(sourceNodeName)) return;
+                    if (!vectorDataNodeName.equals(sourceNodeName)) return;
                     if (!(sourceNode instanceof VectorDataNode)) return;
                     product.removeProductNodeListener(this);
                     imageConfig.setValue(propertyName, sourceNode);
                 }
             });
+        } else {
+            imageConfig.setValue(propertyName, vectorDataNode);
         }
     }
 

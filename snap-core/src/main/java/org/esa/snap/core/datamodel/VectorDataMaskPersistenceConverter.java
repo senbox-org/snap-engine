@@ -47,26 +47,22 @@ public class VectorDataMaskPersistenceConverter extends AbstractMaskPersistenceC
     protected void configureMask(Mask mask, Container root, Product product) {
         final PropertyContainer imageConfig = mask.getImageConfig();
         final String propertyName = Mask.VectorDataType.PROPERTY_NAME_VECTOR_DATA;
-        final String nodeName = root.getProperty(propertyName).getValueString();
-        final VectorDataNode vectorDataNode = product.getVectorDataGroup().get(nodeName);
-        if (vectorDataNode != null) {
-            imageConfig.setValue(propertyName, vectorDataNode);
-        } else {
+        final String vectorDataNodeName = root.getProperty(propertyName).getValueString();
+        final VectorDataNode vectorDataNode = product.getVectorDataGroup().get(vectorDataNodeName);
+        if (vectorDataNode == null) {
             product.addProductNodeListener(new ProductNodeListenerAdapter() {
                 @Override
                 public void nodeAdded(ProductNodeEvent event) {
                     final ProductNode sourceNode = event.getSourceNode();
                     final String sourceNodeName = sourceNode.getName();
-                    if (!nodeName.equals(sourceNodeName)) {
-                        return;
-                    }
-                    if (!(sourceNode instanceof VectorDataNode)) {
-                        return;
-                    }
+                    if (!vectorDataNodeName.equals(sourceNodeName)) return;
+                    if (!(sourceNode instanceof VectorDataNode)) return;
                     product.removeProductNodeListener(this);
                     imageConfig.setValue(propertyName, sourceNode);
                 }
             });
+        } else {
+            imageConfig.setValue(propertyName, vectorDataNode);
         }
     }
 

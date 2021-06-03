@@ -1626,7 +1626,7 @@ public class Product extends ProductNode {
                 listeners = new ArrayList<>();
             }
             if (!listeners.contains(listener)) {
-                listeners.add(listener);
+                listeners.add(0, listener);
                 return true;
             }
         }
