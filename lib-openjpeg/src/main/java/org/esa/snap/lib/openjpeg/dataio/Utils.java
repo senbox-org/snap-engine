@@ -28,6 +28,8 @@ import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class Utils {
 
@@ -169,6 +171,13 @@ public class Utils {
         } catch (NoSuchAlgorithmException exception) {
             return null;
         }
+    }
+
+    public static String getChecksum(String input) {
+        final Checksum checksum = new CRC32();
+        final byte[] bytes = input.getBytes();
+        checksum.update(bytes, 0, bytes.length);
+        return Long.toHexString(checksum.getValue());
     }
 
 }

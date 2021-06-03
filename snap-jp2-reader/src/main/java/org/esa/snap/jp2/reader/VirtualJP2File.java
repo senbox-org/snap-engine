@@ -1,9 +1,9 @@
 package org.esa.snap.jp2.reader;
 
-import org.esa.snap.engine_utilities.file.AbstractFile;
-import org.esa.snap.engine_utilities.util.PathUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.engine_utilities.file.AbstractFile;
+import org.esa.snap.engine_utilities.util.PathUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,10 +66,10 @@ public class VirtualJP2File extends AbstractFile implements JP2LocalFile {
 
         String md5sum = getMD5sum(inputFile.toString());
         if (md5sum == null) {
-            throw new IOException("Unable to get md5sum of path " + inputFile.toString());
+            throw new IOException("Unable to get md5sum of path " + inputFile);
         }
 
-        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "snap", "jp2-reader", version, md5sum, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
+        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "snap", "jp2-reader", version, md5sum);//, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
         if (!Files.exists(localCacheFolder)) {
             Files.createDirectories(localCacheFolder);
         }
