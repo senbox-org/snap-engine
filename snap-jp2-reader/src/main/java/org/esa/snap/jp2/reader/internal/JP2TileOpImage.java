@@ -29,8 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
 /**
  * A JAI operator for handling JP2 tiles.
@@ -74,12 +72,10 @@ public class JP2TileOpImage extends SourcelessOpImage {
         String openJp2 = OpenJpegExecRetriever.getOpenJp2();
         this.useOpenJp2Jna = openJp2 != null && this.bandData.getBandCount() == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
         try {
-            final Checksum checksum = new CRC32();
-            final byte[] bytes = PathUtils.getFileNameWithoutExtension(getLocalImageFile()).toLowerCase().getBytes();
-            checksum.update(bytes, 0, bytes.length);
-            this.tileFilePrefix = Long.toHexString(checksum.getValue());
+            this.tileFilePrefix = Utils.getChecksum(PathUtils.getFileNameWithoutExtension(getLocalImageFile()));
         } catch (IOException e) {
             logger.severe(e.getMessage());
+            this.tileFilePrefix = Utils.getChecksum(this.bandData.getJp2ImageFile().toString());
         }
     }
 

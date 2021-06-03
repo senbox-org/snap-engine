@@ -2,6 +2,7 @@ package org.esa.snap.lib.openjpeg.dataio;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.lib.openjpeg.dataio.library.Callbacks;
 import org.esa.snap.lib.openjpeg.dataio.library.Constants;
 import org.esa.snap.lib.openjpeg.dataio.library.Enums;
@@ -10,21 +11,10 @@ import org.esa.snap.lib.openjpeg.dataio.struct.DecompressParams;
 import org.esa.snap.lib.openjpeg.dataio.struct.DecompressionCodec;
 import org.esa.snap.lib.openjpeg.dataio.struct.Image;
 import org.esa.snap.lib.openjpeg.dataio.struct.ImageComponent;
-import org.esa.snap.core.util.SystemUtils;
 import sun.awt.image.SunWritableRaster;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.PixelInterleavedSampleModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,10 +75,12 @@ public class OpenJP2Decoder implements AutoCloseable {
         this.layer = layer;
         this.tileIndex = tileIndex;
         this.bandIndex = bandIndex == -1 ? 0 : bandIndex;
-        this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
+        /*this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
                 + "_" + String.valueOf(tileIndex)
                 + "_" + String.valueOf(resolution)
-                + "_" + String.valueOf(this.bandIndex) + ".raw");
+                + "_" + String.valueOf(this.bandIndex) + ".raw");*/
+        this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
+                + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
         pStream = OpenJp2.opj_stream_create_default_file_stream(file.toAbsolutePath().toString(), Constants.OPJ_STREAM_READ);
         if (pStream == null || pStream.getValue() == null)
             throw new RuntimeException("Failed to create the stream from the file");
