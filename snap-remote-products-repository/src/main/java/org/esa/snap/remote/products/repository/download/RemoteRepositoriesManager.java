@@ -515,10 +515,13 @@ public class RemoteRepositoriesManager {
             AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
 
             List<ro.cs.tao.eodata.Attribute> taoRemoteAttributes = taoProduct.getAttributes();
-            List<Attribute> remoteAttributes = new ArrayList<>(taoRemoteAttributes.size());
-            for (int k=0; k<taoRemoteAttributes.size(); k++) {
-                ro.cs.tao.eodata.Attribute remoteAttribute = taoRemoteAttributes.get(k);
-                remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
+            List<Attribute> remoteAttributes = new ArrayList<>();
+            if(taoRemoteAttributes != null){
+                remoteAttributes = new ArrayList<>(taoRemoteAttributes.size());
+                for (int k=0; k<taoRemoteAttributes.size(); k++) {
+                    ro.cs.tao.eodata.Attribute remoteAttribute = taoRemoteAttributes.get(k);
+                    remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
+                }
             }
 
             RemoteRepositoryProductImpl repositoryProduct = new RemoteRepositoryProductImpl(taoProduct.getId(), taoProduct.getName(), taoProduct.getLocation(), mission, geometry, taoProduct.getAcquisitionDate(), taoProduct.getApproximateSize());
