@@ -22,7 +22,6 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 public class AsterElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
     private static final String NAME = "ASTER 1sec GDEM";
-    //private static final String DB_FILE_SUFFIX = ".TIF";
     private static final int NUM_X_TILES = 360;
     private static final int NUM_Y_TILES = 166;
     private static final int DEGREE_RES = 1;

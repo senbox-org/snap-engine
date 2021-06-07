@@ -73,7 +73,7 @@ public final class AsterElevationModel extends BaseElevationModel {
         try {
             for (File f : files) {
                 final String name = f.getName().toLowerCase();
-                if (name.startsWith("tiles_") && name.endsWith(".zip")) {
+                if ((name.startsWith("download_") || name.startsWith("tiles_")) && name.endsWith(".zip")) {
                     FileUnpacker.unpackZip(f, parentFolder, null);
                     f.delete();
                 }
