@@ -1,0 +1,10 @@
++++ b/ceres-binding/src/main/java/com/bc/ceres/binding/PropertyDescriptor.java
++++ b/ceres-ui/src/main/java/com/bc/ceres/swing/binding/BindingContext.java
++++ b/ceres-ui/src/main/java/com/bc/ceres/swing/binding/PropertyPane.java
++++ b/snap-core/src/main/java/org/esa/snap/core/datamodel/ColorBar.java
++++ b/snap-core/src/main/java/org/esa/snap/core/datamodel/ColorBarInfo.java
++++ b/snap-core/src/main/java/org/esa/snap/core/datamodel/ImageLegend.java
++++ b/snap-core/src/main/java/org/esa/snap/core/layer/ColorBarLayer.java
++++ b/snap-core/src/main/java/org/esa/snap/core/layer/ColorBarLayerType.java
++++ b/snap-core/src/main/java/org/esa/snap/core/layer/ColorBarParamInfo.java
++++ b/snap-core/src/main/resources/META-INF/services/com.bc.ceres.glayer.LayerType
