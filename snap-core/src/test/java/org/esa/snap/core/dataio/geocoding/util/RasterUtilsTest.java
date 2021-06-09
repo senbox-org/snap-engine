@@ -1,10 +1,20 @@
 package org.esa.snap.core.dataio.geocoding.util;
 
-import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.AMSRE;
+import org.esa.snap.core.dataio.geocoding.AMSUB;
+import org.esa.snap.core.dataio.geocoding.Discontinuity;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.MERIS;
+import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class RasterUtilsTest {
 
@@ -39,6 +49,35 @@ public class RasterUtilsTest {
 
         assertTrue(RasterUtils.containsAntiMeridian(AMSUB.AMSUB_POLE_LON, 25));
         assertTrue(RasterUtils.containsAntiMeridian(AMSUB.AMSUB_ANTI_MERID_LON, 30));
+    }
+
+    @Test
+    public void testFindPoleCandidates() {
+        double[] longitudes = new double[]{
+                14.37, 32.99, 97.55, 144.09,
+                2.05, 11.87, 115.3, 160.25,
+                -11.13, -15.76, -151.63, 178.72,
+                -23.9, -40.01, -115.36, -163.88
+        };
+        double[] latitudes = new double[]{
+                89.998, 89.959, 89.973, 89.946,
+                89.932, 89.967, 89.987, 89.951,
+                89.932, 89.968, 89.992, 89.952,
+                89.930, 89.962, 89.979, 89.948
+        };
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, null, null, 4, 4, 1.0);
+
+        final double deltaToPole = RasterUtils.getLatDeltaToPole(10);
+        double maxLat = 90.0 - deltaToPole;
+        double minLat = -90.0 + deltaToPole;
+
+        final ArrayList<PixelPos> poleCandidates = RasterUtils.findPoleCandidates(geoRaster, maxLat, minLat);
+        assertEquals(4, poleCandidates.size()); // edge pixels are excluded
+        for (PixelPos pixelPos : poleCandidates) {
+            if (pixelPos.x == 0 || pixelPos.y == 0 || pixelPos.x == 3 && pixelPos.y == 3) {
+                fail("Pole candidate position [" + pixelPos.x + "," + pixelPos.y + "] not expected");
+            }
+        }
     }
 
     @Test
