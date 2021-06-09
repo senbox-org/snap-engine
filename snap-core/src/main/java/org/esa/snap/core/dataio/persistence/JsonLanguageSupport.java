@@ -31,14 +31,14 @@ public class JsonLanguageSupport implements MarkupLanguageSupport<Map<String, Ob
     public static final String ATT_PREFIX = "_$ATT$_";
 
     @Override
-    public Map<String, Object> translateToLanguageObject(Item item) {
+    public <T> T translateToLanguageObject(Item item) {
         final Map<String, Object> map = new LinkedHashMap<>();
         if (item.isProperty()) {
             addProperty(map, item.asProperty());
         } else {
             addContainer(map, item.asContainer());
         }
-        return map;
+        return (T) map;
     }
 
     @Override

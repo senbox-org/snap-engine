@@ -20,7 +20,7 @@ package org.esa.snap.core.dataio.persistence;
 
 public interface MarkupLanguageSupport<T> {
 
-    T translateToLanguageObject(Item item);
+    <U> U translateToLanguageObject(Item item);
 
     Item translateToItem(T languageObject);
 
