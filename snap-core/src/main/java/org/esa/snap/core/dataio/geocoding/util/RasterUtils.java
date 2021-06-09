@@ -20,7 +20,6 @@ package org.esa.snap.core.dataio.geocoding.util;
 
 import org.esa.snap.core.dataio.geocoding.Discontinuity;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -29,7 +28,8 @@ import org.esa.snap.core.util.math.SphericalDistance;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.datum.Ellipsoid;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
@@ -228,15 +228,17 @@ public class RasterUtils {
         }
     }
 
-    // returns al (x/y) positions that have a latitude above the defined pole-angle threshold
-    private static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {
+    // returns all (x/y) positions that have a latitude above the defined pole-angle threshold
+    static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {
         final ArrayList<PixelPos> poleCandidates = new ArrayList<>();
 
         final double[] latitudes = geoRaster.getLatitudes();
         final int rasterWidth = geoRaster.getRasterWidth();
-        for (int y = 0; y < geoRaster.getRasterHeight(); y++) {
+        final int rasterHeight = geoRaster.getRasterHeight();
+        // skip boundary pixels, subsequent longitude iteration will fail, if candidate is on the edge of the scene
+        for (int y = 1; y < rasterHeight - 1; y++) {
             final int lineOffset = y * rasterWidth;
-            for (int x = 0; x < rasterWidth; x++) {
+            for (int x = 1; x < rasterWidth - 1; x++) {
                 final double lat = latitudes[lineOffset + x];
                 if ((lat >= maxLat) || (lat <= minLat)) {
                     poleCandidates.add(new PixelPos(x, y));
@@ -282,10 +284,6 @@ public class RasterUtils {
         final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
 
         return distanceMeanRadian * meanEarthRadiusKm;
-    }
-
-    public static void printPointWkt(GeoPos geoPos) {
-        System.out.println("POINT( " + geoPos.lon + " " + geoPos.lat + ")");
     }
 
     private static Rectangle getCenterExtractWindow(int width, int height) {
