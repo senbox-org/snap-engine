@@ -42,7 +42,10 @@ class SwiftAuthMockService {
     }
 
     static boolean isValidToken(String token) {
-        return token.contentEquals(TOKEN) && expirationDate != null && expirationDate.isAfter(LocalDateTime.now(ZoneOffset.UTC));
+        LocalDateTime nowTime = LocalDateTime.now(ZoneOffset.UTC);
+        boolean validToken = token.contentEquals(TOKEN) && expirationDate != null && expirationDate.isAfter(nowTime);
+        Logger.getLogger(SwiftAuthMockService.class.getName()).info("Swift Auth mock service token validation:\n- user token: " + token + "\n- expected token: " + TOKEN + "\n- expiration date: " + expirationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")) + "\n- validation date (now): " + nowTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")) + "\n- valid token: " + validToken);
+        return validToken;
     }
 
     void start() {
