@@ -75,6 +75,14 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_GENERAL_SECTION_LABEL = "Standard Options";
     public static final String PROPERTY_GENERAL_SECTION_TOOLTIP = "General behavior when not using a " + COLOR_LOWER_CASE + " scheme";
 
+
+    public static final String PROPERTY_GENERAL_CUSTOM_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".custom";
+    public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Use Standard Options as Default";
+    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Use Standard Options as default<br>" +
+            " when opening a band<br>otherwise use settings from the file reader.</html>";
+    public static final boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
+
+
     public static final String PROPERTY_GENERAL_PALETTE_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".palette";
     public static final String PROPERTY_GENERAL_PALETTE_LABEL = "Palette";
     public static final String PROPERTY_GENERAL_PALETTE_TOOLTIP = "The color palette file to use when NOT using a " + COLOR_LOWER_CASE + " scheme";
@@ -101,6 +109,10 @@ public class ColorManipulationDefaults {
 
 
 
+
+
+
+
     // Scheme option
 
     private static final String PROPERTY_SCHEME_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".scheme";
@@ -115,6 +127,11 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE +" schemes automatically<br>" +
             " when opening a band based on its name</html>";
     public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
+
+
+
+
+
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
     public static final String PROPERTY_SCHEME_PALETTE_LABEL = "Palette";
@@ -272,7 +289,7 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_PALETTE_DEFAULT_SECTION_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".section";
     public static final String PROPERTY_PALETTE_DEFAULT_SECTION_LABEL = "Default Palettes";
-    public static final String PROPERTY_PALETTE_DEFAULT_SECTION_TOOLTIP = "Palettes to use";
+    public static final String PROPERTY_PALETTE_DEFAULT_SECTION_TOOLTIP = "Palettes to use with associated variables name";
 
     public static final String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".gray.scale";
     public static final String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_LABEL = OPTION_COLOR_GRAY_SCALE;

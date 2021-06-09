@@ -32,7 +32,7 @@ public final class AsterElevationTile extends BaseElevationTile {
         egm = EarthGravitationalModel96.instance();
     }
 
-    protected void addGravitationalModel(final int index, final float[] line) throws Exception {
+    protected void addGravitationalModel(final int index, final float[] line) {
         final GeoPos geoPos = new GeoPos();
         final TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, 0, index, line.length, 1);
         final double[][] v = new double[4][4];
