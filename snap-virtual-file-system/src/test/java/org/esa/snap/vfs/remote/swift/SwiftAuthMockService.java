@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +43,10 @@ class SwiftAuthMockService {
     }
 
     static boolean isValidToken(String token) {
-        return token.contentEquals(TOKEN) && expirationDate != null && expirationDate.isAfter(LocalDateTime.now(ZoneOffset.UTC));
+        LocalDateTime nowTime = LocalDateTime.now(ZoneOffset.UTC);
+        boolean validToken = token.contentEquals(TOKEN) && expirationDate != null && expirationDate.isAfter(nowTime);
+        Logger.getLogger(SwiftAuthMockService.class.getName()).info("Swift Auth mock service token validation:\n-user token:" + token + "\n-expected token: " + TOKEN + "\nexpiration date: " + (new SimpleDateFormat("mm:ss:SSS")).format(expirationDate) + "\n-now time: " + (new SimpleDateFormat("mm:ss:SSS")).format(nowTime) + "\n-valid token: " + validToken);
+        return validToken;
     }
 
     void start() {
