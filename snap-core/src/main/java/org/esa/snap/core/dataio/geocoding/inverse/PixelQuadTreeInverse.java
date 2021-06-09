@@ -35,9 +35,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import static org.esa.snap.core.dataio.geocoding.inverse.Segment.MIN_DIMENSION;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ACROSS;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ALONG;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.INSIDE;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.*;
 
 public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
@@ -394,7 +392,10 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 lon_r = geoPos.lon;
             }
 
-            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
+            final int segmentMinY = segment.y_min + MIN_DIMENSION;
+            final int segmentMaxY  = segment.y_max - MIN_DIMENSION;
+            if ((y_l < segmentMinY || y_l > segmentMaxY) &&
+                    (y_r < segmentMinY || y_r > segmentMaxY) ) {
                 // antimeridian not passing through segment in a way that enables across-swath splitting
                 return new Segment[0];
             }
@@ -432,7 +433,9 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
                 lon_b = geoPos.lon;
             }
-            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+            final int segmentMinX = segment.x_min + MIN_DIMENSION;
+            final int segmentMaxX = segment.x_max - MIN_DIMENSION;
+            if ((x_t < segmentMinX || x_t > segmentMaxX) && (x_b < segmentMinX || x_b > segmentMaxX)) {
                 // antimeridian not passing through segment in a way that enables across-swath splitting
                 return new Segment[0];
             }
