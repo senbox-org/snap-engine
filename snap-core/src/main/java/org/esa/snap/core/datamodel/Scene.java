@@ -19,7 +19,7 @@ package org.esa.snap.core.datamodel;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 
 /**
- * Represents a geo-coded scene. This interface is not ment to be implemented by clients.
+ * Represents a geo-coded scene. This interface is not meant to be implemented by clients.
  */
 public interface Scene {
 
@@ -34,5 +34,7 @@ public interface Scene {
     int getRasterHeight();
 
     Product getProduct();
+
+    boolean isSameRasterSize(Scene other);
 }
 
