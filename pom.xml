@@ -100,6 +100,7 @@
         <module>snap-unmix</module>
         <module>snap-virtual-file-system</module>
         <module>snap-watermask</module>
+        <module>snap-zarr</module>
         <module>blue-marble-worldmap</module>
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
@@ -635,6 +636,13 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.1</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.9.1</version>
                 <scope>test</scope>
             </dependency>
 
