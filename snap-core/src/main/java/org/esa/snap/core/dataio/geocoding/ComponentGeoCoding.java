@@ -135,7 +135,9 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         transferRequiredRasters(srcScene, destScene, subsetDef);
 
-        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+        // rasters are of same size, we can re-use the one we have in RAM tb 2021-06-10
+        if (srcScene.isSameRasterSize(destScene) ||
+                (subsetDef != null && subsetDef.isEntireProductSelected())) {
             destScene.setGeoCoding(clone());
             return true;
         }
@@ -258,6 +260,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding clone = new ComponentGeoCoding(geoRaster, cloneForward, cloneInverse, geoChecks);
 
         clone.isInitialized = this.isInitialized;
+        clone.isCrossingAntiMeridian = this.isCrossingAntiMeridian;
 
         return clone;
     }
