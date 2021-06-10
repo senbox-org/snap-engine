@@ -692,6 +692,11 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         }
 
         final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+        if (idx < 0 || idx >= epsilonLon.length) {
+            // this might be triggered by fillValue pixels tb 2021-06-10
+            return false;
+        }
+
         final double epsLon = epsilonLon[idx];
         if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lonArray)) {
             boolean lonOutside = false;
