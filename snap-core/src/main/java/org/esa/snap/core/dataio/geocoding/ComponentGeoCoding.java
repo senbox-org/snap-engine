@@ -2,16 +2,7 @@ package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.AbstractGeoCoding;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -144,7 +135,9 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         transferRequiredRasters(srcScene, destScene, subsetDef);
 
-        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+        // rasters are of same size, we can re-use the one we have in RAM tb 2021-06-10
+        if (srcScene.isSameRasterSize(destScene) ||
+                (subsetDef != null && subsetDef.isEntireProductSelected())) {
             destScene.setGeoCoding(clone());
             return true;
         }
@@ -267,6 +260,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding clone = new ComponentGeoCoding(geoRaster, cloneForward, cloneInverse, geoChecks);
 
         clone.isInitialized = this.isInitialized;
+        clone.isCrossingAntiMeridian = this.isCrossingAntiMeridian;
 
         return clone;
     }

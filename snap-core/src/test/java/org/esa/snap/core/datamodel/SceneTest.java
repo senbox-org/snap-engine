@@ -17,13 +17,18 @@
 package org.esa.snap.core.datamodel;
 
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.math.FXYSum;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SceneTest extends TestCase {
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class SceneTest {
 
     private Product _srcProduct;
     private Band _srcBand1;
@@ -33,7 +38,7 @@ public class SceneTest extends TestCase {
     private Band _destBand2;
     private ProductSubsetDef _subsetDef;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _srcProduct = new Product("srcProduct", "pType", 100, 200);
         _srcBand1 = _srcProduct.addBand("Band1", ProductData.TYPE_INT8);
@@ -48,8 +53,8 @@ public class SceneTest extends TestCase {
         _subsetDef.setSubSampling(2, 2);
     }
 
+    @Test
     public void testTransferGCFromProductToProduct() {
-
         final AbstractGeoCoding geoCoding = createFXYSumGeoCoding();
         _srcProduct.setSceneGeoCoding(geoCoding);
         final Scene srcScene = SceneFactory.createScene(_srcProduct);
@@ -62,11 +67,10 @@ public class SceneTest extends TestCase {
         assertTrue(_destProduct.isUsingSingleGeoCoding());
         assertSame(_destBand1.getGeoCoding(), _destProduct.getSceneGeoCoding());
         assertSame(_destBand2.getGeoCoding(), _destProduct.getSceneGeoCoding());
-
     }
 
+    @Test
     public void testTransferGCFromBandToProduct() {
-
         final AbstractGeoCoding geoCoding = createFXYSumGeoCoding();
         _srcBand1.setGeoCoding(geoCoding);
         final Scene srcScene = SceneFactory.createScene(_srcBand1);
@@ -79,11 +83,10 @@ public class SceneTest extends TestCase {
         assertTrue(_destProduct.isUsingSingleGeoCoding());
         assertSame(_destBand1.getGeoCoding(), _destProduct.getSceneGeoCoding());
         assertSame(_destBand2.getGeoCoding(), _destProduct.getSceneGeoCoding());
-
     }
 
+    @Test
     public void testTransferGCFromProductToBand() {
-
         final AbstractGeoCoding geoCoding = createFXYSumGeoCoding();
         _srcProduct.setSceneGeoCoding(geoCoding);
         _destBand2.setGeoCoding(createFXYSumGeoCoding());
@@ -101,8 +104,8 @@ public class SceneTest extends TestCase {
         assertNotSame(_destBand1.getGeoCoding(), _destBand2.getGeoCoding());
     }
 
+    @Test
     public void testTransferBandedGCFromProductToProduct() {
-
         final AbstractGeoCoding geoCoding1 = createFXYSumGeoCoding();
         _srcBand1.setGeoCoding(geoCoding1);
         final AbstractGeoCoding geoCoding2 = createFXYSumGeoCoding();
@@ -121,8 +124,8 @@ public class SceneTest extends TestCase {
         assertNotSame(_destBand2.getGeoCoding(), geoCoding2);
     }
 
+    @Test
     public void testTransferBandedGCFromProductToBand() {
-
         final AbstractGeoCoding geoCoding1 = createFXYSumGeoCoding();
         _srcBand1.setGeoCoding(geoCoding1);
         final AbstractGeoCoding geoCoding2 = createFXYSumGeoCoding();
@@ -141,6 +144,31 @@ public class SceneTest extends TestCase {
         assertNotSame(_destBand1.getGeoCoding(), _destBand2.getGeoCoding());
     }
 
+    @Test
+    public void testIsSameRasterSize() {
+        final Scene scene_1 = mock(Scene.class);
+        when(scene_1.getRasterWidth()).thenReturn(100);
+        when(scene_1.getRasterHeight()).thenReturn(300);
+
+        final Scene scene_2 = mock(Scene.class);
+        when(scene_2.getRasterWidth()).thenReturn(100);
+        when(scene_2.getRasterHeight()).thenReturn(300);
+
+        assertTrue(SceneFactory.isSameRasterSize(scene_1, scene_2));
+    }
+
+    @Test
+    public void testIsSameRasterSize_different() {
+        final Scene scene_1 = mock(Scene.class);
+        when(scene_1.getRasterWidth()).thenReturn(100);
+        when(scene_1.getRasterHeight()).thenReturn(300);
+
+        final Scene scene_2 = mock(Scene.class);
+        when(scene_2.getRasterWidth()).thenReturn(101);
+        when(scene_2.getRasterHeight()).thenReturn(299);
+
+        assertFalse(SceneFactory.isSameRasterSize(scene_1, scene_2));
+    }
 
     private AbstractGeoCoding createFXYSumGeoCoding() {
         final AbstractGeoCoding geoCoding;
@@ -149,10 +177,9 @@ public class SceneTest extends TestCase {
         final FXYSum.Linear latFunc = new FXYSum.Linear(new double[]{0, 0, 1});
         final FXYSum.Linear lonFunc = new FXYSum.Linear(new double[]{0, 1, 0});
         geoCoding = new FXYGeoCoding(0, 0, 1, 1,
-                                     xFunc, yFunc,
-                                     latFunc, lonFunc,
-                                     Datum.WGS_84);
+                xFunc, yFunc,
+                latFunc, lonFunc,
+                Datum.WGS_84);
         return geoCoding;
     }
-
 }

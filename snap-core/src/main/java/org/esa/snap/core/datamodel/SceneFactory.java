@@ -45,6 +45,11 @@ public final class SceneFactory {
         return null;
     }
 
+    static boolean isSameRasterSize(Scene source, Scene destination) {
+        return source.getRasterWidth() == destination.getRasterWidth() &&
+                source.getRasterHeight() == destination.getRasterHeight();
+    }
+
     private static boolean transferGeoCoding(final Scene sourceScene,
                                              final Scene targetScene,
                                              final ProductSubsetDef subsetDef) {
@@ -136,6 +141,11 @@ public final class SceneFactory {
         public Product getProduct() {
             return product;
         }
+
+        @Override
+        public boolean isSameRasterSize(Scene other) {
+            return SceneFactory.isSameRasterSize(this, other);
+        }
     }
 
     private static class RasterDataNodeScene implements Scene {
@@ -178,6 +188,11 @@ public final class SceneFactory {
             }
 
             return product;
+        }
+
+        @Override
+        public boolean isSameRasterSize(Scene other) {
+            return SceneFactory.isSameRasterSize(this, other);
         }
     }
 }
