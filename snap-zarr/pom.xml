@@ -16,11 +16,6 @@
 
     <packaging>nbm</packaging>
 
-    <properties>
-        <javahelp.version>2.0.05</javahelp.version>
-        <netbeans.version>RELEASE82</netbeans.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -68,8 +63,8 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
         </dependency>
-
     </dependencies>
+
     <repositories>
         <repository>
             <id>snap-repo-public</id>
@@ -85,6 +80,7 @@
             </snapshots>
         </repository>
     </repositories>
+
     <build>
         <plugins>
             <plugin>
