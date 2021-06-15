@@ -18,17 +18,17 @@
 
 package org.esa.snap.core.dataio.geocoding;
 
+import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.dataio.persistence.Container;
-import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.ProductNodeEvent;
-import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
@@ -76,8 +76,8 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         }
         final Container container = item.asContainer();
 
-        final String forwardKey = container.getProperty(NAME_FORWARD_CODING_KEY).getValueString();
-        final String inverseKey = container.getProperty(NAME_INVERSE_CODING_KEY).getValueString();
+        String forwardKey = container.getProperty(NAME_FORWARD_CODING_KEY).getValueString();
+        String inverseKey = container.getProperty(NAME_INVERSE_CODING_KEY).getValueString();
         final String geoChecksName = container.getProperty(NAME_GEO_CHECKS).getValueString();
         final String geoCrsWKT = container.getProperty(NAME_GEO_CRS).getValueString();
         final String lonVarName = container.getProperty(NAME_LON_VARIABLE_NAME).getValueString();
@@ -227,6 +227,14 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
 
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
                                       resolutionInKm);
+        }
+
+        final boolean isFractionalEnabled = Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY);
+        if (isFractionalEnabled && PixelForward.KEY.equals(forwardKey)) {
+            forwardKey = PixelInterpolatingForward.KEY;
+        }
+        if (isFractionalEnabled && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
         }
 
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
