@@ -1,7 +1,10 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Layer: org/esa/snap/dataio/znap/layer.xml
+OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
+AutoUpdate-Show-In-Client: false
+AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP Supported Plugins
+OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>BETA version of a new ZARR based
  standard IO format for SNAP. We like to hear your feedback. Please
  have a look into the help for more information.</p>
