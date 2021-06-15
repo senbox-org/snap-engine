@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
-package org.esa.snap.dataio.znap.snap;
+package org.esa.snap.dataio.znap;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
@@ -66,8 +68,8 @@ import java.util.prefs.Preferences;
 import static org.esa.snap.core.util.StringUtils.isNotNullAndNotEmpty;
 import static org.esa.snap.core.util.SystemUtils.LOG;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.*;
-import static org.esa.snap.dataio.znap.snap.CFConstantsAndUtils.*;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.*;
+import static org.esa.snap.dataio.znap.CFConstantsAndUtils.*;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.*;
 import static ucar.nc2.constants.ACDD.TIME_END;
 import static ucar.nc2.constants.ACDD.TIME_START;
 import static ucar.nc2.constants.CDM.FILL_VALUE;
@@ -244,10 +246,22 @@ public class ZarrProductWriter extends AbstractProductWriter {
     }
 
     private void collectProductGeoCodingAttrs(Map<String, Object> attrs) throws ProductIOException {
-        final GeoCoding gc = getSourceProduct().getSceneGeoCoding();
+        final Product product = getSourceProduct();
+        final GeoCoding gc = product.getSceneGeoCoding();
         if (gc != null) {
             attrs.put(ATT_NAME_GEOCODING, getGeoCodingAttributes(gc));
         }
+        final String[] coordinateVarNames = {"lat", "latitude", "lon", "longitunde"};
+        final ArrayList<Object> coordNames = new ArrayList<>();
+
+        for (String coordinateVarName : coordinateVarNames) {
+            final RasterDataNode rasterDataNode = product.getRasterDataNode(coordinateVarName);
+            if (rasterDataNode == null) {
+                continue;
+            }
+//            rasterDataNode.getRasterHeight()
+        }
+
     }
 
     private void collectGeneralProductAttrs(Map<String, Object> attrs) {
@@ -307,14 +321,13 @@ public class ZarrProductWriter extends AbstractProductWriter {
             attributes.put(UNITS, tryFindUnitString(rdNode.getUnit()));
         }
         final int nodeDataType = rdNode.getDataType();
-        if (ProductData.isUIntType(nodeDataType)) {
-            attributes.put(UNSIGNED, String.valueOf(true));
-        }
-
         // TODO: 22.07.2019 SE -- shall log10 scaled really be prohibited
         final Number noDataValue;
         if (!rdNode.isLog10Scaled()) {
 
+            if (ProductData.isUIntType(nodeDataType)) {
+                attributes.put(UNSIGNED, String.valueOf(true));
+            }
             if (rdNode.getScalingFactor() != 1.0) {
                 attributes.put(SCALE_FACTOR, rdNode.getScalingFactor());
             }
@@ -671,7 +684,9 @@ public class ZarrProductWriter extends AbstractProductWriter {
     private Map<String, Object> collectTiePointGridAttributes(TiePointGrid tiePointGrid) {
         final Map<String, Object> attributes = new HashMap<>();
         collectVersion(attributes);
-        putArrayDimensions(attributes, tiePointGrid.getGridWidth(), tiePointGrid.getGridHeight());
+        final String xName = dimensionNameGenerator.getDimensionNameFor("xt", tiePointGrid.getGridWidth());
+        final String yName = dimensionNameGenerator.getDimensionNameFor("yt", tiePointGrid.getGridHeight());
+        attributes.put("_ARRAY_DIMENSIONS", new String[]{yName, xName});
         collectRasterAttributes(tiePointGrid, attributes);
         attributes.put(ATT_NAME_OFFSET_X, tiePointGrid.getOffsetX());
         attributes.put(ATT_NAME_OFFSET_Y, tiePointGrid.getOffsetY());
@@ -685,12 +700,6 @@ public class ZarrProductWriter extends AbstractProductWriter {
             attributes.put(DISCONTINUITY, discontinuity);
         }
         return attributes;
-    }
-
-    private void putArrayDimensions(Map<String, Object> attributes, int xDim, int yDim) {
-        final String xName = dimensionNameGenerator.getDimensionNameFor("x", xDim);
-        final String yName = dimensionNameGenerator.getDimensionNameFor("y", yDim);
-        attributes.put("_ARRAY_DIMENSIONS", new String[]{yName, xName});
     }
 
     private void trimChunks(int[] chunks, int[] shape) {
@@ -767,7 +776,9 @@ public class ZarrProductWriter extends AbstractProductWriter {
     private Map<String, Object> collectBandAttributes(Band band) throws ProductIOException {
         final Map<String, Object> bandAttributes = new LinkedHashMap<>();
         collectVersion(bandAttributes);
-        putArrayDimensions(bandAttributes, band.getRasterWidth(), band.getRasterHeight());
+        final String xName = dimensionNameGenerator.getDimensionNameFor("x", band.getRasterWidth());
+        final String yName = dimensionNameGenerator.getDimensionNameFor("y", band.getRasterHeight());
+        bandAttributes.put("_ARRAY_DIMENSIONS", new String[]{yName, xName});
         collectBandAttributes(band, bandAttributes);
         collectSampleCodingAttributes(band, bandAttributes);
         collectVirtualBandAttributes(band, bandAttributes);

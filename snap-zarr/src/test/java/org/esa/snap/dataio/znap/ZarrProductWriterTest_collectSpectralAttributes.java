@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
-package org.esa.snap.dataio.znap.snap;
+package org.esa.snap.dataio.znap;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
@@ -23,11 +25,11 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.BANDWIDTH;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.SOLAR_FLUX;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.UNIT_EXTENSION;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.WAVELENGTH;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.BANDWIDTH;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SOLAR_FLUX;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.UNIT_EXTENSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 

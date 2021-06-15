@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
-package org.esa.snap.dataio.znap.snap;
+package org.esa.snap.dataio.znap;
 
 import org.esa.snap.TestHelper;
 import org.esa.snap.core.dataio.ProductIOException;
@@ -28,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.cast;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.cast;
 
 public class ZarrProductWriterTest_collectOriginalRasterDataNodeOrder {
 

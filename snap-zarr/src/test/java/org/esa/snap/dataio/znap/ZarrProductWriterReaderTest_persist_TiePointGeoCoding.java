@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
-package org.esa.snap.dataio.znap.snap;
+package org.esa.snap.dataio.znap;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -92,8 +94,11 @@ public class ZarrProductWriterReaderTest_persist_TiePointGeoCoding {
     @Test
     public void writeAndRead() throws IOException {
         final Path tempDirectory = createTempDirectory();
-        productWriter.writeProductNodes(product, tempDirectory);
-        final Product readIn = productReader.readProductNodes(tempDirectory, null);
+        productWriter.writeProductNodes(product, tempDirectory.resolve("out.znap"));
+        final Path input = Files.list(tempDirectory)
+                .filter(path -> path.getFileName().toString().startsWith("out.znap"))
+                .collect(Collectors.toList()).get(0);
+        final Product readIn = productReader.readProductNodes(input, null);
 
         assertNotNull(readIn);
         assertEquals(product.getSceneRasterWidth(), readIn.getSceneRasterWidth());

@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
+ *
  */
 
-package org.esa.snap.dataio.znap.snap;
+package org.esa.snap.dataio.znap;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.zarr.DataType;
@@ -91,53 +93,53 @@ import java.util.stream.Collectors;
 import static org.esa.snap.core.util.Guardian.assertNotNull;
 import static org.esa.snap.core.util.Guardian.assertNotNullOrEmpty;
 import static org.esa.snap.core.util.SystemUtils.LOG;
-import static org.esa.snap.dataio.znap.snap.CFConstantsAndUtils.FLAG_MASKS;
-import static org.esa.snap.dataio.znap.snap.CFConstantsAndUtils.FLAG_MEANINGS;
-import static org.esa.snap.dataio.znap.snap.CFConstantsAndUtils.FLAG_VALUES;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_BINARY_FORMAT;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_GEOCODING;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_X;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_Y;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_DESC;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_METADATA;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_NAME;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_HEIGHT;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_WIDTH;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_TYPE;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_SUBSAMPLING_X;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.ATT_NAME_SUBSAMPLING_Y;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.BANDWIDTH;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.COLOR_PALETTE_AUTO_DISTRIBUTE;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.COLOR_PALETTE_DISCRETE;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.COLOR_PALETTE_NUM_COLORS;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.COLOR_PALETTE_POINTS;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.COLOR_RGBA;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.DATASET_AUTO_GROUPING;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.DISCONTINUITY;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.FLAG_DESCRIPTIONS;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.HISTOGRAM_MATCHING;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.IMAGE_INFO;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.LABEL;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.LOG_10_SCALED;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.NAME_MASKS;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.NAME_SAMPLE_CODING;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.SAMPLE;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.SOLAR_FLUX;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.STATISTICS;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.UNCERTAINTY_BAND_NAME;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.UNCERTAINTY_VISUALISATION_MODE;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.VALID_PIXEL_EXPRESSION;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.VIRTUAL_BAND_EXPRESSION;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.WAVELENGTH;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.cast;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.convertToPath;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.getSnapDataType;
-import static org.esa.snap.dataio.znap.snap.ZnapConstantsAndUtils.listToMetadata;
+import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MASKS;
+import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MEANINGS;
+import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_VALUES;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_BINARY_FORMAT;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_GEOCODING;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_X;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_Y;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_DESC;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_METADATA;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_NAME;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_HEIGHT;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_WIDTH;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_TYPE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_SUBSAMPLING_X;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_SUBSAMPLING_Y;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.BANDWIDTH;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.COLOR_PALETTE_AUTO_DISTRIBUTE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.COLOR_PALETTE_DISCRETE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.COLOR_PALETTE_NUM_COLORS;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.COLOR_PALETTE_POINTS;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.COLOR_RGBA;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.DATASET_AUTO_GROUPING;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.DISCONTINUITY;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.FLAG_DESCRIPTIONS;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.HISTOGRAM_MATCHING;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.IMAGE_INFO;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LABEL;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LOG_10_SCALED;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_MASKS;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_SAMPLE_CODING;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SAMPLE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SOLAR_FLUX;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.STATISTICS;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.UNCERTAINTY_BAND_NAME;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.UNCERTAINTY_VISUALISATION_MODE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VALID_PIXEL_EXPRESSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VIRTUAL_BAND_EXPRESSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.cast;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.getSnapDataType;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.listToMetadata;
 import static ucar.nc2.constants.ACDD.TIME_END;
 import static ucar.nc2.constants.ACDD.TIME_START;
 import static ucar.nc2.constants.CDM.FILL_VALUE;
