@@ -592,7 +592,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         String compressorID = getPreference(PROPERTY_NAME_COMPRESSOR_ID, DEFAULT_COMPRESSOR_ID);
         compressorID = compressorID != null ? compressorID.trim() : null;
         if (!DEFAULT_COMPRESSOR_ID.equals(compressorID)) {
-            LOG.info("Znap format product writer will use '" + compressorID + "' compression.");
+            LOG.fine("Znap format product writer will use '" + compressorID + "' compression.");
         }
         return compressorID;
     }
@@ -601,7 +601,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         final String value = getPreference(PROPERTY_NAME_COMPRESSION_LEVEL, "" + DEFAULT_COMPRESSION_LEVEL);
         final int compressionLevel = Integer.parseInt(value);
         if (compressionLevel != DEFAULT_COMPRESSION_LEVEL) {
-            LOG.info("Znap format product writer will use " + compressionLevel + " compression level.");
+            LOG.fine("Znap format product writer will use " + compressionLevel + " compression level.");
         }
         return compressionLevel;
     }
@@ -612,7 +612,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         final boolean useZipArchive = Boolean.parseBoolean(value);
         if (useZipArchive != DEFAULT_USE_ZIP_ARCHIVE) {
             final String insert = useZipArchive ? "" : "not ";
-            LOG.info("Znap format product writer will " + insert + "write into an zip archive.");
+            LOG.fine("Znap format product writer will " + insert + "write into an zip archive.");
         }
         return useZipArchive;
     }
@@ -623,7 +623,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         if (defaultBinaryFormatName.equals(binaryFormatName)) {
             return null;
         }
-        LOG.info("Binary data in Znap format should be written as '" + binaryFormatName + "'");
+        LOG.fine("Binary data in Znap format should be written as '" + binaryFormatName + "'");
         final ProductWriterPlugIn writerPlugIn = ProductIO.getProductWriter(binaryFormatName).getWriterPlugIn();
         if (writerPlugIn == null) {
             throw new IllegalArgumentException("Unable to write binary data as '" + binaryFormatName + "'.");

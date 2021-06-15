@@ -428,7 +428,7 @@ public class ZarrProductReader extends AbstractProductReader {
         final Product product = node.getProduct();
         if (gcAttribs.containsKey(DimapProductConstants.TAG_WKT)
             && gcAttribs.containsKey(DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM)) {
-            LOG.info("Try to instantiate " + CrsGeoCoding.class.getSimpleName() + ".");
+            LOG.fine("Try to instantiate " + CrsGeoCoding.class.getSimpleName() + ".");
             final int width;
             final int height;
             if (node instanceof RasterDataNode) {
@@ -439,15 +439,15 @@ public class ZarrProductReader extends AbstractProductReader {
                 width = product.getSceneRasterWidth();
                 height = product.getSceneRasterHeight();
             }
-            LOG.info("width = " + width);
-            LOG.info("height = " + height);
+            LOG.fine("width = " + width);
+            LOG.fine("height = " + height);
             try {
                 final String wkt = cast(gcAttribs.get(DimapProductConstants.TAG_WKT));
-                LOG.info("wkt = " + wkt);
+                LOG.fine("wkt = " + wkt);
                 final CoordinateReferenceSystem crs = CRS.parseWKT(wkt);
 
                 final List<Double> matrix = cast(gcAttribs.get(DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM));
-                LOG.info("matrix = " + Arrays.toString(matrix.toArray()));
+                LOG.fine("matrix = " + Arrays.toString(matrix.toArray()));
 
                 final double[] ma = new double[matrix.size()];
                 for (int i = 0; i < matrix.size(); i++) {
@@ -461,14 +461,14 @@ public class ZarrProductReader extends AbstractProductReader {
             }
         }
 //        final String type = (String) gcAttribs.get("type");
-        LOG.info("------------------------------------------------------------------------");
+        LOG.fine("------------------------------------------------------------------------");
 //        if (StringUtils.isNotNullAndNotEmpty(type)) {
 //            LOG.info("create " + type + " for " + node.getName());
 //        }
         final Item item = languageSupport.translateToItem(gcAttribs);
         final PersistenceDecoder<GeoCoding> decoder = this.persistence.getDecoder(item);
         if (decoder != null) {
-            LOG.info("Try to instantiate geo coding: "
+            LOG.fine("Try to instantiate geo coding: "
                      + item.getName()
                      + " for " + product.getName());
             GeoCoding gc = decoder.decode(item, product);
@@ -582,7 +582,7 @@ public class ZarrProductReader extends AbstractProductReader {
         applyAncillaryElements(attributes, rasterDataNode);
         if (attributes.get(DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM) != null) {
             final List<Double> matrix = cast(attributes.get(DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM));
-            LOG.info("matrix for band '" + rasterDataNode.getName() + "' = " + Arrays.toString(matrix.toArray()));
+            LOG.fine("matrix for band '" + rasterDataNode.getName() + "' = " + Arrays.toString(matrix.toArray()));
 
             final double[] ma = new double[matrix.size()];
             for (int i = 0; i < matrix.size(); i++) {
