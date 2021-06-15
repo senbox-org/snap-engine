@@ -43,6 +43,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
@@ -141,7 +142,9 @@ public class ZarrProductReaderTest_createGeocoding_ComponentGeoCoding {
 
         logOutput = new ByteArrayOutputStream();
         handler = new StreamHandler(logOutput, new SimpleFormatter());
+        handler.setLevel(Level.FINE);
         SystemUtils.LOG.addHandler(handler);
+        SystemUtils.LOG.setLevel(Level.FINE);
     }
 
     @After
