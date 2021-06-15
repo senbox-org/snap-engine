@@ -865,7 +865,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
                 return definedDims.get(dimSize);
             } else {
                 if (definedDims.containsValue(name)) {
-                    final String newName = name + "_" + definedDims.size();
+                    final String newName = name + definedDims.size();
                     definedDims.put(dimSize, newName);
                     return newName;
                 } else {

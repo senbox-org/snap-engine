@@ -41,7 +41,7 @@ public class ZarrProductWriterTest_DimensionNameGenerator {
 
         final String firstTime_44 = generator.getDimensionNameFor("x", 44);
         final String secondTime_44 = generator.getDimensionNameFor("x", 44);
-        assertThat(firstTime_44).isEqualTo("x_1");
+        assertThat(firstTime_44).isEqualTo("x1");
         assertThat(secondTime_44).isSameAs(firstTime_44);
     }
 
@@ -60,9 +60,9 @@ public class ZarrProductWriterTest_DimensionNameGenerator {
         generator.getDimensionNameFor("c", 22);
         generator.getDimensionNameFor("d", 22);
 
-        assertThat(generator.getDimensionNameFor("a", 44)).isEqualTo("a_1");
-        assertThat(generator.getDimensionNameFor("b", 44)).isEqualTo("b_1");
-        assertThat(generator.getDimensionNameFor("c", 44)).isEqualTo("c_1");
-        assertThat(generator.getDimensionNameFor("d", 44)).isEqualTo("d_1");
+        assertThat(generator.getDimensionNameFor("a", 44)).isEqualTo("a1");
+        assertThat(generator.getDimensionNameFor("b", 44)).isEqualTo("b1");
+        assertThat(generator.getDimensionNameFor("c", 44)).isEqualTo("c1");
+        assertThat(generator.getDimensionNameFor("d", 44)).isEqualTo("d1");
     }
 }
