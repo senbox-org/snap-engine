@@ -21,6 +21,7 @@ package org.esa.snap.core.dataio.geocoding;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Product;
@@ -204,6 +205,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         if (isFractionalEnabled && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
             inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
         }
+        if (isFractionalEnabled && PixelGeoIndexInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelGeoIndexInverse.KEY_INTERPOLATING;
+        }
+
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
         final InverseCoding inverseCoding = ComponentFactory.getInverse(inverseKey);
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);

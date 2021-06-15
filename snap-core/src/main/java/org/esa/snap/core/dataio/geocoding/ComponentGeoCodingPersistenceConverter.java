@@ -21,6 +21,7 @@ package org.esa.snap.core.dataio.geocoding;
 import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.dataio.persistence.Container;
@@ -235,6 +236,9 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
         }
         if (isFractionalEnabled && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
             inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
+        }
+        if (isFractionalEnabled && PixelGeoIndexInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelGeoIndexInverse.KEY_INTERPOLATING;
         }
 
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
