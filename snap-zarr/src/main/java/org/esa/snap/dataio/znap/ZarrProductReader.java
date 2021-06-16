@@ -36,6 +36,7 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
 import org.esa.snap.core.dataio.persistence.PersistenceDecoder;
+import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -599,10 +600,10 @@ public class ZarrProductReader extends AbstractProductReader {
         }
         if (attributes.containsKey(STATISTICS)) {
             final Map<String, Object> stxM = cast(attributes.get(STATISTICS));
-            final double minSample = ((Number) stxM.get(DimapProductConstants.TAG_STX_MIN)).doubleValue();
-            final double maxSample = ((Number) stxM.get(DimapProductConstants.TAG_STX_MAX)).doubleValue();
-            final double meanSample = ((Number) stxM.get(DimapProductConstants.TAG_STX_MEAN)).doubleValue();
-            final double stdDev = ((Number) stxM.get(DimapProductConstants.TAG_STX_STDDEV)).doubleValue();
+            final double minSample = getDoubleValue(stxM.get(DimapProductConstants.TAG_STX_MIN));
+            final double maxSample = getDoubleValue(stxM.get(DimapProductConstants.TAG_STX_MAX));
+            final double meanSample = getDoubleValue(stxM.get(DimapProductConstants.TAG_STX_MEAN));
+            final double stdDev = getDoubleValue(stxM.get(DimapProductConstants.TAG_STX_STDDEV));
             final boolean intHistogram = !ProductData.isFloatingPointType(rasterDataNode.getGeophysicalDataType());
             final List<Integer> integers = cast(stxM.get(DimapProductConstants.TAG_HISTOGRAM));
             final int[] bins = integers.stream().mapToInt(Integer::intValue).toArray();
@@ -630,7 +631,7 @@ public class ZarrProductReader extends AbstractProductReader {
                         point.setLabel(label);
                     }
                 }
-                point.setSample(((Number) pointM.get(SAMPLE)).doubleValue());
+                point.setSample(getDoubleValue(pointM.get(SAMPLE)));
                 final List<Integer> integers = cast(pointM.get(COLOR_RGBA));
                 final int[] rgba = integers.stream().mapToInt(Integer::intValue).toArray();
                 point.setColor(createColor(rgba));
@@ -763,6 +764,10 @@ public class ZarrProductReader extends AbstractProductReader {
             return (Number) attribute;
         }
         return null;
+    }
+
+    private double getDoubleValue(Object o) {
+        return new Property<>("o", o).getValueDouble();
     }
 
     private static class OptimalPlacemarkDescriptorProvider
