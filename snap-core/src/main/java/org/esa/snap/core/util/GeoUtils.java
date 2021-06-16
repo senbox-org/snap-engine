@@ -696,7 +696,7 @@ public class GeoUtils {
             throw new NullPointerException("The pixel region is null.");
         }
         final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
-        GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, pixelRegion, step, false);
+        GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, pixelRegion, step, true);
         final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
