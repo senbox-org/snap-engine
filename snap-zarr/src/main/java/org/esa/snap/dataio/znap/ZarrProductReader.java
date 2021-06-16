@@ -74,6 +74,7 @@ import ucar.ma2.InvalidRangeException;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -120,6 +121,8 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.DISCONTINUITY;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.FLAG_DESCRIPTIONS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.HISTOGRAM_MATCHING;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.IMAGE_INFO;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.KEY_SNAP_PRODUCT_METADATA_JSON;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.KEY_SNAP_VECTOR_DATA_SUBGROUP;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LABEL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LOG_10_SCALED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_MASKS;
@@ -150,8 +153,6 @@ import static ucar.nc2.constants.CF.SCALE_FACTOR;
 import static ucar.nc2.constants.CF.UNITS;
 
 public class ZarrProductReader extends AbstractProductReader {
-
-    private static final String VECTOR_DATA_DIR = ".vector_data";
 
     private ProductReaderPlugIn binaryReaderPlugIn;
     private String binaryFileExtension;
@@ -205,8 +206,6 @@ public class ZarrProductReader extends AbstractProductReader {
         final String productDesc = cast(productAttributes.get(ATT_NAME_PRODUCT_DESC));
         final ProductData.UTC sensingStart = getTime(productAttributes, TIME_START, rootPath); // "time_coverage_start"
         final ProductData.UTC sensingStop = getTime(productAttributes, TIME_END, rootPath); // "time_coverage_end"
-        final List<?> product_metadata = cast(productAttributes.get(ATT_NAME_PRODUCT_METADATA));
-        final MetadataElement[] metadataElements = listToMetadata(product_metadata);
         final int sceneRasterWidth = ((Number) productAttributes.get(ATT_NAME_PRODUCT_SCENE_WIDTH)).intValue();
         final int sceneRasterHeight = ((Number) productAttributes.get(ATT_NAME_PRODUCT_SCENE_HEIGHT)).intValue();
         product = new Product(productName, productType, sceneRasterWidth, sceneRasterHeight, this);
@@ -219,8 +218,15 @@ public class ZarrProductReader extends AbstractProductReader {
         if (productAttributes.get(QUICKLOOK_BAND_NAME) != null) {
             product.setQuicklookBandName(((String) productAttributes.get(QUICKLOOK_BAND_NAME)).trim());
         }
-        for (MetadataElement metadataElement : metadataElements) {
-            product.getMetadataRoot().addElement(metadataElement);
+
+        final InputStream metadataIS = store.getInputStream(KEY_SNAP_PRODUCT_METADATA_JSON);
+        if (metadataIS != null) {
+            try (InputStreamReader in = new InputStreamReader(metadataIS)) {
+                final MetadataElement[] metadataElements = ZnapConstantsAndUtils.readProductMetadata(in);
+                for (MetadataElement metadataElement : metadataElements) {
+                    product.getMetadataRoot().addElement(metadataElement);
+                }
+            }
         }
 
         final HashMap<String, ZarrArray> zarrArrays = new HashMap<>();
@@ -318,7 +324,7 @@ public class ZarrProductReader extends AbstractProductReader {
         }
 
         for (Object rasterNameObj : rasterDataNodeOrder) {
-            String rasterName = cast( rasterNameObj);
+            String rasterName = cast(rasterNameObj);
             if (masksMap.containsKey(rasterName)) {
                 final Map<String, Object> maskMap = masksMap.get(rasterName);
                 final Item item = languageSupport.translateToItem(maskMap);
@@ -347,7 +353,7 @@ public class ZarrProductReader extends AbstractProductReader {
 
     private void readVectorData() throws IOException {
         final List<String> keys = store.getKeysEndingWith(VectorDataNodeIO.FILENAME_EXTENSION).stream()
-                .filter(s -> s.startsWith(VECTOR_DATA_DIR)).collect(Collectors.toList());
+                .filter(s -> s.startsWith(KEY_SNAP_VECTOR_DATA_SUBGROUP)).collect(Collectors.toList());
         for (String key : keys) {
             addVectorDataToProduct(key);
         }

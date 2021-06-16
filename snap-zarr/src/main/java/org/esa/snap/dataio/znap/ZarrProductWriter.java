@@ -29,13 +29,14 @@ import com.bc.zarr.ZarrGroup;
 import com.bc.zarr.storage.FileSystemStore;
 import com.bc.zarr.storage.Store;
 import com.bc.zarr.storage.ZipStore;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.dataio.geometry.WriterBasedVectorDataNodeWriter;
 import org.esa.snap.core.dataio.persistence.*;
@@ -75,6 +76,7 @@ import static ucar.nc2.constants.ACDD.TIME_START;
 import static ucar.nc2.constants.CDM.FILL_VALUE;
 import static ucar.nc2.constants.CDM.UNSIGNED;
 import static ucar.nc2.constants.CF.ADD_OFFSET;
+import static ucar.nc2.constants.CF.COORDINATES;
 import static ucar.nc2.constants.CF.LONG_NAME;
 import static ucar.nc2.constants.CF.SCALE_FACTOR;
 import static ucar.nc2.constants.CF.UNITS;
@@ -153,6 +155,16 @@ public class ZarrProductWriter extends AbstractProductWriter {
             zarrStore = new FileSystemStore(outputRoot);
         }
         zarrGroup = ZarrGroup.create(zarrStore);
+        final ZarrGroup snapSubGroup = zarrGroup.createSubGroup(NAME_SNAP_SUBGROUP);
+
+        try (
+                OutputStream productMetadataStream = zarrStore.getOutputStream(KEY_SNAP_PRODUCT_METADATA_JSON);
+                OutputStreamWriter out = new OutputStreamWriter(productMetadataStream)
+        ) {
+            writeProductMetadata(out, product.getMetadataRoot().getElements());
+        }
+
+        snapSubGroup.createSubGroup(NAME_VECTOR_DATA_SUBGROUP);
         writeVectorData();
         for (TiePointGrid tiePointGrid : product.getTiePointGrids()) {
             writeTiePointGrid(tiePointGrid);
@@ -169,7 +181,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
     private void writeVectorData() throws IOException {
         Product product = getSourceProduct();
         ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
-        zarrStore.delete(".vector_data");
+        zarrStore.delete(KEY_SNAP_VECTOR_DATA_SUBGROUP);
 
         if (vectorDataGroup.getNodeCount() > 0) {
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
@@ -182,7 +194,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
     void writeVectorData(VectorDataNode vectorDataNode) {
         try {
             WriterBasedVectorDataNodeWriter vectorDataNodeWriter = new WriterBasedVectorDataNodeWriter();
-            final Path filePath = Paths.get(".vector_data").resolve(vectorDataNode.getName() + VectorDataNodeIO.FILENAME_EXTENSION);
+            final Path filePath = Paths.get(KEY_SNAP_VECTOR_DATA_SUBGROUP).resolve(vectorDataNode.getName() + VectorDataNodeIO.FILENAME_EXTENSION);
             try (
                     final OutputStream os = zarrStore.getOutputStream(filePath.toString());
                     final Writer writer = new OutputStreamWriter(os)
@@ -210,7 +222,6 @@ public class ZarrProductWriter extends AbstractProductWriter {
         // flag attributes are collected per Band (Flag or Index Band). see collectSampleCodingAttributes()
         collectMaskAttrs(attributes);
         collectOriginalRasterDataNodeOrder(attributes);
-        collectProductMetadata(attributes);
         return attributes;
     }
 
@@ -246,22 +257,31 @@ public class ZarrProductWriter extends AbstractProductWriter {
     }
 
     private void collectProductGeoCodingAttrs(Map<String, Object> attrs) throws ProductIOException {
-        final Product product = getSourceProduct();
-        final GeoCoding gc = product.getSceneGeoCoding();
+        final ArrayList<String> coordNames = new ArrayList<>();
+        final GeoCoding gc = getSourceProduct().getSceneGeoCoding();
+        //noinspection deprecation
+        if (gc instanceof BasicPixelGeoCoding) {
+            @SuppressWarnings("deprecation")
+            final BasicPixelGeoCoding pgc = (BasicPixelGeoCoding) gc;
+            coordNames.add(pgc.getLatBand().getName());
+            coordNames.add(pgc.getLonBand().getName());
+        }
+        if (gc instanceof ComponentGeoCoding) {
+            final ComponentGeoCoding pgc = (ComponentGeoCoding) gc;
+            final GeoRaster geoRaster = pgc.getGeoRaster();
+            if (geoRaster.getSubsamplingX() == 1.0 && geoRaster.getSubsamplingY() == 1.0) {
+                coordNames.add(geoRaster.getLatVariableName());
+                coordNames.add(geoRaster.getLonVariableName());
+            }
+        }
+        if (coordNames.size() > 0) {
+            final String[] names = coordNames.toArray(new String[0]);
+            final String allNames = StringUtils.arrayToString(names, " ");
+            attrs.put(COORDINATES, allNames);
+        }
         if (gc != null) {
             attrs.put(ATT_NAME_GEOCODING, getGeoCodingAttributes(gc));
         }
-        final String[] coordinateVarNames = {"lat", "latitude", "lon", "longitunde"};
-        final ArrayList<Object> coordNames = new ArrayList<>();
-
-        for (String coordinateVarName : coordinateVarNames) {
-            final RasterDataNode rasterDataNode = product.getRasterDataNode(coordinateVarName);
-            if (rasterDataNode == null) {
-                continue;
-            }
-//            rasterDataNode.getRasterHeight()
-        }
-
     }
 
     private void collectGeneralProductAttrs(Map<String, Object> attrs) {
@@ -279,18 +299,6 @@ public class ZarrProductWriter extends AbstractProductWriter {
         }
         if (isNotNullAndNotEmpty(product.getQuicklookBandName())) {
             attrs.put(QUICKLOOK_BAND_NAME, product.getQuicklookBandName());
-        }
-    }
-
-    private void collectProductMetadata(Map<String, Object> attributes) {
-        final Product product = getSourceProduct();
-        try {
-            final MetadataElement[] metadataElements = product.getMetadataRoot().getElements();
-            final List<Map<String, Object>> metadata = metadataToList(metadataElements);
-            attributes.put(ATT_NAME_PRODUCT_METADATA, metadata);
-        } catch (JsonProcessingException e) {
-            // TODO: 17.02.2021 SE -- Turn this into correct exception handing.
-            e.printStackTrace();
         }
     }
 
@@ -624,6 +632,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
             return null;
         }
         LOG.fine("Binary data in Znap format should be written as '" + binaryFormatName + "'");
+        @SuppressWarnings("ConstantConditions")
         final ProductWriterPlugIn writerPlugIn = ProductIO.getProductWriter(binaryFormatName).getWriterPlugIn();
         if (writerPlugIn == null) {
             throw new IllegalArgumentException("Unable to write binary data as '" + binaryFormatName + "'.");

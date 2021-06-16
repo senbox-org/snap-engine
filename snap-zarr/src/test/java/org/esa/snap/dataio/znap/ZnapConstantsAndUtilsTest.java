@@ -26,6 +26,7 @@ import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.metadataToJson;
 public class ZnapConstantsAndUtilsTest {
 
     @Test
-    public void metadataTransformation_toJsonStringAndBack() throws JsonProcessingException {
+    public void metadataTransformation_toJsonStringAndBack() throws IOException {
         final MetadataElement nested = new MetadataElement("nested");
         nested.setDescription("nested Desc");
         nested.addAttribute(new MetadataAttribute("doub", ProductData.createInstance(new double[]{24.3}), true));

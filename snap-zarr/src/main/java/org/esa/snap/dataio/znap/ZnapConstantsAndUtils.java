@@ -42,6 +42,10 @@ import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,6 +63,13 @@ final class ZnapConstantsAndUtils {
     static final String FORMAT_NAME = "SNAP-Zarr";
     static final String SNAP_ZARR_CONTAINER_EXTENSION = ".znap";
     static final String SNAP_ZARR_ZIP_CONTAINER_EXTENSION = ".znap.zip";
+
+    static final String NAME_SNAP_SUBGROUP = "SNAP";
+    static final String NAME_VECTOR_DATA_SUBGROUP = "vector_data";
+
+    static final String KEY_SNAP_SUBGROUP = NAME_SNAP_SUBGROUP;
+    static final String KEY_SNAP_VECTOR_DATA_SUBGROUP = KEY_SNAP_SUBGROUP + "/vector_data";
+    static final String KEY_SNAP_PRODUCT_METADATA_JSON = KEY_SNAP_SUBGROUP + "/product_metadata.json";
 
     public static final String UNIT_EXTENSION = "_unit";
     public static final String BANDWIDTH = "bandwidth";
@@ -97,7 +108,7 @@ final class ZnapConstantsAndUtils {
     // Sample coding attributes
     public static final String FLAG_DESCRIPTIONS = "flag_descriptions";
 
-    // Product header keys
+    // Product header attribute names
     public static final String ATT_NAME_PRODUCT_NAME = "product_name";
     public static final String ATT_NAME_PRODUCT_TYPE = "product_type";
     public static final String ATT_NAME_PRODUCT_DESC = "product_description";
@@ -337,17 +348,26 @@ final class ZnapConstantsAndUtils {
         metadataModule = new SimpleModule("Metadata", new Version(1, 0, 0, null, null, null), deserializers, serializers);
     }
 
-    public static MetadataElement[] jsonToMetadata(String jsonMetadataString) throws JsonProcessingException {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(metadataModule);
-        return objectMapper.readValue(jsonMetadataString, MetadataElement[].class);
+    public static MetadataElement[] jsonToMetadata(String jsonMetadataString) throws IOException {
+        return readProductMetadata(new StringReader(jsonMetadataString));
     }
 
-    public static String metadataToJson(MetadataElement[] metadata) throws JsonProcessingException {
+    public static String metadataToJson(MetadataElement[] metadata) throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        writeProductMetadata(stringWriter, metadata);
+        return stringWriter.toString();
+    }
+
+    public static void writeProductMetadata(Writer out, MetadataElement[] metadata) throws IOException {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(metadataModule);
-//        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
-        return objectMapper.writeValueAsString(metadata);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(out, metadata);
+    }
+
+    public static MetadataElement[] readProductMetadata(Reader in) throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(metadataModule);
+        return objectMapper.readValue(in, MetadataElement[].class);
     }
 
     public static MetadataElement[] listToMetadata(List<?> metadata) throws JsonProcessingException {
