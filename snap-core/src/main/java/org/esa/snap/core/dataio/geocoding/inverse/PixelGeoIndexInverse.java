@@ -94,7 +94,8 @@ public class PixelGeoIndexInverse implements InverseCoding {
         if (distance < epsilon) {
             if (fractionalAccuracy) {
                 final InterpolationContext context = InterpolationContext.extract((int) pixelPos.x, (int) pixelPos.y, longitudes, latitudes, geoRaster.getSceneWidth(), geoRaster.getSceneHeight());
-                pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
+                final PixelPos interpolated = interpolator.interpolate(geoPos, pixelPos, context);
+                pixelPos.setLocation(interpolated.x, interpolated.y);
             }
 
             pixelPos.x = pixelPos.x + geoRaster.getOffsetX();
