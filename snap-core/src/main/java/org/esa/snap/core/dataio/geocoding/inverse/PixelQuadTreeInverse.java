@@ -35,7 +35,9 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import static org.esa.snap.core.dataio.geocoding.inverse.Segment.MIN_DIMENSION;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.*;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ACROSS;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ALONG;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.INSIDE;
 
 public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
@@ -517,8 +519,8 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             if (minDelta < epsilon && minDeltaResult != null) {
                 if (fractionalAccuracy) {
                     final InterpolationContext context = InterpolationContext.extract(minDeltaResult.x, minDeltaResult.y, longitudes, latitudes, rasterWidth, rasterHeight);
-                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
-                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
+                    final PixelPos interpolated = interpolator.interpolate(geoPos, pixelPos, context);
+                    pixelPos.setLocation(interpolated.x + offsetX, interpolated.y + offsetY);
                 } else {
                     pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
                 }
