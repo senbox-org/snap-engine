@@ -10,12 +10,14 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.IOException;
+import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.util.stream.IntStream;
 
@@ -177,7 +179,8 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
                                       resolutionInKm);
         }
 
-        final boolean isFractionalEnabled = Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY);
+        final Preferences snapPreferences = Config.instance("snap").preferences();
+        final boolean isFractionalEnabled = snapPreferences.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
         if (isFractionalEnabled && PixelForward.KEY.equals(forwardKey)) {
             forwardKey = PixelInterpolatingForward.KEY;
         }
