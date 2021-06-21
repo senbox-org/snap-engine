@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -532,8 +532,7 @@ public class ProductIO {
             SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
         }
         if (ioExceptionCollector.size() > 0) {
-            IOException ioException = ioExceptionCollector.get(0);
-            throw ioException;
+            throw ioExceptionCollector.get(0);
         }
     }
 
@@ -557,6 +556,7 @@ public class ProductIO {
     private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
         if (band.hasRasterData()) {
             band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+            band.removeCachedImageData();
             if (semaphore != null) {
                 semaphore.release();
             }
@@ -567,8 +567,7 @@ public class ProductIO {
             int numTiles = tileIndices.length;
             pm.beginTask("Writing raster data...", numTiles);
             if (executor != null) {
-//                Finisher finisher = new Finisher(band.getName(), pm, semaphore, executor, numTiles);
-                Finisher finisher = new Finisher(pm, semaphore, executor, numTiles);
+                Finisher finisher = new Finisher(pm, semaphore, executor, numTiles, band);
                 for (Point tileIndex : tileIndices) {
                     executor.execute(() -> {
                         try {
@@ -643,13 +642,15 @@ public class ProductIO {
         private final Semaphore semaphore;
         private final ExecutorService executor;
         private final int work;
+        private final Band band;
         private int counter;
 
-        public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
+        public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter, Band band) {
             this.pm = pm;
             this.semaphore = semaphore;
             this.executor = executor;
             this.work = counter;
+            this.band = band;
 
         }
 
@@ -662,6 +663,7 @@ public class ProductIO {
                     semaphore.release();
                     executor.shutdown();
                     pm.done();
+                    band.removeCachedImageData();
                 }
             }
         }
