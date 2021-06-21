@@ -268,7 +268,7 @@ public class DimapProductHelpers {
         final Datum datum = createDatum(dom);
         if (geoPosElems.size() > 0) {
             final XMLOutputter xmlOutputter = new XMLOutputter(Format.getCompactFormat());
-            final HashMap<String, GeoCoding> geoCodingInstatnces = new HashMap<>();
+            final HashMap<String, GeoCoding> geoCodingInstances = new HashMap<>();
             Map<String, GeoCoding> wktToCrsGeocodingMap = new HashMap<>();
             final GeoCoding[] geoCodings = new GeoCoding[geoPosElems.size()];
 
@@ -329,12 +329,12 @@ public class DimapProductHelpers {
                         final PersistenceDecoder<GeoCoding> decoder = persistence.getDecoder(item);
                         if (decoder != null) {
                             final String xmlKey = xmlOutputter.outputString(child);
-                            if (geoCodingInstatnces.containsKey(xmlKey)) {
-                                geoCodings[bandIndex] = geoCodingInstatnces.get(xmlKey);
+                            if (geoCodingInstances.containsKey(xmlKey)) {
+                                geoCodings[bandIndex] = geoCodingInstances.get(xmlKey);
                             } else {
                                 final GeoCoding geoCoding = decoder.decode(item, product);
                                 geoCodings[bandIndex] = geoCoding;
-                                geoCodingInstatnces.put(xmlKey, geoCoding);
+                                geoCodingInstances.put(xmlKey, geoCoding);
                             }
                         }
                         if (geoCodings[bandIndex] != null) {
