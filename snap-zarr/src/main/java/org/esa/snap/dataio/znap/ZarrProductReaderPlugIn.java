@@ -43,9 +43,15 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        final Path productRoot = convertToPath(input);
-        if (productRoot == null) {
+        final Path inputPath = convertToPath(input);
+        if (inputPath == null) {
             return DecodeQualification.UNABLE;
+        }
+        final Path productRoot;
+        if (inputPath.getFileName().toString().equalsIgnoreCase(".zattrs")) {
+            productRoot = inputPath.getParent();
+        } else {
+            productRoot = inputPath;
         }
         final boolean isValidRootDirName = productRoot.getFileName().toString().toLowerCase().endsWith(SNAP_ZARR_CONTAINER_EXTENSION);
         if (isValidRootDirName) {
@@ -118,12 +124,16 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
 
             @Override
             public boolean accept(File file) {
-                return isZnapZipArchive(file) || (file.isDirectory() && !isZnapRootDir(file));
+                return file != null && (file.isDirectory() || isZnapZipArchive(file) || isZnapRootDotAttrsFile(file));
             }
 
             @Override
             public boolean isCompoundDocument(File dir) {
-                return isZnapRootDir(dir);
+                return dir != null && isZnapRootDir(dir.getParentFile());
+            }
+
+            private boolean isZnapRootDotAttrsFile(File file) {
+                return file.getName().equals(".zattrs") && isZnapRootDir(file.getParentFile());
             }
 
             private boolean isZnapZipArchive(File file) {
@@ -131,7 +141,7 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
             }
 
             private boolean isZnapRootDir(File file) {
-                return file.isDirectory() && hasContainerExtension(file);
+                return file != null && file.isDirectory() && hasContainerExtension(file);
             }
 
             private boolean hasZipArchiveExtension(File file) {

@@ -192,7 +192,13 @@ public class ZarrProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final Path rootPath = convertToPath(getInput());
+        final Path inputPath = convertToPath(getInput());
+        final Path rootPath;
+        if (inputPath.getFileName().toString().equalsIgnoreCase(".zattrs")) {
+            rootPath = inputPath.getParent();
+        } else {
+            rootPath = inputPath;
+        }
         assert rootPath != null;
         if (Files.isRegularFile(rootPath)) {
             store = new ZipStore(rootPath);

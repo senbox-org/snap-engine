@@ -100,12 +100,12 @@
         <module>snap-unmix</module>
         <module>snap-virtual-file-system</module>
         <module>snap-watermask</module>
-        <module>snap-zarr</module>
         <module>blue-marble-worldmap</module>
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
         <module>snap-remote-execution</module>
         <module>snap-remote-products-repository</module>
+        <module>snap-zarr</module>
 
         <module>lib-hdf</module>
         <module>lib-openjpeg</module>
