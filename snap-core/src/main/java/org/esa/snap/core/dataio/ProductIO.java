@@ -557,6 +557,7 @@ public class ProductIO {
         if (band.hasRasterData()) {
             try {
                 band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+                band.removeCachedImageData();
             } finally {
                 pm.done();
                 if (bandsCountDown != null) {
@@ -570,7 +571,7 @@ public class ProductIO {
             int numTiles = tileIndices.length;
             pm.beginTask("Writing raster data...", numTiles);
             if (executor != null) {
-                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles);
+                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles, band);
                 for (Point tileIndex : tileIndices) {
                     executor.execute(() -> {
                         try {
@@ -645,13 +646,14 @@ public class ProductIO {
         private final ProgressMonitor pm;
         private final CountDownLatch bandsCountDown;
         private final int work;
+        private final Band band;
         private int counter;
 
-        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter) {
+        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter, Band band) {
             this.pm = pm;
             this.bandsCountDown = bandsCountDown;
             this.work = counter;
-
+            this.band = band;
         }
 
         public synchronized void worked() {
@@ -662,6 +664,7 @@ public class ProductIO {
                 if (counter == work) {
                     bandsCountDown.countDown();
                     pm.done();
+                    band.removeCachedImageData();
                 }
             }
         }
