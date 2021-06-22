@@ -150,7 +150,7 @@ public class MaskPersistableTest {
         }
 
         @Override
-        protected void configureMask(Mask mask, Element element) {
+        protected void configureMask(Mask mask, Element element, Product product) {
         }
 
         @Override

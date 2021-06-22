@@ -18,13 +18,18 @@ package org.esa.snap.core.datamodel;
 
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.dataio.persistence.Item;
+import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
+import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.math.FXYSum;
+import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -203,6 +208,30 @@ public class FXYGeoCodingTest {
         assertEquals(51.4, pixelPos.y, 1e-8);
 
         clone.dispose();
+    }
+
+    @Test
+    public void testThatPersistenceEncodeAndDecodeToAndFromJsonCratesAnEqualFXYGeoCodingInstance() {
+        final JsonLanguageSupport langSupp = new JsonLanguageSupport();
+        final FXYGeoCodingPersistenceConverter converter = new FXYGeoCodingPersistenceConverter();
+
+        final Item encoded = converter.encode(_geoCoding);
+        final Map<String, Object> translated = langSupp.translateToLanguageObject(encoded);
+        final Item translatedBack = langSupp.translateToItem(translated);
+        final FXYGeoCoding newInstance = converter.decode(translatedBack, null);
+        assertFXYGeoCodingIsCopied(newInstance, null);
+    }
+
+    @Test
+    public void testThatPersistenceEncodeAndDecodeToAndFromXmlCratesAnEqualFXYGeoCodingInstance() {
+        final JdomLanguageSupport langSupp = new JdomLanguageSupport();
+        final FXYGeoCodingPersistenceConverter converter = new FXYGeoCodingPersistenceConverter();
+
+        final Item encoded = converter.encode(_geoCoding);
+        final Element translated = langSupp.translateToLanguageObject(encoded);
+        final Item translatedBack = langSupp.translateToItem(translated);
+        final FXYGeoCoding newInstance = converter.decode(translatedBack, null);
+        assertFXYGeoCodingIsCopied(newInstance, null);
     }
 
     private void assertFXYGeoCodingIsCopied(final FXYGeoCoding subsetGeoCoding, ProductSubsetDef subset) {

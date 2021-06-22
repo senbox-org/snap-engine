@@ -23,6 +23,7 @@ import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 public class TiePointGeoCodingPersistenceSpi implements PersistenceSpi {
 
     private static final TiePointGeoCodingPersistenceConverter CONVERTER = new TiePointGeoCodingPersistenceConverter();
+
     @Override
     public boolean canDecode(Item item) {
         return CONVERTER.canDecode(item);

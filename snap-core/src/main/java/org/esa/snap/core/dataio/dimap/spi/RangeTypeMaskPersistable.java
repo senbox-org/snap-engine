@@ -19,6 +19,7 @@ package org.esa.snap.core.dataio.dimap.spi;
 import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
 import org.jdom.Element;
 
 import static org.esa.snap.core.datamodel.Mask.RangeType.*;
@@ -31,7 +32,7 @@ public class RangeTypeMaskPersistable extends MaskPersistable {
     }
 
     @Override
-    protected void configureMask(Mask mask, Element element) {
+    protected void configureMask(Mask mask, Element element, Product product) {
         final PropertyContainer imageConfig = mask.getImageConfig();
         final String minimum = getChildAttributeValue(element, DimapProductConstants.TAG_MINIMUM, DimapProductConstants.ATTRIB_VALUE);
         final String maximum = getChildAttributeValue(element, DimapProductConstants.TAG_MAXIMUM, DimapProductConstants.ATTRIB_VALUE);

@@ -103,14 +103,14 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
         final String json = toJson(encoded);
         assertThat(json).isEqualToIgnoringNewLines("{\n" +
                                                    "  \"PixelGeoCoding\" : {\n" +
-                                                   "    \"___persistence_id___\" : \"BPGC:1\",\n" +
+                                                   "    \"___persistence_id___\" : \"BasicPixelGC:1\",\n" +
                                                    "    \"LATITUDE_BAND\" : \"latBand\",\n" +
                                                    "    \"LONGITUDE_BAND\" : \"lonBand\",\n" +
                                                    "    \"VALID_MASK_EXPRESSION\" : \"flags.valid\",\n" +
                                                    "    \"SEARCH_RADIUS\" : 6,\n" +
                                                    "    \"Pixel_Position_Estimator\" : {\n" +
                                                    "      \"TiePointGeoCoding\" : {\n" +
-                                                   "        \"___persistence_id___\" : \"TPGC:1\",\n" +
+                                                   "        \"___persistence_id___\" : \"TiePointGC:1\",\n" +
                                                    "        \"Coordinate_Reference_System\" : {\n" +
                                                    "          \"Horizontal_CS\" : {\n" +
                                                    "            \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
@@ -121,13 +121,11 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
                                                    "                  \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
                                                    "                  \"Ellipsoid_Parameters\" : {\n" +
                                                    "                    \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6378137.0\"\n" +
                                                    "                    },\n" +
                                                    "                    \"ELLIPSOID_MIN_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6356752.3\"\n" +
                                                    "                    }\n" +
                                                    "                  }\n" +
@@ -174,14 +172,14 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
         final String json = toJson(encoded);
         assertThat(json).isEqualToIgnoringNewLines("{\n" +
                                                    "  \"PixelGeoCoding2\" : {\n" +
-                                                   "    \"___persistence_id___\" : \"BPGC:1\",\n" +
+                                                   "    \"___persistence_id___\" : \"BasicPixelGC:1\",\n" +
                                                    "    \"LATITUDE_BAND\" : \"latBand\",\n" +
                                                    "    \"LONGITUDE_BAND\" : \"lonBand\",\n" +
 //                                                   "    \"VALID_MASK_EXPRESSION\" : \"flags.valid\",\n" +
                                                    "    \"SEARCH_RADIUS\" : 6,\n" +
                                                    "    \"Pixel_Position_Estimator\" : {\n" +
                                                    "      \"TiePointGeoCoding\" : {\n" +
-                                                   "        \"___persistence_id___\" : \"TPGC:1\",\n" +
+                                                   "        \"___persistence_id___\" : \"TiePointGC:1\",\n" +
                                                    "        \"Coordinate_Reference_System\" : {\n" +
                                                    "          \"Horizontal_CS\" : {\n" +
                                                    "            \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
@@ -192,13 +190,11 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
                                                    "                  \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
                                                    "                  \"Ellipsoid_Parameters\" : {\n" +
                                                    "                    \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6378137.0\"\n" +
                                                    "                    },\n" +
                                                    "                    \"ELLIPSOID_MIN_AXIS\" : {\n" +
-                                                   "                      \"_@%$_is_property\" : true,\n" +
-                                                   "                      \"_$ATT$_unit\" : \"M\",\n" +
+                                                   "                      \"unit\" : \"M\",\n" +
                                                    "                      \"value\" : \"6356752.3\"\n" +
                                                    "                    }\n" +
                                                    "                  }\n" +
@@ -245,7 +241,7 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
         final String json = toJson(encoded);
         assertThat(json).isEqualToIgnoringNewLines("{\n" +
                                                    "  \"PixelGeoCoding\" : {\n" +
-                                                   "    \"___persistence_id___\" : \"BPGC:1\",\n" +
+                                                   "    \"___persistence_id___\" : \"BasicPixelGC:1\",\n" +
                                                    "    \"LATITUDE_BAND\" : \"latBand\",\n" +
                                                    "    \"LONGITUDE_BAND\" : \"lonBand\",\n" +
                                                    "    \"VALID_MASK_EXPRESSION\" : \"flags.valid\",\n" +
@@ -274,7 +270,7 @@ public class BasicPixelGeoCodingPersistenceConverterTest {
         final String json = toJson(encoded);
         assertThat(json).isEqualToIgnoringNewLines("{\n" +
                                                    "  \"PixelGeoCoding2\" : {\n" +
-                                                   "    \"___persistence_id___\" : \"BPGC:1\",\n" +
+                                                   "    \"___persistence_id___\" : \"BasicPixelGC:1\",\n" +
                                                    "    \"LATITUDE_BAND\" : \"latBand\",\n" +
                                                    "    \"LONGITUDE_BAND\" : \"lonBand\",\n" +
 //                                                   "    \"VALID_MASK_EXPRESSION\" : \"flags.valid\",\n" +

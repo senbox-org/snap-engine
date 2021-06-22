@@ -68,7 +68,7 @@
         
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
-        Otherwise we always get onm thne command-line:
+        Otherwise we always get on the command-line:
 
             SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
             SLF4J: Defaulting to no-operation (NOP) logger implementation
