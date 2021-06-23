@@ -18,12 +18,7 @@ package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.GeoUtils;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateFilter;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -39,9 +34,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
-import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
-import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 
@@ -108,7 +101,8 @@ public class SubsetOp extends Operator {
             description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
 
-    @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \nIf not given, all bands are copied.")
+    @Parameter(description = "The list of tie-point grids name.", alias = "tiePointGrids",
+    rasterDataNodeType = TiePointGrid.class, label = "Tie-Point Grids")
     private String[] tiePointGridNames;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
@@ -346,8 +340,6 @@ public class SubsetOp extends Operator {
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();
-            int rasterWidth = rasterDataNode.getRasterWidth();
-            int rasterHeight = rasterDataNode.getRasterHeight();
             Geometry geom = GeoUtils.computeGeometryUsingPixelRegion(rasterGeoCoding, rect);
             geometryMap.put(rasterDataNode.getName(), geom);
             if (finalGeometry == null) {
