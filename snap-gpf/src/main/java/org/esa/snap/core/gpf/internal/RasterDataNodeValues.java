@@ -78,7 +78,7 @@ public class RasterDataNodeValues {
         } else if (rasterDataNodeType == Mask.class) {
             return product.getMaskGroup().getNodeNames();
         } else if (rasterDataNodeType == TiePointGrid.class) {
-            return product.getTiePointGridNames();            
+            return product.getTiePointGridNames();
         }
         throw new IllegalArgumentException("Unsupported 'rasterDataNodeType': " + rasterDataNodeType);
     }
