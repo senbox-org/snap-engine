@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -81,6 +82,9 @@ public class ReadOp extends Operator {
     @Parameter(description = "The list of source bands.", alias = "sourceBands", label = "Source Bands")
     private String[] bandNames;
 
+    @Parameter(description = "The list of source tie-point grids.", alias = "tiePointGrids", label = "Tie-Point Grids")
+    private String[] tiePointGridNames;
+
     @Parameter(description = "The list of source masks.", alias = "sourceMasks", label = "Source Masks")
     private String[] maskNames;
 
@@ -125,8 +129,9 @@ public class ReadOp extends Operator {
         }
         boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
         boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
+        boolean hasTiePointGridNames = (this.tiePointGridNames != null && this.tiePointGridNames.length > 0);
         ProductSubsetDef subsetDef = null;
-        if (useAdvancedOptions && (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata)) {
+        if (useAdvancedOptions && (hasBandNames || hasMaskNames  || hasTiePointGridNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata)) {
             subsetDef = new ProductSubsetDef();
             subsetDef.setIgnoreMetadata(!this.copyMetadata);
             AbstractSubsetRegion subsetRegion = null;
@@ -186,6 +191,16 @@ public class ReadOp extends Operator {
                         for (Mask mask : currentBands) {
                             if (targetMaskNames.contains(mask.getName())) {
                                 this.targetProduct.getMaskGroup().add(mask);
+                            }
+                        }
+                    }
+                    if (this.tiePointGridNames != null) {
+                        java.util.List<String> targetTiePointGridNames = Arrays.asList(this.tiePointGridNames);
+                        TiePointGrid[] currentGrids = this.targetProduct.getTiePointGridGroup().toArray(new TiePointGrid[0]);
+                        this.targetProduct.getTiePointGridGroup().removeAll();
+                        for (TiePointGrid tiePointGrid : currentGrids) {
+                            if (targetTiePointGridNames.contains(tiePointGrid.getName())) {
+                                this.targetProduct.getTiePointGridGroup().add(tiePointGrid);
                             }
                         }
                     }
