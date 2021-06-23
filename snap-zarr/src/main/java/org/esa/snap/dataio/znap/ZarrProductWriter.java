@@ -146,7 +146,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         dimensionNameGenerator.getDimensionNameFor("x", product.getSceneRasterWidth());
         dimensionNameGenerator.getDimensionNameFor("y", product.getSceneRasterHeight());
         final boolean useZipArchive = getUseZipArchive();
-        if (useZipArchive) {
+        if (useZipArchive && !isExistingEmptyDirectory(outputRoot)) {
             if (!outputRoot.toString().endsWith(".zip")) {
                 outputRoot = parentDir.resolve(outputRoot.getFileName().toString() + ".zip");
             }

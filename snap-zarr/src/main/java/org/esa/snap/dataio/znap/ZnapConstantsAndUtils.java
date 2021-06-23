@@ -46,12 +46,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 final class ZnapConstantsAndUtils {
 
@@ -148,6 +150,15 @@ final class ZnapConstantsAndUtils {
             }
         }
         return null;
+    }
+
+    static boolean isExistingEmptyDirectory(Path path) {
+        try {
+            return Files.isDirectory(path) && Files.list(path).collect(Collectors.toList()).size() == 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private interface OutputConverter {
