@@ -28,8 +28,11 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
+import javax.media.jai.OpImage;
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import javax.media.jai.TileCache;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -571,7 +574,7 @@ public class ProductIO {
             int numTiles = tileIndices.length;
             pm.beginTask("Writing raster data...", numTiles);
             if (executor != null) {
-                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles, band);
+                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles);
                 for (Point tileIndex : tileIndices) {
                     executor.execute(() -> {
                         try {
@@ -605,10 +608,25 @@ public class ProductIO {
             final Raster data = sourceImage.getData(rect);
             final ProductData rasterData = band.createCompatibleRasterData(rect.width, rect.height);
             data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
-            band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
-            rasterData.dispose();
+            try {
+                band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+            } finally {
+                rasterData.dispose();
+                removeCachedTile(sourceImage, tileIndex);
+            }
         }
     }
+
+    private static void removeCachedTile(PlanarImage sourceImage, Point tileIndex) {
+        if (sourceImage instanceof OpImage) {
+            OpImage opImage = (OpImage) sourceImage;
+            TileCache tileCache = opImage.getTileCache();
+            if (tileCache != null) {
+                tileCache.remove(sourceImage, tileIndex.x, tileIndex.y);
+            }
+        }
+    }
+
 
     /**
      * This method is not part of the official API and might change in the future.
@@ -646,14 +664,12 @@ public class ProductIO {
         private final ProgressMonitor pm;
         private final CountDownLatch bandsCountDown;
         private final int work;
-        private final Band band;
         private int counter;
 
-        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter, Band band) {
+        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter) {
             this.pm = pm;
             this.bandsCountDown = bandsCountDown;
             this.work = counter;
-            this.band = band;
         }
 
         public synchronized void worked() {
@@ -664,9 +680,9 @@ public class ProductIO {
                 if (counter == work) {
                     bandsCountDown.countDown();
                     pm.done();
-                    band.removeCachedImageData();
                 }
             }
         }
+
     }
 }
