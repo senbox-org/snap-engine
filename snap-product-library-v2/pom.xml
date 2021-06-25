@@ -40,6 +40,21 @@
             <artifactId>snap-remote-products-repository</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
+        The two explicit jackson dependencies ensure that the following h2gis dependency does not
+        pull in an older version of jackson. The snap-zarr module is not compatible with this.
+        The other way around it works.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.11.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.11.3</version>
+        </dependency>
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>h2gis</artifactId>
@@ -47,7 +62,7 @@
         </dependency>
 
         <!-- JUnit -->
-		<dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
