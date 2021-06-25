@@ -38,7 +38,7 @@ import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.setIma
  * @author Sabine Embacher
  * @since SNAP 9.0
  */
-public abstract class AbstractMaskPersistenceConverter implements PersistenceConverter<Mask> {
+public abstract class AbstractMaskPersistenceConverter extends PersistenceConverter<Mask> {
 
     private static final String NAME_MASK = "Mask";
     private static final String NAME_NAME = "NAME";
@@ -54,7 +54,7 @@ public abstract class AbstractMaskPersistenceConverter implements PersistenceCon
     private static final String NAME_ALPHA = "alpha";
 
     @Override
-    public Mask decode(Item item, Product product) {
+    protected Mask decodeImpl(Item item, Product product) {
         final Container root = item.asContainer();
         final String name = root.getProperty(NAME_NAME).getValueString();
         final int width;

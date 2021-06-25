@@ -33,7 +33,7 @@ import java.util.logging.Level;
 
 import static org.esa.snap.core.datamodel.GeoCodingPersistenceHelper.createDatumContainer;
 
-public class GcpGeoCodingPersistenceConverter implements PersistenceConverter<GcpGeoCoding> {
+public class GcpGeoCodingPersistenceConverter extends PersistenceConverter<GcpGeoCoding> {
 
     // Never change this constant! Instead, create a new one with the
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
@@ -78,7 +78,7 @@ public class GcpGeoCodingPersistenceConverter implements PersistenceConverter<Gc
     }
 
     @Override
-    public GcpGeoCoding decode(Item item, Product product) {
+    public GcpGeoCoding decodeImpl(Item item, Product product) {
         final Container root = item.asContainer();
         final Container CRS = root.getContainer(GeoCodingPersistenceHelper.NAME_COORDINATE_REF_SYS);
         final Datum datum = GeoCodingPersistenceHelper.createDatum(CRS);

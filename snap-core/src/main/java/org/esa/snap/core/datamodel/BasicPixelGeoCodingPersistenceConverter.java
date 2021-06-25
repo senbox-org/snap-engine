@@ -27,7 +27,7 @@ import org.esa.snap.core.dataio.persistence.PersistenceDecoder;
 import org.esa.snap.core.dataio.persistence.PersistenceEncoder;
 import org.esa.snap.core.dataio.persistence.Property;
 
-public class BasicPixelGeoCodingPersistenceConverter implements PersistenceConverter<BasicPixelGeoCoding> {
+public class BasicPixelGeoCodingPersistenceConverter extends PersistenceConverter<BasicPixelGeoCoding> {
 
     private static final String NAME_PIXEL_GEO_CODING = "PixelGeoCoding";
     private static final String NAME_PIXEL_GEO_CODING_2 = "PixelGeoCoding2";
@@ -82,7 +82,7 @@ public class BasicPixelGeoCodingPersistenceConverter implements PersistenceConve
     }
 
     @Override
-    public BasicPixelGeoCoding decode(Item item, Product product) {
+    public BasicPixelGeoCoding decodeImpl(Item item, Product product) {
         final Container rootContainer = item.asContainer();
         final String latBandName = rootContainer.getProperty(NAME_LATITUDE_BAND).getValueString();
         final String lonBandName = rootContainer.getProperty(NAME_LONGITUDE_BAND).getValueString();

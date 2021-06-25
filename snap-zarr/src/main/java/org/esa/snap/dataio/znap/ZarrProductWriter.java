@@ -170,6 +170,9 @@ public class ZarrProductWriter extends AbstractProductWriter {
             writeTiePointGrid(tiePointGrid);
         }
         for (Band band : product.getBands()) {
+            if (band instanceof FilterBand) {
+                continue;
+            }
             initializeZarrArrayForBand(band);
             if (shouldWrite(band)) {
                 initializeZarrBandWriter(band);
@@ -222,6 +225,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
         // flag attributes are collected per Band (Flag or Index Band). see collectSampleCodingAttributes()
         collectMaskAttrs(attributes);
         collectOriginalRasterDataNodeOrder(attributes);
+        collectFilterBandAttrs(attributes);
         return attributes;
     }
 
@@ -254,6 +258,19 @@ public class ZarrProductWriter extends AbstractProductWriter {
             names.add(rasterDataNode.getName());
         }
         attributes.put(ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER, names);
+    }
+
+    private void collectFilterBandAttrs(Map<String, Object> attributes) {
+        final Band[] bands = getSourceProduct().getBands();
+        for (Band band : bands) {
+            if (!(band instanceof FilterBand)) {
+                continue;
+            }
+            final PersistenceEncoder<Object> encoder = persistence.getEncoder(band);
+            if (encoder == null){
+                LOG.warning("Unable to find a PersistenceEncoder for FilterBand '" + band.getName() + "'.");
+            }
+        }
     }
 
     private void collectProductGeoCodingAttrs(Map<String, Object> attrs) throws ProductIOException {

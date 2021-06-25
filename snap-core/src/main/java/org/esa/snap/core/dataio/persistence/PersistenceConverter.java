@@ -20,9 +20,22 @@ package org.esa.snap.core.dataio.persistence;
 
 import org.esa.snap.core.datamodel.Product;
 
-public interface PersistenceConverter<T> extends PersistenceDecoder<T>, PersistenceEncoder<T> {
+public abstract class PersistenceConverter<T> implements PersistenceEncoder<T>, PersistenceDecoder<T> {
 
-    default Item convertToCurrentVersion(Item item, Product product) {
+    /**
+     * Dont override this method. Instead implement {@link #decodeImpl(Item, Product)}.
+     */
+    @Override
+    public T decode(Item item, Product product){
+        if (!isCurrentVersion(item)) {
+            item = convertToCurrentVersion(item, product);
+        }
+        return decodeImpl(item, product);
+    };
+
+    protected abstract T decodeImpl(Item item, Product product);
+
+    protected Item convertToCurrentVersion(Item item, Product product) {
         final HistoricalDecoder[] decoders = getHistoricalDecoders();
         int startIndex = -1;
         for (int i = decoders.length - 1; i >= 0; i--) { // reverse order !
@@ -40,9 +53,17 @@ public interface PersistenceConverter<T> extends PersistenceDecoder<T>, Persiste
         return item;
     }
 
-    default Container createRootContainer(String name) {
+    protected final Container createRootContainer(String name) {
         final Container codingMain = new Container(name);
         codingMain.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
         return codingMain;
+    }
+
+    /**
+     * Override if necessary.
+     */
+    @Override
+    public HistoricalDecoder[] getHistoricalDecoders() {
+        return new HistoricalDecoder[0];
     }
 }

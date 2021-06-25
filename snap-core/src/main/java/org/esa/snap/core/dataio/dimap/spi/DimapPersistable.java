@@ -27,7 +27,7 @@ import java.awt.Dimension;
  * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  *
  * @author Marco Peters
- * @deprecated implement {@link org.esa.snap.core.dataio.persistence.PersistenceConverter PersistenceConverter} instead
+ * @deprecated extend {@link org.esa.snap.core.dataio.persistence.PersistenceConverter PersistenceConverter} instead
  */
 @Deprecated
 public interface DimapPersistable {
