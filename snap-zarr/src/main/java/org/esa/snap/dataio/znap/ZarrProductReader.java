@@ -261,6 +261,7 @@ public class ZarrProductReader extends AbstractProductReader {
 
             final Map<String, Object> attributes = zarrArray.getAttributes();
 
+            final Path rasterDir = rootPath.resolve(rasterName);
             if (attributes.containsKey(ATT_NAME_OFFSET_X)) {
                 final double offsetX = cast(attributes.get(ATT_NAME_OFFSET_X));
                 final double offsetY = cast(attributes.get(ATT_NAME_OFFSET_Y));
@@ -269,7 +270,7 @@ public class ZarrProductReader extends AbstractProductReader {
                 final float[] dataBuffer = new float[width * height];
                 if (attributes.containsKey(ATT_NAME_BINARY_FORMAT)) {
                     initBinaryReaderPlugin(attributes);
-                    final Path srcPath = rootPath.resolve(rasterName).resolve(rasterName + binaryFileExtension);
+                    final Path srcPath = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst().get();
                     final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
                     final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
                     binaryProduct.setProductReader(reader);
@@ -308,7 +309,7 @@ public class ZarrProductReader extends AbstractProductReader {
                 }
                 if (attributes.containsKey(ATT_NAME_BINARY_FORMAT)) {
                     initBinaryReaderPlugin(attributes);
-                    final Path srcPath = rootPath.resolve(rasterName).resolve(rasterName + binaryFileExtension);
+                    final Path srcPath = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst().get();
                     final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
                     final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
                     binaryProduct.setProductReader(reader);
