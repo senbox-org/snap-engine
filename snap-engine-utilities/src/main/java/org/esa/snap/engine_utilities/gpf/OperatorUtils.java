@@ -718,10 +718,10 @@ public final class OperatorUtils {
             for (int j = 0; j < gridWidth; ++j) {
                 latTiePoints[i*gridHeight + j] = (float)(scnProp.latMax - i*subSamplingY*delLat);
                 lonTiePoints[i*gridHeight + j] = (float)(scnProp.lonMin + j*subSamplingX*delLon);
-                System.out.print(lonTiePoints[i*gridHeight + j]);
-                System.out.print(" ");
+                //System.out.print(lonTiePoints[i*gridHeight + j]);
+                //System.out.print(" ");
             }
-            System.out.println();
+            //System.out.println();
         }
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
