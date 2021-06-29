@@ -52,7 +52,7 @@ import java.io.IOException;
         version = "1.0",
         copyright = "Copyright (C) 2017 by Array Systems Computing Inc.",
         description = "Creates a DEM band")
-public final class AddElevationOp extends Operator {
+public class AddElevationOp extends Operator {
 
     @SourceProduct(alias = "source")
     private Product sourceProduct;
@@ -167,7 +167,7 @@ public final class AddElevationOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
+        pm.beginTask("Writing tile", 1);
         try {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final int x0 = targetRectangle.x;
@@ -194,6 +194,7 @@ public final class AddElevationOp extends Operator {
                     for (int x = x0; x < maxX; ++x) {
                         tgtData.setElemDoubleAt(tgtIndex.getIndex(x), localDEM[yy][x - x0 + 1]);
                     }
+
                 }
             } else {
                 for (int y = y0; y < maxY; ++y) {
@@ -203,9 +204,11 @@ public final class AddElevationOp extends Operator {
                     }
                 }
             }
-
+            pm.worked(1);
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 
