@@ -61,7 +61,7 @@ public class OpjDumpTest {
     public void testLaunchOpjDump() throws URISyntaxException, IOException {
         String jp2Path = "/org/esa/snap/lib/openjpeg/dataio/s2/l2a/S2A_USER_MSI_L2A_TL_MPS__20150210T180608_A000069_T14RMQ_B03_20m.jp2";
 
-        String pathToJp2File = OpjDumpTest.class.getResource(jp2Path).getPath();
+        String pathToJp2File = OpjDumpTest.class.getResource(jp2Path).toURI().getPath();
 
         if(IS_OS_WINDOWS) {
             pathToJp2File = pathToJp2File.substring(1);
