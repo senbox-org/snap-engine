@@ -41,6 +41,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String DISTRIB_MANUAL_STR = "Entered Values";
 
     public static final String NULL_SPECIAL = "-1";  // a null value to use for string cases where an empty string would be valid
+    public final static String DASHES = "----------";
 
 
     //--------------------------------------------------------------------------------------------------------------
@@ -186,6 +187,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ForceDecimalPlaces";
     public static final boolean PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT = false;
     public static final Class PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TYPE = Boolean.class;
+
 
 
 
