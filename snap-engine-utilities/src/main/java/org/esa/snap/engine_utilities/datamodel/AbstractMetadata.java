@@ -814,24 +814,27 @@ public final class AbstractMetadata {
     public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) {
 
         final MetadataElement elemRoot = absRoot.getElement(srgr_coefficients);
-        final MetadataElement[] srgr_coef_listElem = elemRoot.getElements();
-        final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[srgr_coef_listElem.length];
-        int k = 0;
-        for (MetadataElement listElem : srgr_coef_listElem) {
-            final SRGRCoefficientList srgrList = new SRGRCoefficientList();
-            srgrList.time = listElem.getAttributeUTC(srgr_coef_time);
-            srgrList.timeMJD = srgrList.time.getMJD();
-            srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
+        if(elemRoot != null) {
+            final MetadataElement[] srgr_coef_listElem = elemRoot.getElements();
+            final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[srgr_coef_listElem.length];
+            int k = 0;
+            for (MetadataElement listElem : srgr_coef_listElem) {
+                final SRGRCoefficientList srgrList = new SRGRCoefficientList();
+                srgrList.time = listElem.getAttributeUTC(srgr_coef_time);
+                srgrList.timeMJD = srgrList.time.getMJD();
+                srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
 
-            final int numSubElems = listElem.getNumElements();
-            srgrList.coefficients = new double[numSubElems];
-            for (int i = 0; i < numSubElems; ++i) {
-                final MetadataElement coefElem = listElem.getElementAt(i);
-                srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
+                final int numSubElems = listElem.getNumElements();
+                srgrList.coefficients = new double[numSubElems];
+                for (int i = 0; i < numSubElems; ++i) {
+                    final MetadataElement coefElem = listElem.getElementAt(i);
+                    srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
+                }
+                srgrCoefficientList[k++] = srgrList;
             }
-            srgrCoefficientList[k++] = srgrList;
+            return srgrCoefficientList;
         }
-        return srgrCoefficientList;
+        return null;
     }
 
     /**
