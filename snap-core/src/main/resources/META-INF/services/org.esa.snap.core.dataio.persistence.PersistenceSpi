@@ -6,4 +6,4 @@ org.esa.snap.core.datamodel.GcpGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.RangeTypeMaskPersistenceSpi
 org.esa.snap.core.datamodel.BandMathsMaskPersistenceSpi
 org.esa.snap.core.datamodel.VectorDataMaskPersistenceSpi
-org.esa.snap.core.datamodel.ConvolutionFilterBandPersistendeSpi
+org.esa.snap.core.datamodel.ConvolutionFilterBandPersistenceSpi

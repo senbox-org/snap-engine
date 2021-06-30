@@ -41,6 +41,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.DataNode;
+import org.esa.snap.core.datamodel.FilterBand;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeometryDescriptor;
@@ -77,9 +78,7 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -88,12 +87,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static org.esa.snap.core.util.Guardian.assertNotNull;
-import static org.esa.snap.core.util.Guardian.assertNotNullOrEmpty;
+import static org.esa.snap.core.datamodel.ConvolutionFilterBandPersistenceConverter.PROP_NAME_BAND_NAME;
+import static org.esa.snap.core.datamodel.ConvolutionFilterBandPersistenceConverter.ROOT_NAME_SPECTRAL_BAND_INFO;
 import static org.esa.snap.core.util.SystemUtils.LOG;
 import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MASKS;
 import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MEANINGS;
@@ -104,7 +104,6 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_X;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_OFFSET_Y;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_DESC;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_METADATA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_NAME;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_HEIGHT;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_PRODUCT_SCENE_WIDTH;
@@ -128,6 +127,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LABEL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LOG_10_SCALED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_MASKS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_SAMPLE_CODING;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_FILTER_BANDS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
@@ -143,7 +143,6 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.cast;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.getSnapDataType;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.listToMetadata;
 import static ucar.nc2.constants.ACDD.TIME_END;
 import static ucar.nc2.constants.ACDD.TIME_START;
 import static ucar.nc2.constants.CDM.FILL_VALUE;
@@ -165,6 +164,8 @@ public class ZarrProductReader extends AbstractProductReader {
     private final JsonLanguageSupport languageSupport = new JsonLanguageSupport();
     private Store store;
     private Product product;
+    private ZarrGroup rootGroup;
+    private Path rootPath;
 
     protected ZarrProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
@@ -193,7 +194,6 @@ public class ZarrProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final Path inputPath = convertToPath(getInput());
-        final Path rootPath;
         if (inputPath.getFileName().toString().equalsIgnoreCase(".zattrs")) {
             rootPath = inputPath.getParent();
         } else {
@@ -205,7 +205,7 @@ public class ZarrProductReader extends AbstractProductReader {
         } else {
             store = new FileSystemStore(rootPath);
         }
-        final ZarrGroup rootGroup = ZarrGroup.open(store);
+        rootGroup = ZarrGroup.open(store);
         final Map<String, Object> productAttributes = rootGroup.getAttributes();
 
         final String productName = cast(productAttributes.get(ATT_NAME_PRODUCT_NAME));
@@ -236,6 +236,18 @@ public class ZarrProductReader extends AbstractProductReader {
             }
         }
 
+        initTiepointGridsAndBands(productAttributes);
+        initMasks(productAttributes);
+        initFilterBands(productAttributes);
+        product.setFileLocation(rootPath.toFile());
+        product.setProductReader(this);
+        product.setModified(false);
+        addGeocodings(productAttributes);
+        readVectorData();
+        return product;
+    }
+
+    private void initTiepointGridsAndBands(Map<String, Object> productAttributes) throws IOException {
         final HashMap<String, ZarrArray> zarrArrays = new HashMap<>();
         final Set<String> arrayKeys = rootGroup.getArrayKeys();
         for (String arrayKey : arrayKeys) {
@@ -244,9 +256,8 @@ public class ZarrProductReader extends AbstractProductReader {
             zarrArrays.put(rasterName, zarrArray);
         }
 
-        final List<?> rasterDataNodeOrder = cast(productAttributes.get(ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER));
-        for (Object rasterNameObj : rasterDataNodeOrder) {
-            String rasterName = cast(rasterNameObj);
+        final List<String> rasterDataNodeOrder = cast(productAttributes.get(ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER));
+        for (String rasterName : rasterDataNodeOrder) {
             if (!zarrArrays.containsKey(rasterName)) {
                 continue;
             }
@@ -270,13 +281,16 @@ public class ZarrProductReader extends AbstractProductReader {
                 final float[] dataBuffer = new float[width * height];
                 if (attributes.containsKey(ATT_NAME_BINARY_FORMAT)) {
                     initBinaryReaderPlugin(attributes);
-                    final Path srcPath = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst().get();
-                    final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
-                    final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
-                    binaryProduct.setProductReader(reader);
-                    final Band dataBand = binaryProduct.getBand("data");
-                    dataBand.readPixels(0, 0, width, height, dataBuffer);
-                    binaryProduct.dispose();
+                    final Optional<Path> first = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst();
+                    if (first.isPresent()) {
+                        final Path srcPath = first.get();
+                        final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
+                        final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
+                        binaryProduct.setProductReader(reader);
+                        final Band dataBand = binaryProduct.getBand("data");
+                        dataBand.readPixels(0, 0, width, height, dataBuffer);
+                        binaryProduct.dispose();
+                    }
                 } else {
                     try {
                         zarrArray.read(dataBuffer, shape, new int[]{0, 0});
@@ -309,19 +323,25 @@ public class ZarrProductReader extends AbstractProductReader {
                 }
                 if (attributes.containsKey(ATT_NAME_BINARY_FORMAT)) {
                     initBinaryReaderPlugin(attributes);
-                    final Path srcPath = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst().get();
-                    final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
-                    final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
-                    binaryProduct.setProductReader(reader);
-                    final Band dataBand = binaryProduct.getBand("data");
-                    band.setSourceImage(dataBand.getSourceImage());
+                    final Optional<Path> first = Files.walk(rasterDir).filter(path -> path.getFileName().toString().endsWith(binaryFileExtension)).findFirst();
+                    if (first.isPresent()) {
+                        final Path srcPath = first.get();
+                        final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
+                        final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
+                        binaryProduct.setProductReader(reader);
+                        final Band dataBand = binaryProduct.getBand("data");
+                        band.setSourceImage(dataBand.getSourceImage());
+                        binaryProducts.put(band, binaryProduct);
+                    }
                 } else {
                     final ZarrOpImage zarrOpImage = new ZarrOpImage(band, shape, chunks, zarrArray, ResolutionLevel.MAXRES);
                     band.setSourceImage(zarrOpImage);
                 }
             }
         }
+    }
 
+    private void initMasks(Map<String, Object> productAttributes) {
         final HashMap<String, Map<String, Object>> masksMap = new HashMap<>();
         final List<Map<String, Map<String, Object>>> masksObjectList = cast(productAttributes.get(NAME_MASKS));
         if (masksObjectList != null) {
@@ -331,8 +351,8 @@ public class ZarrProductReader extends AbstractProductReader {
             }
         }
 
-        for (Object rasterNameObj : rasterDataNodeOrder) {
-            String rasterName = cast(rasterNameObj);
+        final List<String> rasterDataNodeOrder = cast(productAttributes.get(ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER));
+        for (String rasterName : rasterDataNodeOrder) {
             if (masksMap.containsKey(rasterName)) {
                 final Map<String, Object> maskMap = masksMap.get(rasterName);
                 final Item item = languageSupport.translateToItem(maskMap);
@@ -350,13 +370,32 @@ public class ZarrProductReader extends AbstractProductReader {
                 }
             }
         }
+    }
 
-        product.setFileLocation(rootPath.toFile());
-        product.setProductReader(this);
-        product.setModified(false);
-        addGeocodings(productAttributes);
-        readVectorData();
-        return product;
+    private void initFilterBands(Map<String, Object> productAttributes) {
+        if (!productAttributes.containsKey(NAME_FILTER_BANDS)) {
+            return;
+        }
+        final List<Map<String, Map<String, Object>>> filterBandAttrs = cast(productAttributes.get(NAME_FILTER_BANDS));
+        final HashMap<String, Map<String, Object>> fbAttrMap = new HashMap<>();
+        for (Map<String, Map<String, Object>> fbAttr : filterBandAttrs) {
+            final String name = cast(fbAttr.get(ROOT_NAME_SPECTRAL_BAND_INFO).get(PROP_NAME_BAND_NAME));
+            fbAttrMap.put(name, cast(fbAttr));
+        }
+        final List<String> rasterDataNodeOrder = cast(productAttributes.get(ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER));
+        for (String rasterName : rasterDataNodeOrder) {
+            if (!fbAttrMap.containsKey(rasterName)) {
+                continue;
+            }
+            final Map<String, Object> fbAttr = fbAttrMap.get(rasterName);
+            final Item item = languageSupport.translateToItem(fbAttr);
+            final PersistenceDecoder<FilterBand> decoder = persistence.getDecoder(item);
+            if (decoder == null) {
+                continue;
+            }
+            final FilterBand filterBand = decoder.decode(item, product);
+            product.addBand(filterBand);
+        }
     }
 
     private void readVectorData() throws IOException {
@@ -495,33 +534,6 @@ public class ZarrProductReader extends AbstractProductReader {
         }
 
         return null;
-    }
-
-    private String createWarning(IllegalArgumentException e) {
-        final StringWriter out = new StringWriter();
-        final PrintWriter pw = new PrintWriter(out);
-        pw.print("Unable to create geo-coding    ");
-        pw.println(e.getMessage());
-        final StackTraceElement[] stackTrace = e.getStackTrace();
-        for (StackTraceElement element : stackTrace) {
-            pw.println(" ...... " + element.toString());
-        }
-        pw.flush();
-        pw.close();
-        return out.toString();
-    }
-
-    private String getNotEmptyString(Map<?, ?> map, String key) {
-        final Object o = getNotNull(map, key);
-        final String s = ((String) o).trim();
-        assertNotNullOrEmpty(key, s);
-        return s;
-    }
-
-    private Object getNotNull(Map<?, ?> map, String key) {
-        final Object o = map.get(key);
-        assertNotNull(key, o);
-        return o;
     }
 
     private void initBinaryReaderPlugin(Map<String, Object> attributes) {

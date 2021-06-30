@@ -22,7 +22,7 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.PersistenceSpi;
 
-public class ConvolutionFilterBandPersistendeSpi implements PersistenceSpi {
+public class ConvolutionFilterBandPersistenceSpi implements PersistenceSpi {
 
     private static final ConvolutionFilterBandPersistenceConverter CONVERTER = new ConvolutionFilterBandPersistenceConverter();
 
@@ -33,7 +33,7 @@ public class ConvolutionFilterBandPersistendeSpi implements PersistenceSpi {
 
     @Override
     public boolean canEncode(Object object) {
-        return object instanceof ConvolutionFilterBandPersistenceConverter;
+        return object instanceof ConvolutionFilterBand;
     }
 
     @Override

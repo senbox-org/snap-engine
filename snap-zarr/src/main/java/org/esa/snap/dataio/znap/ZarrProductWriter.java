@@ -211,7 +211,8 @@ public class ZarrProductWriter extends AbstractProductWriter {
 
     @Override
     public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
+        if (node instanceof VirtualBand
+            || node instanceof FilterBand) {
             return false;
         }
         return super.shouldWrite(node);
@@ -224,8 +225,8 @@ public class ZarrProductWriter extends AbstractProductWriter {
         collectProductGeoCodingAttrs(attributes);
         // flag attributes are collected per Band (Flag or Index Band). see collectSampleCodingAttributes()
         collectMaskAttrs(attributes);
-        collectOriginalRasterDataNodeOrder(attributes);
         collectFilterBandAttrs(attributes);
+        collectOriginalRasterDataNodeOrder(attributes);
         return attributes;
     }
 
@@ -262,14 +263,24 @@ public class ZarrProductWriter extends AbstractProductWriter {
 
     private void collectFilterBandAttrs(Map<String, Object> attributes) {
         final Band[] bands = getSourceProduct().getBands();
+        final List<Map<String, Object>> filterBands = new ArrayList<>();
         for (Band band : bands) {
             if (!(band instanceof FilterBand)) {
                 continue;
             }
             final PersistenceEncoder<Object> encoder = persistence.getEncoder(band);
-            if (encoder == null){
+            if (encoder == null) {
                 LOG.warning("Unable to find a PersistenceEncoder for FilterBand '" + band.getName() + "'.");
+                continue;
             }
+            final Item item = encoder.encode(band);
+            if (item != null) {
+                final Map<String, Object> languageObject = languageSupport.translateToLanguageObject(item);
+                filterBands.add(languageObject);
+            }
+        }
+        if (filterBands.size() > 0) {
+            attributes.put(NAME_FILTER_BANDS, filterBands);
         }
     }
 

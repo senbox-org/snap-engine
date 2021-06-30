@@ -18,7 +18,6 @@
 
 package org.esa.snap.core.datamodel;
 
-import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.Attribute;
 import org.esa.snap.core.dataio.persistence.Container;
@@ -27,7 +26,6 @@ import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
 import org.esa.snap.core.dataio.persistence.Property;
 import org.esa.snap.core.util.StringUtils;
-import org.jdom.Element;
 
 import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.addAncillaryElements;
 import static org.esa.snap.core.datamodel.RasterDataNodePersistenceHelper.addImageToModelTransformElement;
@@ -42,9 +40,9 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
     // And so on ...
     public static final String ID_VERSION_1 = "ConvFilterBand:1";
 
-    static final String ROOT_NAME_SPECTRAL_BAND_INFO = "Spectral_Band_Info";
+    public static final String ROOT_NAME_SPECTRAL_BAND_INFO = "Spectral_Band_Info";
+    public static final String PROP_NAME_BAND_NAME = "BAND_NAME";
     static final String PROP_NAME_BAND_INDEX = "BAND_INDEX";
-    static final String PROP_NAME_BAND_NAME = "BAND_NAME";
     static final String PROP_NAME_BAND_DESCRIPTION = "BAND_DESCRIPTION";
     static final String PROP_NAME_DATA_TYPE = "DATA_TYPE";
     static final String PROP_NAME_PHYSICAL_UNIT = "PHYSICAL_UNIT";
