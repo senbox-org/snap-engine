@@ -620,7 +620,7 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-    // Border Section
+    // Palette Border Section
 
     private static final String PROPERTY_PALETTE_BORDER_ROOT_KEY = PROPERTY_ROOT_KEY + ".palette.border";
     private static final String PROPERTY_PALETTE_BORDER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "PaletteBorder";
