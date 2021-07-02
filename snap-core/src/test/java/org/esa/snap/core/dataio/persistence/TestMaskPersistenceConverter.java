@@ -24,7 +24,7 @@ import org.esa.snap.core.datamodel.Product;
 
 import java.awt.*;
 
-class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
+class TestMaskPersistenceConverter extends PersistenceConverter<Mask> {
 
     private final static String ID = "TestMaskPersistenceConverter:2";
 
@@ -46,10 +46,7 @@ class TestMaskPersistenceConverter implements PersistenceConverter<Mask> {
     };
 
     @Override
-    public Mask decode(Item item, Product product) {
-        if (!isCurrentVersion(item)) {
-            item = convertToCurrentVersion(item, product);
-        }
+    public Mask decodeImpl(Item item, Product product) {
         final Property<?>[] props = getPropertiesValidated(item);
         final String maskName = props[0].getValueString();
         final String expression = props[1].getValueString();

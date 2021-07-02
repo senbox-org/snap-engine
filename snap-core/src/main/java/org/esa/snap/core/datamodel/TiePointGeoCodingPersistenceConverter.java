@@ -28,7 +28,7 @@ import org.esa.snap.core.dataop.maptransf.Datum;
 import static org.esa.snap.core.datamodel.GeoCodingPersistenceHelper.createDatum;
 import static org.esa.snap.core.datamodel.GeoCodingPersistenceHelper.createDatumContainer;
 
-public class TiePointGeoCodingPersistenceConverter implements PersistenceConverter<TiePointGeoCoding> {
+public class TiePointGeoCodingPersistenceConverter extends PersistenceConverter<TiePointGeoCoding> {
 
     // Never change this constant! Instead, create a new one with the
     // name ID_VERSION_2, as ID_VERSION_1 is used in HistoricalDecoder0.
@@ -63,7 +63,7 @@ public class TiePointGeoCodingPersistenceConverter implements PersistenceConvert
     }
 
     @Override
-    public TiePointGeoCoding decode(Item item, Product product) {
+    public TiePointGeoCoding decodeImpl(Item item, Product product) {
         final Container root = item.asContainer();
 
         final Container CRS = root.getContainer(GeoCodingPersistenceHelper.NAME_COORDINATE_REF_SYS);

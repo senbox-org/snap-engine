@@ -313,6 +313,7 @@ public final class DimapProductConstants {
     // Filter bands support -- versions 1.0, 1.1
     public static final String TAG_FILTER_BAND_INFO = "Filter_Band_Info";
     public static final String TAG_FILTER_SOURCE = "FILTER_SOURCE";
+    public static final String TAG_FILTER_ITERATION_COUNT = "ITERATION_COUNT";
     public static final String TAG_FILTER_KERNEL = "Filter_Kernel";
     public static final String TAG_FILTER_OP_TYPE = "FILTER_OP_TYPE";
     public static final String TAG_FILTER_SUB_WINDOW_SIZE = "FILTER_SUB_WINDOW_SIZE";

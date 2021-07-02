@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 final class ZnapConstantsAndUtils {
 
@@ -119,7 +118,6 @@ final class ZnapConstantsAndUtils {
     public static final String ATT_NAME_BINARY_FORMAT = ZnapPreferencesConstants.PROPERTY_NAME_BINARY_FORMAT.replace(".", "_");
     public static final String ATT_NAME_GEOCODING = "geocoding";
     public static final String ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER = "original_raster_data_node_order";
-    public static final String ATT_NAME_PRODUCT_METADATA = "product_metadata";
 
     // Tie point grid attribute names
     public static final String ATT_NAME_OFFSET_X = "offset_x";
@@ -129,6 +127,10 @@ final class ZnapConstantsAndUtils {
 
     // Sample Coding
     public static final String NAME_SAMPLE_CODING = "name_sample_coding";
+
+    // Others
+    public static final String NAME_MASKS = "Masks";
+    public static final String NAME_FILTER_BANDS = "FilterBands";
 
     static final Class<?>[] IO_TYPES = new Class[]{
             Path.class,
@@ -141,7 +143,6 @@ final class ZnapConstantsAndUtils {
             output -> ((File) output).toPath(),
             output -> Paths.get((String) output)
     };
-    public static final String NAME_MASKS = "Masks";
 
     static Path convertToPath(final Object object) {
         for (int i = 0; i < IO_TYPES.length; i++) {
@@ -154,7 +155,7 @@ final class ZnapConstantsAndUtils {
 
     static boolean isExistingEmptyDirectory(Path path) {
         try {
-            return Files.isDirectory(path) && Files.list(path).collect(Collectors.toList()).size() == 0;
+            return Files.isDirectory(path) && Files.list(path).count() == 0;
         } catch (IOException e) {
             e.printStackTrace();
         }

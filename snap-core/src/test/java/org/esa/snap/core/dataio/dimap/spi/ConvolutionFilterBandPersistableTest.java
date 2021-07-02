@@ -54,7 +54,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         final Element xmlElement = createXmlElement();
 
         final Object object = _convolutionFilterBandPersistable.createObjectFromXml(xmlElement, _product);
-        _product.addBand((Band)object);
+        _product.addBand((Band) object);
 
         assertNotNull(object);
         assertTrue(object instanceof ConvolutionFilterBand);
@@ -78,7 +78,6 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(1.7, cfb.getKernel().getFactor(), EPS);
         assertTrue(ArrayUtils.equalArrays(new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0},
                                           cfb.getKernel().getKernelData(null), EPS));
-
     }
 
     public void testCreateXmlFromObject() {
@@ -94,50 +93,52 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertNotNull(xmlElement);
         assertEquals(DimapProductConstants.TAG_SPECTRAL_BAND_INFO, xmlElement.getName());
         assertEquals(14, xmlElement.getChildren().size());
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_BAND_INDEX) != null);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_BAND_NAME) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_BAND_INDEX));
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_BAND_NAME));
         assertEquals(cfb.getName(), xmlElement.getChildTextTrim(DimapProductConstants.TAG_BAND_NAME));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_BAND_DESCRIPTION) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_BAND_DESCRIPTION));
         assertEquals(cfb.getDescription(), xmlElement.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_DATA_TYPE) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_DATA_TYPE));
         assertEquals(ProductData.getTypeString(cfb.getDataType()), xmlElement.getChildTextTrim(DimapProductConstants.TAG_DATA_TYPE));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_PHYSICAL_UNIT) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_PHYSICAL_UNIT));
         assertEquals(cfb.getUnit(), xmlElement.getChildTextTrim(DimapProductConstants.TAG_PHYSICAL_UNIT));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_SOLAR_FLUX) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_SOLAR_FLUX));
         assertEquals(cfb.getSolarFlux(), Float.parseFloat(xmlElement.getChildTextTrim(DimapProductConstants.TAG_SOLAR_FLUX)), EPS);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_BAND_WAVELEN) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_BAND_WAVELEN));
         assertEquals(cfb.getSpectralWavelength(), Float.parseFloat(xmlElement.getChildTextTrim(DimapProductConstants.TAG_BAND_WAVELEN)), EPS);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_BANDWIDTH) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_BANDWIDTH));
         assertEquals(cfb.getSpectralBandwidth(), Float.parseFloat(xmlElement.getChildTextTrim(DimapProductConstants.TAG_BANDWIDTH)), EPS);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_SCALING_FACTOR) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_SCALING_FACTOR));
         assertEquals(cfb.getScalingFactor(), Double.parseDouble(xmlElement.getChildTextTrim(DimapProductConstants.TAG_SCALING_FACTOR)), EPS);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_SCALING_OFFSET) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_SCALING_OFFSET));
         assertEquals(cfb.getScalingOffset(), Double.parseDouble(xmlElement.getChildTextTrim(DimapProductConstants.TAG_SCALING_OFFSET)), EPS);
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_SCALING_LOG_10) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_SCALING_LOG_10));
         assertEquals(cfb.isLog10Scaled(), Boolean.parseBoolean(xmlElement.getChildTextTrim(DimapProductConstants.TAG_SCALING_LOG_10)));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_NO_DATA_VALUE_USED) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_NO_DATA_VALUE_USED));
         assertEquals(cfb.isNoDataValueUsed(), Boolean.parseBoolean(xmlElement.getChildTextTrim(DimapProductConstants.TAG_NO_DATA_VALUE_USED)));
-        assertTrue(xmlElement.getChild(DimapProductConstants.TAG_NO_DATA_VALUE) != null);
+        assertNotNull(xmlElement.getChild(DimapProductConstants.TAG_NO_DATA_VALUE));
         assertEquals(cfb.getNoDataValue(), Double.parseDouble(xmlElement.getChildTextTrim(DimapProductConstants.TAG_NO_DATA_VALUE)), EPS);
 
         final Element filterInfo = xmlElement.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
         assertNotNull(filterInfo);
         assertEquals("ConvolutionFilterBand", filterInfo.getAttributeValue("bandType"));
-        assertEquals(2, filterInfo.getChildren().size());
-        assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_SOURCE) != null);
+        assertEquals(3, filterInfo.getChildren().size());
+        assertNotNull(filterInfo.getChild(DimapProductConstants.TAG_FILTER_SOURCE));
         assertEquals(cfb.getSource().getName(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE));
+        assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_ITERATION_COUNT) != null);
+        assertEquals("" + cfb.getIterationCount(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_ITERATION_COUNT));
 
         final Kernel kernel = cfb.getKernel();
         final Element kernelInfo = filterInfo.getChild(DimapProductConstants.TAG_FILTER_KERNEL);
         assertNotNull(kernelInfo);
         assertEquals(6, kernelInfo.getChildren().size());
-        assertTrue(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_WIDTH) != null);
+        assertNotNull(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_WIDTH));
         assertEquals(kernel.getWidth(), Integer.parseInt(kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_WIDTH)));
-        assertTrue(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_HEIGHT) != null);
+        assertNotNull(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_HEIGHT));
         assertEquals(kernel.getHeight(), Integer.parseInt(kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_HEIGHT)));
-        assertTrue(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_FACTOR) != null);
+        assertNotNull(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_FACTOR));
         assertEquals(kernel.getFactor(), Double.parseDouble(kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_FACTOR)), EPS);
-        assertTrue(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_DATA) != null);
+        assertNotNull(kernelInfo.getChild(DimapProductConstants.TAG_KERNEL_DATA));
         assertEquals(ConvolutionFilterBandPersistable.toCsv(kernel.getKernelData(null)), kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_DATA));
     }
 
@@ -150,15 +151,15 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         final Element xmlFromObject = _convolutionFilterBandPersistable.createXmlFromObject(object);
 
         assertNotNull(xmlFromObject);
-        final List expChildren = xmlElement.getChildren();
-        final List actChildren = xmlFromObject.getChildren();
+        final List<?> expChildren = xmlElement.getChildren();
+        final List<?> actChildren = xmlFromObject.getChildren();
         assertEquals(expChildren.size(), actChildren.size());
         assertEqualElement(xmlElement, xmlFromObject);
     }
 
     private static void assertEqualElement(Element expElement, Element actElement) {
         if (!expElement.getChildren().isEmpty()) {
-            final List expList = expElement.getChildren();
+            final List<?> expList = expElement.getChildren();
             for (Object expElem : expList) {
                 final Element expSubElement = (Element) expElem;
                 final Element actSubElement = actElement.getChild(expSubElement.getName());
@@ -171,7 +172,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
     }
 
     private Element createXmlElement() {
-        final List<Element> contentList = new ArrayList<Element>(16);
+        final List<Element> contentList = new ArrayList<>(16);
         contentList.add(createElement(DimapProductConstants.TAG_BAND_INDEX, "1"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_NAME, "aBand"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_DESCRIPTION, "this is a band"));
@@ -186,10 +187,10 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE_USED, "true"));
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE, Double.toString(_source.getGeophysicalNoDataValue())));
 
-        final List<Element> filterBandInfoList = new ArrayList<Element>(3);
+        final List<Element> filterBandInfoList = new ArrayList<>(3);
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_SOURCE, "anyBand"));
 
-        final List<Element> kernelInfoList = new ArrayList<Element>(8);
+        final List<Element> kernelInfoList = new ArrayList<>(8);
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_WIDTH, "3"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_HEIGHT, "3"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_FACTOR, "1.7"));

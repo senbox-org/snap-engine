@@ -46,7 +46,7 @@ import java.util.stream.IntStream;
 /**
  * @author Sabine Embacher
  */
-public class ComponentGeoCodingPersistenceConverter implements PersistenceConverter<ComponentGeoCoding> {
+public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter<ComponentGeoCoding> {
 
     public static final String NAME_COMPONENT_GEO_CODING = "ComponentGeoCoding";
     public static final String NAME_FORWARD_CODING_KEY = "ForwardCodingKey";
@@ -72,7 +72,7 @@ public class ComponentGeoCodingPersistenceConverter implements PersistenceConver
     }
 
     @Override
-    public ComponentGeoCoding decode(Item item, Product product) {
+    public ComponentGeoCoding decodeImpl(Item item, Product product) {
         if (item == null || !item.isContainer() || !NAME_COMPONENT_GEO_CODING.equals(item.getName())) {
             SystemUtils.LOG.warning("For decoding a container with name '" + NAME_COMPONENT_GEO_CODING + "' is expected.");
             return null;

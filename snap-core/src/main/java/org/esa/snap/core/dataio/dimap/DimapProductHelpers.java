@@ -1768,6 +1768,9 @@ public class DimapProductHelpers {
                 virtualBand.setNoDataValueUsed(getUseInvalidValue(element));
                 band = virtualBand;
             } else if (isFilterBand(element)) {
+                // Should this section one day be replaced by a MarkupLanguage-independent PersistenceConverter, please
+                // make sure that the older GeneralFilterBands can still be read in.
+                // The current GeneralFilterBandPersistable supports 3 older versions.
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
                 if (persistable != null) {
                     Band origBand = (Band) persistable.createObjectFromXml(element, product);

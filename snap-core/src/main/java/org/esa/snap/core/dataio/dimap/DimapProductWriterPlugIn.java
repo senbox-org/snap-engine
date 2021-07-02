@@ -411,7 +411,7 @@ import java.util.Set;
  * <tr>
  * <td valign="top">2.13.0</td>
  * <td>The use of XML based DimapPersistables was replaced by a new markup language independent Persistence framework.<br>
- * See the interface {@link org.esa.snap.core.dataio.persistence.PersistenceConverter PersistenceConverter} its implementations.
+ * See the abstract class {@link org.esa.snap.core.dataio.persistence.PersistenceConverter PersistenceConverter} and its extenders.
  * </td>
  * </tr>
  * </table>
