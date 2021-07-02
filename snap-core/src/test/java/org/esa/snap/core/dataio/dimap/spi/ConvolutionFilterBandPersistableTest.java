@@ -122,9 +122,11 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         final Element filterInfo = xmlElement.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
         assertNotNull(filterInfo);
         assertEquals("ConvolutionFilterBand", filterInfo.getAttributeValue("bandType"));
-        assertEquals(2, filterInfo.getChildren().size());
+        assertEquals(3, filterInfo.getChildren().size());
         assertNotNull(filterInfo.getChild(DimapProductConstants.TAG_FILTER_SOURCE));
         assertEquals(cfb.getSource().getName(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE));
+        assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_ITERATION_COUNT) != null);
+        assertEquals("" + cfb.getIterationCount(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_ITERATION_COUNT));
 
         final Kernel kernel = cfb.getKernel();
         final Element kernelInfo = filterInfo.getChild(DimapProductConstants.TAG_FILTER_KERNEL);

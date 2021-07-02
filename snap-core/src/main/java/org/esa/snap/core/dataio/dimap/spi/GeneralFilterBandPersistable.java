@@ -72,8 +72,15 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
         final String sourceName = filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE);
         final RasterDataNode sourceNode = product.getRasterDataNode(sourceName);
         final String bandName = element.getChildTextTrim(DimapProductConstants.TAG_BAND_NAME);
-        // todo - read iterationCount
-        final GeneralFilterBand gfb = new GeneralFilterBand(bandName, sourceNode, opType, kernel, 1);
+
+        final int iterationCount;
+        final String iterCountStr = filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_ITERATION_COUNT);
+        if (iterCountStr == null) {
+            iterationCount = 1;
+        } else {
+            iterationCount = Integer.parseInt(iterCountStr);
+        }
+        final GeneralFilterBand gfb = new GeneralFilterBand(bandName, sourceNode, opType, kernel, iterationCount);
 
         gfb.setDescription(element.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION));
         gfb.setUnit(element.getChildTextTrim(DimapProductConstants.TAG_PHYSICAL_UNIT));
@@ -169,6 +176,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE, String.valueOf(gfb.getNoDataValue())));
         final List<Element> filterBandInfoList = new ArrayList<>(5);
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_SOURCE, gfb.getSource().getName()));
+        filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_ITERATION_COUNT, "" + gfb.getIterationCount()));
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_OP_TYPE, gfb.getOpType().toString()));
         filterBandInfoList.add(ConvolutionFilterBandPersistable.convertKernelToElement(gfb.getStructuringElement()));
 

@@ -135,10 +135,11 @@ public class ConvolutionFilterBandPersistenceConverterTest {
 
         final Element filterInfo = xmlElement.getChild(NAME_FILTER_BAND_INFO);
         assertThat(filterInfo).isNotNull();
-        assertThat(filterInfo.getChildren().size()).isEqualTo(3);
+        assertThat(filterInfo.getChildren().size()).isEqualTo(4);
         assertThat(filterInfo.getChildTextTrim(PROP_NAME_BAND_TYPE)).isEqualTo(VALUE_CONVOLUTION_FILTER_BAND);
         assertThat(filterInfo.getChild(PROP_NAME_FILTER_SOURCE)).isNotNull();
         assertThat(filterInfo.getChildTextTrim(PROP_NAME_FILTER_SOURCE)).isEqualTo(cfb.getSource().getName());
+        assertThat(filterInfo.getChildTextTrim(PROP_NAME_FILTER_ITERATION_COUNT)).isEqualTo("" + cfb.getIterationCount());
 
         final Kernel kernel = cfb.getKernel();
         final Element kernelInfo = filterInfo.getChild(NAME_FILTER_KERNEL);

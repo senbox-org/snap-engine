@@ -59,6 +59,7 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
     static final String PROP_NAME_BAND_TYPE = "bandType";
     static final String VALUE_CONVOLUTION_FILTER_BAND = "ConvolutionFilterBand";
     static final String PROP_NAME_FILTER_SOURCE = "FILTER_SOURCE";
+    static final String PROP_NAME_FILTER_ITERATION_COUNT = "ITERATION_COUNT";
 
     static final String NAME_FILTER_KERNEL = "Filter_Kernel";
     static final String PROP_NAME_KERNEL_WIDTH = "KERNEL_WIDTH";
@@ -68,6 +69,22 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
     static final String PROP_NAME_KERNEL_FACTOR = "KERNEL_FACTOR";
     static final String PROP_NAME_KERNEL_DATA = "KERNEL_DATA";
 
+    protected static void initRootContainer(Band gfb, Container root) {
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_BAND_INDEX, String.valueOf(gfb.getProduct().getBandIndex(gfb.getName()))));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_BAND_NAME, gfb.getName()));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_BAND_DESCRIPTION, gfb.getDescription()));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_DATA_TYPE, ProductData.getTypeString(gfb.getDataType())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_PHYSICAL_UNIT, gfb.getUnit()));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_SOLAR_FLUX, String.valueOf(gfb.getSolarFlux())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_BAND_WAVELEN, String.valueOf(gfb.getSpectralWavelength())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_BANDWIDTH, String.valueOf(gfb.getSpectralBandwidth())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_SCALING_FACTOR, String.valueOf(gfb.getScalingFactor())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_SCALING_OFFSET, String.valueOf(gfb.getScalingOffset())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_LOG_10_SCALED, String.valueOf(gfb.isLog10Scaled())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_NO_DATA_VALUE_USED, String.valueOf(gfb.isNoDataValueUsed())));
+        root.add(new Property<>(GeneralFilterBandPersistenceConverter.PROP_NAME_NO_DATA_VALUE, String.valueOf(gfb.getNoDataValue())));
+    }
+
     @Override
     public String getID() {
         return ID_VERSION_1;
@@ -76,24 +93,13 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
     @Override
     public Item encode(ConvolutionFilterBand cfb) {
         final Container root = createRootContainer(ROOT_NAME_SPECTRAL_BAND_INFO);
-        root.add(new Property<>(PROP_NAME_BAND_INDEX, String.valueOf(cfb.getProduct().getBandIndex(cfb.getName()))));
-        root.add(new Property<>(PROP_NAME_BAND_NAME, cfb.getName()));
-        root.add(new Property<>(PROP_NAME_BAND_DESCRIPTION, cfb.getDescription()));
-        root.add(new Property<>(PROP_NAME_DATA_TYPE, ProductData.getTypeString(cfb.getDataType())));
-        root.add(new Property<>(PROP_NAME_PHYSICAL_UNIT, cfb.getUnit()));
-        root.add(new Property<>(PROP_NAME_SOLAR_FLUX, String.valueOf(cfb.getSolarFlux())));
-        root.add(new Property<>(PROP_NAME_BAND_WAVELEN, String.valueOf(cfb.getSpectralWavelength())));
-        root.add(new Property<>(PROP_NAME_BANDWIDTH, String.valueOf(cfb.getSpectralBandwidth())));
-        root.add(new Property<>(PROP_NAME_SCALING_FACTOR, String.valueOf(cfb.getScalingFactor())));
-        root.add(new Property<>(PROP_NAME_SCALING_OFFSET, String.valueOf(cfb.getScalingOffset())));
-        root.add(new Property<>(PROP_NAME_LOG_10_SCALED, String.valueOf(cfb.isLog10Scaled())));
-        root.add(new Property<>(PROP_NAME_NO_DATA_VALUE_USED, String.valueOf(cfb.isNoDataValueUsed())));
-        root.add(new Property<>(PROP_NAME_NO_DATA_VALUE, String.valueOf(cfb.getNoDataValue())));
+        initRootContainer(cfb, root);
 
         final Container filterBandInfo = new Container(NAME_FILTER_BAND_INFO);
         root.add(filterBandInfo);
         filterBandInfo.add(new Property<>(PROP_NAME_BAND_TYPE, VALUE_CONVOLUTION_FILTER_BAND));
         filterBandInfo.add(new Property<>(PROP_NAME_FILTER_SOURCE, cfb.getSource().getName()));
+        filterBandInfo.add(new Property<>(PROP_NAME_FILTER_ITERATION_COUNT, cfb.getIterationCount()));
         filterBandInfo.add(convertKernelToContainer(cfb.getKernel()));
 
         addAncillaryElements(root, cfb);
@@ -106,12 +112,21 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
         final Container root = item.asContainer();
         final Container filterInfo = root.getContainer(NAME_FILTER_BAND_INFO);
         final Container kernelInfo = filterInfo.getContainer(NAME_FILTER_KERNEL);
-        final Kernel kernel = convertElementToKernel(kernelInfo);
+        final Kernel kernel = convertContainerToKernel(kernelInfo);
         final String sourceName = filterInfo.getProperty(PROP_NAME_FILTER_SOURCE).getValueString();
+        final Property<?> iterCountProp = filterInfo.getProperty(PROP_NAME_FILTER_ITERATION_COUNT);
+        final int iterationCount;
+        if (iterCountProp != null) {
+            iterationCount = iterCountProp.getValueInt();
+        } else {
+            iterationCount = 1;
+        }
         final String bandName = root.getProperty(PROP_NAME_BAND_NAME).getValueString();
         final RasterDataNode sourceNode = product.getRasterDataNode(sourceName);
-        // todo - read iterationCount
-        final ConvolutionFilterBand cfb = new ConvolutionFilterBand(bandName, sourceNode, kernel, 1);
+
+        final ConvolutionFilterBand cfb = new ConvolutionFilterBand(
+                bandName, sourceNode, kernel, iterationCount);
+
         cfb.setDescription(root.getProperty(PROP_NAME_BAND_DESCRIPTION).getValueString());
         cfb.setUnit(root.getProperty(PROP_NAME_PHYSICAL_UNIT).getValueString());
         cfb.setSolarFlux(root.getProperty(PROP_NAME_SOLAR_FLUX).getValueFloat());
@@ -165,7 +180,7 @@ public class ConvolutionFilterBandPersistenceConverter extends PersistenceConver
         }
     }
 
-    static Kernel convertElementToKernel(Container kernelInfo) {
+    static Kernel convertContainerToKernel(Container kernelInfo) {
         final String kernelDataString = kernelInfo.getProperty(PROP_NAME_KERNEL_DATA).getValueString();
         final double[] data = StringUtils.toDoubleArray(kernelDataString, ",");
 

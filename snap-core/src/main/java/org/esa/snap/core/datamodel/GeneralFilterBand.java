@@ -98,6 +98,10 @@ public class GeneralFilterBand extends FilterBand {
         return structuringElement;
     }
 
+    public int getIterationCount() {
+        return iterationCount;
+    }
+
     /**
      * Returns the source level-image according the the
      *

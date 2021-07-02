@@ -54,9 +54,9 @@ public abstract class PersistenceConverter<T> implements PersistenceEncoder<T>, 
     }
 
     protected final Container createRootContainer(String name) {
-        final Container codingMain = new Container(name);
-        codingMain.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
-        return codingMain;
+        final Container rootContainer = new Container(name);
+        rootContainer.add(new Property<>(KEY_PERSISTENCE_ID, getID()));
+        return rootContainer;
     }
 
     /**

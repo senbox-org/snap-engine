@@ -55,6 +55,10 @@ public class ConvolutionFilterBand extends FilterBand {
         return kernel;
     }
 
+    public int getIterationCount() {
+        return iterationCount;
+    }
+
     @Override
     protected RenderedImage createSourceLevelImage(RenderedImage sourceImage, int level, RenderingHints rh) {
         KernelJAI jaiKernel = createJaiKernel();
