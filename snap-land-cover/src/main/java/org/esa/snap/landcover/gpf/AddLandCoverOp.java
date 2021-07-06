@@ -78,8 +78,8 @@ public final class AddLandCoverOp extends Operator {
             label = "Resampling Method")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
-    private static Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor;
-    private static Map<LandCoverParameters, Band> paramsToBand;
+    private final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor = new HashMap<>();
+    private final Map<LandCoverParameters, Band> paramsToBand = new HashMap<>();
 
     public static final String DEFAULT_BAND_NAME = "land_cover";
 
@@ -128,8 +128,7 @@ public final class AddLandCoverOp extends Operator {
                 final LandCoverParameters param = new LandCoverParameters(
                         landCoverName, resamplingMethod);
 
-                addLandCover(targetProduct, param);
-
+                addLandCover(targetProduct, param, paramsToDescriptor, paramsToBand);
             }
         }
         if (externalFiles != null) {
@@ -139,21 +138,24 @@ public final class AddLandCoverOp extends Operator {
                     final LandCoverParameters param = new LandCoverParameters(
                             externalFile.getName(), externalFile, resamplingMethod);
 
-                    addLandCover(targetProduct, param);
+                    addLandCover(targetProduct, param, paramsToDescriptor, paramsToBand);
                 }
             }
         }
     }
 
     public static void AddLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param) throws IOException {
-        addLandCover(product, param);
-        initializeDescriptors();
-        setLandCoverBandImages();
+        final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor = new HashMap<>();
+        final Map<LandCoverParameters, Band> paramsToBand = new HashMap<>();
+
+        addLandCover(product, param, paramsToDescriptor, paramsToBand);
+        initializeDescriptors(paramsToDescriptor);
+        setLandCoverBandImages(paramsToDescriptor, paramsToBand);
     }
 
-    private static void addLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param) {
-        paramsToDescriptor = new HashMap<>();
-        paramsToBand = new HashMap<>();
+    private static void addLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param,
+                                     final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor,
+                                     final Map<LandCoverParameters, Band> paramsToBand) {
         String name = LandCoverFactory.getProperName(param.name);
 
         LandCoverModelDescriptor descriptor;
@@ -165,7 +167,7 @@ public final class AddLandCoverOp extends Operator {
             descriptor = modelRegistry.getDescriptor(name);
             paramsToDescriptor.put(param, descriptor);
         }
-        addLandCoverBand(product, descriptor, param);
+        addLandCoverBand(product, descriptor, param, paramsToBand);
     }
 
     @Override
@@ -173,10 +175,10 @@ public final class AddLandCoverOp extends Operator {
         pm.beginTask("", 2);
         try {
             pm.setTaskName("Initializing Descriptors");
-            initializeDescriptors();
+            initializeDescriptors(paramsToDescriptor);
             pm.worked(1);
             pm.setTaskName("Setting Land Cover Band Images");
-            setLandCoverBandImages();
+            setLandCoverBandImages(paramsToDescriptor, paramsToBand);
             pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException(e.getMessage());
@@ -185,13 +187,7 @@ public final class AddLandCoverOp extends Operator {
         }
     }
 
-    @Override
-    public void dispose() {
-        paramsToDescriptor = null;
-        paramsToBand = null;
-    }
-
-    private static void initializeDescriptors() {
+    private static void initializeDescriptors(final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor) {
         for (Map.Entry<LandCoverParameters, LandCoverModelDescriptor> entry : paramsToDescriptor.entrySet()) {
             LandCoverParameters param = entry.getKey();
             if (param.externalFile != null) {
@@ -222,7 +218,8 @@ public final class AddLandCoverOp extends Operator {
         }
     }
 
-    private static void setLandCoverBandImages() throws IOException {
+    private static void setLandCoverBandImages(final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor,
+                                               final Map<LandCoverParameters, Band> paramsToBand) throws IOException {
         for (Map.Entry<LandCoverParameters, LandCoverModelDescriptor> entry : paramsToDescriptor.entrySet()) {
             LandCoverParameters param = entry.getKey();
             Resampling resampling = Resampling.NEAREST_NEIGHBOUR;
@@ -239,7 +236,8 @@ public final class AddLandCoverOp extends Operator {
         }
     }
 
-    private static void addLandCoverBand(Product product, LandCoverModelDescriptor descriptor, LandCoverParameters param) {
+    private static void addLandCoverBand(Product product, LandCoverModelDescriptor descriptor, LandCoverParameters param,
+                                         final Map<LandCoverParameters, Band> paramsToBand) {
         String bandName = getValidBandName(param.bandName, product);
         final Band band = product.addBand(bandName, descriptor.getDataType());
         band.setNoDataValueUsed(true);
@@ -280,7 +278,7 @@ public final class AddLandCoverOp extends Operator {
     private static class LandCoverSourceImage extends RasterDataNodeSampleOpImage {
         private final LandCoverModel landcover;
         private final GeoCoding geoCoding;
-        private double noDataValue;
+        private final double noDataValue;
 
         public LandCoverSourceImage(final LandCoverModel landcover, final GeoCoding geoCoding,
                                     final Band band, final ResolutionLevel level) {
