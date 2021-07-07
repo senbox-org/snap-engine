@@ -173,13 +173,15 @@ public abstract class ElevationFile {
      * @throws IOException if an I/O error occurs
      */
     private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
+        System.out.println("downloadFile");
         SSLUtil sslUtil = new SSLUtil();
         sslUtil.disableSSLCertificateCheck();
-
+        System.out.println("disableSSLCertificateCheck OK");
         final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
+        System.out.println("start connection ...");
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
-
+        System.out.println("open buffer");
         try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength)) {
             try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
                 try (final OutputStream os = new BufferedOutputStream(fileOS)) {
@@ -187,7 +189,7 @@ public abstract class ElevationFile {
                     try {
                         final StatusProgressMonitor status = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
                         status.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
-
+                        System.out.println("Downloading: " + localZipFile.getName() + "... ");
                         final int size = 32768;
                         final byte[] buf = new byte[size];
                         int n;
@@ -196,7 +198,7 @@ public abstract class ElevationFile {
                             status.worked(n);
                         }
                         status.done();
-
+                        System.out.println("done");
                         while (true) {
                             final int b = is.read();
                             if (b == -1) {
