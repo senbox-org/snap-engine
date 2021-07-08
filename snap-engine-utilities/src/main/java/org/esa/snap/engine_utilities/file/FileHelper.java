@@ -19,21 +19,18 @@ package org.esa.snap.engine_utilities.file;
 
 import org.esa.snap.engine_utilities.util.NotRegularFileException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -172,6 +169,34 @@ public class FileHelper {
         }
     }
 
+    private static boolean wasSymlink(ZipFile zipFile, ZipEntry zipEntry) {
+        if (!zipEntry.isDirectory() && zipEntry.getSize() < 4096) {
+            try (InputStream inputStream = zipFile.getInputStream(zipEntry)) {
+                try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    try (BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                        String fileContent = bufferedReader.readLine();
+                        if(fileContent.replaceAll("[\\d\\w\\\\/.\\-+]*","").isEmpty()) {
+                            Path target = Paths.get(fileContent);
+                            Path zipDir = Paths.get(zipFile.getName()).getParent();
+                            Path zipEntryPath = Paths.get(zipEntry.getName());
+                            Path zipEntryDir = zipEntryPath.getParent();
+                            Path zipEntryAbsolutePath = zipDir.resolve(zipEntryDir);
+                            String targetAbsolutePath = new File(zipEntryAbsolutePath.resolve(target).toString()).getCanonicalPath();
+                            Path linkPath = zipEntryAbsolutePath.resolve(zipEntryPath.getFileName());
+                            if (targetAbsolutePath.startsWith(zipDir.toString())) {
+                                Files.createSymbolicLink(linkPath, target);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                //ignore
+            }
+        }
+        return false;
+    }
+
     public static void unzip(Path sourceFile, Path destination, boolean keepFolderStructure) throws IOException {
         if (sourceFile == null || destination == null) {
             throw new IllegalArgumentException("One of the arguments is null");
@@ -192,7 +217,7 @@ public class FileHelper {
                 if (!Files.exists(filePath)) {
                     if (entry.isDirectory()) {
                         Files.createDirectories(filePath);
-                    } else {
+                    } else if(!wasSymlink(zipFile, entry)){
                         try (InputStream inputStream = zipFile.getInputStream(entry)) {
                             try (BufferedOutputStream bos = new BufferedOutputStream(
                                     new FileOutputStream(keepFolderStructure ? filePath.toFile() : strippedFilePath.toFile()))) {
