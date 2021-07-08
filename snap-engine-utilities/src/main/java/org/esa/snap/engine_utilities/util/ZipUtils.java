@@ -45,6 +45,8 @@ public class ZipUtils {
     }
 
     public static boolean isZipped(final Path path) {
+        if(path.getFileName() == null)
+            return false;
         final String name = path.getFileName().toString().toLowerCase();
         for (String ext : extList) {
             if (name.endsWith(ext))
@@ -58,7 +60,7 @@ public class ZipUtils {
     }
 
     public static boolean isZip(final Path inputPath) {
-        return inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
+        return inputPath.getFileName() != null && inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
     }
 
     @Deprecated
