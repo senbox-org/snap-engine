@@ -3,9 +3,7 @@ package org.esa.snap.core.gpf.common.resample;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import javax.media.jai.RasterAccessor;
-import javax.media.jai.RasterFormatTag;
 import java.awt.Rectangle;
-import java.awt.image.Raster;
 
 /**
  * @author Tonio Fincke
@@ -20,11 +18,11 @@ public abstract class DoubleDataInterpolator implements Interpolator {
         this.accessor = DataAccessorFactory.createDoubleDataAccessor(srcAccessor, dstAccessor, noDataValue);
     }
 
-    protected double getSrcData(int index) {
+    double getSrcData(int index) {
         return accessor.getSrcData(index);
     }
 
-    protected void setDstData(int index, double value) {
+    void setDstData(int index, double value) {
         accessor.setDstData(index, value);
     }
 
@@ -50,8 +48,7 @@ public abstract class DoubleDataInterpolator implements Interpolator {
 
     public void dispose(){
 
-    };
-
+    }
 
     static class NearestNeighbour extends DoubleDataInterpolator {
 
@@ -62,11 +59,11 @@ public abstract class DoubleDataInterpolator implements Interpolator {
             double subPixelOffsetY = offsetY - (int) offsetY;
             double subPixelOffsetX = offsetX - (int) offsetX;
             for (int dstY = 0; dstY < destRect.getHeight(); dstY++) {
-                int srcY = (int) (subPixelOffsetY + scaleY * dstY);
+                int srcY = (int) Math.round(subPixelOffsetY + scaleY * dstY);
                 int srcIndexY = getSrcOffset() + srcY * getSrcScalineStride();
                 boolean yValid = srcY < srcRect.getHeight();
                 for (int dstX = 0; dstX < destRect.getWidth(); dstX++) {
-                    int srcX = (int) (subPixelOffsetX + scaleX * dstX);
+                    int srcX = (int) Math.round(subPixelOffsetX + scaleX * dstX);
                     if (yValid && srcX < srcRect.getWidth()) {
                         setDstData(dstIndexY + dstX, getSrcData(srcIndexY + srcX));
                     } else {
@@ -90,13 +87,11 @@ public abstract class DoubleDataInterpolator implements Interpolator {
             double subPixelOffsetX = offsetX - (int) offsetX;
             for (int dstY = 0; dstY < destRect.getHeight(); dstY++) {
                 double srcYF = subPixelOffsetY + (scaleY * (dstY + 0.5)) - 0.5;
-//                double srcYF = subPixelOffsetY + (scaleY * (dstY));
                 int srcY = (int) srcYF;
                 int srcIndexY = getSrcOffset() + srcY * getSrcScalineStride();
                 double wy = srcYF - srcY;
                 for (int dstX = 0; dstX < destRect.getWidth(); dstX++) {
                     double srcXF = subPixelOffsetX + (scaleX * (dstX + 0.5)) - 0.5;
-//                    double srcXF = subPixelOffsetX + (scaleX * (dstX));
                     int srcX = (int) srcXF;
                     double wx = srcXF - srcX;
                     boolean withinSrcH = srcY + 1 < srcH;

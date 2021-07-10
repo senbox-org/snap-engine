@@ -23,6 +23,8 @@ public class InterpolatorFactory {
                     return new LongDataInterpolator.NearestNeighbour();
                 case Bilinear:
                     return new LongDataInterpolator.Bilinear();
+                case Cubic_Convolution:
+                    return new LongDataInterpolator.CubicConvolution();
             }
         }
         throw new IllegalArgumentException("Interpolation method not supported");
