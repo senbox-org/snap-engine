@@ -55,20 +55,20 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testSaveMasterProductBandNames() throws Exception {
+    public void testSaveReferenceProductBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = new String[] {"band1","band2"};
         StackUtils.saveMasterProductBandNames(product, bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
-        assertNotNull(targetSlaveMetadataRoot);
-        String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
-        assertEquals("band1 band2", masterBands);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
+        assertNotNull(targetSecondaryMetadataRoot);
+        String referenceBands = targetSecondaryMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
+        assertEquals("band1 band2", referenceBands);
     }
 
     @Test
-    public void testSaveSlaveProductBandNames_WrongProduct() throws Exception {
+    public void testSaveSecondaryProductBandNames_WrongProduct() throws Exception {
         final Product product = createStackProduct(4);
         String[] bandNames = new String[] {"band1","band2"};
 
@@ -79,27 +79,27 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testSaveSlaveProductBandNames() throws Exception {
+    public void testSaveSecondaryProductBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = new String[] {"band1","band2"};
         StackUtils.saveSlaveProductBandNames(product, "product2_01Feb21", bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
-        assertNotNull(targetSlaveMetadataRoot);
-        String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
-        assertEquals("band_mst1_01Jan21", masterBands);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
+        assertNotNull(targetSecondaryMetadataRoot);
+        String referenceBands = targetSecondaryMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
+        assertEquals("band_mst1_01Jan21", referenceBands);
     }
 
     @Test
-    public void testFindOriginalSlaveProductName() throws Exception {
+    public void testFindOriginalSecondaryProductName() throws Exception {
         final Product product = createStackProduct(4);
 
         assertEquals("product2_01Feb21", StackUtils.findOriginalSlaveProductName(product, product.getBandAt(2)));
     }
 
     @Test
-    public void testGetSlaveBandNames() throws Exception {
+    public void testGetSecondaryBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = StackUtils.getSlaveBandNames(product, "unknown");
@@ -110,7 +110,7 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testIsMasterBand() throws Exception {
+    public void testIsReferenceBand() throws Exception {
         final Product product = createStackProduct(4);
 
         assertTrue(StackUtils.isMasterBand(product.getBandAt(0).getName(), product));
@@ -118,7 +118,7 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testIsSlaveBand() throws Exception {
+    public void testIsSecondaryBand() throws Exception {
         final Product product = createStackProduct(4);
 
         assertFalse(StackUtils.isSlaveBand(product.getBandAt(0).getName(), product));
@@ -126,7 +126,7 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testGetSlaveProductNames() throws Exception {
+    public void testGetSecondaryProductNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] productNames = StackUtils.getSlaveProductNames(product);
@@ -192,18 +192,18 @@ public class TestStackUtils {
         final Product product = TestUtils.createProduct("type", w, h);
 
         String date = "_01Jan21";
-        Band mstBand = TestUtils.createBand(product, "band_mst" + 1 + date, w, h);
-        StackUtils.saveMasterProductBandNames(product, new String[] {mstBand.getName()});
+        Band refBand = TestUtils.createBand(product, "band_mst" + 1 + date, w, h);
+        StackUtils.saveMasterProductBandNames(product, new String[] {refBand.getName()});
 
-        final List<String> slvBands = new ArrayList<>();
+        final List<String> secBands = new ArrayList<>();
         date = "_01Feb21";
         for(int i=2; i < numBands; ++i) {
             Band band = TestUtils.createBand(product, "band_slv" + i + date, w, h);
-            slvBands.add(band.getName());
+            secBands.add(band.getName());
         }
-        String slvProductName = "product2"+date;
-        addStackMetadata(product, slvProductName);
-        StackUtils.saveSlaveProductBandNames(product, slvProductName, slvBands.toArray(new String[0]));
+        String secProductName = "product2"+date;
+        addStackMetadata(product, secProductName);
+        StackUtils.saveSlaveProductBandNames(product, secProductName, secBands.toArray(new String[0]));
 
         return product;
     }
@@ -214,17 +214,17 @@ public class TestStackUtils {
 
         absRoot.setAttributeInt(AbstractMetadata.coregistered_stack, 1);
 
-        final MetadataElement slv1Meta = absRoot.createDeepClone();
-        slv1Meta.setName(secondaryProductName);
-        slv1Meta.setAttributeString(AbstractMetadata.PRODUCT, secondaryProductName);
+        final MetadataElement sec1Meta = absRoot.createDeepClone();
+        sec1Meta.setName(secondaryProductName);
+        sec1Meta.setAttributeString(AbstractMetadata.PRODUCT, secondaryProductName);
 
-        MetadataElement slaveMetadata;
+        MetadataElement secondaryMetadata;
         if(root.containsElement(AbstractMetadata.SLAVE_METADATA_ROOT)) {
-            slaveMetadata = root.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+            secondaryMetadata = root.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
         } else {
-            slaveMetadata = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            root.addElement(slaveMetadata);
+            secondaryMetadata = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+            root.addElement(secondaryMetadata);
         }
-        slaveMetadata.addElement(slv1Meta);
+        secondaryMetadata.addElement(sec1Meta);
     }
 }

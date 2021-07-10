@@ -74,26 +74,26 @@ public class ReplaceMetadataOp extends Operator {
             if (sourceProduct.length != 2) {
                 throw new OperatorException("ReplaceMetadataOp requires two source products.");
             }
-            final Product masterProduct = sourceProduct[0];
-            final Product slaveProduct = sourceProduct[1];
+            final Product refProduct = sourceProduct[0];
+            final Product secondaryProduct = sourceProduct[1];
 
             // create target product
-            targetProduct = new Product(masterProduct.getName(),
-                    slaveProduct.getProductType(),
-                    masterProduct.getSceneRasterWidth(),
-                    masterProduct.getSceneRasterHeight());
+            targetProduct = new Product(refProduct.getName(),
+                    secondaryProduct.getProductType(),
+                    refProduct.getSceneRasterWidth(),
+                    refProduct.getSceneRasterHeight());
 
             // Add target bands
-            final Band[] bands = masterProduct.getBands();
+            final Band[] bands = refProduct.getBands();
             for (Band srcBand : bands) {
 
-                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), masterProduct, targetProduct, false);
+                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), refProduct, targetProduct, false);
                 targetBand.setSourceImage(srcBand.getSourceImage());
             }
 
-            ProductUtils.copyProductNodes(slaveProduct, targetProduct);
+            ProductUtils.copyProductNodes(secondaryProduct, targetProduct);
 
-            final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(masterProduct);
+            final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(refProduct);
             final int isPolsar = absRootMst.getAttributeInt(AbstractMetadata.polsarData, 0);
             final int isCalibrated = absRootMst.getAttributeInt(AbstractMetadata.abs_calibration_flag, 0);
 
