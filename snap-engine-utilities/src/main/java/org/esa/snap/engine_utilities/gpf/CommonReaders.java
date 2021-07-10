@@ -22,6 +22,7 @@ public class CommonReaders {
     private final static ProductReaderPlugIn S1ReadPlugIn = getReaderPlugIn("SENTINEL-1");
     private final static ProductReaderPlugIn GeoTiffReadPlugIn = getReaderPlugIn("GeoTIFF");
     private final static ProductReaderPlugIn ImageIOReadPlugIn = getReaderPlugIn("PNG");
+    private final static ProductReaderPlugIn ProductGroupPlugIn = getReaderPlugIn("ProductGroup");
 
     private static ProductReaderPlugIn getReaderPlugIn(final String format) {
         final ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
@@ -57,6 +58,8 @@ public class CommonReaders {
             return read(file, RS2ReadPlugIn);
         } else if (filename.endsWith("tif")) {
             return read(file, GeoTiffReadPlugIn);
+        } else if (filename.endsWith("product_group.json")) {
+            return read(file, ProductGroupPlugIn);
         } else if (filename.endsWith("dbl")) {
             return ProductIO.readProduct(file, "SMOS-DBL");
         } else if (filename.endsWith("zip")) {
@@ -69,6 +72,11 @@ public class CommonReaders {
             }
         } else if (filename.endsWith("png")) {
             return read(file, ImageIOReadPlugIn);
+        } else if (file.isDirectory()) {
+            File pgFile = new File(file, "product_group.json");
+            if(pgFile.exists()) {
+                return read(pgFile, ProductGroupPlugIn);
+            }
         }
         return null;
     }
@@ -77,7 +85,11 @@ public class CommonReaders {
         if(selectedPlugIn == null)
             return null;
         final ProductReader productReader = selectedPlugIn.createReaderInstance();
-        return productReader == null ? null : productReader.readProductNodes(file, null);
+        Product product = productReader == null ? null : productReader.readProductNodes(file, null);
+        if(product != null && product.getFileLocation() == null) {
+            product.setFileLocation(file);
+        }
+        return product;
     }
 
     /**
