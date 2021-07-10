@@ -21,6 +21,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.common.WriteOp;
 import org.esa.snap.core.gpf.internal.OperatorContext;
 import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
@@ -213,6 +214,9 @@ public class GraphProcessor {
                                 // tiles of all other OperatorImage computed stack-wise.
                                 //
                                 for (Band band : targetProduct.getBands()) {
+                                    if (!shouldWrite(nodeContext, band)) {
+                                        continue;
+                                    }
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
@@ -225,6 +229,9 @@ public class GraphProcessor {
                                 // (2) Pull tile from source images of other regular bands.
                                 //
                                 for (Band band : targetProduct.getBands()) {
+                                    if (!shouldWrite(nodeContext, band)) {
+                                        continue;
+                                    }
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
@@ -293,6 +300,14 @@ public class GraphProcessor {
         }
 
         return graphContext.getOutputProducts();
+    }
+
+    private static boolean shouldWrite(final NodeContext nodeContext, final Band band) {
+        if(nodeContext.getOperator() instanceof WriteOp) {
+            WriteOp writeOp = (WriteOp)nodeContext.getOperator();
+            return writeOp.shouldWrite(band);
+        }
+        return true;
     }
 
     private Map<Dimension, List<NodeContext>> buildTileDimensionMap(NodeContext[] outputNodeContexts) {

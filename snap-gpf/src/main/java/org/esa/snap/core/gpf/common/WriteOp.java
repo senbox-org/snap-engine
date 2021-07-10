@@ -286,6 +286,22 @@ public class WriteOp extends Operator {
         }
         pm.beginTask("Preparing writing", writableBands.size() + 1);
         try {
+            if (writableBands.size() > 0) {
+                // Create not existing directories before writing
+                if (file != null && file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
+                productWriter.writeProductNodes(targetProduct, file);
+
+                // check again which bands should write after targetProduct and file are known to writer
+                writableBands.clear();
+                for (final Band band : bands) {
+                    if (productWriter.shouldWrite(band)) {
+                        writableBands.add(band);
+                    }
+                }
+            }
+
             tileSizes = new Dimension[writableBands.size()];
             tileCountsX = new int[writableBands.size()];
             tilesWritten = new boolean[writableBands.size()][][];
@@ -304,16 +320,10 @@ public class WriteOp extends Operator {
                 }
                 pm.worked(1);
             }
-            if (writableBands.size() > 0) {
-                if (writeEntireTileRows) {
-                    targetProduct.setPreferredTileSize(tileSizes[0]);
-                }
-                // Create not existing directories before writing
-                if (file != null && file.getParentFile() != null) {
-                    file.getParentFile().mkdirs();
-                }
-                productWriter.writeProductNodes(targetProduct, file);
+            if (tileSizes.length > 0 && writeEntireTileRows) {
+                targetProduct.setPreferredTileSize(tileSizes[0]);
             }
+
             pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
@@ -457,6 +467,11 @@ public class WriteOp extends Operator {
             }
         }
         return true;
+    }
+
+    public boolean shouldWrite(final Band band) {
+        boolean shouldWrite = writableBands.contains(band);
+        return shouldWrite;
     }
 
     @Override
