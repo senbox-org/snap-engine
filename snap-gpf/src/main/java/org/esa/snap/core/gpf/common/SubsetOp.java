@@ -102,7 +102,7 @@ public class SubsetOp extends Operator {
     private boolean fullSwath;
 
     @Parameter(description = "The list of tie-point grids name.", alias = "tiePointGrids",
-    rasterDataNodeType = TiePointGrid.class, label = "Tie-Point Grids")
+    rasterDataNodeType = TiePointGrid.class)
     private String[] tiePointGridNames;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
@@ -170,7 +170,7 @@ public class SubsetOp extends Operator {
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         if (tiePointGridNames != null) {
             subsetDef.addNodeNames(tiePointGridNames);
-        } else {
+        }else{
             subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
         }
 
@@ -242,7 +242,6 @@ public class SubsetOp extends Operator {
 
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(!copyMetadata);
-
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
             targetProduct.setName("Subset_" + targetProduct.getName());
