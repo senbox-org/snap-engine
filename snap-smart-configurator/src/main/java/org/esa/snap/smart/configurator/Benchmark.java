@@ -36,7 +36,7 @@ public class Benchmark {
      */
     private List<BenchmarkSingleCalculus> benchmarkCalculus;
 
-    public Benchmark(List<Integer> tileSizes, List<String> readerTileDimension, List<Integer> cacheSizes, List<Integer> nbThreads){
+    public Benchmark(List<String> tileSizes, List<String> readerTileDimension, List<Integer> cacheSizes, List<Integer> nbThreads){
 
         if(tileSizes.isEmpty() || readerTileDimension.isEmpty() || cacheSizes.isEmpty() || nbThreads.isEmpty()){
             throw new IllegalArgumentException("All benchmark parameters need to be filled");
@@ -49,7 +49,7 @@ public class Benchmark {
 
         //generate possible calculus list
 
-        for(Integer tileSize : tileSizes) {
+        for(String tileSize : tileSizes) {
             for (String dim : readerTileDimension) {
                 for (Integer cacheSize : cacheSizes) {
                     for (Integer nbThread : nbThreads) {
@@ -79,7 +79,7 @@ public class Benchmark {
     public void loadBenchmarkPerfParams(BenchmarkSingleCalculus benchmarkSingleCalculus){
         ConfigurationOptimizer confOptimizer = ConfigurationOptimizer.getInstance();
         PerformanceParameters benchmarkPerformanceParameters = confOptimizer.getActualPerformanceParameters();
-        benchmarkPerformanceParameters.setDefaultTileSize(benchmarkSingleCalculus.getTileSize());
+        benchmarkPerformanceParameters.setDefaultTileSize(benchmarkSingleCalculus.getTileSizeInt());
         benchmarkPerformanceParameters.setTileWidth(benchmarkSingleCalculus.getTileWidth());
         benchmarkPerformanceParameters.setTileHeight(benchmarkSingleCalculus.getTileHeight());
         benchmarkPerformanceParameters.setCacheSize(benchmarkSingleCalculus.getCacheSize());

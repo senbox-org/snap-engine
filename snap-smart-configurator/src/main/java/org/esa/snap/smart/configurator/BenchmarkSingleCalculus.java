@@ -28,7 +28,7 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
     /**
      * tile size (px)
      */
-    private int tileSize;
+    private String tileSize;
 
     /**
      * tile Width (px)
@@ -65,15 +65,15 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
      */
     private int executionOrder;
 
-    public BenchmarkSingleCalculus(int tileSize, String tileHeight, String tileWidth, int cacheSize, int nbThreads){
+    public BenchmarkSingleCalculus(String tileSize, String tileHeight, String tileWidth, int cacheSize, int nbThreads){
         this(tileSize, tileHeight, tileWidth, cacheSize, nbThreads, false);
     }
 
-    public BenchmarkSingleCalculus(int tileSize, String dimension, int cacheSize, int nbThreads){
+    public BenchmarkSingleCalculus(String tileSize, String dimension, int cacheSize, int nbThreads){
         this(tileSize, dimension, cacheSize, nbThreads, false);
     }
 
-    public BenchmarkSingleCalculus(int tileSize, String tileHeight, String tileWidth, int cacheSize, int nbThreads, boolean hideOutput){
+    public BenchmarkSingleCalculus(String tileSize, String tileHeight, String tileWidth, int cacheSize, int nbThreads, boolean hideOutput){
         this.tileSize = tileSize;
         this.tileHeight = tileHeight;
         this.tileWidth = tileWidth;
@@ -83,7 +83,7 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
         this.executionTime = null;
     }
 
-    public BenchmarkSingleCalculus(int tileSize, String dimension, int cacheSize, int nbThreads, boolean hideOutput){
+    public BenchmarkSingleCalculus(String tileSize, String dimension, int cacheSize, int nbThreads, boolean hideOutput){
 
         this(tileSize,
              PerformanceParameters.getHeightFromTileDimensionString(dimension),
@@ -121,6 +121,7 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
 
         int tileHeight = -1;
         int tileWidth = -1;
+        int tileSizeInt = -1;
         try {
             tileHeight = Integer.parseInt(this.tileHeight);
         } catch (Exception e) {
@@ -133,7 +134,10 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
             //Ignore
         }
 
-        int[] calculus = {this.executionOrder,tileSize, tileWidth, tileHeight, this.cacheSize, this.nbThreads, execution};
+        if(!this.tileSize.matches("\\*"))
+            tileSizeInt = Integer.parseInt(this.tileSize);
+
+        int[] calculus = {this.executionOrder,tileSizeInt, tileWidth, tileHeight, this.cacheSize, this.nbThreads, execution};
         return calculus;
     }
 
@@ -142,7 +146,11 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
         if (this.executionTime != null) {
             execution = this.executionTime.intValue();
         }
-        int[] calculus = {this.executionOrder,this.tileSize, this.cacheSize, this.nbThreads, execution};
+        int tileSizeInt =-1;
+        if(!this.tileSize.matches("\\*"))
+            tileSizeInt = Integer.parseInt(this.tileSize);
+
+        int[] calculus = {this.executionOrder,tileSizeInt, this.cacheSize, this.nbThreads, execution};
         return calculus;
     }
 
@@ -175,8 +183,16 @@ public class BenchmarkSingleCalculus implements Comparable<BenchmarkSingleCalcul
         return tileHeight;
     }
 
-    public int getTileSize() {
+    public String getTileSize() {
         return tileSize;
+    }
+
+    public int getTileSizeInt() {
+        return Integer.parseInt(tileSize);
+    }
+
+    public void setTileSize(String tileSizeVal) {
+        this.tileSize=tileSizeVal;
     }
 
     public String getDimensionString () {
