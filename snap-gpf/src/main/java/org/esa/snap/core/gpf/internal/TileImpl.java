@@ -121,6 +121,17 @@ public class TileImpl implements Tile {
         return rasterDataNode.scale(sample);
     }
 
+    private int toRaw(int sample) {
+        final double rawSample = rasterDataNode.scaleInverse(sample);
+        if (rawSample < -2147483648.0) {
+            return Integer.MIN_VALUE;
+        }
+        if (rawSample > 2147483647.0) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) Math.round(rawSample);
+    }
+
     @Override
     public float toRaw(float sample) {
         return (float) rasterDataNode.scaleInverse(sample);
@@ -492,7 +503,6 @@ public class TileImpl implements Tile {
         int sample = raster.getSample(x, y, 0);
         // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
         if (signedByte) {
-            //noinspection SillyAssignment
             sample = (byte) sample;
         }
         if (scaled) {
@@ -504,9 +514,32 @@ public class TileImpl implements Tile {
     @Override
     public void setSample(int x, int y, int sample) {
         if (scaled) {
-            sample = (int) Math.floor(toRaw((double) sample) + 0.5);
+            sample = toRaw(sample);
+        }
+        switch (rasterDataNode.getDataType()) {
+            case ProductData.TYPE_INT8:
+                sample = clipOrRound(sample, -128, 127);
+                break;
+            case ProductData.TYPE_INT16:
+                sample = clipOrRound(sample, -32768, 32767);
+                break;
+            case ProductData.TYPE_UINT8:
+                sample = clipOrRound(sample, 0, 255);
+                break;
+            case ProductData.TYPE_UINT16:
+                sample = clipOrRound(sample, 0, 65535);
+                break;
         }
         writableRaster.setSample(x, y, 0, sample);
+    }
+
+    private int clipOrRound(int sample, int lowerBound, int upperBound) {
+        if (sample < lowerBound) {
+            sample = lowerBound;
+        } else if (sample > upperBound) {
+            sample = upperBound;
+        }
+        return sample;
     }
 
     @Override
@@ -514,7 +547,6 @@ public class TileImpl implements Tile {
         float sample = raster.getSampleFloat(x, y, 0);
         // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
         if (signedByte) {
-            //noinspection SillyAssignment
             sample = (byte) sample;
         }
         if (scaled) {
@@ -528,16 +560,38 @@ public class TileImpl implements Tile {
         if (scaled) {
             sample = toRaw(sample);
         }
+        switch (rasterDataNode.getDataType()) {
+            case ProductData.TYPE_INT8:
+                sample = clipOrRound(sample, -128.0f, 127.0f);
+                break;
+            case ProductData.TYPE_INT16:
+                sample = clipOrRound(sample, -32768.0f, 32767.0f);
+                break;
+            case ProductData.TYPE_UINT8:
+                sample = clipOrRound(sample, 0.0f, 255.0f);
+                break;
+            case ProductData.TYPE_UINT16:
+                sample = clipOrRound(sample, 0.0f, 65535.0f);
+                break;
+        }
         writableRaster.setSample(x, y, 0, sample);
     }
 
+    private float clipOrRound(float sample, float lowerBound, float upperBound) {
+        if (sample < lowerBound) {
+            return lowerBound;
+        }
+        if (sample > upperBound) {
+            return upperBound;
+        }
+        return (float) Math.rint(sample);
+    }
 
     @Override
     public double getSampleDouble(int x, int y) {
         double sample = raster.getSampleDouble(x, y, 0);
         // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
         if (signedByte) {
-            //noinspection SillyAssignment
             sample = (byte) sample;
         }
         if (scaled) {
@@ -551,7 +605,31 @@ public class TileImpl implements Tile {
         if (scaled) {
             sample = toRaw(sample);
         }
+        switch (rasterDataNode.getDataType()) {
+            case ProductData.TYPE_INT8:
+                sample = clipOrRound(sample, -128.0, 127.0);
+                break;
+            case ProductData.TYPE_INT16:
+                sample = clipOrRound(sample, -32768.0, 32767.0);
+                break;
+            case ProductData.TYPE_UINT8:
+                sample = clipOrRound(sample, 0.0, 255.0);
+                break;
+            case ProductData.TYPE_UINT16:
+                sample = clipOrRound(sample, 0.0, 65535.0);
+                break;
+        }
         writableRaster.setSample(x, y, 0, sample);
+    }
+
+    private double clipOrRound(double sample, double lowerBound, double upperBound) {
+        if (sample < lowerBound) {
+            return lowerBound;
+        }
+        if (sample > upperBound) {
+            return upperBound;
+        }
+        return Math.rint(sample);
     }
 
     @Override

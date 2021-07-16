@@ -43,10 +43,16 @@ public interface Resampling {
     Resampling BISINC_5_POINT_INTERPOLATION = new BiSinc5PointInterpolationResampling();
     Resampling BISINC_11_POINT_INTERPOLATION = new BiSinc11PointInterpolationResampling();
     Resampling BISINC_21_POINT_INTERPOLATION = new BiSinc21PointInterpolationResampling();
+
     /**
      * The bicubic spline interpolation resampling method.
      */
     Resampling BICUBIC_INTERPOLATION = new BiCubicInterpolationResampling();
+
+    /**
+     * The non-negative bicubic spline interpolation resampling method.
+     */
+    Resampling NON_NEGATIVE_BICUBIC_INTERPOLATION = new NonNegative(BICUBIC_INTERPOLATION);
 
     /**
      * Gets a unique identifier for this resampling method, e.g. "BILINEAR_INTERPOLATION".

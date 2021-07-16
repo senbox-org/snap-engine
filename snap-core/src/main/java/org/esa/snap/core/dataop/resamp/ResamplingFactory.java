@@ -30,6 +30,7 @@ public final class ResamplingFactory {
     public static final String BISINC_11_POINT_INTERPOLATION_NAME = "BISINC_11_POINT_INTERPOLATION";
     public static final String BISINC_21_POINT_INTERPOLATION_NAME = "BISINC_21_POINT_INTERPOLATION";
     public static final String BICUBIC_INTERPOLATION_NAME = "BICUBIC_INTERPOLATION";
+    public static final String NON_NEGATIVE_BICUBIC_INTERPOLATION_NAME = "NON_NEGATIVE_BICUBIC_INTERPOLATION";
 
     public static final String[] resamplingNames = new String[]{
             NEAREST_NEIGHBOUR_NAME,
@@ -70,6 +71,8 @@ public final class ResamplingFactory {
                 return Resampling.BISINC_21_POINT_INTERPOLATION;
             case BICUBIC_INTERPOLATION_NAME:
                 return Resampling.BICUBIC_INTERPOLATION;
+            case NON_NEGATIVE_BICUBIC_INTERPOLATION_NAME:
+                return Resampling.NON_NEGATIVE_BICUBIC_INTERPOLATION;
             default:
                 return null;
         }
