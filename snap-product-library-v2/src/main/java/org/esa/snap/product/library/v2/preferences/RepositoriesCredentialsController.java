@@ -1,5 +1,7 @@
 package org.esa.snap.product.library.v2.preferences;
 
+import org.apache.http.auth.Credentials;
+import org.esa.snap.product.library.v2.preferences.model.RemoteRepositoryCollectionsCredentials;
 import org.esa.snap.product.library.v2.preferences.model.RemoteRepositoryCredentials;
 import org.esa.snap.product.library.v2.preferences.model.RepositoriesCredentialsConfigurations;
 import org.esa.snap.runtime.EngineConfig;
@@ -7,7 +9,9 @@ import org.esa.snap.runtime.EngineConfig;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,12 +61,67 @@ public class RepositoriesCredentialsController {
     }
 
     /**
+     * Gets the list of Remote Repositories Collections Credentials.
+     *
+     * @return the list of Remote Repositories Credentials
+     */
+    public List<RemoteRepositoryCollectionsCredentials> getRepositoriesCollectionsCredentials() {
+        return this.repositoriesCredentialsConfigurations.getRemoteRepositoryCollectionsCredentials();
+    }
+
+    public void saveRepositoryCollectionCredential(String remoteRepositoryName, String collectionId, Credentials credential) {
+        boolean found = false;
+        if (!getRepositoriesCollectionsCredentials().isEmpty()) {
+            for (RemoteRepositoryCollectionsCredentials collectionsCredentials : getRepositoriesCollectionsCredentials()) {
+                if (collectionsCredentials.getRepositoryName().contentEquals(remoteRepositoryName)) {
+                    found = true;
+                    if (collectionsCredentials.getCollectionsCredentials().containsKey(collectionId)) {
+                        collectionsCredentials.getCollectionsCredentials().replace(collectionId, credential);
+                    } else {
+                        collectionsCredentials.getCollectionsCredentials().put(collectionId, credential);
+                    }
+                }
+            }
+        }
+        if (!found) {
+            Map<String, Credentials> collectionCredentials = new LinkedHashMap<>();
+            collectionCredentials.put(collectionId, credential);
+            getRepositoriesCollectionsCredentials().add(new RemoteRepositoryCollectionsCredentials(remoteRepositoryName, collectionCredentials));
+        }
+        try {
+            saveConfigurations(this.repositoriesCredentialsConfigurations);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public Credentials getRepositoryCollectionCredential(String remoteRepositoryName, String collectionId) {
+        if (!getRepositoriesCollectionsCredentials().isEmpty()) {
+            for (RemoteRepositoryCollectionsCredentials collectionsCredentials : getRepositoriesCollectionsCredentials()) {
+                if (collectionsCredentials.getRepositoryName().contentEquals(remoteRepositoryName) && collectionsCredentials.getCollectionsCredentials().containsKey(collectionId)) {
+                    return collectionsCredentials.getCollectionsCredentials().get(collectionId);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets whether auto-decompression of archived downloaded products is enabled
      *
      * @return {@code true} if the auto-decompression of archived downloaded products is enabled
      */
     public boolean isAutoUncompress() {
         return this.repositoriesCredentialsConfigurations.isAutoUncompress();
+    }
+
+    /**
+     * Gets whether downloading all pages of search results is enabled
+     *
+     * @return {@code true} if downloading all pages of search results is enabled
+     */
+    public boolean downloadsAllPages() {
+        return this.repositoriesCredentialsConfigurations.downloadsAllPages();
     }
 
     /**
