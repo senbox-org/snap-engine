@@ -206,7 +206,7 @@ public class ColorBarParamInfo {
 //        return colorBarThickness;
 //    }
 //
-//    public void setColorBarThickness(int colorBarThickness) {
+//    public void setColorBarWidth(int colorBarThickness) {
 //        this.colorBarThickness = colorBarThickness;
 //    }
 //

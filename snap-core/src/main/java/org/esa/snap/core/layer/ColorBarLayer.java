@@ -22,16 +22,12 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.runtime.Config;
-import org.esa.snap.runtime.EngineConfig;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
-import java.io.File;
-import java.util.prefs.Preferences;
 
 
 /**
@@ -136,7 +132,7 @@ public class ColorBarLayer extends Layer {
 
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength(getColorBarLength());
-            imageLegend.setColorBarThickness(getColorBarWidth());
+            imageLegend.setColorBarWidth(getColorBarWidth());
             imageLegend.setLayerScaling(getLayerScaling());
 
             imageLegend.setLabelsShow(isLabelsShow());
@@ -840,14 +836,14 @@ public class ColorBarLayer extends Layer {
 
 
     private int getColorBarLength() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
-                ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT);
     }
 
 
     private int getColorBarWidth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
-                ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT);
     }
 
 

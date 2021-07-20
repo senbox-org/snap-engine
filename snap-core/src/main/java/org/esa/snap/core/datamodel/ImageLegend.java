@@ -222,7 +222,7 @@ public class ImageLegend {
 
         imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
         imageLegendCopy.setColorBarLength(getColorBarLength());
-        imageLegendCopy.setColorBarThickness(getColorBarThickness());
+        imageLegendCopy.setColorBarWidth(getColorBarThickness());
 
         imageLegendCopy.setLayerScaling(getLayerScaling());
         //            imageLegend.setBackgroundTransparencyEnabled(true);
@@ -296,11 +296,11 @@ public class ImageLegend {
 
 
         // Sizing and Location
-        setColorBarLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
-                ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT));
+        setColorBarLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT));
 
-        setColorBarThickness(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
-                ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT));
+        setColorBarWidth(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT));
 
         setTitleVerticalAnchor(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT));
@@ -694,7 +694,7 @@ public class ImageLegend {
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
         setUnitsFontSize((int) Math.round(scalingFactor * getUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
-        setColorBarThickness((int) Math.round(scalingFactor * getColorBarThickness()));
+        setColorBarWidth((int) Math.round(scalingFactor * getColorBarThickness()));
 
         BufferedImage bufferedImage = createImage();
 
@@ -704,7 +704,7 @@ public class ImageLegend {
         setTitleFontSize(tmpTitleFontSize);
         setUnitsFontSize(tmpTitleUnitsFontSize);
         setColorBarLength(tmpColorBarLength);
-        setColorBarThickness(tmpColorBarThickness);
+        setColorBarWidth(tmpColorBarThickness);
 
         return bufferedImage;
     }
@@ -1998,7 +1998,7 @@ public class ImageLegend {
         return colorBarThickness;
     }
 
-    public void setColorBarThickness(int colorBarThickness) {
+    public void setColorBarWidth(int colorBarThickness) {
         this.colorBarThickness = colorBarThickness;
     }
 

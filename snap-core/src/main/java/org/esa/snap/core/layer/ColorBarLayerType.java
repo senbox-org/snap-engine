@@ -320,27 +320,25 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-    public static final String PROPERTY_LEGEND_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.length";
-    public static final String PROPERTY_LEGEND_LENGTH_LABEL = "Color Bar Length";
-    public static final String PROPERTY_LEGEND_LENGTH_TOOLTIP = "Length in pixels of the color bar";
-    private static final String PROPERTY_LEGEND_LENGTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Legend Length";
-    public static final int PROPERTY_LEGEND_LENGTH_VALUE_MIN = 500;
-    public static final int PROPERTY_LEGEND_LENGTH_VALUE_MAX = 8000;
-    public static final String PROPERTY_LEGEND_LENGTH_VALUE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LEGEND_LENGTH_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_LEGEND_LENGTH_VALUE_MAX + "]";
+    public static final String PROPERTY_COLORBAR_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".colorbar.length";
+    public static final String PROPERTY_COLORBAR_LENGTH_LABEL = "Color Bar Length";
+    public static final String PROPERTY_COLORBAR_LENGTH_TOOLTIP = "Length in pixels of the color bar";
+    private static final String PROPERTY_COLORBAR_LENGTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "ColorbarLength";
+    public static final int PROPERTY_COLORBAR_LENGTH_VALUE_MIN = 500;
+    public static final int PROPERTY_COLORBAR_LENGTH_VALUE_MAX = 8000;
+    public static final String PROPERTY_COLORBAR_LENGTH_VALUE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_VALUE_MAX + "]";
+    public static final int PROPERTY_COLORBAR_LENGTH_DEFAULT = 1200;
+    public static final Class PROPERTY_COLORBAR_LENGTH_TYPE = Integer.class;
 
-    public static final int PROPERTY_LEGEND_LENGTH_DEFAULT = 1200;
-    public static final Class PROPERTY_LEGEND_LENGTH_TYPE = Integer.class;
-
-    public static final String PROPERTY_LEGEND_WIDTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.width";
-    public static final String PROPERTY_LEGEND_WIDTH_LABEL = "Color Bar Width";
-    public static final String PROPERTY_LEGEND_WIDTH_TOOLTIP = "Width in pixels of the color bar";
-    private static final String PROPERTY_LEGEND_WIDTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "LegendWidth";
-    public static final int PROPERTY_LEGEND_WIDTH_MIN = 5;
-    public static final int PROPERTY_LEGEND_WIDTH_MAX = 1000;
-    public static final String PROPERTY_LEGEND_WIDTH_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MIN + "," + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MAX + "]";
-
-    public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 70;
-    public static final Class PROPERTY_LEGEND_WIDTH_TYPE = Integer.class;
+    public static final String PROPERTY_COLORBAR_WIDTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".colorbar.width";
+    public static final String PROPERTY_COLORBAR_WIDTH_LABEL = "Color Bar Width";
+    public static final String PROPERTY_COLORBAR_WIDTH_TOOLTIP = "Width in pixels of the color bar";
+    private static final String PROPERTY_COLORBAR_WIDTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "ColorWidth";
+    public static final int PROPERTY_COLORBAR_WIDTH_MIN = 5;
+    public static final int PROPERTY_COLORBAR_WIDTH_MAX = 1000;
+    public static final String PROPERTY_COLORBAR_WIDTH_INTERVAL = "[" + ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_MIN + "," + ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_MAX + "]";
+    public static final int PROPERTY_COLORBAR_WIDTH_DEFAULT = 70;
+    public static final Class PROPERTY_COLORBAR_WIDTH_TYPE = Integer.class;
 
 
     
@@ -892,13 +890,13 @@ public class ColorBarLayerType extends LayerType {
         locationSizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SIZE_ALIAS);
         vc.addProperty(locationSizeScalingModel);
 
-        final Property legendLengthModel = Property.create(PROPERTY_LEGEND_LENGTH_KEY, ColorBarLayerType.PROPERTY_LEGEND_LENGTH_TYPE, true, true);
-        legendLengthModel.getDescriptor().setAlias(PROPERTY_LEGEND_LENGTH_ALIAS);
-        vc.addProperty(legendLengthModel);
+        final Property colorbarLengthModel = Property.create(PROPERTY_COLORBAR_LENGTH_KEY, ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_TYPE, true, true);
+        colorbarLengthModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LENGTH_ALIAS);
+        vc.addProperty(colorbarLengthModel);
 
-        final Property legendWidthModel = Property.create(PROPERTY_LEGEND_WIDTH_KEY, ColorBarLayerType.PROPERTY_LEGEND_WIDTH_TYPE, true, true);
-        legendWidthModel.getDescriptor().setAlias(PROPERTY_LEGEND_WIDTH_ALIAS);
-        vc.addProperty(legendWidthModel);
+        final Property colorbarWidthModel = Property.create(PROPERTY_COLORBAR_WIDTH_KEY, ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_TYPE, true, true);
+        colorbarWidthModel.getDescriptor().setAlias(PROPERTY_COLORBAR_WIDTH_ALIAS);
+        vc.addProperty(colorbarWidthModel);
 
 
 
