@@ -674,6 +674,22 @@ public class ColorBarLayer extends Layer {
         }
     }
 
+    public static boolean isFontTypeBold(int fontType) {
+        if (fontType  == (Font.ITALIC | Font.BOLD) || fontType == Font.BOLD) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isFontTypeItalic(int fontType) {
+        if (fontType  == (Font.ITALIC | Font.BOLD) || fontType == Font.ITALIC) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     private boolean isColorBarLocationInside() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_INSIDE_KEY,
