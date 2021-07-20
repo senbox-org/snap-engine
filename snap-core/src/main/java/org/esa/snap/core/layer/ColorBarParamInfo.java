@@ -202,7 +202,7 @@ public class ColorBarParamInfo {
 //        this.colorBarLength = colorBarLength;
 //    }
 //
-//    public int getColorBarThickness() {
+//    public int getColorBarWidth() {
 //        return colorBarThickness;
 //    }
 //

@@ -137,7 +137,7 @@ public class ImageLegend {
     private int unitsFontSize;
     private int labelsFontSize;
     private int colorBarLength;
-    private int colorBarThickness;
+    private int colorBarWidth;
     private double layerScaling;
 
     private String titleOverRide = null;
@@ -222,7 +222,7 @@ public class ImageLegend {
 
         imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
         imageLegendCopy.setColorBarLength(getColorBarLength());
-        imageLegendCopy.setColorBarWidth(getColorBarThickness());
+        imageLegendCopy.setColorBarWidth(getColorBarWidth());
 
         imageLegendCopy.setLayerScaling(getLayerScaling());
         //            imageLegend.setBackgroundTransparencyEnabled(true);
@@ -686,7 +686,7 @@ public class ImageLegend {
         int tmpTitleFontSize = getTitleFontSize();
         int tmpTitleUnitsFontSize = getUnitsFontSize();
         int tmpColorBarLength = getColorBarLength();
-        int tmpColorBarThickness = getColorBarThickness();
+        int tmpColorBarThickness = getColorBarWidth();
 
         setLabelsFontSize((int) Math.round(scalingFactor * getLabelsFontSize()));
         setTickmarkLength((int) Math.round(scalingFactor * getTickmarkLength()));
@@ -694,7 +694,7 @@ public class ImageLegend {
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
         setUnitsFontSize((int) Math.round(scalingFactor * getUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
-        setColorBarWidth((int) Math.round(scalingFactor * getColorBarThickness()));
+        setColorBarWidth((int) Math.round(scalingFactor * getColorBarWidth()));
 
         BufferedImage bufferedImage = createImage();
 
@@ -968,7 +968,7 @@ public class ImageLegend {
             int requiredHeight = getBorderGap()
                     + requiredHeaderHeight
                     + getTitleGap()
-                    + getColorBarThickness()
+                    + getColorBarWidth()
                     + getLabelGap()
                     + tickOffset
                     + requiredLabelsHeight
@@ -981,7 +981,7 @@ public class ImageLegend {
             paletteRect = new Rectangle(getBorderGap() + firstLabelOverhangWidth,
                     getBorderGap() + requiredHeaderHeight + getTitleGap(),
                     legendSize.width - getBorderGap() - getBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
-                    getColorBarThickness());
+                    getColorBarWidth());
 
             legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
@@ -1007,7 +1007,7 @@ public class ImageLegend {
                     ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
 
 
-                double colorBarAndLabelsRequiredWidth = getColorBarThickness() + getLabelGap() + tickOffset + labelsRequiredDimension.getWidth();
+                double colorBarAndLabelsRequiredWidth = getColorBarWidth() + getLabelGap() + tickOffset + labelsRequiredDimension.getWidth();
 
                 requiredWidth = Math.max(headerRequiredDimension.getWidth(), colorBarAndLabelsRequiredWidth);
 
@@ -1037,7 +1037,7 @@ public class ImageLegend {
 
                 requiredWidth = getBorderGap()
                         + getTitleHeight()
-                        + getColorBarThickness()
+                        + getColorBarWidth()
                         + tickOffset
                         + getLabelGap()
                         + getLongestLabelWidth(g2dTmp)
@@ -1069,7 +1069,7 @@ public class ImageLegend {
             if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getTitleGap(),
-                        getColorBarThickness(),
+                        getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
@@ -1077,7 +1077,7 @@ public class ImageLegend {
             } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
-                        getColorBarThickness(),
+                        getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
@@ -1085,7 +1085,7 @@ public class ImageLegend {
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getTitleGap(),
                         getBorderGap() + labelOverhangHeight,
-                        getColorBarThickness(),
+                        getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
@@ -1093,7 +1093,7 @@ public class ImageLegend {
             } else { // VERTICAL_TITLE_RIGHT
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
-                        getColorBarThickness(),
+                        getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
@@ -1409,7 +1409,7 @@ public class ImageLegend {
                 } else { // VERTICAL_TITLE_RIGHT
                     translateX = x0
                             + 0.5 * getTitleHeight()
-                            + getColorBarThickness()
+                            + getColorBarWidth()
                             + getTickmarkLength()
                             + getLabelGap()
                             + getLongestLabelWidth(g2d)
@@ -1994,12 +1994,12 @@ public class ImageLegend {
         this.colorBarLength = colorBarLength;
     }
 
-    public int getColorBarThickness() {
-        return colorBarThickness;
+    public int getColorBarWidth() {
+        return colorBarWidth;
     }
 
     public void setColorBarWidth(int colorBarThickness) {
-        this.colorBarThickness = colorBarThickness;
+        this.colorBarWidth = colorBarThickness;
     }
 
     public double getLayerScaling() {

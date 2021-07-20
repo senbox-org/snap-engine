@@ -312,14 +312,6 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-
-
-
-
-
-
-
-
     public static final String PROPERTY_COLORBAR_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".colorbar.length";
     public static final String PROPERTY_COLORBAR_LENGTH_LABEL = "Color Bar Length";
     public static final String PROPERTY_COLORBAR_LENGTH_TOOLTIP = "Length in pixels of the color bar";
@@ -709,7 +701,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_EXPORT_USE_BW_COLOR_TYPE = Boolean.class;
 
     public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + "use.legend.width";
-    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_LABEL = "Use Legend Width";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_LABEL = "Resize to Legend Width";
     public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_TOOLTIP = "Resize to desired legend image";
     private static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseLegendWidth";
     public static final boolean PROPERTY_EXPORT_USE_LEGEND_WIDTH_DEFAULT = true;
@@ -719,7 +711,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_EXPORT_LEGEND_WIDTH_LABEL = "Legend Width";
     public static final String PROPERTY_EXPORT_LEGEND_WIDTH_TOOLTIP = "Width of legend image (height if vertical image)";
     private static final String PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "LegendWidth";
-    public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1200;
+    public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1400;
     public static final Class PROPERTY_EXPORT_LEGEND_WIDTH_TYPE = Integer.class;
 
     // ---------------------------------------------------------
