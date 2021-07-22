@@ -15,9 +15,12 @@
  */
 package org.esa.snap.landcover.dataio;
 
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
+
+import java.awt.*;
 
 /**
  * An <code>LandCoverModel</code> is used to obtain a land cover above a
@@ -31,6 +34,15 @@ public interface LandCoverModel {
      * @return the descriptor which is never null
      */
     LandCoverModelDescriptor getDescriptor();
+
+    /**
+     * Inform landcover model of the target aoi
+     *
+     * @param geoCoding the target geocoding
+     * @param rasterDim the target raster dimensions
+     */
+    default void setAOIGeoCoding(final GeoCoding geoCoding, final Dimension rasterDim) {
+    }
 
     /**
      * Gets the land cover at the geographical coordinate.

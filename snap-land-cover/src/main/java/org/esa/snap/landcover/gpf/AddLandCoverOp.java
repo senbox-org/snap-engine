@@ -221,7 +221,7 @@ public final class AddLandCoverOp extends Operator {
     private static void setLandCoverBandImages(final Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor,
                                                final Map<LandCoverParameters, Band> paramsToBand) throws IOException {
         for (Map.Entry<LandCoverParameters, LandCoverModelDescriptor> entry : paramsToDescriptor.entrySet()) {
-            LandCoverParameters param = entry.getKey();
+            final LandCoverParameters param = entry.getKey();
             Resampling resampling = Resampling.NEAREST_NEIGHBOUR;
             if (param.resamplingMethod != null) {
                 resampling = ResamplingFactory.createResampling(param.resamplingMethod);
@@ -229,9 +229,10 @@ public final class AddLandCoverOp extends Operator {
                     throw new OperatorException("Resampling method " + param.resamplingMethod + " is invalid");
                 }
             }
-            LandCoverModelDescriptor descriptor = entry.getValue();
+            final LandCoverModelDescriptor descriptor = entry.getValue();
             final LandCoverModel landcover = descriptor.createLandCoverModel(resampling);
-            Band band = paramsToBand.get(param);
+            final Band band = paramsToBand.get(param);
+            landcover.setAOIGeoCoding(band.getGeoCoding(), band.getRasterSize());
             band.setSourceImage(createLandCoverSourceImage(landcover, band));
         }
     }
