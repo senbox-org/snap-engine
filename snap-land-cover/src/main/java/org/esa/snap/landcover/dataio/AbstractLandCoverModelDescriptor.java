@@ -124,7 +124,7 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
 
     public ImageInfo getImageInfo() {
         return new ImageInfo(new ColorPaletteDef(
-                colorPalettePoints.toArray(new ColorPaletteDef.Point[colorPalettePoints.size()]), colorPalettePoints.size()));
+                colorPalettePoints.toArray(new ColorPaletteDef.Point[0]), colorPalettePoints.size()));
     }
 
     public int getDataType() {
@@ -166,7 +166,7 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
         final Set<String> keys = prop.getPropertyKeys();
         for (String key : keys) {
             try {
-                final Integer value = Integer.parseInt(key);
+                final int value = Integer.parseInt(key);
                 final String str = prop.getPropertyString(key);
                 final int c = str.indexOf("Color(");
                 final int c1 = c + 6;

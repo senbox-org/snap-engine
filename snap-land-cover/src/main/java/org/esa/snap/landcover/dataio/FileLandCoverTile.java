@@ -119,11 +119,9 @@ public class FileLandCoverTile extends DownloadableContentImpl implements Resamp
     private CachingObjectArray.ObjectFactory getLineFactory() {
         final Band band = product.getBandAt(0);
         final int width = product.getSceneRasterWidth();
-        return new CachingObjectArray.ObjectFactory() {
-            public Object createObject(final int index) throws Exception {
-                updateCache(index);
-                return band.getSourceImage().getData(new Rectangle(0, index, width, 1)).getPixels(0, index, width, 1, new float[width]);
-            }
+        return index -> {
+            updateCache(index);
+            return band.getSourceImage().getData(new Rectangle(0, index, width, 1)).getPixels(0, index, width, 1, new float[width]);
         };
     }
 

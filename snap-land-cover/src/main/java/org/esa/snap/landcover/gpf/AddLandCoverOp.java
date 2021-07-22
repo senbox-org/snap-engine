@@ -301,7 +301,7 @@ public final class AddLandCoverOp extends Operator {
     public static class LandCoverParameters {
         public String name;
         public String resamplingMethod;
-        public String bandName = DEFAULT_BAND_NAME;
+        public String bandName;
         public File externalFile = null;
 
         public LandCoverParameters(final String name, final String resamplingMethod) {

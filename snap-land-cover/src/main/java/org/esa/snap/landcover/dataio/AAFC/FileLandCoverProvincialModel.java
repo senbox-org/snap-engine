@@ -29,7 +29,7 @@ import java.util.List;
 
 public class FileLandCoverProvincialModel extends FileLandCoverModel {
 
-    private List<TileData> tileDataList = new ArrayList<>();
+    private final List<TileData> tileDataList = new ArrayList<>();
 
     public FileLandCoverProvincialModel(final LandCoverModelDescriptor descriptor, final File[] files,
                                         final Resampling resamplingMethod) throws IOException {

@@ -36,7 +36,6 @@ public class BaseLandCoverTile implements LandCoverTile {
         this.bandWidth = band.getRasterWidth();
         noDataValue = dem.getDescriptor().getNoDataValue();
         objectArray = new float[band.getRasterHeight() + 1][];
-        //System.out.println("Dem Tile "+product.getName());
     }
 
     public final void clearCache() {

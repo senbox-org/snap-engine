@@ -38,7 +38,7 @@ public class ConfigFileLandCoverModelDescriptor extends AbstractLandCoverModelDe
         final String prefix = LANDCOVER + '.' + descriptorName;
         name = configProp.getPropertyString(prefix + ".name");
         remotePath = configProp.getPropertyString(prefix + ".remotePath");
-        NO_DATA_VALUE = (double) configProp.getPropertyInt(prefix + ".nodatavalue");
+        NO_DATA_VALUE = configProp.getPropertyInt(prefix + ".nodatavalue");
         isUTM = configProp.getPropertyBool(prefix + ".utmIndexed");
         isFloat = configProp.getPropertyBool(prefix + ".floatData");
         final int numFiles = configProp.getPropertyInt(prefix + ".file.num");
@@ -50,7 +50,7 @@ public class ConfigFileLandCoverModelDescriptor extends AbstractLandCoverModelDe
                 fileArray.add(new File(filePath));
             }
         }
-        fileList = fileArray.toArray(new File[fileArray.size()]);
+        fileList = fileArray.toArray(new File[0]);
 
         final String colourIndex = configProp.getPropertyString(prefix + ".colourIndex");
         if (colourIndex != null && !colourIndex.isEmpty()) {

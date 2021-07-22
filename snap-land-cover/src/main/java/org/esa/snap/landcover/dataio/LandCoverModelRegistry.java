@@ -59,7 +59,7 @@ public class LandCoverModelRegistry {
     }
 
     public LandCoverModelDescriptor[] getAllDescriptors() {
-        return descriptors.getServices().toArray(new LandCoverModelDescriptor[descriptors.getServices().size()]);
+        return descriptors.getServices().toArray(new LandCoverModelDescriptor[0]);
     }
 
     // Initialization on demand holder idiom
