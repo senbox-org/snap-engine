@@ -39,10 +39,12 @@ public class TiePointInverse implements InverseCoding {
 
         double minSquareDistance = Double.MAX_VALUE;
         for (final Approximation approx : approximations) {
-            final double squareDistance = approx.getSquareDistance(lat, lon);
-            if (squareDistance < minSquareDistance && squareDistance < approx.getMinSquareDistance()) {
-                minSquareDistance = squareDistance;
-                approximation = approx;
+            if (approx != null) {
+                final double squareDistance = approx.getSquareDistance(lat, lon);
+                if (squareDistance < minSquareDistance && squareDistance < approx.getMinSquareDistance()) {
+                    minSquareDistance = squareDistance;
+                    approximation = approx;
+                }
             }
         }
 
@@ -135,9 +137,6 @@ public class TiePointInverse implements InverseCoding {
         final Rectangle[] rectangles = MathUtils.subdivideRectangle(width, height, numTilesI, numTilesJ, 1);
         for (int i = 0; i < rectangles.length; i++) {
             final Approximation approximation = createApproximation(lonGrid, latGrid, rectangles[i]);
-            if (approximation == null) {
-                return null;
-            }
             approximations[i] = approximation;
         }
 
