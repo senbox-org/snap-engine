@@ -1,6 +1,12 @@
 package org.esa.snap.core.dataio.geocoding.inverse;
 
-import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.AMSR2;
+import org.esa.snap.core.dataio.geocoding.AMSRE;
+import org.esa.snap.core.dataio.geocoding.AMSUB;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.MERIS;
+import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.dataio.geocoding.util.Approximation;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -9,10 +15,14 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.math.FXYSum;
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 import static java.lang.Double.NaN;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class TiePointInverseTest {
 
@@ -20,7 +30,7 @@ public class TiePointInverseTest {
     public void testNormalizeLonGrid_no_anti_meridian() {
         final float[] floatLongitudes = RasterUtils.toFloat(MERIS.MER_RR_LON);
         final TiePointGrid lonGrid = new TiePointGrid("lon", 5, 5, 0.5, 0.5,
-                16, 16, floatLongitudes);
+                                                      16, 16, floatLongitudes);
 
         final TiePointGrid normalizedLonGrid = TiePointInverse.normalizeLonGrid(lonGrid);
         assertArrayEquals(floatLongitudes, normalizedLonGrid.getTiePoints(), 1e-8f);
@@ -31,7 +41,7 @@ public class TiePointInverseTest {
     public void testNormalizeLonGrid_anti_meridian_east_normalized() {
         final float[] floatLongitudes = RasterUtils.toFloat(AMSUB.AMSUB_ANTI_MERID_LON);
         final TiePointGrid lonGrid = new TiePointGrid("lon", 31, 31, 0.5, 0.5,
-                1.0, 1.0, floatLongitudes);
+                                                      1.0, 1.0, floatLongitudes);
 
         final TiePointGrid normalizedLonGrid = TiePointInverse.normalizeLonGrid(lonGrid);
         final float[] tiePoints = normalizedLonGrid.getTiePoints();
@@ -47,7 +57,7 @@ public class TiePointInverseTest {
     public void testNormalizeLonGrid_anti_meridian_west_normalized() {
         final float[] floatLongitudes = RasterUtils.toFloat(AMSR2.AMSR2_ANTI_MERID_LON);
         final TiePointGrid lonGrid = new TiePointGrid("lon", 32, 26, 0.5, 0.5,
-                1.0, 1.0, floatLongitudes);
+                                                      1.0, 1.0, floatLongitudes);
 
         final TiePointGrid normalizedLonGrid = TiePointInverse.normalizeLonGrid(lonGrid);
         final float[] tiePoints = normalizedLonGrid.getTiePoints();
@@ -62,7 +72,7 @@ public class TiePointInverseTest {
     @Test
     public void testInitLatLonMinMax() {
         final TiePointInverse.Boundaries boundaries = TiePointInverse.initLatLonMinMax(RasterUtils.toFloat(MERIS.MER_RR_LON),
-                RasterUtils.toFloat(MERIS.MER_RR_LAT));
+                                                                                       RasterUtils.toFloat(MERIS.MER_RR_LAT));
         assertEquals(17.256619943847657, boundaries.normalizedLonMin, 1e-8);
         assertEquals(19.767063604125976, boundaries.normalizedLonMax, 1e-8);
 
@@ -76,7 +86,7 @@ public class TiePointInverseTest {
     @Test
     public void testInitLatLonMinMax_overlap_start_corrected() {
         final TiePointInverse.Boundaries boundaries = TiePointInverse.initLatLonMinMax(new float[]{-181, -180, -179, -178},
-                new float[]{11, 12, 13, 14});
+                                                                                       new float[]{11, 12, 13, 14});
         assertEquals(-181.00001, boundaries.normalizedLonMin, 1e-8);
         assertEquals(-177.99999, boundaries.normalizedLonMax, 1e-8);
 
@@ -90,7 +100,7 @@ public class TiePointInverseTest {
     @Test
     public void testInitLatLonMinMax_overlap_end_corrected() {
         final TiePointInverse.Boundaries boundaries = TiePointInverse.initLatLonMinMax(new float[]{179, 180, 181, 182},
-                new float[]{12, 13, 14, 15});
+                                                                                       new float[]{12, 13, 14, 15});
         assertEquals(178.99999, boundaries.normalizedLonMin, 1e-8);
         assertEquals(182.00001, boundaries.normalizedLonMax, 1e-8);
 
@@ -119,9 +129,9 @@ public class TiePointInverseTest {
     @Test
     public void testCreateWarpPoints() {
         final TiePointGrid lonGrid = new TiePointGrid("lon", 9, 9, 0.5, 0.5,
-                3, 3, RasterUtils.toFloat(TestData.getSubSampled(3, AMSRE.AMSRE_HIGH_RES_LON, 25)));
+                                                      3, 3, RasterUtils.toFloat(TestData.getSubSampled(3, AMSRE.AMSRE_HIGH_RES_LON, 25)));
         final TiePointGrid latGrid = new TiePointGrid("lat", 9, 9, 0.5, 0.5,
-                3, 3, RasterUtils.toFloat(TestData.getSubSampled(3, AMSRE.AMSRE_HIGH_RES_LAT, 25)));
+                                                      3, 3, RasterUtils.toFloat(TestData.getSubSampled(3, AMSRE.AMSRE_HIGH_RES_LAT, 25)));
         final Rectangle subsetRect = new Rectangle(2, 1, 6, 6);
 
         final double[][] warpPoints = TiePointInverse.createWarpPoints(lonGrid, latGrid, subsetRect);
@@ -228,9 +238,9 @@ public class TiePointInverseTest {
     @Test
     public void testCreateApproximation() {
         final TiePointGrid lonGrid = new TiePointGrid("lon", 5, 5, 0.5, 0.5,
-                16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
+                                                      16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
         final TiePointGrid latGrid = new TiePointGrid("lat", 5, 5, 0.5, 0.5,
-                16, 16, RasterUtils.toFloat(MERIS.MER_RR_LAT));
+                                                      16, 16, RasterUtils.toFloat(MERIS.MER_RR_LAT));
         final Rectangle subsetRect = new Rectangle(2, 1, 3, 3);
 
         final Approximation approximation = TiePointInverse.createApproximation(lonGrid, latGrid, subsetRect);
@@ -245,9 +255,9 @@ public class TiePointInverseTest {
     @Test
     public void testGetApproximations_MER_RR_standard() {
         final TiePointGrid lonGrid = new TiePointGrid("lon", 5, 5, 0.5, 0.5,
-                16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
+                                                      16, 16, RasterUtils.toFloat(MERIS.MER_RR_LON));
         final TiePointGrid latGrid = new TiePointGrid("lat", 5, 5, 0.5, 0.5,
-                16, 16, RasterUtils.toFloat(MERIS.MER_RR_LAT));
+                                                      16, 16, RasterUtils.toFloat(MERIS.MER_RR_LAT));
 
         final Approximation[] approximations = TiePointInverse.getApproximations(lonGrid, latGrid);
         assertNotNull(approximations);
@@ -289,6 +299,38 @@ public class TiePointInverseTest {
         } finally {
             TiePointInverse.highPrecisionInverse = oldValue;
         }
+    }
+
+    @Test
+    public void testGetApproximations_withFillValues() {
+        final int gridWidth = 26;
+        final int gridHeight = 35;
+        final float[] lonPoints = RasterUtils.toFloat(MERIS.MER_FSG_LON);
+        final float[] latPoints = RasterUtils.toFloat(MERIS.MER_FSG_LAT);
+        // create Regions with fill values
+        for (int i = 30 * gridWidth; i < latPoints.length; i++) {
+            latPoints[i] = -9999.9f;
+            lonPoints[i] = -9999.9f;
+        }
+        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5, 0.5,
+                                                      16, 16, lonPoints);
+        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, 0.5, 0.5,
+                                                      16, 16, latPoints);
+
+        final Approximation[] approximations = TiePointInverse.getApproximations(lonGrid, latGrid);
+        assertNotNull(approximations);
+        assertEquals(88, approximations.length);
+        assertNull(approximations[80]);
+        assertNull(approximations[87]);
+
+        final Approximation approximation = approximations[0];
+        assertEquals(15.23906010389328, approximation.getCenterLon(), 1e-8);
+        assertEquals(65.63226270675659, approximation.getCenterLat(), 1e-8);
+        assertEquals(2.0255989219997164E-4, approximation.getMinSquareDistance(), 1e-8);
+        //noinspection ConstantConditions
+        assertTrue(approximation.getFX() instanceof FXYSum);
+        //noinspection ConstantConditions
+        assertTrue(approximation.getFY() instanceof FXYSum);
     }
 
     @Test
