@@ -27,6 +27,7 @@ import org.esa.snap.engine_utilities.download.DownloadableFile;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +52,13 @@ public class FileLandCoverTile extends DownloadableContentImpl implements Resamp
     }
 
     public FileLandCoverTile(final LandCoverModel model, final File localFile, final ProductReader reader,
-                             final String archiveExt)
-            throws IOException {
-        super(localFile, model.getDescriptor().getArchiveUrl(), archiveExt);
+                             final String archiveExt) throws IOException {
+        this(model, localFile, model.getDescriptor().getArchiveUrl(), reader, archiveExt);
+    }
+
+    public FileLandCoverTile(final LandCoverModel model, final File localFile, final URL remoteURL,
+                             final ProductReader reader, final String archiveExt) throws IOException {
+        super(localFile, remoteURL, archiveExt);
         this.model = model;
         this.reader = reader;
         noDataValue = model.getDescriptor().getNoDataValue();
