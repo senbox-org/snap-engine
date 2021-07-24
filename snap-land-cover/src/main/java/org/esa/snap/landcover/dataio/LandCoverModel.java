@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
 import java.awt.*;
+import java.io.IOException;
 
 /**
  * An <code>LandCoverModel</code> is used to obtain a land cover above a
@@ -40,8 +41,9 @@ public interface LandCoverModel {
      *
      * @param geoCoding the target geocoding
      * @param rasterDim the target raster dimensions
+     * @throws Exception if a non-runtime error occurs, e.g I/O error
      */
-    default void setAOIGeoCoding(final GeoCoding geoCoding, final Dimension rasterDim) {
+    default void setAOIGeoCoding(final GeoCoding geoCoding, final Dimension rasterDim) throws IOException {
     }
 
     /**
