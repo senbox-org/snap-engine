@@ -86,10 +86,6 @@ public class GlobCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
         return new FileLandCoverModel(this, fileList, resampling);
     }
 
-    public String createTileFilename(final int minLat, final int minLon) {
-        return fileList[0].getName();
-    }
-
     @Override
     public boolean isInstalled() {
         return true;

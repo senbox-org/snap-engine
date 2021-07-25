@@ -241,10 +241,6 @@ public class MODISVCFV5TRE2007ModelDescriptor extends AbstractLandCoverModelDesc
         return new FileLandCoverUTMZoneLatBandModel(this, fileList, resampling);
     }
 
-    public String createTileFilename(final int minLat, final int minLon) {
-        return fileList[0].getName();
-    }
-
     @Override
     public int getDataType() {
         return ProductData.TYPE_FLOAT32;

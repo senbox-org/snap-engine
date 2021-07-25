@@ -63,10 +63,6 @@ public class ConfigFileLandCoverModelDescriptor extends AbstractLandCoverModelDe
         return isUTM ? new FileLandCoverUTMModel(this, fileList, resampling) : new FileLandCoverModel(this, fileList, resampling);
     }
 
-    public String createTileFilename(int minLat, int minLon) {
-        return fileList[0].getName();
-    }
-
     @Override
     public int getDataType() {
         return isFloat ? ProductData.TYPE_FLOAT32 : super.getDataType();
