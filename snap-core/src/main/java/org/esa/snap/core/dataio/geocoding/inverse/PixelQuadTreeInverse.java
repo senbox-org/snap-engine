@@ -35,9 +35,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import static org.esa.snap.core.dataio.geocoding.inverse.Segment.MIN_DIMENSION;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ACROSS;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.ALONG;
-import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.INSIDE;
+import static org.esa.snap.core.dataio.geocoding.inverse.SegmentCoverage.*;
 
 public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
 
@@ -300,7 +298,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         final GeoPos geoPos = new GeoPos();
         if (segmentCoverage == ACROSS) {
             // check left
-            int y_l = Integer.MIN_VALUE;
+            int y_l = -1;
             for (int y = segment.y_min + 1; y < segment.y_max; y++) {
                 calculator.getGeoPos(segment.x_min, y, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
@@ -310,7 +308,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
 
             // check right
-            int y_r = Integer.MIN_VALUE;
+            int y_r = -1;
             for (int y = segment.y_min + 1; y < segment.y_max; y++) {
                 calculator.getGeoPos(segment.x_max, y, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
@@ -318,7 +316,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                     break;
                 }
             }
-            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
+            if ((y_l - segment.y_min) < MIN_DIMENSION && (y_r - segment.y_min) < MIN_DIMENSION) {
                 // no suitable split-points found - as a last idea, we split at half
                 return segment.split(true);
             }
@@ -332,7 +330,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             }
         } else if (segmentCoverage == ALONG) {
             // check top
-            int x_t = Integer.MIN_VALUE;
+            int x_t = -1;
             for (int x = segment.x_min + 1; x < segment.x_max; x++) {
                 calculator.getGeoPos(x, segment.y_min, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
@@ -341,7 +339,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
             }
             // check bottom
-            int x_b = Integer.MIN_VALUE;
+            int x_b = -1;
             for (int x = segment.x_min + 1; x < segment.x_max; x++) {
                 calculator.getGeoPos(x, segment.y_max, geoPos);
                 if (!segment.isInside(geoPos.lon, geoPos.lat)) {
@@ -349,7 +347,7 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                     break;
                 }
             }
-            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+            if ((x_t - segment.x_min) < MIN_DIMENSION && (x_b - segment.x_min) < MIN_DIMENSION) {
                 // no suitable split-points found - as a last idea, we split at half
                 return segment.split(false);
             }
