@@ -241,6 +241,11 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         return max + epsilon;
     }
 
+    // for testing only tb 2021-06-28
+    ArrayList<Segment> getSegmentList() {
+        return segmentList;
+    }
+
     private ArrayList<Segment> calculateSegmentation(int rasterWidth, int rasterHeight, PixelPos[] poleLocations) {
         final ArrayList<Segment> segmentList = new ArrayList<>();
 
