@@ -173,7 +173,7 @@ public class RasterUtils {
         return floats;
     }
 
-    static double[] toDouble(float[] floats) {
+    public static double[] toDouble(float[] floats) {
         final double[] doubles = new double[floats.length];
 
         for (int i = 0; i < floats.length; i++) {
