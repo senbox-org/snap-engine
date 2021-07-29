@@ -162,7 +162,7 @@ public class ImageLegend {
 
         antialiasing = true;
 
-        // todo Most of these following parameters get initialized/set later so most can likely be deleted
+        // todo Most of these following parameters get initialized/set later so the following can likely be deleted
 
 //        showTitle = true;
 //        titleText = "";

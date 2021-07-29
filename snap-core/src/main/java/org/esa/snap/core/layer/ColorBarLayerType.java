@@ -90,10 +90,10 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_ORIENTATION_SECTION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_ORIENTATION_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".orientation";
-    public static final String PROPERTY_ORIENTATION_LABEL = "Orientation";
-    public static final String PROPERTY_ORIENTATION_TOOLTIP = "Orientation of the color bar legend";
+    public static final String PROPERTY_ORIENTATION_LABEL = "Alignment";
+    public static final String PROPERTY_ORIENTATION_TOOLTIP = "Alignment (vertical/horizontal) of the color bar legend";
     public static final Class PROPERTY_ORIENTATION_TYPE = String.class;
-    public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Orientation";
+    public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Alignment";
     public static final String PROPERTY_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
     public static final String PROPERTY_ORIENTATION_OPTION2 = OPTION_VERTICAL;
     public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_HORIZONTAL;
@@ -292,15 +292,15 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SECTION_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".apply";
-    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale legend size relative to image size";
-    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the color bar size relative to the scene image size";
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale to Scene Size";
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the color bar legend size to percentage of the scene image size using Legend Scaling Factor";
     private static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Apply";
     public static final boolean PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = true;
     public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = Boolean.class;
 
     public static final String PROPERTY_IMAGE_SCALING_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
-    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Legend Scaling (%)";
-    public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar relative to the scene image size";
+    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
+    public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
     public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 60.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
@@ -697,20 +697,20 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_EXPORT_USE_BW_COLOR_LABEL = "Black/White Color Override";
     public static final String PROPERTY_EXPORT_USE_BW_COLOR_TOOLTIP = "Overrides colors and uses black & white";
     private static final String PROPERTY_EXPORT_USE_BW_COLOR_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseBlackWhiteColor";
-    public static final boolean PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT = true;
+    public static final boolean PROPERTY_EXPORT_USE_BW_COLOR_DEFAULT = false;
     public static final Class PROPERTY_EXPORT_USE_BW_COLOR_TYPE = Boolean.class;
 
-    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + "use.legend.width";
-    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_LABEL = "Resize to Legend Width";
-    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_TOOLTIP = "Resize to desired legend image";
-    private static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseLegendWidth";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + "use.legend.size";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_LABEL = "Scale to File Size";
+    public static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_TOOLTIP = "Resize to desired legend size";
+    private static final String PROPERTY_EXPORT_USE_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "UseLegendSize";
     public static final boolean PROPERTY_EXPORT_USE_LEGEND_WIDTH_DEFAULT = true;
     public static final Class PROPERTY_EXPORT_USE_LEGEND_WIDTH_TYPE = Boolean.class;
 
-    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".legend.width";
-    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_LABEL = "Legend Width";
-    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_TOOLTIP = "Width of legend image (height if vertical image)";
-    private static final String PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "LegendWidth";
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".legend.size";
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_LABEL = "File Size";
+    public static final String PROPERTY_EXPORT_LEGEND_WIDTH_TOOLTIP = "Width (in pixels) of legend image file (height if vertical image)";
+    private static final String PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "LegendSize";
     public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1400;
     public static final Class PROPERTY_EXPORT_LEGEND_WIDTH_TYPE = Integer.class;
 
