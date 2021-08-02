@@ -203,12 +203,12 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_LOCATION_SECTION_KEY = PROPERTY_LOCATION_ROOT_KEY + ".section";
     public static final String PROPERTY_LOCATION_SECTION_LABEL = "Placement Location";
-    public static final String PROPERTY_LOCATION_SECTION_TOOLTIP = "Set location and relative size of color bar image";
+    public static final String PROPERTY_LOCATION_SECTION_TOOLTIP = "Set placement location of color bar image legend on the scene image";
     public static final String PROPERTY_LOCATION_SECTION_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_LOCATION_INSIDE_KEY = PROPERTY_LOCATION_ROOT_KEY + ".inside";
     public static final String PROPERTY_LOCATION_INSIDE_LABEL = "Place Color Bar Inside Image";
-    public static final String PROPERTY_LOCATION_INSIDE_TOOLTIP = "Place color bar inside/outside image bounds";
+    public static final String PROPERTY_LOCATION_INSIDE_TOOLTIP = "Place color bar inside/outside scene image bounds";
     private static final String PROPERTY_LOCATION_INSIDE_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Inside";
     public static final boolean PROPERTY_LOCATION_INSIDE_DEFAULT = true;
     public static final Class PROPERTY_LOCATION_INSIDE_TYPE = Boolean.class;
@@ -236,22 +236,22 @@ public class ColorBarLayerType extends LayerType {
     }
 
     public static final String PROPERTY_LOCATION_PLACEMENT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Legend Anchor";
+    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Scene Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place color bar on image";
     private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
-    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Legend Offset";
-    public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move color bar away from axis (by percentage of color bar height)";
+    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Scene Anchor Offset";
+    public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move color bar legend away from anchored axis (by percentage of color bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
-    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Legend Shift";
-    public static final String PROPERTY_LOCATION_SHIFT_TOOLTIP = "Move color bar along the axis (by percentage of color bar width)";
+    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Scene Anchor Shift";
+    public static final String PROPERTY_LOCATION_SHIFT_TOOLTIP = "Move color bar legend along the anchored axis (by percentage of color bar width)";
     private static final String PROPERTY_LOCATION_SHIFT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Shift";
     public static final Double PROPERTY_LOCATION_SHIFT_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_SHIFT_TYPE = Double.class;
@@ -271,13 +271,13 @@ public class ColorBarLayerType extends LayerType {
     };
 
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
-    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Anchor (Vert)";
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Anchor";
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_TOOLTIP = "Where to place title on vertical legend";
-    private static final String PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleVerticalAnchor";
+    private static final String PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleAnchor";
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_TOP;
     public static final Class PROPERTY_LOCATION_TITLE_VERTICAL_TYPE = String.class;
     public static final Object PROPERTY_LOCATION_TITLE_VERTICAL_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
-
+    public static final boolean PROPERTY_LOCATION_TITLE_VERTICAL_ENABLED = false;
 
 
 
