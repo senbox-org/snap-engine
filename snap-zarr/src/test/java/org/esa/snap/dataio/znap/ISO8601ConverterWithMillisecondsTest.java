@@ -18,16 +18,16 @@
 
 package org.esa.snap.dataio.znap;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import java.text.ParseException;
 import java.util.Calendar;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class ISO8601ConverterWithMillisecondsTest {
 
@@ -48,7 +48,7 @@ public class ISO8601ConverterWithMillisecondsTest {
     @Test
     public void parse() throws ParseException {
         //execution
-        final ProductData.UTC parsedUTC = ISO8601ConverterWithMlliseconds.parse(DATE_TIME_STRING);
+        final ProductData.UTC parsedUTC = ISO8601ConverterWithMilliseconds.parse(DATE_TIME_STRING);
 
         assertThat(parsedUTC.getAsCalendar().get(Calendar.YEAR), is(equalTo(YEAR)));
         assertThat(parsedUTC.getAsCalendar().get(Calendar.MONTH) + 1, is(equalTo(MONTH)));
@@ -62,10 +62,10 @@ public class ISO8601ConverterWithMillisecondsTest {
     @Test
     public void format() throws ParseException {
         //preparation
-        final ProductData.UTC parsedUTC = ISO8601ConverterWithMlliseconds.parse(DATE_TIME_STRING);
+        final ProductData.UTC parsedUTC = ISO8601ConverterWithMilliseconds.parse(DATE_TIME_STRING);
 
         //execution
-        final String formattedUTC = ISO8601ConverterWithMlliseconds.format(parsedUTC);
+        final String formattedUTC = ISO8601ConverterWithMilliseconds.format(parsedUTC);
 
         assertThat(formattedUTC, is(equalTo(DATE_TIME_STRING)));
     }

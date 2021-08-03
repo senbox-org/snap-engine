@@ -73,7 +73,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 import ucar.ma2.InvalidRangeException;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,9 +126,9 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.KEY_SNAP_PRODUCT_ME
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.KEY_SNAP_VECTOR_DATA_SUBGROUP;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LABEL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.LOG_10_SCALED;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_FILTER_BANDS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_MASKS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_SAMPLE_CODING;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_FILTER_BANDS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
@@ -765,7 +766,7 @@ public class ZarrProductReader extends AbstractProductReader {
         }
         final String iso8601String = cast(productAttributes.get(attributeName));
         try {
-            return ISO8601ConverterWithMlliseconds.parse(iso8601String);
+            return ISO8601ConverterWithMilliseconds.parse(iso8601String);
         } catch (ParseException e) {
             throw new IOException("Unparseable " + attributeName + " while reading product '" + rootPath.toString() + "'", e);
         }
