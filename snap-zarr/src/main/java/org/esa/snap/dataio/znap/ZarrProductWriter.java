@@ -909,7 +909,9 @@ public class ZarrProductWriter extends AbstractProductWriter {
             bandAttributes.put(ATT_NAME_BINARY_FORMAT, binaryWriterPlugIn.getFormatNames()[0]);
         }
         final GeoCoding geoCoding = band.getGeoCoding();
-        bandAttributes.put(ATT_NAME_GEOCODING, getGeoCodingAttributes(geoCoding));
+        if (geoCoding != null) {
+            bandAttributes.put(ATT_NAME_GEOCODING, getGeoCodingAttributes(geoCoding));
+        }
         return bandAttributes;
     }
 

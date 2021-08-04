@@ -18,7 +18,12 @@
 
 package org.esa.snap.dataio.znap;
 
-import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
+import org.esa.snap.core.dataio.geocoding.GeoChecks;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
 import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.datamodel.Product;
@@ -37,15 +42,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertNull;
 
 public class ZarrProductWriterReaderTest_persist_ComponentGeoCoding {
 
@@ -53,8 +58,8 @@ public class ZarrProductWriterReaderTest_persist_ComponentGeoCoding {
             "GEOGCS[\"TestWGS8.4(DD)\", DATUM[\"TestWGS8.4\", SPHEROID[\"WGTest\", 637813.70, 29.8257223563]], PRIMEM[\"Greenwich\", 0.0], " +
             "UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geolon\", EAST], AXIS[\"Geolat\", NORTH]]";
 
+    private final List<Path> tempDirectories = new ArrayList<>();
     private Product product;
-    private List<Path> tempDirectories = new ArrayList<>();
     private ZarrProductWriter productWriter;
     private ZarrProductReader productReader;
 
@@ -175,6 +180,24 @@ public class ZarrProductWriterReaderTest_persist_ComponentGeoCoding {
 
         assertEquals(srcGeoRaster.getSubsamplingX(), readGeoRaster.getSubsamplingX(), Double.MIN_VALUE);
         assertEquals(srcGeoRaster.getSubsamplingY(), readGeoRaster.getSubsamplingY(), Double.MIN_VALUE);
+    }
+
+    @Test
+    public void writeAndRead_noGeoCoding_withBand() throws IOException {
+//        product = new Product("name", "type");
+//        Band band = new Band("band", ProductData.TYPE_INT32, 2 , 2);
+//        band.setData(ProductData.createInstance(new int[]{12, 13, 14, 15}));
+        product.setSceneGeoCoding(null);
+        product.addBand("band", ProductData.TYPE_INT32);
+
+        final Path tempDirectory = createTempDirectory();
+        productWriter.writeProductNodes(product, tempDirectory);
+        final Product readIn = productReader.readProductNodes(tempDirectory, null);
+
+        assertNotNull(readIn);
+        assertEquals(product.getSceneRasterWidth(), readIn.getSceneRasterWidth());
+        assertEquals(product.getSceneRasterHeight(), readIn.getSceneRasterHeight());
+        assertNull(readIn.getSceneGeoCoding());
     }
 
     private Path createTempDirectory() throws IOException {
