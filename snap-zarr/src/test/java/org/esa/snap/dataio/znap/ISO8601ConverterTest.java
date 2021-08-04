@@ -29,7 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class ISO8601ConverterWithMillisecondsTest {
+public class ISO8601ConverterTest {
 
     private static final int YEAR = 2023;
     private static final int MONTH = 11;
@@ -37,18 +37,19 @@ public class ISO8601ConverterWithMillisecondsTest {
     private static final int HOUR = 14;
     private static final int MINUTE = 25;
     private static final int SECOND = 36;
-    private static final int MILLISECOND = 126;
-    private static final String DATE_TIME_STRING = "" + YEAR + "-" + MONTH + "-" + DAY + "T" + HOUR + ":" + MINUTE + ":" + SECOND + "." + MILLISECOND;
+    private static final long MICROSECOND = 126935;
+    private static final String ZONEOFFSET = "Z";
+    private static final String DATE_TIME_STRING = "" + YEAR + "-" + MONTH + "-" + DAY + "T" + HOUR + ":" + MINUTE + ":" + SECOND + "." + MICROSECOND + ZONEOFFSET;
 
     @Before
     public void setUp() throws Exception {
-        assertThat(DATE_TIME_STRING, is(equalTo("2023-11-13T14:25:36.126")));
+        assertThat(DATE_TIME_STRING, is(equalTo("2023-11-13T14:25:36.126935Z")));
     }
 
     @Test
     public void parse() throws ParseException {
         //execution
-        final ProductData.UTC parsedUTC = ISO8601ConverterWithMilliseconds.parse(DATE_TIME_STRING);
+        final ProductData.UTC parsedUTC = ISO8601Converter.parse(DATE_TIME_STRING);
 
         assertThat(parsedUTC.getAsCalendar().get(Calendar.YEAR), is(equalTo(YEAR)));
         assertThat(parsedUTC.getAsCalendar().get(Calendar.MONTH) + 1, is(equalTo(MONTH)));
@@ -56,16 +57,16 @@ public class ISO8601ConverterWithMillisecondsTest {
         assertThat(parsedUTC.getAsCalendar().get(Calendar.HOUR_OF_DAY), is(equalTo(HOUR)));
         assertThat(parsedUTC.getAsCalendar().get(Calendar.MINUTE), is(equalTo(MINUTE)));
         assertThat(parsedUTC.getAsCalendar().get(Calendar.SECOND), is(equalTo(SECOND)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.MILLISECOND), is(equalTo(MILLISECOND)));
+        assertThat(parsedUTC.getMicroSecondsFraction(), is(equalTo(MICROSECOND)));
     }
 
     @Test
     public void format() throws ParseException {
         //preparation
-        final ProductData.UTC parsedUTC = ISO8601ConverterWithMilliseconds.parse(DATE_TIME_STRING);
+        final ProductData.UTC parsedUTC = ISO8601Converter.parse(DATE_TIME_STRING);
 
         //execution
-        final String formattedUTC = ISO8601ConverterWithMilliseconds.format(parsedUTC);
+        final String formattedUTC = ISO8601Converter.format(parsedUTC);
 
         assertThat(formattedUTC, is(equalTo(DATE_TIME_STRING)));
     }

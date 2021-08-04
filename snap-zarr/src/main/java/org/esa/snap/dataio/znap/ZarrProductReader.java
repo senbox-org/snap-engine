@@ -766,7 +766,7 @@ public class ZarrProductReader extends AbstractProductReader {
         }
         final String iso8601String = cast(productAttributes.get(attributeName));
         try {
-            return ISO8601ConverterWithMilliseconds.parse(iso8601String);
+            return ISO8601Converter.parse(iso8601String);
         } catch (ParseException e) {
             throw new IOException("Unparseable " + attributeName + " while reading product '" + rootPath.toString() + "'", e);
         }

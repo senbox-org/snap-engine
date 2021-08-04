@@ -578,7 +578,7 @@ public class ZarrProductWriter extends AbstractProductWriter {
 
     private void addTimeAttribute(Map<String, Object> productAttributes, String attName, ProductData.UTC utc) {
         if (utc != null) {
-            productAttributes.put(attName, ISO8601ConverterWithMilliseconds.format(utc));
+            productAttributes.put(attName, ISO8601Converter.format(utc));
         }
     }
 
