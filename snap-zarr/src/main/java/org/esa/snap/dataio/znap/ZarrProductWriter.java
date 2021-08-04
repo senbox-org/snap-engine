@@ -135,6 +135,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SAMPLE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SNAP_ZARR_ZIP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SOLAR_FLUX;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.STATISTICS;
@@ -232,8 +233,8 @@ public class ZarrProductWriter extends AbstractProductWriter {
         dimensionNameGenerator.getDimensionNameFor("y", product.getSceneRasterHeight());
         final boolean useZipArchive = getUseZipArchive();
         if (useZipArchive && !isExistingEmptyDirectory(outputRoot)) {
-            if (!outputRoot.toString().endsWith(".zip")) {
-                outputRoot = parentDir.resolve(outputRoot.getFileName().toString() + ".zip");
+            if (!outputRoot.toString().toLowerCase().endsWith(SNAP_ZARR_ZIP_CONTAINER_EXTENSION)) {
+                outputRoot = parentDir.resolve(outputRoot.getFileName().toString() + SNAP_ZARR_ZIP_CONTAINER_EXTENSION);
             }
             zarrStore = new ZipStore(outputRoot);
         } else {
