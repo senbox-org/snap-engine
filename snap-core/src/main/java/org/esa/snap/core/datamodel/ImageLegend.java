@@ -40,7 +40,7 @@ import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZ
  * @author Daniel Knowles
  * @version $Revision$ $Date$
  */
-// MAY2021 - Daniel Knowles - Major revisions to Color Bar
+// MAY2021 - Daniel Knowles - Major revisions to Color Bar Legend
 
 public class ImageLegend {
 
