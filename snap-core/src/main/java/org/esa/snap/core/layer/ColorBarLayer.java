@@ -129,6 +129,9 @@ public class ColorBarLayer extends Layer {
             imageLegend.setScalingFactor(getLabelValuesScalingFactor());
             imageLegend.setDecimalPlaces(getDecimalPlaces());
             imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
+            imageLegend.setWeightTolerance(getWeightTolerance());
+
+
 
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength(getColorBarLength());
@@ -138,7 +141,7 @@ public class ColorBarLayer extends Layer {
             imageLegend.setLabelsShow(isLabelsShow());
             imageLegend.setLabelsFontName(getLabelsFontName());
             imageLegend.setLabelsFontType(getLabelsFontType());
-            imageLegend.setLabelsFontSize(getLablesFontSize());
+            imageLegend.setLabelsFontSize(getLabelsFontSize());
             imageLegend.setLabelsColor(getLabelsColor());
 
             imageLegend.setTickmarkColor(getTickmarksColor());
@@ -173,7 +176,12 @@ public class ColorBarLayer extends Layer {
 
             // Update the properties with some calculated/looked-up values
 
-            setLabelValuesActual(imageLegend.getCustomLabelValues());
+            // todo Maybe add this to preferences, to let GUI auto-populate this textfield.   The problem is that the field
+            // can get wide and all other fields also get wide with right alignment.
+            boolean autoPopulateTextfield = false;
+            if (autoPopulateTextfield) {
+                setLabelValuesActual(imageLegend.getCustomLabelValues());
+            }
 
             setTitle(imageLegend.getTitleText());
 
@@ -505,14 +513,10 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT);
     }
 
-
-    private int getLablesFontSize() {
+    private int getLabelsFontSize() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
     }
-
-
-
 
     private int getOrientation() {
         String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
@@ -815,6 +819,12 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT);
     }
+
+    private Double getWeightTolerance() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_KEY,
+                ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT);
+    }
+
 
 
     private class ProductNodeHandler extends ProductNodeListenerAdapter {

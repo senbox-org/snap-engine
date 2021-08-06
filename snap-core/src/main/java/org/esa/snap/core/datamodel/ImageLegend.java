@@ -64,10 +64,10 @@ public class ImageLegend {
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
 
-    public static final double WEIGHT_TOLERANCE = 0.0001;  // machine error can make calculated weight slightly outside of range 0-1
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
-    public static final double INVALID_WEIGHT = -1.0;
 
+    private double weightTolerance;
+    
     private double titleToUnitsVerticalGap;
     private double titleToUnitsHorizontalGap;
     private double titleHeight;
@@ -227,6 +227,8 @@ public class ImageLegend {
         imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
         imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
 
+        imageLegendCopy.setWeightTolerance(getWeightTolerance());
+
         return imageLegendCopy;
     }
 
@@ -268,6 +270,10 @@ public class ImageLegend {
 
         setDecimalPlacesForce(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT));
+
+        setWeightTolerance(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_KEY,
+                ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT));
+
 
 
         // Sizing and Location
@@ -443,6 +449,9 @@ public class ImageLegend {
 
         setBackdropBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
+
+
+
 
 
         setLayerScaling(100.0);
@@ -764,23 +773,42 @@ public class ImageLegend {
                     weight = getLinearWeightFromLinearValue(value, min, max);
                 }
 
+                // Apply tolerance to potentially bring weight into valid state
                 weight = getValidWeight(weight);
-                if (weight != INVALID_WEIGHT) {
+
+                if (weight >= 0 && weight <= 1) {
                     if (getScalingFactor() != 0) {
                         value = value * getScalingFactor();
                         ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        double formattedValue = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double valueScaledFormatted = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double minScaled = min * getScalingFactor();
+                        double maxScaled = max * getScalingFactor();
 
-                        if ((formattedValue >= min *getScalingFactor()) && (formattedValue *getScalingFactor()) <= max) {
+                        double weightScaled;
+                        if (imageInfo.isLogScaled()) {
+                            weightScaled = getLinearWeightFromLogValue(valueScaledFormatted, minScaled, maxScaled);
+                        } else {
+                            weightScaled = getLinearWeightFromLinearValue(valueScaledFormatted, minScaled, maxScaled);
+                        }
+
+                        // Apply tolerance to potentially bring weight into valid state
+                        weightScaled = getValidWeight(weightScaled);
+
+                        if (weightScaled >= 0 && weightScaled <= 1) {
+                            // adjust weight to match formatted string
+                            colorBarInfo.setLocationWeight(weightScaled);
+
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
-                        } else {
-                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
-                            colorBarInfo.setFormattedValue(newFormattedValue);
-                            colorBarInfos.add(colorBarInfo);
-                            manualPointsArrayList.add(newFormattedValue);
                         }
+// This else block would put label in with no decimal restrictions for the case where the end point is not shown due to rounding
+//                        } else {
+//                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
+//                            colorBarInfo.setFormattedValue(newFormattedValue);
+//                            colorBarInfos.add(colorBarInfo);
+//                            manualPointsArrayList.add(newFormattedValue);
+//                        }
                     }
                 }
             }
@@ -833,7 +861,7 @@ public class ImageLegend {
                                 }
 
                                 weight = getValidWeight(weight);
-                                if (weight != INVALID_WEIGHT) {
+                                if (weight >= 0 && weight <= 1) {
                                     ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
                                     colorBarInfos.add(colorBarInfo);
                                 }
@@ -845,11 +873,15 @@ public class ImageLegend {
 
     }
 
+
+
+
+
     private double getValidWeight(double weight) {
         // due to rounding issues we want to make sure the weight isn't just below 0 or just above 1
         // this would cause the tick mark to possibly be placed a very tiny amount outside of the colorbar if not corrected here
 
-        boolean valid = (weight >= (0 - WEIGHT_TOLERANCE) && weight <= (1 + WEIGHT_TOLERANCE))
+        boolean valid = (weight >= (0 - weightTolerance) && weight <= (1 + weightTolerance))
                 ? true : false;
 
         if (valid) {
@@ -862,7 +894,7 @@ public class ImageLegend {
 
             return weight;
         } else {
-            return INVALID_WEIGHT;
+            return -1;
         }
 
     }
@@ -2019,8 +2051,9 @@ public class ImageLegend {
         final double min = getImageInfo().getColorPaletteDef().getMinDisplaySample();
         final double max = getImageInfo().getColorPaletteDef().getMaxDisplaySample();
 
-        double value, weight;
-        double roundedValue, adjustedWeight;
+        double value;
+        double weight;
+
         colorBarInfos.clear();
 
         if (getTickMarkCount() >= 2) {
@@ -2030,58 +2063,39 @@ public class ImageLegend {
             for (int i = 0; i < getTickMarkCount(); i++) {
 
                 weight = i * normalizedDelta;
-                double linearValue = getLinearValueUsingLinearWeight(weight, min, max);
                 if (imageInfo.isLogScaled()) {
                     value = getLogarithmicValueUsingLinearWeight(weight, min, max);
-//                        roundedValue = round(value,decimalPlaces-1);
-//                        adjustedWeight = getLinearWeightFromLogValue(roundedValue, min, max);
                 } else {
                     value = getLinearValueUsingLinearWeight(weight, min, max);
-//                        roundedValue = round(linearValue,decimalPlaces);
-//                        adjustedWeight = getLinearWeightFromLinearValue(roundedValue, min, max);
                 }
 
-//                System.out.println("weight="+weight);
-//                System.out.println("value="+value);
 
-                // todo try to make some kind of rounding thing work
-                roundedValue = value;
-                adjustedWeight = weight;
+                // Apply tolerance to potentially bring weight into valid state
+                weight = getValidWeight(weight);
 
-                adjustedWeight = getValidWeight(adjustedWeight);
-                if (adjustedWeight != INVALID_WEIGHT) {
+                if (weight >= 0 && weight <= 1) {
                     if (getScalingFactor() != 0) {
-                        roundedValue = roundedValue * getScalingFactor();
-                        ColorBarInfo colorBarInfo = new ColorBarInfo(roundedValue, adjustedWeight, getDecimalPlaces(), isDecimalPlacesForce());
+                        value = value * getScalingFactor();
+                        ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        double newValue = Double.valueOf(colorBarInfo.getFormattedValue()) / getScalingFactor();
+                        double valueScaledFormatted = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double minScaled = min * getScalingFactor();
+                        double maxScaled = max * getScalingFactor();
 
-
-                        double newWeight;
+                        double weightScaled;
                         if (imageInfo.isLogScaled()) {
-                            newWeight = getLinearWeightFromLogValue(newValue, min, max);
+                            weightScaled = getLinearWeightFromLogValue(valueScaledFormatted, minScaled, maxScaled);
                         } else {
-                            newWeight = getLinearWeightFromLinearValue(newValue, min, max);
+                            weightScaled = getLinearWeightFromLinearValue(valueScaledFormatted, minScaled, maxScaled);
                         }
 
-                        // adjust weight to match formatted string
-                        colorBarInfo.setLocationWeight(newWeight);
+                        // Apply tolerance to potentially bring weight into valid state
+                        weightScaled = getValidWeight(weightScaled);
 
+                        if (weightScaled >= 0 && weightScaled <= 1) {
+                            // adjust weight to match formatted string
+                            colorBarInfo.setLocationWeight(weightScaled);
 
-
-//                        System.out.println("newWeight=" +newWeight );
-//                        System.out.println("newValue=" +newValue  );
-//                        System.out.println("min=" +min );
-//                        System.out.println("max=" + max );
-//                        System.out.println("" );
-
-
-                        // allow close tick values to appear on color bar which would otherwise not appear due to decimal formatting.
-                        // If the color palette is defined by statistics of the band then this tolerance can be useful
-                        // Otherwise if the palette is defined with sensible min/max number then the tolerance shouldn't be needed
-                        double tolerance = .01;
-
-                        if (newWeight > 0 - tolerance && newWeight < 1 + tolerance) {
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
                         }
@@ -2420,5 +2434,13 @@ public class ImageLegend {
 
     public void setBackdropBorderShow(boolean backdropBorderShow) {
         this.backdropBorderShow = backdropBorderShow;
+    }
+
+    public double getWeightTolerance() {
+        return weightTolerance;
+    }
+
+    public void setWeightTolerance(double weightTolerance) {
+        this.weightTolerance = weightTolerance;
     }
 }

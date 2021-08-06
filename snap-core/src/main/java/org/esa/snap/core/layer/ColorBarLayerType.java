@@ -194,7 +194,12 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TYPE = Boolean.class;
 
 
-
+    public static final String PROPERTY_WEIGHT_TOLERANCE_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + "weight.tolerance";
+    public static final String PROPERTY_WEIGHT_TOLERANCE_LABEL = "Weight Tolerance";
+    public static final String PROPERTY_WEIGHT_TOLERANCE_TOOLTIP = "Weight tolerance to keep rounded value on the ends of the color bar";
+    private static final String PROPERTY_WEIGHT_TOLERANCE_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "WeightTolerance";
+    public static final Double PROPERTY_WEIGHT_TOLERANCE_DEFAULT = 0.001;
+    public static final Class PROPERTY_WEIGHT_TOLERANCE_TYPE = Double.class;
 
 
 
@@ -719,6 +724,10 @@ public class ColorBarLayerType extends LayerType {
     public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1400;
     public static final Class PROPERTY_EXPORT_LEGEND_WIDTH_TYPE = Integer.class;
 
+
+
+
+
     // ---------------------------------------------------------
 
     public static final String PROPERTY_NAME_RASTER = "raster";
@@ -840,6 +849,9 @@ public class ColorBarLayerType extends LayerType {
         labelValuesForceDecimalPlacesModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS);
         vc.addProperty(labelValuesForceDecimalPlacesModel);
 
+        final Property weightToleranceModel = Property.create(PROPERTY_WEIGHT_TOLERANCE_KEY, Double.class, PROPERTY_WEIGHT_TOLERANCE_DEFAULT, true);
+        weightToleranceModel.getDescriptor().setAlias(PROPERTY_WEIGHT_TOLERANCE_ALIAS);
+        vc.addProperty(weightToleranceModel);
 
 
 
@@ -1160,7 +1172,6 @@ public class ColorBarLayerType extends LayerType {
         final Property exportLegendWidthModel = Property.create(PROPERTY_EXPORT_LEGEND_WIDTH_KEY, Integer.class, PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT, true);
         exportLegendWidthModel.getDescriptor().setAlias(PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS);
         vc.addProperty(exportLegendWidthModel);
-
 
 
 
