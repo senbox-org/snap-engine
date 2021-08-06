@@ -127,7 +127,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_SECTION_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS +"Section";
 
     public static final String PROPERTY_LABEL_VALUES_MODE_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".mode";
-    public static final String PROPERTY_LABEL_VALUES_MODE_LABEL = "Mode";
+    public static final String PROPERTY_LABEL_VALUES_MODE_LABEL = "Label Value Mode";
     public static final String PROPERTY_LABEL_VALUES_MODE_TOOLTIP = "Mode for setting label values on the " + COLOR_LOWER_CASE + " bar legend";
     public static final Class PROPERTY_LABEL_VALUES_MODE_TYPE = String.class;
     public static final String PROPERTY_LABEL_VALUES_MODE_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Mode";
@@ -452,7 +452,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_UNITS_FONT_ITALIC_TYPE = Boolean.class;
 
     public static final String PROPERTY_UNITS_FONT_NAME_KEY = PROPERTY_UNITS_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_UNITS_FONT_NAME_LABEL = "Units Typeface";
+    public static final String PROPERTY_UNITS_FONT_NAME_LABEL = "Units Font";
     public static final String PROPERTY_UNITS_FONT_NAME_TOOLTIP = "Set the text font of the title units";
     public static final String PROPERTY_UNITS_FONT_NAME_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontName";
     public static final String PROPERTY_UNITS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
@@ -542,34 +542,34 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TICKMARKS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TickMarks";
 
     public static final String PROPERTY_TICKMARKS_SECTION_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".section";
-    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tick Marks";
+    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
     public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Format options for the " + COLOR_LOWER_CASE + " bar legend tickmarks";
     public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_TICKMARKS_SHOW_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".show";
-    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show Tick Marks";
+    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show Tickmarks";
     public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
     public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
     public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TICKMARKS_LENGTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".length";
-    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Tick Length";
+    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Tickmark Length";
     public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
     public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Length";
     public static final int PROPERTY_TICKMARKS_LENGTH_DEFAULT = 12;
     public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Integer.class;
 
     public static final String PROPERTY_TICKMARKS_WIDTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".width";
-    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Tick Width";
+    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Tickmark Width";
     public static final String PROPERTY_TICKMARKS_WIDTH_TOOLTIP = "Set width of tickmarks";
     public static final String PROPERTY_TICKMARKS_WIDTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Width";
     public static final int PROPERTY_TICKMARKS_WIDTH_DEFAULT = 4;
     public static final Class PROPERTY_TICKMARKS_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_TICKMARKS_COLOR_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".color";
-    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tick " + COLOR_MIXED_CASE;
-    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set " + COLOR_LOWER_CASE + " of the tickmarks";
+    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tickmark " + COLOR_MIXED_CASE;
+    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set " + COLOR_LOWER_CASE + " of the tick marks";
     private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
@@ -596,7 +596,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_BACKDROP_ROOT_KEY + "transparency";
-    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Trans";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Transparency";
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the " + COLOR_LOWER_CASE + " bar legend backdrop";
     private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Transparency";
     public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.0;
@@ -622,26 +622,26 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_PALETTE_BORDER_SECTION_KEY = PROPERTY_PALETTE_BORDER_ROOT_KEY + ".section";
     public static final String PROPERTY_PALETTE_BORDER_SECTION_ALIAS = PROPERTY_PALETTE_BORDER_ROOT_ALIAS + "Section";
-    public static final String PROPERTY_PALETTE_BORDER_SECTION_LABEL = "Palette Border";
+    public static final String PROPERTY_PALETTE_BORDER_SECTION_LABEL = "Color Bar Border";
     public static final String PROPERTY_PALETTE_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
 
     public static final String PROPERTY_PALETTE_BORDER_SHOW_KEY = PROPERTY_PALETTE_BORDER_ROOT_KEY + ".show";
-    public static final String PROPERTY_PALETTE_BORDER_SHOW_LABEL = "Show Palette Border";
-    public static final String PROPERTY_PALETTE_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
+    public static final String PROPERTY_PALETTE_BORDER_SHOW_LABEL = "Show Color Bar Border";
+    public static final String PROPERTY_PALETTE_BORDER_SHOW_TOOLTIP = "Display a border around the color bar image";
     private static final String PROPERTY_PALETTE_BORDER_SHOW_ALIAS = PROPERTY_PALETTE_BORDER_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_PALETTE_BORDER_SHOW_DEFAULT = true;
     public static final Class PROPERTY_PALETTE_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_PALETTE_BORDER_WIDTH_KEY = PROPERTY_PALETTE_BORDER_ROOT_KEY + ".width";
     public static final String PROPERTY_PALETTE_BORDER_WIDTH_LABEL = "Border Width";
-    public static final String PROPERTY_PALETTE_BORDER_WIDTH_TOOLTIP = "Width of border line";
+    public static final String PROPERTY_PALETTE_BORDER_WIDTH_TOOLTIP = "Width of color bar border line";
     private static final String PROPERTY_PALETTE_BORDER_WIDTH_ALIAS = PROPERTY_PALETTE_BORDER_ROOT_ALIAS + "Width";
     public static final int PROPERTY_PALETTE_BORDER_WIDTH_DEFAULT = 1;
     public static final Class PROPERTY_PALETTE_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_PALETTE_BORDER_COLOR_KEY = PROPERTY_PALETTE_BORDER_ROOT_KEY + ".color";
     public static final String PROPERTY_PALETTE_BORDER_COLOR_LABEL = "Border " + COLOR_MIXED_CASE;
-    public static final String PROPERTY_PALETTE_BORDER_COLOR_TOOLTIP = COLOR_MIXED_CASE + " of border line";
+    public static final String PROPERTY_PALETTE_BORDER_COLOR_TOOLTIP = COLOR_MIXED_CASE + " of color bar border line";
     private static final String PROPERTY_PALETTE_BORDER_COLOR_ALIAS = PROPERTY_PALETTE_BORDER_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_PALETTE_BORDER_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_PALETTE_BORDER_COLOR_TYPE = Color.class;
@@ -656,25 +656,25 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_SECTION_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".section";
     public static final String PROPERTY_LEGEND_BORDER_SECTION_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "Section";
     public static final String PROPERTY_LEGEND_BORDER_SECTION_LABEL = "Legend Border";
-    public static final String PROPERTY_LEGEND_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
+    public static final String PROPERTY_LEGEND_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the full legend";
 
     public static final String PROPERTY_LEGEND_BORDER_SHOW_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.show";
     public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Border";
-    public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
+    public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_SHOW_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderShow";
     public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = true;
     public static final Class PROPERTY_LEGEND_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.width";
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_LABEL = "Border Width";
-    public static final String PROPERTY_LEGEND_BORDER_WIDTH_TOOLTIP = "Width of border line";
+    public static final String PROPERTY_LEGEND_BORDER_WIDTH_TOOLTIP = "Width of border line around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_WIDTH_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderWidth";
     public static final int PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT = 3;
     public static final Class PROPERTY_LEGEND_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_LEGEND_BORDER_COLOR_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.color";
     public static final String PROPERTY_LEGEND_BORDER_COLOR_LABEL = "Border " + COLOR_MIXED_CASE;
-    public static final String PROPERTY_LEGEND_BORDER_COLOR_TOOLTIP = COLOR_MIXED_CASE + " of border line";
+    public static final String PROPERTY_LEGEND_BORDER_COLOR_TOOLTIP = COLOR_MIXED_CASE + " of border line around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_COLOR_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderColor";
     public static final Color PROPERTY_LEGEND_BORDER_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_LEGEND_BORDER_COLOR_TYPE = Color.class;
@@ -1054,7 +1054,7 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-        // Tick Marks Section
+        // Tickmarks Section
 
         final Property tickmarksSectionModel = Property.create(PROPERTY_TICKMARKS_SECTION_KEY, Boolean.class, true, true);
         tickmarksSectionModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SECTION_ALIAS);

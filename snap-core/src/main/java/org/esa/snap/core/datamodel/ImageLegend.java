@@ -162,31 +162,6 @@ public class ImageLegend {
 
         antialiasing = true;
 
-        // todo Most of these following parameters get initialized/set later so the following can likely be deleted
-
-//        showTitle = true;
-//        titleText = "";
-//
-//        orientation = HORIZONTAL;
-//        backdropColor = Color.white;
-//        tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
-//        labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
-//        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
-//        unitsColor = ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT;
-//
-//        setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
-//        setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
-//        setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
-//
-//        setLabelsFontSize(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
-//        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
-//
-//        backdropTransparency = 1.0f;
-//
-//        setDecimalPlaces(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT);
-//        scalingFactor = 1;
-//
-//        setDecimalPlacesForce(false);
 //        setCustomLabelValues("");
 
     }
@@ -859,8 +834,6 @@ public class ImageLegend {
 
                                 weight = getValidWeight(weight);
                                 if (weight != INVALID_WEIGHT) {
-//                                System.out.println("TEST formattedValue=" + formattedValue);
-//                                System.out.println("TEST weight=" + weight);
                                     ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
                                     colorBarInfos.add(colorBarInfo);
                                 }
@@ -919,10 +892,6 @@ public class ImageLegend {
             }
         }
 
-//        System.out.println("Title required width =" + headerRequiredDimension.width);
-//        System.out.println("Title required height =" + headerRequiredDimension.height);
-//        System.out.println("Title =" + getTitleText());
-//        System.out.println("Title units =" + getUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -1048,19 +1017,12 @@ public class ImageLegend {
                 double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
 
                 requiredHeight = Math.max(colorBarWithLabelsRequiredHeight, headerRequiredDimension.getHeight());
-//                requiredHeight = Math.max(requiredHeight, getColorBarLength());
-//            requiredHeight = Math.max(requiredHeight, MIN_VERTICAL_COLORBAR_HEIGHT);
                 requiredHeight = getBorderGap() + requiredHeight + getBorderGap();
-
-                //todo Danny changed this to make legend size stable
 
                 if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
                     discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
                     requiredWidth += discreteBooster;
                 }
-
-//                requiredHeight = getColorBarLength();
-
 
                 legendSize = new Dimension((int) requiredWidth, (int) requiredHeight);
             }
@@ -1117,13 +1079,8 @@ public class ImageLegend {
     }
 
     private void draw(Graphics2D g2d) {
-//        if (isBackdropShow()) {
         fillBackground(g2d);
-//        }
-
-
         drawPalette(g2d);
-
         drawHeaderText(g2d);
 
         if (isLabelsShow()) {
@@ -1136,9 +1093,7 @@ public class ImageLegend {
         if (isAlphaUsed()) {
             color = new Color(color.getRed(), color.getGreen(), color.getBlue(), getBackgroundAlpha());
         }
-//        if (getBackgroundTransparency() == 1.0) {
-//             color = UIManager.getColor("Panel.background");
-//        }
+
         g2d.setColor(color);
         g2d.fillRect(0, 0, legendSize.width + 1, legendSize.height + 1);
     }
@@ -1392,9 +1347,7 @@ public class ImageLegend {
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
                 int labelOverhangHeight = (int) Math.ceil(singleLetter.getHeight() / 2.0);
 
-
                 double translateX;
-
 
                 if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                     translateX = x0;
@@ -1917,9 +1870,6 @@ public class ImageLegend {
     private FontMetrics createFontMetrics() {
         BufferedImage bi = createBufferedImage(32, 32);
         final Graphics2D g2d = bi.createGraphics();
-//        if (font != null) {
-//            g2d.setFont(font);
-//        }
         final FontMetrics fontMetrics = g2d.getFontMetrics();
         g2d.dispose();
         return fontMetrics;
@@ -2154,16 +2104,6 @@ public class ImageLegend {
         this.titleOverRide = titleOverRide;
     }
 
-    // todo Danny tmp edit
-//    public boolean isInitialized() {
-//        ColorPaletteSourcesInfo colorPaletteSourcesInfo = raster.getImageInfo().getColorPaletteSourcesInfo();
-//        return colorPaletteSourcesInfo.isColorBarInitialized();
-//    }
-//
-//    public void setInitialized(boolean initialized) {
-//        ColorPaletteSourcesInfo colorPaletteSourcesInfo = raster.getImageInfo().getColorPaletteSourcesInfo();
-//        colorPaletteSourcesInfo.setColorBarInitialized(initialized);
-//    }
 
     public boolean allowTitleOverride(PropertyMap configuration) {
         if (configuration != null) {

@@ -196,12 +196,6 @@ public class ColorBarLayer extends Layer {
                     final AffineTransform transform = new AffineTransform();
                     transform.concatenate(transformSave);
                     transform.concatenate(vp.getModelToViewTransform());
-                    //              transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
-//
-//                transform.concatenate(createTransform(raster, bufferedImage));
-//                g2d.drawRenderedImage(bufferedImage, transform);
-
-
                     g2d.setTransform(transform);
                     drawImage(g2d, raster, bufferedImage);
 
@@ -228,7 +222,6 @@ public class ColorBarLayer extends Layer {
         AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
         transform.concatenate(createTransform(raster, image));
         return transform;
-        //   return createTransform(raster, image);
     }
 
     private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
@@ -417,8 +410,6 @@ public class ColorBarLayer extends Layer {
 
         double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + offsetAdjust : shift + shiftAdjust;
         double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + shiftAdjust : rasterWidth + offset + offsetAdjust;
-        //double[] flatmatrix = {scaleX, 0.0, 0.0, scaleY, x_axis_translation, y_axis_translation};
-
 
         double[] flatmatrix = {1, 0.0, 0.0, 1, x_axis_translation, y_axis_translation};
 
@@ -521,27 +512,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private double getPtsToPixelsMultiplier() {
-
-        if (ptsToPixelsMultiplier == NULL_DOUBLE) {
-            final double PTS_PER_INCH = 72.0;
-            final double PAPER_HEIGHT = 11.0;
-            final double PAPER_WIDTH = 8.5;
-
-            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
-            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
-
-            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
-                // use height
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
-            } else {
-                // use width
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
-            }
-        }
-
-        return ptsToPixelsMultiplier;
-    }
 
 
     private int getOrientation() {
