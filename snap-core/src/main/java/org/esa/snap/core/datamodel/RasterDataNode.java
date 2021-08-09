@@ -2021,7 +2021,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     /**
-     * Applies the scaling <code>v * scalingFactor + scalingOffset</code> the the given input value. If the
+     * Applies the scaling <code>v * scalingFactor + scalingOffset</code> the given input value. If the
      * <code>log10Scaled</code> property is true, the result is taken to the power of 10 <i>after</i> the actual
      * scaling.
      *
@@ -2038,7 +2038,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     /**
-     * Applies the inverse scaling <code>(v - scalingOffset) / scalingFactor</code> the the given input value. If the
+     * Applies the inverse scaling <code>(v - scalingOffset) / scalingFactor</code> the given input value. If the
      * <code>log10Scaled</code> property is true, the common logarithm is applied to the input <i>before</i> the actual
      * scaling.
      *
