@@ -48,10 +48,11 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
         final Path productRoot;
-        if (inputPath.getFileName().toString().equalsIgnoreCase(".zattrs")) {
-            productRoot = inputPath.getParent();
-        } else {
+        final String lowerName = inputPath.getFileName().toString().toLowerCase();
+        if (lowerName.endsWith(".znap.zip") || lowerName.endsWith(".znap")) {
             productRoot = inputPath;
+        } else {
+            productRoot = inputPath.getParent();
         }
         final boolean isValidRootDirName = productRoot.getFileName().toString().toLowerCase().endsWith(SNAP_ZARR_CONTAINER_EXTENSION);
         if (isValidRootDirName) {
@@ -124,7 +125,7 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
 
             @Override
             public boolean accept(File file) {
-                return file != null && (file.isDirectory() || isZnapZipArchive(file) || isZnapRootDotAttrsFile(file));
+                return file != null && (file.isDirectory() || isZnapZipArchive(file) || isFileInZnapRootDir(file));
             }
 
             @Override
@@ -132,8 +133,8 @@ public class ZarrProductReaderPlugIn implements ProductReaderPlugIn {
                 return dir != null && isZnapRootDir(dir.getParentFile());
             }
 
-            private boolean isZnapRootDotAttrsFile(File file) {
-                return file.getName().equals(".zattrs") && isZnapRootDir(file.getParentFile());
+            private boolean isFileInZnapRootDir(File file) {
+                return file != null && isZnapRootDir(file.getParentFile());
             }
 
             private boolean isZnapZipArchive(File file) {

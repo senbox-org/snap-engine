@@ -135,6 +135,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SAMPLE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SNAP_ZARR_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SNAP_ZARR_ZIP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SOLAR_FLUX;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
@@ -232,12 +233,12 @@ public class ZarrProductWriter extends AbstractProductWriter {
         dimensionNameGenerator.getDimensionNameFor("x", product.getSceneRasterWidth());
         dimensionNameGenerator.getDimensionNameFor("y", product.getSceneRasterHeight());
         final boolean useZipArchive = getUseZipArchive();
-        if (useZipArchive && !isExistingEmptyDirectory(outputRoot)) {
-            if (!outputRoot.toString().toLowerCase().endsWith(SNAP_ZARR_ZIP_CONTAINER_EXTENSION)) {
-                outputRoot = parentDir.resolve(outputRoot.getFileName().toString() + SNAP_ZARR_ZIP_CONTAINER_EXTENSION);
-            }
+        final String stripedFilename = getFilenameWithoutExtension();
+        if (useZipArchive) {
+            outputRoot = parentDir.resolve(stripedFilename + SNAP_ZARR_ZIP_CONTAINER_EXTENSION);
             zarrStore = new ZipStore(outputRoot);
         } else {
+            outputRoot = parentDir.resolve(stripedFilename + SNAP_ZARR_CONTAINER_EXTENSION);
             zarrStore = new FileSystemStore(outputRoot);
         }
         zarrGroup = ZarrGroup.create(zarrStore);
@@ -265,6 +266,13 @@ public class ZarrProductWriter extends AbstractProductWriter {
             }
         }
         zarrGroup.writeAttributes(collectProductAttributes());
+    }
+
+    private String getFilenameWithoutExtension() {
+        String fileName = outputRoot.getFileName().toString();
+        fileName = fileName.toLowerCase().endsWith(".zip") ? fileName.substring(0, fileName.length() - 4) : fileName;
+        fileName = fileName.toLowerCase().endsWith(".znap") ? fileName.substring(0, fileName.length() - 5) : fileName;
+        return fileName;
     }
 
     private void writeVectorData() throws IOException {

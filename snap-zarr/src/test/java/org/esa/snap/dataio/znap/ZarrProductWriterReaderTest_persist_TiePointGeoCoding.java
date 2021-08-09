@@ -94,8 +94,9 @@ public class ZarrProductWriterReaderTest_persist_TiePointGeoCoding {
     @Test
     public void writeAndRead() throws IOException {
         final Path tempDirectory = createTempDirectory();
-        productWriter.writeProductNodes(product, tempDirectory);
-        final Product readIn = productReader.readProductNodes(tempDirectory, null);
+        final Path rootDir = tempDirectory.resolve("test.znap");
+        productWriter.writeProductNodes(product, rootDir);
+        final Product readIn = productReader.readProductNodes(rootDir, null);
 
         assertNotNull(readIn);
         assertEquals(product.getSceneRasterWidth(), readIn.getSceneRasterWidth());

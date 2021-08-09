@@ -195,10 +195,11 @@ public class ZarrProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final Path inputPath = convertToPath(getInput());
-        if (inputPath.getFileName().toString().equalsIgnoreCase(".zattrs")) {
-            rootPath = inputPath.getParent();
-        } else {
+        final String lowerName = inputPath.getFileName().toString().toLowerCase();
+        if (lowerName.endsWith(".znap.zip") || lowerName.endsWith(".znap")) {
             rootPath = inputPath;
+        } else {
+            rootPath = inputPath.getParent();
         }
         assert rootPath != null;
         if (Files.isRegularFile(rootPath)) {
@@ -703,7 +704,7 @@ public class ZarrProductReader extends AbstractProductReader {
         if (flagMeanings != null) {
 
             final List<Number> flagMasks = cast(attributes.get(FLAG_MASKS));
-            final List<Double> flagValues = cast(attributes.get(FLAG_VALUES));
+            final List<Number> flagValues = cast(attributes.get(FLAG_VALUES));
 
             FlagCoding flagCoding = null;
             IndexCoding indexCoding = null;

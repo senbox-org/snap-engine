@@ -122,9 +122,10 @@ public class ZarrProductWriterReaderTest_persist_ComponentGeoCoding {
 
     @Test
     public void writeAndRead() throws IOException {
-        final Path tempDirectory = createTempDirectory();
-        productWriter.writeProductNodes(product, tempDirectory);
-        final Product readIn = productReader.readProductNodes(tempDirectory, null);
+        final Path tempDir = createTempDirectory();
+        final Path rootDir = tempDir.resolve("test.znap");
+        productWriter.writeProductNodes(product, rootDir);
+        final Product readIn = productReader.readProductNodes(rootDir, null);
 
         assertNotNull(readIn);
         assertEquals(product.getSceneRasterWidth(), readIn.getSceneRasterWidth());
@@ -190,9 +191,10 @@ public class ZarrProductWriterReaderTest_persist_ComponentGeoCoding {
         product.setSceneGeoCoding(null);
         product.addBand("band", ProductData.TYPE_INT32);
 
-        final Path tempDirectory = createTempDirectory();
-        productWriter.writeProductNodes(product, tempDirectory);
-        final Product readIn = productReader.readProductNodes(tempDirectory, null);
+        final Path tempDir = createTempDirectory();
+        final Path rootDir = tempDir.resolve("test.znap");
+        productWriter.writeProductNodes(product, rootDir);
+        final Product readIn = productReader.readProductNodes(rootDir, null);
 
         assertNotNull(readIn);
         assertEquals(product.getSceneRasterWidth(), readIn.getSceneRasterWidth());

@@ -111,7 +111,8 @@ public class ZarrProductWriterReaderTest_SharedGeoCodings {
     @Test
     public void writeAndRead() throws IOException {
         final ZarrProductWriter writer = new ZarrProductWriter(new ZarrProductWriterPlugIn());
-        final Path rootPath = createTempDirectory();
+        final Path tempPath = createTempDirectory();
+        final Path rootPath = tempPath.resolve("test.znap");
         writer.writeProductNodes(product, rootPath);
 
         final ZarrProductReader reader = new ZarrProductReader(new ZarrProductReaderPlugIn());
@@ -144,14 +145,15 @@ public class ZarrProductWriterReaderTest_SharedGeoCodings {
     @Test
     public void testThatTheGeneratedOutputsAreEqual() throws IOException {
         final ZarrProductWriter writer = new ZarrProductWriter(new ZarrProductWriterPlugIn());
-        final Path rootPath = createTempDirectory();
+        final Path tempPath = createTempDirectory();
+        final Path rootPath = tempPath.resolve("test.znap");
         writer.writeProductNodes(product, rootPath);
 
         final ZarrProductReader reader = new ZarrProductReader(new ZarrProductReaderPlugIn());
         final Product product = reader.readProductNodes(rootPath, null);
 
         final ZarrProductWriter secondWriter = new ZarrProductWriter(new ZarrProductWriterPlugIn());
-        final Path secondRoot = createTempDirectory();
+        final Path secondRoot = tempPath.resolve("secondTest.znap");
         secondWriter.writeProductNodes(product, secondRoot);
 
         final List<Path> firstList = Files.walk(rootPath).filter(path -> path.getFileName().toString().equals(".zattrs")).collect(Collectors.toList());
