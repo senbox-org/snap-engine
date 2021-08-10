@@ -251,7 +251,7 @@ public class BeamMetadataPart extends ProfilePartIO {
             MetadataElement subElement = element.getElementAt(i);
             final String subElementName = subElement.getName();
             // Including the ADS of some MERIS files breaks the NetCDF. It can't be read by the NetCDF Java library anymore. Other libs can read it.
-            // If not requested the ADS is not written
+            // If not requested the ADS is not written (See SNAP-1473, SNAP 1474)
             boolean saveADS = Config.instance("snap").preferences().getBoolean("save.product.annotations", false);
             if (!saveADS && subElementName.toLowerCase().endsWith("ads")) {
                 continue;
