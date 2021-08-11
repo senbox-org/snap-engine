@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -92,6 +93,7 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
     }
 
     @Test
+    @Ignore
     public void writeAndRead() throws IOException {
         final Path tempDirectory = createTempDirectory();
         final Path rootDir = tempDirectory.resolve("test.znap");
