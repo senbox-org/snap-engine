@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
+        <groupId>org.esa.snap</groupId>
         <version>9.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>snap-product-library-v2</artifactId>
-    <packaging>nbm</packaging>
+    <artifactId>snap-znap</artifactId>
+    <name>ZNAP Product Reader/Writer</name>
+    <description>A Zarr format based product reader and writer.</description>
 
-    <name>SNAP Product Library v2</name>
-    <description>SNAP Product Library v2</description>
+    <packaging>nbm</packaging>
 
     <dependencies>
         <dependency>
@@ -25,7 +23,15 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-glayer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-binding</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -36,38 +42,44 @@
             <artifactId>snap-engine-utilities</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>snap-remote-products-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--
-        The two explicit jackson dependencies ensure that the following h2gis dependency does not
-        pull in an older version of jackson. The snap-znap module is not compatible with this.
-        The other way around it works.
-        -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.11.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.11.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.orbisgis</groupId>
-            <artifactId>h2gis</artifactId>
-            <version>1.5.0</version>
+            <groupId>com.bc.zarr</groupId>
+            <artifactId>jzarr</artifactId>
+            <version>0.3.4</version>
         </dependency>
 
-        <!-- JUnit -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.jimfs</groupId>
+            <artifactId>jimfs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -76,7 +88,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
+                        <publicPackage>org.esa.snap.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -93,5 +105,5 @@
             </plugin>
         </plugins>
     </build>
-</project>
 
+</project>
