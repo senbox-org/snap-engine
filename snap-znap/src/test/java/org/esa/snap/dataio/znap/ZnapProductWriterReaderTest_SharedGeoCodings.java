@@ -24,7 +24,6 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
-import org.esa.snap.runtime.Config;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.prefs.Preferences;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -46,11 +45,12 @@ public class ZnapProductWriterReaderTest_SharedGeoCodings {
 
     private Product product;
     private final List<Path> tempDirectories = new ArrayList<>();
+    private Properties properties;
 
     @Before
     public void setUp() throws Exception {
-        final Preferences snap = Config.instance("snap").load().preferences();
-        snap.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+        properties = new Properties();
+        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
         product = new Product("test", "type", 3, 4);
         final Date start = new Date();
         final Date end = new Date(start.getTime() + 4000);
@@ -110,9 +110,10 @@ public class ZnapProductWriterReaderTest_SharedGeoCodings {
 
     @Test
     public void writeAndRead() throws IOException {
-        final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
         final Path tempPath = createTempDirectory();
         final Path rootPath = tempPath.resolve("test.znap");
+        final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
+        writer.setPreferencesForTestPurposesOnly(properties);
         writer.writeProductNodes(product, rootPath);
 
         final ZnapProductReader reader = new ZnapProductReader(new ZnapProductReaderPlugIn());
@@ -144,16 +145,19 @@ public class ZnapProductWriterReaderTest_SharedGeoCodings {
 
     @Test
     public void testThatTheGeneratedOutputsAreEqual() throws IOException {
-        final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
         final Path tempPath = createTempDirectory();
         final Path rootPath = tempPath.resolve("test.znap");
+
+        final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
+        writer.setPreferencesForTestPurposesOnly(properties);
         writer.writeProductNodes(product, rootPath);
 
         final ZnapProductReader reader = new ZnapProductReader(new ZnapProductReaderPlugIn());
         final Product product = reader.readProductNodes(rootPath, null);
 
-        final ZnapProductWriter secondWriter = new ZnapProductWriter(new ZnapProductWriterPlugIn());
         final Path secondRoot = tempPath.resolve("secondTest.znap");
+        final ZnapProductWriter secondWriter = new ZnapProductWriter(new ZnapProductWriterPlugIn());
+        secondWriter.setPreferencesForTestPurposesOnly(properties);
         secondWriter.writeProductNodes(product, secondRoot);
 
         final List<Path> firstList = Files.walk(rootPath).filter(path -> path.getFileName().toString().equals(".zattrs")).collect(Collectors.toList());

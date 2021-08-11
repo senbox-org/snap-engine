@@ -86,6 +86,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
@@ -180,6 +181,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
     private Path outputRoot;
     private Store zarrStore;
     private DimensionNameGenerator dimensionNameGenerator;
+    private Properties testPreferences;
 
     public ZnapProductWriter(final ZnapProductWriterPlugIn productWriterPlugIn) {
         super(productWriterPlugIn);
@@ -761,8 +763,15 @@ public class ZnapProductWriter extends AbstractProductWriter {
         return writerPlugIn;
     }
 
-    private String getPreference(String key, String _default) {
-        return getPreferences().get(key, _default);
+    void setPreferencesForTestPurposesOnly(Properties testPreferences) {
+        this.testPreferences = testPreferences;
+    }
+
+    private String getPreference(String key, String defaultValue) {
+        if (testPreferences != null) {
+            return testPreferences.getProperty(key, defaultValue);
+        }
+        return getPreferences().get(key, defaultValue);
     }
 
     private Preferences getPreferences() {

@@ -29,10 +29,10 @@ import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 import org.geotools.referencing.CRS;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -99,8 +100,11 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
         sceneGeoCoding.initialize();
         product.setSceneGeoCoding(sceneGeoCoding);
 
+        final Properties properties = new Properties();
+        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
 
         productWriter = (ZnapProductWriter) new ZnapProductWriterPlugIn().createWriterInstance();
+        productWriter.setPreferencesForTestPurposesOnly(properties);
         productReader = (ZnapProductReader) new ZnapProductReaderPlugIn().createReaderInstance();
     }
 
@@ -122,7 +126,6 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
     }
 
     @Test
-    @Ignore
     public void writeAndRead() throws IOException {
         final Path tempDir = createTempDirectory();
         final Path rootDir = tempDir.resolve("test.znap");
@@ -186,7 +189,6 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
     }
 
     @Test
-    @Ignore
     public void writeAndRead_noGeoCoding_withBand() throws IOException {
 //        product = new Product("name", "type");
 //        Band band = new Band("band", ProductData.TYPE_INT32, 2 , 2);

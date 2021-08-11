@@ -23,9 +23,9 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -71,7 +72,11 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
 
         product.setSceneGeoCoding(new TiePointGeoCoding(lat, lon));
 
+        final Properties properties = new Properties();
+        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         productWriter = (ZnapProductWriter) new ZnapProductWriterPlugIn().createWriterInstance();
+        productWriter.setPreferencesForTestPurposesOnly(properties);
         productReader = (ZnapProductReader) new ZnapProductReaderPlugIn().createReaderInstance();
     }
 
@@ -93,7 +98,6 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
     }
 
     @Test
-    @Ignore
     public void writeAndRead() throws IOException {
         final Path tempDirectory = createTempDirectory();
         final Path rootDir = tempDirectory.resolve("test.znap");
