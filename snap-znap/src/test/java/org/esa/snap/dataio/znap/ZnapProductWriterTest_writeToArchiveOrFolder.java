@@ -22,7 +22,6 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.TreeDeleter;
-import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,21 +29,25 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.prefs.Preferences;
+import java.util.Properties;
 
-import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.DEFAULT_USE_ZIP_ARCHIVE;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 import static org.junit.Assert.assertTrue;
 
 
-public class ZnapProductReaderTest_writing {
+public class ZnapProductWriterTest_writeToArchiveOrFolder {
 
     private Path testPath;
+    private Product dummy;
+    private ZnapProductWriter writer;
 
     @Before
     public void setUp() throws Exception {
-        testPath = Files.createTempDirectory("ZarrProductReaderTest_writing");
-        Files.createDirectories(testPath);
+        testPath = Files.createTempDirectory(getClass().getCanonicalName());
+        dummy = createDummyProduct();
+        writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
     }
 
     @After
@@ -53,29 +56,31 @@ public class ZnapProductReaderTest_writing {
     }
 
     @Test
-    public void testFileExtension() throws IOException {
-        final Product dummy = createDummyProduct();
+    public void testFileExtension_writeToFolder() throws IOException {
+        //preparation
+        final Properties properties = new Properties();
+        properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+        writer.setPreferencesForTestPurposesOnly(properties);
 
-        ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
+        //execution
         writer.writeProductNodes(dummy, testPath.resolve("filename"));
 
-        String expectedExtension = getExpectedExtension();
-
-        assertTrue(testPath.resolve("filename" + expectedExtension).toFile().exists());
-
+        //verification
+        assertTrue(Files.isDirectory(testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION)));
     }
 
-    private String getExpectedExtension() {
-        String expectedExtension = ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
-        if (isUsingZipArchive()) {
-            expectedExtension = ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
-        }
-        return expectedExtension;
-    }
+    @Test
+    public void testFileExtension_writeToZipArchive() throws IOException {
+        //preparation
+        final Properties properties = new Properties();
+        properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
+        writer.setPreferencesForTestPurposesOnly(properties);
 
-    private boolean isUsingZipArchive() {
-        final Preferences preferences = Config.instance("snap").load().preferences();
-        return preferences.getBoolean(PROPERTY_NAME_USE_ZIP_ARCHIVE, DEFAULT_USE_ZIP_ARCHIVE);
+        //execution
+        writer.writeProductNodes(dummy, testPath.resolve("filename"));
+
+        //verification
+        assertTrue(Files.isRegularFile(testPath.resolve("filename" + ZNAP_ZIP_CONTAINER_EXTENSION)));
     }
 
     private Product createDummyProduct() {
