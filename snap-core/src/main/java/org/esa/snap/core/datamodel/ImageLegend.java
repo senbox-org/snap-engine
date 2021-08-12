@@ -67,7 +67,7 @@ public class ImageLegend {
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
 
     private double weightTolerance;
-    
+
     private double titleToUnitsVerticalGap;
     private double titleToUnitsHorizontalGap;
     private double titleHeight;
@@ -273,6 +273,8 @@ public class ImageLegend {
 
         setWeightTolerance(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_KEY,
                 ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT));
+
+
 
 
 

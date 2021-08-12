@@ -196,12 +196,17 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_WEIGHT_TOLERANCE_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + "weight.tolerance";
     public static final String PROPERTY_WEIGHT_TOLERANCE_LABEL = "Weight Tolerance";
-    public static final String PROPERTY_WEIGHT_TOLERANCE_TOOLTIP = "Weight tolerance to keep rounded value on the ends of the color bar";
+    public static final String PROPERTY_WEIGHT_TOLERANCE_TOOLTIP = "Weight tolerance to keep desired generated rounded values on the ends of the color bar";
     private static final String PROPERTY_WEIGHT_TOLERANCE_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "WeightTolerance";
     public static final Double PROPERTY_WEIGHT_TOLERANCE_DEFAULT = 0.001;
     public static final Class PROPERTY_WEIGHT_TOLERANCE_TYPE = Double.class;
 
-
+    public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".populate.values.textfield";
+    public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_LABEL = "Auto-Fill Values Textfield";
+    public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_TOOLTIP = "Auto-populate the values field with the generated values";
+    private static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "PopulateValueTextfield";
+    public static final boolean PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT = false;
+    public static final Class PROPERTY_POPULATE_VALUES_TEXTFIELD_TYPE = Boolean.class;
 
 
 
@@ -686,6 +691,9 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+
+
+
     //  Legend Export Section
 
     private static final String PROPERTY_LEGEND_EXPORT_ROOT_KEY = PROPERTY_ROOT_KEY + ".legend.export";
@@ -852,6 +860,10 @@ public class ColorBarLayerType extends LayerType {
         final Property weightToleranceModel = Property.create(PROPERTY_WEIGHT_TOLERANCE_KEY, Double.class, PROPERTY_WEIGHT_TOLERANCE_DEFAULT, true);
         weightToleranceModel.getDescriptor().setAlias(PROPERTY_WEIGHT_TOLERANCE_ALIAS);
         vc.addProperty(weightToleranceModel);
+
+        final Property populateLabelValesTextfieldModel = Property.create(PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY, Boolean.class, PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT , true);
+        populateLabelValesTextfieldModel.getDescriptor().setAlias(PROPERTY_POPULATE_VALUES_TEXTFIELD_ALIAS);
+        vc.addProperty(populateLabelValesTextfieldModel);
 
 
 

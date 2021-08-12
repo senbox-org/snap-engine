@@ -179,7 +179,7 @@ public class ColorBarLayer extends Layer {
             // todo Maybe add this to preferences, to let GUI auto-populate this textfield.   The problem is that the field
             // can get wide and all other fields also get wide with right alignment.
             boolean autoPopulateTextfield = false;
-            if (autoPopulateTextfield) {
+            if (getPopulateLabelsTextfield()) {
                 setLabelValuesActual(imageLegend.getCustomLabelValues());
             }
 
@@ -512,6 +512,12 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT);
     }
+
+    private boolean getPopulateLabelsTextfield() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY,
+                ColorBarLayerType.PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT);
+    }
+
 
     private int getLabelsFontSize() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
