@@ -22,8 +22,6 @@ import org.esa.snap.engine_utilities.download.DownloadableFile;
  */
 public interface LandCoverTile extends DownloadableFile {
 
-    void dispose();
-
     float getSample(int pixelX, int pixelY) throws Exception;
 
     void clearCache();

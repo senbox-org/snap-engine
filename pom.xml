@@ -105,7 +105,7 @@
         <module>snap-sta</module>
         <module>snap-remote-execution</module>
         <module>snap-remote-products-repository</module>
-        <module>snap-zarr</module>
+        <module>snap-znap</module>
 
         <module>lib-hdf</module>
         <module>lib-openjpeg</module>
@@ -193,7 +193,7 @@
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-zarr</artifactId>
+                <artifactId>snap-znap</artifactId>
                 <version>${snap.version}</version>
             </dependency>
             <dependency>

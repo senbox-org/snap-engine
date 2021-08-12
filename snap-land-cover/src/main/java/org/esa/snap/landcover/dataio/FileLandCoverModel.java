@@ -16,17 +16,16 @@
 package org.esa.snap.landcover.dataio;
 
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
 public class FileLandCoverModel implements LandCoverModel {
 
@@ -38,14 +37,15 @@ public class FileLandCoverModel implements LandCoverModel {
     protected final LandCoverModelDescriptor descriptor;
     protected FileLandCoverTile[] tileList = null;
 
-    protected static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn("GeoTIFF");
+    protected static final ProductReaderPlugIn productReaderPlugIn = new GeoTiffProductReaderPlugIn();
 
     public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final File[] files,
-                              final Resampling resamplingMethod) throws IOException {
+                              final Resampling resamplingMethod) {
         this(descriptor, files, resamplingMethod, ".zip");
     }
+
     public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final File[] files,
-                              final Resampling resamplingMethod, final String archiveExt) throws IOException {
+                              final Resampling resamplingMethod, final String archiveExt) {
 
         this.descriptor = descriptor;
         this.resampling = resamplingMethod;
@@ -128,10 +128,5 @@ public class FileLandCoverModel implements LandCoverModel {
 
     public boolean getSamples(final int[] x, final int[] y, final double[][] samples) throws IOException {
         return false;
-    }
-
-    protected static ProductReaderPlugIn getReaderPlugIn(final String formatName) {
-        final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(formatName);
-        return (ProductReaderPlugIn) readerPlugIns.next();
     }
 }

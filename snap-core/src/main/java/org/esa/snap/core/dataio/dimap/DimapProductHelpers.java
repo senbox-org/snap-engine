@@ -64,7 +64,6 @@ import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ImageUtils;
-import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
@@ -1493,7 +1492,11 @@ public class DimapProductHelpers {
                     if (cyclicElem != null) {
                         final boolean cyclic = Boolean.parseBoolean(cyclicElem.getTextTrim());
                         if (cyclic) {
-                            final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY, String.valueOf(TiePointGrid.DISCONT_AT_180));
+                            // If the discontinuity is not stored, this is for example the case
+                            // for products prior version 2.13.0. We need still need to analyse the data as it was
+                            // in the old versions. So we use DISCONT_AUTO as default fallback value here.
+                            final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY,
+                                                                               String.valueOf(TiePointGrid.DISCONT_AUTO));
                             final int discontinuity = Integer.parseInt(intVal);
                             tiePointGrid.setDiscontinuity(discontinuity);
                         }
@@ -1773,12 +1776,10 @@ public class DimapProductHelpers {
                 // The current GeneralFilterBandPersistable supports 3 older versions.
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
                 if (persistable != null) {
-                    Band origBand = (Band) persistable.createObjectFromXml(element, product);
-                    // currently it can be null if the operator of filtered band is of type
+                    band = (Band) persistable.createObjectFromXml(element, product);
+                    // currently, it can be null if the operator of filtered band is of type
                     // GeneralFilterBand.STDDEV or GeneralFilterBand.RMS
-                    if (origBand != null) {
-                        band = new Band(origBand.getName(), origBand.getDataType(), bandSize.width, bandSize.height);
-                        ProductUtils.copyRasterDataNodeProperties(origBand, band);
+                    if (band != null) {
                         product.addBand(band);
                     }
                 }

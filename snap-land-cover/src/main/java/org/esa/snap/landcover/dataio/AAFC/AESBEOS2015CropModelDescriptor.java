@@ -67,8 +67,4 @@ public class AESBEOS2015CropModelDescriptor extends AbstractLandCoverModelDescri
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
         return new FileLandCoverProvincialModel(this, fileList, resampling);
     }
-
-    public String createTileFilename(final int minLat, final int minLon) {
-        return fileList[0].getName();
-    }
 }

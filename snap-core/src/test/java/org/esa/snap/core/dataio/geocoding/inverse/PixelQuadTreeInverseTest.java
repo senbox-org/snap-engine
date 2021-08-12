@@ -10,6 +10,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 import static java.lang.Double.NaN;
@@ -18,7 +19,6 @@ import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEO
 import static org.junit.Assert.*;
 
 public class PixelQuadTreeInverseTest {
-
 
     @Test
     public void testGetPixelPos_SLSTR_OL() {
@@ -295,7 +295,7 @@ public class PixelQuadTreeInverseTest {
     @Test
     public void testGetGeoPos_AMSR2() {
         final GeoRaster geoRaster = new GeoRaster(AMSR2.AMSR2_ANTI_MERID_LON, AMSR2.AMSR2_ANTI_MERID_LAT, null, null, 32, 26,
-                                                  32, 26, 0.3, 0.5, 0.5, 1.0, 1.0);
+                32, 26, 0.3, 0.5, 0.5, 1.0, 1.0);
         PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
@@ -308,7 +308,7 @@ public class PixelQuadTreeInverseTest {
     @Test
     public void testGetGeoPos_SLST_OL() {
         final GeoRaster geoRaster = get_SLSTR_OL();
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
+        final PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         final GeoPos geoPos = new GeoPos();
@@ -318,9 +318,65 @@ public class PixelQuadTreeInverseTest {
     }
 
     @Test
+    public void testMSI_projected_L1() {
+        final GeoRaster geoRaster = TestData.get_MSI_L1();
+
+        final PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        // check segmentation - this was failing before the fix tb 2021-07-28
+        final ArrayList<Segment> segmentList = inverse.getSegmentList();
+        assertEquals(3, segmentList.size());
+
+        Segment segment = segmentList.get(0);
+        assertEquals(0, segment.x_min);
+        assertEquals(3, segment.x_max);
+        assertEquals(0, segment.y_min);
+        assertEquals(15, segment.y_max);
+        assertEquals(28.9297100620607, segment.lon_min, 1e-8);
+        assertEquals(29.98484832633402, segment.lon_max, 1e-8);
+        assertEquals(44.85622580870736, segment.lat_min, 1e-8);
+        assertEquals(47.86594330232314, segment.lat_max, 1e-8);
+
+        segment = segmentList.get(1);
+        assertEquals(4, segment.x_min);
+        assertEquals(14, segment.x_max);
+        assertEquals(0, segment.y_min);
+        assertEquals(15, segment.y_max);
+        assertEquals(30.11143503969883, segment.lon_min, 1e-8);
+        assertEquals(33.07239877701666, segment.lon_max, 1e-8);
+        assertEquals(44.88855397295411, segment.lat_min, 1e-8);
+        assertEquals(47.91009255076986, segment.lat_max, 1e-8);
+
+        segment = segmentList.get(2);
+        assertEquals(15, segment.x_min);
+        assertEquals(24, segment.x_max);
+        assertEquals(0, segment.y_min);
+        assertEquals(15, segment.y_max);
+        assertEquals(33.34907077400352, segment.lon_min, 1e-8);
+        assertEquals(36.03306268790175, segment.lon_max, 1e-8);
+        assertEquals(44.88519183667283, segment.lat_min, 1e-8);
+        assertEquals(47.90952354992115, segment.lat_max, 1e-8);
+
+        // convert some points on the first scanline
+        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(47.83791144390204, 28.9297100620607), null);
+        assertEquals(0.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+
+        pixelPos = inverse.getPixelPos(new GeoPos(47.86594330232314, 29.81579432123888), null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+
+        // this one in the second segment
+        pixelPos = inverse.getPixelPos(new GeoPos(47.87376876944839, 30.11143503969883), null);
+        assertEquals(4.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
     public void testGetEpsilon_AMSR2() {
         final GeoRaster geoRaster = new GeoRaster(AMSR2.AMSR2_ANTI_MERID_LON, AMSR2.AMSR2_ANTI_MERID_LAT, null, null, 32, 26,
-                                                  32, 26, 5.0, 0.5, 0.5, 1.0, 1.0);
+                32, 26, 5.0, 0.5, 0.5, 1.0, 1.0);
         PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
@@ -1020,7 +1076,7 @@ public class PixelQuadTreeInverseTest {
         try {
             PixelQuadTreeInverse.splitAtOutsidePoint(segment, SegmentCoverage.INSIDE, new MockCalculator());
             fail("IllegalStateException expected");
-        } catch (IllegalStateException expected){
+        } catch (IllegalStateException expected) {
         }
     }
 
@@ -1078,7 +1134,7 @@ public class PixelQuadTreeInverseTest {
         try {
             PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.INSIDE, new MockCalculator());
             fail("IllegalStateException expected");
-        } catch (IllegalStateException expected){
+        } catch (IllegalStateException expected) {
         }
     }
 }

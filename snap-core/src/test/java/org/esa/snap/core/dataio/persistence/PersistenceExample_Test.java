@@ -201,7 +201,7 @@ public class PersistenceExample_Test {
     @Test
     public void test_Encode_JSON() throws JsonProcessingException {
         // Writer initializing (Dimap or Zarr)
-        // in this case we are simulating e.g. SNAP-ZARR ... a JSON use case
+        // in this case we are simulating e.g. ZNAP ... a JSON use case
         final JsonLanguageSupport languageSupport = new JsonLanguageSupport();
 
         // the language dependent node where the created nodes shall be added

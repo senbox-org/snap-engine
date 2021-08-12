@@ -107,6 +107,13 @@ class SwiftMockService {
                 } else {
                     response = "AccessDenied".getBytes();
                     httpStatus = HttpURLConnection.HTTP_FORBIDDEN;
+                    if(authHeader == null){
+                        Logger.getLogger(SwiftMockService.class.getName()).severe("authHeader is missing. " );
+                    }else {
+                        if (SwiftAuthMockService.isValidToken(authHeader.get(0))) {
+                            Logger.getLogger(SwiftMockService.class.getName()).severe("invalid token.. ");
+                        }
+                    }
                 }
             } catch (IllegalArgumentException ex) {
                 response = "Bad request".getBytes();

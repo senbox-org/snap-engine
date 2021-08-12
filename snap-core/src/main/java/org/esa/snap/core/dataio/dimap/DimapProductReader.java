@@ -348,6 +348,9 @@ public class DimapProductReader extends AbstractProductReader {
                     System.arraycopy(fullData, srcPos, destData, y1 * destWidth, destWidth);
                 }
             }
+            if (tpg.getDiscontinuity() == TiePointGrid.DISCONT_AUTO) {
+                tpg.setDiscontinuity(TiePointGrid.getDiscontinuity(destData));
+            }
         } catch (Exception e) {
             throw new IOException(
                     MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tpg.getName()), e);

@@ -84,6 +84,11 @@ public class TestData {
                              25, 27, 0.3, 0.5, 0.5, 1.0, 1.0);
     }
 
+    public static GeoRaster get_MSI_L1() {
+        return new GeoRaster(MSI.MSI_L1_SUBS_LON, MSI.MSI_L1_SUBS_LAT, null, null, 25, 16,
+                25, 16, 221.4, 0.5, 0.5, 1.0, 1.0);
+    }
+
     public static GeoRaster get_FlatEarth() {
         final double[] longitudes = {
                 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,

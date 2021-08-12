@@ -10,4 +10,6 @@ public interface ProgressListener {
     public void notifyProgress(short progressPercent);
 
     public void notifyApproximateSize(long approximateSize);
+
+    void notifyProductStatus(String productStatus);
 }

@@ -58,11 +58,11 @@ class RemoteProductsRepositoryProviderImpl implements RemoteProductsRepositoryPr
     }
 
     @Override
-    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
+    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, int pageSize, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                        throws Exception {
 
-        return RemoteRepositoriesManager.downloadProductList(getRepositoryName(), mission, credentials, parameterValues, downloaderListener, thread);
+        return RemoteRepositoriesManager.downloadProductList(getRepositoryName(), mission, pageSize,credentials, parameterValues, downloaderListener, thread);
     }
 
     @Override
