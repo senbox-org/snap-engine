@@ -41,6 +41,7 @@ import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZ
  * @version $Revision$ $Date$
  */
 // MAY2021 - Daniel Knowles - Major revisions to Color Bar Legend
+    // todo there is extra unused methods and some commented out code which relates so SeaDAS-BEAM code for defining preset colorbar labels based on a bandname lookup, the commented out and unused methods may be useful in implementing that mechanism later if it is desired.
 
 public class ImageLegend {
 
