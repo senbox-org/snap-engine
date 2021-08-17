@@ -242,7 +242,7 @@ public class ColorBarLayer extends Layer {
         int rasterHeight = raster.getRasterHeight();
 
 
-        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
+        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
         double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLocationShift() / 100) : -(colorBarImageHeight * getLocationShift() / 100);
 
         double offsetAdjust = 0;
