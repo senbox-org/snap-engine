@@ -195,7 +195,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".force.decimal.places";
-    public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_LABEL = "Trailing Decimal Zeros";
+    public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_LABEL = "Force Trailing Decimal Zeros";
     public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TOOLTIP = "Force to exact decimal places by adding trailing zeros as needed";
     private static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ForceDecimalPlaces";
     public static final boolean PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT = false;
