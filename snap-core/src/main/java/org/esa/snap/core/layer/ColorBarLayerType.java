@@ -702,7 +702,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_EXPORT_EDITOR_SHOW_LABEL = "Show Editor";
     public static final String PROPERTY_EXPORT_EDITOR_SHOW_TOOLTIP = "Display editor for " + COLOR_LOWER_CASE + " bar export tool";
     private static final String PROPERTY_EXPORT_EDITOR_SHOW_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "EditorShow";
-    public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = false;
     public static final Class PROPERTY_EXPORT_EDITOR_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_EXPORT_USE_BW_COLOR_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".use.blackwhite.color";
@@ -839,6 +839,10 @@ public class ColorBarLayerType extends LayerType {
         labelValuesActualModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_ACTUAL_ALIAS);
         vc.addProperty(labelValuesActualModel);
 
+        final Property populateLabelValesTextfieldModel = Property.create(PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY, Boolean.class, PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT , true);
+        populateLabelValesTextfieldModel.getDescriptor().setAlias(PROPERTY_POPULATE_VALUES_TEXTFIELD_ALIAS);
+        vc.addProperty(populateLabelValesTextfieldModel);
+
         final Property labelValuesScalingFactorModel = Property.create(PROPERTY_LABEL_VALUES_SCALING_KEY, Double.class, PROPERTY_LABEL_VALUES_SCALING_DEFAULT, true);
         labelValuesScalingFactorModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SCALING_ALIAS);
         vc.addProperty(labelValuesScalingFactorModel);
@@ -851,14 +855,11 @@ public class ColorBarLayerType extends LayerType {
         labelValuesForceDecimalPlacesModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS);
         vc.addProperty(labelValuesForceDecimalPlacesModel);
 
+
+
         final Property weightToleranceModel = Property.create(PROPERTY_WEIGHT_TOLERANCE_KEY, Double.class, PROPERTY_WEIGHT_TOLERANCE_DEFAULT, true);
         weightToleranceModel.getDescriptor().setAlias(PROPERTY_WEIGHT_TOLERANCE_ALIAS);
         vc.addProperty(weightToleranceModel);
-
-        final Property populateLabelValesTextfieldModel = Property.create(PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY, Boolean.class, PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT , true);
-        populateLabelValesTextfieldModel.getDescriptor().setAlias(PROPERTY_POPULATE_VALUES_TEXTFIELD_ALIAS);
-        vc.addProperty(populateLabelValesTextfieldModel);
-
 
 
         // Placement Section
