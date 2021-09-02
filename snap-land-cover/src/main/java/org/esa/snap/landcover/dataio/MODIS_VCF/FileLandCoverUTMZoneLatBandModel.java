@@ -80,7 +80,7 @@ public class FileLandCoverUTMZoneLatBandModel extends FileLandCoverModel {
             if (file.getName().contains(tileID)) {
                 final FileLandCoverTile tile = new FileLandCoverTile(this, file, productReaderPlugIn.createReaderInstance());
                 tileMap.put(tileID, tile);
-                tileList = tileMap.values().toArray(new FileLandCoverTile[tileMap.size()]);
+                tileList = tileMap.values().toArray(new FileLandCoverTile[0]);
                 return tile;
             }
         }
@@ -99,11 +99,7 @@ public class FileLandCoverUTMZoneLatBandModel extends FileLandCoverModel {
                 for (int j = 0; j < 4; j += 2) {
                     final Character latBandID = tileID.charAt(i);
                     final int zoneID = Integer.parseInt(tileID.substring(2 + j, 4 + j));
-                    HashMap<Integer, String> map = latLonZonesMap.get(latBandID);
-                    if (map == null) {
-                        map = new HashMap<>();
-                        latLonZonesMap.put(latBandID, map);
-                    }
+                    HashMap<Integer, String> map = latLonZonesMap.computeIfAbsent(latBandID, k -> new HashMap<>());
                     map.put(zoneID, tileID);
                     //System.out.println("FileLandCoverUTMZoneLatBandModel.buildLatBandAndLonZoneIDMaps: added (" + latBandID + "," + zoneID + ") -> " + tileID);
                 }

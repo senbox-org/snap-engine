@@ -17,17 +17,16 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.util.GeoUtils;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateFilter;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -39,13 +38,13 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
-import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
-import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.locationtech.jts.geom.Geometry;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,12 +60,13 @@ import java.util.logging.Level;
  * @author Marco Zuehlke
  * @author Norman Fomferra
  * @author Marco Peters
+ * @author Florian Douziech
  * @since BEAM 4.9
  */
 @OperatorMetadata(alias = "Subset",
         category = "Raster",
-        authors = "Marco Zuehlke, Norman Fomferra, Marco Peters",
-        version = "1.2",
+        authors = "SNAP Developers",
+        version = "1.3",
         copyright = "(c) 2011 by Brockmann Consult",
         description = "Create a spatial and/or spectral subset of a data product.")
 public class SubsetOp extends Operator {
@@ -80,15 +80,17 @@ public class SubsetOp extends Operator {
             rasterDataNodeType = Band.class, label = "Source Bands")
     private String[] bandNames;
 
+    @Parameter(description = "The list of tie-point grid names.", alias = "tiePointGrids",
+            rasterDataNodeType = TiePointGrid.class)
+    private String[] tiePointGridNames;
+
     @Parameter(converter = RectangleConverter.class,
             description = "The subset region in pixel coordinates.\n" +
-                          "Use the following format: <x>,<y>,<width>,<height>\n" +
-                          "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
+                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
     private Rectangle region = null;
 
-    HashMap<String,Rectangle> finalRegionMap = new HashMap<>();
-
-    @Parameter(description = "The band used to indicate the pixel coordinates.", alias = "referenceBand" ,
+    @Parameter(description = "The band used to indicate the pixel coordinates.", alias = "referenceBand",
             rasterDataNodeType = Band.class, label = "Reference Band")
     private String referenceBand = null;
 
@@ -107,9 +109,6 @@ public class SubsetOp extends Operator {
     @Parameter(defaultValue = "false",
             description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
-
-    @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \nIf not given, all bands are copied.")
-    private String[] tiePointGridNames;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
     private boolean copyMetadata;
@@ -176,7 +175,7 @@ public class SubsetOp extends Operator {
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         if (tiePointGridNames != null) {
             subsetDef.addNodeNames(tiePointGridNames);
-        } else {
+        }else{
             subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
         }
 
@@ -191,7 +190,7 @@ public class SubsetOp extends Operator {
             for (String nodeName : nodeNames) {
                 collectReferencedRasters(nodeName, referencedNodeNames);
             }
-            subsetDef.addNodeNames(referencedNodeNames.toArray(new String[referencedNodeNames.size()]));
+            subsetDef.addNodeNames(referencedNodeNames.toArray(new String[0]));
         }
 
         if (geoRegion != null) {
@@ -248,7 +247,6 @@ public class SubsetOp extends Operator {
 
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(!copyMetadata);
-
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
             targetProduct.setName("Subset_" + targetProduct.getName());
@@ -346,8 +344,6 @@ public class SubsetOp extends Operator {
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();
-            int rasterWidth = rasterDataNode.getRasterWidth();
-            int rasterHeight = rasterDataNode.getRasterHeight();
             Geometry geom = GeoUtils.computeGeometryUsingPixelRegion(rasterGeoCoding, rect);
             geometryMap.put(rasterDataNode.getName(), geom);
             if (finalGeometry == null) {

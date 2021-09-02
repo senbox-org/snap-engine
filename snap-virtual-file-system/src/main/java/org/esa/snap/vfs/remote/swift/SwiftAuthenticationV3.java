@@ -9,6 +9,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -140,11 +141,13 @@ final class SwiftAuthenticationV3 {
      */
     String getAuthorizationToken() {
         if (this.domain == null || this.domain.isEmpty() || this.projectId == null || this.projectId.isEmpty() || this.user == null || this.user.isEmpty() || this.password == null || this.password.isEmpty()) {
+            Logger.getLogger(SwiftAuthenticationV3.class.getName()).info("missing credentials (sa1)");
             return null;
         }
         if (!isValid()) {
             this.authorizationToken = requestNewAuthorizationToken();
         }
+        Logger.getLogger(SwiftAuthenticationV3.class.getName()).info("authorizationToken=" + authorizationToken + " (sa2)");
         return this.authorizationToken;
     }
 }

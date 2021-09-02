@@ -281,7 +281,7 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-zarr</artifactId>
+            <artifactId>snap-znap</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

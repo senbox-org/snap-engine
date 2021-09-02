@@ -61,8 +61,4 @@ public class AESBEOS2012CropModelDescriptor extends AbstractLandCoverModelDescri
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
         return new FileLandCoverUTMModel(this, fileList, resampling);
     }
-
-    public String createTileFilename(final int minLat, final int minLon) {
-        return fileList[0].getName();
-    }
 }

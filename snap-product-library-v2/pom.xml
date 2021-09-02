@@ -42,7 +42,7 @@
         </dependency>
         <!--
         The two explicit jackson dependencies ensure that the following h2gis dependency does not
-        pull in an older version of jackson. The snap-zarr module is not compatible with this.
+        pull in an older version of jackson. The snap-znap module is not compatible with this.
         The other way around it works.
         -->
         <dependency>

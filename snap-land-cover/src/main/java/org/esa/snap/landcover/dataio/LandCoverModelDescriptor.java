@@ -110,28 +110,12 @@ public interface LandCoverModelDescriptor {
     boolean isInstalled();
 
     /**
-     * Tests whether or not the LandCover is currently being installed.
-     *
-     * @return true, if so
-     */
-    boolean isInstalling();
-
-    /**
      * Asynchronously installs the files required to use the LandCover if not already done or in progress.
      *
      * @return true, if the DEM is already installed, is being installed or will be installed. False, if an error occurred
      * or the user canceled the installation
      */
     boolean installFiles();
-
-    /**
-     * create the file name of a tile based on the position
-     *
-     * @param tileX x position
-     * @param tileY y position
-     * @return tile name
-     */
-    String createTileFilename(final int tileX, final int tileY);
 
     IndexCoding getIndexCoding();
 
