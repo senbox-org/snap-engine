@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.internal;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.image.ImageManager;
@@ -108,10 +109,12 @@ public class OperatorImageTileStack extends OperatorImage {
             // really understood, this overwrites the tile-data computed by operators further up the graph when running
             // in tile-stack-computation modus.
             if (!(operatorContext.isOutputNode()) && operatorContext.isComputingImageOf(band)) {
-                WritableRaster tileRaster = getWritableRaster(band, tile);
-                writableRasters.put(band, tileRaster);
-                Tile targetTile = createTargetTile(band, tileRaster, destRect);
-                targetTiles.put(band, targetTile);
+                if(shouldWrite(band)) {
+                    WritableRaster tileRaster = getWritableRaster(band, tile);
+                    writableRasters.put(band, tileRaster);
+                    Tile targetTile = createTargetTile(band, tileRaster, destRect);
+                    targetTiles.put(band, targetTile);
+                }
             } else if (requiresAllBands()) {
                 Tile targetTile = operatorContext.getSourceTile(band, destRect);
                 targetTiles.put(band, targetTile);
@@ -139,6 +142,13 @@ public class OperatorImageTileStack extends OperatorImage {
             */
             operatorContext.fireTileComputed(operatorImage, destRect, startNanos);
         }
+    }
+
+    private boolean shouldWrite(final Band band) {
+        Band trgBand = getTargetBand();
+        Product trgProduct = trgBand.getProduct();
+
+        return true;
     }
 
     private WritableRaster getWritableRaster(Band band, WritableRaster targetTileRaster) {
