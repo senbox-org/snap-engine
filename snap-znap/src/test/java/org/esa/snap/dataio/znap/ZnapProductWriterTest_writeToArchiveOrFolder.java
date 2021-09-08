@@ -50,7 +50,7 @@ public class ZnapProductWriterTest_writeToArchiveOrFolder {
         // deleting temp directory in @After or @AfterClass method didn't work reliable. Probably sometimes some
         // files were still in use at the time delete was called. So we try, delete on exit with a shutdown hook.
         // We have one common test dir. Each test creates its own folder
-        baseTestPath = Paths.get(tmpDir, ZnapProductWriteAndReadTest_allAvailableBinaryWriters.class.getCanonicalName());
+        baseTestPath = Paths.get(tmpDir, ZnapProductWriterTest_writeToArchiveOrFolder.class.getCanonicalName());
         deleteRemainingsOfPreviousRun();
         Files.createDirectories(baseTestPath);
 
