@@ -22,13 +22,14 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.TreeDeleter;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
@@ -39,20 +40,38 @@ import static org.junit.Assert.assertTrue;
 
 public class ZnapProductWriterTest_writeToArchiveOrFolder {
 
-    private Path testPath;
+    private static Path baseTestPath;
     private Product dummy;
     private ZnapProductWriter writer;
 
-    @Before
-    public void setUp() throws Exception {
-        testPath = Files.createTempDirectory(getClass().getCanonicalName());
-        dummy = createDummyProduct();
-        writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        // deleting temp directory in @After or @AfterClass method didn't work reliable. Probably sometimes some
+        // files were still in use at the time delete was called. So we try, delete on exit with a shutdown hook.
+        // We have one common test dir. Each test creates its own folder
+        baseTestPath = Paths.get(tmpDir, ZnapProductWriteAndReadTest_allAvailableBinaryWriters.class.getCanonicalName());
+        deleteRemainingsOfPreviousRun();
+        Files.createDirectories(baseTestPath);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                TreeDeleter.deleteDir(baseTestPath);
+            } catch (IOException ignore) {
+            }
+        }));
     }
 
-    @After
-    public void tearDown() throws IOException {
-        TreeDeleter.deleteDir(testPath);
+    private static void deleteRemainingsOfPreviousRun() throws IOException {
+        if (Files.isDirectory(baseTestPath)) {
+            TreeDeleter.deleteDir(baseTestPath);
+        }
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        dummy = createDummyProduct();
+        writer = new ZnapProductWriter(new ZnapProductWriterPlugIn());
     }
 
     @Test
@@ -61,12 +80,13 @@ public class ZnapProductWriterTest_writeToArchiveOrFolder {
         final Properties properties = new Properties();
         properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
         writer.setPreferencesForTestPurposesOnly(properties);
+        final Path testDir = baseTestPath.resolve("writeToFolder");
 
         //execution
-        writer.writeProductNodes(dummy, testPath.resolve("filename"));
+        writer.writeProductNodes(dummy, testDir.resolve("filename"));
 
         //verification
-        assertTrue(Files.isDirectory(testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION)));
+        assertTrue(Files.isDirectory(testDir.resolve("filename" + ZNAP_CONTAINER_EXTENSION)));
     }
 
     @Test
@@ -75,12 +95,13 @@ public class ZnapProductWriterTest_writeToArchiveOrFolder {
         final Properties properties = new Properties();
         properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
         writer.setPreferencesForTestPurposesOnly(properties);
+        final Path testDir = baseTestPath.resolve("writeToZipArchive");
 
         //execution
-        writer.writeProductNodes(dummy, testPath.resolve("filename"));
+        writer.writeProductNodes(dummy, testDir.resolve("filename"));
 
         //verification
-        assertTrue(Files.isRegularFile(testPath.resolve("filename" + ZNAP_ZIP_CONTAINER_EXTENSION)));
+        assertTrue(Files.isRegularFile(testDir.resolve("filename" + ZNAP_ZIP_CONTAINER_EXTENSION)));
     }
 
     private Product createDummyProduct() {
