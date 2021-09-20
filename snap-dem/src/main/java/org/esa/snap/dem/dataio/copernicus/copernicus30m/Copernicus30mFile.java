@@ -21,28 +21,9 @@ public class Copernicus30mFile extends ElevationFile {
 
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
-        final CopernicusElevationTile tile ;
-        if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
-
-            ResamplingOp resampler = new ResamplingOp();
-            resampler.setParameter("targetWidth", 3600);
-            resampler.setParameter("targetHeight", 3600);
-            resampler.setParameter("upsampling", "Nearest");
-            resampler.setParameter("downsampling", "First");
-            resampler.setParameter("flagDownsampling", "First");
-            resampler.setSourceProduct(product);
-            Product resampled = resampler.getTargetProduct();
-            product.getName();
-            resampled.getBandAt(0).readRasterDataFully();
-            ProductIO.writeProduct(resampled, localFile.getAbsolutePath(), "GeoTIFF");
-
-            //System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
-
-            tile = new CopernicusElevationTile(demModel, resampled);
-
-        }else{
-            tile = new CopernicusElevationTile(demModel, product);
-        }
+        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);;
+        tile.setHeight(product.getSceneRasterHeight());
+        tile.setWidth(product.getSceneRasterWidth());
         demModel.updateCache(tile);
         return tile;
     }
