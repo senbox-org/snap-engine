@@ -30,8 +30,8 @@ import com.bc.zarr.storage.FileSystemStore;
 import com.bc.zarr.storage.Store;
 import com.bc.zarr.storage.ZipStore;
 import org.esa.snap.core.dataio.AbstractProductWriter;
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
@@ -82,6 +82,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,10 +182,22 @@ public class ZnapProductWriter extends AbstractProductWriter {
     private Path outputRoot;
     private Store zarrStore;
     private DimensionNameGenerator dimensionNameGenerator;
-    private Properties testPreferences;
+    private Properties testProperties;
 
     public ZnapProductWriter(final ZnapProductWriterPlugIn productWriterPlugIn) {
         super(productWriterPlugIn);
+        compressor = CompressorFactory.create(getCompressorId(), "level", getCompressionLevel());
+        binaryWriterPlugIn = getBinaryWriterPlugin(productWriterPlugIn);
+    }
+
+    /**
+     * This constructor exists for test purposes only.
+     * By specifying the testProperties, the various snap.preferences used in the writer can be simulated.
+     * @param productWriterPlugIn
+     */
+    ZnapProductWriter(final ZnapProductWriterPlugIn productWriterPlugIn, Properties testProperties) {
+        super(productWriterPlugIn);
+        this.testProperties = testProperties;
         compressor = CompressorFactory.create(getCompressorId(), "level", getCompressionLevel());
         binaryWriterPlugIn = getBinaryWriterPlugin(productWriterPlugIn);
     }
@@ -755,8 +768,9 @@ public class ZnapProductWriter extends AbstractProductWriter {
             return null;
         }
         LOG.fine("Binary data in Znap format should be written as '" + binaryFormatName + "'");
-        @SuppressWarnings("ConstantConditions")
-        final ProductWriterPlugIn writerPlugIn = ProductIO.getProductWriter(binaryFormatName).getWriterPlugIn();
+        ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
+        Iterator<ProductWriterPlugIn> writerPlugIns = plugInManager.getWriterPlugIns(binaryFormatName);
+        ProductWriterPlugIn writerPlugIn = writerPlugIns.hasNext() ? writerPlugIns.next() : null;
         if (writerPlugIn == null) {
             throw new IllegalArgumentException("Unable to write binary data as '" + binaryFormatName + "'.");
         }
@@ -764,12 +778,12 @@ public class ZnapProductWriter extends AbstractProductWriter {
     }
 
     void setPreferencesForTestPurposesOnly(Properties testPreferences) {
-        this.testPreferences = testPreferences;
+        this.testProperties = testPreferences;
     }
 
     private String getPreference(String key, String defaultValue) {
-        if (testPreferences != null) {
-            return testPreferences.getProperty(key, defaultValue);
+        if (testProperties != null) {
+            return testProperties.getProperty(key, defaultValue);
         }
         return getPreferences().get(key, defaultValue);
     }
