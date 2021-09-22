@@ -120,7 +120,7 @@ public final class CDEMElevationModel extends BaseElevationModel {
     private List<String> getFileURLs(final String path, final String ext) {
         final List<String> fileList = new ArrayList<>();
         try {
-            final Document doc = Jsoup.connect(path).timeout(10*1000).validateTLSCertificates(false).get();
+            final Document doc = Jsoup.connect(path).timeout(10*1000).get();
 
             final Element table = doc.select("table").first();
             final Elements tbRows = table.select("tr");

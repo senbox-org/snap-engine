@@ -34,8 +34,8 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     private final double NUM_PIXELS_PER_TILEinv;
     protected final double NO_DATA_VALUE;
     protected final int DEGREE_RES;
-    private final int RASTER_WIDTH;
-    protected final int RASTER_HEIGHT;
+    private int RASTER_WIDTH;
+    protected int RASTER_HEIGHT;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
 
@@ -117,6 +117,13 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
 
     public int getHeight() {
         return RASTER_HEIGHT;
+    }
+
+    public void setWidth(int newWidth){
+        this.RASTER_WIDTH = newWidth;
+    }
+    public void setHeight(int newHeight){
+        this.RASTER_HEIGHT = newHeight;
     }
 
     public void updateCache(final ElevationTile tile) {

@@ -27,7 +27,6 @@ import org.esa.snap.dataio.envi.EnviProductWriterPlugIn;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdf4WriterPlugIn;
 import org.esa.snap.runtime.Engine;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,42 +34,51 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import static com.bc.ceres.core.ProgressMonitor.NULL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_BINARY_FORMAT;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
 
-    private Path testPath;
+    private static Path baseTestPath;
     private Product dummy;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        final String tmpDir = System.getProperty("java.io.tmpdir");
         Engine.start();
+        // deleting temp directory in @After or @AfterClass method didn't work reliable. Probably sometimes some
+        // files were still in use at the time delete was called. So we try, delete on exit with a shutdown hook.
+        // We have one common test dir. Each test creates its own folder
+        baseTestPath = Paths.get(tmpDir, ZnapProductWriteAndReadTest_allAvailableBinaryWriters.class.getCanonicalName());
+        deleteRemainingsOfPreviousRun();
+        Files.createDirectories(baseTestPath);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                TreeDeleter.deleteDir(baseTestPath);
+            } catch (IOException ignore) {
+            }
+        }));
+    }
+
+    private static void deleteRemainingsOfPreviousRun() throws IOException {
+        if (Files.isDirectory(baseTestPath)) {
+            TreeDeleter.deleteDir(baseTestPath);
+        }
     }
 
     @Before
     public void setUp() throws Exception {
-        testPath = Files.createTempDirectory(getClass().getCanonicalName());
         dummy = createDummyProduct();
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        TreeDeleter.deleteDir(testPath);
-//        Files.walk(testPath).sorted(Collections.reverseOrder()).forEach(path -> {
-//            path.toFile().deleteOnExit();
-//            try {
-//                Files.delete(path);
-//            } catch (IOException ignore) {
-//                System.out.println(ignore.getMessage());
-//            }
-//        });
     }
 
     @Test
@@ -83,16 +91,18 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         writer.setPreferencesForTestPurposesOnly(properties);
         final Band band = dummy.getBand("band");
 
+        final Path testDir = baseTestPath.resolve("ENVI");
+
         //execution
         try {
-            writer.writeProductNodes(dummy, testPath.resolve("filename"));
+            writer.writeProductNodes(dummy, testDir.resolve("filename"));
             writer.writeBandRasterData(band, 0, 0, 2, 2, band.getData(), NULL);
         } finally {
             writer.close();
         }
 
         //verification
-        final Path rootDir = testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
+        final Path rootDir = testDir.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
         assertTrue(Files.isDirectory(rootDir));
         assertTrue(Files.isDirectory(rootDir.resolve("band")));
         assertTrue(Files.isDirectory(rootDir.resolve("band").resolve("band")));
@@ -123,15 +133,16 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         final Band band = dummy.getBand("band");
 
         //execution
+        final Path testDir = baseTestPath.resolve("GeoTiff");
         try {
-            writer.writeProductNodes(dummy, testPath.resolve("filename"));
+            writer.writeProductNodes(dummy, testDir.resolve("filename"));
             writer.writeBandRasterData(band, 0, 0, 2, 2, band.getData(), NULL);
         } finally {
             writer.close();
         }
 
         //verification
-        final Path rootDir = testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
+        final Path rootDir = testDir.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
         assertTrue(Files.isDirectory(rootDir));
         assertTrue(Files.isDirectory(rootDir.resolve("band")));
         assertTrue(Files.isRegularFile(rootDir.resolve("band").resolve("band.tif")));
@@ -158,17 +169,18 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn(), properties);
         writer.setPreferencesForTestPurposesOnly(properties);
         final Band band = dummy.getBand("band");
+        final Path testDir = baseTestPath.resolve("GeoTIFF_BigTIFF");
 
         //execution
         try {
-            writer.writeProductNodes(dummy, testPath.resolve("filename"));
+            writer.writeProductNodes(dummy, testDir.resolve("filename"));
             writer.writeBandRasterData(band, 0, 0, 2, 2, band.getData(), NULL);
         } finally {
             writer.close();
         }
 
         //verification
-        final Path rootDir = testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
+        final Path rootDir = testDir.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
         assertTrue(Files.isDirectory(rootDir));
         assertTrue(Files.isDirectory(rootDir.resolve("band")));
         assertTrue(Files.isRegularFile(rootDir.resolve("band").resolve("band.tif")));
@@ -197,15 +209,16 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         final Band band = dummy.getBand("band");
 
         //execution
+        final Path testDir = baseTestPath.resolve("NetCDF4_CF");
         try {
-            writer.writeProductNodes(dummy, testPath.resolve("filename"));
+            writer.writeProductNodes(dummy, testDir.resolve("filename"));
             writer.writeBandRasterData(band, 0, 0, 2, 2, band.getData(), NULL);
         } finally {
             writer.close();
         }
 
         //verification
-        final Path rootDir = testPath.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
+        final Path rootDir = testDir.resolve("filename" + ZNAP_CONTAINER_EXTENSION);
         assertTrue(Files.isDirectory(rootDir));
         assertTrue(Files.isDirectory(rootDir.resolve("band")));
         assertTrue(Files.isRegularFile(rootDir.resolve("band").resolve("band.nc")));
@@ -230,4 +243,5 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         targetProduct.addBand(band);
         return targetProduct;
     }
+
 }
