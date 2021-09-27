@@ -16,10 +16,7 @@ import java.util.Properties;
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
 import static org.esa.snap.core.dataio.geocoding.util.XYInterpolator.SYSPROP_GEOCODING_INTERPOLATOR;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class PixelQuadTreeInverseTest {
 
@@ -136,7 +133,7 @@ public class PixelQuadTreeInverseTest {
         // interpolate in y direction between replicated pixels
         pixelPos = inverse.getPixelPos(new GeoPos(66.49456, -24.169599), null);
         assertEquals(6, pixelPos.x, 1e-8);
-        assertEquals(13.750093939267787, pixelPos.y, 1e-8);
+        assertEquals(13.750093939267787, pixelPos.y, 1e-7);
 
         // interpolate in lat-direction
         pixelPos = inverse.getPixelPos(new GeoPos(66.44213, -24.22587), null);
@@ -1113,7 +1110,20 @@ public class PixelQuadTreeInverseTest {
         segment.lat_min = 0.0;
         segment.lat_max = 60.0;
 
+        // splitpoint is at x = 3
         final Segment[] segments = PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.ALONG, new MockCalculator(179.8));
+        assertEquals(0, segments.length);
+    }
+
+    @Test
+    public void testSplitAtAntiMeridian_AcrossTrack_tooSmallSegment() {
+        final Segment segment = new Segment(0, 199, 0, 399);
+        segment.lon_min = 170.0;
+        segment.lon_max = 30.0;
+        segment.lat_min = 0.0;
+        segment.lat_max = 60.0;
+
+        final Segment[] segments = PixelQuadTreeInverse.splitAtAntiMeridian(segment, SegmentCoverage.ACROSS, new MockCalculator(160.3));
         assertEquals(0, segments.length);
     }
 
