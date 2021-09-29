@@ -103,67 +103,95 @@ public class ColorBarLayer extends Layer {
             }
 
 
-            imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
-
-            imageLegend.setShowTitle(isShowTitle());
+            // Title & Units Text
             imageLegend.setTitleText(title);
+            imageLegend.setUnitsText(unitsText);
+
+
+            // Orientation
+            imageLegend.setOrientation(getOrientation());
+            imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
+            imageLegend.setReversePalette(isReversePalette());
+
+
+            // Tick Label Values
+            imageLegend.setDistributionType(getLabelValuesMode());
+            imageLegend.setTickMarkCount(getLabelValuesCount());
+            imageLegend.setCustomLabelValues(getLabelValuesActual());
+            imageLegend.setScalingFactor(getLabelValuesScalingFactor());
+            imageLegend.setDecimalPlaces(getDecimalPlaces());
+            imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
+            imageLegend.setWeightTolerance(getWeightTolerance());
+
+
+            // Placement Location
+
+
+            // Size & Scaling
+            imageLegend.setLayerScaling(getLayerScaling());
+            imageLegend.setColorBarLength(getColorBarLength());
+            imageLegend.setColorBarWidth(getColorBarWidth());
+
+
+            // Title Format
+            imageLegend.setShowTitle(isShowTitle());
             imageLegend.setTitleFontSize(getTitleFontSize());
             imageLegend.setTitleColor(getTitleColor());
             imageLegend.setTitleFontName(getTitleFontName());
             imageLegend.setTitleFontType(getTitleFontType());
 
+
+            // Units Format
             imageLegend.setShowUnits(isShowTitleUnits());
-            imageLegend.setUnitsText(unitsText);
             imageLegend.setUnitsFontSize(getUnitsFontSize());
             imageLegend.setUnitsColor(getUnitsColor());
             imageLegend.setUnitsFontName(getUnitsFontName());
             imageLegend.setUnitsFontType(getUnitsFontType());
 
-            imageLegend.setTickMarkCount(getLabelValuesCount());
-            imageLegend.setDistributionType(getLabelValuesMode());
-            imageLegend.setCustomLabelValues(getLabelValuesActual());
 
-            imageLegend.setOrientation(getOrientation());
-            imageLegend.setReversePalette(isReversePalette());
-
-            imageLegend.setScalingFactor(getLabelValuesScalingFactor());
-            imageLegend.setDecimalPlaces(getDecimalPlaces());
-            imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
-
-            imageLegend.setAntialiasing((Boolean) true);
-            imageLegend.setColorBarLength(getColorBarLength());
-            imageLegend.setColorBarWidth(getColorBarWidth());
-            imageLegend.setLayerScaling(getLayerScaling());
-
+            // Tick Label Format
             imageLegend.setLabelsShow(isLabelsShow());
             imageLegend.setLabelsFontName(getLabelsFontName());
             imageLegend.setLabelsFontType(getLabelsFontType());
-            imageLegend.setLabelsFontSize(getLablesFontSize());
+            imageLegend.setLabelsFontSize(getLabelsFontSize());
             imageLegend.setLabelsColor(getLabelsColor());
 
-            imageLegend.setTickmarkColor(getTickmarksColor());
+
+            // Tickmarks
+            imageLegend.setTickmarkShow(isTickmarksShow());
             imageLegend.setTickmarkLength(getTickmarksLength());
             imageLegend.setTickmarkWidth(getTickmarksWidth());
-            imageLegend.setTickmarkShow(isTickmarksShow());
+            imageLegend.setTickmarkColor(getTickmarksColor());
 
-            imageLegend.setBackdropColor(getBackdropColor());
-            imageLegend.setBackdropTransparency(((Number) getBackdropTransparency()).floatValue());
-            imageLegend.setBackdropShow(isBackdropShow());
 
+            // Palette Border
             imageLegend.setBorderShow(isBorderShow());
             imageLegend.setBorderWidth(getBorderWidth());
             imageLegend.setBorderColor(getBorderColor());
 
-            imageLegend.setBackdropBorderColor(getBackdropBorderColor());
-            imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
+
+            // Legend Border
             imageLegend.setBackdropBorderShow(isBackdropBorderShow());
+            imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
+            imageLegend.setBackdropBorderColor(getBackdropBorderColor());
+
+
+            // Legend Backdrop
+            imageLegend.setBackdropShow(isBackdropShow());
+            imageLegend.setBackdropTransparency(((Number) getBackdropTransparency()).floatValue());
+            imageLegend.setBackdropColor(getBackdropColor());
+
+
 
             imageLegend.setTransparencyEnabled(true);
+            imageLegend.setAntialiasing((Boolean) true);
+
+
 
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
 
-            
+
             if (applySizeScaling()) {
                 bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
             } else {
@@ -173,7 +201,9 @@ public class ColorBarLayer extends Layer {
 
             // Update the properties with some calculated/looked-up values
 
-            setLabelValuesActual(imageLegend.getCustomLabelValues());
+            if (getPopulateLabelsTextfield()) {
+                setLabelValuesActual(imageLegend.getCustomLabelValues());
+            }
 
             setTitle(imageLegend.getTitleText());
 
@@ -196,12 +226,6 @@ public class ColorBarLayer extends Layer {
                     final AffineTransform transform = new AffineTransform();
                     transform.concatenate(transformSave);
                     transform.concatenate(vp.getModelToViewTransform());
-                    //              transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
-//
-//                transform.concatenate(createTransform(raster, bufferedImage));
-//                g2d.drawRenderedImage(bufferedImage, transform);
-
-
                     g2d.setTransform(transform);
                     drawImage(g2d, raster, bufferedImage);
 
@@ -228,7 +252,6 @@ public class ColorBarLayer extends Layer {
         AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
         transform.concatenate(createTransform(raster, image));
         return transform;
-        //   return createTransform(raster, image);
     }
 
     private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
@@ -241,7 +264,7 @@ public class ColorBarLayer extends Layer {
         int rasterHeight = raster.getRasterHeight();
 
 
-        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
+        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
         double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLocationShift() / 100) : -(colorBarImageHeight * getLocationShift() / 100);
 
         double offsetAdjust = 0;
@@ -417,8 +440,6 @@ public class ColorBarLayer extends Layer {
 
         double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + offsetAdjust : shift + shiftAdjust;
         double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + shiftAdjust : rasterWidth + offset + offsetAdjust;
-        //double[] flatmatrix = {scaleX, 0.0, 0.0, scaleY, x_axis_translation, y_axis_translation};
-
 
         double[] flatmatrix = {1, 0.0, 0.0, 1, x_axis_translation, y_axis_translation};
 
@@ -461,29 +482,86 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private boolean isLabelsShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT);
+
+
+    // Title & Units Text
+
+    private String getTitle() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
+    }
+
+    private void setTitle(String value) {
+        try {
+            String valueCurrent = getTitle();
+            System.out.println("Current title = " + valueCurrent);
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                System.out.println("Inside and setting title to " + value);
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
     }
 
 
-    private Color getLabelsColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT);
+
+    private String getUnits() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
     }
 
+    private void setUnits(String value) {
+        try {
+            String valueCurrent = getUnits();
+
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
+    }
+
+
+
+
+
+    // Orientation
+
+    private int getOrientation() {
+        String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
+
+        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
+            return ImageLegend.VERTICAL;
+        } else {
+            return ImageLegend.HORIZONTAL;
+        }
+    }
+
+    private String getTitleVerticalAnchor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT);
+    }
+
+
+    private boolean isReversePalette() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT);
+    }
+
+
+
+    // Tick Label Values
 
     private String getLabelValuesMode() {
-            return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
-                    ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT);
     }
-
 
     private int getLabelValuesCount() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT);
     }
-
 
     private String getLabelValuesActual() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
@@ -495,6 +573,11 @@ public class ColorBarLayer extends Layer {
             getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) value);
         } catch (ValidationException v) {
         }
+    }
+
+    private boolean getPopulateLabelsTextfield() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY,
+                ColorBarLayerType.PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT);
     }
 
 
@@ -515,59 +598,184 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private int getLablesFontSize() {
+    private Double getWeightTolerance() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_KEY,
+                ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT);
+    }
+
+
+
+    // Placement Location
+
+    private boolean isColorBarLocationInside() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_INSIDE_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_INSIDE_DEFAULT);
+    }
+
+
+    private String getColorBarLocationPlacement() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_DEFAULT);
+    }
+
+    private Double getLocationOffset() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_OFFSET_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_OFFSET_DEFAULT);
+    }
+
+    private Double getLocationShift() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_SHIFT_DEFAULT);
+    }
+
+
+
+    // Size & Scaling
+
+    private boolean applySizeScaling() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
+    }
+
+
+    private Double getLayerScaling() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_DEFAULT);
+    }
+
+
+    private int getColorBarLength() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT);
+    }
+
+
+    private int getColorBarWidth() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT);
+    }
+
+
+
+    // Title Format
+
+    private boolean isShowTitle() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT);
+    }
+
+
+    private int getTitleFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT);
+    }
+
+    private Boolean isTitleFontBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
+    }
+
+    private Boolean isTitleFontItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
+    }
+
+
+    private int getTitleFontType() {
+        return getFontType(isTitleFontItalic(), isTitleFontBold());
+    }
+
+    private String getTitleFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT);
+    }
+
+    private Color getTitleColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT);
+    }
+
+
+
+
+    // Units Format
+
+    private boolean isShowTitleUnits() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT);
+    }
+
+    private int getUnitsFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_DEFAULT);
+    }
+
+    private Boolean isTitleUnitsFontBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
+    }
+    private Boolean isTitleUnitsFontItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
+    }
+
+    private int getUnitsFontType() {
+        return getFontType(isTitleUnitsFontItalic(), isTitleUnitsFontBold());
+    }
+
+    private String getUnitsFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_DEFAULT);
+    }
+
+    private Color getUnitsColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT);
+    }
+
+
+
+    // Tick Label Format
+
+    private boolean isLabelsShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT);
+    }
+
+    private int getLabelsFontSize() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
     }
 
+    private Boolean isLabelsBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_DEFAULT);
+    }
 
-    private double getPtsToPixelsMultiplier() {
+    private Boolean isLabelsItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_DEFAULT);
+    }
 
-        if (ptsToPixelsMultiplier == NULL_DOUBLE) {
-            final double PTS_PER_INCH = 72.0;
-            final double PAPER_HEIGHT = 11.0;
-            final double PAPER_WIDTH = 8.5;
+    private String getLabelsFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
+    }
 
-            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
-            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
-
-            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
-                // use height
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
-            } else {
-                // use width
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
-            }
-        }
-
-        return ptsToPixelsMultiplier;
+    private int getLabelsFontType() {
+        return getFontType(isLabelsItalic(), isLabelsBold());
     }
 
 
-    private int getOrientation() {
-        String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
-                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
-
-        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
-            return ImageLegend.VERTICAL;
-        } else {
-            return ImageLegend.HORIZONTAL;
-        }
+    private Color getLabelsColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT);
     }
 
 
-    private boolean isReversePalette() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
-                ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT);
-    }
 
 
-    // Tickmarks Section
-
-    private Color getTickmarksColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT);
-    }
+    // Tickmarks
 
     private boolean isTickmarksShow() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_KEY,
@@ -585,8 +793,14 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
     }
 
+    private Color getTickmarksColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT);
+    }
 
-    // Border Section
+
+
+    // Palette Border
 
     private boolean isBorderShow() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_KEY,
@@ -604,23 +818,8 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    // Backdrop Section
 
-    private boolean isBackdropShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_SHOW_DEFAULT);
-    }
-
-    private double getBackdropTransparency() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT);
-    }
-
-    private Color getBackdropColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_COLOR_DEFAULT);
-    }
-
+    // Legend Border
 
     private boolean isBackdropBorderShow() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_KEY,
@@ -638,25 +837,29 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private String getLabelsFontName() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
+
+    // Legend Backdrop
+
+    private boolean isBackdropShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_SHOW_DEFAULT);
     }
 
-    private Boolean isLabelsItalic() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_DEFAULT);
+    private double getBackdropTransparency() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT);
     }
 
-    private Boolean isLabelsBold() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_DEFAULT);
+    private Color getBackdropColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_COLOR_DEFAULT);
     }
 
-    private int getLabelsFontType() {
-        return getFontType(isLabelsItalic(), isLabelsBold());
-    }
 
+
+
+
+    // Some general font methods
 
     public static int getFontType(boolean italic, boolean bold) {
         if (italic && bold) {
@@ -687,164 +890,14 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private boolean isColorBarLocationInside() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_INSIDE_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_INSIDE_DEFAULT);
-    }
 
 
-    private String getColorBarLocationPlacement() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_DEFAULT);
-    }
 
 
-    private String getTitleVerticalAnchor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT);
-    }
 
 
-    private Double getLocationOffset() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_OFFSET_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_OFFSET_DEFAULT);
-    }
-
-    private Double getLocationShift() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_SHIFT_DEFAULT);
-    }
 
 
-    private boolean isShowTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT);
-    }
-
-    private String getTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
-    }
-
-    private void setTitle(String value) {
-        try {
-            String valueCurrent = getTitle();
-            System.out.println("Current title = " + valueCurrent);
-            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                System.out.println("Inside and setting title to " + value);
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY).setValue((Object) value);
-            }
-        } catch (ValidationException v) {
-        }
-    }
-
-    private Color getTitleColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT);
-    }
-
-    private int getTitleFontSize() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT);
-    }
-
-    private Boolean isTitleFontItalic() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
-    }
-
-    private Boolean isTitleFontBold() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
-    }
-
-    private int getTitleFontType() {
-        return getFontType(isTitleFontItalic(), isTitleFontBold());
-    }
-
-    private String getTitleFontName() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT);
-    }
-
-
-    private boolean isShowTitleUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT);
-    }
-
-
-    private void setUnits(String value) {
-        try {
-            String valueCurrent = getUnits();
-
-            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY).setValue((Object) value);
-            }
-        } catch (ValidationException v) {
-        }
-    }
-
-    private int getUnitsFontSize() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_DEFAULT);
-    }
-
-
-    private Color getUnitsColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT);
-    }
-
-
-    private Boolean isTitleUnitsFontItalic() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
-    }
-
-    private Boolean isTitleUnitsFontBold() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
-    }
-
-    private int getUnitsFontType() {
-        return getFontType(isTitleUnitsFontItalic(), isTitleUnitsFontBold());
-    }
-
-    private String getUnitsFontName() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_FONT_NAME_DEFAULT);
-    }
-
-
-    private String getUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
-    }
-
-
-    private boolean applySizeScaling() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
-    }
-
-
-    private Double getLayerScaling() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_DEFAULT);
-    }
-
-
-    private int getColorBarLength() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_KEY,
-                ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT);
-    }
-
-
-    private int getColorBarWidth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
-                ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT);
-    }
 
 
     private class ProductNodeHandler extends ProductNodeListenerAdapter {

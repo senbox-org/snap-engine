@@ -40,7 +40,8 @@ import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZ
  * @author Daniel Knowles
  * @version $Revision$ $Date$
  */
-// MAY2021 - Daniel Knowles - Major revisions to Color Bar
+// MAY2021 - Daniel Knowles - Major revisions to Color Bar Legend
+// todo there is extra unused methods and some commented out code which relates so SeaDAS-BEAM code for defining preset colorbar labels based on a bandname lookup, the commented out and unused methods may be useful in implementing that mechanism later if it is desired.
 
 public class ImageLegend {
 
@@ -64,9 +65,9 @@ public class ImageLegend {
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
 
-    public static final double WEIGHT_TOLERANCE = 0.0001;  // machine error can make calculated weight slightly outside of range 0-1
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
-    public static final double INVALID_WEIGHT = -1.0;
+
+    private double weightTolerance;
 
     private double titleToUnitsVerticalGap;
     private double titleToUnitsHorizontalGap;
@@ -162,31 +163,6 @@ public class ImageLegend {
 
         antialiasing = true;
 
-        // todo Most of these following parameters get initialized/set later so the following can likely be deleted
-
-//        showTitle = true;
-//        titleText = "";
-//
-//        orientation = HORIZONTAL;
-//        backdropColor = Color.white;
-//        tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
-//        labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
-//        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
-//        unitsColor = ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT;
-//
-//        setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
-//        setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
-//        setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
-//
-//        setLabelsFontSize(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT);
-//        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
-//
-//        backdropTransparency = 1.0f;
-//
-//        setDecimalPlaces(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT);
-//        scalingFactor = 1;
-//
-//        setDecimalPlacesForce(false);
 //        setCustomLabelValues("");
 
     }
@@ -252,6 +228,8 @@ public class ImageLegend {
         imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
         imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
 
+        imageLegendCopy.setWeightTolerance(getWeightTolerance());
+
         return imageLegendCopy;
     }
 
@@ -293,6 +271,12 @@ public class ImageLegend {
 
         setDecimalPlacesForce(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT));
+
+        setWeightTolerance(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_KEY,
+                ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT));
+
+
+
 
 
         // Sizing and Location
@@ -468,6 +452,9 @@ public class ImageLegend {
 
         setBackdropBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
+
+
+
 
 
         setLayerScaling(100.0);
@@ -789,23 +776,42 @@ public class ImageLegend {
                     weight = getLinearWeightFromLinearValue(value, min, max);
                 }
 
+                // Apply tolerance to potentially bring weight into valid state
                 weight = getValidWeight(weight);
-                if (weight != INVALID_WEIGHT) {
+
+                if (weight >= 0 && weight <= 1) {
                     if (getScalingFactor() != 0) {
                         value = value * getScalingFactor();
                         ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        double formattedValue = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double valueScaledFormatted = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double minScaled = min * getScalingFactor();
+                        double maxScaled = max * getScalingFactor();
 
-                        if ((formattedValue >= min *getScalingFactor()) && (formattedValue *getScalingFactor()) <= max) {
+                        double weightScaled;
+                        if (imageInfo.isLogScaled()) {
+                            weightScaled = getLinearWeightFromLogValue(valueScaledFormatted, minScaled, maxScaled);
+                        } else {
+                            weightScaled = getLinearWeightFromLinearValue(valueScaledFormatted, minScaled, maxScaled);
+                        }
+
+                        // Apply tolerance to potentially bring weight into valid state
+                        weightScaled = getValidWeight(weightScaled);
+
+                        if (weightScaled >= 0 && weightScaled <= 1) {
+                            // adjust weight to match formatted string
+                            colorBarInfo.setLocationWeight(weightScaled);
+
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
-                        } else {
-                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
-                            colorBarInfo.setFormattedValue(newFormattedValue);
-                            colorBarInfos.add(colorBarInfo);
-                            manualPointsArrayList.add(newFormattedValue);
                         }
+// This else block would put label in with no decimal restrictions for the case where the end point is not shown due to rounding
+//                        } else {
+//                            String newFormattedValue = Double.toString(colorBarInfo.getValue());
+//                            colorBarInfo.setFormattedValue(newFormattedValue);
+//                            colorBarInfos.add(colorBarInfo);
+//                            manualPointsArrayList.add(newFormattedValue);
+//                        }
                     }
                 }
             }
@@ -816,67 +822,69 @@ public class ImageLegend {
             }
 
         } else if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
-                distributeEvenly();
+            distributeEvenly();
 
         } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
-                if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
-                    // this will initialize the points
-                    distributeEvenly();
-                    colorBarInfos.clear();
-                }
+            if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
+                // this will initialize the points
+                distributeEvenly();
+                colorBarInfos.clear();
+            }
 
-                String addThese = getCustomLabelValues();
+            String addThese = getCustomLabelValues();
 
-                if (addThese != null && addThese.length() > 0) {
-                    String[] formattedValues = addThese.split(",");
+            if (addThese != null && addThese.length() > 0) {
+                String[] formattedValues = addThese.split(",");
 
 
-                    for (String formattedValue : formattedValues) {
-                        if (formattedValue != null) {
-                            formattedValue.trim();
-                            if (formattedValue.length() > 0 && scalingFactor != 0) {
+                for (String formattedValue : formattedValues) {
+                    if (formattedValue != null) {
+                        formattedValue.trim();
+                        if (formattedValue.length() > 0 && scalingFactor != 0) {
 
-                                String[] valueAndString = formattedValue.split(":");
-                                if (valueAndString.length == 2) {
-                                    value = Double.valueOf(valueAndString[0]) / getScalingFactor();
-                                    formattedValue = valueAndString[1];
+                            String[] valueAndString = formattedValue.split(":");
+                            if (valueAndString.length == 2) {
+                                value = Double.valueOf(valueAndString[0]) / getScalingFactor();
+                                formattedValue = valueAndString[1];
+                            } else {
+                                value = Double.valueOf(formattedValue) / getScalingFactor();
+                            }
+
+
+                            if (imageInfo.isLogScaled()) {
+                                if (value == min) {
+                                    weight = 0;
+                                } else if (value == max) {
+                                    weight = 1;
                                 } else {
-                                    value = Double.valueOf(formattedValue) / getScalingFactor();
+                                    weight = getLinearWeightFromLogValue(value, min, max);
                                 }
+                            } else {
+                                weight = getLinearWeightFromLinearValue(value, min, max);
+                            }
 
-
-                                if (imageInfo.isLogScaled()) {
-                                    if (value == min) {
-                                        weight = 0;
-                                    } else if (value == max) {
-                                        weight = 1;
-                                    } else {
-                                        weight = getLinearWeightFromLogValue(value, min, max);
-                                    }
-                                } else {
-                                    weight = getLinearWeightFromLinearValue(value, min, max);
-                                }
-
-                                weight = getValidWeight(weight);
-                                if (weight != INVALID_WEIGHT) {
-//                                System.out.println("TEST formattedValue=" + formattedValue);
-//                                System.out.println("TEST weight=" + weight);
-                                    ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
-                                    colorBarInfos.add(colorBarInfo);
-                                }
+                            weight = getValidWeight(weight);
+                            if (weight >= 0 && weight <= 1) {
+                                ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
+                                colorBarInfos.add(colorBarInfo);
                             }
                         }
                     }
                 }
             }
+        }
 
     }
+
+
+
+
 
     private double getValidWeight(double weight) {
         // due to rounding issues we want to make sure the weight isn't just below 0 or just above 1
         // this would cause the tick mark to possibly be placed a very tiny amount outside of the colorbar if not corrected here
 
-        boolean valid = (weight >= (0 - WEIGHT_TOLERANCE) && weight <= (1 + WEIGHT_TOLERANCE))
+        boolean valid = (weight >= (0 - weightTolerance) && weight <= (1 + weightTolerance))
                 ? true : false;
 
         if (valid) {
@@ -889,7 +897,7 @@ public class ImageLegend {
 
             return weight;
         } else {
-            return INVALID_WEIGHT;
+            return -1;
         }
 
     }
@@ -919,10 +927,6 @@ public class ImageLegend {
             }
         }
 
-//        System.out.println("Title required width =" + headerRequiredDimension.width);
-//        System.out.println("Title required height =" + headerRequiredDimension.height);
-//        System.out.println("Title =" + getTitleText());
-//        System.out.println("Title units =" + getUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -1048,19 +1052,12 @@ public class ImageLegend {
                 double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
 
                 requiredHeight = Math.max(colorBarWithLabelsRequiredHeight, headerRequiredDimension.getHeight());
-//                requiredHeight = Math.max(requiredHeight, getColorBarLength());
-//            requiredHeight = Math.max(requiredHeight, MIN_VERTICAL_COLORBAR_HEIGHT);
                 requiredHeight = getBorderGap() + requiredHeight + getBorderGap();
-
-                //todo Danny changed this to make legend size stable
 
                 if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
                     discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
                     requiredWidth += discreteBooster;
                 }
-
-//                requiredHeight = getColorBarLength();
-
 
                 legendSize = new Dimension((int) requiredWidth, (int) requiredHeight);
             }
@@ -1117,13 +1114,8 @@ public class ImageLegend {
     }
 
     private void draw(Graphics2D g2d) {
-//        if (isBackdropShow()) {
         fillBackground(g2d);
-//        }
-
-
         drawPalette(g2d);
-
         drawHeaderText(g2d);
 
         if (isLabelsShow()) {
@@ -1136,9 +1128,7 @@ public class ImageLegend {
         if (isAlphaUsed()) {
             color = new Color(color.getRed(), color.getGreen(), color.getBlue(), getBackgroundAlpha());
         }
-//        if (getBackgroundTransparency() == 1.0) {
-//             color = UIManager.getColor("Panel.background");
-//        }
+
         g2d.setColor(color);
         g2d.fillRect(0, 0, legendSize.width + 1, legendSize.height + 1);
     }
@@ -1392,9 +1382,7 @@ public class ImageLegend {
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
                 int labelOverhangHeight = (int) Math.ceil(singleLetter.getHeight() / 2.0);
 
-
                 double translateX;
-
 
                 if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                     translateX = x0;
@@ -1917,9 +1905,6 @@ public class ImageLegend {
     private FontMetrics createFontMetrics() {
         BufferedImage bi = createBufferedImage(32, 32);
         final Graphics2D g2d = bi.createGraphics();
-//        if (font != null) {
-//            g2d.setFont(font);
-//        }
         final FontMetrics fontMetrics = g2d.getFontMetrics();
         g2d.dispose();
         return fontMetrics;
@@ -2069,8 +2054,9 @@ public class ImageLegend {
         final double min = getImageInfo().getColorPaletteDef().getMinDisplaySample();
         final double max = getImageInfo().getColorPaletteDef().getMaxDisplaySample();
 
-        double value, weight;
-        double roundedValue, adjustedWeight;
+        double value;
+        double weight;
+
         colorBarInfos.clear();
 
         if (getTickMarkCount() >= 2) {
@@ -2080,58 +2066,39 @@ public class ImageLegend {
             for (int i = 0; i < getTickMarkCount(); i++) {
 
                 weight = i * normalizedDelta;
-                double linearValue = getLinearValueUsingLinearWeight(weight, min, max);
                 if (imageInfo.isLogScaled()) {
                     value = getLogarithmicValueUsingLinearWeight(weight, min, max);
-//                        roundedValue = round(value,decimalPlaces-1);
-//                        adjustedWeight = getLinearWeightFromLogValue(roundedValue, min, max);
                 } else {
                     value = getLinearValueUsingLinearWeight(weight, min, max);
-//                        roundedValue = round(linearValue,decimalPlaces);
-//                        adjustedWeight = getLinearWeightFromLinearValue(roundedValue, min, max);
                 }
 
-//                System.out.println("weight="+weight);
-//                System.out.println("value="+value);
 
-                // todo try to make some kind of rounding thing work
-                roundedValue = value;
-                adjustedWeight = weight;
+                // Apply tolerance to potentially bring weight into valid state
+                weight = getValidWeight(weight);
 
-                adjustedWeight = getValidWeight(adjustedWeight);
-                if (adjustedWeight != INVALID_WEIGHT) {
+                if (weight >= 0 && weight <= 1) {
                     if (getScalingFactor() != 0) {
-                        roundedValue = roundedValue * getScalingFactor();
-                        ColorBarInfo colorBarInfo = new ColorBarInfo(roundedValue, adjustedWeight, getDecimalPlaces(), isDecimalPlacesForce());
+                        value = value * getScalingFactor();
+                        ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, getDecimalPlaces(), isDecimalPlacesForce());
 
-                        double newValue = Double.valueOf(colorBarInfo.getFormattedValue()) / getScalingFactor();
+                        double valueScaledFormatted = Double.valueOf(colorBarInfo.getFormattedValue());
+                        double minScaled = min * getScalingFactor();
+                        double maxScaled = max * getScalingFactor();
 
-
-                        double newWeight;
+                        double weightScaled;
                         if (imageInfo.isLogScaled()) {
-                            newWeight = getLinearWeightFromLogValue(newValue, min, max);
+                            weightScaled = getLinearWeightFromLogValue(valueScaledFormatted, minScaled, maxScaled);
                         } else {
-                            newWeight = getLinearWeightFromLinearValue(newValue, min, max);
+                            weightScaled = getLinearWeightFromLinearValue(valueScaledFormatted, minScaled, maxScaled);
                         }
 
-                        // adjust weight to match formatted string
-                        colorBarInfo.setLocationWeight(newWeight);
+                        // Apply tolerance to potentially bring weight into valid state
+                        weightScaled = getValidWeight(weightScaled);
 
+                        if (weightScaled >= 0 && weightScaled <= 1) {
+                            // adjust weight to match formatted string
+                            colorBarInfo.setLocationWeight(weightScaled);
 
-
-//                        System.out.println("newWeight=" +newWeight );
-//                        System.out.println("newValue=" +newValue  );
-//                        System.out.println("min=" +min );
-//                        System.out.println("max=" + max );
-//                        System.out.println("" );
-
-
-                        // allow close tick values to appear on color bar which would otherwise not appear due to decimal formatting.
-                        // If the color palette is defined by statistics of the band then this tolerance can be useful
-                        // Otherwise if the palette is defined with sensible min/max number then the tolerance shouldn't be needed
-                        double tolerance = .01;
-
-                        if (newWeight > 0 - tolerance && newWeight < 1 + tolerance) {
                             colorBarInfos.add(colorBarInfo);
                             manualPointsArrayList.add(colorBarInfo.getFormattedValue());
                         }
@@ -2154,16 +2121,6 @@ public class ImageLegend {
         this.titleOverRide = titleOverRide;
     }
 
-    // todo Danny tmp edit
-//    public boolean isInitialized() {
-//        ColorPaletteSourcesInfo colorPaletteSourcesInfo = raster.getImageInfo().getColorPaletteSourcesInfo();
-//        return colorPaletteSourcesInfo.isColorBarInitialized();
-//    }
-//
-//    public void setInitialized(boolean initialized) {
-//        ColorPaletteSourcesInfo colorPaletteSourcesInfo = raster.getImageInfo().getColorPaletteSourcesInfo();
-//        colorPaletteSourcesInfo.setColorBarInitialized(initialized);
-//    }
 
     public boolean allowTitleOverride(PropertyMap configuration) {
         if (configuration != null) {
@@ -2480,5 +2437,13 @@ public class ImageLegend {
 
     public void setBackdropBorderShow(boolean backdropBorderShow) {
         this.backdropBorderShow = backdropBorderShow;
+    }
+
+    public double getWeightTolerance() {
+        return weightTolerance;
+    }
+
+    public void setWeightTolerance(double weightTolerance) {
+        this.weightTolerance = weightTolerance;
     }
 }

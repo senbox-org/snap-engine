@@ -3,7 +3,7 @@ package org.esa.snap.core.datamodel;
 import java.text.DecimalFormat;
 
 /**
- * Created by danielknowles on 6/27/14.
+ * @author Daniel Knowles
  */
 public class ColorBarInfo {
 
@@ -20,7 +20,6 @@ public class ColorBarInfo {
         setDecimalPlaces(decimalPlaces);
         setDecimalPlacesForce(decimalPlacesForce);
         setFormattedValue();
-//        ImageLegend.getLinearValueUsingLinearWeight(1.0,1.0,1.0);
     }
 
     public ColorBarInfo(double value, double locationWeight, String formattedValue) {
