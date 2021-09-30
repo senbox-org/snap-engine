@@ -703,7 +703,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_EXPORT_EDITOR_SHOW_LABEL = "Show Editor";
     public static final String PROPERTY_EXPORT_EDITOR_SHOW_TOOLTIP = "Display editor for " + COLOR_LOWER_CASE + " bar export tool";
     private static final String PROPERTY_EXPORT_EDITOR_SHOW_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "EditorShow";
-    public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = false;
+    public static final boolean PROPERTY_EXPORT_EDITOR_SHOW_DEFAULT = true;
     public static final Class PROPERTY_EXPORT_EDITOR_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_EXPORT_USE_BW_COLOR_KEY = PROPERTY_LEGEND_EXPORT_ROOT_KEY + ".use.blackwhite.color";
