@@ -26,23 +26,13 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
+import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -57,7 +47,7 @@ import java.util.logging.Logger;
  */
 public class GraphProcessor {
 
-    private final List<GraphProcessingObserver> observerList;
+    private List<GraphProcessingObserver> observerList;
     private Logger logger;
     private volatile OperatorException error = null;
 
@@ -291,7 +281,7 @@ public class GraphProcessor {
                 }
             }
 
-            awaitAllPermits(semaphore, parallelism);
+            acquirePermits(semaphore, parallelism);
             if (error != null) {
                 throw error;
             }
@@ -324,7 +314,7 @@ public class GraphProcessor {
                                       TileScheduler tileScheduler, TileComputationListener[] listeners,
                                       int parallelism) {
         Point[] points = new Point[]{new Point(tileX, tileY)};
-        acquirePermit(semaphore);
+        acquirePermits(semaphore, 1);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
@@ -338,26 +328,14 @@ public class GraphProcessor {
         /////////////////////////////////////////////////////////////////////
     }
 
-    private static void acquirePermit(Semaphore semaphore) {
+    private static void acquirePermits(Semaphore semaphore, int permits) {
         try {
-            semaphore.acquire(1);
+            semaphore.acquire(permits);
         } catch (InterruptedException e) {
             throw new OperatorException(e);
         }
     }
 
-    private static void awaitAllPermits(Semaphore semaphore, int permits) {
-        // This way of acquiring permits is a workaround for issue SNAP-1479
-        // https://senbox.atlassian.net/browse/SNAP-1479
-        try {
-            final boolean allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
-            if (!allAcquired) {
-                Thread.sleep(200);
-            }
-        } catch (InterruptedException e) {
-            throw new OperatorException(e);
-        }
-    }
 
     private void fireProcessingStarted(GraphContext graphContext) {
         for (GraphProcessingObserver processingObserver : observerList) {
