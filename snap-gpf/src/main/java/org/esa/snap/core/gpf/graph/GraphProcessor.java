@@ -26,13 +26,23 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.*;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.TileComputationListener;
+import javax.media.jai.TileRequest;
+import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -47,10 +57,9 @@ import java.util.logging.Logger;
  */
 public class GraphProcessor {
 
-    private List<GraphProcessingObserver> observerList;
+    private final List<GraphProcessingObserver> observerList;
     private Logger logger;
     private volatile OperatorException error = null;
-
 
     /**
      * Creates a new instance og {@code GraphProcessor}.
@@ -153,9 +162,9 @@ public class GraphProcessor {
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
         dimList.sort((d1, d2) -> {
-            Long area1 = (long) (d1.width) * (long)(d1.height);
-            Long area2 = (long) (d2.width) * (long)(d2.height);
-            return area1.compareTo(area2);
+            long area1 = (long) (d1.width) * (long) (d1.height);
+            long area2 = (long) (d2.width) * (long) (d2.height);
+            return Long.compare(area1, area2);
         });
 
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
@@ -198,13 +207,12 @@ public class GraphProcessor {
                     for (int tileY = 0; tileY < numYTiles; tileY++) {
                         for (int tileX = 0; tileX < numXTiles; tileX++) {
                             if (pm.isCanceled()) {
-                                // todo - check: throw exception here? (nf, 2010.10.21)
                                 return graphContext.getOutputProducts();
                             }
                             Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                    tileY * tileSize.height,
-                                    tileSize.width,
-                                    tileSize.height);
+                                                                    tileY * tileSize.height,
+                                                                    tileSize.width,
+                                                                    tileSize.height);
                             fireTileStarted(graphContext, tileRectangle);
                             for (NodeContext nodeContext : nodeContextList) {
                                 Product targetProduct = nodeContext.getTargetProduct();
@@ -216,7 +224,7 @@ public class GraphProcessor {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                parallelism);
+                                                             parallelism);
 
                                         break;
                                     }
@@ -229,7 +237,7 @@ public class GraphProcessor {
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                             forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                    tileScheduler, listeners, parallelism);
+                                                                 tileScheduler, listeners, parallelism);
                                         }
                                     }
                                 }
@@ -247,24 +255,23 @@ public class GraphProcessor {
                             for (int tileY = 0; tileY < numYTiles; tileY++) {
                                 for (int tileX = 0; tileX < numXTiles; tileX++) {
                                     if (pm.isCanceled()) {
-                                        // todo - check: throw exception here? (nf, 2010.10.21)
                                         return graphContext.getOutputProducts();
                                     }
 
                                     Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                            tileY * tileSize.height,
-                                            tileSize.width,
-                                            tileSize.height);
+                                                                            tileY * tileSize.height,
+                                                                            tileSize.width,
+                                                                            tileSize.height);
                                     fireTileStarted(graphContext, tileRectangle);
 
                                     // Simply pull tile from source images of regular bands.
                                     //
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                parallelism);
+                                                             parallelism);
                                     } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                         forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                tileScheduler, listeners, parallelism);
+                                                             tileScheduler, listeners, parallelism);
                                     }
                                     fireTileStopped(graphContext, tileRectangle);
                                     if (monitorProgress) {
@@ -281,7 +288,8 @@ public class GraphProcessor {
                 }
             }
 
-            acquirePermits(semaphore, parallelism);
+            awaitAllPermits(semaphore, parallelism);
+
             if (error != null) {
                 throw error;
             }
@@ -314,7 +322,7 @@ public class GraphProcessor {
                                       TileScheduler tileScheduler, TileComputationListener[] listeners,
                                       int parallelism) {
         Point[] points = new Point[]{new Point(tileX, tileY)};
-        acquirePermits(semaphore, 1);
+        acquirePermit(semaphore);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
@@ -328,14 +336,32 @@ public class GraphProcessor {
         /////////////////////////////////////////////////////////////////////
     }
 
-    private static void acquirePermits(Semaphore semaphore, int permits) {
+    private static void acquirePermit(Semaphore semaphore) {
         try {
-            semaphore.acquire(permits);
+            semaphore.acquire(1);
         } catch (InterruptedException e) {
             throw new OperatorException(e);
         }
     }
 
+    private static void awaitAllPermits(Semaphore semaphore, int permits) {
+        // This way of acquiring permits is a workaround for issue SNAP-1479
+        // https://senbox.atlassian.net/browse/SNAP-1479
+        try {
+            boolean allAcquired;
+            do {
+                allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
+                if (!allAcquired) {
+                    Thread.sleep(200);
+                } else {
+                    // if acquired, release them again.
+                    semaphore.release(permits);
+                }
+            } while (!allAcquired);
+        } catch (InterruptedException e) {
+            throw new OperatorException(e);
+        }
+    }
 
     private void fireProcessingStarted(GraphContext graphContext) {
         for (GraphProcessingObserver processingObserver : observerList) {
