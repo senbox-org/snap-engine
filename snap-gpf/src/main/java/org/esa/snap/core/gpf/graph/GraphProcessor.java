@@ -352,10 +352,8 @@ public class GraphProcessor {
             do {
                 allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
                 if (!allAcquired) {
+                    System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
                     Thread.sleep(200);
-                } else {
-                    // if acquired, release them again.
-                    semaphore.release(permits);
                 }
             } while (!allAcquired);
         } catch (InterruptedException e) {
