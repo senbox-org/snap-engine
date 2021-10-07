@@ -167,6 +167,7 @@ public class GraphProcessor {
             return Long.compare(area1, area2);
         });
 
+        System.out.println("graphContext = " + graphContext.getGraph().getId());
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
 
@@ -350,9 +351,9 @@ public class GraphProcessor {
         try {
             boolean allAcquired;
             do {
+                System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
                 allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
                 if (!allAcquired) {
-                    System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
                     Thread.sleep(200);
                 }
             } while (!allAcquired);
