@@ -198,6 +198,10 @@ public class CrsGrid implements MosaickingGrid {
         return new double[]{geoPos.getLat(), geoPos.getLon()};
     }
 
+    public GeoPos getCenterPos(long bin) {
+        return crsGeoCoding.getGeoPos(new PixelPos(  bin % numCols + 0.5, bin / numCols + 0.5), null);
+    }
+
     public Product reprojectToGrid(Product sourceProduct) {
         Product gridProduct = new Product("ColocationGrid", "ColocationGrid", this.numCols, this.numRows);
         gridProduct.setSceneGeoCoding(this.crsGeoCoding);
