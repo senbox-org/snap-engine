@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.sun.media.jai.util.SunTileScheduler;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
@@ -36,6 +37,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
@@ -289,7 +291,9 @@ public class GraphProcessor {
                 }
             }
 
-            awaitAllPermits(semaphore, parallelism);
+
+            waitProcessingEnds(tileScheduler);
+            //awaitAllPermits(semaphore, parallelism);
 
             if (error != null) {
                 throw error;
@@ -302,6 +306,33 @@ public class GraphProcessor {
         }
 
         return graphContext.getOutputProducts();
+    }
+
+    private void waitProcessingEnds(TileScheduler scheduler) {
+        if (scheduler instanceof SunTileScheduler) {
+            SunTileScheduler sunScheduler = (SunTileScheduler) scheduler;
+            Field tilesInProgress = null;
+            try {
+                tilesInProgress = sunScheduler.getClass().getDeclaredField("tilesInProgress");
+                tilesInProgress.setAccessible(true);
+                Map inProgress;
+                do {
+                    inProgress = (Map) tilesInProgress.get(sunScheduler);
+                    System.out.printf("inProgress = %d%n", inProgress.size());
+//                    if (!inProgress.isEmpty()) {
+                    Thread.sleep(500);
+//                    }
+                } while (!inProgress.isEmpty());
+
+            } catch (ReflectiveOperationException | InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                if (tilesInProgress != null) {
+                    tilesInProgress.setAccessible(false);
+                }
+            }
+
+        }
     }
 
     private Map<Dimension, List<NodeContext>> buildTileDimensionMap(NodeContext[] outputNodeContexts) {
@@ -323,6 +354,7 @@ public class GraphProcessor {
                                       TileScheduler tileScheduler, TileComputationListener[] listeners,
                                       int parallelism) {
         Point[] points = new Point[]{new Point(tileX, tileY)};
+        System.out.printf("starting [%d,%d] - %s%n", tileX, tileY, image);
         acquirePermit(semaphore);
         if (error != null) {
             semaphore.release(parallelism);
@@ -401,6 +433,7 @@ public class GraphProcessor {
         public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                  int tileY,
                                  Raster raster) {
+            System.out.printf("releasing [%d,%d] - %s%n", tileX, tileY, image);
             semaphore.release();
         }
 
