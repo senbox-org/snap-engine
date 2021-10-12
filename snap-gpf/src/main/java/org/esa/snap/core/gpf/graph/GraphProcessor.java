@@ -300,8 +300,8 @@ public class GraphProcessor {
             }
 
 
-            waitProcessingEnds(tileScheduler, tileRequests);
-            //awaitAllPermits(semaphore, parallelism);
+//            waitProcessingEnds(tileScheduler, tileRequests);
+            awaitAllPermits(semaphore, parallelism);
 
             if (error != null) {
                 throw error;
