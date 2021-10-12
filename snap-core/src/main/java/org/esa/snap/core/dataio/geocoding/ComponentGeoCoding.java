@@ -13,10 +13,12 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.Scene;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCoding extends AbstractGeoCoding {
@@ -150,7 +152,13 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final String lonVariableName = this.geoRaster.getLonVariableName();
         final String latVariableName = this.geoRaster.getLatVariableName();
 
-        final GeoRaster geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        final GeoRaster geoRaster;
+        try {
+            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        } catch (IOException e) {
+            SystemUtils.LOG.warning("error loading geolocation data: " + e.getMessage());
+            return false;
+        }
         ForwardCoding forwardCoding = null;
         if (this.forwardCoding != null) {
             forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
@@ -304,7 +312,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         return geoRaster;
     }
 
-    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) {
+    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) throws IOException {
         GeoRaster geoRaster;
         final Product destProduct = destScene.getProduct();
         final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);
@@ -335,11 +343,13 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             subsamplingX = lonTPG.getSubSamplingX();
             subsamplingY = lonTPG.getSubSamplingY();
         } else {
+            // this is based on already subsetted geo-location data, we take
+            // the subset in full resolution of the subset here tb 2021-05-12
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
-            longitudes = lonRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-            latitudes = latRaster.getGeophysicalImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            longitudes = RasterUtils.loadGeoData(lonRaster);
+            latitudes = RasterUtils.loadGeoData(latRaster);
 
             offsetX = 0.5;
             offsetY = 0.5;
@@ -349,7 +359,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
                                   gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
-                                  this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
+                                  // @todo 1 tb/tb this should also take the subsampling in y direction into account
+                                  this.geoRaster.getRasterResolutionInKm() * subsamplingY,
                                   offsetX, offsetY, subsamplingX, subsamplingY);
         return geoRaster;
     }
