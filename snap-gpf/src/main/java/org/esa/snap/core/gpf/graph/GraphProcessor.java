@@ -63,12 +63,19 @@ public class GraphProcessor {
     private Logger logger;
     private volatile OperatorException error = null;
 
+    private final Map<Integer, String> TILE_STATUS_MAP = new HashMap<>();
+
     /**
      * Creates a new instance og {@code GraphProcessor}.
      */
     public GraphProcessor() {
         observerList = new ArrayList<>(3);
         logger = SystemUtils.LOG;
+        TILE_STATUS_MAP.put(0, "TILE_STATUS_PENDING");
+        TILE_STATUS_MAP.put(1, "TILE_STATUS_PROCESSING");
+        TILE_STATUS_MAP.put(2, "TILE_STATUS_COMPUTED");
+        TILE_STATUS_MAP.put(3, "TILE_STATUS_CANCELLED");
+        TILE_STATUS_MAP.put(4, "TILE_STATUS_FAILED");
     }
 
     /**
@@ -169,7 +176,7 @@ public class GraphProcessor {
             return Long.compare(area1, area2);
         });
 
-        System.out.println("graphContext = " + graphContext.getGraph().getId());
+//        System.out.println("graphContext = " + graphContext.getGraph().getId());
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
 
@@ -193,6 +200,7 @@ public class GraphProcessor {
             numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
         }
 
+        List<TileRequest> tileRequests = new ArrayList<>();
         try {
             pm.beginTask("Executing operators...", numPmTicks);
             for (NodeContext outputNodeContext : outputNodeContexts) {
@@ -226,8 +234,8 @@ public class GraphProcessor {
                                 for (Band band : targetProduct.getBands()) {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
-                                        forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                        tileRequests.add(forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
+                                                                              parallelism));
 
                                         break;
                                     }
@@ -239,8 +247,8 @@ public class GraphProcessor {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                            forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                                 tileScheduler, listeners, parallelism);
+                                            tileRequests.add(forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
+                                                                                  tileScheduler, listeners, parallelism));
                                         }
                                     }
                                 }
@@ -270,11 +278,11 @@ public class GraphProcessor {
                                     // Simply pull tile from source images of regular bands.
                                     //
                                     if (image != null) {
-                                        forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                        tileRequests.add(forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
+                                                                              parallelism));
                                     } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                        forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                             tileScheduler, listeners, parallelism);
+                                        tileRequests.add(forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
+                                                                              tileScheduler, listeners, parallelism));
                                     }
                                     fireTileStopped(graphContext, tileRectangle);
                                     if (monitorProgress) {
@@ -292,7 +300,7 @@ public class GraphProcessor {
             }
 
 
-            waitProcessingEnds(tileScheduler);
+            waitProcessingEnds(tileScheduler, tileRequests);
             //awaitAllPermits(semaphore, parallelism);
 
             if (error != null) {
@@ -308,7 +316,7 @@ public class GraphProcessor {
         return graphContext.getOutputProducts();
     }
 
-    private void waitProcessingEnds(TileScheduler scheduler) {
+    private void waitProcessingEnds(TileScheduler scheduler, List<TileRequest> tileRequests) {
         if (scheduler instanceof SunTileScheduler) {
             SunTileScheduler sunScheduler = (SunTileScheduler) scheduler;
             Field tilesInProgress = null;
@@ -318,12 +326,18 @@ public class GraphProcessor {
                 Map inProgress;
                 do {
                     inProgress = (Map) tilesInProgress.get(sunScheduler);
-                    System.out.printf("inProgress = %d%n", inProgress.size());
-//                    if (!inProgress.isEmpty()) {
-                    Thread.sleep(500);
-//                    }
+//                    System.out.printf("inProgress = %d%n", inProgress.size());
+                    if (!inProgress.isEmpty()) {
+                        Thread.sleep(500);
+                    }
                 } while (!inProgress.isEmpty());
-
+//                for (TileRequest tileRequest : tileRequests) {
+//                    final Point[] tiles = tileRequest.getTileIndices();
+//                    for (Point tile : tiles) {
+//                        final int tileStatus = tileRequest.getTileStatus(tile.x, tile.y);
+//                        System.out.printf("%s - TileStatus[%d,%d] - %s,%n", tileRequest.getImage(), tile.x, tile.y, TILE_STATUS_MAP.get(tileStatus));
+//                    }
+//                }
             } catch (ReflectiveOperationException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
@@ -350,11 +364,11 @@ public class GraphProcessor {
         return tileSizeMap;
     }
 
-    private void forceTileComputation(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
-                                      TileScheduler tileScheduler, TileComputationListener[] listeners,
-                                      int parallelism) {
+    private TileRequest forceTileComputation(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
+                                             TileScheduler tileScheduler, TileComputationListener[] listeners,
+                                             int parallelism) {
         Point[] points = new Point[]{new Point(tileX, tileY)};
-        System.out.printf("starting [%d,%d] - %s%n", tileX, tileY, image);
+//        System.out.printf("starting [%d,%d] - %s%n", tileX, tileY, image);
         acquirePermit(semaphore);
         if (error != null) {
             semaphore.release(parallelism);
@@ -364,7 +378,7 @@ public class GraphProcessor {
         //
         // Note: GPF pull-processing is triggered here!!!
         //
-        tileScheduler.scheduleTiles(image, points, listeners);
+        return tileScheduler.scheduleTiles(image, points, listeners);
         //
         /////////////////////////////////////////////////////////////////////
     }
@@ -383,7 +397,7 @@ public class GraphProcessor {
         try {
             boolean allAcquired;
             do {
-                System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
+//                System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
                 allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
                 if (!allAcquired) {
                     Thread.sleep(200);
@@ -433,7 +447,7 @@ public class GraphProcessor {
         public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                  int tileY,
                                  Raster raster) {
-            System.out.printf("releasing [%d,%d] - %s%n", tileX, tileY, image);
+//            System.out.printf("releasing [%d,%d] - %s%n", tileX, tileY, image);
             semaphore.release();
         }
 
