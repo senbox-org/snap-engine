@@ -18,7 +18,6 @@ package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.sun.media.jai.util.SunTileScheduler;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
@@ -37,14 +36,10 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -63,7 +58,6 @@ public class GraphProcessor {
     private Logger logger;
     private volatile OperatorException error = null;
 
-    private final Map<Integer, String> TILE_STATUS_MAP = new HashMap<>();
 
     /**
      * Creates a new instance og {@code GraphProcessor}.
@@ -71,11 +65,6 @@ public class GraphProcessor {
     public GraphProcessor() {
         observerList = new ArrayList<>(3);
         logger = SystemUtils.LOG;
-        TILE_STATUS_MAP.put(0, "TILE_STATUS_PENDING");
-        TILE_STATUS_MAP.put(1, "TILE_STATUS_PROCESSING");
-        TILE_STATUS_MAP.put(2, "TILE_STATUS_COMPUTED");
-        TILE_STATUS_MAP.put(3, "TILE_STATUS_CANCELLED");
-        TILE_STATUS_MAP.put(4, "TILE_STATUS_FAILED");
     }
 
     /**
@@ -122,7 +111,7 @@ public class GraphProcessor {
      * @param graph the {@link Graph}
      * @param pm    a progress monitor. Can be used to signal progress.
      * @throws GraphException if any error occurs during execution
-     * @see GraphProcessor#executeGraph(GraphContext, com.bc.ceres.core.ProgressMonitor)
+     * @see GraphProcessor#executeGraph(GraphContext, ProgressMonitor)
      */
     public void executeGraph(Graph graph, ProgressMonitor pm) throws GraphException {
         GraphContext graphContext;
@@ -164,28 +153,137 @@ public class GraphProcessor {
     public Product[] executeGraph(GraphContext graphContext, ProgressMonitor pm) {
         fireProcessingStarted(graphContext);
 
-        //Header header = graphContext.getGraph().getHeader();
-        // TODO use header to specify execution order (mz, 2009-11-16)
         NodeContext[] outputNodeContexts = graphContext.getOutputNodeContexts();
-        Map<Dimension, List<NodeContext>> tileDimMap = buildTileDimensionMap(outputNodeContexts);
 
-        List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
-        dimList.sort((d1, d2) -> {
-            long area1 = (long) (d1.width) * (long) (d1.height);
-            long area2 = (long) (d2.width) * (long) (d2.height);
-            return Long.compare(area1, area2);
-        });
+        Dimension maxTileLayout = getMaxTileLayout(outputNodeContexts);
 
-//        System.out.println("graphContext = " + graphContext.getGraph().getId());
-        ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
-        JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
+        JAI jaiInstance = JAI.getDefaultInstance();
+        ImagingListener imagingListenerBackup = jaiInstance.getImagingListener();
+        jaiInstance.setImagingListener(new GPFImagingListener());
 
-        final TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
+        final TileScheduler tileScheduler = jaiInstance.getTileScheduler();
         final int parallelism = tileScheduler.getParallelism();
         final Semaphore semaphore = new Semaphore(parallelism, true);
-        final TileComputationListener tcl = new GraphTileComputationListener(semaphore, parallelism);
-        final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
+        final TileComputationListener[] tilelisteners = new TileComputationListener[]{new GraphTileComputationListener(semaphore, parallelism)};
 
+        boolean canComputeTileStack = isComputeTileStackUsable(graphContext);
+
+        try {
+            final int outputNodeCount = graphContext.getGraph().getNodeCount();
+            int numPmTicks = (outputNodeCount * maxTileLayout.width * maxTileLayout.height) + outputNodeCount;
+            pm.beginTask("Executing operators...", numPmTicks);
+            for (NodeContext outputNodeContext : outputNodeContexts) {
+                NodeSource[] sources = outputNodeContext.getNode().getSources();
+                executeNodeSources(sources, graphContext, ProgressMonitor.NULL);
+                outputNodeContext.getOperator().execute(ProgressMonitor.NULL);
+                pm.worked(1);
+            }
+            pm.setTaskName("Computing raster data...");
+
+            if (canComputeTileStack) {
+                for (int tileY = 0; tileY < maxTileLayout.height; tileY++) {
+                    for (int tileX = 0; tileX < maxTileLayout.width; tileX++) {
+                        if (pm.isCanceled()) {
+                            return graphContext.getOutputProducts();
+                        }
+
+                        for (NodeContext nodeContext : outputNodeContexts) {
+                            Product targetProduct = nodeContext.getTargetProduct();
+                            final Dimension tileSize = targetProduct.getPreferredTileSize();
+                            Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                                                    tileY * tileSize.height,
+                                                                    tileSize.width,
+                                                                    tileSize.height);
+
+                            fireTileStarted(graphContext, tileRectangle);
+
+                            // (1) Pull tile from first OperatorImage we find. This will trigger pulling
+                            // tiles of all other OperatorImage computed stack-wise.
+                            //
+                            for (Band band : targetProduct.getBands()) {
+                                PlanarImage image = nodeContext.getTargetImage(band);
+                                if (image != null) {
+                                    orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
+                                              parallelism);
+
+                                    break;
+                                }
+                            }
+
+                            // (2) Pull tile from source images of other regular bands.
+                            //
+                            for (Band band : targetProduct.getBands()) {
+                                PlanarImage image = nodeContext.getTargetImage(band);
+                                if (image == null) {
+                                    if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
+                                        orderTile(band.getSourceImage(), tileX, tileY, semaphore,
+                                                  tileScheduler, tilelisteners, parallelism);
+                                    }
+                                }
+                            }
+                            fireTileStopped(graphContext, tileRectangle);
+                        }
+                        pm.worked(1);
+                    }
+                }
+            } else {
+                for (NodeContext nodeContext : outputNodeContexts) {
+                    Product targetProduct = nodeContext.getTargetProduct();
+                    final Dimension tileSize = targetProduct.getPreferredTileSize();
+                    boolean monitorProgress = true;
+                    for (Band band : targetProduct.getBands()) {
+                        PlanarImage image = nodeContext.getTargetImage(band);
+                        for (int tileY = 0; tileY < maxTileLayout.height; tileY++) {
+                            for (int tileX = 0; tileX < maxTileLayout.width; tileX++) {
+                                if (pm.isCanceled()) {
+                                    return graphContext.getOutputProducts();
+                                }
+
+                                Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                                                        tileY * tileSize.height,
+                                                                        tileSize.width,
+                                                                        tileSize.height);
+                                fireTileStarted(graphContext, tileRectangle);
+
+                                // Simply pull tile from source images of regular bands.
+                                //
+                                if (image != null) {
+                                    orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
+                                              parallelism);
+                                } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
+                                    orderTile(band.getSourceImage(), tileX, tileY, semaphore,
+                                              tileScheduler, tilelisteners, parallelism);
+                                }
+                                fireTileStopped(graphContext, tileRectangle);
+                                if (monitorProgress) {
+                                    pm.worked(1);
+                                    // as a consequence of inverting the loop, progressMonitor ticks must only be increased
+                                    // once per product processed. This crude boolean logic ensures that. Nevertheless,
+                                    // this class needs refactoring! tb 2021-05-21
+                                    monitorProgress = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            acquirePermits(semaphore, parallelism);
+
+            if (error != null) {
+                throw error;
+            }
+        } finally {
+            semaphore.release(parallelism);
+            pm.done();
+            JAI.getDefaultInstance().setImagingListener(imagingListenerBackup);
+            fireProcessingStopped(graphContext);
+        }
+
+        return graphContext.getOutputProducts();
+    }
+
+    private boolean isComputeTileStackUsable(GraphContext graphContext) {
         // loop over all nodes and check if one of them computes tile-stack. If so, we do stack-processing. tb 2020-02-07
         boolean canComputeTileStack = false;
         final Deque<NodeContext> nodeContexts = graphContext.getInitNodeContextDeque();
@@ -194,182 +292,33 @@ public class GraphProcessor {
                 canComputeTileStack |= nodeContext.canComputeTileStack();
             }
         }
-
-        int numPmTicks = graphContext.getGraph().getNodeCount();
-        for (Dimension dimension : dimList) {
-            numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
-        }
-
-        List<TileRequest> tileRequests = new ArrayList<>();
-        try {
-            pm.beginTask("Executing operators...", numPmTicks);
-            for (NodeContext outputNodeContext : outputNodeContexts) {
-                NodeSource[] sources = outputNodeContext.getNode().getSources();
-                executeNodeSources(sources, graphContext, pm);
-                outputNodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1));
-            }
-            pm.setTaskName("Computing raster data...");
-            for (Dimension dimension : dimList) {
-                List<NodeContext> nodeContextList = tileDimMap.get(dimension);
-                final int numXTiles = dimension.width;
-                final int numYTiles = dimension.height;
-                Dimension tileSize = nodeContextList.get(0).getTargetProduct().getPreferredTileSize();
-                if (canComputeTileStack) {
-                    for (int tileY = 0; tileY < numYTiles; tileY++) {
-                        for (int tileX = 0; tileX < numXTiles; tileX++) {
-                            if (pm.isCanceled()) {
-                                return graphContext.getOutputProducts();
-                            }
-                            Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                                                    tileY * tileSize.height,
-                                                                    tileSize.width,
-                                                                    tileSize.height);
-                            fireTileStarted(graphContext, tileRectangle);
-                            for (NodeContext nodeContext : nodeContextList) {
-                                Product targetProduct = nodeContext.getTargetProduct();
-
-                                // (1) Pull tile from first OperatorImage we find. This will trigger pulling
-                                // tiles of all other OperatorImage computed stack-wise.
-                                //
-                                for (Band band : targetProduct.getBands()) {
-                                    PlanarImage image = nodeContext.getTargetImage(band);
-                                    if (image != null) {
-                                        tileRequests.add(forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                                              parallelism));
-
-                                        break;
-                                    }
-                                }
-
-                                // (2) Pull tile from source images of other regular bands.
-                                //
-                                for (Band band : targetProduct.getBands()) {
-                                    PlanarImage image = nodeContext.getTargetImage(band);
-                                    if (image == null) {
-                                        if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                            tileRequests.add(forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                                                  tileScheduler, listeners, parallelism));
-                                        }
-                                    }
-                                }
-                            }
-                            fireTileStopped(graphContext, tileRectangle);
-                            pm.worked(1);
-                        }
-                    }
-                } else {
-                    for (NodeContext nodeContext : nodeContextList) {
-                        Product targetProduct = nodeContext.getTargetProduct();
-                        boolean monitorProgress = true;
-                        for (Band band : targetProduct.getBands()) {
-                            PlanarImage image = nodeContext.getTargetImage(band);
-                            for (int tileY = 0; tileY < numYTiles; tileY++) {
-                                for (int tileX = 0; tileX < numXTiles; tileX++) {
-                                    if (pm.isCanceled()) {
-                                        return graphContext.getOutputProducts();
-                                    }
-
-                                    Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                                                            tileY * tileSize.height,
-                                                                            tileSize.width,
-                                                                            tileSize.height);
-                                    fireTileStarted(graphContext, tileRectangle);
-
-                                    // Simply pull tile from source images of regular bands.
-                                    //
-                                    if (image != null) {
-                                        tileRequests.add(forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                                              parallelism));
-                                    } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                        tileRequests.add(forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                                              tileScheduler, listeners, parallelism));
-                                    }
-                                    fireTileStopped(graphContext, tileRectangle);
-                                    if (monitorProgress) {
-                                        pm.worked(1);
-                                        // as a consequence of inverting the loop, progressMonitor ticks must only be increased
-                                        // once per product processed. This crude boolean logic ensures that. Nevertheless,
-                                        // this class needs refactoring! tb 2021-05-21
-                                        monitorProgress = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-
-//            waitProcessingEnds(tileScheduler, tileRequests);
-            awaitAllPermits(semaphore, parallelism);
-
-            if (error != null) {
-                throw error;
-            }
-        } finally {
-            semaphore.release(parallelism);
-            pm.done();
-            JAI.getDefaultInstance().setImagingListener(imagingListener);
-            fireProcessingStopped(graphContext);
-        }
-
-        return graphContext.getOutputProducts();
+        return canComputeTileStack;
     }
 
-    private void waitProcessingEnds(TileScheduler scheduler, List<TileRequest> tileRequests) {
-        if (scheduler instanceof SunTileScheduler) {
-            SunTileScheduler sunScheduler = (SunTileScheduler) scheduler;
-            Field tilesInProgress = null;
-            try {
-                tilesInProgress = sunScheduler.getClass().getDeclaredField("tilesInProgress");
-                tilesInProgress.setAccessible(true);
-                Map inProgress;
-                do {
-                    inProgress = (Map) tilesInProgress.get(sunScheduler);
-//                    System.out.printf("inProgress = %d%n", inProgress.size());
-                    if (!inProgress.isEmpty()) {
-                        Thread.sleep(500);
-                    }
-                } while (!inProgress.isEmpty());
-//                for (TileRequest tileRequest : tileRequests) {
-//                    final Point[] tiles = tileRequest.getTileIndices();
-//                    for (Point tile : tiles) {
-//                        final int tileStatus = tileRequest.getTileStatus(tile.x, tile.y);
-//                        System.out.printf("%s - TileStatus[%d,%d] - %s,%n", tileRequest.getImage(), tile.x, tile.y, TILE_STATUS_MAP.get(tileStatus));
-//                    }
-//                }
-            } catch (ReflectiveOperationException | InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                if (tilesInProgress != null) {
-                    tilesInProgress.setAccessible(false);
-                }
-            }
-
-        }
-    }
-
-    private Map<Dimension, List<NodeContext>> buildTileDimensionMap(NodeContext[] outputNodeContexts) {
-        final int mapSize = outputNodeContexts.length;
-        Map<Dimension, List<NodeContext>> tileSizeMap = new HashMap<>(mapSize);
+    private Dimension getMaxTileLayout(NodeContext[] outputNodeContexts) {
+        int numXTiles = -1;
+        int numYTiles = -1;
         for (NodeContext outputNodeContext : outputNodeContexts) {
+            // it is okay to do it on a product basis
+            // the product has the greatest scene width and height
             Product targetProduct = outputNodeContext.getTargetProduct();
             Dimension tileSize = targetProduct.getPreferredTileSize();
-            final int numXTiles = MathUtils.ceilInt(targetProduct.getSceneRasterWidth() / (double) tileSize.width);
-            final int numYTiles = MathUtils.ceilInt(targetProduct.getSceneRasterHeight() / (double) tileSize.height);
-            Dimension tileDim = new Dimension(numXTiles, numYTiles);
-            List<NodeContext> nodeContextList = tileSizeMap.computeIfAbsent(tileDim, k -> new ArrayList<>(mapSize));
-            nodeContextList.add(outputNodeContext);
+            final Dimension sceneSize = targetProduct.getSceneRasterSize();
+            numXTiles = Math.max(numXTiles, MathUtils.ceilInt(sceneSize.getWidth() / tileSize.getWidth()));
+            numYTiles = Math.max(numYTiles, MathUtils.ceilInt(sceneSize.getHeight() / tileSize.getHeight()));
         }
-        return tileSizeMap;
+        return new Dimension(numXTiles, numYTiles);
     }
 
-    private TileRequest forceTileComputation(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
-                                             TileScheduler tileScheduler, TileComputationListener[] listeners,
-                                             int parallelism) {
-        Point[] points = new Point[]{new Point(tileX, tileY)};
-//        System.out.printf("starting [%d,%d] - %s%n", tileX, tileY, image);
-        acquirePermit(semaphore);
+    private void orderTile(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
+                           TileScheduler tileScheduler, TileComputationListener[] listeners,
+                           int parallelism) {
+        if (tileX > image.getMaxTileX() || tileY > image.getMaxTileX()) {
+            // tileIndex is not inside image, probably due to multi-size nature
+            // This image is smaller than the product size
+            return;
+        }
+        acquirePermits(semaphore, 1);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
@@ -378,35 +327,35 @@ public class GraphProcessor {
         //
         // Note: GPF pull-processing is triggered here!!!
         //
-        return tileScheduler.scheduleTiles(image, points, listeners);
+        Point[] points = new Point[]{new Point(tileX, tileY)};
+        tileScheduler.scheduleTiles(image, points, listeners);
         //
         /////////////////////////////////////////////////////////////////////
     }
 
-    private static void acquirePermit(Semaphore semaphore) {
+    private static void acquirePermits(Semaphore semaphore, int permits) {
         try {
-            semaphore.acquire(1);
+            semaphore.acquire(permits);
         } catch (InterruptedException e) {
             throw new OperatorException(e);
         }
     }
 
-    private static void awaitAllPermits(Semaphore semaphore, int permits) {
-        // This way of acquiring permits is a workaround for issue SNAP-1479
-        // https://senbox.atlassian.net/browse/SNAP-1479
-        try {
-            boolean allAcquired;
-            do {
-//                System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
-                allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
-                if (!allAcquired) {
-                    Thread.sleep(200);
-                }
-            } while (!allAcquired);
-        } catch (InterruptedException e) {
-            throw new OperatorException(e);
-        }
-    }
+//    private static void awaitAllPermits(Semaphore semaphore, int permits) {
+//        // This way of acquiring permits is a workaround for issue SNAP-1479
+//        // https://senbox.atlassian.net/browse/SNAP-1479
+//        try {
+//            boolean allAcquired;
+//            do {
+//                allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
+//                if (!allAcquired) {
+//                    Thread.sleep(200);
+//                }
+//            } while (!allAcquired);
+//        } catch (InterruptedException e) {
+//            throw new OperatorException(e);
+//        }
+//    }
 
     private void fireProcessingStarted(GraphContext graphContext) {
         for (GraphProcessingObserver processingObserver : observerList) {
