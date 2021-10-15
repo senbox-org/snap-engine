@@ -24,6 +24,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.internal.OperatorContext;
 import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
 import javax.media.jai.JAI;
@@ -86,7 +87,7 @@ public class GraphProcessor {
     }
 
     /**
-     * Adds an observer to this graph popcessor. {@link GraphProcessingObserver}s are informed about
+     * Adds an observer to this graph processor. {@link GraphProcessingObserver}s are informed about
      * processing steps of the currently running processing graph.
      *
      * @param processingObserver the observer
@@ -169,7 +170,7 @@ public class GraphProcessor {
         boolean canComputeTileStack = isComputeTileStackUsable(graphContext);
 
         try {
-            final int outputNodeCount = graphContext.getGraph().getNodeCount();
+            final int outputNodeCount = outputNodeContexts.length;
             int numPmTicks = (outputNodeCount * maxTileLayout.width * maxTileLayout.height) + outputNodeCount;
             pm.beginTask("Executing operators...", numPmTicks);
             for (NodeContext outputNodeContext : outputNodeContexts) {
@@ -201,6 +202,14 @@ public class GraphProcessor {
                             // tiles of all other OperatorImage computed stack-wise.
                             //
                             for (Band band : targetProduct.getBands()) {
+                                final int maxBandTilesX = MathUtils.ceilInt(band.getRasterWidth() / tileSize.getWidth());
+                                final int maxBandTilesY = MathUtils.ceilInt(band.getRasterHeight() / tileSize.getHeight());
+                                if (tileX > maxBandTilesX || tileY > maxBandTilesY) {
+                                    // tileIndex is not inside image, probably due to multi-size nature
+                                    // This image is smaller than the product size
+                                    continue;
+                                }
+
                                 PlanarImage image = nodeContext.getTargetImage(band);
                                 if (image != null) {
                                     orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
@@ -233,6 +242,8 @@ public class GraphProcessor {
                     boolean monitorProgress = true;
                     for (Band band : targetProduct.getBands()) {
                         PlanarImage image = nodeContext.getTargetImage(band);
+                        final int maxBandTilesX = MathUtils.ceilInt(band.getRasterWidth() / tileSize.getWidth());
+                        final int maxBandTilesY = MathUtils.ceilInt(band.getRasterHeight() / tileSize.getHeight());
                         for (int tileY = 0; tileY < maxTileLayout.height; tileY++) {
                             for (int tileX = 0; tileX < maxTileLayout.width; tileX++) {
                                 if (pm.isCanceled()) {
@@ -243,6 +254,12 @@ public class GraphProcessor {
                                                                         tileY * tileSize.height,
                                                                         tileSize.width,
                                                                         tileSize.height);
+
+                                if (tileX > maxBandTilesX || tileY > maxBandTilesY) {
+                                    // tileIndex is not inside image, probably due to multi-size nature
+                                    // This image is smaller than the product size
+                                    continue;
+                                }
                                 fireTileStarted(graphContext, tileRectangle);
 
                                 // Simply pull tile from source images of regular bands.
@@ -255,6 +272,7 @@ public class GraphProcessor {
                                               tileScheduler, tilelisteners, parallelism);
                                 }
                                 fireTileStopped(graphContext, tileRectangle);
+
                                 if (monitorProgress) {
                                     pm.worked(1);
                                     // as a consequence of inverting the loop, progressMonitor ticks must only be increased
@@ -303,6 +321,11 @@ public class GraphProcessor {
             // the product has the greatest scene width and height
             Product targetProduct = outputNodeContext.getTargetProduct();
             Dimension tileSize = targetProduct.getPreferredTileSize();
+            if (tileSize == null) {
+                tileSize = JAIUtils.computePreferredTileSize(targetProduct.getSceneRasterWidth(),
+                                                             targetProduct.getSceneRasterHeight(), 4);
+                targetProduct.setPreferredTileSize(tileSize);
+            }
             final Dimension sceneSize = targetProduct.getSceneRasterSize();
             numXTiles = Math.max(numXTiles, MathUtils.ceilInt(sceneSize.getWidth() / tileSize.getWidth()));
             numYTiles = Math.max(numYTiles, MathUtils.ceilInt(sceneSize.getHeight() / tileSize.getHeight()));
@@ -313,12 +336,7 @@ public class GraphProcessor {
     private void orderTile(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
                            TileScheduler tileScheduler, TileComputationListener[] listeners,
                            int parallelism) {
-        if (tileX > image.getMaxTileX() || tileY > image.getMaxTileX()) {
-            // tileIndex is not inside image, probably due to multi-size nature
-            // This image is smaller than the product size
-            return;
-        }
-        acquirePermits(semaphore, 1);
+        acquirePermit(semaphore);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
@@ -329,8 +347,13 @@ public class GraphProcessor {
         //
         Point[] points = new Point[]{new Point(tileX, tileY)};
         tileScheduler.scheduleTiles(image, points, listeners);
+
         //
         /////////////////////////////////////////////////////////////////////
+    }
+
+    private static void acquirePermit(Semaphore semaphore) {
+        acquirePermits(semaphore, 1);
     }
 
     private static void acquirePermits(Semaphore semaphore, int permits) {
@@ -341,21 +364,6 @@ public class GraphProcessor {
         }
     }
 
-//    private static void awaitAllPermits(Semaphore semaphore, int permits) {
-//        // This way of acquiring permits is a workaround for issue SNAP-1479
-//        // https://senbox.atlassian.net/browse/SNAP-1479
-//        try {
-//            boolean allAcquired;
-//            do {
-//                allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
-//                if (!allAcquired) {
-//                    Thread.sleep(200);
-//                }
-//            } while (!allAcquired);
-//        } catch (InterruptedException e) {
-//            throw new OperatorException(e);
-//        }
-//    }
 
     private void fireProcessingStarted(GraphContext graphContext) {
         for (GraphProcessingObserver processingObserver : observerList) {
@@ -396,7 +404,6 @@ public class GraphProcessor {
         public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                  int tileY,
                                  Raster raster) {
-//            System.out.printf("releasing [%d,%d] - %s%n", tileX, tileY, image);
             semaphore.release();
         }
 
