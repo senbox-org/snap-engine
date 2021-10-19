@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.sun.media.jai.util.SunTileScheduler;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
@@ -37,9 +38,12 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -59,6 +63,7 @@ public class GraphProcessor {
     private Logger logger;
     private volatile OperatorException error = null;
 
+    private final Map<Integer, String> TILE_STATUS_MAP = new HashMap<>();
 
     /**
      * Creates a new instance og {@code GraphProcessor}.
@@ -66,6 +71,11 @@ public class GraphProcessor {
     public GraphProcessor() {
         observerList = new ArrayList<>(3);
         logger = SystemUtils.LOG;
+        TILE_STATUS_MAP.put(0, "TILE_STATUS_PENDING");
+        TILE_STATUS_MAP.put(1, "TILE_STATUS_PROCESSING");
+        TILE_STATUS_MAP.put(2, "TILE_STATUS_COMPUTED");
+        TILE_STATUS_MAP.put(3, "TILE_STATUS_CANCELLED");
+        TILE_STATUS_MAP.put(4, "TILE_STATUS_FAILED");
     }
 
     /**
@@ -169,6 +179,7 @@ public class GraphProcessor {
 
         boolean canComputeTileStack = isComputeTileStackUsable(graphContext);
 
+        List<TileRequest> tileRequests = new ArrayList<>();
         try {
             final int outputNodeCount = outputNodeContexts.length;
             int numPmTicks = (outputNodeCount * maxTileLayout.width * maxTileLayout.height) + outputNodeCount;
@@ -212,8 +223,8 @@ public class GraphProcessor {
 
                                 PlanarImage image = nodeContext.getTargetImage(band);
                                 if (image != null) {
-                                    orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
-                                              parallelism);
+                                    tileRequests.add(orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
+                                                               parallelism));
 
                                     break;
                                 }
@@ -225,8 +236,8 @@ public class GraphProcessor {
                                 PlanarImage image = nodeContext.getTargetImage(band);
                                 if (image == null) {
                                     if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                        orderTile(band.getSourceImage(), tileX, tileY, semaphore,
-                                                  tileScheduler, tilelisteners, parallelism);
+                                        tileRequests.add(orderTile(band.getSourceImage(), tileX, tileY, semaphore,
+                                                                   tileScheduler, tilelisteners, parallelism));
                                     }
                                 }
                             }
@@ -265,11 +276,11 @@ public class GraphProcessor {
                                 // Simply pull tile from source images of regular bands.
                                 //
                                 if (image != null) {
-                                    orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
-                                              parallelism);
+                                    tileRequests.add(orderTile(image, tileX, tileY, semaphore, tileScheduler, tilelisteners,
+                                                               parallelism));
                                 } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                    orderTile(band.getSourceImage(), tileX, tileY, semaphore,
-                                              tileScheduler, tilelisteners, parallelism);
+                                    tileRequests.add(orderTile(band.getSourceImage(), tileX, tileY, semaphore,
+                                                               tileScheduler, tilelisteners, parallelism));
                                 }
                                 fireTileStopped(graphContext, tileRectangle);
 
@@ -286,7 +297,8 @@ public class GraphProcessor {
                 }
             }
 
-            acquirePermits(semaphore, parallelism);
+            waitProcessingEnds(tileScheduler, tileRequests);
+//            acquirePermits(semaphore, parallelism);
 
             if (error != null) {
                 throw error;
@@ -299,6 +311,41 @@ public class GraphProcessor {
         }
 
         return graphContext.getOutputProducts();
+    }
+
+    private void waitProcessingEnds(TileScheduler scheduler, List<TileRequest> tileRequests) {
+        if (scheduler instanceof SunTileScheduler) {
+            SunTileScheduler sunScheduler = (SunTileScheduler) scheduler;
+            Field tilesInProgress = null;
+            try {
+                tilesInProgress = sunScheduler.getClass().getDeclaredField("tilesInProgress");
+                tilesInProgress.setAccessible(true);
+                Map inProgress;
+                int countDown = 50;
+                do {
+                    inProgress = (Map) tilesInProgress.get(sunScheduler);
+                    System.out.printf("inProgress = %d%n", inProgress.size());
+                    if (!inProgress.isEmpty()) {
+                        Thread.sleep(500);
+                    }
+                    countDown--;
+                } while (!inProgress.isEmpty() && countDown > 0);
+                for (TileRequest tileRequest : tileRequests) {
+                    final Point[] tiles = tileRequest.getTileIndices();
+                    for (Point tile : tiles) {
+                        final int tileStatus = tileRequest.getTileStatus(tile.x, tile.y);
+                        System.out.printf("%s - TileStatus[%d,%d] - %s,%n", tileRequest.getImage(), tile.x, tile.y, TILE_STATUS_MAP.get(tileStatus));
+                    }
+                }
+            } catch (ReflectiveOperationException | InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                if (tilesInProgress != null) {
+                    tilesInProgress.setAccessible(false);
+                }
+            }
+
+        }
     }
 
     private boolean isComputeTileStackUsable(GraphContext graphContext) {
@@ -333,9 +380,9 @@ public class GraphProcessor {
         return new Dimension(numXTiles, numYTiles);
     }
 
-    private void orderTile(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
-                           TileScheduler tileScheduler, TileComputationListener[] listeners,
-                           int parallelism) {
+    private TileRequest orderTile(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
+                                  TileScheduler tileScheduler, TileComputationListener[] listeners,
+                                  int parallelism) {
         acquirePermit(semaphore);
         if (error != null) {
             semaphore.release(parallelism);
@@ -346,7 +393,7 @@ public class GraphProcessor {
         // Note: GPF pull-processing is triggered here!!!
         //
         Point[] points = new Point[]{new Point(tileX, tileY)};
-        tileScheduler.scheduleTiles(image, points, listeners);
+        return tileScheduler.scheduleTiles(image, points, listeners);
 
         //
         /////////////////////////////////////////////////////////////////////
