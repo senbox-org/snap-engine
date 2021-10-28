@@ -1,3 +1,21 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
@@ -39,10 +57,12 @@ public class TiePointInverse implements InverseCoding {
 
         double minSquareDistance = Double.MAX_VALUE;
         for (final Approximation approx : approximations) {
-            final double squareDistance = approx.getSquareDistance(lat, lon);
-            if (squareDistance < minSquareDistance && squareDistance < approx.getMinSquareDistance()) {
-                minSquareDistance = squareDistance;
-                approximation = approx;
+            if (approx != null) {
+                final double squareDistance = approx.getSquareDistance(lat, lon);
+                if (squareDistance < minSquareDistance && squareDistance < approx.getMinSquareDistance()) {
+                    minSquareDistance = squareDistance;
+                    approximation = approx;
+                }
             }
         }
 
@@ -135,9 +155,6 @@ public class TiePointInverse implements InverseCoding {
         final Rectangle[] rectangles = MathUtils.subdivideRectangle(width, height, numTilesI, numTilesJ, 1);
         for (int i = 0; i < rectangles.length; i++) {
             final Approximation approximation = createApproximation(lonGrid, latGrid, rectangles[i]);
-            if (approximation == null) {
-                return null;
-            }
             approximations[i] = approximation;
         }
 

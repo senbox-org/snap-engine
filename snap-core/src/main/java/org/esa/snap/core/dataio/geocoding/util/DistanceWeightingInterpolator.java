@@ -53,11 +53,6 @@ abstract class DistanceWeightingInterpolator implements XYInterpolator {
         }
         inv_sum = 1.0 / inv_sum;
 
-        if (pixelPos == null) {
-            pixelPos = new PixelPos();
-        }
-        pixelPos.x = x_sum * inv_sum;
-        pixelPos.y = y_sum * inv_sum;
-        return pixelPos;
+        return new PixelPos(x_sum * inv_sum, y_sum * inv_sum);
     }
 }

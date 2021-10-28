@@ -152,4 +152,46 @@ public class PixelForwardTest {
         final ForwardCoding forwardCoding = plugin.create();
         assertTrue(forwardCoding instanceof PixelForward);
     }
+
+    @Test
+    public void testNoInterpolationX() {
+        final GeoRaster geoRaster = TestData.get_FlatEarth();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final PixelPos pixelPos = new PixelPos(5.5, 5.5);
+
+        GeoPos geoPos = null;
+        for (int i = 0; i <= 10; i++) {
+            pixelPos.x = 5.5 + (0.1 * i);
+            geoPos = pixelForward.getGeoPos(pixelPos, null);
+            if (i < 5) {
+                assertEquals(25.0, geoPos.lon, 1e-8);
+            } else {
+                assertEquals(26.0, geoPos.lon, 1e-8);
+            }
+            assertEquals(44.0, geoPos.lat, 1e-8);
+        }
+    }
+
+    @Test
+    public void testNoInterpolationY() {
+        final GeoRaster geoRaster = TestData.get_FlatEarth();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final PixelPos pixelPos = new PixelPos(5.5, 5.5);
+
+        GeoPos geoPos = null;
+        for (int i = 0; i <= 10; i++) {
+            pixelPos.y = 5.5 + (0.1 * i);
+            geoPos = pixelForward.getGeoPos(pixelPos, null);
+            assertEquals(25.0, geoPos.lon, 1e-8);
+            if (i < 5) {
+                assertEquals(44.0, geoPos.lat, 1e-8);
+            } else {
+                assertEquals(43.0, geoPos.lat, 1e-8);
+            }
+        }
+    }
 }

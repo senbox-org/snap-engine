@@ -1,3 +1,21 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
@@ -379,7 +397,10 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 lon_r = geoPos.lon;
             }
 
-            if (y_l < MIN_DIMENSION && y_r < MIN_DIMENSION) {
+            final int segmentMinY = segment.y_min + MIN_DIMENSION;
+            final int segmentMaxY  = segment.y_max - MIN_DIMENSION;
+            if ((y_l < segmentMinY || y_l > segmentMaxY) &&
+                    (y_r < segmentMinY || y_r > segmentMaxY) ) {
                 // antimeridian not passing through segment in a way that enables across-swath splitting
                 return new Segment[0];
             }
@@ -417,7 +438,9 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
                 }
                 lon_b = geoPos.lon;
             }
-            if (x_t < MIN_DIMENSION && x_b < MIN_DIMENSION) {
+            final int segmentMinX = segment.x_min + MIN_DIMENSION;
+            final int segmentMaxX = segment.x_max - MIN_DIMENSION;
+            if ((x_t < segmentMinX || x_t > segmentMaxX) && (x_b < segmentMinX || x_b > segmentMaxX)) {
                 // antimeridian not passing through segment in a way that enables across-swath splitting
                 return new Segment[0];
             }
@@ -499,8 +522,8 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             if (minDelta < epsilon && minDeltaResult != null) {
                 if (fractionalAccuracy) {
                     final InterpolationContext context = InterpolationContext.extract(minDeltaResult.x, minDeltaResult.y, longitudes, latitudes, rasterWidth, rasterHeight);
-                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
-                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
+                    final PixelPos interpolated = interpolator.interpolate(geoPos, pixelPos, context);
+                    pixelPos.setLocation(interpolated.x + offsetX, interpolated.y + offsetY);
                 } else {
                     pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
                 }
@@ -674,6 +697,11 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
         }
 
         final int idx = (int) Math.floor((Math.abs(latMin) + Math.abs(latMax)) / 2 * 10);
+        if (idx < 0 || idx >= epsilonLon.length) {
+            // this might be triggered by fillValue pixels tb 2021-06-10
+            return false;
+        }
+
         final double epsLon = epsilonLon[idx];
         if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lonArray)) {
             boolean lonOutside = false;
