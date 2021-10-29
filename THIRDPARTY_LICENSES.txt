@@ -93,7 +93,7 @@ quartz;Job scheduler;quartz-scheduler;Apache License;http://www.quartz-scheduler
 rhino;Java script engine;Rhino;Mozilla Public License;http://www.mozilla.org/rhino/;https://github.com/mozilla/rhino/blob/master/LICENSE.txt
 sevenzipjbinding;Compression library;sevenzipjbinding;LGPLv2;http://sevenzipjbind.sourceforge.net/;https://github.com/borisbrodski/sevenzipjbinding/blob/master/License.txt
 sl4j;Logging;slf4j;MIT;http://www.slf4j.org/;https://opensource.org/licenses/mit-license.php
-stax2-api;Stax2 API is an extension to standard Stax API ('STandard Api for Xml procesing'), pull-parser API of JDK, added in JDK 6.;FasterXML;The BSD License;https://github.com/FasterXML/stax2-api;http://www.opensource.org/licenses/bsd-license.php
+stax2-api;Stax2 API is an extension to standard Stax API ('STandard Api for Xml processing'), pull-parser API of JDK, added in JDK 6.;FasterXML;The BSD License;https://github.com/FasterXML/stax2-api;http://www.opensource.org/licenses/bsd-license.php
 swingx;GUI library;SwingX;LGPLv3;https://en.wikipedia.org/wiki/SwingLabs;https://www.gnu.org/licenses/lgpl-3.0.en.html
 thumbnailator;Image scaling;Coobird;MIT;https://github.com/coobird/thumbnailator;https://opensource.org/licenses/mit-license.php
 trove4j;GNU Trove: High performance collections for Java;Trove4j;GNU Lesser General Public License 2.1;https://bitbucket.org/trove4j/trove;http://www.gnu.org/licenses/lgpl-2.1.txt
