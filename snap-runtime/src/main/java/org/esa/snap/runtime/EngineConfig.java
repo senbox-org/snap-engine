@@ -64,6 +64,16 @@ public class EngineConfig extends Config {
     public static final String PROPERTY_LOGGER_NAME = "snap.logger.name";
     public static final String PROPERTY_LOG_LEVEL = "snap.log.level";
 
+
+
+
+//    public static final String USER_DIR_DEFAULT = ".snap";
+    public static final String USER_DIR_DEFAULT = ".seadas8";
+
+
+
+
+
     static String[] DEFAULT_EXCLUDED_CLUSTER_NAMES = new String[]{
             "bin", "etc", "platform", "ide", "java"
     };
@@ -136,7 +146,7 @@ public class EngineConfig extends Config {
         if (value != null) {
             return Paths.get(value);
         }
-        return Paths.get(System.getProperty("user.home"), ".snap");
+        return Paths.get(System.getProperty("user.home"), USER_DIR_DEFAULT);
     }
 
     public EngineConfig configFile(Path value) {

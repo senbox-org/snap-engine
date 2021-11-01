@@ -38,8 +38,7 @@ public class VersionChecker {
 
     public static final String PK_CHECK_INTERVAL = "snap.versionCheck.interval";
     private static final String PK_LAST_DATE = "snap.versionCheck.lastDate";
-    private static final String VERSION_FILE_NAME = "VERSION.txt";
-    private static final String REMOTE_VERSION_FILE_URL = "http://step.esa.int/downloads/" + VERSION_FILE_NAME;
+    private static final String REMOTE_VERSION_FILE_URL = SystemUtils.getApplicationRemoteVersionUrl();
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     private static VersionChecker instance = new VersionChecker();
@@ -113,7 +112,7 @@ public class VersionChecker {
      */
     public Version getLocalVersion() {
         if (localVersion.get() == null) {
-            Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(VersionChecker.VERSION_FILE_NAME);
+            Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(SystemUtils.VERSION_FILE_NAME);
             try {
                 if (localVersionStream != null) {
                     localVersion.set(readVersionFromStream(localVersionStream));

@@ -17,6 +17,7 @@ package org.esa.snap.core.util;
 
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.EngineConfig;
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
@@ -69,6 +70,34 @@ public class SystemUtils {
     private static final String MANIFEST_ATTR_MODULE_NAME = "OpenIDE-Module-Name";
     private static final String MANIFEST_ATTR_MODULE_VERSION = "OpenIDE-Module-Specification-Version";
 
+    // Branding Defaults
+
+    // This allows alternate java methods to be called (for instance SnapAboutBox vs BrandedAboutBox).  These would
+    // methods which essentially override the Snap method and make future merging a lot easier.
+    public static final boolean BRANDED_APPLICATION = false;
+
+    // Even though there is a method to let the snap.properties override this ... there are several locations which need this
+    // hardcoded in String constant form ... so for branding this constant should be set here.
+//    public static final String APPLICATION_NAME = "SNAP";
+    public static final String APPLICATION_NAME = "SeaDAS";
+
+
+        public static final String APPLICATION_HOMEPAGE_URL_DEFAULT = "https://step.esa.int";
+//    public static final String APPLICATION_HOMEPAGE_URL_DEFAULT = "https://seadas.gsfc.nasa.gov";
+
+
+    public static final String VERSION_FILE_NAME = "VERSION.txt";
+
+        public static final String REMOTE_VERSION_FILE_URL = "https://step.esa.int/downloads/" + VERSION_FILE_NAME;
+//    public static final String REMOTE_VERSION_FILE_URL = "https://seadas.gsfc.nasa.gov/downloads/" + VERSION_FILE_NAME;
+//
+        public static final String DEFAULT_REPORT_ISSUE_PAGE_URL = "http://step.esa.int/main/community/issue-reporting/";
+//    public static final String DEFAULT_REPORT_ISSUE_PAGE_URL = "https://seadas.gsfc.nasa.gov/help/issue-reporting/";
+
+
+
+
+
 
     /**
      * The SNAP system logger. Default name is "org.esa.snap" which may be overridden by system property "snap.logger.name".
@@ -113,7 +142,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationHomepageUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", "http://step.esa.int");
+        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", APPLICATION_HOMEPAGE_URL_DEFAULT);
     }
 
     /**
@@ -191,6 +220,21 @@ public class SystemUtils {
         return Config.instance().preferences().get("snap.context", "snap");
     }
 
+
+    /**
+     * This method makes the assumption that as part of the branding the snap.context field was set to match the properties file name
+     *
+     * @return application properties file
+     */
+
+    public static File getPropertiesFiles() {
+        Path appEtcDir = SystemUtils.getApplicationHomeDir().toPath().resolve("etc");
+        String fileName = getApplicationContextId() + ".properties";
+        return new File (appEtcDir.toFile(), fileName);
+    }
+
+
+
     /**
      * Gets the application name used in logger output and information messages.
      * The context ID is configured using the system property
@@ -202,7 +246,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationName() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", "SNAP");
+        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", APPLICATION_NAME);
     }
 
     /**
@@ -468,14 +512,35 @@ public class SystemUtils {
 
     }
 
+    // variable key changed from ".remoteVersion.url" to ".remote.version.url"
     public static String getApplicationRemoteVersionUrl() {
-        final String key = getApplicationContextId() + ".remoteVersion.url";
-        String applicationHomepageUrl = getApplicationHomepageUrl();
-        if (!applicationHomepageUrl.endsWith("/")) {
-            applicationHomepageUrl = applicationHomepageUrl + "/";
-        }
-        return System.getProperty(key, applicationHomepageUrl + "software/version.txt");
+        return Config.instance().preferences().get(getApplicationContextId() + ".remote.version.url", REMOTE_VERSION_FILE_URL);
+
+        // These are the previous lines within this previously unused method just in case someone needs them
+//        final String key = getApplicationContextId() + ".remoteVersion.url";
+//        String applicationHomepageUrl = getApplicationHomepageUrl();
+//        if (!applicationHomepageUrl.endsWith("/")) {
+//            applicationHomepageUrl = applicationHomepageUrl + "/";
+//        }
+//        return System.getProperty(key, applicationHomepageUrl + "software/version.txt");
+
     }
+
+
+    // variable key changed from ".reportIssuePageUrl" to ".report.issue.url"
+    public static String getReportAnIssueUrl() {
+        return Config.instance().preferences().get(getApplicationContextId() + ".report.issue.url", DEFAULT_REPORT_ISSUE_PAGE_URL);
+    }
+
+
+
+
+    public static boolean isBrandedApplication() {
+        String value = Config.instance().preferences().get(getApplicationContextId() + ".branding", Boolean.toString(false));
+        return Boolean.parseBoolean(value);
+    }
+
+
 
     /**
      * Tries to load the metadata from {@code META-INF/MANIFEST.MF} contained in the module jar
@@ -506,7 +571,7 @@ public class SystemUtils {
      */
     public static String getReleaseVersion() {
         String version = null;
-        Path versionFile = getApplicationHomeDir().toPath().resolve("VERSION.txt");
+        Path versionFile = getApplicationHomeDir().toPath().resolve(VERSION_FILE_NAME);
         if (Files.exists(versionFile)) {
             try {
                 List<String> versionInfo = Files.readAllLines(versionFile);
@@ -520,7 +585,7 @@ public class SystemUtils {
         if (version != null) {
             return version;
         }
-        return "[no version info, missing ${SNAP_HOME}/VERSION.txt]";
+        return "[no version info, missing ${SNAP_HOME}/" + VERSION_FILE_NAME + ".txt]";
     }
 
     /**
