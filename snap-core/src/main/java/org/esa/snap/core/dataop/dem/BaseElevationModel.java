@@ -28,16 +28,16 @@ import java.util.List;
 
 public abstract class BaseElevationModel implements ElevationModel, Resampling.Raster {
 
-    private final int NUM_X_TILES;
+    protected final int NUM_X_TILES;
     protected final int NUM_Y_TILES;
-    protected final int NUM_PIXELS_PER_TILE;
-    private final double NUM_PIXELS_PER_TILEinv;
+    protected int NUM_PIXELS_PER_TILE;
+    protected double NUM_PIXELS_PER_TILEinv;
     protected final double NO_DATA_VALUE;
-    protected final int DEGREE_RES;
+    protected int DEGREE_RES;
     protected int RASTER_WIDTH;
     protected int RASTER_HEIGHT;
-    protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
-    protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
 
     protected final ElevationModelDescriptor descriptor;
     private final ElevationFile[][] elevationFiles;

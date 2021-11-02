@@ -36,7 +36,7 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
     @Override
     public double getIndexY(final GeoPos geoPos) {
-        return ((90.0 - geoPos.lat) * CopernicusElevationTile.determineWidth(geoPos, 90));
+        return ((90.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv);
     }
 
     @Override
@@ -46,12 +46,28 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
         return new GeoPos(pixelLat, pixelLon);
     }
 
-    @Override
 
-    public double getElevation(final GeoPos geoPos) throws Exception {
+    private void init(final GeoPos geoPos) {
+
+        int width = CopernicusElevationTile.determineWidth(geoPos, 90);
+        NUM_PIXELS_PER_TILE = width;
+
+
+        NUM_PIXELS_PER_TILEinv = 1.0 / (double) NUM_PIXELS_PER_TILE;
+
+        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    }
+    @Override
+    public synchronized double getElevation(final GeoPos geoPos) throws Exception {
+
         if (geoPos.lon > 180) {
             geoPos.lon -= 360;
         }
+        init(geoPos);
         final double pixelY = getIndexY(geoPos);
         if (pixelY < 0 || Double.isNaN(pixelY)) {
             return NO_DATA_VALUE;
@@ -60,7 +76,7 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
         final double elevation;
         //synchronized(resampling) {
         Resampling.Index newIndex = resampling.createIndex();
-        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, CopernicusElevationTile.determineWidth(geoPos, 90), RASTER_HEIGHT, newIndex);
+        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
         elevation = resampling.resample(resamplingRaster, newIndex);
         //}
         return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
