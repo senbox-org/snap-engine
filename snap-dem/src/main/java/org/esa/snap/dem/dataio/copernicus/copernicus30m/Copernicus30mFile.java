@@ -21,7 +21,7 @@ public class Copernicus30mFile extends ElevationFile {
 
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
-        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);;
+        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);
         tile.setHeight(product.getSceneRasterHeight());
         tile.setWidth(product.getSceneRasterWidth());
         demModel.updateCache(tile);

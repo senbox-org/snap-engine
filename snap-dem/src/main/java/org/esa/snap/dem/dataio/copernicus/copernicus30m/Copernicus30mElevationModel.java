@@ -7,6 +7,8 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+
 import java.io.File;
 
 public class Copernicus30mElevationModel extends BaseElevationModel {
@@ -29,6 +31,24 @@ public class Copernicus30mElevationModel extends BaseElevationModel {
         final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0;
         final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0;
         return new GeoPos(pixelLat, pixelLon);
+    }
+    @Override
+    public double getElevation(final GeoPos geoPos) throws Exception {
+        if (geoPos.lon > 180) {
+            geoPos.lon -= 360;
+        }
+        final double pixelY = getIndexY(geoPos);
+        if (pixelY < 0 || Double.isNaN(pixelY)) {
+            return NO_DATA_VALUE;
+        }
+
+        final double elevation;
+        //synchronized(resampling) {
+        Resampling.Index newIndex = resampling.createIndex();
+        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, CopernicusElevationTile.determineWidth(geoPos, 30), RASTER_HEIGHT, newIndex);
+        elevation = resampling.resample(resamplingRaster, newIndex);
+        //}
+        return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
     }
 
     @Override

@@ -34,7 +34,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     private final double NUM_PIXELS_PER_TILEinv;
     protected final double NO_DATA_VALUE;
     protected final int DEGREE_RES;
-    private int RASTER_WIDTH;
+    protected int RASTER_WIDTH;
     protected int RASTER_HEIGHT;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
@@ -42,7 +42,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     protected final ElevationModelDescriptor descriptor;
     private final ElevationFile[][] elevationFiles;
     protected final Resampling resampling;
-    private final Resampling.Raster resamplingRaster;
+    protected final Resampling.Raster resamplingRaster;
 
     private final List<ElevationTile> elevationTileCache = new ArrayList<>(20);
     private int maxCacheSize = 60;
