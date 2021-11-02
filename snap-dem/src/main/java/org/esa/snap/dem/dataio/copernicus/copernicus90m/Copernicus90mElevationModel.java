@@ -1,5 +1,6 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus90m;
 
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.BaseElevationModel;
@@ -7,9 +8,23 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.dem.dataio.cdem.CDEMElevationTile;
+import org.esa.snap.dem.dataio.cdem.CDEMFile;
+import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Copernicus90mElevationModel extends BaseElevationModel {
+
+    private Map<String, List<Copernicus90mFile>> tileMap = new HashMap<>();
+    private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn("GeoTIFF");
+
+
     public Copernicus90mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
     }
@@ -21,7 +36,7 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
     @Override
     public double getIndexY(final GeoPos geoPos) {
-        return ((90.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv);
+        return ((90.0 - geoPos.lat) * CopernicusElevationTile.determineWidth(geoPos, 90));
     }
 
     @Override

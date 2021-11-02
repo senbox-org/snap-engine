@@ -1,6 +1,8 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.BaseElevationTile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
@@ -55,5 +57,37 @@ public class CopernicusElevationTile extends BaseElevationTile  implements Resam
                 line[i] += egm.getEGM(geoPos.lat, geoPos.lon, v);
             }
         }
+    }
+    public static int determineWidth(final GeoPos geoPos, int resolution){
+        int abs_lat = (int) Math.abs(geoPos.lat);
+        int multiplier = 1;
+        //Resolution will be either 30 (30m tiles) or 90 (90m tiles).
+        if(resolution == 30){
+            multiplier = 3;
+        }
+        if(abs_lat < 50){
+            return 1200 * multiplier;
+        }else if (abs_lat >= 50  && abs_lat < 60 ){
+            return 800 * multiplier;
+        }else if (abs_lat >= 60 && abs_lat < 70){
+            return 600 * multiplier;
+        }else if(abs_lat >= 70 && abs_lat < 75){
+            return 400* multiplier;
+        }else if(abs_lat >= 75 && abs_lat < 80){
+            return 400* multiplier;
+        }else if (abs_lat >= 80 && abs_lat < 85 ){
+            return 240* multiplier;
+        }else{
+            return 120* multiplier;
+        }
+    }
+
+    public static int determineWidth(final PixelPos pixelPos, int resolution ){
+        GeoPos geoPos = new GeoPos(pixelPos.x, pixelPos.y);
+        return determineWidth(geoPos, resolution);
+    }
+
+    public GeoCoding getTileGeocoding() {
+        return product != null ? product.getSceneGeoCoding() : null;
     }
 }
