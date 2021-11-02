@@ -15,6 +15,20 @@ public class Copernicus30mElevationModel extends BaseElevationModel {
     public Copernicus30mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
     }
+    private void init(final GeoPos geoPos) {
+
+        int width = CopernicusElevationTile.determineWidth(geoPos, 30);
+        NUM_PIXELS_PER_TILE = width;
+
+
+        NUM_PIXELS_PER_TILEinv = 1.0 / (double) NUM_PIXELS_PER_TILE;
+
+        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    }
 
     @Override
     public double getIndexX(final GeoPos geoPos) {
@@ -33,10 +47,11 @@ public class Copernicus30mElevationModel extends BaseElevationModel {
         return new GeoPos(pixelLat, pixelLon);
     }
     @Override
-    public double getElevation(final GeoPos geoPos) throws Exception {
+    public synchronized double getElevation(final GeoPos geoPos) throws Exception {
         if (geoPos.lon > 180) {
             geoPos.lon -= 360;
         }
+        init(geoPos);
         final double pixelY = getIndexY(geoPos);
         if (pixelY < 0 || Double.isNaN(pixelY)) {
             return NO_DATA_VALUE;
@@ -45,7 +60,7 @@ public class Copernicus30mElevationModel extends BaseElevationModel {
         final double elevation;
         //synchronized(resampling) {
         Resampling.Index newIndex = resampling.createIndex();
-        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, CopernicusElevationTile.determineWidth(geoPos, 30), RASTER_HEIGHT, newIndex);
+        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
         elevation = resampling.resample(resamplingRaster, newIndex);
         //}
         return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
