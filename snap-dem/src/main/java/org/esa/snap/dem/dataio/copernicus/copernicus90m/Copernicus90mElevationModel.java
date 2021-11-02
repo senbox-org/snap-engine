@@ -47,6 +47,26 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
     }
 
     @Override
+
+    public double getElevation(final GeoPos geoPos) throws Exception {
+        if (geoPos.lon > 180) {
+            geoPos.lon -= 360;
+        }
+        final double pixelY = getIndexY(geoPos);
+        if (pixelY < 0 || Double.isNaN(pixelY)) {
+            return NO_DATA_VALUE;
+        }
+
+        final double elevation;
+        //synchronized(resampling) {
+        Resampling.Index newIndex = resampling.createIndex();
+        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, CopernicusElevationTile.determineWidth(geoPos, 90), RASTER_HEIGHT, newIndex);
+        elevation = resampling.resample(resamplingRaster, newIndex);
+        //}
+        return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
+    }
+
+    @Override
     public int getWidth(){
         return RASTER_HEIGHT;
     }
