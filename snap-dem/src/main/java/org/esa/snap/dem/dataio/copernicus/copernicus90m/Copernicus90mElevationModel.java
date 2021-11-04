@@ -24,6 +24,10 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
     private Map<String, List<Copernicus90mFile>> tileMap = new HashMap<>();
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn("GeoTIFF");
+    int NUM_PIXELS_PER_TILE_WIDTH;
+    double NUM_PIXELS_PER_TILE_WIDTHinv;
+    double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTH;
+    double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTHinv;
 
 
     public Copernicus90mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
@@ -51,16 +55,22 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
     private void init(final GeoPos geoPos) {
 
         int width = CopernicusElevationTile.determineWidth(geoPos, 90);
-        NUM_PIXELS_PER_TILE = width;
+        NUM_PIXELS_PER_TILE = 1200;
+        NUM_PIXELS_PER_TILE_WIDTH = width;
+
 
 
         NUM_PIXELS_PER_TILEinv = 1.0 / (double) NUM_PIXELS_PER_TILE;
+        NUM_PIXELS_PER_TILE_WIDTHinv = 1.0 / (double) NUM_PIXELS_PER_TILE_WIDTH;
 
-        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_WIDTH;
         RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
         DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
         DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTH = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTHinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
     }
     @Override
     public synchronized double getElevation(final GeoPos geoPos) throws Exception {
@@ -115,7 +125,7 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
             int j = 0;
             for (int x : xArray) {
-                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILEinv);
+                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILE_WIDTHinv);
 
                 final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
                 if (tile == null) {
@@ -125,7 +135,7 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
                     continue;
                 }
 
-                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE, pixelY);
+                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE_WIDTH, pixelY);
                 if (samples[i][j] == NO_DATA_VALUE) {
                     samples[i][j] = Double.NaN;
                     allValid = false;
