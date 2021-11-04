@@ -1,12 +1,10 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
-import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 

@@ -1,34 +1,17 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus90m;
 
-import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
-import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.snap.dem.dataio.cdem.CDEMElevationTile;
-import org.esa.snap.dem.dataio.cdem.CDEMFile;
-import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Copernicus90mElevationModel extends BaseElevationModel {
-
-    private Map<String, List<Copernicus90mFile>> tileMap = new HashMap<>();
-    private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn("GeoTIFF");
-    int NUM_PIXELS_PER_TILE_WIDTH;
-    double NUM_PIXELS_PER_TILE_WIDTHinv;
-    double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTH;
-    double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTHinv;
-
 
     public Copernicus90mElevationModel(ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
@@ -36,42 +19,38 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
 
     @Override
     public double getIndexX(final GeoPos geoPos) {
-        return ((geoPos.lon + 180.0) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv);
+        return ((geoPos.lon + 180.0) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv);
     }
 
     @Override
     public double getIndexY(final GeoPos geoPos) {
-        return ((90.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv);
+        return ((90.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv);
     }
 
     @Override
     public GeoPos getGeoPos(final PixelPos pixelPos) {
-        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0;
-        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0;
+        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y - 90.0;
+        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X - 180.0;
         return new GeoPos(pixelLat, pixelLon);
     }
 
-
     private void init(final GeoPos geoPos) {
 
-        int width = CopernicusElevationTile.determineWidth(geoPos, 90);
-        NUM_PIXELS_PER_TILE = 1200;
-        NUM_PIXELS_PER_TILE_WIDTH = width;
+        NUM_PIXELS_PER_TILE_X = CopernicusElevationTile.determineWidth(geoPos, 90);
+        NUM_PIXELS_PER_TILE_Y = descriptor.getTileHeight();
 
+        NUM_PIXELS_PER_TILE_X_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_X;
+        NUM_PIXELS_PER_TILE_Y_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_Y;
 
+        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_X;
+        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE_Y;
 
-        NUM_PIXELS_PER_TILEinv = 1.0 / (double) NUM_PIXELS_PER_TILE;
-        NUM_PIXELS_PER_TILE_WIDTHinv = 1.0 / (double) NUM_PIXELS_PER_TILE_WIDTH;
-
-        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_WIDTH;
-        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
-
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
-
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTH = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_WIDTHinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_X;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_Y;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y;
     }
+
     @Override
     public synchronized double getElevation(final GeoPos geoPos) throws Exception {
 
@@ -79,23 +58,19 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
             geoPos.lon -= 360;
         }
         init(geoPos);
+
         final double pixelY = getIndexY(geoPos);
         if (pixelY < 0 || Double.isNaN(pixelY)) {
             return NO_DATA_VALUE;
         }
 
         final double elevation;
-        //synchronized(resampling) {
+
         Resampling.Index newIndex = resampling.createIndex();
         resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
         elevation = resampling.resample(resamplingRaster, newIndex);
-        //}
-        return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
-    }
 
-    @Override
-    public int getWidth(){
-        return RASTER_HEIGHT;
+        return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
     }
 
     @Override
@@ -112,39 +87,6 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
         } catch (Exception e){
             e.printStackTrace();
         }
-
-    }
-
-    @Override
-    public boolean getSamples(final int[] xArray, final int[] yArray, final double[][] samples) throws Exception {
-        boolean allValid = true;
-        int i = 0;
-        for (int y : yArray) {
-            final int tileYIndex = (int) (y * NUM_PIXELS_PER_TILEinv);
-            final int pixelY = y - tileYIndex * NUM_PIXELS_PER_TILE;
-
-            int j = 0;
-            for (int x : xArray) {
-                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILE_WIDTHinv);
-
-                final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
-                if (tile == null) {
-                    samples[i][j] = Double.NaN;
-                    allValid = false;
-                    ++j;
-                    continue;
-                }
-
-                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE_WIDTH, pixelY);
-                if (samples[i][j] == NO_DATA_VALUE) {
-                    samples[i][j] = Double.NaN;
-                    allValid = false;
-                }
-                ++j;
-            }
-            ++i;
-        }
-        return allValid;
     }
 
     public static String createTileFilename(double minLat, double minLon) {

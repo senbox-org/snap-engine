@@ -57,7 +57,6 @@ public class CopernicusDownloader {
         //System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
 
         try{
-            System.out.println(download_path);
             BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream());
             FileOutputStream fileOutputStream = new FileOutputStream(installDir + "/" + target_filename);
             byte[] dataBuffer = new byte[1024];
