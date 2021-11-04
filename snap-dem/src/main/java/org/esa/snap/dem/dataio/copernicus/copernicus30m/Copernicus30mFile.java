@@ -6,15 +6,16 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 
 public class Copernicus30mFile extends ElevationFile {
 
-    private final Copernicus30mElevationModel demModel;
+    private final CopernicusElevationModel demModel;
 
-    public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) {
+    public Copernicus30mFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
-        demModel = copernicus30mElevationModel;
+        demModel = copernicusElevationModel;
     }
 
     @Override
