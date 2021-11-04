@@ -31,6 +31,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     protected final int NUM_X_TILES;
     protected final int NUM_Y_TILES;
     protected int NUM_PIXELS_PER_TILE;
+    protected int NUM_PIXELS_PER_TILE_WIDTH;
     protected double NUM_PIXELS_PER_TILEinv;
     protected final double NO_DATA_VALUE;
     protected int DEGREE_RES;
@@ -40,7 +41,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
 
     protected final ElevationModelDescriptor descriptor;
-    private final ElevationFile[][] elevationFiles;
+    protected final ElevationFile[][] elevationFiles;
     protected final Resampling resampling;
     protected final Resampling.Raster resamplingRaster;
 
@@ -154,7 +155,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return sample == NO_DATA_VALUE ? Double.NaN : sample;
     }
 
-    public final boolean getSamples(final int[] xArray, final int[] yArray, final double[][] samples) throws Exception {
+    public boolean getSamples(final int[] xArray, final int[] yArray, final double[][] samples) throws Exception {
         boolean allValid = true;
         int i = 0;
         for (int y : yArray) {
