@@ -6,6 +6,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
+import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.dem.dataio.cdem.CDEMElevationTile;
@@ -102,6 +103,38 @@ public class Copernicus90mElevationModel extends BaseElevationModel {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public boolean getSamples(final int[] xArray, final int[] yArray, final double[][] samples) throws Exception {
+        boolean allValid = true;
+        int i = 0;
+        for (int y : yArray) {
+            final int tileYIndex = (int) (y * NUM_PIXELS_PER_TILEinv);
+            final int pixelY = y - tileYIndex * NUM_PIXELS_PER_TILE;
+
+            int j = 0;
+            for (int x : xArray) {
+                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILEinv);
+
+                final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
+                if (tile == null) {
+                    samples[i][j] = Double.NaN;
+                    allValid = false;
+                    ++j;
+                    continue;
+                }
+
+                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE, pixelY);
+                if (samples[i][j] == NO_DATA_VALUE) {
+                    samples[i][j] = Double.NaN;
+                    allValid = false;
+                }
+                ++j;
+            }
+            ++i;
+        }
+        return allValid;
     }
 
     public static String createTileFilename(double minLat, double minLon) {
