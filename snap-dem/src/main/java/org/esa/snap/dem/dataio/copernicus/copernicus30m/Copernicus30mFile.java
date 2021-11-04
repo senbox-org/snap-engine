@@ -1,27 +1,26 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
-import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 
 public class Copernicus30mFile extends ElevationFile {
 
-    private final Copernicus30mElevationModel demModel;
+    private final CopernicusElevationModel demModel;
 
-    public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) {
+    public Copernicus30mFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
-        demModel = copernicus30mElevationModel;
+        demModel = copernicusElevationModel;
     }
 
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
-        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);;
+        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);
         tile.setHeight(product.getSceneRasterHeight());
         tile.setWidth(product.getSceneRasterWidth());
         demModel.updateCache(tile);

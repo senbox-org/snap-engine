@@ -28,21 +28,25 @@ import java.util.List;
 
 public abstract class BaseElevationModel implements ElevationModel, Resampling.Raster {
 
-    private final int NUM_X_TILES;
+    protected final int NUM_X_TILES;
     protected final int NUM_Y_TILES;
-    protected final int NUM_PIXELS_PER_TILE;
-    private final double NUM_PIXELS_PER_TILEinv;
+    protected int NUM_PIXELS_PER_TILE_X;
+    protected int NUM_PIXELS_PER_TILE_Y;
+    protected double NUM_PIXELS_PER_TILE_X_inv;
+    protected double NUM_PIXELS_PER_TILE_Y_inv;
     protected final double NO_DATA_VALUE;
-    protected final int DEGREE_RES;
-    private int RASTER_WIDTH;
+    protected int DEGREE_RES;
+    protected int RASTER_WIDTH;
     protected int RASTER_HEIGHT;
-    protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
-    protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv;
+    protected double DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv;
 
     protected final ElevationModelDescriptor descriptor;
-    private final ElevationFile[][] elevationFiles;
+    protected final ElevationFile[][] elevationFiles;
     protected final Resampling resampling;
-    private final Resampling.Raster resamplingRaster;
+    protected final Resampling.Raster resamplingRaster;
 
     private final List<ElevationTile> elevationTileCache = new ArrayList<>(20);
     private int maxCacheSize = 60;
@@ -58,15 +62,19 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         NUM_X_TILES = descriptor.getNumXTiles();
         NUM_Y_TILES = descriptor.getNumYTiles();
         NO_DATA_VALUE = descriptor.getNoDataValue();
-        NUM_PIXELS_PER_TILE = descriptor.getTileWidth();
-        NUM_PIXELS_PER_TILEinv = 1.0 / (double) NUM_PIXELS_PER_TILE;
+        NUM_PIXELS_PER_TILE_X = descriptor.getTileWidth();
+        NUM_PIXELS_PER_TILE_Y = descriptor.getTileHeight();
+        NUM_PIXELS_PER_TILE_X_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_X;
+        NUM_PIXELS_PER_TILE_Y_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_Y;
         DEGREE_RES = descriptor.getTileWidthInDegrees();
 
-        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
-        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_X;
+        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE_Y;
 
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (double) NUM_PIXELS_PER_TILE;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_X;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_Y;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y;
 
         elevationFiles = createElevationFiles();    // must be last
     }
@@ -119,13 +127,6 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return RASTER_HEIGHT;
     }
 
-    public void setWidth(int newWidth){
-        this.RASTER_WIDTH = newWidth;
-    }
-    public void setHeight(int newHeight){
-        this.RASTER_HEIGHT = newHeight;
-    }
-
     public void updateCache(final ElevationTile tile) {
         synchronized (elevationTileCache) {
             elevationTileCache.remove(tile);
@@ -142,14 +143,14 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public final double getSample(final double pixelX, final double pixelY) throws Exception {
-        final int tileXIndex = (int) (pixelX * NUM_PIXELS_PER_TILEinv);
-        final int tileYIndex = (int) (pixelY * NUM_PIXELS_PER_TILEinv);
+        final int tileXIndex = (int) (pixelX * NUM_PIXELS_PER_TILE_X_inv);
+        final int tileYIndex = (int) (pixelY * NUM_PIXELS_PER_TILE_Y_inv);
         final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if (tile == null) {
             return Double.NaN;
         }
-        final double sample = tile.getSample((int) (pixelX - tileXIndex * NUM_PIXELS_PER_TILE),
-                                             (int) (pixelY - tileYIndex * NUM_PIXELS_PER_TILE));
+        final double sample = tile.getSample((int) (pixelX - tileXIndex * NUM_PIXELS_PER_TILE_X),
+                                             (int) (pixelY - tileYIndex * NUM_PIXELS_PER_TILE_Y));
 
         return sample == NO_DATA_VALUE ? Double.NaN : sample;
     }
@@ -158,12 +159,12 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         boolean allValid = true;
         int i = 0;
         for (int y : yArray) {
-            final int tileYIndex = (int) (y * NUM_PIXELS_PER_TILEinv);
-            final int pixelY = y - tileYIndex * NUM_PIXELS_PER_TILE;
+            final int tileYIndex = (int) (y * NUM_PIXELS_PER_TILE_Y_inv);
+            final int pixelY = y - tileYIndex * NUM_PIXELS_PER_TILE_Y;
 
             int j = 0;
             for (int x : xArray) {
-                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILEinv);
+                final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILE_X_inv);
 
                 final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
                 if (tile == null) {
@@ -173,7 +174,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
                     continue;
                 }
 
-                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE, pixelY);
+                samples[i][j] = tile.getSample(x - tileXIndex * NUM_PIXELS_PER_TILE_X, pixelY);
                 if (samples[i][j] == NO_DATA_VALUE) {
                     samples[i][j] = Double.NaN;
                     allValid = false;

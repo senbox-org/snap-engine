@@ -8,7 +8,6 @@ public class Copernicus30mElevationModelDescriptor extends AbstractElevationMode
 
     private static final String NAME = "Copernicus 30m Global DEM";
 
-
     private final int RASTER_SIZE = 3600;
     private final int RASTER_DEGREE_WIDTH = 1;
     public static final int NUM_X_TILES = 360;

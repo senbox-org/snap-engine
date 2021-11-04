@@ -39,18 +39,18 @@ public final class AsterElevationModel extends BaseElevationModel {
 
     @Override
     public double getIndexX(final GeoPos geoPos) {
-        return (geoPos.lon + 180.0) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+        return (geoPos.lon + 180.0) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv;
     }
 
     @Override
     public double getIndexY(final GeoPos geoPos) {
-        return (83.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+        return (83.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv;
     }
 
     @Override
     public GeoPos getGeoPos(final PixelPos pixelPos) {
-        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 83.0;
-        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0;
+        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y - 83.0;
+        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X - 180.0;
         return new GeoPos(pixelLat, pixelLon);
     }
 
