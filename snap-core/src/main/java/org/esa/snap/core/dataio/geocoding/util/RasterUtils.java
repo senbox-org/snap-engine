@@ -202,7 +202,7 @@ public class RasterUtils {
      * reading operation. Please do not use from a context where this is not desired.
      *
      * @param dataNode the raster data node providing the geolocation data
-     * @return the scaled array of geo-lcation values
+     * @return the scaled array of geo-location values
      * @throws IOException on disk-access errors
      */
     public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
