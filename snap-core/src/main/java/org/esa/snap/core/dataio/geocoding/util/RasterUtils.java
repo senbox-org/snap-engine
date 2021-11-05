@@ -30,13 +30,8 @@ import org.opengis.referencing.datum.Ellipsoid;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.image.DataBufferDouble;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import static java.awt.image.DataBuffer.TYPE_DOUBLE;
 
 public class RasterUtils {
 
@@ -211,21 +206,13 @@ public class RasterUtils {
      * @throws IOException on disk-access errors
      */
     public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
-        final Raster dataRaster = dataNode.getGeophysicalImage().getData();
-        final SampleModel sampleModel = dataRaster.getSampleModel();
-        if (sampleModel.getDataType() == TYPE_DOUBLE && sampleModel.getNumBands() == 1) {
-            return ((DataBufferDouble) dataRaster.getDataBuffer()).getData();
-        } else {
-            final Dimension rasterSize = dataNode.getRasterSize();
-            final double[] values = new double[rasterSize.width * rasterSize.height];
-            dataRaster.getSamples(0, 0, rasterSize.width, rasterSize.height, 0, values);
-
-            // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
-            dataNode.unloadRasterData();
-            dataNode.removeCachedImageData();
-
-            return values;
-        }
+        final Dimension rasterSize = dataNode.getRasterSize();
+        final double[] geoData = new double[rasterSize.width * rasterSize.height];
+        dataNode.readPixels(0, 0, rasterSize.width, rasterSize.height, geoData);
+        // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
+        dataNode.unloadRasterData();
+        dataNode.removeCachedImageData();
+        return geoData;
     }
 
     // returns all (x/y) positions that have a latitude above the defined pole-angle threshold
