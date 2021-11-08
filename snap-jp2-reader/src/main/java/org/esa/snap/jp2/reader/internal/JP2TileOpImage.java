@@ -98,8 +98,11 @@ public class JP2TileOpImage extends SourcelessOpImage {
 
     @Override
     protected synchronized void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
+        //the internal reader doesn't manage more 4 bands in input
+        //the libopenjpg is used for the jp2 multiband input
         try {
-            if (this.useOpenJp2Jna) {
+            if (this.useOpenJp2Jna){
+                //maybe add a parameter to indicate the jpg2000 have more 4 bands. In this case, 
                 computeRectDirect(levelDestinationRaster, levelDestinationRectangle);
             } else {
                 computeRectIndirect(levelDestinationRaster, levelDestinationRectangle);
@@ -146,7 +149,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private void writeDataOnLevelRaster(WritableRaster levelDestinationRaster, Raster readTileImage) {
-        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{this.bandSource.getBandIndex()});
+        int index = this.bandSource.getBandIndex();
+        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{index});
         levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(), readBandRaster);
     }
 
