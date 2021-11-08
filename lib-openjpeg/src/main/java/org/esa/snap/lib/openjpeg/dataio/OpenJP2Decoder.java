@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,6 +50,7 @@ public class OpenJP2Decoder implements AutoCloseable {
     private int dataType;
     private int tileIndex;
     private int bandIndex;
+    private int numBands;
     private Logger logger;
     private final Set<Path> pendingWrites;
     private Function<Path, Void> writeCompletedCallback;
@@ -89,6 +91,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         pImage = new PointerByReference();
         OpenJp2.opj_read_header(pStream, pCodec, pImage);
         Image jImage = RasterUtils.dereference(Image.class, pImage.getValue());
+        this.numBands = jImage.numcomps;
         ImageComponent component = ((ImageComponent[]) jImage.comps.toArray(jImage.numcomps))[this.bandIndex];
         width = component.w;
         height = component.h;
@@ -166,6 +169,10 @@ public class OpenJP2Decoder implements AutoCloseable {
                 jImage.numcomps == 3 && comps[0].dx == comps[0].dy && comps[1].dx != 1) {
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_SYCC;
         } else if (jImage.numcomps <= 2) {
+            jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
+        } else
+        {
+            logger.warning("color_space checking :" +jImage.color_space);
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         }
         return comps;
@@ -251,7 +258,9 @@ public class OpenJP2Decoder implements AutoCloseable {
         while (this.pendingWrites.contains(this.tileFile)) {
             Thread.yield();
         }
-        int[] bandOffsets = new int[] { 0 };
+
+        int[] bandOffsets = new int[this.numBands];
+        Arrays.fill(bandOffsets,0);
         DataBuffer buffer;
         if (!Files.exists(this.tileFile)) {
             ImageComponent[] components = decode();
@@ -267,6 +276,7 @@ public class OpenJP2Decoder implements AutoCloseable {
                     logger.warning(ex.getMessage());
                 }
             });
+            this.logger.info("components.length: "+components.length+";  this.bandIndex:"+this.bandIndex);
             if (components.length > 1) {
                 for (int i = 0; i < components.length; i++) {
                     final int index = i;
@@ -277,10 +287,12 @@ public class OpenJP2Decoder implements AutoCloseable {
                                 fName = fName.substring(0, fName.lastIndexOf("_")) + "_" + String.valueOf(index) + ".raw";
                                 Path otherBandFile = Paths.get(fName);
                                 this.pendingWrites.add(otherBandFile);
+                                this.logger.info(fName+";"+this.bandIndex);
                                 RasterUtils.write(components[index].w, components[index].h,
                                         components[index].data.getPointer().getIntArray(0, components[index].w * components[index].h),
                                         this.dataType, otherBandFile, this.writeCompletedCallback);
                             } catch (Exception ex) {
+                                this.logger.info("EXception");
                                 logger.warning(ex.getMessage());
                             }
                         });
@@ -344,6 +356,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         }
         SampleModel sampleModel = new PixelInterleavedSampleModel(this.dataType, width, height, 1, width, bandOffsets);
         WritableRaster raster = null;
+        System.out.println("SunWritableRaster "+buffer.getSize());
         try {
             raster = new SunWritableRaster(sampleModel, buffer, new Point(0, 0));
         } catch (Exception e) {
