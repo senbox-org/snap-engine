@@ -130,7 +130,6 @@ public class JP2ProductReader extends AbstractProductReader {
                 }
                 productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, false);
             }
-
             Product product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
             product.setFileLocation(jp2File.toFile());
             product.setProductReader(this);
@@ -142,6 +141,7 @@ public class JP2ProductReader extends AbstractProductReader {
             if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
                 metadataRoot.addElement(imageInfo.toMetadataElement());
                 metadataRoot.addElement(csInfo.toMetadataElement());
+                logger.log(Level.INFO, csInfo.toMetadataElement()+";"+imageInfo.toMetadataElement());
             }
             if (metadata != null) {
                 metadata.setFileName(jp2File.toString());

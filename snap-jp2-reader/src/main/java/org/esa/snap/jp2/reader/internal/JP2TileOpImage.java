@@ -69,8 +69,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
         this.tileOffsetFromDecompressedImageX = tileOffsetFromDecompressedImageX;
         this.tileOffsetFromDecompressedImageY = tileOffsetFromDecompressedImageY;
 
-        String openJp2 = OpenJpegExecRetriever.getOpenJp2();
-        this.useOpenJp2Jna = openJp2 != null && this.bandData.getBandCount() == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
+        String openJp2 = OpenJpegExecRetriever.getOpenJp2();//&& (this.bandData.getBandCount() == 1 || this.bandData.getBandCount() > 4)
+        this.useOpenJp2Jna = openJp2 != null && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
         try {
             this.tileFilePrefix = Utils.getChecksum(PathUtils.getFileNameWithoutExtension(getLocalImageFile()));
         } catch (IOException e) {
@@ -114,9 +114,9 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private void computeRectDirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws IOException {
-        if (this.bandSource.getBandIndex() != 0) {
-            throw new IllegalStateException("The OpenJP2Decoder API can be used to the band count is 1 and band index is 0.");
-        }
+        // if (this.bandSource.getBandIndex() != 0) {
+        //     throw new IllegalStateException("The OpenJP2Decoder API can be used to the band count is 1 and band index is 0.");
+        // }
         int level = getLevel();
         Path localCacheFolder = this.bandData.getLocalCacheFolder();
         Path localImageFile = getLocalImageFile();
@@ -190,7 +190,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
             } else {
                 tileFileName = tileFile.toString();
             }
-
+            logger.info("-r"+ String.valueOf(level)+"-l"+ Byte.toString(LAYER)+"-t"+ String.valueOf(this.decompressTileIndex)
+                +"-p"+String.valueOf(DataBuffer.getDataTypeSize(getSampleModel().getDataType())));
             final Map<String, String> params = new HashMap<>();
             params.put("-i", Utils.GetIterativeShortPathNameW(localImageFile.toString()));
             params.put("-r", String.valueOf(level));
