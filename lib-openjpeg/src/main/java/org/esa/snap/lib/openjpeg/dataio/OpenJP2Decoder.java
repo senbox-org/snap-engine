@@ -257,44 +257,24 @@ public class OpenJP2Decoder implements AutoCloseable {
         while (this.pendingWrites.contains(this.tileFile)) {
             Thread.yield();
         }
-
+        // int[] bandOffsets = new int[] {0};
         int[] bandOffsets = new int[this.numBands];
         Arrays.fill(bandOffsets,0);
         DataBuffer buffer;
         if (!Files.exists(this.tileFile)) {
             ImageComponent[] components = decode();
-            ImageComponent component = components[this.bandIndex];
-            width = component.w;
-            height = component.h;
-            pixels = component.data.getPointer().getIntArray(0, component.w * component.h);
+            // ImageComponent component = components[this.bandIndex];
+            width = components[this.bandIndex].w;
+            height = components[this.bandIndex].h;
+            pixels = components[this.bandIndex].data.getPointer().getIntArray(0, components[this.bandIndex].w * components[this.bandIndex].h);
             executor.submit(() -> {
                 try {
                     this.pendingWrites.add(this.tileFile);
-                    RasterUtils.write(component.w, component.h, pixels, this.dataType, this.tileFile, this.writeCompletedCallback);
+                    RasterUtils.write(components[this.bandIndex].w, components[this.bandIndex].h, pixels, this.dataType, this.tileFile, this.writeCompletedCallback);
                 } catch (Exception ex) {
                     logger.warning(ex.getMessage());
                 }
             });
-            if (components.length > 1) {
-                for (int i = 0; i < components.length; i++) {
-                    final int index = i;
-                    if (index != this.bandIndex) {
-                        executor.submit(() -> {
-                            try {
-                                String fName = this.tileFile.getFileName().toString();
-                                fName = fName.substring(0, fName.lastIndexOf("_")) + "_" + String.valueOf(index) + ".raw";
-                                Path otherBandFile = Paths.get(fName);
-                                this.pendingWrites.add(otherBandFile);
-                                RasterUtils.write(components[index].w, components[index].h,
-                                        components[index].data.getPointer().getIntArray(0, components[index].w * components[index].h),
-                                        this.dataType, otherBandFile, this.writeCompletedCallback);
-                            } catch (Exception ex) {
-                                logger.warning(ex.getMessage());
-                            }
-                        });
-                    }
-                }
-            }
             switch (this.dataType) {
                 case DataBuffer.TYPE_BYTE:
                     buffer = RasterUtils.extractROIAsByteBuffer(pixels, width, height, roi);
