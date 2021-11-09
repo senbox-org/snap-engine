@@ -45,7 +45,12 @@ public class JtsGeometryConverter implements Converter<Geometry> {
             return null;
         }
         try {
-            return new WKTReader().read(text);
+            final Geometry geometry = new WKTReader().read(text);
+            if (geometry == null) {
+                // unfortunately, the WKTReader does not always throw an exception if the WKT is invalid
+                throw new ConversionException("The geometry could not be parsed.");
+            }
+            return geometry;
         } catch (ParseException e) {
             throw new ConversionException("Could not parse geometry.", e);
         }
