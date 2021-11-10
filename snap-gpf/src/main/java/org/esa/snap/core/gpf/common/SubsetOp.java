@@ -81,7 +81,7 @@ public class SubsetOp extends Operator {
     private String[] bandNames;
 
     @Parameter(description = "The list of tie-point grid names.", alias = "tiePointGrids",
-            rasterDataNodeType = TiePointGrid.class)
+            rasterDataNodeType = TiePointGrid.class, label = "Tie-Point Grids")
     private String[] tiePointGridNames;
 
     @Parameter(converter = RectangleConverter.class,
