@@ -356,7 +356,6 @@ public class OpenJP2Decoder implements AutoCloseable {
         }
         SampleModel sampleModel = new PixelInterleavedSampleModel(this.dataType, width, height, 1, width, bandOffsets);
         WritableRaster raster = null;
-        System.out.println("SunWritableRaster "+buffer.getSize());
         try {
             raster = new SunWritableRaster(sampleModel, buffer, new Point(0, 0));
         } catch (Exception e) {
