@@ -172,7 +172,6 @@ public class OpenJP2Decoder implements AutoCloseable {
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         } else
         {
-            logger.warning("color_space checking :" +jImage.color_space);
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         }
         return comps;
@@ -276,7 +275,6 @@ public class OpenJP2Decoder implements AutoCloseable {
                     logger.warning(ex.getMessage());
                 }
             });
-            this.logger.info("components.length: "+components.length+";  this.bandIndex:"+this.bandIndex);
             if (components.length > 1) {
                 for (int i = 0; i < components.length; i++) {
                     final int index = i;
@@ -287,12 +285,10 @@ public class OpenJP2Decoder implements AutoCloseable {
                                 fName = fName.substring(0, fName.lastIndexOf("_")) + "_" + String.valueOf(index) + ".raw";
                                 Path otherBandFile = Paths.get(fName);
                                 this.pendingWrites.add(otherBandFile);
-                                this.logger.info(fName+";"+this.bandIndex);
                                 RasterUtils.write(components[index].w, components[index].h,
                                         components[index].data.getPointer().getIntArray(0, components[index].w * components[index].h),
                                         this.dataType, otherBandFile, this.writeCompletedCallback);
                             } catch (Exception ex) {
-                                this.logger.info("EXception");
                                 logger.warning(ex.getMessage());
                             }
                         });
