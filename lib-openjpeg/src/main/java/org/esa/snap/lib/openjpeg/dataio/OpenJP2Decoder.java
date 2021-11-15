@@ -103,6 +103,12 @@ public class OpenJP2Decoder implements AutoCloseable {
             return null;
         };
     }
+    /**
+     * Returns the extracted image bands number
+     */
+    public int getBandNumber() throws IOException {
+        return this.numBands;
+    }
 
     /**
      * Returns the extracted image dimensions
