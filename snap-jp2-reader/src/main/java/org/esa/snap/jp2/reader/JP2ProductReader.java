@@ -141,7 +141,6 @@ public class JP2ProductReader extends AbstractProductReader {
             if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
                 metadataRoot.addElement(imageInfo.toMetadataElement());
                 metadataRoot.addElement(csInfo.toMetadataElement());
-                logger.log(Level.INFO, csInfo.toMetadataElement()+";"+imageInfo.toMetadataElement());
             }
             if (metadata != null) {
                 metadata.setFileName(jp2File.toString());

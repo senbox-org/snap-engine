@@ -172,8 +172,7 @@ public class OpenJP2Decoder implements AutoCloseable {
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         } else
         {
-            System.out.println("color_space checking :" +jImage.color_space);
-            jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_UNSPECIFIED;
+            jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         }
         return comps;
     }
@@ -264,7 +263,6 @@ public class OpenJP2Decoder implements AutoCloseable {
         DataBuffer buffer;
         if (!Files.exists(this.tileFile)) {
             ImageComponent[] components = decode();
-            // ImageComponent component = components[this.bandIndex];
             width = components[this.bandIndex].w;
             height = components[this.bandIndex].h;
             pixels = components[this.bandIndex].data.getPointer().getIntArray(0, components[this.bandIndex].w * components[this.bandIndex].h);
@@ -286,12 +284,10 @@ public class OpenJP2Decoder implements AutoCloseable {
             //                     fName = fName.substring(0, fName.lastIndexOf("_")) + "_" + String.valueOf(index) + ".raw";
             //                     Path otherBandFile = Paths.get(fName);
             //                     this.pendingWrites.add(otherBandFile);
-            //                     System.out.println(fName+";"+this.bandIndex);
             //                     RasterUtils.write(components[index].w, components[index].h,
             //                             components[index].data.getPointer().getIntArray(0, components[index].w * components[index].h),
             //                             this.dataType, otherBandFile, this.writeCompletedCallback);
             //                 } catch (Exception ex) {
-            //                     this.logger.info("Exception");
             //                     logger.warning(ex.getMessage());
             //                 }
             //             });
