@@ -263,7 +263,6 @@ public class OpenJP2Decoder implements AutoCloseable {
         DataBuffer buffer;
         if (!Files.exists(this.tileFile)) {
             ImageComponent[] components = decode();
-            // ImageComponent component = components[this.bandIndex];
             width = components[this.bandIndex].w;
             height = components[this.bandIndex].h;
             pixels = components[this.bandIndex].data.getPointer().getIntArray(0, components[this.bandIndex].w * components[this.bandIndex].h);
