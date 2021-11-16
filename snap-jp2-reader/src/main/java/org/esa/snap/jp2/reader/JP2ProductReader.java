@@ -130,7 +130,6 @@ public class JP2ProductReader extends AbstractProductReader {
                 }
                 productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, false);
             }
-
             Product product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
             product.setFileLocation(jp2File.toFile());
             product.setProductReader(this);
