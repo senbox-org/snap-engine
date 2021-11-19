@@ -182,14 +182,14 @@ public final class ReaderUtils {
 
         if (latCorners == null || lonCorners == null) return;
 
-        final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = Math.min(10, Math.max(2, product.getSceneRasterWidth()));
+        final int gridHeight = Math.min(10, Math.max(2, product.getSceneRasterHeight()));
 
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
@@ -221,8 +221,8 @@ public final class ReaderUtils {
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
