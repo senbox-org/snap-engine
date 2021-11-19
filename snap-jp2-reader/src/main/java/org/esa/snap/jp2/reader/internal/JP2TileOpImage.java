@@ -45,6 +45,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
     private JP2BandData bandData;
     private DecompressedImageSupport decompressedImageSupport;
     private boolean useOpenJp2Jna;
+    private boolean isAvailableOpenJp2Jna;
     private int decompressTileIndex;
     private int tileOffsetFromDecompressedImageX;
     private int tileOffsetFromDecompressedImageY;
@@ -70,7 +71,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
         this.tileOffsetFromDecompressedImageY = tileOffsetFromDecompressedImageY;
 
         String openJp2 = OpenJpegExecRetriever.getOpenJp2();
-        this.useOpenJp2Jna = openJp2 != null && this.bandData.getBandCount() == 1 && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
+        this.isAvailableOpenJp2Jna = openJp2 != null;
+        this.useOpenJp2Jna = isAvailableOpenJp2Jna && Boolean.parseBoolean(Config.instance("s2tbx").preferences().get("use.openjp2.jna", "false"));
         try {
             this.tileFilePrefix = Utils.getChecksum(PathUtils.getFileNameWithoutExtension(getLocalImageFile()));
         } catch (IOException e) {
@@ -99,11 +101,16 @@ public class JP2TileOpImage extends SourcelessOpImage {
     @Override
     protected synchronized void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
         try {
-            if (this.useOpenJp2Jna) {
-                computeRectDirect(levelDestinationRaster, levelDestinationRectangle);
-            } else {
-                computeRectIndirect(levelDestinationRaster, levelDestinationRectangle);
+            boolean alreadyComputed = false;
+            if(this.isAvailableOpenJp2Jna){
+                //in case og OpenJp2Jna available, 3 possibilities:
+                //    1/ the preference is actived, the computation is done
+                //    2/ the are more than 4 bands, the computation is enforced
+                //    3/ the are less than 5 bands and the preference is not enable, the computation is left to be done
+                alreadyComputed = computeRectDirect(levelDestinationRaster, levelDestinationRectangle);
             }
+            if(!alreadyComputed)
+                computeRectIndirect(levelDestinationRaster, levelDestinationRectangle);
         } catch (InterruptedException | IOException ex) {
             throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
         }
@@ -113,22 +120,24 @@ public class JP2TileOpImage extends SourcelessOpImage {
         return this.decompressedImageSupport.getLevel();
     }
 
-    private void computeRectDirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws IOException {
-        if (this.bandSource.getBandIndex() != 0) {
-            throw new IllegalStateException("The OpenJP2Decoder API can be used to the band count is 1 and band index is 0.");
-        }
+    private boolean computeRectDirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws IOException {
         int level = getLevel();
         Path localCacheFolder = this.bandData.getLocalCacheFolder();
         Path localImageFile = getLocalImageFile();
         int dataType = getSampleModel().getDataType();
         try (OpenJP2Decoder decoder = new OpenJP2Decoder(localCacheFolder, localImageFile, this.bandSource.getBandIndex(), dataType, level, LAYER, this.decompressTileIndex)) {
             Dimension levelDecompressedImageSize = decoder.getImageDimensions(); // the whole image size from the specified level
-            Rectangle intersection = computeLevelDirectIntersection(level, levelDecompressedImageSize.width, levelDecompressedImageSize.height, levelDestinationRectangle);
-            if (!intersection.isEmpty()) {
-                Raster readTileImage = decoder.read(intersection);
-                writeDataOnLevelRaster(levelDestinationRaster, readTileImage);
+            if(decoder.getBandNumber()>4 || this.useOpenJp2Jna) {
+                Rectangle intersection = computeLevelDirectIntersection(level, levelDecompressedImageSize.width, levelDecompressedImageSize.height, levelDestinationRectangle);
+                if (!intersection.isEmpty()) {
+                    Raster readTileImage = decoder.read(intersection);
+                    writeDataOnLevelRaster(levelDestinationRaster, readTileImage);
+                }
+            }else {
+                return false;
             }
         }
+        return true;
     }
 
     private void computeRectIndirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws InterruptedException, IOException {
@@ -146,7 +155,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private void writeDataOnLevelRaster(WritableRaster levelDestinationRaster, Raster readTileImage) {
-        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{this.bandSource.getBandIndex()});
+        int index = this.bandSource.getBandIndex();
+        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{index});
         levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(), readBandRaster);
     }
 
@@ -190,7 +200,6 @@ public class JP2TileOpImage extends SourcelessOpImage {
             } else {
                 tileFileName = tileFile.toString();
             }
-
             final Map<String, String> params = new HashMap<>();
             params.put("-i", Utils.GetIterativeShortPathNameW(localImageFile.toString()));
             params.put("-r", String.valueOf(level));
