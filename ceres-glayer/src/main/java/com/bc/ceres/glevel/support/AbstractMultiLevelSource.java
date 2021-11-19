@@ -113,7 +113,7 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
      */
     protected synchronized void checkLevel(int level) {
         if (level < 0 || level >= getModel().getLevelCount()) {
-            throw new IllegalArgumentException("level=" + level);
+            throw new IllegalArgumentException("level=" + level + " < " + getModel().getLevelCount());
         }
     }
 
