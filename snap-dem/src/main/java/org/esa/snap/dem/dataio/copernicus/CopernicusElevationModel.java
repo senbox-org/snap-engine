@@ -1,5 +1,6 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.BaseElevationModel;
@@ -7,11 +8,12 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mFile;
 
 import java.io.File;
 
 public abstract class CopernicusElevationModel extends BaseElevationModel {
+
+    private final static GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
 
     public CopernicusElevationModel(final ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
@@ -81,13 +83,15 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
 
         final String fileName = createTileFilename(minLat, minLon);
         final File localFile = new File(demInstallDir, fileName);
-        GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         try {
-            elevationFiles[x][NUM_Y_TILES - 1 - y] = new Copernicus90mFile(this, localFile, plugIn.createReaderInstance());
+            elevationFiles[x][NUM_Y_TILES - 1 - y] = createElevationFile(this, localFile, plugIn.createReaderInstance());
         } catch (Exception e){
             e.printStackTrace();
         }
     }
+
+    protected abstract ElevationFile createElevationFile(final CopernicusElevationModel model,
+                                                         final File localFile, final ProductReader reader);
 
     public String createTileFilename(double minLat, double minLon) {
         int lat = (int) minLat;
