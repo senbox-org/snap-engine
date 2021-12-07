@@ -17,7 +17,6 @@ package org.esa.snap.core.util;
 
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
-import org.esa.snap.runtime.EngineConfig;
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
@@ -70,32 +69,30 @@ public class SystemUtils {
     private static final String MANIFEST_ATTR_MODULE_NAME = "OpenIDE-Module-Name";
     private static final String MANIFEST_ATTR_MODULE_VERSION = "OpenIDE-Module-Specification-Version";
 
-    // Branding Defaults
-
-    // This allows alternate java methods to be called (for instance SnapAboutBox vs BrandedAboutBox).  These would
-    // methods which essentially override the Snap method and make future merging a lot easier.
-    public static final boolean BRANDED_APPLICATION = false;
-
-    // Even though there is a method to let the snap.properties override this ... there are several locations which need this
-    // hardcoded in String constant form ... so for branding this constant should be set here.
-//    public static final String APPLICATION_NAME = "SNAP";
-    public static final String APPLICATION_NAME = "SeaDAS";
-
-
-        public static final String APPLICATION_HOMEPAGE_URL_DEFAULT = "https://step.esa.int";
-//    public static final String APPLICATION_HOMEPAGE_URL_DEFAULT = "https://seadas.gsfc.nasa.gov";
-
 
     public static final String VERSION_FILE_NAME = "VERSION.txt";
 
-        public static final String REMOTE_VERSION_FILE_URL = "https://step.esa.int/downloads/" + VERSION_FILE_NAME;
-//    public static final String REMOTE_VERSION_FILE_URL = "https://seadas.gsfc.nasa.gov/downloads/" + VERSION_FILE_NAME;
-//
-        public static final String DEFAULT_REPORT_ISSUE_PAGE_URL = "http://step.esa.int/main/community/issue-reporting/";
-//    public static final String DEFAULT_REPORT_ISSUE_PAGE_URL = "https://seadas.gsfc.nasa.gov/help/issue-reporting/";
 
+    // Some Property Keys and Defaults relevant to branding
+    // These property values can be branded by setting in the snap.properties file
 
+    public static final String APPLICATION_NAME_PROPERTY_KEY = ".application.name";
+    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SNAP";
 
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_KEY = ".remote.version.url";
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads" + "/" + VERSION_FILE_NAME;
+
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_KEY = ".homepage.url";
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
+
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_KEY = ".report.issue.url";
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int/main/community/issue-reporting";
+
+    public static final String RELEASE_NOTES_URL_PROPERTY_KEY = ".release.notes.url";
+    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://senbox.atlassian.net/issues/?filter=-4&jql=project%20%3D%20SNAP%20AND%20fixVersion%20%3D%20";
+
+    public static final String MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY = ".mainframe.title.include.version";
+    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
 
 
 
@@ -142,7 +139,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationHomepageUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", APPLICATION_HOMEPAGE_URL_DEFAULT);
+        return Config.instance().preferences().get(getApplicationContextId() + APPLICATION_HOMEPAGE_URL_PROPERTY_KEY, APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT);
     }
 
     /**
@@ -220,21 +217,6 @@ public class SystemUtils {
         return Config.instance().preferences().get("snap.context", "snap");
     }
 
-
-    /**
-     * This method makes the assumption that as part of the branding the snap.context field was set to match the properties file name
-     *
-     * @return application properties file
-     */
-
-    public static File getPropertiesFiles() {
-        Path appEtcDir = SystemUtils.getApplicationHomeDir().toPath().resolve("etc");
-        String fileName = getApplicationContextId() + ".properties";
-        return new File (appEtcDir.toFile(), fileName);
-    }
-
-
-
     /**
      * Gets the application name used in logger output and information messages.
      * The context ID is configured using the system property
@@ -246,7 +228,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationName() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", APPLICATION_NAME);
+        return Config.instance().preferences().get(getApplicationContextId() + APPLICATION_NAME_PROPERTY_KEY, APPLICATION_NAME_PROPERTY_DEFAULT);
     }
 
     /**
@@ -514,29 +496,22 @@ public class SystemUtils {
 
     // variable key changed from ".remoteVersion.url" to ".remote.version.url"
     public static String getApplicationRemoteVersionUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".remote.version.url", REMOTE_VERSION_FILE_URL);
-
-        // These are the previous lines within this previously unused method just in case someone needs them
-//        final String key = getApplicationContextId() + ".remoteVersion.url";
-//        String applicationHomepageUrl = getApplicationHomepageUrl();
-//        if (!applicationHomepageUrl.endsWith("/")) {
-//            applicationHomepageUrl = applicationHomepageUrl + "/";
-//        }
-//        return System.getProperty(key, applicationHomepageUrl + "software/version.txt");
-
+        return Config.instance().preferences().get(getApplicationContextId() + REMOTE_VERSION_FILE_URL_PROPERTY_KEY, REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT);
     }
 
 
     // variable key changed from ".reportIssuePageUrl" to ".report.issue.url"
     public static String getReportAnIssueUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".report.issue.url", DEFAULT_REPORT_ISSUE_PAGE_URL);
+        return Config.instance().preferences().get(getApplicationContextId() + REPORT_ISSUE_PAGE_URL_PROPERTY_KEY, REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT);
     }
 
 
+    public static String getReleaseNotesUrl() {
+        return Config.instance().preferences().get(getApplicationContextId() + RELEASE_NOTES_URL_PROPERTY_KEY, RELEASE_NOTES_URL_PROPERTY_DEFAULT);
+    }
 
-
-    public static boolean isBrandedApplication() {
-        String value = Config.instance().preferences().get(getApplicationContextId() + ".branding", Boolean.toString(false));
+    public static boolean isMainframeTitleIncludeVersion() {
+        String value = Config.instance().preferences().get(SystemUtils.getApplicationContextId() + MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY, Boolean.toString(MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT));
         return Boolean.parseBoolean(value);
     }
 

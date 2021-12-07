@@ -38,7 +38,6 @@ public class VersionChecker {
 
     public static final String PK_CHECK_INTERVAL = "snap.versionCheck.interval";
     private static final String PK_LAST_DATE = "snap.versionCheck.lastDate";
-    private static final String REMOTE_VERSION_FILE_URL = SystemUtils.getApplicationRemoteVersionUrl();
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     private static VersionChecker instance = new VersionChecker();
@@ -85,12 +84,12 @@ public class VersionChecker {
     public boolean checkForNewRelease() {
         Version localVersion = getLocalVersion();
         if (localVersion == null) {
-            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new SNAP version. Local version could not be retrieved.");
+            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new " + SystemUtils.getApplicationName() + " version. Local version could not be retrieved.");
             return false;
         }
         Version remoteVersion = getRemoteVersion();
         if (remoteVersion == null) {
-            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new SNAP version. Remote version could not be retrieved.");
+            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new " + SystemUtils.getApplicationName() + " version. Remote version could not be retrieved.");
             return false;
         }
         return compareVersions();
@@ -140,7 +139,7 @@ public class VersionChecker {
         if (remoteVersion.get() == null) {
             try {
                 remoteVersion.set(readVersionFromStream(
-                        remoteVersionStream == null ? new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openStream() : remoteVersionStream));
+                        remoteVersionStream == null ? new URL(SystemUtils.getApplicationRemoteVersionUrl()).openStream() : remoteVersionStream));
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
