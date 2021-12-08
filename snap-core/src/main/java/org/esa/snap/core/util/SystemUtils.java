@@ -493,6 +493,7 @@ public class SystemUtils {
 
     }
 
+    // variable key changed from ".remoteVersion.url" to ".remote.version.url"
     public static String getApplicationRemoteVersionUrl() {
         return Config.instance().preferences().get(getApplicationContextId() + REMOTE_VERSION_FILE_URL_PROPERTY_KEY, REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT);
     }
