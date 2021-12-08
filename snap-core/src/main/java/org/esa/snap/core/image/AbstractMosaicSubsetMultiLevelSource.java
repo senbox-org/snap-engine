@@ -67,7 +67,6 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         super.reset();
 
         this.tileImageDisposer.disposeAll();
-        System.gc();
     }
 
     protected final <TileDataType> List<RenderedImage> buildDecompressedTileImages(Rectangle imageCellReadBounds, DecompressedImageSupport decompressedImageSupport, int defaultImageWidth,
