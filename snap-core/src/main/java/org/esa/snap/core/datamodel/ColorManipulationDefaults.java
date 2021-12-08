@@ -1,7 +1,6 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.util.NamingConvention;
-
 import static org.esa.snap.core.util.NamingConvention.*;
 
 
