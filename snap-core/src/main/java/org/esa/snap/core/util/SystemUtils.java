@@ -95,7 +95,6 @@ public class SystemUtils {
     public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
 
 
-
     /**
      * The SNAP system logger. Default name is "org.esa.snap" which may be overridden by system property "snap.logger.name".
      */
@@ -309,7 +308,7 @@ public class SystemUtils {
         if (File.separatorChar != _URL_DIR_SEPARATOR_CHAR
                 && urlPath.indexOf(_URL_DIR_SEPARATOR_CHAR) >= 0) {
             return urlPath.replace(_URL_DIR_SEPARATOR_CHAR,
-                                   File.separatorChar);
+                    File.separatorChar);
         }
         return urlPath;
     }
@@ -467,7 +466,7 @@ public class SystemUtils {
             System.setErr(originalErrStream);
         }
         int parallelism = Config.instance().preferences().getInt(SNAP_PARALLELISM_PROPERTY_NAME,
-                                                                 Runtime.getRuntime().availableProcessors());
+                Runtime.getRuntime().availableProcessors());
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
         tileScheduler.setParallelism(parallelism);
         LOG.fine(MessageFormat.format("JAI tile scheduler parallelism set to {0}", parallelism));
@@ -513,7 +512,6 @@ public class SystemUtils {
         String value = Config.instance().preferences().get(SystemUtils.getApplicationContextId() + MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY, Boolean.toString(MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT));
         return Boolean.parseBoolean(value);
     }
-
 
 
     /**
