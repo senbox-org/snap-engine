@@ -1,6 +1,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.util.NamingConvention;
+
 import static org.esa.snap.core.util.NamingConvention.*;
 
 
@@ -67,8 +68,6 @@ public class ColorManipulationDefaults {
     private static final String PROPERTY_ROOT_KEY = "color.manipulation";
 
 
-
-
     // Palettes (Default)
 
     private static final String PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".palette.default";
@@ -80,24 +79,23 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".gray.scale";
     public static final String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_LABEL = OPTION_COLOR_GRAY_SCALE;
     public static final String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_TOOLTIP = "The palette file to use when GRAY-SCALE is selected";
-    public static  String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_DEFAULT = PALETTE_GRAY_SCALE_DEFAULT;
+    public static String PROPERTY_PALETTE_DEFAULT_GRAY_SCALE_DEFAULT = PALETTE_GRAY_SCALE_DEFAULT;
 
     public static final String PROPERTY_PALETTE_DEFAULT_STANDARD_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".standard";
     public static final String PROPERTY_PALETTE_DEFAULT_STANDARD_LABEL = OPTION_COLOR_STANDARD;
-    public static final String PROPERTY_PALETTE_DEFAULT_STANDARD_TOOLTIP = "The palette file to use when STANDARD " + COLOR_UPPER_CASE +" is selected";
-    public static  String PROPERTY_PALETTE_DEFAULT_STANDARD_DEFAULT = PALETTE_STANDARD_DEFAULT;
+    public static final String PROPERTY_PALETTE_DEFAULT_STANDARD_TOOLTIP = "The palette file to use when STANDARD " + COLOR_UPPER_CASE + " is selected";
+    public static String PROPERTY_PALETTE_DEFAULT_STANDARD_DEFAULT = PALETTE_STANDARD_DEFAULT;
 
     public static final String PROPERTY_PALETTE_DEFAULT_UNIVERSAL_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".universal";
     public static final String PROPERTY_PALETTE_DEFAULT_UNIVERSAL_LABEL = OPTION_COLOR_UNIVERSAL;
     public static final String PROPERTY_PALETTE_DEFAULT_UNIVERSAL_TOOLTIP = "<html>The color blind compliant palette file to use when <br>" +
             "UNIVERSAL " + COLOR_UPPER_CASE + " is selected</html>";
-    public static  String PROPERTY_PALETTE_DEFAULT_UNIVERSAL_DEFAULT = PALETTE_UNIVERSAL_DEFAULT;
+    public static String PROPERTY_PALETTE_DEFAULT_UNIVERSAL_DEFAULT = PALETTE_UNIVERSAL_DEFAULT;
 
     public static final String PROPERTY_PALETTE_DEFAULT_ANOMALIES_KEY = PROPERTY_PALETTE_DEFAULT_KEY_SUFFIX + ".anomalies";
     public static final String PROPERTY_PALETTE_DEFAULT_ANOMALIES_LABEL = OPTION_COLOR_ANOMALIES;
     public static final String PROPERTY_PALETTE_DEFAULT_ANOMALIES_TOOLTIP = "The palette file to use when ANOMALIES is selected";
-    public static  String PROPERTY_PALETTE_DEFAULT_ANOMALIES_DEFAULT = PALETTE_ANOMALIES_DEFAULT;
-
+    public static String PROPERTY_PALETTE_DEFAULT_ANOMALIES_DEFAULT = PALETTE_ANOMALIES_DEFAULT;
 
 
     // Scheme (Default)
@@ -130,7 +128,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_GENERAL_RANGE_TOOLTIP = "Range options to use when NOT using a " + COLOR_LOWER_CASE + "scheme";
     public static final String PROPERTY_GENERAL_RANGE_OPTION1 = OPTION_RANGE_FROM_DATA;
     public static final String PROPERTY_GENERAL_RANGE_OPTION2 = OPTION_RANGE_FROM_PALETTE;
-    public static  String PROPERTY_GENERAL_RANGE_DEFAULT = OPTION_RANGE_FROM_DATA;
+    public static String PROPERTY_GENERAL_RANGE_DEFAULT = OPTION_RANGE_FROM_DATA;
 
     public static final String PROPERTY_GENERAL_LOG_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".log";
     public static final String PROPERTY_GENERAL_LOG_LABEL = "Log Scaling";
@@ -138,12 +136,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_GENERAL_LOG_OPTION1 = OPTION_LOG_TRUE;
     public static final String PROPERTY_GENERAL_LOG_OPTION2 = OPTION_LOG_FALSE;
     public static final String PROPERTY_GENERAL_LOG_OPTION3 = OPTION_LOG_FROM_PALETTE;
-    public static  String PROPERTY_GENERAL_LOG_DEFAULT = OPTION_LOG_FALSE;
-
-
-
-
-
+    public static String PROPERTY_GENERAL_LOG_DEFAULT = OPTION_LOG_FALSE;
 
 
     // Scheme (Band Lookup))
@@ -157,9 +150,9 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".auto.apply";
     public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Auto-apply";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE +" schemes automatically<br>" +
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE + " schemes automatically<br>" +
             " when opening a band based on its name</html>";
-    public static  boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
 
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
@@ -179,7 +172,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_RANGE_OPTION1 = OPTION_RANGE_FROM_SCHEME;
     public static final String PROPERTY_SCHEME_RANGE_OPTION2 = OPTION_RANGE_FROM_DATA;
     public static final String PROPERTY_SCHEME_RANGE_OPTION3 = OPTION_RANGE_FROM_PALETTE;
-    public static  String PROPERTY_SCHEME_RANGE_DEFAULT = OPTION_RANGE_FROM_SCHEME;
+    public static String PROPERTY_SCHEME_RANGE_DEFAULT = OPTION_RANGE_FROM_SCHEME;
 
     public static final String PROPERTY_SCHEME_LOG_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".log";
     public static final String PROPERTY_SCHEME_LOG_LABEL = "Log Scaling";
@@ -188,9 +181,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_LOG_OPTION2 = OPTION_LOG_FROM_PALETTE;
     public static final String PROPERTY_SCHEME_LOG_OPTION3 = OPTION_LOG_TRUE;
     public static final String PROPERTY_SCHEME_LOG_OPTION4 = OPTION_LOG_FALSE;
-    public static  String PROPERTY_SCHEME_LOG_DEFAULT = OPTION_LOG_FROM_SCHEME;
-
-
+    public static String PROPERTY_SCHEME_LOG_DEFAULT = OPTION_LOG_FROM_SCHEME;
 
 
     // Range Percentile Default Options
@@ -205,38 +196,33 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_RANGE_PERCENTILE_LABEL = "Percentile Default";
     public static final String PROPERTY_RANGE_PERCENTILE_TOOLTIP = "The percentile of the data to use for determining min, max range when clicking the using the " +
             "band statistics 'From Data'";
-    public static  double PROPERTY_RANGE_PERCENTILE_DEFAULT = 92.0;
+    public static double PROPERTY_RANGE_PERCENTILE_DEFAULT = 92.0;
 
 
     public static final String PROPERTY_100_PERCENT_BUTTON_KEY = PROPERTY_PERCENTILE_KEY_SUFFIX + ".100.percent.enable.button";
     public static final String PROPERTY_100_PERCENT_BUTTON_LABEL = "100% Button";
     public static final String PROPERTY_100_PERCENT_BUTTON_TOOLTIP = "Enable 100% range button in the sliders editor";
-    public static  boolean PROPERTY_100_PERCENT_BUTTON_DEFAULT = true;
+    public static boolean PROPERTY_100_PERCENT_BUTTON_DEFAULT = true;
 
     public static final String PROPERTY_95_PERCENT_BUTTON_KEY = PROPERTY_PERCENTILE_KEY_SUFFIX + ".95.percent.enable.button";
     public static final String PROPERTY_95_PERCENT_BUTTON_LABEL = "95% Button";
     public static final String PROPERTY_95_PERCENT_BUTTON_TOOLTIP = "Enable 95% range button in the sliders editor";
-    public static  boolean PROPERTY_95_PERCENT_BUTTON_DEFAULT = false;
+    public static boolean PROPERTY_95_PERCENT_BUTTON_DEFAULT = false;
 
     public static final String PROPERTY_1_SIGMA_BUTTON_KEY = PROPERTY_PERCENTILE_KEY_SUFFIX + ".1.sigma.enable.button";
     public static final String PROPERTY_1_SIGMA_BUTTON_LABEL = "<html>1&sigma; (68.27%) Button</html>";
     public static final String PROPERTY_1_SIGMA_BUTTON_TOOLTIP = "Enable 68.27% range button in the sliders editor";
-    public static  boolean PROPERTY_1_SIGMA_BUTTON_DEFAULT = false;
+    public static boolean PROPERTY_1_SIGMA_BUTTON_DEFAULT = false;
 
     public static final String PROPERTY_2_SIGMA_BUTTON_KEY = PROPERTY_PERCENTILE_KEY_SUFFIX + ".2.sigma.enable.button";
     public static final String PROPERTY_2_SIGMA_BUTTON_LABEL = "<html>2&sigma; (95.45%) Button</html>";
     public static final String PROPERTY_2_SIGMA_BUTTON_TOOLTIP = "Enable 95.45% range button in the sliders editor";
-    public static  boolean PROPERTY_2_SIGMA_BUTTON_DEFAULT = true;
+    public static boolean PROPERTY_2_SIGMA_BUTTON_DEFAULT = true;
 
     public static final String PROPERTY_3_SIGMA_BUTTON_KEY = PROPERTY_PERCENTILE_KEY_SUFFIX + ".3.sigma.enable.button";
     public static final String PROPERTY_3_SIGMA_BUTTON_LABEL = "<html>3&sigma; (99.73%) Button</html>";
     public static final String PROPERTY_3_SIGMA_BUTTON_TOOLTIP = "Enable 99.73% range button in the sliders editor";
-    public static  boolean PROPERTY_3_SIGMA_BUTTON_DEFAULT = true;
-
-
-
-
-
+    public static boolean PROPERTY_3_SIGMA_BUTTON_DEFAULT = true;
 
 
     // Scheme Selector Options
@@ -258,20 +244,19 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_TOOLTIP = "<html>Scheme selector will display all schemes <br>" +
             "including schemes with missing cpd files</html>";
-    public static  boolean PROPERTY_SCHEME_SHOW_DISABLED_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_SHOW_DISABLED_DEFAULT = false;
 
     public static final String PROPERTY_SCHEME_SORT_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".sort";
     public static final String PROPERTY_SCHEME_SORT_LABEL = "Sort";
     public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "<html>Scheme selector will display all schemes alphabetically sorted<br>" +
             " as opposed to the original xml order</html>";
-    public static  boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
+    public static boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".split";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_LABEL = "Categorize";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Scheme selector will display all schemes categorized into<br>" +
             "primary and additional categories by the PRIMARY field<br> of the color_palette_schemes.xml</html>";
-    public static  boolean PROPERTY_SCHEME_CATEGORIZE_DISPLAY_DEFAULT = true;
-
+    public static boolean PROPERTY_SCHEME_CATEGORIZE_DISPLAY_DEFAULT = true;
 
 
     // Sliders Editor Options
@@ -285,25 +270,23 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".extra.info";
     public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_LABEL = "Show Information";
     public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_TOOLTIP = "Display information in the histogram/slider view by default";
-    public static  boolean PROPERTY_SLIDERS_SHOW_INFORMATION_DEFAULT = true;
+    public static boolean PROPERTY_SLIDERS_SHOW_INFORMATION_DEFAULT = true;
 
     public static final String PROPERTY_SLIDERS_ZOOM_IN_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.in";
     public static final String PROPERTY_SLIDERS_ZOOM_IN_LABEL = "Histogram Zoom";
     public static final String PROPERTY_SLIDERS_ZOOM_IN_TOOLTIP = "Display histogram slider view zoomed in by default";
-    public static  boolean PROPERTY_SLIDERS_ZOOM_IN_DEFAULT = true;
+    public static boolean PROPERTY_SLIDERS_ZOOM_IN_DEFAULT = true;
 
 
     public static final String PROPERTY_ZOOM_VERTICAL_BUTTONS_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.vertical.enable.buttons";
     public static final String PROPERTY_ZOOM_VERTICAL_BUTTONS_LABEL = "Vertical Zoom Buttons";
     public static final String PROPERTY_ZOOM_VERTICAL_BUTTONS_TOOLTIP = "Enable zoom vertical buttons in the sliders editor";
-    public static  boolean PROPERTY_ZOOM_VERTICAL_BUTTONS_DEFAULT = true;
+    public static boolean PROPERTY_ZOOM_VERTICAL_BUTTONS_DEFAULT = true;
 
     public static final String PROPERTY_INFORMATION_BUTTON_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".extra.info.enable.button";
     public static final String PROPERTY_INFORMATION_BUTTON_LABEL = "Information Button";
     public static final String PROPERTY_INFORMATION_BUTTON_TOOLTIP = "Enable histogram overlay information button in the sliders editor";
-    public static  boolean PROPERTY_INFORMATION_BUTTON_DEFAULT = true;
-
-
+    public static boolean PROPERTY_INFORMATION_BUTTON_DEFAULT = true;
 
 
     // RGB Options
@@ -317,13 +300,12 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_RGB_OPTIONS_MIN_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.min";
     public static final String PROPERTY_RGB_OPTIONS_MIN_LABEL = "Range Button (Min)";
     public static final String PROPERTY_RGB_OPTIONS_MIN_TOOLTIP = "The min value to use in the RGB (A..B) range button";
-    public static  double PROPERTY_RGB_OPTIONS_MIN_DEFAULT = 0.0;
+    public static double PROPERTY_RGB_OPTIONS_MIN_DEFAULT = 0.0;
 
     public static final String PROPERTY_RGB_OPTIONS_MAX_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.max";
     public static final String PROPERTY_RGB_OPTIONS_MAX_LABEL = "Range Button (Max)";
     public static final String PROPERTY_RGB_OPTIONS_MAX_TOOLTIP = "The max value to use in the RGB (A..B) range button";
-    public static  double PROPERTY_RGB_OPTIONS_MAX_DEFAULT = 1.0;
-
+    public static double PROPERTY_RGB_OPTIONS_MAX_DEFAULT = 1.0;
 
 
     // Restore to defaults
