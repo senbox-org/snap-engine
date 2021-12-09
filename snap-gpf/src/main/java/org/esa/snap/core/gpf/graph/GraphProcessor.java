@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -163,12 +162,11 @@ public class GraphProcessor {
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
         dimList.sort((d1, d2) -> {
-            long area1 = (long) (d1.width) * (long) (d1.height);
-            long area2 = (long) (d2.width) * (long) (d2.height);
-            return Long.compare(area1, area2);
+            Long area1 = (long) (d1.width) * (long) (d1.height);
+            Long area2 = (long) (d2.width) * (long) (d2.height);
+            return area1.compareTo(area2);
         });
 
-//        System.out.println("graphContext = " + graphContext.getGraph().getId());
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
 
@@ -290,8 +288,7 @@ public class GraphProcessor {
                 }
             }
 
-            awaitAllPermits(semaphore, parallelism);
-
+            acquirePermits(semaphore, parallelism);
             if (error != null) {
                 throw error;
             }
@@ -324,7 +321,7 @@ public class GraphProcessor {
                                       TileScheduler tileScheduler, TileComputationListener[] listeners,
                                       int parallelism) {
         Point[] points = new Point[]{new Point(tileX, tileY)};
-        acquirePermit(semaphore);
+        acquirePermits(semaphore, 1);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
@@ -338,30 +335,14 @@ public class GraphProcessor {
         /////////////////////////////////////////////////////////////////////
     }
 
-    private static void acquirePermit(Semaphore semaphore) {
+    private static void acquirePermits(Semaphore semaphore, int permits) {
         try {
-            semaphore.acquire(1);
+            semaphore.acquire(permits);
         } catch (InterruptedException e) {
             throw new OperatorException(e);
         }
     }
 
-    private static void awaitAllPermits(Semaphore semaphore, int permits) {
-        // This way of acquiring permits is a workaround for issue SNAP-1479
-        // https://senbox.atlassian.net/browse/SNAP-1479
-        try {
-            boolean allAcquired;
-            do {
-//                System.out.printf("Waiting for Permits %d/%d%n", semaphore.availablePermits(), permits);
-                allAcquired = semaphore.tryAcquire(permits, 1, TimeUnit.SECONDS);
-                if (!allAcquired) {
-                    Thread.sleep(200);
-                }
-            } while (!allAcquired);
-        } catch (InterruptedException e) {
-            throw new OperatorException(e);
-        }
-    }
 
     private void fireProcessingStarted(GraphContext graphContext) {
         for (GraphProcessingObserver processingObserver : observerList) {
@@ -402,7 +383,6 @@ public class GraphProcessor {
         public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                  int tileY,
                                  Raster raster) {
-//            System.out.printf("releasing [%d,%d] - %s%n", tileX, tileY, image);
             semaphore.release();
         }
 
