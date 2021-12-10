@@ -32,7 +32,7 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
     private final SRTM3GeoTiffElevationModel demModel;
 
     private static final String remoteHTTP1 = "http://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/TIFF/";
-    private static final String remoteHTTP2 = "http://cgiar-csi-srtm.openterrain.org.s3.amazonaws.com/source/";
+    private static final String remoteHTTP2 = "https://download.esa.int/step/auxdata/dem/SRTM90/tiff/";
 
     private static final String remoteFTP = Settings.instance().get("DEM.srtm3GeoTiffDEM_FTP", "xftp.jrc.it");
     private static final String remotePath = Settings.getPath("DEM.srtm3GeoTiffDEM_remotePath");
