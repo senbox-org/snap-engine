@@ -83,9 +83,12 @@ public class OpenJP2Decoder implements AutoCloseable {
                 + "_" + String.valueOf(this.bandIndex) + ".raw");*/
         this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
                 + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
+        
         pStream = OpenJp2.opj_stream_create_default_file_stream(file.toAbsolutePath().toString(), Constants.OPJ_STREAM_READ);
-        if (pStream == null || pStream.getValue() == null)
+        if (pStream == null || pStream.getValue() == null){
+            logger.info("file to stream: "+file.toAbsolutePath().toString()+";"+file.getFileName().toString()+"_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
             throw new RuntimeException("Failed to create the stream from the file");
+        }
         this.parameters = initDecodeParams(file);
         pCodec = setupDecoder(parameters);
         pImage = new PointerByReference();
