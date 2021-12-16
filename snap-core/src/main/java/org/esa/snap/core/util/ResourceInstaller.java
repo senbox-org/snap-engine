@@ -87,6 +87,9 @@ public class ResourceInstaller {
         }
     }
 
+
+
+
     private void copyResources(Collection<Path> resources, ProgressMonitor pm) throws IOException {
         synchronized (ResourceInstaller.class) {
             pm.beginTask("Copying resources...", resources.size());
