@@ -86,7 +86,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         
         pStream = OpenJp2.opj_stream_create_default_file_stream(file.toAbsolutePath().toString(), Constants.OPJ_STREAM_READ);
         if (pStream == null || pStream.getValue() == null){
-            throw new RuntimeException("Failed to create the stream from the file:\n"+file.toAbsolutePath().toString()+";"+file.getFileName().toString()+"_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
+            throw new RuntimeException("Failed to create the stream from the file:\n"+Utils.getChecksum(file.toAbsolutePath().toString())+";"+file.getFileName().toString()+"_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
         }
         this.parameters = initDecodeParams(file);
         pCodec = setupDecoder(parameters);
