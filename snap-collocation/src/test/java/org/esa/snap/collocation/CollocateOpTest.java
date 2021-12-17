@@ -47,18 +47,18 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertEquals(true, op.getRenameMasterComponents());
-        assertEquals(true, op.getRenameSlaveComponents());
+        assertEquals(true, op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -139,18 +139,18 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertEquals(true, op.getRenameMasterComponents());
-        assertEquals(true, op.getRenameSlaveComponents());
+        assertEquals(true, op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -225,10 +225,10 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
@@ -246,11 +246,11 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameSlaveComponents(false);
-        op.setSlaveComponentPattern("");
+        op.setRenameDependentComponents(false);
+        op.setDependentComponentPattern("");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(slaveProduct);
 
         try {
             op.getTargetProduct();
