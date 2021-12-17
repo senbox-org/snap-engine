@@ -59,7 +59,7 @@ import static java.text.MessageFormat.format;
 /**
  * This operator is used to spatially collocate two data products. It requires two source products,
  * a {@code master} product which provides the Coordinate reference system and grid into which
- * the raster data sets of the {@code slave} product are resampled to.
+ * the raster data sets of the {@code dependent} product are resampled to.
  *
  * @author Ralf Quast
  * @author Norman Fomferra
