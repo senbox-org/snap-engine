@@ -111,7 +111,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Enable";
     public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Ude following scheme parameters as default<br>" +
             " when opening a band<br>otherwise use settings from the file reader.</html>";
-    public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
+    public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = true;
 
 
     public static final String PROPERTY_GENERAL_PALETTE_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".palette";
@@ -152,7 +152,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Auto-apply";
     public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE + " schemes automatically<br>" +
             " when opening a band based on its name</html>";
-    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
 
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
