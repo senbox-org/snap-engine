@@ -77,22 +77,28 @@ public class SystemUtils {
     // These property values can be branded by setting in the snap.properties file
 
     public static final String APPLICATION_NAME_PROPERTY_KEY = ".application.name";
-    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SNAP";
+    //    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SNAP";
+    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SeaDAS";
 
     public static final String REMOTE_VERSION_FILE_URL_PROPERTY_KEY = ".remote.version.url";
-    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads" + "/" + VERSION_FILE_NAME;
+    //    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads/VERSION.txt";
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/downloads/VERSION.txt";
 
     public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_KEY = ".homepage.url";
-    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
+    //    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov";
 
     public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_KEY = ".report.issue.url";
-    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int/main/community/issue-reporting";
+    //    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int/main/community/issue-reporting";
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/help/issue-reporting";
 
     public static final String RELEASE_NOTES_URL_PROPERTY_KEY = ".release.notes.url";
-    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://senbox.atlassian.net/issues/?filter=-4&jql=project%20%3D%20SNAP%20AND%20fixVersion%20%3D%20";
+    //    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://senbox.atlassian.net/issues/?filter=-4&jql=project%20%3D%20SNAP%20AND%20fixVersion%20%3D%20";
+    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/announcement";
 
     public static final String MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY = ".mainframe.title.include.version";
-    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
+    //    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
+    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = true;
 
 
     /**
