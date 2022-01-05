@@ -81,8 +81,8 @@ public class SystemUtils {
     public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SeaDAS";
 
     public static final String REMOTE_VERSION_FILE_URL_PROPERTY_KEY = ".remote.version.url";
-//    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads/VERSION.txt";
-    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/downloads/VERSION.txt";
+    //        public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads" + "/" + VERSION_FILE_NAME;
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/downloads" + "/" + VERSION_FILE_NAME;
 
     public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_KEY = ".homepage.url";
     //    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
