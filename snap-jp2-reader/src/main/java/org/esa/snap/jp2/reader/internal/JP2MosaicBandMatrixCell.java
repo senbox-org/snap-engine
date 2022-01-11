@@ -67,6 +67,9 @@ public class JP2MosaicBandMatrixCell implements BandMatrixCell, JP2BandData {
     }
 
     public int getDefaultImageWidth() {
-        return getCellWidth();
+        // the images of a Sentinel2 band may overlap and return the decompressed image width
+        // to compute the correct number of tiles extracted from the JP2 file
+        // example: for cell width to display=5001, source image width=5490, tile width=640 the total tile count must be 9 and not 8.
+        return this.tileLayout.width; // return getCellWidth();
     }
 }
