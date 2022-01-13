@@ -235,6 +235,9 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private static int computeIndirectLevelOffsetToRead(int level, int tileOffsetFromDecompressedImage, int levelTileSize, int levelReadTileOffset, int levelDecompressedImageSize) {
+        if (levelTileSize > levelDecompressedImageSize) {
+            throw new IllegalArgumentException("The image tile size " + levelTileSize + " to display is greater then the decompressed image size " + levelDecompressedImageSize +" extracted from the source file for level " + level+".");
+        }
         int levelDecompressedTileOffset = ImageUtils.computeLevelSize(tileOffsetFromDecompressedImage, level);
         int value = levelDecompressedTileOffset + levelReadTileOffset;
         if ((levelDecompressedTileOffset + levelTileSize) > levelDecompressedImageSize) {
