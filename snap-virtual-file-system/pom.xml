@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>8.6cv</version>
+        <version>8.0.3.6cv</version>
     </parent>
 
     <artifactId>snap-virtual-file-system</artifactId>
