@@ -324,14 +324,12 @@ public class EnvisatProductReader extends AbstractProductReader {
                 flagDsList.add(band);
             }
         }
-        if (!flagDsList.isEmpty()) {
-            for (Band flagDs : flagDsList) {
-                String flagDsName = flagDs.getName();
-                Mask[] masks = productFile.createDefaultMasks(flagDsName);
-                ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-                for (Mask mask : masks) {
-                    maskGroup.add(mask);
-                }
+        for (Band flagDs : flagDsList) {
+            String flagDsName = flagDs.getName();
+            Mask[] masks = productFile.createDefaultMasks(flagDsName);
+            ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+            for (Mask mask : masks) {
+                maskGroup.add(mask);
             }
         }
     }
