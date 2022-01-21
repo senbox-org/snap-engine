@@ -436,6 +436,7 @@ public class RemoteRepositoriesManager {
             }
         } else {
             List<EOProduct> pageResults = query.execute();
+            downloaderListener.notifyProductCount(pageResults.size());
 
             ThreadStatus.checkCancelled(thread);
 
