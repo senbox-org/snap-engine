@@ -400,6 +400,9 @@ public class Product extends ProductNode {
     }
 
     static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
+        if (listener == null) {
+            return;
+        }
         switch (event.getType()) {
             case ProductNodeEvent.NODE_CHANGED:
                 listener.nodeChanged(event);
