@@ -238,7 +238,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(geoCoding, imageWidth, imageHeight, false);
         }
 
-        return readProduct(geoTiffImageReader, productName, productBounds);
+        return readProduct(geoTiffImageReader, productName, productBounds, null, subsetDef);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
