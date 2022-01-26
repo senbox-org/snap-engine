@@ -415,6 +415,9 @@ public class RemoteRepositoriesManager {
             }
 
             query.setPageSize(pageSize);
+            if(query.supportsPaging()) {
+                query.setMaxResults(pageSize);
+            }
 
             WKTReader wktReader = new WKTReader();
             productList = new ArrayList<>();
