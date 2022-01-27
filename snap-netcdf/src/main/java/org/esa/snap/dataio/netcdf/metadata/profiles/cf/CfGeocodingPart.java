@@ -15,7 +15,6 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ForwardCoding;
@@ -57,6 +56,8 @@ import ucar.nc2.Variable;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.List;
+
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
 
 public class CfGeocodingPart extends ProfilePartIO {
 
@@ -393,14 +394,17 @@ public class CfGeocodingPart extends ProfilePartIO {
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                   width, height, resolutionInKm);
 
+        final boolean fractionalAccuracy = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
         final ForwardCoding forward;
-        final InverseCoding inverse;
-        final boolean fractionalAccuracy = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
         if (fractionalAccuracy) {
             forward = ComponentFactory.getForward(PixelInterpolatingForward.KEY);
-            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING);
         } else {
             forward = ComponentFactory.getForward(PixelForward.KEY);
+        }
+        final InverseCoding inverse;
+        if (fractionalAccuracy) {
+            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING);
+        } else {
             inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
         }
 

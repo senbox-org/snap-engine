@@ -72,6 +72,15 @@ public interface ElevationModelDescriptor {
     int getTileWidth();
 
     /**
+     * Gets the height of a tile in pixels. Note for most dem tiles the width and height are the same
+     *
+     * @return the height of a tile in pixels, e.g. 1800
+     */
+    default int getTileHeight() {
+        return getTileWidth();
+    }
+
+    /**
      * Gets the number of tiles in x direction
      *
      * @return number of rows

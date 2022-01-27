@@ -4,7 +4,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>8.0.3.6cv</version>
+        <version>8.0.9.1cv</version>
     </parent>
 
     <artifactId>snap-engine-utilities</artifactId>
@@ -30,13 +30,6 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
         </dependency>
-<!--
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
--->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -52,9 +45,6 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.engine_utilities.*</publicPackage>
-<!--
-                        <publicPackage>org.apache.commons.*</publicPackage>
-                        -->
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -72,4 +62,3 @@
         </plugins>
     </build>
 </project>
-

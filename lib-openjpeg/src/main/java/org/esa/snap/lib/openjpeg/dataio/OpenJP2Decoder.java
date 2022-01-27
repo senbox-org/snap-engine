@@ -2,6 +2,7 @@ package org.esa.snap.lib.openjpeg.dataio;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.lib.openjpeg.dataio.library.Callbacks;
 import org.esa.snap.lib.openjpeg.dataio.library.Constants;
 import org.esa.snap.lib.openjpeg.dataio.library.Enums;
@@ -10,25 +11,15 @@ import org.esa.snap.lib.openjpeg.dataio.struct.DecompressParams;
 import org.esa.snap.lib.openjpeg.dataio.struct.DecompressionCodec;
 import org.esa.snap.lib.openjpeg.dataio.struct.Image;
 import org.esa.snap.lib.openjpeg.dataio.struct.ImageComponent;
-import org.esa.snap.core.util.SystemUtils;
 import sun.awt.image.SunWritableRaster;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.PixelInterleavedSampleModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +50,7 @@ public class OpenJP2Decoder implements AutoCloseable {
     private int dataType;
     private int tileIndex;
     private int bandIndex;
+    private int numBands;
     private Logger logger;
     private final Set<Path> pendingWrites;
     private Function<Path, Void> writeCompletedCallback;
@@ -85,10 +77,12 @@ public class OpenJP2Decoder implements AutoCloseable {
         this.layer = layer;
         this.tileIndex = tileIndex;
         this.bandIndex = bandIndex == -1 ? 0 : bandIndex;
-        this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
+        /*this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
                 + "_" + String.valueOf(tileIndex)
                 + "_" + String.valueOf(resolution)
-                + "_" + String.valueOf(this.bandIndex) + ".raw");
+                + "_" + String.valueOf(this.bandIndex) + ".raw");*/
+        this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
+                + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
         pStream = OpenJp2.opj_stream_create_default_file_stream(file.toAbsolutePath().toString(), Constants.OPJ_STREAM_READ);
         if (pStream == null || pStream.getValue() == null)
             throw new RuntimeException("Failed to create the stream from the file");
@@ -97,6 +91,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         pImage = new PointerByReference();
         OpenJp2.opj_read_header(pStream, pCodec, pImage);
         Image jImage = RasterUtils.dereference(Image.class, pImage.getValue());
+        this.numBands = jImage.numcomps;
         ImageComponent component = ((ImageComponent[]) jImage.comps.toArray(jImage.numcomps))[this.bandIndex];
         width = component.w;
         height = component.h;
@@ -107,6 +102,12 @@ public class OpenJP2Decoder implements AutoCloseable {
             }
             return null;
         };
+    }
+    /**
+     * Returns the extracted image bands number
+     */
+    public int getBandNumber() throws IOException {
+        return this.numBands;
     }
 
     /**
@@ -174,6 +175,9 @@ public class OpenJP2Decoder implements AutoCloseable {
                 jImage.numcomps == 3 && comps[0].dx == comps[0].dy && comps[1].dx != 1) {
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_SYCC;
         } else if (jImage.numcomps <= 2) {
+            jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
+        } else
+        {
             jImage.color_space = Enums.ColorSpace.OPJ_CLRSPC_GRAY;
         }
         return comps;
@@ -259,42 +263,23 @@ public class OpenJP2Decoder implements AutoCloseable {
         while (this.pendingWrites.contains(this.tileFile)) {
             Thread.yield();
         }
-        int[] bandOffsets = new int[] { 0 };
+        // int[] bandOffsets = new int[] {0};
+        int[] bandOffsets = new int[this.numBands];
+        Arrays.fill(bandOffsets,0);
         DataBuffer buffer;
         if (!Files.exists(this.tileFile)) {
             ImageComponent[] components = decode();
-            ImageComponent component = components[this.bandIndex];
-            width = component.w;
-            height = component.h;
-            pixels = component.data.getPointer().getIntArray(0, component.w * component.h);
+            width = components[this.bandIndex].w;
+            height = components[this.bandIndex].h;
+            pixels = components[this.bandIndex].data.getPointer().getIntArray(0, components[this.bandIndex].w * components[this.bandIndex].h);
             executor.submit(() -> {
                 try {
                     this.pendingWrites.add(this.tileFile);
-                    RasterUtils.write(component.w, component.h, pixels, this.dataType, this.tileFile, this.writeCompletedCallback);
+                    RasterUtils.write(components[this.bandIndex].w, components[this.bandIndex].h, pixels, this.dataType, this.tileFile, this.writeCompletedCallback);
                 } catch (Exception ex) {
                     logger.warning(ex.getMessage());
                 }
             });
-            if (components.length > 1) {
-                for (int i = 0; i < components.length; i++) {
-                    final int index = i;
-                    if (index != this.bandIndex) {
-                        executor.submit(() -> {
-                            try {
-                                String fName = this.tileFile.getFileName().toString();
-                                fName = fName.substring(0, fName.lastIndexOf("_")) + "_" + String.valueOf(index) + ".raw";
-                                Path otherBandFile = Paths.get(fName);
-                                this.pendingWrites.add(otherBandFile);
-                                RasterUtils.write(components[index].w, components[index].h,
-                                        components[index].data.getPointer().getIntArray(0, components[index].w * components[index].h),
-                                        this.dataType, otherBandFile, this.writeCompletedCallback);
-                            } catch (Exception ex) {
-                                logger.warning(ex.getMessage());
-                            }
-                        });
-                    }
-                }
-            }
             switch (this.dataType) {
                 case DataBuffer.TYPE_BYTE:
                     buffer = RasterUtils.extractROIAsByteBuffer(pixels, width, height, roi);

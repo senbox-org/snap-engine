@@ -357,7 +357,6 @@ public class Band extends AbstractBand {
         Product product = getProductSafe();
         ProductWriter writer = product.getProductWriterSafe();
         writer.writeBandRasterData(this, offsetX, offsetY, width, height, rasterData, pm);
-        removeCachedImageData();
     }
 
     /**

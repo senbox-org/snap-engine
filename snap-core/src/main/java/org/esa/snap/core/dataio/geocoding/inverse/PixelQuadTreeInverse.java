@@ -499,8 +499,8 @@ public class PixelQuadTreeInverse implements InverseCoding, GeoPosCalculator {
             if (minDelta < epsilon && minDeltaResult != null) {
                 if (fractionalAccuracy) {
                     final InterpolationContext context = InterpolationContext.extract(minDeltaResult.x, minDeltaResult.y, longitudes, latitudes, rasterWidth, rasterHeight);
-                    pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
-                    pixelPos.setLocation(pixelPos.x + offsetX, pixelPos.y + offsetY);
+                    final PixelPos interpolated = interpolator.interpolate(geoPos, pixelPos, context);
+                    pixelPos.setLocation(interpolated.x + offsetX, interpolated.y + offsetY);
                 } else {
                     pixelPos.setLocation(minDeltaResult.x + offsetX, minDeltaResult.y + offsetY);
                 }

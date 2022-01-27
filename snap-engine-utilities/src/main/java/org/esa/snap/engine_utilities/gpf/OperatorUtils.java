@@ -52,6 +52,13 @@ public final class OperatorUtils {
     public static final String TPG_LATITUDE = "latitude";
     public static final String TPG_LONGITUDE = "longitude";
 
+    public static String createProductName(final String productName, final String suffix) {
+        if(!productName.endsWith(suffix)) {
+            return productName + suffix;
+        }
+        return productName;
+    }
+
     /**
      * Get incidence angle tie point grid.
      *
@@ -158,21 +165,6 @@ public final class OperatorUtils {
             throw new OperatorException("Band name contains multiple polarizations: " + pol);
         }
         return null;
-    }
-
-    public static String getSubswathFromBandName(final String bandName) {
-
-        String ss = "";
-        final String bandNameU = bandName.toUpperCase();
-        if (bandNameU.contains("_IW")) {
-            int idx = bandNameU.indexOf("_IW")+1;
-            return bandNameU.substring(idx, idx + 3);
-        } else if (bandNameU.contains("_EW")) {
-            int idx = bandNameU.indexOf("_EW")+1;
-            return bandNameU.substring(idx, idx + 3);
-        }
-
-        return "";
     }
 
     /**
@@ -726,10 +718,10 @@ public final class OperatorUtils {
             for (int j = 0; j < gridWidth; ++j) {
                 latTiePoints[i*gridHeight + j] = (float)(scnProp.latMax - i*subSamplingY*delLat);
                 lonTiePoints[i*gridHeight + j] = (float)(scnProp.lonMin + j*subSamplingX*delLon);
-                System.out.print(lonTiePoints[i*gridHeight + j]);
-                System.out.print(" ");
+                //System.out.print(lonTiePoints[i*gridHeight + j]);
+                //System.out.print(" ");
             }
-            System.out.println();
+            //System.out.println();
         }
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
@@ -739,6 +731,14 @@ public final class OperatorUtils {
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, lonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
+
+        if (product.getTiePointGrid(latGrid.getName()) != null) {
+            product.removeTiePointGrid(product.getTiePointGrid(latGrid.getName()));
+        }
+
+        if (product.getTiePointGrid(lonGrid.getName()) != null) {
+            product.removeTiePointGrid(product.getTiePointGrid(lonGrid.getName()));
+        }
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);

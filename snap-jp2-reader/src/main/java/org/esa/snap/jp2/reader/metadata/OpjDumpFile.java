@@ -151,10 +151,12 @@ public class OpjDumpFile {
         List<String> xmlMetadata = fileFormatReader.getXmlMetadata();
         if (xmlMetadata != null && xmlMetadata.size() > 0) {
             this.metadata = GenericXmlMetadata.create(Jp2XmlMetadata.class, xmlMetadata.get(0));
-            this.metadata.setName("XML Metadata");
-            for (int i= 1; i< xmlMetadata.size(); i++) {
-                MetadataElement element = GenericXmlMetadata.create(Jp2XmlMetadata.class, xmlMetadata.get(i)).getRootElement();
-                metadata.getRootElement().addElement(element);
+            if(this.metadata!=null) {
+                this.metadata.setName("XML Metadata");
+                for (int i= 1; i< xmlMetadata.size(); i++) {
+                    MetadataElement element = GenericXmlMetadata.create(Jp2XmlMetadata.class, xmlMetadata.get(i)).getRootElement();
+                    metadata.getRootElement().addElement(element);
+                }
             }
         }
     }

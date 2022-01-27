@@ -21,7 +21,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>8.0.3.6cv</version>
+        <version>8.0.9.1cv</version>
     </parent>
 
     <artifactId>snap-gpf</artifactId>
@@ -140,4 +140,3 @@
         </plugins>
     </build>
 </project>
-

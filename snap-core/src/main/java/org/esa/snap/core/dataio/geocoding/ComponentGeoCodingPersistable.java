@@ -3,18 +3,21 @@ package org.esa.snap.core.dataio.geocoding;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.IOException;
+import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.util.stream.IntStream;
 
@@ -176,14 +179,18 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
                                       resolutionInKm);
         }
 
-        // TODO preliminary location to overwrite non-interpolating spec of input product e.g. for binning with supersampling, mb, 2021-03-31
-        // Tom, please find a better solution.
-        if (Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY) && PixelForward.KEY.equals(forwardKey)) {
-             forwardKey = PixelInterpolatingForward.KEY;
+        final Preferences snapPreferences = Config.instance("snap").preferences();
+        final boolean isFractionalEnabled = snapPreferences.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        if (isFractionalEnabled && PixelForward.KEY.equals(forwardKey)) {
+            forwardKey = PixelInterpolatingForward.KEY;
         }
-        if (Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY) && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
-             inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
+        if (isFractionalEnabled && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
         }
+        if (isFractionalEnabled && PixelGeoIndexInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelGeoIndexInverse.KEY_INTERPOLATING;
+        }
+
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
         final InverseCoding inverseCoding = ComponentFactory.getInverse(inverseKey);
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);

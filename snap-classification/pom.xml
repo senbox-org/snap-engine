@@ -23,7 +23,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>8.0.3.6cv</version>
+        <version>8.0.9.1cv</version>
     </parent>
 
     <name>SNAP Classification</name>
@@ -58,7 +58,7 @@
             <version>1.0.10</version>
         </dependency>
         <dependency>
-            <groupId>net.sf</groupId>
+            <groupId>net.sourceforge</groupId>
             <artifactId>javaml</artifactId>
             <version>0.1.7</version>
         </dependency>

@@ -334,6 +334,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             subsamplingX = lonTPG.getSubSamplingX();
             subsamplingY = lonTPG.getSubSamplingY();
         } else {
+            // this is based on already subsetted geo-location data, we take
+            // the subset in full resolution of the subset here tb 2021-05-12
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
@@ -348,7 +350,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
                                   gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
-                                  this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
+                                  // @todo 1 tb/tb this should also take the subsampling in y direction into account
+                                  this.geoRaster.getRasterResolutionInKm() * subsamplingY,
                                   offsetX, offsetY, subsamplingX, subsamplingY);
         return geoRaster;
     }

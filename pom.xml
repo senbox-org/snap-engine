@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>8.0.3.6cv</version>
+    <version>8.0.9.1cv</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -76,7 +76,7 @@
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
-        <module>snap-product-library</module>
+        <!--module>snap-product-library</module-->
         <module>snap-product-library-v2</module>
         <module>snap-dem</module>
         <module>snap-envi-reader</module>
@@ -634,7 +634,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.1</version>
                 <scope>test</scope>
             </dependency>
 

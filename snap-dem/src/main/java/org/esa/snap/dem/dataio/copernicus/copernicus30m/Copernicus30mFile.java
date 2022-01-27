@@ -5,42 +5,24 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
-import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 
 public class Copernicus30mFile extends ElevationFile {
 
-    private final Copernicus30mElevationModel demModel;
+    private final CopernicusElevationModel demModel;
 
-    public Copernicus30mFile(Copernicus30mElevationModel copernicus30mElevationModel, File localFile, ProductReader reader) {
+    public Copernicus30mFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
-        demModel = copernicus30mElevationModel;
+        demModel = copernicusElevationModel;
     }
 
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
-        final CopernicusElevationTile tile ;
-        if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
-            System.out.println("Rescaling the raster");
-            ResamplingOp resampler = new ResamplingOp();
-            resampler.setParameter("targetWidth", 3600);
-            resampler.setParameter("targetHeight", 3600);
-            resampler.setParameter("upsampling", "Nearest");
-            resampler.setParameter("downsampling", "First");
-            resampler.setParameter("flagDownsampling", "First");
-            resampler.setSourceProduct(product);
-            Product resampled = resampler.getTargetProduct();
-
-
-            System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
-
-
-            tile = new CopernicusElevationTile(demModel, resampled);
-
-        }else{
-            tile = new CopernicusElevationTile(demModel, product);
-        }
+        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);
+        tile.setHeight(product.getSceneRasterHeight());
+        tile.setWidth(product.getSceneRasterWidth());
         demModel.updateCache(tile);
         return tile;
     }
@@ -65,15 +47,9 @@ public class Copernicus30mFile extends ElevationFile {
 
             return downloader.downloadTiles(lat, lon,30);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            remoteFileExists = false;
             return false;
         }
     }
-
-
-
-
-
-
-
 }

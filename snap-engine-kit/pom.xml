@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>8.0.3.6cv</version>
+        <version>8.0.9.1cv</version>
     </parent>
 
     <artifactId>snap-engine-kit</artifactId>
@@ -92,11 +92,11 @@
             <artifactId>snap-engine-utilities</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-product-library</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-product-library-v2</artifactId>

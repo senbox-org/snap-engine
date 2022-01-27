@@ -15,11 +15,7 @@
  */
 package org.esa.snap.engine_utilities.gpf;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
@@ -68,6 +64,10 @@ public class InputProductValidator {
         }
     }
 
+    public boolean isCoregisteredStack() {
+        return StackUtils.isCoregisteredStack(product);
+    }
+
     public void checkIfCoregisteredStack() throws OperatorException {
         if (!StackUtils.isCoregisteredStack(product)) {
             throw new OperatorException(SHOULD_BE_COREGISTERED);
@@ -81,8 +81,11 @@ public class InputProductValidator {
     }
 
     public boolean isCollocated() {
-        return (absRoot != null &&
-                absRoot.getAttribute(AbstractMetadata.collocated_stack).getData().getElemBoolean());
+        if (absRoot != null) {
+            MetadataAttribute attrib = absRoot.getAttribute(AbstractMetadata.collocated_stack);
+            return (attrib != null && attrib.getData().getElemBoolean());
+        }
+        return false;
     }
 
     public boolean isComplex() {

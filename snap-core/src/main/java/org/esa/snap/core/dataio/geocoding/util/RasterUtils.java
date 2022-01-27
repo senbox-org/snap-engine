@@ -207,18 +207,18 @@ public class RasterUtils {
      * reading operation. Please do not use from a context where this is not desired.
      *
      * @param dataNode the raster data node providing the geolocation data
-     * @return the scaled array of geo-lcation values
+     * @return the scaled array of geo-location values
      * @throws IOException on disk-access errors
      */
     public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
         final Dimension rasterSize = dataNode.getRasterSize();
         final double[] geoData = new double[rasterSize.width * rasterSize.height];
-        dataNode.readPixels(0,0,rasterSize.width,rasterSize.height,geoData);
+        dataNode.readPixels(0, 0, rasterSize.width, rasterSize.height, geoData);
         // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
         dataNode.unloadRasterData();
         dataNode.removeCachedImageData();
         return geoData;
-        }
+    }
 
     // returns al (x/y) positions that have a latitude above the defined pole-angle threshold
     private static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {

@@ -138,7 +138,16 @@ public class Jp2XmlMetadata extends XmlMetadata {
         Point2D origin = null;
         String coords = getAttributeValue(JP2ProductReaderConstants.TAG_ORIGIN, null);
         if (coords != null) {
-            origin = new Point2D.Double(Double.parseDouble(coords.split(" ")[0]), Double.parseDouble(coords.split(" ")[1]));
+            // SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+            // origin = new Point2D.Double(Double.parseDouble(coords.split(" ")[0]), Double.parseDouble(coords.split(" ")[1]));
+            // there are JP2 files with values like "  42.788298611111109   23.271622685185189", resulting in empty tokens and tokens starting with white space
+            final String[] result = Arrays.stream(coords.split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+            if (!getCrsGeocoding().equals("EPSG::4326")) {
+                origin = new Point2D.Double(Double.parseDouble(result[0]), Double.parseDouble(result[1]));
+            }
+            else {
+                origin = new Point2D.Double(Double.parseDouble(result[1]), Double.parseDouble(result[0]));
+            }
         }
         return origin;
     }
@@ -146,7 +155,17 @@ public class Jp2XmlMetadata extends XmlMetadata {
     public double getStepX() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
         if (values != null) {
-            return Double.parseDouble(values[0].split(" ")[0]);
+            // SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+            // return Double.parseDouble(values[0].split(" ")[0]);
+            // there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"]
+            if (!getCrsGeocoding().equals("EPSG::4326")) {
+                final String[] result = Arrays.stream(values[0].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+                return Double.parseDouble(result[0]);
+            }
+            else {
+                final String[] result = Arrays.stream(values[1].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+                return Double.parseDouble(result[1]);
+            }
         }
         return 0;
     }
@@ -154,7 +173,17 @@ public class Jp2XmlMetadata extends XmlMetadata {
     public double getStepY() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
         if (values != null) {
-            return Double.parseDouble(values[1].split(" ")[1]);
+            // SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+            //return Double.parseDouble(values[1].split(" ")[1]);
+            // there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"]
+            if (!getCrsGeocoding().equals("EPSG::4326")) {
+                final String[] result = Arrays.stream(values[1].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+                return Double.parseDouble(result[1]);
+            }
+            else {
+                final String[] result = Arrays.stream(values[0].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+                return Double.parseDouble(result[0]);
+            }
         }
         return 0;
     }
