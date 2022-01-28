@@ -115,7 +115,11 @@ class TiffTagToMetadataConverter {
             if (geoTiffTag.hasValueNames()) {
                 sb.append(geoTiffTag.getValueName(tiffField.getAsInt(i)));
             } else {
-                sb.append(tiffField.getValueAsString(i));
+                try{
+                    sb.append(tiffField.getValueAsString(i));
+                } catch (Exception e){
+                    sb.append("99999");
+                }
             }
             if (i + 1 < dataCount) {
                 sb.append(", ");
