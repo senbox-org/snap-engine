@@ -78,34 +78,42 @@ public class OpenJP2Decoder implements AutoCloseable {
         this.layer = layer;
         this.tileIndex = tileIndex;
         this.bandIndex = bandIndex == -1 ? 0 : bandIndex;
+        /*this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
+                + "_" + String.valueOf(tileIndex)
+                + "_" + String.valueOf(resolution)
+                + "_" + String.valueOf(this.bandIndex) + ".raw");*/
         this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
                 + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
-        String tileFileName = "";
-        String fname = file.toAbsolutePath().toString();
-        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-            try {
-                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
-                        + tileFile.getName(tileFile.getNameCount() - 1);
-                fname = Utils.GetIterativeShortPathNameW(fname);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to create the a shorter tile the file");
+        if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), file.toFile()) < 0L)) {
+            String tileFileName="";
+            if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
+                try {
+                    tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
+                            + tileFile.getName(tileFile.getNameCount() - 1);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to create the a shorter tile the file");
+                }
+                this.tileFile = cacheDir.resolve(tileFileName);
             }
-            this.tileFile = cacheDir.resolve(tileFileName);
-        }
-        pStream = OpenJp2.opj_stream_create_default_file_stream(fname, Constants.OPJ_STREAM_READ);
 
-        if (pStream == null || pStream.getValue() == null){
-            throw new RuntimeException("Failed to create the stream from the file: "+file.toAbsolutePath().toString());
+            try {
+                pStream = OpenJp2.opj_stream_create_default_file_stream(Utils.GetIterativeShortPathNameW(file.toString()), Constants.OPJ_STREAM_READ);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create the a shorter input the file");
+            }
+            if (pStream == null || pStream.getValue() == null){
+                throw new RuntimeException("Failed to create the stream from the file: "+file.toAbsolutePath().toString());
+            }
+            this.parameters = initDecodeParams(file);
+            pCodec = setupDecoder(parameters);
+            pImage = new PointerByReference();
+            OpenJp2.opj_read_header(pStream, pCodec, pImage);
+            Image jImage = RasterUtils.dereference(Image.class, pImage.getValue());
+            this.numBands = jImage.numcomps;
+            ImageComponent component = ((ImageComponent[]) jImage.comps.toArray(jImage.numcomps))[this.bandIndex];
+            width = component.w;
+            height = component.h;
         }
-        this.parameters = initDecodeParams(file);
-        pCodec = setupDecoder(parameters);
-        pImage = new PointerByReference();
-        OpenJp2.opj_read_header(pStream, pCodec, pImage);
-        Image jImage = RasterUtils.dereference(Image.class, pImage.getValue());
-        this.numBands = jImage.numcomps;
-        ImageComponent component = ((ImageComponent[]) jImage.comps.toArray(jImage.numcomps))[this.bandIndex];
-        width = component.w;
-        height = component.h;
         this.pendingWrites = Collections.synchronizedSet(new HashSet<>());
         this.writeCompletedCallback = value -> {
             if (value != null) {
