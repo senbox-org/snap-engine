@@ -18,6 +18,7 @@ package org.esa.snap.core.dataio;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
+import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -164,7 +165,6 @@ public class ProductIO {
             if (formatName != null) {
                 final Iterator<ProductReaderPlugIn> it = registry.getReaderPlugIns(formatName);
 
-                selectedPlugIn = null;
                 while (it.hasNext()) {
                     ProductReaderPlugIn plugIn = it.next();
                     DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
@@ -433,6 +433,10 @@ public class ProductIO {
         }
         productWriter.setIncrementalMode(incremental);
 
+        writeProduct(product, file, productWriter, pm);
+    }
+
+    static void writeProduct(Product product, File file, ProductWriter productWriter, ProgressMonitor pm) throws IOException {
         ProductWriter productWriterOld = product.getProductWriter();
         product.setProductWriter(productWriter);
 
@@ -450,8 +454,16 @@ public class ProductIO {
             writeAllBands(product, pm);
             e = System.currentTimeMillis();
             long t2 = e - s;
+            s = System.currentTimeMillis();
+            if (productWriter instanceof DimapProductWriter && product.isModified()) {
+                // If we get here all tiles are written
+                // we can update the header only for DIMAP, so rewrite it, to handle intermediate changes
+                productWriter.writeProductNodes(product, file);
+            }
+            e = System.currentTimeMillis();
+            long t3 = e - s;
             SystemUtils.LOG.fine("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
-            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2));
+            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2 + t3));
         } catch (IOException e) {
             ioException = e;
         } finally {
@@ -534,8 +546,7 @@ public class ProductIO {
             SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
         }
         if (ioExceptionCollector.size() > 0) {
-            IOException ioException = ioExceptionCollector.get(0);
-            throw ioException;
+            throw ioExceptionCollector.get(0);
         }
     }
 

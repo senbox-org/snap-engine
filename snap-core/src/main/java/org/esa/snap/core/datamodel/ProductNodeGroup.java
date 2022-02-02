@@ -132,7 +132,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
     /**
      * @param name the name
-     * @return the product node with the given name.
+     * @return the product node with the given name or {@code null} is a node with the name is not contained in the group.
      */
     public T get(String name) {
         return nodeList.get(name);

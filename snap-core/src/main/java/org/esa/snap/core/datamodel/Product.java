@@ -400,6 +400,9 @@ public class Product extends ProductNode {
     }
 
     static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
+        if (listener == null) {
+            return;
+        }
         switch (event.getType()) {
             case ProductNodeEvent.NODE_CHANGED:
                 listener.nodeChanged(event);
@@ -2619,6 +2622,10 @@ public class Product extends ProductNode {
      * @param mask the mask to be added, must not be {@code null}
      */
     public void addMask(Mask mask) {
+        Assert.argument(!containsRasterDataNode(mask.getName()),
+                        String.format("The Product '%s' already contains a mask with the name '%s'.",
+                                      getName(), mask.getName()));
+
         getMaskGroup().add(mask);
     }
 
