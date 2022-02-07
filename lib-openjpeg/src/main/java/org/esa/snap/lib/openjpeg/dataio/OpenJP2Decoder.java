@@ -15,6 +15,7 @@ import sun.awt.image.SunWritableRaster;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -44,7 +46,7 @@ public class OpenJP2Decoder implements AutoCloseable {
     private PointerByReference pImage;
     private int width;
     private int height;
-    private final Path tileFile;
+    private Path tileFile;
     private int resolution;
     private int layer;
     private int dataType;
@@ -77,16 +79,27 @@ public class OpenJP2Decoder implements AutoCloseable {
         this.layer = layer;
         this.tileIndex = tileIndex;
         this.bandIndex = bandIndex == -1 ? 0 : bandIndex;
-        /*this.tileFile = cacheDir.resolve(file.getFileName().toString().replace(".", "_").toLowerCase()
-                + "_" + String.valueOf(tileIndex)
-                + "_" + String.valueOf(resolution)
-                + "_" + String.valueOf(this.bandIndex) + ".raw");*/
+
         this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
                 + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
-        
-        pStream = OpenJp2.opj_stream_create_default_file_stream(file.toAbsolutePath().toString(), Constants.OPJ_STREAM_READ);
+        String tileFileName="";
+        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
+            try {
+                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
+                        + tileFile.getName(tileFile.getNameCount() - 1);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create the a shorter tile the file");
+            }
+            this.tileFile = cacheDir.resolve(tileFileName);
+        }
+
+        try {
+            pStream = OpenJp2.opj_stream_create_default_file_stream(Utils.GetIterativeShortPathNameW(file.toString()), Constants.OPJ_STREAM_READ);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create the a shorter input the file");
+        }
         if (pStream == null || pStream.getValue() == null){
-            throw new RuntimeException("Failed to create the stream from the file: "+file.toAbsolutePath().toString());
+            throw new RuntimeException("Failed to create the stream from the file: "+file.toString());
         }
         this.parameters = initDecodeParams(file);
         pCodec = setupDecoder(parameters);
