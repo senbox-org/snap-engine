@@ -83,17 +83,12 @@ public class OpenJP2Decoder implements AutoCloseable {
         this.tileFile = cacheDir.resolve(Utils.getChecksum(file.getFileName().toString())
                 + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
         String tileFileName="";
-        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-            try {
-                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
-                        + tileFile.getName(tileFile.getNameCount() - 1);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to create the a shorter tile the file");
-            }
-            this.tileFile = cacheDir.resolve(tileFileName);
-        }
-
         try {
+            if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
+                    tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
+                            + tileFile.getName(tileFile.getNameCount() - 1);
+                this.tileFile = cacheDir.resolve(tileFileName);
+            }
             pStream = OpenJp2.opj_stream_create_default_file_stream(Utils.GetIterativeShortPathNameW(file.toString()), Constants.OPJ_STREAM_READ);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create the a shorter input the file");
