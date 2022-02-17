@@ -167,7 +167,7 @@ public final class VFSRemoteFileRepositoriesController {
      * Writes the VFS Remote File Repositories Properties on SNAP configuration file.
      */
     public void saveProperties() throws IOException {
-//        validateConfig();
+        validateConfig();
         OutputStream outputStream = null;
         try {
             if (!Files.exists(this.vfsConfigFile)) {
