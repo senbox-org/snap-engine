@@ -133,6 +133,7 @@ public class RemoteRepositoriesManager {
         DataSourceComponent downloadStrategy;
         synchronized (this.downloadingProducts) {
             downloadStrategy = this.downloadingProducts.remove(key);
+            this.downloadingProducts.notifyAll();
         }
         if (downloadStrategy == null) {
             // the product is not downloading
@@ -252,10 +253,10 @@ public class RemoteRepositoriesManager {
                     }
                 }
                 synchronized (this.downloadingProducts) {
-                    this.downloadingProducts.wait(waitTime);
+                    this.downloadingProducts.wait(this.downloadingProducts.get(key) != null ? waitTime: 1);
                 }
                 waitTime += 10000;
-            } while (product.getProductStatus() == ProductStatus.QUEUED && !this.downloadingProducts.isEmpty());
+            } while (product.getProductStatus() == ProductStatus.QUEUED && this.downloadingProducts.get(key) != null);
 
             // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
             boolean downloadingProductCancelled;
@@ -414,6 +415,9 @@ public class RemoteRepositoriesManager {
             }
 
             query.setPageSize(pageSize);
+            if(query.supportsPaging()) {
+                query.setMaxResults(pageSize);
+            }
 
             WKTReader wktReader = new WKTReader();
             productList = new ArrayList<>();
@@ -435,6 +439,7 @@ public class RemoteRepositoriesManager {
             }
         } else {
             List<EOProduct> pageResults = query.execute();
+            downloaderListener.notifyProductCount(pageResults.size());
 
             ThreadStatus.checkCancelled(thread);
 
