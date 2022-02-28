@@ -4,7 +4,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>8.0.9.1cv</version>
+        <version>8.0.9.2cv</version>
     </parent>
 
     <artifactId>snap-test-utils</artifactId>

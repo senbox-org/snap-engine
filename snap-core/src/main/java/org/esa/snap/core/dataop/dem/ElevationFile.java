@@ -35,6 +35,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -43,6 +44,7 @@ import java.util.zip.ZipFile;
  */
 public abstract class ElevationFile {
 
+    private final static Logger LOG = Logger.getLogger(ElevationFile.class.getName());
     protected File localFile;
     protected File localZipFile;
     protected final ProductReader productReader;
@@ -137,6 +139,8 @@ public abstract class ElevationFile {
             product = productReader.readProductNodes(localFile, null);
         } else if(localZipFile.exists()) {
             product = productReader.readProductNodes(localZipFile, null);
+        } else {
+            LOG.info("local file " + localFile + " or " + localZipFile + " not found");
         }
 
         if (product != null) {
