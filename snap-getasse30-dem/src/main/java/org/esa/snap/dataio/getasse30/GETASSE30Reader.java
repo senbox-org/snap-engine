@@ -180,7 +180,7 @@ public class GETASSE30Reader extends AbstractProductReader {
 
     private static File createCacheDir() throws IOException {
         final File cacheDir = new File(SystemUtils.getCacheDir(), "temp");
-        if (!cacheDir.exists() && !cacheDir.mkdirs()) {
+        if (!cacheDir.mkdirs() && !cacheDir.exists()) {
             throw new IOException("Failed to create directory '" + cacheDir + "'.");
         }
         return cacheDir;

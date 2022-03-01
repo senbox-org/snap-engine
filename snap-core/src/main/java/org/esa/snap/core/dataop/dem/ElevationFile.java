@@ -140,11 +140,14 @@ public abstract class ElevationFile {
         } else if(localZipFile.exists()) {
             product = productReader.readProductNodes(localZipFile, null);
         } else {
-            LOG.info("local file " + localFile + " or " + localZipFile + " not found");
+            LOG.info("file " + localFile + " or " + localZipFile + " not found locally");
+            return;
         }
 
         if (product != null) {
             tile = createTile(product);
+        } else {
+            LOG.warning("reading file " + localFile + " or " + localZipFile + " failed");
         }
     }
 
