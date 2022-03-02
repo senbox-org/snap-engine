@@ -232,7 +232,7 @@ public class CommandLineArgs {
     }
 
     public static long getDefaultTileCacheSize() {
-        return Config.instance().load().preferences().getLong("snap.jai.tileCacheSize", 512) * M;
+        return Config.instance().load().preferences().getLong("snap.jai.tileCacheSize", 4096) * M;
     }
 
     public long getTileCacheCapacity() {
