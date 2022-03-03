@@ -226,7 +226,7 @@ public class PerformanceParameters {
         actualParameters.setDefaultTileSize(Config.instance().preferences().getInt(PROPERTY_DEFAULT_TILE_SIZE, 512));
         actualParameters.setTileWidth(Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, null));
         actualParameters.setTileHeight(Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, null));
-        actualParameters.setCacheSize(Config.instance().preferences().getInt(PROPERTY_JAI_CACHE_SIZE, 4096));
+        actualParameters.setCacheSize(Config.instance().preferences().getInt(PROPERTY_JAI_CACHE_SIZE, 1024));
 
         return actualParameters;
     }

@@ -485,7 +485,7 @@ public class SystemUtils {
         long OneMiB = 1024L * 1024L;
 
         JAI.enableDefaultTileCache();
-        long size = Config.instance().preferences().getLong("snap.jai.tileCacheSize", 4096L) * OneMiB;
+        long size = Config.instance().preferences().getLong("snap.jai.tileCacheSize", 1024L) * OneMiB;
         JAI.getDefaultInstance().getTileCache().setMemoryCapacity(size);
 
         final long tileCacheSize = JAI.getDefaultInstance().getTileCache().getMemoryCapacity() / OneMiB;
