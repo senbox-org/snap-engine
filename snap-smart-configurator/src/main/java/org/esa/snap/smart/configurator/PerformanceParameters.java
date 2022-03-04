@@ -224,8 +224,8 @@ public class PerformanceParameters {
         final int defaultNbThreads = JavaSystemInfos.getInstance().getNbCPUs();
         actualParameters.setNbThreads(Config.instance().preferences().getInt(SystemUtils.SNAP_PARALLELISM_PROPERTY_NAME, defaultNbThreads));
         actualParameters.setDefaultTileSize(Config.instance().preferences().getInt(PROPERTY_DEFAULT_TILE_SIZE, 1024));
-        actualParameters.setTileWidth(Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, "1024"));
-        actualParameters.setTileHeight(Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, "1024"));
+        actualParameters.setTileWidth(Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, null));
+        actualParameters.setTileHeight(Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, null));
         actualParameters.setCacheSize(Config.instance().preferences().getInt(PROPERTY_JAI_CACHE_SIZE, 1024));
 
         return actualParameters;
