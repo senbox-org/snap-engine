@@ -499,8 +499,8 @@ public abstract class AbstractProductReader implements ProductReader {
 
     public static void configurePreferredTileSize(Product product) {
         Dimension newSize = getConfiguredTileSize(product,
-                                                  Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, "1024"),
-                                                  Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, "1024"));
+                                                  Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, null),
+                                                  Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, null));
         if (newSize != null) {
             Dimension oldSize = product.getPreferredTileSize();
             if (oldSize == null) {
