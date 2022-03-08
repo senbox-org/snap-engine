@@ -37,6 +37,7 @@
             It is used to filter manifest.mf and set the manifest's "OpenIDE-Module-Specification-Version" header.
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
+        <seadas.version>8.2.0</seadas.version>
         <snap.version>${project.version}</snap.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.1</hdf.version>
@@ -870,7 +871,7 @@
                             <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
                         <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
-                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-Xmx4096M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
 
