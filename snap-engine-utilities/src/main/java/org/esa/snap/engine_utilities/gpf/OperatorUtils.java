@@ -310,7 +310,9 @@ public final class OperatorUtils {
                     newTiePointValues,
                     disconnect);
 
-            targetProduct.removeTiePointGrid(tpg);
+            if(targetProduct.containsTiePointGrid(tpg.getName())) {
+                targetProduct.removeTiePointGrid(targetProduct.getTiePointGrid(tpg.getName()));
+            }
             targetProduct.addTiePointGrid(newTPG);
         }
 
