@@ -38,7 +38,7 @@ James;Mail server;James;Apache License;https://james.apache.org/;https://www.apa
 JASYPT;Encryption;JASYPT;Apache License;http://www.jasypt.org/;https://www.apache.org/licenses/
 Java SE JRE;Java Runtime;Oracle;Oracle Binary Code License;http://www.oracle.com/technetwork/java/javase/overview/index.html;http://www.oracle.com/technetwork/java/javase/terms/license/index.html
 java-cup-11b;LALR parser generator;cup;BSD Style;http://www2.cs.tum.edu/projects/cup/;http://www2.cs.tum.edu/projects/cup/licence.php
-javahelp;User Help;ORACLE;GPL;https://javaee.github.io/javahelp/;https://en.wikipedia.org/wiki/JavaHelp
+javahelp;User Help;ORACLE;CDDL;https://javaee.github.io/javahelp/;https://github.com/javaee/javahelp/blob/master/LICENSE
 javaml;Machine leatning;Java Machine Learning;GPLv2;http://java-ml.sourceforge.net/;https://sourceforge.net/p/java-ml/java-ml-code/ci/master/tree/legal/license.txt
 Javassist;Bytecode manipulation;Javassist;Apache License;http://jboss-javassist.github.io/javassist/;https://www.apache.org/licenses/
 Jaxen;XPath Engine;Jaxen;BSD 3 Clause;http://www.cafeconleche.org/jaxen;http://opensource.org/licenses/BSD-3-Clause
@@ -102,7 +102,7 @@ velocity;Template engine;velocity;Apache License;http://velocity.apache.org/;htt
 weka-dev;Machine Learning;weka;GPL3;https://www.cs.waikato.ac.nz/ml/weka/index.html;http://www.gnu.org/licenses/gpl-3.0.en.html
 werken-xpath;XML handling;werken-xpath;BSD Style;https://sourceforge.net/projects/werken-xpath/;http://hsqldb.org/web/hsqlLicense.html
 woodstox;XML handling;woodstox;Apache License or BSD;https://github.com/codehaus/woodstox;NONE
-worldwind;Globe visualisation;NASA;NASA OPEN SOURCE AGREEMENT;http://worldwind.arc.nasa.gov/java;https://github.com/NASAWorldWind/WorldWindJava/blob/develop/LICENSE.txt
+worldwind;Globe visualisation;NASA;Apache License, Version 2.0;http://worldwind.arc.nasa.gov/java;https://github.com/NASAWorldWind/WorldWindJava#license
 xerces;XML handling;Xerces;Apache License;http://xerces.apache.org/xerces2-j/;https://www.apache.org/licenses/
 xml-apis;XML handling;Apache;Apache 2.0 and W3C;http://xml.apache.org/commons/;http://www.apache.org/licenses/LICENSE-2.0
 xml-commons;XML handling;xml-commons;Apache License;http://xerces.apache.org/xml-commons/;https://www.apache.org/licenses/
