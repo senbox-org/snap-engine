@@ -1,6 +1,6 @@
 Name;Description / Use;IPR owner;License;IPR URL;License URL
 abdera;Atom client;Apache;Apache License;http://abdera.apache.org/;https://www.apache.org/licenses/
-Abeel Java Toolkit (ajt);Used for classification;Thomas Abeel;LGPLv3;http://www.gnu.de/documents/lgpl.de.html;http://www.gnu.de/documents/lgpl.de.html
+Abeel Java Toolkit (ajt);Used for classification;Thomas Abeel;LGPLv3;https://sourceforge.net/projects/ajt/;http://www.gnu.de/documents/lgpl.de.html
 animal-sniffer-annotations;Animal Sniffer Annotations;Mojohaus;MIT license;https://github.com/mojohaus/;http://www.opensource.org/licenses/mit-license.php
 Apache Commons;Common libraries;Apache;Apache License;http://commons.apache.org/;https://www.apache.org/licenses/
 apache-mime4j-core;Parser for e-mail message streams;Apache;The Apache Software License, Version 2.0;http://james.apache.org/mime4j/apache-mime4j-core/;http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -101,7 +101,7 @@ udunits;Units support;Unidata;NetCDF C library license (MIT-style) ;https://www.
 velocity;Template engine;velocity;Apache License;http://velocity.apache.org/;https://www.apache.org/licenses/
 weka-dev;Machine Learning;weka;GPL3;https://www.cs.waikato.ac.nz/ml/weka/index.html;http://www.gnu.org/licenses/gpl-3.0.en.html
 werken-xpath;XML handling;werken-xpath;BSD Style;https://sourceforge.net/projects/werken-xpath/;http://hsqldb.org/web/hsqlLicense.html
-woodstox;XML handling;woodstox;Apache License or BSD;https://github.com/codehaus/woodstox;NONE
+woodstox;XML handling;woodstox;GPLv2;https://github.com/codehaus/woodstox;https://github.com/codehaus/woodstox/blob/master/wstx-tools/release-notes/GPL2.0
 worldwind;Globe visualisation;NASA;Apache License, Version 2.0;http://worldwind.arc.nasa.gov/java;https://github.com/NASAWorldWind/WorldWindJava#license
 xerces;XML handling;Xerces;Apache License;http://xerces.apache.org/xerces2-j/;https://www.apache.org/licenses/
 xml-apis;XML handling;Apache;Apache 2.0 and W3C;http://xml.apache.org/commons/;http://www.apache.org/licenses/LICENSE-2.0
