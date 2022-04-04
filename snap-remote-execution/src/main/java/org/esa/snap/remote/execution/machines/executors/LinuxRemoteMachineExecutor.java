@@ -33,7 +33,7 @@ public class LinuxRemoteMachineExecutor extends AbstractRemoteMachineExecutor {
 
     @Override
     protected boolean runGraph(String gptFilePath, String graphFilePathToProcess) throws IOException, JSchException {
-        String command = "sh" + " " + gptFilePath + " " + graphFilePathToProcess;
+        String command = gptFilePath + " " + graphFilePathToProcess;
         OutputConsole consoleBuffer = new OutputConsole();
         int exitStatus = this.sshConnection.executeLinuxCommand(command.toString(), null, consoleBuffer);
 
