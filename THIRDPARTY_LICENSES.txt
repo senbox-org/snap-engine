@@ -20,7 +20,7 @@ F2J;Fortran-to-Java BLAS/LAPACK;F2J;BSD Style;http://icl.cs.utk.edu/f2j/;http://
 GeographicLib-Java;Geographic calculation;GeographicLib;MIT;https://sourceforge.net/projects/geographiclib/;https://opensource.org/licenses/mit-license.php
 geotools;Tools for working with geo-data;GeoTools;LGPLv2;http://www.geotools.org/;http://docs.geotools.org/latest/userguide/welcome/license.html
 geronimo;Server;Geronimo;Apache License;http://geronimo.apache.org/;https://www.apache.org/licenses/
-gluegen;Generate code to call C libraries;Gluegen;BSD-2-Clause;https://jogamp.org/gluegen/www/;http://opensource.org/licenses/BSD-2-Clause
+gluegen;Generate code to call C libraries;Gluegen;BSD 2 Clause;https://jogamp.org/gluegen/www/;http://opensource.org/licenses/BSD-2-Clause
 Gson ;Json IO;Google;Apache License;https://github.com/google/gson;https://www.apache.org/licenses/
 Guava;General Library for Java;Google;Apache License;https://github.com/google/guava;https://www.apache.org/licenses/
 hamcrest;Testing framework;Hamcrest;BSD 3 Clause;http://hamcrest.org/;http://opensource.org/licenses/BSD-3-Clause
@@ -42,7 +42,7 @@ javahelp;User Help;ORACLE;CDDL;https://javaee.github.io/javahelp/;https://github
 javaml;Machine leatning;Java Machine Learning;GPLv2;http://java-ml.sourceforge.net/;https://sourceforge.net/p/java-ml/java-ml-code/ci/master/tree/legal/license.txt
 Javassist;Bytecode manipulation;Javassist;Apache License;http://jboss-javassist.github.io/javassist/;https://www.apache.org/licenses/
 Jaxen;XPath Engine;Jaxen;BSD 3 Clause;http://www.cafeconleche.org/jaxen;http://opensource.org/licenses/BSD-3-Clause
-jblas;Fast linear algebra library for Java;jblas;BSD 3-clause style license;https://github.com/mikiobraun/jblas;http://opensource.org/licenses/BSD-3-Clause
+jblas;Fast linear algebra library for Java;jblas;BSD 3 Clause style license;https://github.com/mikiobraun/jblas;http://opensource.org/licenses/BSD-3-Clause
 JCIP;Included By 3rd party;http://jcip.net/;None;http://jcip.net/;NONE
 jcommon;Utils;jfree;LGPLv3;NONE;https://mvnrepository.com/artifact/net.sourceforge.jexcelapi/jxl/2.6.12
 jcoord;Coord transformation;jcoord;GPLv2;http://www.jstott.me.uk/jcoord/;http://www.jstott.me.uk/gpl/
@@ -50,8 +50,8 @@ jdom;XML handling;jdom;Apache License;http://jdom.org/;https://www.apache.org/li
 jdom2;Accessing, manipulating, and outputting XML data from Java code;jdom;Similar to Apache License but with the acknowledgment clause removed;http://www.jdom.org/;https://raw.github.com/hunterhacker/jdom/master/LICENSE.txt
 je;Provides cursor based data access;oracle;Sleepycat License;https://docs.oracle.com/cd/E17277_02/html/GettingStartedGuide/applicationoverview.html;http://download.oracle.com/maven/com/sleepycat/je/license.txt
 jewelCli;Command line interface;lexicalscope;Apache License;http://jewelcli.lexicalscope.com/;https://www.apache.org/licenses/
-jexcelapi;Excel files;jexcelapi;LGPLv3;http://jexcelapi.sourceforge.net/;https://mvnrepository.com/artifact/net.sourceforge.jexcelapi/jxl/2.6.12
-jfreechart;Plot library;jfree;LGPLv3;NONE;https://mvnrepository.com/artifact/net.sourceforge.jexcelapi/jxl/2.6.12
+jexcelapi;Excel files;jexcelapi;LGPLv3;http://jexcelapi.sourceforge.net/;http://www.gnu.de/documents/lgpl-2.1.de.html
+jfreechart;Plot library;jfree;LGPLv3;https://www.jfree.org/;https://www.gnu.org/licenses/lgpl-3.0.html
 jgridshift;Transformations;jgridshift;LGPLv2;http://jgridshift.sourceforge.net/;http://www.gnu.de/documents/lgpl-2.1.de.html
 jhdf / jhdf5;HDF(5) support;HDF Group;BSD Style;https://portal.hdfgroup.org/display/support/HDF-Java;https://bitbucket.hdfgroup.org/projects/HDFVIEW/repos/hdfview/browse/COPYING?raw
 JIDE Common;GUI library;Jidesoft;GPL with classpath exception ;http://jidesoft.com/;http://openjdk.java.net/legal/gplv2+ce.html
@@ -85,9 +85,9 @@ nujan;NetCDF java writing;NCAR RAL;Modified MIT License;https://ral.ucar.edu/;NO
 Objenesis;Class instantiation;Objenesis;Apache License;http://objenesis.org/;https://www.apache.org/licenses/
 olingo;Open Data Protocol;olingo;Apache License;http://olingo.apache.org/;https://www.apache.org/licenses/
 oro;Text processing;ORO;Apache License;http://jakarta.apache.org/oro/;https://www.apache.org/licenses/
-picocontainer;class instantiation;picocontainer;BSD-2-Clause;http://picocontainer.com/;http://opensource.org/licenses/BSD-2-Clause
+picocontainer;class instantiation;picocontainer;BSD 2 Clause;http://picocontainer.com/;http://opensource.org/licenses/BSD-2-Clause
 powermock;Testing framework;PowerMock;Apache License;http://powermock.github.io/;https://www.apache.org/licenses/
-prefuse-core;A toolkit for building interactive information visualization applications;Prefuse;BSD 3-clause;http://prefuse.org/;http://prefuse.org/license-prefuse.txt
+prefuse-core;A toolkit for building interactive information visualization applications;Prefuse;BSD 3 Clause;http://prefuse.org/;http://prefuse.org/license-prefuse.txt
 protobuf;Protocol Buffers ;Google;BSD 3 Clause;https://github.com/google/protobuf;http://opensource.org/licenses/BSD-3-Clause
 quartz;Job scheduler;quartz-scheduler;Apache License;http://www.quartz-scheduler.org/;https://www.apache.org/licenses/
 rhino;Java script engine;Rhino;Mozilla Public License;http://www.mozilla.org/rhino/;https://github.com/mozilla/rhino/blob/master/LICENSE.txt
@@ -107,7 +107,7 @@ xerces;XML handling;Xerces;Apache License;http://xerces.apache.org/xerces2-j/;ht
 xml-apis;XML handling;Apache;Apache 2.0 and W3C;http://xml.apache.org/commons/;http://www.apache.org/licenses/LICENSE-2.0
 xml-commons;XML handling;xml-commons;Apache License;http://xerces.apache.org/xml-commons/;https://www.apache.org/licenses/
 xmlpull;XML handling;xmlpull;public-domain;http://www.xmlpull.org/;https://en.wikipedia.org/wiki/Public-domain_software
-xpp3;XML handling;MXP;Public Domain;http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/;https://mvnrepository.com/artifact/xpp3/xpp3
+xpp3;XML handling;MXP;Public Domain;http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/;http://www.apache.org/licenses/LICENSE-2.0
 xsd;XML handling;eclipse xsd;Eclipse Public License;http://www.eclipse.org/modeling/mdt/downloads/?project=xsd;https://projects.eclipse.org/content/eclipse-public-license-1.0
 xstream;XML handling;Xstream;BSD License;http://x-stream.github.io/;http://x-stream.github.io/license.html
 xz;Data compression;Tukaani;public-domain;http://tukaani.org/xz/java.html;https://en.wikipedia.org/wiki/Public-domain_software
