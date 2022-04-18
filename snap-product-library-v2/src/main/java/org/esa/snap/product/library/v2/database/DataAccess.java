@@ -328,7 +328,10 @@ public class DataAccess {
                         Geometry productGeometry = resultSet.getGeometry("geometry");
                         //TODO Jean use GeometryUtils.convertProductGeometry(productGeometry)
                         //AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
-                        AbstractGeometry2D geometry = convertProductGeometry(productGeometry);
+                        AbstractGeometry2D geometry = null;
+                        if(productGeometry != null) {
+                            geometry = convertProductGeometry(productGeometry);
+                        }
                         String metadataMission = resultSet.getString("metadata_mission");
                         LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, geometry);
                         localProduct.setRemoteMission(remoteMission);
@@ -878,18 +881,31 @@ public class DataAccess {
                                      FileTime fileTime, long sizeInBytes, Connection connection)
             throws SQLException {
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION);
-        return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
-                               sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
-                               fileTime.toMillis(), geometry.toWKT(), null, null, null);
+        if (geometry != null) {
+            return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
+                    fileTime.toMillis(), geometry.toWKT(), null, null, null);
+        } else {
+            return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
+                    fileTime.toMillis(), null, null, null);
+        }
     }
 
     private static int insertProduct(RepositoryProduct productToSave, Path relativePath, int remoteMissionId, int localRepositoryId,
                                      FileTime fileTime, long sizeInBytes, Connection connection)
-            throws SQLException {;
-        return addLocalProduct(connection, productToSave.getName(), remoteMissionId, null, localRepositoryId, relativePath.toString(),
-                               sizeInBytes, productToSave.getAcquisitionDate(), fileTime.toMillis(), productToSave.getPolygon().toWKT(),
-                               productToSave.getDataFormatType().getValue(), productToSave.getPixelType().getValue(),
-                               productToSave.getSensorType().getValue());
+            throws SQLException {
+        if (productToSave.getPolygon() != null) {
+            return addLocalProduct(connection, productToSave.getName(), remoteMissionId, null, localRepositoryId, relativePath.toString(),
+                    sizeInBytes, productToSave.getAcquisitionDate(), fileTime.toMillis(), productToSave.getPolygon().toWKT(),
+                    productToSave.getDataFormatType().getValue(), productToSave.getPixelType().getValue(),
+                    productToSave.getSensorType().getValue());
+        } else {
+            return addLocalProduct(connection, productToSave.getName(), remoteMissionId, null, localRepositoryId, relativePath.toString(),
+                    sizeInBytes, productToSave.getAcquisitionDate(), fileTime.toMillis(),
+                    productToSave.getDataFormatType().getValue(), productToSave.getPixelType().getValue(),
+                    productToSave.getSensorType().getValue());
+        }
     }
 
     private static int addLocalProduct(Connection connection, String name, Integer remoteMissionId, String metadataMission, int repositoryId, String relativePath,
@@ -935,6 +951,63 @@ public class DataAccess {
             statement.setInt(12, sensorTypeId);
         } else {
             statement.setNull(12, Types.INTEGER);
+        }
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows == 0) {
+            throw new SQLException("Failed to insert the product, no rows affected.");
+        } else {
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Failed to get the generated product id.");
+                }
+            }
+        }
+    }
+
+    private static int addLocalProduct(Connection connection, String name, Integer remoteMissionId, String metadataMission, int repositoryId, String relativePath,
+                                       long size, Date acquisitionDate, long lastModified,
+                                       Integer dataFormatId, Integer pixelTypeId, Integer sensorTypeId) throws SQLException {
+        final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
+                "(name, remote_mission_id, metadata_mission, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
+                "last_modified_date, data_format_type_id, pixel_type_id, sensor_type_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        statement.setString(1, name);
+        if (remoteMissionId != null) {
+            statement.setInt(2, remoteMissionId);
+        } else {
+            statement.setNull(2, Types.INTEGER);
+        }
+        if (metadataMission != null) {
+            statement.setString(3, metadataMission);
+        } else {
+            statement.setNull(3, Types.VARCHAR);
+        }
+
+        statement.setInt(4, repositoryId);
+        statement.setString(5, relativePath);
+        statement.setLong(6, size);
+        if (acquisitionDate != null) {
+            statement.setTimestamp(7, new Timestamp(acquisitionDate.getTime()));
+        } else {
+            statement.setNull(7, Types.TIMESTAMP);
+        }
+        statement.setTimestamp(8, new Timestamp(lastModified));
+        if (dataFormatId != null) {
+            statement.setInt(9, dataFormatId);
+        } else {
+            statement.setNull(9, Types.INTEGER);
+        }
+        if (pixelTypeId != null) {
+            statement.setInt(10, pixelTypeId);
+        } else {
+            statement.setNull(10, Types.INTEGER);
+        }
+        if (sensorTypeId != null) {
+            statement.setInt(11, sensorTypeId);
+        } else {
+            statement.setNull(11, Types.INTEGER);
         }
         int affectedRows = statement.executeUpdate();
         if (affectedRows == 0) {
