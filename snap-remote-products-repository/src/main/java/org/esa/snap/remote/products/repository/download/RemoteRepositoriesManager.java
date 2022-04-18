@@ -516,8 +516,11 @@ public class RemoteRepositoriesManager {
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct taoProduct = pageResults.get(i);
 
-            Geometry productGeometry = wktReader.read(taoProduct.getGeometry());
-            AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
+            AbstractGeometry2D geometry = null;
+            if(taoProduct.getGeometry() != null) {
+                Geometry productGeometry = wktReader.read(taoProduct.getGeometry());
+                geometry = GeometryUtils.convertProductGeometry(productGeometry);
+            }
 
             List<ro.cs.tao.eodata.Attribute> taoRemoteAttributes = taoProduct.getAttributes();
             List<Attribute> remoteAttributes = new ArrayList<>();
