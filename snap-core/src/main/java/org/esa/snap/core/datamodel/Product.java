@@ -2623,7 +2623,7 @@ public class Product extends ProductNode {
      */
     public void addMask(Mask mask) {
         Assert.argument(!containsRasterDataNode(mask.getName()),
-                        String.format("The Product '%s' already contains a mask with the name '%s'.",
+                        String.format("The Product '%s' already contains a raster with the name '%s'.",
                                       getName(), mask.getName()));
 
         getMaskGroup().add(mask);
