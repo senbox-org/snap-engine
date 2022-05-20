@@ -213,8 +213,10 @@ public class FeatureUtils {
                     Geometry clippedSourceGeometry;
                     try {
                         Geometry sourceGeometry = (Geometry) sourceFeature.getDefaultGeometry();
+                        GeometryCoordinateSequenceTransformer clip2SourceTransformer = getTransform(targetCrs, clipCrs);
+                        sourceGeometry = clip2SourceTransformer.transform(sourceGeometry);
                         clippedSourceGeometry = getClippedGeometry(sourceGeometry, clipGeometry);
-                    } catch (TopologyException ignored) {
+                    } catch (TopologyException | TransformException ignored) {
                         continue;
                     }
 
