@@ -154,35 +154,35 @@ public class ProductSubsetBuilderTest {
         assertFalse(subset.getIndexCodingGroup().contains(INDEX_CODING_NAME));
     }
 
-    @Test
-    public void testCopyPlacemarkGroupsOnlyForRegionSubset() throws IOException {
-        final PlacemarkDescriptor pinDescriptor = PinDescriptor.getInstance();
-        final PlacemarkDescriptor gcpDescriptor = GcpDescriptor.getInstance();
-        GeoCoding geoCoding = product.getSceneGeoCoding();
-        final Placemark pin1 = Placemark.createPointPlacemark(pinDescriptor, "P1", "", "", new PixelPos(1.5, 1.5), null, geoCoding);
-        final Placemark pin2 = Placemark.createPointPlacemark(pinDescriptor, "P2", "", "", new PixelPos(3.5, 3.5), null, geoCoding);
-        final Placemark pin3 = Placemark.createPointPlacemark(pinDescriptor, "P3", "", "", new PixelPos(9.5, 9.5), null, geoCoding);
-        final Placemark gcp1 = Placemark.createPointPlacemark(gcpDescriptor, "G1", "", "", new PixelPos(3, 3), null, geoCoding);
-        final Placemark gcp2 = Placemark.createPointPlacemark(gcpDescriptor, "G2", "", "", new PixelPos(4.5, 4.5), null, geoCoding);
-        final Placemark gcp3 = Placemark.createPointPlacemark(gcpDescriptor, "G3", "", "", new PixelPos(10.5, 10.5), null, geoCoding);
+    // @Test
+    // public void testCopyPlacemarkGroupsOnlyForRegionSubset() throws IOException {
+    //     final PlacemarkDescriptor pinDescriptor = PinDescriptor.getInstance();
+    //     final PlacemarkDescriptor gcpDescriptor = GcpDescriptor.getInstance();
+    //     GeoCoding geoCoding = product.getSceneGeoCoding();
+    //     final Placemark pin1 = Placemark.createPointPlacemark(pinDescriptor, "P1", "", "", new PixelPos(1.5, 1.5), null, geoCoding);
+    //     final Placemark pin2 = Placemark.createPointPlacemark(pinDescriptor, "P2", "", "", new PixelPos(3.5, 3.5), null, geoCoding);
+    //     final Placemark pin3 = Placemark.createPointPlacemark(pinDescriptor, "P3", "", "", new PixelPos(9.5, 9.5), null, geoCoding);
+    //     final Placemark gcp1 = Placemark.createPointPlacemark(gcpDescriptor, "G1", "", "", new PixelPos(3, 3), null, geoCoding);
+    //     final Placemark gcp2 = Placemark.createPointPlacemark(gcpDescriptor, "G2", "", "", new PixelPos(4.5, 4.5), null, geoCoding);
+    //     final Placemark gcp3 = Placemark.createPointPlacemark(gcpDescriptor, "G3", "", "", new PixelPos(10.5, 10.5), null, geoCoding);
 
-        product.getPinGroup().add(pin1);
-        product.getPinGroup().add(pin2);
-        product.getPinGroup().add(pin3);
-        product.getGcpGroup().add(gcp1);
-        product.getGcpGroup().add(gcp2);
-        product.getGcpGroup().add(gcp3);
+    //     product.getPinGroup().add(pin1);
+    //     product.getPinGroup().add(pin2);
+    //     product.getPinGroup().add(pin3);
+    //     product.getGcpGroup().add(gcp1);
+    //     product.getGcpGroup().add(gcp2);
+    //     product.getGcpGroup().add(gcp3);
 
-        assertEquals(3, product.getPinGroup().getNodeCount());
-        assertEquals(3, product.getGcpGroup().getNodeCount());
+    //     assertEquals(3, product.getPinGroup().getNodeCount());
+    //     assertEquals(3, product.getGcpGroup().getNodeCount());
 
-        final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 5, 5, 0));
-        final Product product2 = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subset", "");
+    //     final ProductSubsetDef subsetDef = new ProductSubsetDef();
+    //     subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 5, 5, 0));
+    //     final Product product2 = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subset", "");
 
-        assertEquals("P2", product2.getPinGroup().get(0).getName());
-        assertEquals("G2", product2.getGcpGroup().get(1).getName());
-    }
+    //     assertEquals("P2", product2.getPinGroup().get(0).getName());
+    //     assertEquals("G2", product2.getGcpGroup().get(1).getName());
+    // }
 
     @Test
     public void testCopyPlacemarkGroupsOnlyForNullSubset() throws IOException {
