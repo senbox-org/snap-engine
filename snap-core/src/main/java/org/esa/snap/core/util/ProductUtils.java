@@ -1131,7 +1131,7 @@ public class ProductUtils {
                 VectorDataNode sourceVDN = vectorDataGroup.get(i);
                 String name = sourceVDN.getName();
                 FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = sourceVDN.getFeatureCollection();
-                featureCollection = FeatureUtils.clipCollection(featureCollection,
+                featureCollection = FeatureUtils.clipCollection2(featureCollection,
                         srcModelCrs,
                         clipGeometry,
                         DefaultGeographicCRS.WGS84,

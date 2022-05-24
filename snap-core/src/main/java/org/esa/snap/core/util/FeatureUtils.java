@@ -213,6 +213,103 @@ public class FeatureUtils {
                     Geometry clippedSourceGeometry;
                     try {
                         Geometry sourceGeometry = (Geometry) sourceFeature.getDefaultGeometry();
+                        clippedSourceGeometry = getClippedGeometry(sourceGeometry, clipGeometry);
+                    } catch (TopologyException ignored) {
+                        continue;
+                    }
+
+                    if (!clippedSourceGeometry.isEmpty()) {
+                        SimpleFeature targetFeature = createTargetFeature(clippedSourceGeometry, targetSchema,
+                                                                          sourceFeature, source2TargetTransformer);
+                        if (targetFeature != null) {
+                            targetCollection.add(targetFeature);
+                        }
+                    }
+                }
+            }
+
+            return targetCollection;
+        } finally {
+            pm.done();
+        }
+    }
+
+     /**
+     * Clips the given {@code sourceCollection} against the {@code clipGeometry} and reprojects the clipped features
+     * to the targetCrs.
+     *
+     * @param sourceCollection the feature collection to be clipped and reprojected. If it does not
+     *                         have an associated CRS, the one specified by {@code defaultSourceCrs} is used.
+     * @param defaultSourceCrs if {@code sourceCollection} does not have an associated CRS, this one is used.
+     * @param clipGeometry     the geometry used for clipping
+     * @param clipCrs          the CRS of the {@code clipGeometry}
+     * @param targetID         the ID of the resulting {@link FeatureCollection}. If {@code null} the ID of
+     *                         the sourceCollection is used.
+     * @param targetCrs        the CRS the {@link FeatureCollection} is reprojected to. If {@code null} no reprojection
+     *                         is applied.
+     * @return the clipped and possibly reprojected {@link FeatureCollection}
+     * @throws IllegalStateException if the {@code sourceCollection} has no associated CRS and {@code defaultSourceCrs}
+     *                               is {@code null}
+     */
+    public static DefaultFeatureCollection clipCollection2(
+            FeatureCollection<SimpleFeatureType, SimpleFeature> sourceCollection,
+            CoordinateReferenceSystem defaultSourceCrs,
+            Geometry clipGeometry, CoordinateReferenceSystem clipCrs,
+            String targetID, CoordinateReferenceSystem targetCrs, ProgressMonitor pm) {
+
+        try {
+            pm.beginTask("Clipping features", sourceCollection.size());
+
+            SimpleFeatureType sourceSchema = sourceCollection.getSchema();
+            Map<Object, Object> userData = sourceSchema.getUserData();
+            CoordinateReferenceSystem sourceCrs = sourceSchema.getCoordinateReferenceSystem();
+            if (targetID == null || targetID.isEmpty()) {
+                targetID = sourceCollection.getID();
+            }
+            if (sourceCrs == null) {
+                sourceCrs = defaultSourceCrs;
+            }
+            if (sourceCrs == null) {
+                throw new IllegalStateException("'sourceCollection' has no CRS defined and 'defaultSourceCrs' is null");
+            }
+            try {
+                sourceSchema = FeatureTypes.transform(sourceSchema, sourceCrs);
+            } catch (SchemaException e) {
+                throw new IllegalStateException(e);
+            }
+            if (targetCrs == null) {
+                targetCrs = sourceCrs;
+            }
+
+            try {
+                GeometryCoordinateSequenceTransformer clip2SourceTransformer = getTransform(clipCrs, sourceCrs);
+                clipGeometry = clip2SourceTransformer.transform(clipGeometry);
+            } catch (TransformException e) {
+                throw new IllegalStateException(e);
+            }
+
+            GeometryCoordinateSequenceTransformer source2TargetTransformer;
+            SimpleFeatureType targetSchema;
+
+            try {
+                targetSchema = FeatureTypes.transform(sourceSchema, targetCrs);
+                targetSchema.getUserData().putAll(userData);
+                source2TargetTransformer = getTransform(sourceCrs, targetCrs);
+            } catch (SchemaException e) {
+                throw new IllegalStateException(e);
+            }
+
+            DefaultFeatureCollection targetCollection = new DefaultFeatureCollection(targetID, targetSchema);
+
+            try (FeatureIterator<SimpleFeature> features = sourceCollection.features()) {
+                while (features.hasNext()) {
+                    SimpleFeature sourceFeature = features.next();
+
+                    pm.worked(1);
+
+                    Geometry clippedSourceGeometry;
+                    try {
+                        Geometry sourceGeometry = (Geometry) sourceFeature.getDefaultGeometry();
                         GeometryCoordinateSequenceTransformer clip2SourceTransformer = getTransform(targetCrs, clipCrs);
                         sourceGeometry = clip2SourceTransformer.transform(sourceGeometry);
                         clippedSourceGeometry = getClippedGeometry(sourceGeometry, clipGeometry);
