@@ -37,6 +37,7 @@ public class StringArrayConverterTest extends AbstractConverterTest {
         assertEquals("\u002C", ",");
         testValueType(String[].class);
         testParseSuccess(new String[]{"a", "b", "c"}, "a,b,c");
+        testParseSuccess(new String[]{}, ",");
 //        testParseSuccess(new String[]{" a", "\tb", "c\n"}, " a,\tb,c\n"); // test space decoding (none!)
         testParseSuccess(new String[]{"a,b", "c,d", "e,f"}, "a\\u002Cb,c\\u002Cd,e\\u002Cf"); // test comma decoding
         testFormatSuccess("a,b,c", new String[]{"a", "b", "c"});
