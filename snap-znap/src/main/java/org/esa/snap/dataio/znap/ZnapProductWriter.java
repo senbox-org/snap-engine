@@ -236,7 +236,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
 
     @Override
     public void deleteOutput() {
-        throw new RuntimeException("not implemented");
+        // todo implement the deletion of the output
     }
 
     @Override
