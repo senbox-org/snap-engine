@@ -137,8 +137,6 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_COLOR_RGBA;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NO_DATA_VALUE_USED;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.QUICKLOOK_BAND_NAME;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SAMPLE;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SOLAR_FLUX;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.SPECTRAL_BAND_INDEX;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.STATISTICS;
@@ -149,6 +147,8 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VALID_PIXEL_EXPRESS
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VIRTUAL_BAND_EXPRESSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH_UNIT;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.getSnapDataType;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.writeProductMetadata;
@@ -225,10 +225,12 @@ public class ZnapProductWriter extends AbstractProductWriter {
             value.dispose();
         }
         zarrWriters.clear();
-        try {
-            zarrStore.close();
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "Unable to close the zarr product writer store.", e);
+        if (zarrStore != null) {
+            try {
+                zarrStore.close();
+            } catch (IOException e) {
+                LOG.log(Level.WARNING, "Unable to close the zarr product writer store.", e);
+            }
         }
     }
 
