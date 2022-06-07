@@ -30,6 +30,7 @@ public class FilterWindow {
     public static final String SIZE_13x13 = "13x13";
     public static final String SIZE_15x15 = "15x15";
     public static final String SIZE_17x17 = "17x17";
+    public static final String SIZE_21x21 = "21x21";
 
     private final int windowSizeX, windowSizeY;
     private final int halfWindowSizeX, halfWindowSizeY;
@@ -91,6 +92,8 @@ public class FilterWindow {
                 return 15;
             case SIZE_17x17:
                 return 17;
+            case SIZE_21x21:
+                return 21;
             default:
                 return 0;
         }

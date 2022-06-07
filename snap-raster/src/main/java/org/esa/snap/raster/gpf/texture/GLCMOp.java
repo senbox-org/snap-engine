@@ -55,7 +55,7 @@ import java.util.Map;
  * 9. GLCM Variance
  * 10. GLCM Correlation
  * <p>
- * [1] Robert M. Haralick, K. Shanmugam, and Its'hak Dinstein. "Textural Features for Image Classification"
+ * [1] Robert M. Haralick, K. Shanmugam, and Its'Hak Dinstein. "Textural Features for Image Classification"
  * IEEE Trans. on Systems, Man and Cybernetics, Vol 3 , No. 6, pp. 610-621, Nov. 1973.
  */
 
@@ -76,7 +76,8 @@ public final class GLCMOp extends Operator {
             label = "Source Bands")
     private String[] sourceBands = null;
 
-    @Parameter(valueSet = {FilterWindow.SIZE_5x5, FilterWindow.SIZE_7x7, FilterWindow.SIZE_9x9, FilterWindow.SIZE_11x11},
+    @Parameter(valueSet = {FilterWindow.SIZE_5x5, FilterWindow.SIZE_7x7, FilterWindow.SIZE_9x9, FilterWindow.SIZE_11x11,
+            FilterWindow.SIZE_13x13, FilterWindow.SIZE_15x15, FilterWindow.SIZE_17x17, FilterWindow.SIZE_21x21},
             defaultValue = FilterWindow.SIZE_9x9, label = "Window Size")
     private String windowSizeStr = FilterWindow.SIZE_9x9;
 
