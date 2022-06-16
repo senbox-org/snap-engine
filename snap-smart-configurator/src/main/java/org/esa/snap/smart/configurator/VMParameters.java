@@ -92,7 +92,7 @@ public class VMParameters {
 
     public static Path getSnapConfigPath() {
         if(snapConfigPath == null) {
-            snapConfigPath = Config.instance().installDir().resolve("etc").resolve("snap.conf");
+            snapConfigPath = Config.instance().installDir().resolve("etc").resolve("seadas.conf");
         }
         return snapConfigPath;
     }
