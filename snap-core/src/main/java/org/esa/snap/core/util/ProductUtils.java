@@ -57,6 +57,20 @@ import java.util.Map;
  */
 public class ProductUtils {
 
+    private static String GLOBAL_ATTRIBUTES_KEY = "Global_Attributes";
+    public static String METADATA_PROJECTION_KEY = "map_projection";
+    public static String[] METADATA_POSSIBLE_PROJECTION_KEYS = {METADATA_PROJECTION_KEY, "Projection", "crs"};
+    public static String[] METADATA_POSSIBLE_SENSOR_KEYS = {"Sensor_Name", "Instrument", "Sensor"};
+    public static String[] METADATA_POSSIBLE_PLATFORM_KEYS = {"Platform"};
+    public static String[] METADATA_POSSIBLE_PROCESSING_VERSION_KEYS = {"Processing_Version"};
+    public static String[] METADATA_POSSIBLE_DAY_NIGHT_KEYS = {"Day_Night_Flag", "Day_Night"};
+    public static String[] METADATA_POSSIBLE_ORBIT_KEYS = {"Orbit_Number", "Orbit"};
+    public static String[] METADATA_POSSIBLE_START_ORBIT_KEYS = {"Start_Orbit_Number", "End_Orbit"};
+    public static String[] METADATA_POSSIBLE_END_ORBIT_KEYS = {"End_Orbit_Number", "End_Orbit"};
+
+    public static String METADATA_RESOLUTION_KEY = "spatial_resolution";
+    public static  String[] METADATA_POSSIBLE_RESOLUTION_KEYS = {METADATA_RESOLUTION_KEY, "spatialResolution", "resolution", "Resolution"};
+
     private static final int[] RGB_BAND_OFFSETS = new int[]{
             2, 1, 0
     };
@@ -1075,6 +1089,267 @@ public class ProductUtils {
             }
         }
     }
+
+    // todo Danny added this
+    public static void markAsDerivedFromMetaDataField(Product product, String attribute) {
+
+        String tag = "Derived from (";
+
+        if (attribute != null && attribute.length() > 0 && product != null && product.getMetadataRoot() != null && product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY) != null) {
+            MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
+
+            String value = "";
+
+            MetadataAttribute metadataAttribute = metadataElement.getAttribute(attribute);
+
+            if (metadataAttribute != null) {
+                value = metadataAttribute.getData().toString();
+
+                if (value != null && value.length() > 0 && !value.startsWith(tag)) {
+                    value = tag + value + ")";
+                    setMetaDataField(product, attribute, value);
+                }
+            }
+        }
+
+    }
+
+
+    // todo Danny added this
+    public static void markProductMetaDataFieldAsDerivedFrom(Product product) {
+
+        markAsDerivedFromMetaDataField(product, "product_name");
+        markAsDerivedFromMetaDataField(product, "title");
+        markAsDerivedFromMetaDataField(product, "processing_level");
+
+        String tag = "Derived from (";
+
+        if (product != null) {
+            String productType = product.getProductType();
+
+            if (productType != null && productType.length() > 0 && !productType.startsWith(tag)) {
+                productType = tag + productType + ")";
+                product.setProductType(productType);
+            }
+        }
+
+    }
+
+
+    // todo Danny added this
+    public static void prependHistoryMetaDataField(Product product, String latestHistoryEvent) {
+
+        String HISTORY_KEY = "history";
+        String history = latestHistoryEvent;
+
+        if (product != null && product.getMetadataRoot() != null && product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY) != null) {
+
+            MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
+
+            if (metadataElement.getAttribute(HISTORY_KEY) != null) {
+                String previousHistory = metadataElement.getAttribute(HISTORY_KEY).getData().toString();
+
+                if (previousHistory.length() > 0) {
+                    history = latestHistoryEvent + " :: " + previousHistory;
+                }
+            }
+
+            setMetaDataField(product, HISTORY_KEY, history);
+        }
+    }
+
+
+    // todo Danny added this
+    public static void setResolutionMetaDataField(Product product, boolean markAsDerivedFrom) {
+
+        setMetaDataFieldFromPossible(product, METADATA_RESOLUTION_KEY, METADATA_POSSIBLE_RESOLUTION_KEYS);
+
+        if (markAsDerivedFrom) {
+            markAsDerivedFromMetaDataField(product, METADATA_RESOLUTION_KEY);
+        }
+    }
+
+
+    // todo Danny added this
+    // if attribute does not exist then set to first value found from the possibleAttributes
+    public static void setMetaDataFieldFromPossible(Product product, String attribute, String[] possibleAttributes) {
+
+        if (product != null && product.getMetadataRoot() != null) {
+            MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
+
+            if (metadataElement != null) {
+                MetadataAttribute metadataAttribute = metadataElement.getAttribute(attribute);
+
+                if (metadataAttribute == null) {
+                    for (String key : possibleAttributes) {
+                        if (metadataElement.getAttribute(key) != null) {
+                            String value = metadataElement.getAttribute(key).getData().toString();
+                            setMetaDataField(product, attribute, value);
+                            break;
+                        }
+                    }
+
+                    for (String key : possibleAttributes) {
+                        if (key != null && !key.equals(attribute)) {
+                            deleteMetaDataField(product, key);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    // todo Danny added this
+    public static void setMapProjectionMetaDataFields(Product product) {
+
+        String MAP_PROJECTION_KEY = "map_projection";
+        String CRS_KEY = "crs";
+        String UNDEFINED_VALUE = "undefined";
+        String[] keysToDelete = {"projection", "mapprojection", "coordinatesystem", "coordinatereferencesystem", "coordinate_system", "geocoding", "geo_coding"};
+
+
+        if (product != null && product.getMetadataRoot() != null && product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY) != null) {
+
+            deleteMetaDataFields(product, keysToDelete);
+
+            String mapProjectionString = UNDEFINED_VALUE;
+            String crsString = UNDEFINED_VALUE;
+
+            if (product.getSceneGeoCoding() != null && product.getSceneGeoCoding().getMapCRS() != null) {
+                if (product.getSceneGeoCoding().getMapCRS().getName() != null) {
+                    mapProjectionString = product.getSceneGeoCoding().getMapCRS().getName().toString();
+                }
+                if (product.getSceneGeoCoding().getMapCRS().toString() != null) {
+                    crsString = product.getSceneGeoCoding().getMapCRS().toString().replaceAll("\n", "").replaceAll(" ", "");
+                }
+            }
+
+            setMetaDataField(product, MAP_PROJECTION_KEY, mapProjectionString);
+            setMetaDataField(product, CRS_KEY, crsString);
+        }
+    }
+
+
+    // todo Danny added this
+    public static void deleteMetaDataFields(Product product, String[] fields) {
+
+        MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
+
+        for (String key : fields) {
+            MetadataAttribute metadataAttribute = metadataElement.getAttribute(key);
+            if (metadataAttribute != null) {
+                metadataAttribute.setReadOnly(false);
+                metadataElement.removeAttribute(metadataAttribute);
+            }
+        }
+    }
+
+
+    // todo Danny added this
+    public static void deleteMetaDataField(Product product, String field) {
+        String[] fields = {field};
+        deleteMetaDataFields(product, fields);
+    }
+
+
+    // todo Danny added this
+    public static void setMetaDataField(Product product, String field, String value) {
+
+        String UNDEFINED_VALUE = "undefined";
+
+        if (product != null && product.getMetadataRoot() != null && product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY) != null) {
+
+            MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
+
+            MetadataAttribute metadataAttribute = metadataElement.getAttribute(field);
+            if (metadataAttribute != null) {
+                metadataAttribute.setReadOnly(false);
+                metadataAttribute.setModified(true);
+            }
+
+            // this wont do anything if attribute is not a String type
+            try {
+                if (value != null) {
+                    metadataElement.setAttributeString(field, value);
+                } else {
+                    metadataElement.setAttributeString(field, UNDEFINED_VALUE);
+                }
+            } catch (Exception e) {
+
+            }
+
+            if (metadataAttribute != null) {
+                metadataAttribute.setReadOnly(true);
+            }
+        }
+    }
+
+    public static String getMetaData(Product product, String key) {
+        // Created by Daniel Knowles
+        String metaData = "";
+
+        if (key != null && key.length() > 0) {
+            try {
+                metaData = product.getMetadataRoot().getElement("Global_Attributes").getAttribute(key).getData().getElemString();
+            } catch (Exception ignore) {
+                try {
+                    metaData = product.getMetadataRoot().getElement("Global_Attributes").getAttribute(key.toLowerCase()).getData().getElemString();
+                } catch (Exception ignoreThis) {
+                    try {
+                        metaData = product.getMetadataRoot().getElement("Global_Attributes").getAttribute(key.toUpperCase()).getData().getElemString();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+
+        return metaData;
+    }
+
+    public static String getMetaData(Product product, String[] keys) {
+        // Created by Daniel Knowles
+        String metaData = "";
+
+        for (String key: keys) {
+            metaData = getMetaData(product, key);
+
+            if (metaData.length() > 0) {
+                return metaData;
+            }
+        }
+
+        return metaData;
+    }
+
+
+    public static String getMetaDataOrbit(Product product) {
+        // Created by Daniel Knowles
+        // Note this tries to retrieve an orbit or orbit range name
+        String   metaData = getMetaData(product, METADATA_POSSIBLE_ORBIT_KEYS);
+
+        if (metaData != null && metaData.length() > 0) {
+            return metaData;
+        }
+
+        try {
+            String startOrbit = getMetaData(product, METADATA_POSSIBLE_START_ORBIT_KEYS);
+            String endOrbit = getMetaData(product, METADATA_POSSIBLE_END_ORBIT_KEYS);
+            if (startOrbit != null && startOrbit.length() > 0 && endOrbit != null && endOrbit.length() > 0) {
+                metaData = startOrbit + "-" + endOrbit;
+            } else if (endOrbit == null && startOrbit != null && startOrbit.length() > 0) {
+                metaData = startOrbit;
+            } else if (startOrbit == null && endOrbit != null && endOrbit.length() > 0) {
+                metaData = endOrbit;
+            }
+        } catch (Exception ignored) {
+        }
+
+
+        return metaData;
+    }
+
+
 
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
 
