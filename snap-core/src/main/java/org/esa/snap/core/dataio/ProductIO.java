@@ -556,7 +556,7 @@ public class ProductIO {
                 break;
             }
             pm.setSubTaskName("Writing band '" + band.getName() + "'");
-            ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
+            ProgressMonitor subPM = SubProgressMonitor.createSynchronized(pm, 1);
             writeRasterDataFully(subPM, band, null, null, null);
         }
     }
@@ -597,7 +597,11 @@ public class ProductIO {
                             ioExceptionCollector.add(e);
                             pm.setCanceled(true);
                         } finally {
-                            finisher.worked();
+                            try {
+                                finisher.worked();
+                            } catch (IllegalArgumentException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
                 }

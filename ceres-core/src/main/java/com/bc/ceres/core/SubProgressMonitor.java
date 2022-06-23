@@ -84,6 +84,23 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
     }
 
     /**
+     * Creates a progress monitor based on the passed in parent monitor.If the parent monitor is {@link ProgressMonitor#NULL},
+     * <code>monitor</code> is returned, otherwise a new <code>SubProgressMonitor</code> is created.
+     * In contrast to the monitor returned by {@link #create(ProgressMonitor, int)} this one can be considered to be thread-safe.
+     *
+     * @param monitor the parent progress monitor
+     * @param ticks   the number of work ticks allocated from the
+     *                parent monitor
+     * @return a progress monitor
+     */
+    public static ProgressMonitor createSynchronized(ProgressMonitor monitor, int ticks) {
+        if (monitor == ProgressMonitor.NULL) {
+            return monitor;
+        }
+        return new SyncSubProgressMonitor(monitor, ticks);
+    }
+
+    /**
      * Creates a new sub-progress monitor for the given monitor. The sub
      * progress monitor uses the given number of work ticks from its
      * parent monitor.
@@ -209,10 +226,41 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
     }
 
     /* (Intentionally not javadoc'd)
-      * Implements the method <code>ProgressMonitor.worked</code>.
-      */
+     * Implements the method <code>ProgressMonitor.worked</code>.
+     */
     @Override
     public void worked(int work) {
         internalWorked(work);
-	}
+    }
+
+    private static class SyncSubProgressMonitor extends SubProgressMonitor {
+        public SyncSubProgressMonitor(ProgressMonitor monitor, int ticks) {
+            super(monitor, ticks);
+        }
+
+        @Override
+        public synchronized void beginTask(String taskName, int totalWork) {
+            super.beginTask(taskName, totalWork);
+        }
+
+        @Override
+        public synchronized void done() {
+            super.done();
+        }
+
+        @Override
+        public synchronized void internalWorked(double work) {
+            super.internalWorked(work);
+        }
+
+        @Override
+        public synchronized void setSubTaskName(String subTaskName) {
+            super.setSubTaskName(subTaskName);
+        }
+
+        @Override
+        public synchronized void worked(int work) {
+            super.worked(work);
+        }
+    }
 }
