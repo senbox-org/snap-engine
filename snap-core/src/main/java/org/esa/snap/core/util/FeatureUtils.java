@@ -215,7 +215,7 @@ public class FeatureUtils {
                         Geometry sourceGeometry = (Geometry) sourceFeature.getDefaultGeometry();
                         clippedSourceGeometry = getClippedGeometry(sourceGeometry, clipGeometry);
                     } catch (TopologyException ignored) {
-                        continue;
+                        continue; // todo: swallowed exception, see https://senbox.atlassian.net/browse/SNAP-1539
                     }
 
                     if (!clippedSourceGeometry.isEmpty()) {
