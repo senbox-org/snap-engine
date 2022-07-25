@@ -29,7 +29,7 @@ public class SRTM1HgtElevationModelDescriptor extends AbstractElevationModelDesc
     private static final int NUM_Y_TILES = 120;
     private static final int DEGREE_RES = 1;
     public static final int PIXEL_RES = 3600;
-    public static final int NO_DATA_VALUE = -32768;
+    public static final int NO_DATA_VALUE = 0;
 
     private static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     private static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
