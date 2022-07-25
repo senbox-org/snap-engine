@@ -12,6 +12,8 @@ public class Copernicus30mElevationModelDescriptor extends AbstractElevationMode
     private final int RASTER_DEGREE_WIDTH = 1;
     public static final int NUM_X_TILES = 360;
     public static final int NUM_Y_TILES = 180;
+    public static final int NO_DATA_VALUE = -32768;
+
     @Override
     public String getName() {
         return NAME;
@@ -19,7 +21,7 @@ public class Copernicus30mElevationModelDescriptor extends AbstractElevationMode
 
     @Override
     public float getNoDataValue() {
-        return 0;
+        return NO_DATA_VALUE;
     }
 
     @Override
