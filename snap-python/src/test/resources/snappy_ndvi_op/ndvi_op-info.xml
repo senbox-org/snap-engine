@@ -15,7 +15,7 @@
 
     <description>
         This is an example for the SNAP Python API.
-        It demonstrates the development of a a Python processor plug-in
+        It demonstrates the development of a Python processor plug-in
         taking the optical NDVI 'algorithm' as an example.
     </description>
 
