@@ -1090,7 +1090,6 @@ public class ProductUtils {
         }
     }
 
-    // todo Danny added this
     public static void markAsDerivedFromMetaDataField(Product product, String attribute) {
 
         String tag = "Derived from (";
@@ -1115,7 +1114,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void markProductMetaDataFieldAsDerivedFrom(Product product) {
 
         markAsDerivedFromMetaDataField(product, "product_name");
@@ -1136,7 +1134,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void prependHistoryMetaDataField(Product product, String latestHistoryEvent) {
 
         String HISTORY_KEY = "history";
@@ -1159,7 +1156,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void setResolutionMetaDataField(Product product, boolean markAsDerivedFrom) {
 
         setMetaDataFieldFromPossible(product, METADATA_RESOLUTION_KEY, METADATA_POSSIBLE_RESOLUTION_KEYS);
@@ -1170,7 +1166,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     // if attribute does not exist then set to first value found from the possibleAttributes
     public static void setMetaDataFieldFromPossible(Product product, String attribute, String[] possibleAttributes) {
 
@@ -1200,7 +1195,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void setMapProjectionMetaDataFields(Product product) {
 
         String MAP_PROJECTION_KEY = "map_projection";
@@ -1231,7 +1225,6 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void deleteMetaDataFields(Product product, String[] fields) {
 
         MetadataElement metadataElement = product.getMetadataRoot().getElement(GLOBAL_ATTRIBUTES_KEY);
@@ -1246,14 +1239,12 @@ public class ProductUtils {
     }
 
 
-    // todo Danny added this
     public static void deleteMetaDataField(Product product, String field) {
         String[] fields = {field};
         deleteMetaDataFields(product, fields);
     }
 
 
-    // todo Danny added this
     public static void setMetaDataField(Product product, String field, String value) {
 
         String UNDEFINED_VALUE = "undefined";
@@ -1338,7 +1329,7 @@ public class ProductUtils {
             if (startOrbit != null && startOrbit.length() > 0 && endOrbit != null && endOrbit.length() > 0) {
                 metaData = startOrbit + "-" + endOrbit;
             } else if (endOrbit == null && startOrbit != null && startOrbit.length() > 0) {
-                metaData = startOrbit;
+                metaData = startOrbit ;
             } else if (startOrbit == null && endOrbit != null && endOrbit.length() > 0) {
                 metaData = endOrbit;
             }

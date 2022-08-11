@@ -262,9 +262,7 @@ public class StxFactory {
 
                 if (mustComputeHistogramStx) {
                     int binCount = histogramBinCount != null ? histogramBinCount : DEFAULT_BIN_COUNT;
-//                    todo Danny added this .  Ideally minimum should be reserved for statistics of the data and not be used to set the bin minimum,
-// but currently existing older programs use it this way so I don't want to break them as is.
-//                     the new way is to use binMin and binMax for designating the histogram bin range.
+
                     if (Double.isNaN(binMin)) {
                         binMin = minimum;
                     }
