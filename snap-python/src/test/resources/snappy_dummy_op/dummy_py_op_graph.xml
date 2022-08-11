@@ -1,0 +1,9 @@
+<graph id="someGraphId">
+    <version>1.0</version>
+    <node id="Testing">
+        <operator>py_Dummy_op</operator>
+        <sources>
+            <source>${input}</source>
+        </sources>
+    </node>
+</graph>

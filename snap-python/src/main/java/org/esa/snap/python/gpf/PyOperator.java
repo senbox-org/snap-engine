@@ -17,6 +17,9 @@ import org.jpy.PyObject;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An operator which uses Python code to process data products.
@@ -30,6 +33,7 @@ import java.util.Map;
         authors = "Norman Fomferra",
         internal = true)
 public class PyOperator extends Operator {
+    private static final int NO_IMPLEMENTATIONS = 0;
     private final int COMPUTE_METHOD = 0x01;
     private final int COMPUTE_TILE_METHOD = 0x02;
     private final int COMPUTE_TILE_STACK_METHOD = 0x04;
@@ -47,11 +51,12 @@ public class PyOperator extends Operator {
     @Parameter(description = "Name of the Python class which implements the operator. Please refer to the SNAP help for details.")
     private String pythonClassName;
 
-    private transient PyModule pyModule;
+
+    private final transient AtomicBoolean isPythonInitialised = new AtomicBoolean(false);
+    private final transient AtomicReference<PyObject> pyProcessorImpl = new AtomicReference<>();
+    private final transient AtomicInteger computeMethodFlags = new AtomicInteger(0);
+
     private transient PyOperatorDelegate pythonProcessor;
-
-    private transient int computeMethodFlags;
-
 
     public String getPythonModulePath() {
         return pythonModulePath;
@@ -77,9 +82,18 @@ public class PyOperator extends Operator {
         this.pythonClassName = pythonClassName;
     }
 
-
     @Override
     public void initialize() throws OperatorException {
+        synchronized (PyLib.class) {
+            ensurePythonInitialised();
+            PyObject pythonProcessorImpl = retrievePyProcessorImpl();
+            initMethodImplFlags(pythonProcessorImpl);
+            pythonProcessor = pythonProcessorImpl.createProxy(PyOperatorDelegate.class);
+            pythonProcessor.initialize(this);
+        }
+    }
+
+    private void ensurePythonInitialised() {
         if (pythonModuleName == null || pythonModuleName.isEmpty()) {
             throw new OperatorException("Missing parameter 'pythonModuleName'");
         }
@@ -87,23 +101,32 @@ public class PyOperator extends Operator {
             throw new OperatorException("Missing value for parameter 'pythonClassName'");
         }
 
-        try {
-            PyBridge.establish();
-        } catch (IOException e) {
-            throw new OperatorException("Failed to establish Python bridge", e);
-        }
+        if (!isPythonInitialised.getAndSet(true)) {
+            try {
+                PyBridge.establish();
+            } catch (IOException e) {
+                throw new OperatorException("Failed to establish Python bridge", e);
+            }
 
-        synchronized (PyLib.class) {
             PyBridge.extendSysPath(pythonModulePath);
-
             String code = String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName);
             PyLib.execScript(code);
+        }
+    }
 
-            pyModule = PyModule.importModule(pythonModuleName);
-            PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
+    private PyObject retrievePyProcessorImpl() {
+        if (pyProcessorImpl.get() == null) {
+            PyModule pyModule = PyModule.importModule(pythonModuleName);
+            pyProcessorImpl.set(pyModule.call(pythonClassName));
+        }
+        return pyProcessorImpl.get();
+    }
+
+    private void initMethodImplFlags(PyObject pythonProcessorImpl) {
+        if (computeMethodFlags.get() == NO_IMPLEMENTATIONS) {
             try {
                 pythonProcessorImpl.getAttribute("compute");
-                computeMethodFlags |= COMPUTE_METHOD;
+                computeMethodFlags.accumulateAndGet(COMPUTE_METHOD, (left, right) -> left | right);
                 SystemUtils.LOG.warning(String.format("Python class %s.%s (path %s):\n"
                                                               + "The method compute(self, context, tiles, rectangle) is deprecated.\n"
                                                               + "Please replace it by computeTileStack(self, context, tiles, rectangle) or\n"
@@ -115,35 +138,36 @@ public class PyOperator extends Operator {
             }
             try {
                 pythonProcessorImpl.getAttribute("doExecute");
-                computeMethodFlags |= DO_EXECUTE_METHOD;
+                computeMethodFlags.accumulateAndGet(DO_EXECUTE_METHOD, (left, right) -> left | right);
             } catch (RuntimeException e) {
                 // attribute "doExecute" not found
             }
             try {
                 pythonProcessorImpl.getAttribute("computeTile");
-                computeMethodFlags |= COMPUTE_TILE_METHOD;
+                computeMethodFlags.accumulateAndGet(COMPUTE_TILE_METHOD, (left, right) -> left | right);
             } catch (RuntimeException e) {
                 // attribute "computeTile" not found
             }
             try {
                 pythonProcessorImpl.getAttribute("computeTileStack");
-                computeMethodFlags |= COMPUTE_TILE_STACK_METHOD;
+                computeMethodFlags.accumulateAndGet(COMPUTE_TILE_STACK_METHOD, (left, right) -> left | right);
             } catch (RuntimeException e) {
                 // attribute "computeTileStack" not found
             }
-            if (computeMethodFlags == 0) {
+            if (computeMethodFlags.get() == NO_IMPLEMENTATIONS) {
                 throw new OperatorException("Neither doExecute(self, pm), computeTile(self, context, band, tile), " +
-                                            "nor computeTileStack(self, context, tiles, rectangle) method found.");
+                                                    "nor computeTileStack(self, context, tiles, rectangle) method found.");
             }
-            pythonProcessor = pythonProcessorImpl.createProxy(PyOperatorDelegate.class);
-            pythonProcessor.initialize(this);
         }
     }
 
     @Override
     public void doExecute(ProgressMonitor pm) {
         synchronized (PyLib.class) {
-            if ((computeMethodFlags & DO_EXECUTE_METHOD) != 0) {
+            ensurePythonInitialised();
+            PyObject pythonProcessorImpl = retrievePyProcessorImpl();
+            initMethodImplFlags(pythonProcessorImpl);
+            if ((computeMethodFlags.get() & DO_EXECUTE_METHOD) != 0) {
                 pythonProcessor.doExecute(pm);
             }
         }
@@ -151,13 +175,23 @@ public class PyOperator extends Operator {
 
     @Override
     public boolean canComputeTile() {
-        return (computeMethodFlags & COMPUTE_TILE_METHOD) != 0;
+        synchronized (PyLib.class) {
+            ensurePythonInitialised();
+            PyObject pythonProcessorImpl = retrievePyProcessorImpl();
+            initMethodImplFlags(pythonProcessorImpl);
+            return (computeMethodFlags.get() & COMPUTE_TILE_METHOD) != 0;
+        }
     }
 
     @Override
     public boolean canComputeTileStack() {
-        return (computeMethodFlags & COMPUTE_METHOD) != 0
-                || (computeMethodFlags & COMPUTE_TILE_STACK_METHOD) != 0;
+        synchronized (PyLib.class) {
+            ensurePythonInitialised();
+            PyObject pythonProcessorImpl = retrievePyProcessorImpl();
+            initMethodImplFlags(pythonProcessorImpl);
+            return (computeMethodFlags.get() & COMPUTE_METHOD) != 0
+                    || (computeMethodFlags.get() & COMPUTE_TILE_STACK_METHOD) != 0;
+        }
     }
 
     @Override
@@ -165,7 +199,7 @@ public class PyOperator extends Operator {
         synchronized (PyLib.class) {
             //System.out.println("computeTileStack: thread = " + Thread.currentThread());
             //PyLib.Diag.setFlags(PyLib.Diag.F_EXEC);
-            if ((computeMethodFlags & COMPUTE_TILE_METHOD) != 0) {
+            if ((computeMethodFlags.get() & COMPUTE_TILE_METHOD) != 0) {
                 pythonProcessor.computeTile(this, targetBand, targetTile);
             } else {
                 throw new OperatorException("Missing computeTile(self, context, band, tile) method.");
@@ -179,9 +213,9 @@ public class PyOperator extends Operator {
         synchronized (PyLib.class) {
             //System.out.println("computeTileStack: thread = " + Thread.currentThread());
             //PyLib.Diag.setFlags(PyLib.Diag.F_EXEC);
-            if ((computeMethodFlags & COMPUTE_METHOD) != 0) {
+            if ((computeMethodFlags.get() & COMPUTE_METHOD) != 0) {
                 pythonProcessor.compute(this, targetTiles, targetRectangle);
-            } else if ((computeMethodFlags & COMPUTE_TILE_STACK_METHOD) != 0) {
+            } else if ((computeMethodFlags.get() & COMPUTE_TILE_STACK_METHOD) != 0) {
                 pythonProcessor.computeTileStack(this, targetTiles, targetRectangle);
             } else {
                 throw new OperatorException("Missing computeTileStack(self, context, tiles, rectangle) method.");
