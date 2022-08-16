@@ -61,6 +61,8 @@ class GeoTiffBandWriter {
         ifd = null;
         ios = null;
         tempProduct = null;
+        bandsList.clear();
+        bandsList = null;
     }
 
     /**
@@ -158,13 +160,22 @@ class GeoTiffBandWriter {
                 } else if (bandDataType == ProductData.TYPE_FLOAT32) {
                     final float[] data = new float[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
-                        data[x] = regionData.getElemFloatAt(stride + x);
+                        if (sourceBand.isFlagBand() && ProductData.isUIntType(sourceBand.getDataType())) {
+                            // bits in int and uint are the same. We need int here for the float conversion method.
+                            data[x] = Float.intBitsToFloat(regionData.getElemIntAt(stride + x));
+                        } else {
+                            data[x] = regionData.getElemFloatAt(stride + x);
+                        }
                     }
                     ios.writeFloats(data, 0, regionWidth);
                 } else if (bandDataType == ProductData.TYPE_FLOAT64) {
                     final double[] data = new double[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
-                        data[x] = regionData.getElemDoubleAt(stride + x);
+                        if (sourceBand.isFlagBand() && ProductData.isUIntType(sourceBand.getDataType())) {
+                            data[x] = Double.longBitsToDouble(regionData.getElemUIntAt(stride + x));
+                        } else {
+                            data[x] = regionData.getElemDoubleAt(stride + x);
+                        }
                     }
                     ios.writeDoubles(data, 0, regionWidth);
                 }

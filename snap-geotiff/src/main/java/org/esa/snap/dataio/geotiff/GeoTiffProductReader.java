@@ -329,7 +329,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
 
-                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, mosaicImageTileSize, bandIndex,
+                    // For flags using the most-significant bit it is important that the values are specially treated.
+                    // It is not necessary for flags with short or byte data type, because thre is a next higher data type which can take the value, but for int32 there is none.
+                    boolean interpretAsUnsignedInt = dataBufferType >= DataBuffer.TYPE_INT && ProductData.isUIntType(band.getDataType());
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, interpretAsUnsignedInt, productBounds, mosaicImageTileSize, bandIndex,
                                                                                            band.getGeoCoding(), isGlobalShifted180, noDataValue, defaultJAIReadTileSize);
                     ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
