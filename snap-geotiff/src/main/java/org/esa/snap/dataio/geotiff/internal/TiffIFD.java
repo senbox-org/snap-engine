@@ -43,7 +43,6 @@ import java.util.List;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 2932 $ $Date: 2008-08-28 16:43:48 +0200 (Do, 28 Aug 2008) $
  */
 public class TiffIFD {
 
@@ -192,7 +191,7 @@ public class TiffIFD {
 
     private static int getNumBands(Product product) {
         final Band[] bands = product.getBands();
-        final List<Band> bandList = new ArrayList<Band>(bands.length);
+        final List<Band> bandList = new ArrayList<>(bands.length);
         for (Band band : bands) {
             if (Utils.shouldWriteNode(band)) {
                 bandList.add(band);
@@ -252,8 +251,8 @@ public class TiffIFD {
 
         final int numEntries = geoTIFFMetadata.getNumGeoKeyEntries();
         final TiffShort[] directoryTagValues = new TiffShort[numEntries * 4];
-        final ArrayList<TiffDouble> doubleValues = new ArrayList<TiffDouble>();
-        final ArrayList<String> asciiValues = new ArrayList<String>();
+        final ArrayList<TiffDouble> doubleValues = new ArrayList<>();
+        final ArrayList<String> asciiValues = new ArrayList<>();
         for (int i = 0; i < numEntries; i++) {
             final GeoTIFFMetadata.KeyEntry entry = geoTIFFMetadata.getGeoKeyEntryAt(i);
             final int[] data = entry.getData();
@@ -278,11 +277,11 @@ public class TiffIFD {
         }
         setEntry(new TiffDirectoryEntry(TiffTag.GeoKeyDirectoryTag, directoryTagValues));
         if (!doubleValues.isEmpty()) {
-            final TiffDouble[] tiffDoubles = doubleValues.toArray(new TiffDouble[doubleValues.size()]);
+            final TiffDouble[] tiffDoubles = doubleValues.toArray(new TiffDouble[0]);
             setEntry(new TiffDirectoryEntry(TiffTag.GeoDoubleParamsTag, tiffDoubles));
         }
         if (!asciiValues.isEmpty()) {
-            final String[] tiffAsciies = asciiValues.toArray(new String[asciiValues.size()]);
+            final String[] tiffAsciies = asciiValues.toArray(new String[0]);
             setEntry(new TiffDirectoryEntry(TiffTag.GeoAsciiParamsTag, new GeoTiffAscii(tiffAsciies)));
         }
         double[] modelTransformation = geoTIFFMetadata.getModelTransformation();
@@ -380,9 +379,7 @@ public class TiffIFD {
         }
 
         final TiffShort[] tiffValues = new TiffShort[getNumBands(product)];
-        for (int i = 0; i < tiffValues.length; i++) {
-            tiffValues[i] = sampleFormat;
-        }
+        Arrays.fill(tiffValues, sampleFormat);
 
         return tiffValues;
     }

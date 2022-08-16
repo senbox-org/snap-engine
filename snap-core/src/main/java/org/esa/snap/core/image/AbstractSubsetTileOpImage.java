@@ -2,15 +2,14 @@ package org.esa.snap.core.image;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.ImageUtils;
-import org.esa.snap.core.util.jai.JAIUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
-import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 
 /**
  * Created by jcoravu on 11/12/2019.
@@ -85,9 +84,13 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
                 int currentSrcXOffset = this.imageBoundsSupport.getSourceX() + computeSourceX(offsetX + x);
                 validateCoordinate(currentSrcXOffset, normalBoundsIntersection.x, normalBoundsIntersection.width);
                 double value = normalRasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, bandIndex);
-                levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, value);
+                setSample(levelDestinationRaster, levelDestinationRectangle, bandIndex, y, x, value);
             }
         }
+    }
+
+    protected void setSample(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle, int bandIndex, int y, int x, double value) {
+        levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, value);
     }
 
     protected final int getProductDataType() {
@@ -125,9 +128,9 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
         return this.imageBoundsSupport.getSourceCoord(y, 0, this.imageBoundsSupport.getSourceHeight()-1);
     }
 
-    protected final static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {
+    protected static void validateCoordinate(int coordinateToCheck, int minimumCoordinate, int size) {
         if ((coordinateToCheck < minimumCoordinate) || (coordinateToCheck > (minimumCoordinate + size))) {
-            throw new IllegalStateException("The coordinate " + coordinateToCheck + " is out of bounds. The minimum coordinate is " + minimumCoordinate+ " and the size is " + size + ".");
+            throw new IllegalStateException("The coordinate " + coordinateToCheck + " is out of bounds. The minimum coordinate is " + minimumCoordinate + " and the size is " + size + ".");
         }
     }
 

@@ -18,6 +18,7 @@ package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -39,6 +40,7 @@ import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -68,9 +70,11 @@ import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -211,6 +215,46 @@ public class GeoTiffWriteReadTest {
     }
 
     @Test
+    public void testReadProductWithHighestFlagSet() throws Exception {
+        URL resource = getClass().getResource("C2RCC_max_flag_test.dim");
+        final Product probeProduct = ProductIO.readProduct(new File(resource.toURI()));
+        final File tiffFileToTest = File.createTempFile("C2RCC_FLag", ".tif");
+        ProductIO.writeProduct(probeProduct, tiffFileToTest, "GeoTIFF", false);
+        Product product = reader.readProductNodes(tiffFileToTest, null);
+        final Band c2rcc_flags = product.getBand("c2rcc_flags");
+        // Pixel at 47, 41; index = 3327
+        final long pixelInt = c2rcc_flags.readPixels(47, 41, 1, 1, new int[1])[0];
+
+        assertTrue(BitSetter.isFlagSet(pixelInt, 0));   // RTOSA_OOS
+        assertFalse(BitSetter.isFlagSet(pixelInt, 1));  // RTOSA_OOR
+        assertFalse(BitSetter.isFlagSet(pixelInt, 2));  // RHOW_OOR
+        assertTrue(BitSetter.isFlagSet(pixelInt, 3));   // CLOUD_RISK
+        assertFalse(BitSetter.isFlagSet(pixelInt, 4));  // IOP_OOR
+        assertFalse(BitSetter.isFlagSet(pixelInt, 5));  // APIG_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 6));  // ADET_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 7));  // AGELB_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 8));  // BPART_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 9));  // BWIT_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 10)); // APIG_AT_MIN
+        assertFalse(BitSetter.isFlagSet(pixelInt, 11)); // ADET_AT_MIN
+        assertFalse(BitSetter.isFlagSet(pixelInt, 12)); // AGELB_AT_MIN
+        assertFalse(BitSetter.isFlagSet(pixelInt, 13)); // BPART_AT_MIN
+        assertFalse(BitSetter.isFlagSet(pixelInt, 14)); // BWIT_AT_MIN
+        assertTrue(BitSetter.isFlagSet(pixelInt, 15));  // RHOW_OOS
+        assertFalse(BitSetter.isFlagSet(pixelInt, 16)); // KD489_OOR
+        assertFalse(BitSetter.isFlagSet(pixelInt, 17)); // KDmin_OOR
+        assertFalse(BitSetter.isFlagSet(pixelInt, 18)); // KD489_AT_MAX
+        assertFalse(BitSetter.isFlagSet(pixelInt, 19)); // KD489_AT_MIN
+        assertTrue(BitSetter.isFlagSet(pixelInt, 31));  // VALID_PE
+
+        final Band iop_apig = product.getBand("iop_apig");
+        assertEquals(0.0051777f, iop_apig.readPixels(47, 41, 1, 1, new float[1])[0], 1.0e-6);
+
+        final Band conc_chl = product.getBand("conc_chl");
+        assertEquals(0.0880901, conc_chl.readPixels(47, 41, 1, 1, new float[1])[0], 1.0e-6);
+    }
+
+    @Test
     public void testWriteReadIndexCodingWith2BandsBand() throws IOException {
         final Band bandUInt8 = outProduct.addBand("uint8", ProductData.TYPE_UINT8);
         bandUInt8.setDataElems(createByteData(getProductSize(), 20));
@@ -304,7 +348,7 @@ public class GeoTiffWriteReadTest {
 
 
     @Test
-    public void testWriteReadLambertConformalConic_MapGeoCoding() throws IOException, TransformException, FactoryException {
+    public void testWriteReadLambertConformalConic_MapGeoCoding() throws IOException {
         setLambertConformalConicGeoCoding_MapGeoCoding(outProduct);
 
         performTest(2.0e-4f);
@@ -423,7 +467,7 @@ public class GeoTiffWriteReadTest {
 
     private static void setLambertConformalConicGeoCoding_MapGeoCoding(final Product product) {
         final MapTransformDescriptor descriptor = MapProjectionRegistry.getDescriptor(
-                    LambertConformalConicDescriptor.TYPE_ID);
+                LambertConformalConicDescriptor.TYPE_ID);
         final double[] values = descriptor.getParameterDefaultValues();
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i] - 0.001;
@@ -437,7 +481,7 @@ public class GeoTiffWriteReadTest {
     }
 
     private static void setLambertConformalConicGeoCoding(final Product product) throws FactoryException,
-                                                                                        TransformException {
+            TransformException {
         final MathTransformFactory transformFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
         final ParameterValueGroup parameters = transformFactory.getDefaultParameters(LAMBERT_CONIC_CONFORMAL_1SP);
         final Ellipsoid ellipsoid = DefaultGeodeticDatum.WGS84.getEllipsoid();
@@ -488,14 +532,14 @@ public class GeoTiffWriteReadTest {
 
     private static void setTiePointGeoCoding(final Product product) {
         final TiePointGrid latGrid = new TiePointGrid("lat", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
-                    85, 84, 83,
-                    75, 74, 73,
-                    65, 64, 63
+                85, 84, 83,
+                75, 74, 73,
+                65, 64, 63
         });
         final TiePointGrid lonGrid = new TiePointGrid("lon", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
-                    -15, -5, 5,
-                    -16, -6, 4,
-                    -17, -7, 3
+                -15, -5, 5,
+                -16, -6, 4,
+                -17, -7, 3
         });
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
