@@ -176,8 +176,8 @@ public class BinningOp extends Operator {
 
     @Parameter(interval = "[0,24]",
             description = "A sensor-dependent constant given in hours of a day (0 to 24)\n" +
-                          "at which a sensor has a minimum number of observations at the date line (the 180 degree meridian).\n" +
-                          "Only used if parameter 'dataDayMode' is set to 'SPATIOTEMPORAL_DATADAY'.")
+                    "at which a sensor has a minimum number of observations at the date line (the 180 degree meridian).\n" +
+                    "Only used if parameter 'dataDayMode' is set to 'SPATIOTEMPORAL_DATADAY'. This is usually the equator crossing time (ECT)")
     private Double minDataHour;
 
     @Parameter(description = "Number of rows in the (global) planetary grid. Must be even.", defaultValue = "2160")

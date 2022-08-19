@@ -20,6 +20,8 @@ import org.esa.snap.binning.DataPeriod;
 
 /**
  * The definition of a "spatial data-day", or more generally, a spatial data-period used for the binning.
+ * A detailed description of this period definition can be found in
+ * the <a href="https://www.globcolour.info/CDR_Docs/GlobCOLOUR_PUG_v4.1.pdf">GlobColour PUG in section 3.4 "The GlobColour data-day approach"</a>.
  *
  * @author Norman Fomferra
  */
@@ -37,7 +39,8 @@ public class SpatialDataPeriod implements DataPeriod {
      * @param duration    The binning period's duration in days.
      * @param minDataHour The time in hours of a day (0 to 24) at which a given sensor has a minimum number of observations at the date line (the 180deg meridian).
      *                    This number is usually found plotting longitude-time pairs of given sensor observations and then finding
-     *                    the area where there are a minimum number of observations at the date line.
+     *                    the area where there are a minimum number of observations at the date line. This is the crossing nodal time (CNT),
+     *                    which is equal to the equator crossing time (ECT)
      */
     public SpatialDataPeriod(double startTime, double duration, double minDataHour) {
         this.startTime = startTime;
