@@ -1186,10 +1186,10 @@ public class ProductUtils {
                         for (String keyVariation : keyVariations) {
                             if (metadataElement.getAttribute(keyVariation) != null) {
                                 String value = metadataElement.getAttribute(keyVariation).getData().toString();
-                            setMetaDataField(product, attribute, value);
-                            break;
+                                setMetaDataField(product, attribute, value);
+                                break;
+                            }
                         }
-                    }
                     }
 
                     for (String key : possibleAttributes) {
@@ -1336,17 +1336,17 @@ public class ProductUtils {
         if (exact) {
             return getMetaData(product, key);
         } else {
-        String metaData = "";
+            String metaData = "";
             String[] keyVariations = StringUtils.getStringCaseVariations(key);
             for (String keyVariation : keyVariations) {
                 metaData = getMetaData(product, keyVariation);
                 if (metaData != null && metaData.length() > 0) {
-                return metaData;
+                    return metaData;
+                }
             }
-        }
 
-        return metaData;
-    }
+            return metaData;
+        }
     }
 
 
@@ -1361,7 +1361,7 @@ public class ProductUtils {
     public static String getMetaDataOrbit(Product product) {
         // Created by Daniel Knowles
         // Note this tries to retrieve an orbit or orbit range name
-        String   metaData = getMetaData(product, METADATA_POSSIBLE_ORBIT_KEYS);
+        String metaData = getMetaData(product, METADATA_POSSIBLE_ORBIT_KEYS);
 
         if (metaData != null && metaData.length() > 0) {
             return metaData;
@@ -1373,7 +1373,7 @@ public class ProductUtils {
             if (startOrbit != null && startOrbit.length() > 0 && endOrbit != null && endOrbit.length() > 0) {
                 metaData = startOrbit + "-" + endOrbit;
             } else if (endOrbit == null && startOrbit != null && startOrbit.length() > 0) {
-                metaData = startOrbit ;
+                metaData = startOrbit;
             } else if (startOrbit == null && endOrbit != null && endOrbit.length() > 0) {
                 metaData = endOrbit;
             }
