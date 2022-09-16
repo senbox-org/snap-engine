@@ -146,7 +146,12 @@ public class BeamBandPart extends ProfilePartIO {
             if (geoCodingValue.equals(expectedCRSName)) {
                 final Variable crsVariable = netcdfFile.getRootGroup().findVariable(expectedCRSName);
                 if (crsVariable != null) {
-                    final Attribute wktAtt = crsVariable.findAttribute("wkt");
+                    // CF standard attribute name
+                    Attribute wktAtt = crsVariable.findAttribute("crs_wkt");
+                    // legacy SNAP attribute name
+                    if (wktAtt == null) {
+                        wktAtt = crsVariable.findAttribute("wkt");
+                    }
                     final Attribute i2mAtt = crsVariable.findAttribute("i2m");
                     if (wktAtt != null && i2mAtt != null) {
                         band.setGeoCoding(createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue()));
@@ -285,6 +290,9 @@ public class BeamBandPart extends ProfilePartIO {
                     }
                     final String crsName = "crs_" + band.getName();
                     final NVariable crsVariable = ncFile.addScalarVariable(crsName, DataType.INT);
+                    // CF standard attribute name
+                    crsVariable.addAttribute("crs_wkt", crs.toWKT());
+                    // legacy SNAP attribute name
                     crsVariable.addAttribute("wkt", crs.toWKT());
                     crsVariable.addAttribute("i2m", StringUtils.arrayToCsv(matrix));
                     variable.addAttribute(GEOCODING, crsName);

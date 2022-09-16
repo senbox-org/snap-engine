@@ -117,7 +117,12 @@ public class BeamGeocodingPart extends CfGeocodingPart {
 
         final Variable crsVar = netcdfFile.getRootGroup().findVariable("crs");
         if (crsVar != null) {
-            final Attribute wktAtt = crsVar.findAttribute("wkt");
+            // CF standard attribute name
+            Attribute wktAtt = crsVar.findAttribute("crs_wkt");
+            // SNAP legacy attribute name
+            if (wktAtt == null) {
+                wktAtt = crsVar.findAttribute("wkt");
+            }
             final Attribute i2mAtt = crsVar.findAttribute("i2m");
             if (wktAtt != null && i2mAtt != null) {
                 return createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue());
@@ -173,6 +178,9 @@ public class BeamGeocodingPart extends CfGeocodingPart {
             ((AffineTransform) transform).getMatrix(matrix);
         }
         final NVariable crsVariable = ncFile.addScalarVariable("crs", DataType.INT);
+        // CF standard attribute name
+        crsVariable.addAttribute("crs_wkt", crs.toWKT());
+        // legacy SNAP attribute name
         crsVariable.addAttribute("wkt", crs.toWKT());
         crsVariable.addAttribute("i2m", StringUtils.arrayToCsv(matrix));
     }
