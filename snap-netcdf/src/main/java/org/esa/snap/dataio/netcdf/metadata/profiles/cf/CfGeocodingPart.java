@@ -45,8 +45,11 @@ import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import org.esa.snap.runtime.Config;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -63,8 +66,11 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     private boolean geographicCRS;
     private boolean latLonVarsAddedByGeocoding;
+    private boolean xYVarsAddedByGeocoding;
     private String latVarName;
     private String lonVarName;
+    private String yVarName;
+    private String xVarName;
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
@@ -146,6 +152,15 @@ public class CfGeocodingPart extends ProfilePartIO {
                 addGeographicCoordinateVariables(ncFile, ul, br, latVarName, lonVarName);
             }
         }
+        if (geoCoding instanceof CrsGeoCoding && ! geographicCRS) {
+            xVarName = "x";
+            yVarName = "y";
+            addMetricCoordinateVariables(ncFile,
+                                         (CrsGeoCoding) geoCoding,
+                                         product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                                         xVarName, yVarName);
+            xYVarsAddedByGeocoding = true;
+        }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
     }
 
@@ -155,50 +170,81 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     @Override
     public void encode(ProfileWriteContext ctx, Product product) throws IOException {
-        if (!latLonVarsAddedByGeocoding) {
-            return;
+        if (xYVarsAddedByGeocoding) {
+            final int h = product.getSceneRasterHeight();
+            final int w = product.getSceneRasterWidth();
+            NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+            NVariable yVariable = ncFile.findVariable(yVarName);
+            NVariable xVariable = ncFile.findVariable(xVarName);
+            final double[] x = new double[w];
+            final double[] y = new double[h];
+            final MathTransform imageToMapTransform = product.getSceneGeoCoding().getImageToMapTransform();
+            for (int j = 0; j < h; j++) {
+                final DirectPosition2D p0 = new DirectPosition2D(0, j);
+                final DirectPosition2D p = new DirectPosition2D();
+                try {
+                    imageToMapTransform.transform(p0, p);
+                } catch (TransformException e) {
+                    throw new IOException(e);
+                }
+                y[j] = p.y;
+            }
+            for (int i = 0; i < w; i++) {
+                final DirectPosition2D p0 = new DirectPosition2D(i, 0);
+                final DirectPosition2D p = new DirectPosition2D();
+                try {
+                    imageToMapTransform.transform(p0, p);
+                } catch (TransformException e) {
+                    throw new IOException(e);
+                }
+                x[i] = p.x;
+            }
+            yVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{h}, y));
+            xVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{w}, x));
         }
-        final int h = product.getSceneRasterHeight();
-        final int w = product.getSceneRasterWidth();
+        if (latLonVarsAddedByGeocoding) {
+            final int h = product.getSceneRasterHeight();
+            final int w = product.getSceneRasterWidth();
 
-        final GeoCoding geoCoding = product.getSceneGeoCoding();
-        final PixelPos pixelPos = new PixelPos();
-        final GeoPos geoPos = new GeoPos();
+            final GeoCoding geoCoding = product.getSceneGeoCoding();
+            final PixelPos pixelPos = new PixelPos();
+            final GeoPos geoPos = new GeoPos();
 
-        NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-        NVariable latVariable = ncFile.findVariable(latVarName);
-        NVariable lonVariable = ncFile.findVariable(lonVarName);
-        if (geographicCRS) {
-            final double[] lat = new double[h];
-            final double[] lon = new double[w];
-            pixelPos.x = 0 + 0.5f;
-            for (int y = 0; y < h; y++) {
-                pixelPos.y = y + 0.5f;
-                geoCoding.getGeoPos(pixelPos, geoPos);
-                lat[y] = geoPos.getLat();
-            }
-            pixelPos.y = 0 + 0.5f;
-            for (int x = 0; x < w; x++) {
-                pixelPos.x = x + 0.5f;
-                geoCoding.getGeoPos(pixelPos, geoPos);
-                lon[x] = geoPos.getLon();
-            }
-            latVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{h}, lat));
-            lonVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{w}, lon));
-        } else {
-            final double[] lat = new double[w];
-            final double[] lon = new double[w];
-            final boolean isYFlipped = (Boolean) ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME);
-            for (int y = 0; y < h; y++) {
-                pixelPos.y = y + 0.5f;
+            NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+            NVariable latVariable = ncFile.findVariable(latVarName);
+            NVariable lonVariable = ncFile.findVariable(lonVarName);
+            if (geographicCRS) {
+                final double[] lat = new double[h];
+                final double[] lon = new double[w];
+                pixelPos.x = 0 + 0.5f;
+                for (int y = 0; y < h; y++) {
+                    pixelPos.y = y + 0.5f;
+                    geoCoding.getGeoPos(pixelPos, geoPos);
+                    lat[y] = geoPos.getLat();
+                }
+                pixelPos.y = 0 + 0.5f;
                 for (int x = 0; x < w; x++) {
                     pixelPos.x = x + 0.5f;
                     geoCoding.getGeoPos(pixelPos, geoPos);
-                    lat[x] = geoPos.getLat();
                     lon[x] = geoPos.getLon();
                 }
-                latVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lat));
-                lonVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lon));
+                latVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{h}, lat));
+                lonVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{w}, lon));
+            } else {
+                final double[] lat = new double[w];
+                final double[] lon = new double[w];
+                final boolean isYFlipped = (Boolean) ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME);
+                for (int y = 0; y < h; y++) {
+                    pixelPos.y = y + 0.5f;
+                    for (int x = 0; x < w; x++) {
+                        pixelPos.x = x + 0.5f;
+                        geoCoding.getGeoPos(pixelPos, geoPos);
+                        lat[x] = geoPos.getLat();
+                        lon[x] = geoPos.getLon();
+                    }
+                    latVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lat));
+                    lonVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lon));
+                }
             }
         }
     }
@@ -222,6 +268,37 @@ public class CfGeocodingPart extends ProfilePartIO {
         lon.addAttribute("standard_name", "longitude");
         lon.addAttribute(Constants.VALID_MIN_ATT_NAME, ul.getLon());
         lon.addAttribute(Constants.VALID_MAX_ATT_NAME, br.getLon());
+    }
+
+    private void addMetricCoordinateVariables(NFileWriteable ncFile,
+                                              CrsGeoCoding geoCoding,
+                                              int width, int height,
+                                              String xVarName, String yVarName)
+            throws IOException {
+        final DirectPosition2D ul = new DirectPosition2D(0, 0);
+        final DirectPosition2D lr = new DirectPosition2D(width, height);
+        final DirectPosition2D ulm = new DirectPosition2D();
+        final DirectPosition2D lrm = new DirectPosition2D();
+        try {
+            geoCoding.getImageToMapTransform().transform(ul, ulm);
+            geoCoding.getImageToMapTransform().transform(lr, lrm);
+        } catch (TransformException e) {
+            throw new IOException(e);
+        }
+
+        final NVariable y = ncFile.addVariable(yVarName, DataType.DOUBLE, null, yVarName);
+        y.addAttribute("units", "m");
+        y.addAttribute("long_name", "y coordinate of projection");
+        y.addAttribute("standard_name", "projection_y_coordinate");
+        y.addAttribute(Constants.VALID_MIN_ATT_NAME, Math.min(ulm.y, lrm.y));
+        y.addAttribute(Constants.VALID_MAX_ATT_NAME, Math.max(ulm.y, lrm.y));
+
+        final NVariable x = ncFile.addVariable(xVarName, DataType.DOUBLE, null, xVarName);
+        x.addAttribute("units", "m");
+        x.addAttribute("long_name", "x coordinate of projection");
+        x.addAttribute("standard_name", "projection_x_coordinate");
+        x.addAttribute(Constants.VALID_MIN_ATT_NAME, ulm.x);
+        x.addAttribute(Constants.VALID_MAX_ATT_NAME, lrm.x);
     }
 
     private void addLatLonBands(final NFileWriteable ncFile, Dimension tileSize,
