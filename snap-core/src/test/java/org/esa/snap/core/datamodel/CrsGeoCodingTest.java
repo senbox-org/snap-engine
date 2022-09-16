@@ -18,6 +18,7 @@ package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.cs.DefaultEllipsoidalCS;
@@ -315,5 +316,35 @@ public class CrsGeoCodingTest {
         final double scaleY = 1.0;
         i2m.scale(scaleX, -scaleY);
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84, imageBounds, i2m);
+    }
+
+    @Test
+    public void testDetermineMetricCoordinates() throws Exception {
+        int numCols = 20;
+        int numRows = 30;
+        float easting = 4321000.0f;
+        float northing = 3210000.0f;
+        float pixelSizeX = 10.0f;
+        float pixelSizeY = -10.0f;
+        float referencePixelX = 0.0f;
+        float referencePixelY = 0.0f;
+        final CrsGeoCoding geoCoding = new CrsGeoCoding(CRS.decode("EPSG:3035", true),
+                                                        numCols, numRows, easting, northing, pixelSizeX, pixelSizeY, referencePixelX, referencePixelY);
+        // We expect the projection centre at 0/0
+        GeoPos geoPos = new GeoPos();
+        geoCoding.getGeoPos(new PixelPos(0.0f, 0.0f), geoPos);
+        assertEquals(10.0, geoPos.lon, 0.001f);
+        assertEquals(52.0, geoPos.lat, 0.001f);
+        // we expect a shifted pixel position at a corresponding metric position
+        final DirectPosition2D ul = new DirectPosition2D(0, 0);
+        final DirectPosition2D lr = new DirectPosition2D(20, 30);
+        final DirectPosition2D ulm = new DirectPosition2D();
+        final DirectPosition2D lrm = new DirectPosition2D();
+        geoCoding.getImageToMapTransform().transform(ul, ulm);
+        geoCoding.getImageToMapTransform().transform(lr, lrm);
+        assertEquals(4321000.0, ulm.x,0.001f);
+        assertEquals(3210000.0, ulm.y,0.001f);
+        assertEquals(4321200.0, lrm.x,0.001f);
+        assertEquals(3210300.0, lrm.y,0.001f);
     }
 }
