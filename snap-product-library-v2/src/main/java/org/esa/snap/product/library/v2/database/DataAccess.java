@@ -64,6 +64,8 @@ public class DataAccess {
         add(".png"); add(".bmp"); add(".gif");
     }};
 
+    public static boolean databaseInitialised = false;
+
     private static H2DatabaseParameters dbParams;
 
     public static void initialize() {
@@ -1133,7 +1135,22 @@ public class DataAccess {
     }
 
     private static Connection getConnection() throws SQLException {
-        final Connection connection = DriverManager.getConnection(dbParams.getUrl(), dbParams.getProperties());
+        // Improve SNAP startup time by initialising Product Library DB on first usage only
+        if (!databaseInitialised){
+            try {
+                // load H2 driver
+                Class.forName("org.h2.Driver");
+                DataAccess.initialize();
+                databaseInitialised = true;
+
+                DataAccess.upgradeDatabase();
+                logger.info("Successfully initialized product library database.");
+
+            } catch (Exception exception) {
+                logger.log(Level.SEVERE, "Failed to initialize the database.", exception);
+            }
+        }
+        Connection connection = DriverManager.getConnection(dbParams.getUrl(), dbParams.getProperties());
         connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         return connection;
     }
