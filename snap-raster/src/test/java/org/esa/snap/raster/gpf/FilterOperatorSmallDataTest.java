@@ -45,7 +45,7 @@ import static org.junit.Assert.assertArrayEquals;
 /**
  * @author Marco Peters
  */
-public class FilterOperatorTest {
+public class FilterOperatorSmallDataTest {
     private static final int width = 5;
     private static final int height = 5;
     private static final short[] sourceDataB1 = new short[]{
