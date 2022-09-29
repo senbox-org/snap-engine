@@ -35,7 +35,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -73,8 +74,8 @@ public class FilterOperator extends Operator {
     @Parameter(description = "The kernel file", label = "Kernel File")
     private File userDefinedKernelFile = null;
 
-    private transient Map<Band, Band> bandMap = new HashMap<>(5);
-    private transient final Map<String, Filter> filterMap = new HashMap<>(5);
+    private final transient Map<Band, Band> bandMap = new HashMap<>(5);
+    private final transient Map<String, Filter> filterMap = new HashMap<>(5);
 
     private static final String PRODUCT_SUFFIX = "_Flt";
 
@@ -88,7 +89,8 @@ public class FilterOperator extends Operator {
         populateFilterMap(SMOOTHING_FILTERS);
         populateFilterMap(SHARPENING_FILTERS);
         populateFilterMap(LAPLACIAN_FILTERS);
-        // populateFilterMap(NON_LINEAR_FILTERS);
+        populateFilterMap(NON_LINEAR_FILTERS);
+        populateFilterMap(MORPHOLOGY_FILTERS);
     }
 
     private void populateFilterMap(Filter[] filters) {
@@ -112,28 +114,35 @@ public class FilterOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
         ensureSingleRasterSize(sourceProduct);
+        if (userDefinedKernelFile == null && selectedFilterName == null) {
+            throw new OperatorException("Parameter 'userDefinedKernelFile' or 'selectedFilterName' must be specified");
+        }
+
+        Filter selectedFilter;
+        if (userDefinedKernelFile != null) {
+            try {
+                selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
+            } catch (IOException ioe) {
+                throw new OperatorException(String.format("Could not load user defined kernel from %s", userDefinedKernelFile), ioe);
+            }
+        } else {
+            selectedFilter = filterMap.get(selectedFilterName);
+            if (selectedFilter == null) {
+                throw new OperatorException(String.format("Specified filter name '%s' is unknown", selectedFilterName));
+            }
+        }
+
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
+                                    sourceProduct.getProductType(),
+                                    sourceProduct.getSceneRasterWidth(),
+                                    sourceProduct.getSceneRasterHeight());
+
+        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames, true);
 
         try {
-            targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                    sourceProduct.getProductType(),
-                    sourceProduct.getSceneRasterWidth(),
-                    sourceProduct.getSceneRasterHeight());
-
-            Filter selectedFilter = null;
-            if (userDefinedKernelFile != null) {
-                selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
-            } else if (selectedFilterName != null) {
-                selectedFilter = filterMap.get(selectedFilterName);
-            }
-
-            if (selectedFilter == null)
-                return;
-
-            final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames, true);
-
             for (Band srcBand : sourceBands) {
                 final Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
-                        sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                                                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
                 targetBand.setUnit(srcBand.getUnit());
                 targetProduct.addBand(targetBand);
 
@@ -142,8 +151,9 @@ public class FilterOperator extends Operator {
                 bandMap.put(targetBand, filterBand);
 
                 final Band existingBand = sourceProduct.getBand(filterBandName);
-                if (existingBand != null)
+                if (existingBand != null) {
                     sourceProduct.removeBand(existingBand);
+                }
                 sourceProduct.addBand(filterBand);
             }
 
@@ -179,20 +189,30 @@ public class FilterOperator extends Operator {
         }
     }
 
-    private static FilterBand createFilterBand(Filter filter, String bandName, RasterDataNode raster) throws Exception {
+    private static FilterBand createFilterBand(Filter filter, String bandName, RasterDataNode raster) {
 
         final FilterBand filterBand;
         if (filter instanceof KernelFilter) {
             final KernelFilter kernelFilter = (KernelFilter) filter;
             filterBand = new ConvolutionFilterBand(bandName, raster, kernelFilter.kernel, 1);
         } else {
-            throw new Exception("unhandled filter type");
-            //final GeneralFilter generalFilter = (GeneralFilter) filter;
-            //filterBand = new GeneralFilterBand(bandName, raster, generalFilter.operator, kernel, 1);
+            final GeneralFilter generalFilter = (GeneralFilter) filter;
+            filterBand = new GeneralFilterBand(bandName, raster, generalFilter.operator, getKernel(generalFilter), 1);
         }
         final String descr = MessageFormat.format("Filter ''{0}''", filter.toString());
         filterBand.setDescription(descr);
         return filterBand;
+    }
+
+    private static Kernel getKernel(GeneralFilter filter) {
+        final double[] kernelData = new double[filter.width * filter.height];
+        Arrays.fill(kernelData, 1.0);
+        return new Kernel(filter.width,
+                          filter.height,
+                          filter.width / 2,
+                          filter.height / 2,
+                          1.0,
+                          kernelData);
     }
 
     private static KernelFilter getUserDefinedFilter(File userDefinedKernelFile) throws IOException {
@@ -204,7 +224,7 @@ public class FilterOperator extends Operator {
         int k = 0;
         for (int r = 0; r < filterHeight; r++) {
             for (int c = 0; c < filterWidth; c++) {
-                data[k++] = (double) kernelData[r][c];
+                data[k++] = kernelData[r][c];
             }
         }
         return new KernelFilter("User Defined Filter", new Kernel(filterWidth, filterHeight, data));
@@ -404,20 +424,38 @@ public class FilterOperator extends Operator {
             })),
     };
     public static final Filter[] SMOOTHING_FILTERS = {
-            new KernelFilter("Arithmetic 3x3 Mean", new Kernel(3, 3, 1.0 / 9.0, new double[]{
+            new KernelFilter("Arithmetic 3x3 Mean", new Kernel(3, 3, 1.0 / 9.0, new double[]{   // Operator Name
+                    +1, +1, +1,
+                    +1, +1, +1,
+                    +1, +1, +1,
+            })),
+            new KernelFilter("Arithmetic Mean 3x3", new Kernel(3, 3, 1.0 / 9.0, new double[]{   // GUI Name
                     +1, +1, +1,
                     +1, +1, +1,
                     +1, +1, +1,
             })),
 
-            new KernelFilter("Arithmetic 4x4 Mean", new Kernel(4, 4, 1.0 / 16.0, new double[]{
+            new KernelFilter("Arithmetic 4x4 Mean", new Kernel(4, 4, 1.0 / 16.0, new double[]{ // Operator Name
+                    +1, +1, +1, +1,
+                    +1, +1, +1, +1,
+                    +1, +1, +1, +1,
+                    +1, +1, +1, +1,
+            })),
+            new KernelFilter("Arithmetic Mean 4x4", new Kernel(4, 4, 1.0 / 16.0, new double[]{ // GUI Name
                     +1, +1, +1, +1,
                     +1, +1, +1, +1,
                     +1, +1, +1, +1,
                     +1, +1, +1, +1,
             })),
 
-            new KernelFilter("Arithmetic 5x5 Mean", new Kernel(5, 5, 1.0 / 25.0, new double[]{
+            new KernelFilter("Arithmetic 5x5 Mean", new Kernel(5, 5, 1.0 / 25.0, new double[]{  // Operator Name
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+            })),
+            new KernelFilter("Arithmetic Mean 5x5", new Kernel(5, 5, 1.0 / 25.0, new double[]{  // GUI Name
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
@@ -462,17 +500,41 @@ public class FilterOperator extends Operator {
 
     };
     public static final Filter[] LAPLACIAN_FILTERS = {
-            new KernelFilter("Laplace 3x3", new Kernel(3, 3, new double[]{
+            new KernelFilter("Laplace 3x3", new Kernel(3, 3, new double[]{  // Operator Name
                     +0, -1, +0,
                     -1, +4, -1,
                     +0, -1, +0,
             })),
-            new KernelFilter("Laplace 5x5", new Kernel(5, 5, new double[]{
+            new KernelFilter("Laplace 3x3 (a)", new Kernel(3, 3, new double[]{  // GUI Name
+                    +0, -1, +0,
+                    -1, +4, -1,
+                    +0, -1, +0,
+            })),
+            new KernelFilter("Laplace 3x3 (b)", new Kernel(3, 3, new double[]{  // GUI Name
+                    -1, -1, -1,
+                    -1, +8, -1,
+                    -1, -1, -1,
+            })),
+            new KernelFilter("Laplace 5x5", new Kernel(5, 5, new double[]{  // Operator Name
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
                     +1, +1, 24, +1, +1,
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
+            })),
+            new KernelFilter("Laplace 5x5 (a)", new Kernel(5, 5, new double[]{  // GUI Name
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+                    +1, +1, 24, +1, +1,
+                    +1, +1, +1, +1, +1,
+                    +1, +1, +1, +1, +1,
+            })),
+            new KernelFilter("Laplace 5x5 (b)", new Kernel(5, 5, new double[]{  // GUI Name
+                    -1, -1, -1, -1, -1,
+                    -1, -1, -1, -1, -1,
+                    -1, -1, 24, -1, -1,
+                    -1, -1, -1, -1, -1,
+                    -1, -1, -1, -1, -1,
             })),
     };
 
@@ -485,10 +547,23 @@ public class FilterOperator extends Operator {
             new GeneralFilter("Mean 5x5", 5, 5, GeneralFilterBand.OpType.MEAN),
             new GeneralFilter("Median 3x3", 3, 3, GeneralFilterBand.OpType.MEDIAN),
             new GeneralFilter("Median 5x5", 5, 5, GeneralFilterBand.OpType.MEDIAN),
-            //new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.STDDEV),
-            //new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.STDDEV),
-            //new GeneralFilter("Root-Mean-Square 3x3", 3, 3, GeneralFilterBand.RMS),
-            //new GeneralFilter("Root-Mean-Square 5x5", 5, 5, GeneralFilterBand.RMS),
+            new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.OpType.STDDEV),
+            new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.OpType.STDDEV),
+            new GeneralFilter("Standard Deviation 7x7", 7, 7, GeneralFilterBand.OpType.STDDEV),
+    };
+    public static final Filter[] MORPHOLOGY_FILTERS = {
+            new GeneralFilter("Erosion 3x3", 3, 3, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Erosion 5x5", 5, 5, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Erosion 7x7", 7, 7, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Dilation 3x3", 3, 3, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Dilation 5x5", 5, 5, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Dilation 7x7", 7, 7, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Opening 3x3", 3, 3, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Opening 5x5", 5, 5, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Opening 7x7", 7, 7, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Closing 3x3", 3, 3, GeneralFilterBand.OpType.CLOSING),
+            new GeneralFilter("Closing 5x5", 5, 5, GeneralFilterBand.OpType.CLOSING),
+            new GeneralFilter("Closing 7x7", 7, 7, GeneralFilterBand.OpType.CLOSING),
     };
 
     /**
