@@ -134,10 +134,10 @@ public class FilterOperatorSmallDataTest {
     }
 
     @Test
-    public void test_Laplacian_Laplace_3x3_a() throws IOException {
+    public void test_Laplacian_Laplace_3x3() throws IOException {
         final HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("sourceBands", "B1,B2");
-        parameters.put("selectedFilterName", "Laplace 3x3 (a)");
+        parameters.put("selectedFilterName", "Laplace 3x3");
         final Product target = GPF.createProduct("Image-Filter", parameters, testProduct);
         final Band b1 = target.getBand("B1");
         final float[] b1Pixels = b1.readPixels(0, 0, width, height, new float[width * height]);
