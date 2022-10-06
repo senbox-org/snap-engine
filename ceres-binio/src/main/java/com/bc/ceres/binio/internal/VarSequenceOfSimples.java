@@ -103,4 +103,9 @@ final class VarSequenceOfSimples extends AbstractSequenceOfSimples {
             segment.flushData(getContext());
         }
     }
+
+    @Override
+    public void dispose() throws IOException {
+        segment.dispose();
+    }
 }

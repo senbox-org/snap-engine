@@ -96,4 +96,9 @@ final class FixSequenceOfSimples extends AbstractSequenceOfSimples {
     public void flush() throws IOException {
         segment.flushData(getContext());
     }
+
+    @Override
+    public void dispose() throws IOException {
+        segment.dispose();
+    }
 }

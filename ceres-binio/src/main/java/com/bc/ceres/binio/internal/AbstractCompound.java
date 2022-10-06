@@ -291,4 +291,12 @@ abstract class AbstractCompound extends AbstractCollection implements CompoundIn
             }
         }
     }
+
+    @Override
+    public void dispose() throws IOException {
+        for (MemberInstance member : members) {
+            member.dispose();
+        }
+        super.dispose();
+    }
 }
