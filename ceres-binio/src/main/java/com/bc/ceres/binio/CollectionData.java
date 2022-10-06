@@ -82,4 +82,6 @@ public interface CollectionData {
     CompoundData getCompound(int index) throws IOException;
 
     void flush() throws IOException;
+
+    void dispose() throws IOException;
 }

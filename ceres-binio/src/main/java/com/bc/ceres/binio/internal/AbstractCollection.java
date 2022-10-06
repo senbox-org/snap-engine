@@ -48,6 +48,11 @@ abstract class AbstractCollection implements CollectionInstance {
         return getSize() >= 0L;
     }
 
+    @Override
+    public void dispose() throws IOException {
+        context.dispose();
+    }
+
     /////////////////////////////////////////////////////////////////////////
     // Non-indexed data access (not applicable)
 

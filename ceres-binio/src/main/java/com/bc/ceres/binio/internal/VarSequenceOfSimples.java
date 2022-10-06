@@ -16,7 +16,10 @@
 
 package com.bc.ceres.binio.internal;
 
-import com.bc.ceres.binio.*;
+import com.bc.ceres.binio.CollectionData;
+import com.bc.ceres.binio.DataAccessException;
+import com.bc.ceres.binio.DataContext;
+import com.bc.ceres.binio.SequenceType;
 
 import java.io.IOException;
 
@@ -102,5 +105,10 @@ final class VarSequenceOfSimples extends AbstractSequenceOfSimples {
         if (isDataAccessible()) {
             segment.flushData(getContext());
         }
+    }
+
+    @Override
+    public void dispose() throws IOException {
+        segment.dispose();
     }
 }
