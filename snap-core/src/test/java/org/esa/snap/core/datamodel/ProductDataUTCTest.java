@@ -25,7 +25,7 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class ProductDataUTCTest {
@@ -116,17 +116,12 @@ public class ProductDataUTCTest {
 
     @Test
     public void testMerisDateParsing() throws ParseException {
-        String _jan = "03-JAN-2003 01:02:03.3456";
-        String _feb = "05-FEB-2002 02:03:04.67890";
-        String _mar = "06-MAR-2002 02:03:04.67890";
-        String _apr = "07-APR-2004 04:06:22.32311";
-        String _mai = "08-MAY-2005 12:33:57.32311";
-        String _dec = "23-DEC-2004 22:16:43.556677";
 
         final TimeZone utcZone = TimeZone.getTimeZone("UTC");
         Calendar calendar = GregorianCalendar.getInstance(utcZone, Locale.ENGLISH);
 
-        Date date = ProductData.UTC.parse(_jan).getAsDate();
+        String janString = "03-JAN-2003 01:02:03.3456";
+        Date date = ProductData.UTC.parse(janString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(3, calendar.get(Calendar.DAY_OF_MONTH));
@@ -137,7 +132,8 @@ public class ProductDataUTCTest {
         assertEquals(3, calendar.get(Calendar.SECOND));
         assertEquals(346, calendar.get(Calendar.MILLISECOND));
 
-        date = ProductData.UTC.parse(_feb).getAsDate();
+        String febString = "05-FEB-2002 02:03:04.67890";
+        date = ProductData.UTC.parse(febString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(5, calendar.get(Calendar.DAY_OF_MONTH));
@@ -148,7 +144,8 @@ public class ProductDataUTCTest {
         assertEquals(4, calendar.get(Calendar.SECOND));
         assertEquals(679, calendar.get(Calendar.MILLISECOND));
 
-        date = ProductData.UTC.parse(_mar).getAsDate();
+        String marString = "06-MAR-2002 02:03:04.67890";
+        date = ProductData.UTC.parse(marString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
@@ -159,7 +156,8 @@ public class ProductDataUTCTest {
         assertEquals(4, calendar.get(Calendar.SECOND));
         assertEquals(679, calendar.get(Calendar.MILLISECOND));
 
-        date = ProductData.UTC.parse(_apr).getAsDate();
+        String aprString = "07-APR-2004 04:06:22.32311";
+        date = ProductData.UTC.parse(aprString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(7, calendar.get(Calendar.DAY_OF_MONTH));
@@ -170,7 +168,8 @@ public class ProductDataUTCTest {
         assertEquals(22, calendar.get(Calendar.SECOND));
         assertEquals(323, calendar.get(Calendar.MILLISECOND));
 
-        date = ProductData.UTC.parse(_mai).getAsDate();
+        String mayString = "08-MAY-2005 12:33:57.32311";
+        date = ProductData.UTC.parse(mayString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(8, calendar.get(Calendar.DAY_OF_MONTH));
@@ -181,7 +180,8 @@ public class ProductDataUTCTest {
         assertEquals(57, calendar.get(Calendar.SECOND));
         assertEquals(323, calendar.get(Calendar.MILLISECOND));
 
-        date = ProductData.UTC.parse(_dec).getAsDate();
+        String decString = "23-DEC-2004 22:16:43.556677";
+        date = ProductData.UTC.parse(decString).getAsDate();
         calendar.clear();
         calendar.setTime(date);
         assertEquals(23, calendar.get(Calendar.DAY_OF_MONTH));
