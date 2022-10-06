@@ -1,6 +1,5 @@
 /*
- *
- * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2022.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -14,9 +13,10 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  *
+ *
  */
 
-package org.esa.snap.dataio.znap;
+package org.esa.snap.core.util;
 
 import org.esa.snap.core.datamodel.ProductData;
 

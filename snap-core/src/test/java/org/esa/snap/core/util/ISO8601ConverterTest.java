@@ -1,6 +1,5 @@
 /*
- *
- * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2022.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -14,20 +13,19 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  *
+ *
  */
 
-package org.esa.snap.dataio.znap;
+package org.esa.snap.core.util;
 
 import org.esa.snap.core.datamodel.ProductData;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 
 public class ISO8601ConverterTest {
 
@@ -43,7 +41,7 @@ public class ISO8601ConverterTest {
 
     @Before
     public void setUp() throws Exception {
-        assertThat(DATE_TIME_STRING, is(equalTo("2023-11-13T14:25:36.126935Z")));
+        MatcherAssert.assertThat(DATE_TIME_STRING, Matchers.is(Matchers.equalTo("2023-11-13T14:25:36.126935Z")));
     }
 
     @Test
@@ -51,13 +49,13 @@ public class ISO8601ConverterTest {
         //execution
         final ProductData.UTC parsedUTC = ISO8601Converter.parse(DATE_TIME_STRING);
 
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.YEAR), is(equalTo(YEAR)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.MONTH) + 1, is(equalTo(MONTH)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.DAY_OF_MONTH), is(equalTo(DAY)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.HOUR_OF_DAY), is(equalTo(HOUR)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.MINUTE), is(equalTo(MINUTE)));
-        assertThat(parsedUTC.getAsCalendar().get(Calendar.SECOND), is(equalTo(SECOND)));
-        assertThat(parsedUTC.getMicroSecondsFraction(), is(equalTo(MICROSECOND)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.YEAR), Matchers.is(Matchers.equalTo(YEAR)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.MONTH) + 1, Matchers.is(Matchers.equalTo(MONTH)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.DAY_OF_MONTH), Matchers.is(Matchers.equalTo(DAY)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.HOUR_OF_DAY), Matchers.is(Matchers.equalTo(HOUR)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.MINUTE), Matchers.is(Matchers.equalTo(MINUTE)));
+        MatcherAssert.assertThat(parsedUTC.getAsCalendar().get(Calendar.SECOND), Matchers.is(Matchers.equalTo(SECOND)));
+        MatcherAssert.assertThat(parsedUTC.getMicroSecondsFraction(), Matchers.is(Matchers.equalTo(MICROSECOND)));
     }
 
     @Test
@@ -68,6 +66,6 @@ public class ISO8601ConverterTest {
         //execution
         final String formattedUTC = ISO8601Converter.format(parsedUTC);
 
-        assertThat(formattedUTC, is(equalTo(DATE_TIME_STRING)));
+        MatcherAssert.assertThat(formattedUTC, Matchers.is(Matchers.equalTo(DATE_TIME_STRING)));
     }
 }
