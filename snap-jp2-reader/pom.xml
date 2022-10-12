@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>lib-openjpeg</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- JUnit -->
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
