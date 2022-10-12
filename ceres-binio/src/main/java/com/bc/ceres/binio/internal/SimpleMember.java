@@ -169,6 +169,11 @@ final class SimpleMember implements MemberInstance {
         segment.flushData(context);
     }
 
+    @Override
+    public void dispose() throws IOException {
+        segment.dispose();
+    }
+
     // data access
     ////////////////////////////////////////////////////
 

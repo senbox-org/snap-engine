@@ -64,6 +64,11 @@ final class VarSequenceOfFixCollections extends AbstractSequenceOfCollections {
     }
 
     @Override
+    public void dispose() throws IOException {
+
+    }
+
+    @Override
     public long getSize() {
         final SequenceType type = resolvedSequenceType;
         return type != null ? type.getSize() : -1;
