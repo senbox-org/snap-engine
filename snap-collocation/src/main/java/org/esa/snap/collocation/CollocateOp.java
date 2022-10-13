@@ -67,9 +67,9 @@ import static java.text.MessageFormat.format;
  */
 @OperatorMetadata(alias = "Collocate",
         category = "Raster/Geometric",
-        version = "1.2",
+        version = "1.3",
         authors = "Ralf Quast, Norman Fomferra",
-        copyright = "(c) 2007-2011 by Brockmann Consult",
+        copyright = "(c) 2007-2022 by Brockmann Consult",
         description = "Collocates two products based on their geo-codings.")
 public class CollocateOp extends Operator {
 
@@ -112,6 +112,10 @@ public class CollocateOp extends Operator {
     @Parameter(defaultValue = "COLLOCATED",
             description = "The product type string for the target product (informal)")
     private String targetProductType;
+
+    @Parameter(defaultValue = "false", label = "Copy metadata of slave products",
+            description = "Copies also the metadata of the secondary (slave) products to the target")
+    private boolean copySecondaryMetadata;
 
     @Parameter(defaultValue = "true",
             description = "Whether or not components of the master product shall be renamed in the target product.")
@@ -162,6 +166,10 @@ public class CollocateOp extends Operator {
 
     public void setTargetProductType(String targetProductType) {
         this.targetProductType = targetProductType;
+    }
+
+    public void setCopySecondaryMetadata(boolean copySecondaryMetadata) {
+        this.copySecondaryMetadata = copySecondaryMetadata;
     }
 
     public boolean getRenameMasterComponents() {
@@ -323,6 +331,17 @@ public class CollocateOp extends Operator {
             targetProduct.setEndTime(new ProductData.UTC(utc2.getMJD()));
         }
 
+        if (copySecondaryMetadata) {
+            final MetadataElement secondaryTargetMetadata = new MetadataElement("SecondaryMetadata");
+            targetProduct.getMetadataRoot().addElement(secondaryTargetMetadata);
+            for (Product secProduct : slaveProducts) {
+                final MetadataElement currentMetadata = new MetadataElement(secProduct.getName());
+                final MetadataElement metadataRoot = secProduct.getMetadataRoot();
+                ProductUtils.copyMetadata(metadataRoot, currentMetadata);
+                secondaryTargetMetadata.addElement(currentMetadata);
+            }
+        }
+
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
 
@@ -400,11 +419,8 @@ public class CollocateOp extends Operator {
 
             // Copy master geo-coding
             ProductUtils.copyGeoCoding(masterProduct, targetProduct);
-
             // Add slave masks
             copyMasks(slaveProduct, renameSlaveComponents, slaveComponentPattern, originalSlaveNames, slaveRasters);
-
-            // Check: one day we may want to copy slave metadata as well
 
             if (renameSlaveComponents) {
                 updateExpressions(originalSlaveNames, slaveRasters);
