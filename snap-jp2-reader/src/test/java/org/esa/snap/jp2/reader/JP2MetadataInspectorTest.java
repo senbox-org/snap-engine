@@ -32,7 +32,7 @@ public class JP2MetadataInspectorTest {
 
     @Test
     public void testMetadataInspector() throws URISyntaxException, IOException {
-        URL resource = getClass().getResource("sample.jp2");
+        URL resource = getClass().getResource("S2_subset_sample.jp2");
         assertNotNull(resource);
 
         File productFile = new File(resource.toURI());
@@ -43,7 +43,7 @@ public class JP2MetadataInspectorTest {
         assertEquals(400, metadata.getProductWidth());
         assertEquals(300, metadata.getProductHeight());
 
-        assertNull(metadata.getGeoCoding());
+        assertNotNull(metadata.getGeoCoding());
 
         assertNotNull(metadata.getBandList());
         assertEquals(3, metadata.getBandList().size());
