@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -36,6 +37,7 @@ import java.awt.Color;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class CollocateOpTest {
@@ -48,11 +50,12 @@ public class CollocateOpTest {
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
         op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
-        assertEquals(true, op.getRenameMasterComponents());
-        assertEquals(true, op.getRenameSlaveComponents());
+        assertTrue(op.getRenameMasterComponents());
+        assertTrue(op.getRenameSlaveComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
         assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
@@ -61,6 +64,11 @@ public class CollocateOpTest {
         op.setSlaveProduct(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
+
+        final MetadataElement secMetadata = targetProduct.getMetadataRoot().getElement("SecondaryMetadata");
+        final MetadataElement secMeta = secMetadata.getElement("MER_RR_1P");
+        assertEquals(1, secMeta.getNumElements());
+        assertNotNull(secMeta.getElement("test1"));
 
         int numMasterBands = masterProduct.getNumBands();
         int numSlaveBands = slaveProduct.getNumBands();
@@ -140,11 +148,12 @@ public class CollocateOpTest {
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
         op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
-        assertEquals(true, op.getRenameMasterComponents());
-        assertEquals(true, op.getRenameSlaveComponents());
+        assertTrue(op.getRenameMasterComponents());
+        assertTrue(op.getRenameSlaveComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
         assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
@@ -153,6 +162,11 @@ public class CollocateOpTest {
         op.setSlaveProduct(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
+
+        final MetadataElement secMetadata = targetProduct.getMetadataRoot().getElement("SecondaryMetadata");
+        final MetadataElement secMeta = secMetadata.getElement("MER_RR_2P");
+        assertEquals(1, secMeta.getNumElements());
+        assertNotNull(secMeta.getElement("test2"));
 
         int numMasterBands = masterProduct.getNumBands();
         int numSlaveBands = slaveProduct.getNumBands();
@@ -257,12 +271,12 @@ public class CollocateOpTest {
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("Target product already contains a raster data node with name 'latitude'. " +
-                    "Parameter slaveComponentPattern must be set.",
-                    oe.getMessage());
+                                 "Parameter slaveComponentPattern must be set.",
+                         oe.getMessage());
         }
     }
 
-    private static float[] wl = new float[]{
+    private static final float[] wl = new float[]{
             412.6395569f,
             442.5160217f,
             489.8732910f,
@@ -291,6 +305,7 @@ public class CollocateOpTest {
         }
         addFlagCoding(product, "l1_flags");
         addIndexCoding(product, "l1_class");
+        product.getMetadataRoot().addElement(new MetadataElement("test1"));
 
         product.addTiePointGrid(createTPG("latitude"));
         product.addTiePointGrid(createTPG("longitude"));
@@ -313,6 +328,7 @@ public class CollocateOpTest {
         }
         addFlagCoding(product, "l2_flags");
         addIndexCoding(product, "l2_class");
+        product.getMetadataRoot().addElement(new MetadataElement("test2"));
 
         product.addTiePointGrid(createTPG("latitude"));
         product.addTiePointGrid(createTPG("longitude"));
