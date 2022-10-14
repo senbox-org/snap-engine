@@ -26,6 +26,9 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.util.MetadataUtils;
 import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
+import ucar.ma2.Array;
+import ucar.nc2.Attribute;
+import ucar.nc2.Group;
 
 import java.io.IOException;
 
@@ -81,5 +84,66 @@ public class CfMetadataPart extends ProfilePartIO {
             }
 
         }
+
+        if (metadataRoot.getNumElements() > 0) {
+            final Group metadataGroup = netcdfFileWriteable.addGroup(null, "metadataGroup");
+            addElementToGroup(netcdfFileWriteable, metadataGroup, metadataRoot);
+        }
     }
+
+    private void addElementToGroup(NFileWriteable netcdfFileWriteable, Group ncGroup, MetadataElement root) {
+        addAttributesToGroup(ncGroup, root.getAttributes());
+        if (root.getNumElements() > 0) {
+            final Group newGroup = netcdfFileWriteable.addGroup(ncGroup, root.getName());
+            final MetadataElement[] elements = root.getElements();
+            for (MetadataElement element : elements) {
+                addElementToGroup(netcdfFileWriteable, newGroup, element);
+            }
+        }
+    }
+
+    private void addAttributesToGroup(Group group, MetadataAttribute[] attributes) {
+        for (MetadataAttribute attribute : attributes) {
+            addAttribute(group, attribute);
+        }
+    }
+
+    private static void addAttribute(Group group, MetadataAttribute attribute) {
+        final ProductData data = attribute.getData();
+        final int type = data.getType();
+        if (data.isScalar()) {
+            switch (type) {
+                case ProductData.TYPE_FLOAT32:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemFloat()));
+                    break;
+                case ProductData.TYPE_FLOAT64:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemDouble()));
+                    break;
+                case ProductData.TYPE_INT8:
+                case ProductData.TYPE_INT16:
+                case ProductData.TYPE_INT32:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemInt()));
+                    break;
+                case ProductData.TYPE_UINT8:
+                case ProductData.TYPE_UINT16:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemInt(), data.isUnsigned()));
+                    break;
+                case ProductData.TYPE_UINT32:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemLong(), data.isUnsigned()));
+                    break;
+                case ProductData.TYPE_ASCII:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + type);
+            }
+        } else {
+            if (ProductData.TYPE_ASCII == type || ProductData.TYPE_UTC == type) {
+                group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
+            } else {
+                group.addAttribute(new Attribute(attribute.getName(), Array.makeFromJavaArray(data.getElemFloat())));
+            }
+        }
+    }
+
 }

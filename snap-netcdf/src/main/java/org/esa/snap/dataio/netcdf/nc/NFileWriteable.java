@@ -21,6 +21,7 @@ import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Group;
 import ucar.nc2.NetcdfFileWriter;
 
 import java.io.IOException;
@@ -97,6 +98,10 @@ public abstract class NFileWriteable {
         return variables.get(variableName);
     }
 
+    public Group addGroup(Group parent, String name) {
+        return netcdfFileWriter.addGroup(parent, name);
+    }
+
     public boolean isNameValid(String name) {
         return VariableNameHelper.isVariableNameValid(name);
     }
@@ -118,5 +123,4 @@ public abstract class NFileWriteable {
             throw new IOException(e);
         }
     }
-
 }
