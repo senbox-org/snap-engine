@@ -25,10 +25,7 @@ import org.esa.snap.runtime.Config;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Structure;
-import ucar.nc2.Variable;
+import ucar.nc2.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,6 +40,7 @@ public class MetadataUtils {
 
     public static final String GLOBAL_ATTRIBUTES = "Global_Attributes";
     public static final String VARIABLE_ATTRIBUTES = "Variable_Attributes";
+    public static final String METADATA_GROUP_NAME = "Metadata_Group";
     private static final String PROPERTY_KEY_METADATA_ELEMENT_LIMIT = "snap.dataio.netcdf.metadataElementLimit";
     private static final int DEFAULT_MAX_NUM_VALUES_READ = 100;
 
@@ -54,46 +52,71 @@ public class MetadataUtils {
     }
 
     public static void readNetcdfMetadata(NetcdfFile netcdfFile, MetadataElement root, int maxNumValuesRead) {
-        root.addElement(readAttributeList(netcdfFile.getGlobalAttributes(), GLOBAL_ATTRIBUTES));
+        AttributeContainer attributes = netcdfFile.getRootGroup().attributes();
+        root.addElement(readAttributeList(attributes, GLOBAL_ATTRIBUTES));
         root.addElement(readVariableDescriptions(netcdfFile.getVariables(), VARIABLE_ATTRIBUTES, maxNumValuesRead));
+        Group metadataGroup = netcdfFile.findGroup(METADATA_GROUP_NAME);
+        if (metadataGroup != null) {
+            root.addElement(readMetadataGroup(metadataGroup));
+        }
     }
 
-    public static MetadataElement readAttributeList(final List<Attribute> attributeList,
+    private static MetadataElement readMetadataGroup(Group metadataGroup) {
+        MetadataElement groupElem = new MetadataElement(metadataGroup.getShortName());
+        for (Attribute attribute : metadataGroup.attributes()) {
+            ProductData data = createProductData(attribute);
+            groupElem.addAttribute(new MetadataAttribute(attribute.getShortName(), data, true));
+        }
+        List<Group> groups = metadataGroup.getGroups();
+        for (Group group : groups) {
+            groupElem.addElement(readMetadataGroup(group));
+        }
+        return groupElem;
+    }
+
+    public static MetadataElement readAttributeList(final Iterable<Attribute> attributeList,
                                                     String elementName) {
         // todo - note that we still do not support NetCDF data type 'char' here!
         MetadataElement metadataElement = new MetadataElement(elementName);
         for (Attribute attribute : attributeList) {
-            final int productDataType = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false,
-                                                                                   false);
-            if (productDataType != -1) {
-                ProductData productData = null;
-                if (attribute.isString()) {
-                    final String stringValue = attribute.getStringValue();
-                    if (stringValue != null) {
-                        productData = ProductData.createInstance(stringValue);
-                    }
-                } else if (attribute.isArray()) {
-                    final Array values = attribute.getValues();
-                    if (values != null) {
-                        productData = ProductData.createInstance(productDataType, attribute.getLength());
-                        productData.setElems(values.getStorage());
-                    }
-                } else {
-                    final Array values = attribute.getValues();
-                    if (values != null) {
-                        productData = ProductData.createInstance(productDataType, 1);
-                        productData.setElems(values.getStorage());
-                    }
+            ProductData productData = createProductData(attribute);
+            if (productData != null) {
+                String shortName = attribute.getShortName();
+                if (GLOBAL_ATTRIBUTES.equals(elementName)) {
+                    System.out.println(shortName);
                 }
-                if (productData != null) {
-                    MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getShortName(),
-                                                                                productData,
-                                                                                true);
-                    metadataElement.addAttribute(metadataAttribute);
-                }
+                MetadataAttribute metadataAttribute = new MetadataAttribute(shortName, productData, true);
+                metadataElement.addAttribute(metadataAttribute);
             }
         }
         return metadataElement;
+    }
+
+    private static ProductData createProductData(Attribute attribute) {
+        final int productDataType = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false,
+                false);
+        ProductData productData = null;
+        if (productDataType != -1) {
+            if (attribute.isString()) {
+                final String stringValue = attribute.getStringValue();
+                if (stringValue != null) {
+                    productData = ProductData.createInstance(stringValue);
+                }
+            } else if (attribute.isArray()) {
+                final Array values = attribute.getValues();
+                if (values != null) {
+                    productData = ProductData.createInstance(productDataType, attribute.getLength());
+                    productData.setElems(values.getStorage());
+                }
+            } else {
+                final Array values = attribute.getValues();
+                if (values != null) {
+                    productData = ProductData.createInstance(productDataType, 1);
+                    productData.setElems(values.getStorage());
+                }
+            }
+        }
+        return productData;
     }
 
     public static MetadataElement readVariableDescriptions(final List<Variable> variableList,
@@ -114,13 +137,13 @@ public class MetadataUtils {
         Preferences preferences = Config.instance().preferences();
         if (preferences.get(PROPERTY_KEY_METADATA_ELEMENT_LIMIT, null) == null) {
             SystemUtils.LOG.warning("Missing configuration property '" + PROPERTY_KEY_METADATA_ELEMENT_LIMIT + "'. " +
-                                            "Using default ("+DEFAULT_MAX_NUM_VALUES_READ+").");
+                    "Using default (" + DEFAULT_MAX_NUM_VALUES_READ + ").");
         }
         return preferences.getInt(PROPERTY_KEY_METADATA_ELEMENT_LIMIT, DEFAULT_MAX_NUM_VALUES_READ);
     }
 
     public static MetadataElement createMetadataElement(Variable variable, int maxNumValuesRead) {
-        final MetadataElement element = readAttributeList(variable.getAttributes(), variable.getFullName());
+        final MetadataElement element = readAttributeList(variable.attributes(), variable.getFullName());
         if (variable.getRank() == 1) {
             final MetadataElement valuesElem = new MetadataElement("Values");
             element.addElement(valuesElem);

@@ -51,7 +51,7 @@ public class CfMetadataPart extends ProfilePartIO {
             if (!VariableNameHelper.isVariableNameValid(attributeName)) {
                 attributeName = VariableNameHelper.convertToValidName(attributeName);
                 SystemUtils.LOG.warning("Found invalid attribute name '" + attribute.getName() +
-                                                "' - replaced by '" + attributeName + "'.");
+                        "' - replaced by '" + attributeName + "'.");
             }
 
             if (dataType == ProductData.TYPE_ASCII) {
@@ -82,24 +82,29 @@ public class CfMetadataPart extends ProfilePartIO {
                 final long data = (long) attribute.getData().getElemDouble();
                 netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             }
-
         }
 
         if (metadataRoot.getNumElements() > 0) {
-            final Group metadataGroup = netcdfFileWriteable.addGroup(null, "metadataGroup");
-            addElementToGroup(netcdfFileWriteable, metadataGroup, metadataRoot);
+            Group rootGroup = getRootGroup(netcdfFileWriteable);
+            Group metadataGroup = netcdfFileWriteable.addGroup(rootGroup, MetadataUtils.METADATA_GROUP_NAME);
+            for (MetadataElement element : metadataRoot.getElements()) {
+                addElementToGroup(netcdfFileWriteable, metadataGroup, element);
+            }
         }
     }
 
     private void addElementToGroup(NFileWriteable netcdfFileWriteable, Group ncGroup, MetadataElement root) {
-        addAttributesToGroup(ncGroup, root.getAttributes());
-        if (root.getNumElements() > 0) {
-            final Group newGroup = netcdfFileWriteable.addGroup(ncGroup, root.getName());
-            final MetadataElement[] elements = root.getElements();
-            for (MetadataElement element : elements) {
-                addElementToGroup(netcdfFileWriteable, newGroup, element);
-            }
+        final Group newGroup = netcdfFileWriteable.addGroup(ncGroup, root.getName());
+        addAttributesToGroup(newGroup, root.getAttributes());
+        final MetadataElement[] elements = root.getElements();
+        for (MetadataElement element : elements) {
+            addElementToGroup(netcdfFileWriteable, newGroup, element);
         }
+    }
+
+    private static Group getRootGroup(NFileWriteable netcdfFileWriteable) {
+        // this is a workaround to get the root group
+        return netcdfFileWriteable.addGroup(null, "");
     }
 
     private void addAttributesToGroup(Group group, MetadataAttribute[] attributes) {

@@ -98,6 +98,10 @@ public abstract class NFileWriteable {
         return variables.get(variableName);
     }
 
+    public Group getRootGroup() {
+        return netcdfFileWriter.getNetcdfFile().getRootGroup();
+    }
+
     public Group addGroup(Group parent, String name) {
         return netcdfFileWriter.addGroup(parent, name);
     }
