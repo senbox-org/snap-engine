@@ -109,6 +109,7 @@
 
         <module>lib-hdf</module>
         <module>lib-openjpeg</module>
+        <module>lib-gdal</module>
         <module>snap-test-utils</module>
     </modules>
 
@@ -266,6 +267,12 @@
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
                 <version>5.5.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>lib-gdal</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
