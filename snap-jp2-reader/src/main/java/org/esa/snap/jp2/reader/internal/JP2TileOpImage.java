@@ -127,7 +127,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
         int dataType = getSampleModel().getDataType();
         try (OpenJP2Decoder decoder = new OpenJP2Decoder(localCacheFolder, localImageFile, this.bandSource.getBandIndex(), dataType, level, LAYER, this.decompressTileIndex)) {
             Dimension levelDecompressedImageSize = decoder.getImageDimensions(); // the whole image size from the specified level
-            if(decoder.getBandNumber() > 1 || this.useOpenJp2Jna) {
+            if(decoder.getBandNumber()>4 || this.useOpenJp2Jna) {
                 Rectangle intersection = computeLevelDirectIntersection(level, levelDecompressedImageSize.width, levelDecompressedImageSize.height, levelDestinationRectangle);
                 if (!intersection.isEmpty()) {
                     Raster readTileImage = decoder.read(intersection);
@@ -155,9 +155,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     private void writeDataOnLevelRaster(WritableRaster levelDestinationRaster, Raster readTileImage) {
-        //int index = this.bandSource.getBandIndex();
-        //Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{index});
-        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{0});
+        int index = this.bandSource.getBandIndex();
+        Raster readBandRaster = readTileImage.createChild(0, 0, readTileImage.getWidth(), readTileImage.getHeight(), 0, 0, new int[]{index});
         levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(), readBandRaster);
     }
 
