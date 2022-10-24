@@ -3,6 +3,8 @@ package org.esa.snap.binning.support;
 import com.bc.ceres.core.ProgressMonitor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.ParseException;
 import org.esa.snap.binning.MosaickingGrid;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
