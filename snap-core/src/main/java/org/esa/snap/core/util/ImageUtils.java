@@ -166,7 +166,7 @@ public class ImageUtils {
         SampleModel sampleModel = null;
         ColorModel colorModel = null;
         if (dataBufferType != null) {
-            sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType.intValue(), levelTileWidth, levelTileHeight);
+            sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, levelTileWidth, levelTileHeight);
             colorModel = PlanarImage.createColorModel(sampleModel);
             if (colorModel == null) {
                 int dataType = sampleModel.getDataType();
@@ -249,19 +249,26 @@ public class ImageUtils {
     }
 
     public static int computeTileCount(int imageSize, int tileSize) {
-        int tileCount = imageSize / tileSize;
+        /*int tileCount = imageSize / tileSize;
         if (imageSize % tileSize != 0) {
             tileCount++;
         }
-        return tileCount;
+        return tileCount;*/
+        return Math.round(imageSize / (float) tileSize);
     }
 
     public static double computeLevelSizeAsDouble(int sourceSize, int level) {
-        return sourceSize / Math.pow(2, level);
+        // return sourceSize / Math.pow(2, level);
+        // The bitwise operation is ~3 times faster than the commented one
+        return sourceSize / (double) ( 1 << level);
     }
 
+    private static final int[] levelMasks = new int[] { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256 };
+
     public static int computeLevelSize(int sourceSize, int level) {
-        return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
+        // return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
+        // The bitwise operation is ~3 times faster than the commented one
+        return (sourceSize >> level) + ((sourceSize & levelMasks[level]) == 0 ? 0 : 1);
     }
 
     /**
