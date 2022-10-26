@@ -45,23 +45,23 @@ public class CollocateOpTest {
     @Test
     public void testCollocate1Type() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
+        assertTrue(op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -71,10 +71,10 @@ public class CollocateOpTest {
         assertNotNull(secMeta.getElement("test1"));
 
         int numMasterBands = masterProduct.getNumBands();
-        int numSlaveBands = slaveProduct.getNumBands();
+        int numDependentBands = dependentProduct.getNumBands();
         int numMasterTPGs = masterProduct.getNumTiePointGrids();
-        int numSlaveTPGs = slaveProduct.getNumTiePointGrids();
-        assertEquals(numMasterBands + numSlaveBands + numSlaveTPGs + 1, targetProduct.getNumBands());
+        int numDependentTPGs = dependentProduct.getNumTiePointGrids();
+        assertEquals(numMasterBands + numDependentBands + numDependentTPGs + 1, targetProduct.getNumBands());
         assertEquals(numMasterTPGs, targetProduct.getNumTiePointGrids());
 
         assertEquals("radiance_1_M", targetProduct.getBandAt(0).getName());
@@ -143,23 +143,23 @@ public class CollocateOpTest {
     @Test
     public void testCollocate2Types() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct2();
+        final Product dependentProduct = createTestProduct2();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
+        assertTrue(op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -169,10 +169,10 @@ public class CollocateOpTest {
         assertNotNull(secMeta.getElement("test2"));
 
         int numMasterBands = masterProduct.getNumBands();
-        int numSlaveBands = slaveProduct.getNumBands();
+        int numDependentBands = dependentProduct.getNumBands();
         int numMasterTPGs = masterProduct.getNumTiePointGrids();
-        int numSlaveTPGs = slaveProduct.getNumTiePointGrids();
-        assertEquals(numMasterBands + numSlaveBands + numSlaveTPGs + 1, targetProduct.getNumBands());
+        int numDependentTPGs = dependentProduct.getNumTiePointGrids();
+        assertEquals(numMasterBands + numDependentBands + numDependentTPGs + 1, targetProduct.getNumBands());
         assertEquals(numMasterTPGs, targetProduct.getNumTiePointGrids());
 
         assertEquals("radiance_1_M", targetProduct.getBandAt(0).getName());
@@ -235,14 +235,14 @@ public class CollocateOpTest {
     @Test
     public void testAutogroupingAATSRStyle() {
         final Product masterProduct = createTestProductAATSR();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_S");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
@@ -254,24 +254,24 @@ public class CollocateOpTest {
     }
 
     @Test
-    public void testCollocate_failsWhenSlaveRenamingPatternIsMissing() {
+    public void testCollocate_failsWhenDependentRenamingPatternIsMissing() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameSlaveComponents(false);
-        op.setSlaveComponentPattern("");
+        op.setRenameDependentComponents(false);
+        op.setDependentComponentPattern("");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         try {
             op.getTargetProduct();
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("Target product already contains a raster data node with name 'latitude'. " +
-                                 "Parameter slaveComponentPattern must be set.",
+                                 "Parameter dependentComponentPattern must be set.",
                          oe.getMessage());
         }
     }
