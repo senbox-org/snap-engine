@@ -19,6 +19,7 @@ package org.esa.snap.core.datamodel;
 import com.bc.ceres.core.Assert;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -136,6 +137,22 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      */
     public T get(String name) {
         return nodeList.get(name);
+    }
+
+    /**
+     * @param suffix the suffix
+     * @return the product node with the given suffix in its name or {@code null} is a node with the given suffix is not contained in the group.
+     */
+    public T getBandWithSuffix(String suffix) {
+        // search the node name with the given suffix
+        final String name = Arrays.stream(nodeList.getNames()).filter(n -> n.endsWith(suffix))
+                .findFirst()
+                .orElse(null);
+        // if such node is found, retrieve it
+        if (name != null) {
+            return nodeList.get(name);
+        }
+        return null;
     }
 
     /**

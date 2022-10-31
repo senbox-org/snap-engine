@@ -1236,6 +1236,19 @@ public class Product extends ProductNode {
         return bandGroup.get(name);
     }
 
+    /**
+     * Returns the band having the given suffix in its name (method used in radiometric indexes after SIITBX-494 fix).
+     *
+     * @param suffix the band name suffix
+     * @return the band with the given suffix in its name or {@code null} if a band with the given suffix is not contained in this
+     * product.
+     * @throws IllegalArgumentException if the given name is {@code null} or empty.
+     */
+    public Band getBandWithSuffix(final String suffix) {
+        Guardian.assertNotNullOrEmpty("suffix", suffix);
+        return bandGroup.getBandWithSuffix(suffix);
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Quicklook support
 
