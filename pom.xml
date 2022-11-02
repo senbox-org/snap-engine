@@ -42,7 +42,7 @@
         <netcdf.version>5.3.1</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <geotools.version>20.0</geotools.version>
-        <org.locationtech.version>1.16.0</org.locationtech.version>
+        <org.locationtech.version>1.19.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -114,7 +114,7 @@
 
     <organization>
         <name>European Space Agency (ESA)</name>
-        <url>http://step.esa.int/</url>
+        <url>https://step.esa.int/</url>
     </organization>
 
     <inceptionYear>2014</inceptionYear>
@@ -127,7 +127,7 @@
     <licenses>
         <license>
             <name>GNU General Public License (GPL)</name>
-            <url>http://www.gnu.org/licenses/gpl.html</url>
+            <url>https://www.gnu.org/licenses/gpl.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
