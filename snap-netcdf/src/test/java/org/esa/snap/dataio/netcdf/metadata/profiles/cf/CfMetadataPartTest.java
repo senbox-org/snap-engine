@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class CfMetadataPartTest {
 
@@ -213,5 +214,33 @@ public class CfMetadataPartTest {
         Map<String, Number> getGlobalNumberAttributes() {
             return globalNumberAttributes;
         }
+    }
+
+    @Test
+    public void testMakeCompatible() {
+        MetadataElement root = new MetadataElement("root");
+        MetadataElement g1 = new MetadataElement("g1");
+        g1.addElement(new MetadataElement("same"));
+        g1.addElement(new MetadataElement("same"));
+        g1.addElement(new MetadataElement("same"));
+        g1.addElement(new MetadataElement("diff"));
+        root.addElement(g1);
+
+        MetadataElement g2 = new MetadataElement("g2");
+        g2.addElement(new MetadataElement("diff1"));
+        g2.addElement(new MetadataElement("diff2"));
+        g2.addElement(new MetadataElement("other"));
+        root.addElement(g2);
+
+        CfMetadataPart.makeCompatible(root);
+
+        assertNotNull(g1.getElement("same.0"));
+        assertNotNull(g1.getElement("same.1"));
+        assertNotNull(g1.getElement("same.2"));
+        assertNotNull(g1.getElement("diff"));
+
+        assertNotNull(g2.getElement("diff1"));
+        assertNotNull(g2.getElement("diff2"));
+        assertNotNull(g2.getElement("other"));
     }
 }
