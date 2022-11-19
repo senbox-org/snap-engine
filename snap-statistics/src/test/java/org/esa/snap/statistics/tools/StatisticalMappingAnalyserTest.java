@@ -64,9 +64,9 @@ public class StatisticalMappingAnalyserTest {
         fullNames.add(StatisticsOp.MAXIMUM +"_CHL");
         fullNames.add(StatisticsOp.MAXIMUM +"_YS");
         fullNames.add(StatisticsOp.MAXIMUM +"_TSM");
-        fullNames.add(StatisticsOp.AVERAGE +"_CHL");
-        fullNames.add(StatisticsOp.AVERAGE +"_YS");
-        fullNames.add(StatisticsOp.AVERAGE +"_TSM");
+        fullNames.add(StatisticsOp.MEAN +"_CHL");
+        fullNames.add(StatisticsOp.MEAN +"_YS");
+        fullNames.add(StatisticsOp.MEAN +"_TSM");
         fullNames.add(StatisticsOp.SIGMA +"_CHL");
         fullNames.add(StatisticsOp.SIGMA +"_YS");
         fullNames.add(StatisticsOp.SIGMA +"_TSM");
@@ -76,7 +76,7 @@ public class StatisticalMappingAnalyserTest {
         final StatisticalMappingAnalyser mappingAnalyser = new StatisticalMappingAnalyser(fullNames);
 
         assertEquals(7, mappingAnalyser.getStatisticalMeasureNames().length);
-        assertEquals(StatisticsOp.AVERAGE, mappingAnalyser.getStatisticalMeasureNames()[0]);
+        assertEquals(StatisticsOp.MEAN, mappingAnalyser.getStatisticalMeasureNames()[0]);
         assertEquals(StatisticsOp.MAX_ERROR, mappingAnalyser.getStatisticalMeasureNames()[1]);
         assertEquals(StatisticsOp.MAXIMUM, mappingAnalyser.getStatisticalMeasureNames()[2]);
         assertEquals(StatisticsOp.MEDIAN, mappingAnalyser.getStatisticalMeasureNames()[3]);
