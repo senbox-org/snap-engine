@@ -33,7 +33,9 @@ public class ColorManipulationDefaults {
 
     // xml files used by the color scheme manager
     public static final String COLOR_SCHEME_LOOKUP_FILENAME = "color_palette_scheme_lookup.xml";
+    public static final String COLOR_SCHEME_LOOKUP_USER_FILENAME = "color_palette_scheme_lookup_user.xml";
     public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.xml";
+    public static final String COLOR_SCHEMES_USER_FILENAME = "color_palette_schemes_user.xml";
 
     // Indicates which color palette contained within the color scheme xml to use
     public static final String OPTION_COLOR_STANDARD_SCHEME = "From Scheme STANDARD";
