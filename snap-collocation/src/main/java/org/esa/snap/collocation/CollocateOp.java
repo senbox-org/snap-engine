@@ -74,9 +74,9 @@ import static java.text.MessageFormat.format;
 public class CollocateOp extends Operator {
 
     public static final String SOURCE_NAME_REFERENCE = "${ORIGINAL_NAME}";
-    public static final String SLAVE_NUMBER_ID_REFERENCE = "${DEPENDENT_NUMBER_ID}";
+    public static final String DEPENDENT_NUMBER_ID_REFERENCE = "${DEPENDENT_NUMBER_ID}";
     public static final String DEFAULT_MASTER_COMPONENT_PATTERN = "${ORIGINAL_NAME}_M";
-    public static final String DEFAULT_SLAVE_COMPONENT_PATTERN = "${ORIGINAL_NAME}_D${DEPENDENT_NUMBER_ID}";
+    public static final String DEFAULT_DEPENDENT_COMPONENT_PATTERN = "${ORIGINAL_NAME}_S${DEPENDENT_NUMBER_ID}";
     private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
     private static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
     private static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
@@ -129,7 +129,7 @@ public class CollocateOp extends Operator {
             description = "The text pattern to be used when renaming master components.")
     private String masterComponentPattern;
 
-    @Parameter(defaultValue = DEFAULT_SLAVE_COMPONENT_PATTERN,
+    @Parameter(defaultValue = DEFAULT_DEPENDENT_COMPONENT_PATTERN,
             description = "The text pattern to be used when renaming dependent components.")
     private String dependentComponentPattern;
 
@@ -406,13 +406,13 @@ public class CollocateOp extends Operator {
             if (dependentProducts.length == 1) {
                 collocationFlagBands[i] = targetProduct.addBand(collocationFlagsBandNames[i], ProductData.TYPE_INT8);
                 FlagCoding collocationFlagCoding = new FlagCoding(collocationFlagsBandNames[i]);
-                collocationFlagCoding.addFlag(String.format("SLAVE_PRESENT"), 1, "Data for the dependent is present.");
+                collocationFlagCoding.addFlag(String.format("DEPENDENT_PRESENT"), 1, "Data for the dependent is present.");
                 collocationFlagBands[i].setSampleCoding(collocationFlagCoding);
                 targetProduct.getFlagCodingGroup().add(collocationFlagCoding);
             } else {
                 collocationFlagBands[i] = targetProduct.addBand(collocationFlagsBandNames[i], ProductData.TYPE_INT8);
                 FlagCoding collocationFlagCoding = new FlagCoding(collocationFlagsBandNames[i]);
-                collocationFlagCoding.addFlag(String.format("SLAVE_%d_PRESENT", i), 1, "Data for the dependent is present.");
+                collocationFlagCoding.addFlag(String.format("DEPENDENT_%d_PRESENT", i), 1, "Data for the dependent is present.");
                 collocationFlagBands[i].setSampleCoding(collocationFlagCoding);
                 targetProduct.getFlagCodingGroup().add(collocationFlagCoding);
             }
@@ -468,9 +468,9 @@ public class CollocateOp extends Operator {
     private String rename(String rasterDataNodeName, int productIndex) {
         rasterDataNodeName = dependentComponentPattern.replace(SOURCE_NAME_REFERENCE, rasterDataNodeName);
         if (dependentProducts.length > 1) {
-            return rasterDataNodeName.replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(productIndex));
+            return rasterDataNodeName.replace(DEPENDENT_NUMBER_ID_REFERENCE, String.valueOf(productIndex));
         } else {
-            return rasterDataNodeName.replace(SLAVE_NUMBER_ID_REFERENCE, "");
+            return rasterDataNodeName.replace(DEPENDENT_NUMBER_ID_REFERENCE, "");
         }
     }
 
@@ -726,7 +726,7 @@ public class CollocateOp extends Operator {
                 }
                 if (rename) {
                     if (dependentProducts.length == 1) {
-                        targetMask.setName(pattern.replace(SOURCE_NAME_REFERENCE, sourceMask.getName()).replace(SLAVE_NUMBER_ID_REFERENCE, ""));
+                        targetMask.setName(pattern.replace(SOURCE_NAME_REFERENCE, sourceMask.getName()).replace(DEPENDENT_NUMBER_ID_REFERENCE, ""));
                     } else {
                         int id = -1;
                         for (int i = 0; i < dependentProducts.length; i++) {
@@ -735,7 +735,7 @@ public class CollocateOp extends Operator {
                                 break;
                             }
                         }
-                        targetMask.setName(pattern.replace(SOURCE_NAME_REFERENCE, sourceMask.getName()).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id)));
+                        targetMask.setName(pattern.replace(SOURCE_NAME_REFERENCE, sourceMask.getName()).replace(DEPENDENT_NUMBER_ID_REFERENCE, String.valueOf(id)));
                     }
                 }
                 targetProduct.getMaskGroup().add(targetMask);
@@ -771,7 +771,7 @@ public class CollocateOp extends Operator {
             String flagCodingName = flagCoding.getName();
             if (rename) {
                 if (dependentProducts.length == 1) {
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
+                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(DEPENDENT_NUMBER_ID_REFERENCE, "");
                 } else {
                     int id = -1;
                     for (int i = 0; i < dependentProducts.length; i++) {
@@ -780,7 +780,7 @@ public class CollocateOp extends Operator {
                             break;
                         }
                     }
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
+                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(DEPENDENT_NUMBER_ID_REFERENCE, String.valueOf(id));
                 }
             }
             final Product product = band.getProduct();
@@ -796,7 +796,7 @@ public class CollocateOp extends Operator {
             String indexCodingName = indexCoding.getName();
             if (rename) {
                 if (dependentProducts.length == 1) {
-                    indexCodingName = pattern.replace(SOURCE_NAME_REFERENCE, indexCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
+                    indexCodingName = pattern.replace(SOURCE_NAME_REFERENCE, indexCodingName).replace(DEPENDENT_NUMBER_ID_REFERENCE, "");
                 } else {
                     int id = -1;
                     for (int i = 0; i < dependentProducts.length; i++) {
@@ -805,7 +805,7 @@ public class CollocateOp extends Operator {
                             break;
                         }
                     }
-                    indexCodingName = pattern.replace(SOURCE_NAME_REFERENCE, indexCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
+                    indexCodingName = pattern.replace(SOURCE_NAME_REFERENCE, indexCodingName).replace(DEPENDENT_NUMBER_ID_REFERENCE, String.valueOf(id));
                 }
             }
             final Product product = band.getProduct();
@@ -919,7 +919,7 @@ public class CollocateOp extends Operator {
                     }
                 }
 
-                last = componentPattern.replace(SOURCE_NAME_REFERENCE, last).replace(SLAVE_NUMBER_ID_REFERENCE, "*");
+                last = componentPattern.replace(SOURCE_NAME_REFERENCE, last).replace(DEPENDENT_NUMBER_ID_REFERENCE, "*");
                 clone[clone.length - 1] = last;
             }
             paths.add(String.join("/", clone));
