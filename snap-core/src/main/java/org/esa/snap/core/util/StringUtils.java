@@ -23,10 +23,7 @@ import org.jdom.output.XMLOutputter;
 
 import java.awt.Color;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * The <code>StringUtils</code> class provides frequently used utility methods dealing with <code>String</code> values
@@ -55,6 +52,22 @@ public class StringUtils {
      * @throws IllegalArgumentException if one of the arguments was null
      * @see java.util.StringTokenizer
      */
+
+    public  enum CaseType {
+        TITLE,
+        TITLE_UNDERSCORE,
+        LOWER_UNDERSCORE,
+        UPPER_UNDERSCORE,
+        CAMEL_LOWER_FIRST,
+        CAMEL_UPPER
+    }
+
+
+    public static String DELIMITOR_SPACE = " ";
+    public static String DELIMITOR_UNDERSCORE = "_";
+
+
+
     public static List<String> split(String text, char[] separators, boolean trimTokens, List<String> tokens) {
 
         Guardian.assertNotNull("text", text);
@@ -884,5 +897,144 @@ public class StringUtils {
         prettyFormat.setOmitDeclaration(true);
         prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
         return prettyFormat;
+    }
+
+
+    public static String[] getStringCaseVariations(String s) {
+        // Created by Daniel Knowles
+        if (s == null || s.length() == 0) {
+            return null;
+        }
+
+        if (s.length() == 1) {
+            String[] stringArray = {s.toLowerCase(), s.toUpperCase()};
+            return stringArray;
+        }
+
+        LinkedHashSet<String> linkedHashSet = new LinkedHashSet<String>();
+        linkedHashSet.add(s);
+        linkedHashSet.add(getStringCaseVariation(s, CaseType.LOWER_UNDERSCORE));
+        linkedHashSet.add(getStringCaseVariation(s, CaseType.UPPER_UNDERSCORE));
+        linkedHashSet.add(getStringCaseVariation(s, CaseType.CAMEL_LOWER_FIRST));
+        linkedHashSet.add(getStringCaseVariation(s, CaseType.CAMEL_UPPER));
+        linkedHashSet.add(getStringCaseVariation(s, CaseType.TITLE_UNDERSCORE));
+
+        String[] stringArray = new String[linkedHashSet.size()];
+        linkedHashSet.toArray(stringArray);
+        return stringArray;
+    }
+
+
+
+    public static String getStringCaseVariation(String s, CaseType caseType) {
+        // Created by Daniel Knowles
+        if (s == null || s.length() == 0) {
+            return null;
+        }
+
+        String tmpString;
+        switch (caseType) {
+            case TITLE:
+                return toTitleCase(s, true);
+            case TITLE_UNDERSCORE:
+                return toTitleCase(s, false);
+            case LOWER_UNDERSCORE:
+                tmpString = toTitleCase(s, true);
+                if (tmpString != null) {
+                    return tmpString.toLowerCase();
+                } else {
+                    return null;
+                }
+            case UPPER_UNDERSCORE:
+                tmpString = toTitleCase(s, true);
+                if (tmpString != null) {
+                    return tmpString.toUpperCase();
+                } else {
+                    return null;
+                }
+            case CAMEL_LOWER_FIRST:
+                return toCamelCase(s, false);
+            case CAMEL_UPPER:
+                return toCamelCase(s, true);
+            default:
+                return null;
+        }
+
+
+    }
+
+
+    static String toCamelCase(String s, boolean upper) {
+        // Created by Daniel Knowles
+
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+
+        String sourceDelimitor;
+
+        if (s.contains(DELIMITOR_SPACE)) {
+            sourceDelimitor = DELIMITOR_SPACE;
+        } else if (s.contains(DELIMITOR_UNDERSCORE)) {
+            sourceDelimitor = DELIMITOR_UNDERSCORE;
+        } else {
+            return s;
+        }
+
+        String[] parts = s.split(sourceDelimitor);
+        StringBuilder camelCaseString = new StringBuilder("");
+        boolean firstWordSet = false;
+        for (String part : parts) {
+            if (part != null && part.length() > 0) {
+                if (!firstWordSet && !upper) {
+                    camelCaseString.append(part.toLowerCase());
+                    firstWordSet = true;
+                } else {
+                    camelCaseString.append(toProperCase(part));
+                }
+            }
+        }
+
+        return camelCaseString.toString();
+    }
+
+
+    static String toTitleCase(String s, boolean spaceDelimitor) {
+        // Created by Daniel Knowles
+        // Source string is either space or underscore delimited
+        // Returned string is of format "This Is My Title" or "This_Is_My_Title"
+
+        String delimitor = (spaceDelimitor) ? DELIMITOR_SPACE : DELIMITOR_UNDERSCORE;
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+
+        String sourceDelimitor;
+
+        if (s.contains(DELIMITOR_SPACE)) {
+            sourceDelimitor = DELIMITOR_SPACE;
+        } else if (s.contains(DELIMITOR_UNDERSCORE)) {
+            sourceDelimitor = DELIMITOR_UNDERSCORE;
+        } else {
+            return s;
+        }
+
+        String[] parts = s.split(sourceDelimitor);
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = toProperCase(parts[i]);
+        }
+
+        return StringUtils.join(parts, delimitor);
+    }
+
+
+    static String toProperCase(String s) {
+        // Created by Daniel Knowles
+
+        if (s == null || s.length() < 2) {
+            return s;
+}
+
+        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 }
