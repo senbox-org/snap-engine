@@ -58,6 +58,8 @@ import java.util.Map;
  * @version $Revision$ $Date$
  * @since Ceres 0.6
  */
+// MAR2020 - Daniel Knowles - Added setEnabled so that some properties can be initially enabled/disabled
+
 public class BindingContext {
 
     private final PropertySet propertySet;
@@ -477,6 +479,22 @@ public class BindingContext {
         }
         component.setEnabled(enabled);
     }
+
+
+    /**
+     * Sets the <i>enabled</i> state of the components associated with {@code targetProperty}.
+     * Enablement of the target property matches that of the source property.
+     *
+     * @param targetPropertyName  The name of the target property.
+     * @param sourcePropertyName  The name of the source property.
+     */
+    public Enablement bindEnabledState(final String targetPropertyName,
+                                       final String sourcePropertyName) {
+        return bindEnabledState(targetPropertyName, true,
+                new EqualValuesCondition(sourcePropertyName, true));
+    }
+
+
 
     /**
      * Sets the <i>enabled</i> state of the components associated with {@code targetProperty}.
