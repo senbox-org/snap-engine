@@ -1,4 +1,4 @@
-package org.esa.s2tbx.dataio.gdal.drivers;
+package org.esa.snap.dataio.gdal.drivers;
 
 import java.util.Hashtable;
 import java.util.Vector;

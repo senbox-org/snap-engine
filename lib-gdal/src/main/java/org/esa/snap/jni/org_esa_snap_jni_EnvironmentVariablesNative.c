@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "org_esa_s2tbx_jni_EnvironmentVariablesNative.h"
+#include "org_esa_snap_jni_EnvironmentVariablesNative.h"
 
-JNIEXPORT jint JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_chdir(JNIEnv *env, jclass thisObj, jstring inDir) {
+JNIEXPORT jint JNICALL Java_org_esa_snap_jni_EnvironmentVariablesNative_chdir(JNIEnv *env, jclass thisObj, jstring inDir) {
    	const char *dir = (*env)->GetStringUTFChars(env, inDir, NULL);
    	if (!dir) {
     	return -1;
@@ -17,7 +17,7 @@ JNIEXPORT jint JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_chdir(J
     return res;
 }
 
-JNIEXPORT jstring JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_getcwd(JNIEnv *env, jclass thisObj) {
+JNIEXPORT jstring JNICALL Java_org_esa_snap_jni_EnvironmentVariablesNative_getcwd(JNIEnv *env, jclass thisObj) {
 	char *currentDirectory;
     currentDirectory = getcwd(NULL, 0);
 
@@ -25,7 +25,7 @@ JNIEXPORT jstring JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_getc
    	return (*env)->NewStringUTF(env, currentDirectory);
 }
 
-JNIEXPORT jstring JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_getenv(JNIEnv *env, jclass thisObj, jstring inJNIKey) {
+JNIEXPORT jstring JNICALL Java_org_esa_snap_jni_EnvironmentVariablesNative_getenv(JNIEnv *env, jclass thisObj, jstring inJNIKey) {
 	// convert the JNI String (jstring) into C-String (char*)
    	const char *inCKey = (*env)->GetStringUTFChars(env, inJNIKey, NULL);
    	if (NULL == inCKey) {
@@ -42,7 +42,7 @@ JNIEXPORT jstring JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_gete
    	return (*env)->NewStringUTF(env, existingValue);
 }
 
-JNIEXPORT jint JNICALL Java_org_esa_s2tbx_jni_EnvironmentVariablesNative_putenv(JNIEnv * env, jclass thisObj, jstring inJNIKeyEqualValue) {
+JNIEXPORT jint JNICALL Java_org_esa_snap_jni_EnvironmentVariablesNative_putenv(JNIEnv * env, jclass thisObj, jstring inJNIKeyEqualValue) {
 	// convert the JNI String (jstring) into C-String (char*)
    	const char *inCKeyEqualValue = (*env)->GetStringUTFChars(env, inJNIKeyEqualValue, NULL);
    	if (NULL == inCKeyEqualValue) {

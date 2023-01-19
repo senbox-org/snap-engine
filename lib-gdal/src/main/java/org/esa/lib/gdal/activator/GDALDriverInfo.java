@@ -1,6 +1,6 @@
 package org.esa.lib.gdal.activator;
 
-import org.esa.s2tbx.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
 
 /**
  * GDAL Driver Info class containing information about a GDAL driver.

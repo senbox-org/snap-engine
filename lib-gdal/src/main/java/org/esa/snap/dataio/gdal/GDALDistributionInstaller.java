@@ -1,6 +1,6 @@
-package org.esa.s2tbx.dataio.gdal;
+package org.esa.snap.dataio.gdal;
 
-import org.esa.s2tbx.jni.EnvironmentVariables;
+import org.esa.snap.jni.EnvironmentVariables;
 import org.esa.snap.core.util.NativeLibraryUtils;
 
 import java.io.File;

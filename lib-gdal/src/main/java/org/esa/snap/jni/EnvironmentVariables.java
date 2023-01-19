@@ -1,4 +1,4 @@
-package org.esa.s2tbx.jni;
+package org.esa.snap.jni;
 
 /**
  * Environment Variables class for control OS environment variables during runtime

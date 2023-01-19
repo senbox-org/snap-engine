@@ -1,4 +1,4 @@
-package org.esa.s2tbx.dataio.gdal;
+package org.esa.snap.dataio.gdal;
 
 import org.esa.snap.runtime.Config;
 
