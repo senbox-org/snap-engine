@@ -1,6 +1,6 @@
 package org.esa.lib.gdal.activator;
 
-import org.esa.s2tbx.dataio.gdal.GDALLoader;
+import org.esa.snap.dataio.gdal.GDALLoader;
 import org.esa.snap.runtime.Activator;
 
 /**

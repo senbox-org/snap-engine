@@ -15,11 +15,11 @@
  *  *  with this program; if not, see http://www.gnu.org/licenses/
  *
  */
-package org.esa.s2tbx.dataio.gdal;
+package org.esa.snap.dataio.gdal;
 
 import org.esa.lib.gdal.activator.GDALInstallInfo;
-import org.esa.s2tbx.dataio.gdal.drivers.GDAL;
-import org.esa.s2tbx.dataio.gdal.drivers.GDALConstConstants;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
 import org.esa.snap.core.datamodel.ProductData;
 
 import java.net.URL;

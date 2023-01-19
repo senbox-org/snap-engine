@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.s2tbx.dataio.gdal;
+package org.esa.snap.dataio.gdal;
 
 import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.core.util.StringUtils;

@@ -59,8 +59,8 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.lib.gdal.*</publicPackage>
-                        <publicPackage>org.esa.s2tbx.dataio.gdal.*</publicPackage>
-                        <publicPackage>org.esa.s2tbx.jni.*</publicPackage>
+                        <publicPackage>org.esa.snap.dataio.gdal.*</publicPackage>
+                        <publicPackage>org.esa.snap.jni.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

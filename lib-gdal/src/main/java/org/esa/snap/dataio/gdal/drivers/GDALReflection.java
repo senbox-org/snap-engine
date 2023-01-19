@@ -1,6 +1,6 @@
-package org.esa.s2tbx.dataio.gdal.drivers;
+package org.esa.snap.dataio.gdal.drivers;
 
-import org.esa.s2tbx.dataio.gdal.GDALLoader;
+import org.esa.snap.dataio.gdal.GDALLoader;
 
 import java.lang.reflect.Method;
 

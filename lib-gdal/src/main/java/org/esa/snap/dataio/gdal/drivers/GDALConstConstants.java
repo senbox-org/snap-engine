@@ -1,4 +1,4 @@
-package org.esa.s2tbx.dataio.gdal.drivers;
+package org.esa.snap.dataio.gdal.drivers;
 
 /**
  * GDAL gdalconstConstants JNI driver class
