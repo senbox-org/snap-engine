@@ -273,7 +273,6 @@ public class OpenJP2Decoder implements AutoCloseable {
         while (this.pendingWrites.contains(this.tileFile)) {
             Thread.yield();
         }
-        //int[] bandOffsets = new int[] {0};
         int[] bandOffsets = new int[this.numBands];
         Arrays.fill(bandOffsets,0);
         DataBuffer buffer;
