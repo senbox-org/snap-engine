@@ -249,7 +249,7 @@ public class ImageUtils {
     }
 
     public static int computeTileCount(int imageSize, int tileSize) {
-        return Math.round(imageSize / (float) tileSize);
+        return (int) Math.ceil(imageSize / (double) tileSize);
     }
 
     public static double computeLevelSizeAsDouble(int sourceSize, int level) {
@@ -257,11 +257,9 @@ public class ImageUtils {
         return sourceSize / (double) ( 1 << level);
     }
 
-    private static final int[] levelMasks = new int[] { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256 };
-
     public static int computeLevelSize(int sourceSize, int level) {
         // The bitwise operation is ~3 times faster than Math.ceil(computeLevelSizeAsDouble(sourceSize, level))
-        return (sourceSize >> level) + ((sourceSize & levelMasks[level]) == 0 ? 0 : 1);
+        return (sourceSize >> level) + ((sourceSize & (~(~0 << level))) == 0 ? 0 : 1);
     }
 
     /**
