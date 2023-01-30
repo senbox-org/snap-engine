@@ -1,0 +1,27 @@
+# Generated thanks to https://to-be-continuous.gitlab.io/kicker/ by frederick BALDO frederick.baldo@csgroup.eu 
+
+# included templates
+include:
+  # Maven template
+  - project: "to-be-continuous/maven"
+    ref: "3.2"
+    file: "templates/gitlab-ci-maven.yml"
+
+
+# variables
+variables:
+  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.8-eclipse-temurin-8"
+
+
+# your pipeline stages
+stages:
+  - build
+  - test
+  - package-build
+  - package-test
+  - infra
+  - deploy
+  - acceptance
+  - publish
+  - infra-prod
+  - production
