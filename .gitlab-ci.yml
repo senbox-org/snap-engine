@@ -19,9 +19,8 @@ stages:
   - test
   - package-build
   - package-test
-  - infra
-  - deploy
-  - acceptance
-  - publish
-  - infra-prod
-  - production
+  # - deploy
+  # - acceptance
+  # - publish
+  # - infra-prod
+  # - production
