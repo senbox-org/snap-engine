@@ -115,7 +115,7 @@
 
     <organization>
         <name>European Space Agency (ESA)</name>
-        <url>http://step.esa.int/</url>
+        <url>https://step.esa.int/</url>
     </organization>
 
     <inceptionYear>2014</inceptionYear>
@@ -128,7 +128,7 @@
     <licenses>
         <license>
             <name>GNU General Public License (GPL)</name>
-            <url>http://www.gnu.org/licenses/gpl.html</url>
+            <url>https://www.gnu.org/licenses/gpl.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -747,7 +747,7 @@
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.8</version>
+                <version>1.4.20</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>

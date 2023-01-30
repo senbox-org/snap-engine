@@ -31,6 +31,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Group;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CfMetadataPart extends ProfilePartIO {
 
@@ -87,10 +88,34 @@ public class CfMetadataPart extends ProfilePartIO {
         if (metadataRoot.getNumElements() > 0) {
             Group rootGroup = getRootGroup(netcdfFileWriteable);
             Group metadataGroup = netcdfFileWriteable.addGroup(rootGroup, MetadataUtils.METADATA_GROUP_NAME);
-            for (MetadataElement element : metadataRoot.getElements()) {
+            // work on a clone as we might modify it to make it compatible with NetCDF conventions
+            MetadataElement deepClone = metadataRoot.createDeepClone();
+            makeCompatible(deepClone);
+            for (MetadataElement element : deepClone.getElements()) {
                 addElementToGroup(netcdfFileWriteable, metadataGroup, element);
             }
+            deepClone.dispose();
         }
+    }
+
+    static void makeCompatible(MetadataElement elem) {
+        String[] subElemNames = elem.getElementNames();
+        // only if the number of distinct elem names is different to the total number of names we need to take action
+        if (Arrays.stream(subElemNames).distinct().count() < subElemNames.length) {
+            MetadataElement[] subElems = elem.getElements();
+            for (MetadataElement subElem : subElems) {
+                MetadataElement[] equalNameElems = Arrays.stream(subElems).filter(s -> s.getName().equals(subElem.getName())).toArray(MetadataElement[]::new);
+                if (equalNameElems.length > 1) {
+                    for (int k = 0; k < equalNameElems.length; k++) {
+                        MetadataElement element = equalNameElems[k];
+                        element.setName(element.getName() + "." + k);
+                    }
+                }
+            }
+        }
+
+        Arrays.stream(elem.getElements()).forEach(CfMetadataPart::makeCompatible);
+
     }
 
     private void addElementToGroup(NFileWriteable netcdfFileWriteable, Group ncGroup, MetadataElement root) {
@@ -134,7 +159,10 @@ public class CfMetadataPart extends ProfilePartIO {
                     group.addAttribute(new Attribute(attribute.getName(), data.getElemInt(), data.isUnsigned()));
                     break;
                 case ProductData.TYPE_UINT32:
+                case ProductData.TYPE_INT64:
                     group.addAttribute(new Attribute(attribute.getName(), data.getElemLong(), data.isUnsigned()));
+                case ProductData.TYPE_UINT64:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemDouble()));
                     break;
                 case ProductData.TYPE_ASCII:
                     group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
@@ -146,7 +174,7 @@ public class CfMetadataPart extends ProfilePartIO {
             if (ProductData.TYPE_ASCII == type || ProductData.TYPE_UTC == type) {
                 group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
             } else {
-                group.addAttribute(new Attribute(attribute.getName(), Array.makeFromJavaArray(data.getElemFloat())));
+                group.addAttribute(new Attribute(attribute.getName(), Array.makeFromJavaArray(data.getElems())));
             }
         }
     }
