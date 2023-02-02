@@ -217,19 +217,21 @@ class GDALInstaller {
      */
     private static void copyEnvironmentVariablesNativeLibrary(GDALVersion gdalVersion) throws IOException {
         Path evFilePath = gdalVersion.getEnvironmentVariablesFilePath();
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Copy the environment variables library file.");
-        }
-
-        URL libraryFileURLFromSources = gdalVersion.getEnvironmentVariablesFilePathFromSources();
-        if (libraryFileURLFromSources != null) {
+        if (!Files.exists(evFilePath)) {
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "The environment variables library file path on the local disk is '" + evFilePath.toString() + "' and the library file name from sources is '" + libraryFileURLFromSources.toString() + "'.");
+                logger.log(Level.FINE, "Copy the environment variables library file.");
             }
 
-            FileHelper.copyFile(libraryFileURLFromSources, evFilePath);
-        } else {
-            throw new IllegalStateException("Unable to get environment variables libraryFileURLFromSources");
+            URL libraryFileURLFromSources = gdalVersion.getEnvironmentVariablesFilePathFromSources();
+            if (libraryFileURLFromSources != null) {
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, "The environment variables library file path on the local disk is '" + evFilePath.toString() + "' and the library file name from sources is '" + libraryFileURLFromSources.toString() + "'.");
+                }
+
+                FileHelper.copyFile(libraryFileURLFromSources, evFilePath);
+            } else {
+                throw new IllegalStateException("Unable to get environment variables libraryFileURLFromSources");
+            }
         }
     }
 
