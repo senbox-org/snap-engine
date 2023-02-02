@@ -13,8 +13,8 @@ import java.util.prefs.Preferences;
 public class GDALLoaderConfig {
 
     public static final String CONFIG_NAME = "snap";
-    private static final String PREFERENCE_KEY_USE_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed";
-    private static final String PREFERENCE_KEY_SELECTED_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed.version";
+    static final String PREFERENCE_KEY_USE_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed";
+    static final String PREFERENCE_KEY_SELECTED_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed.version";
 
     private static final Logger logger = Logger.getLogger(GDALLoaderConfig.class.getName());
     private static final GDALLoaderConfig instance = new GDALLoaderConfig();

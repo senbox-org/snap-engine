@@ -25,7 +25,7 @@ public enum OSCategory {
 
     private static final Logger logger = Logger.getLogger(OSCategory.class.getName());
 
-    private static final String ENV_NAME = "environment-variables";
+    static final String ENV_NAME = "environment-variables";
 
     private static final OSCategory osCategory = retrieveOSCategory();
 
