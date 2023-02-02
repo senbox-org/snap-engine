@@ -33,17 +33,17 @@ public enum GDALVersion {
     GDAL_21X_JNI("2.1.x", "2-1-X", true, false),
     GDAL_20X_JNI("2.0.x", "2-0-X", true, false);
 
-    private static final String VERSION_NAME = "{version}";
-    private static final String JNI_NAME = "{jni}";
-    private static final String DIR_NAME = "gdal-" + VERSION_NAME + JNI_NAME;
-    private static final String ZIP_NAME = DIR_NAME + ".zip";
-    private static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
-    private static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
-    private static final String GDAL_JNI_LIBRARY_FILE = "java/gdal.jar";
+    static final String VERSION_NAME = "{version}";
+    static final String JNI_NAME = "{jni}";
+    static final String DIR_NAME = "gdal-" + VERSION_NAME + JNI_NAME;
+    static final String ZIP_NAME = DIR_NAME + ".zip";
+    static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
+    static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
+    static final String GDAL_JNI_LIBRARY_FILE = "java/gdal.jar";
 
-    private static final String GDALINFIO_EXECUTABLE_NAME = "gdalinfo";
-    private static final String GDALINFO_EXECUTABLE_ARGS = "--version";
-    private static final Map<String, GDALVersion> JNI_VERSIONS = buildJNIVersionsMap();
+    static final String GDALINFIO_EXECUTABLE_NAME = "gdalinfo";
+    static final String GDALINFO_EXECUTABLE_ARGS = "--version";
+    static final Map<String, GDALVersion> JNI_VERSIONS = buildJNIVersionsMap();
 
     private static final Logger logger = Logger.getLogger(GDALVersion.class.getName());
 
@@ -127,7 +127,7 @@ public enum GDALVersion {
         return INSTALLED_VERSIONS;
     }
 
-    private static String fetchProcessOutput(Process process) throws IOException {
+    static String fetchProcessOutput(Process process) throws IOException {
         StringBuilder output = new StringBuilder();
         Thread.yield(); // yield the control to other threads for ensure that the process has started
         try (InputStream commandInputStream = process.getInputStream();
@@ -267,7 +267,7 @@ public enum GDALVersion {
      *
      * @param osCategory the new OS category
      */
-    private void setOsCategory(OSCategory osCategory) {
+    void setOsCategory(OSCategory osCategory) {
         this.osCategory = osCategory;
     }
 
