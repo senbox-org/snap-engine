@@ -51,7 +51,7 @@ import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
  */
 class GDALInstaller {
 
-    private static final String PREFERENCE_KEY = "gdal.installer";
+    private static final String PREFERENCE_KEY_INSTALLER_VERSION = "gdal.installer";
     private static final Logger logger = Logger.getLogger(GDALInstaller.class.getName());
 
     GDALInstaller() {
@@ -178,7 +178,7 @@ class GDALInstaller {
         Config config = Config.instance(CONFIG_NAME);
         config.load();
         Preferences preferences = config.preferences();
-        return preferences.get(PREFERENCE_KEY, null);
+        return preferences.get(PREFERENCE_KEY_INSTALLER_VERSION, null);
     }
 
     /**
@@ -188,7 +188,7 @@ class GDALInstaller {
         Config config = Config.instance(CONFIG_NAME);
         config.load();
         Preferences preferences = config.preferences();
-        preferences.put(PREFERENCE_KEY, newModuleSpecificationVersion);
+        preferences.put(PREFERENCE_KEY_INSTALLER_VERSION, newModuleSpecificationVersion);
         try {
             preferences.flush();
         } catch (BackingStoreException exception) {
