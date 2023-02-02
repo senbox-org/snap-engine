@@ -66,7 +66,7 @@ public abstract class ProductNode extends ExtensibleObject {
     }
 
     /**
-     * Sets the the owner node of this node.
+     * Sets the owner node of this node.
      * <p>Overrides shall finally call <code>super.setOwner(owner)</code>.
      *
      * @param owner the new owner
@@ -270,7 +270,7 @@ public abstract class ProductNode extends ExtensibleObject {
      *
      * @return the product reader, never <code>null</code>
      *
-     * @throws IllegalStateException if the the product reader is <code>null</code>
+     * @throws IllegalStateException if the product reader is <code>null</code>
      */
     protected ProductReader getProductReaderSafe() {
         ProductReader productReader = getProductReader();
@@ -393,7 +393,7 @@ public abstract class ProductNode extends ExtensibleObject {
 
 
     /**
-     * Returns whether or not this node is part of the given subset.
+     * Returns whether this node is part of the given subset.
      *
      * @param subsetDef The subset definition.
      * @return <code>true</code> if the subset is not <code>null</code> and it contains a node name equal to this node's

@@ -28,6 +28,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.XppDomReader;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -57,7 +58,9 @@ public class ModuleManifestParserTest
 
         XppDomReader domReader = new XppDomReader(fooElem);
         Foo foo = new Foo();
-        new XStream().unmarshal(domReader, foo);
+        XStream xStream = new XStream();
+        xStream.addPermission(AnyTypePermission.ANY);
+        xStream.unmarshal(domReader, foo);
 
         assertEquals("Bibo", foo.name);
         assertEquals(41, foo.age);

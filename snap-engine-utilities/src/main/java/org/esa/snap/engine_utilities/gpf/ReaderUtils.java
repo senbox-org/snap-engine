@@ -373,7 +373,7 @@ public final class ReaderUtils {
 
     private static String[] MONTHS = new String[] {"JAN","FEB","MAR","APR","JUN","JUL","AUG","SEP","OCT","NOV","DEC"};
 
-    private static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
+    public static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
         Guardian.assertNotNull("name", name);
         char[] sortedValidChars;
         if (validChars == null) {
