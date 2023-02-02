@@ -41,6 +41,7 @@ import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
 
 /**
  * GDAL installer class for deploying GDAL binaries to the aux data dir.
@@ -50,7 +51,6 @@ import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
  */
 class GDALInstaller {
 
-    private static final String CONFIG_NAME = "s2tbx";
     private static final String PREFERENCE_KEY = "gdal.installer";
     private static final Logger logger = Logger.getLogger(GDALInstaller.class.getName());
 

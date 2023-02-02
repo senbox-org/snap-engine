@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
+
 /**
  * GDAL Install Info class which stores the location of installed GDAL distribution.
  *
@@ -30,7 +32,7 @@ public class GDALInstallInfo {
     public synchronized void setLocations(Path binLocation) {
         this.binLocation = binLocation;
         try {
-            Config config = Config.instance("s2tbx");
+            Config config = Config.instance(CONFIG_NAME);
             config.load();
             Preferences preferences = config.preferences();
             preferences.put("gdal.apps.path", this.binLocation.toString());
