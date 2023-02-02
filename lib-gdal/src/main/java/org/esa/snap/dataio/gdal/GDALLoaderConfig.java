@@ -12,9 +12,9 @@ import java.util.prefs.Preferences;
  */
 public class GDALLoaderConfig {
 
-    private static final String INSTANCE_CONFIG = "s2tbx";
-    private static final String PREFERENCE_KEY_USE_INSTALLED_GDAL = "s2tbx.dataio.gdal.installed";
-    private static final String PREFERENCE_KEY_SELECTED_INSTALLED_GDAL = "s2tbx.dataio.gdal.installed.version";
+    public static final String CONFIG_NAME = "snap";
+    private static final String PREFERENCE_KEY_USE_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed";
+    private static final String PREFERENCE_KEY_SELECTED_INSTALLED_GDAL = CONFIG_NAME + ".dataio.gdal.installed.version";
 
     private static final Logger logger = Logger.getLogger(GDALLoaderConfig.class.getName());
     private static final GDALLoaderConfig instance = new GDALLoaderConfig();
@@ -43,7 +43,7 @@ public class GDALLoaderConfig {
      * @return the setting for using installed distribution
      */
     private boolean loadUseInstalledGDALLibrary() {
-        final Preferences preferences = Config.instance(INSTANCE_CONFIG).load().preferences();
+        final Preferences preferences = Config.instance(CONFIG_NAME).load().preferences();
         return preferences.getBoolean(PREFERENCE_KEY_USE_INSTALLED_GDAL, true);
     }
 
@@ -53,7 +53,7 @@ public class GDALLoaderConfig {
      * @return the setting for selecting installed distribution
      */
     private String loadSelectedInstalledGDALLibrary() {
-        final Preferences preferences = Config.instance(INSTANCE_CONFIG).load().preferences();
+        final Preferences preferences = Config.instance(CONFIG_NAME).load().preferences();
         return preferences.get(PREFERENCE_KEY_SELECTED_INSTALLED_GDAL, PREFERENCE_NONE_VALUE_SELECTED_INSTALLED_GDAL);
     }
 
@@ -64,7 +64,7 @@ public class GDALLoaderConfig {
      */
     public void setUseInstalledGDALLibrary(boolean useInstalledGDALLibrary) {
         this.useInstalledGDALLibrary = useInstalledGDALLibrary;
-        final Preferences preferences = Config.instance(INSTANCE_CONFIG).load().preferences();
+        final Preferences preferences = Config.instance(CONFIG_NAME).load().preferences();
         preferences.putBoolean(PREFERENCE_KEY_USE_INSTALLED_GDAL, this.useInstalledGDALLibrary);
         try {
             preferences.flush();
@@ -80,7 +80,7 @@ public class GDALLoaderConfig {
      */
     public void setSelectedInstalledGDALLibrary(String selectedInstalledGDALLibrary) {
         this.selectedInstalledGDALLibrary = selectedInstalledGDALLibrary;
-        final Preferences preferences = Config.instance(INSTANCE_CONFIG).load().preferences();
+        final Preferences preferences = Config.instance(CONFIG_NAME).load().preferences();
         preferences.put(PREFERENCE_KEY_SELECTED_INSTALLED_GDAL, this.selectedInstalledGDALLibrary);
         try {
             preferences.flush();
