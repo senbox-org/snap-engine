@@ -113,10 +113,10 @@ public class GDALVersionTest {
         return getExpectedGDALVersionLocation(GDAL_321_FULL).toString();
     }
 
-    private static String retrieveExpectedInstalledVersionLocation() {
+    private static String retrieveExpectedInstalledVersionLocation(GDALVersion gdalVersion) {
         return Arrays.stream(getExpectedOSCategory().getExecutableLocations(GDALINFIO_EXECUTABLE_NAME)).filter(installedVersionLocation -> {
             try {
-                return JNI_VERSIONS.get(fetchProcessOutput(Runtime.getRuntime().exec(new String[]{installedVersionLocation + File.separator + GDALINFIO_EXECUTABLE_NAME, GDALINFO_EXECUTABLE_ARGS})).replaceAll("[\\s\\S]*?(\\d*\\.\\d*\\.\\d*)[\\s\\S]*$", "$1").replaceAll("(\\d*\\.\\d*)[\\s\\S]*$", "$1.x")) != null;
+                return JNI_VERSIONS.get(fetchProcessOutput(Runtime.getRuntime().exec(new String[]{installedVersionLocation + File.separator + GDALINFIO_EXECUTABLE_NAME, GDALINFO_EXECUTABLE_ARGS})).replaceAll("[\\s\\S]*?(\\d*\\.\\d*\\.\\d*)[\\s\\S]*$", "$1").replaceAll("(\\d*\\.\\d*)[\\s\\S]*$", "$1.x")) == gdalVersion;
             } catch (IOException e) {
                 return false;
             }
@@ -127,7 +127,7 @@ public class GDALVersionTest {
         if (gdalVersion.name.equals(GDAL_321_FULL.name)) {
             return retrieveExpectedInternalVersionLocation();
         } else {
-            return retrieveExpectedInstalledVersionLocation();
+            return retrieveExpectedInstalledVersionLocation(gdalVersion);
         }
     }
 
