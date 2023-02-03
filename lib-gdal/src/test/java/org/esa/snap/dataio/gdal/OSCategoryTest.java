@@ -16,9 +16,9 @@ public class OSCategoryTest {
     private static final String ARCHITECTURE_X86 = "x86";
     private static final String ARCHITECTURE_UNKNOWN = "x86";
     private static final String EXECUTABLE_NAME = "ping";
-    private static final String LINUX_OS_EXECUTABLE_LOCATION = "/bin/";
+    private static final String LINUX_OS_EXECUTABLE_LOCATION = "/bin";
     private static final String WINDOWS_OS_EXECUTABLE_LOCATION = "C:\\Windows\\System32";
-    private static final String MACOS_OS_EXECUTABLE_LOCATION = "/sbin/";
+    private static final String MACOS_OS_EXECUTABLE_LOCATION = "/sbin";
 
     @Test
     public void testGetOSCategory() {
