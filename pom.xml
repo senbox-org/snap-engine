@@ -76,7 +76,6 @@
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
-        <!--module>snap-product-library</module-->
         <module>snap-product-library-v2</module>
         <module>snap-dem</module>
         <module>snap-envi-reader</module>
@@ -212,11 +211,6 @@
                 <version>${snap.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.esa.snap</groupId>
-                <artifactId>snap-product-library</artifactId>
-                <version>${snap.version}</version>
             </dependency>
 
             <!-- SNAP Extension Modules -->
