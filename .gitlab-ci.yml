@@ -6,12 +6,19 @@ include:
   - project: "to-be-continuous/maven"
     ref: "3.2"
     file: "templates/gitlab-ci-maven.yml"
+  # SonarQube template
+  - project: "to-be-continuous/sonar"
+    ref: "3.1"
+    file: "templates/gitlab-ci-sonar.yml"
 
+# secret variables
+# (define the variables below in your GitLab project variables)
+# SONAR_TOKEN: SonarQube authentication [token](https://docs.sonarqube.org/latest/user-guide/user-token/) (depends on your authentication method)
 
 # variables
 variables:
   MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.8-eclipse-temurin-8"
-
+  SONAR_HOST_URL: "http://sonarqube-sonarqube-lts.sonarqube.svc.cluster.local:9000"
 
 # your pipeline stages
 stages:
@@ -19,6 +26,7 @@ stages:
   - test
   - package-build
   - package-test
+  # - infra
   # - deploy
   # - acceptance
   # - publish
