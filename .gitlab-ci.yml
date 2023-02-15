@@ -22,7 +22,7 @@ variables:
   # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
-    -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
     -Dorg.slf4j.simpleLogger.showDateTime=true
     -Djava.awt.headless=true
 
@@ -53,8 +53,8 @@ image: maven:3.6.3-jdk-8
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - ${CI_PROJECT_DIR}/.m2/repository
-    - ${CI_PROJECT_DIR}/.sonar/cache
+    - .m2/repository
+    - .sonar/cache
     
 # For merge requests do not `deploy` but only run `verify`.
 # See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
@@ -85,6 +85,9 @@ Build:
   stage: build 
   script:
     - mvn --batch-mode compile
+  artifacts:
+    paths:
+      - "**/target/classes"
 
 Test:
   tags: 
@@ -99,6 +102,8 @@ Test:
       - "target/site/*.html"
     reports:
       junit: "target/site/*.html"
+  dependencies:
+    - Build
 
 Sonarqube:
   tags: 
@@ -118,6 +123,9 @@ Sonarqube:
   only:
     - master # or the name of your main branch
     - merge_requests
+  dependencies:
+    - Build
+    - Test
 
 Package: 
   tags: 
@@ -132,6 +140,9 @@ Package:
   only: 
     - master
     - tags
+  dependencies:
+    - Build
+    - Test
 
 Deploy:
   tags: 
