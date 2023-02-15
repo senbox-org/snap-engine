@@ -46,8 +46,9 @@
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
-        <sonar.projectKey>senbox-org_snap-engine_AYYxoTV6fae61wO2F_gz</sonar.projectKey>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.java.binaries>**/classes</sonar.java.binaries>
+        <sonar.exclusions>*/src</sonar.exclusions>
     </properties>
 
     <modules>
