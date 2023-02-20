@@ -45,7 +45,7 @@ mvn-sonar:
     # For complete details on the GitHub API please see:
     # https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
     - |-
-      curl -X POST $URL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"state": "'$CI_JOB_NAME'", "context": "$STATUS_NAME", "target_url": "'$CI_PIPELINE_URL'", "description": "The build status"}'
+      curl -X POST $URL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"state": "'$CI_JOB_NAME'", "context": "'$STATUS_NAME'", "target_url": "'$CI_PIPELINE_URL'", "description": "The build status"}'
   environment:
     name: reporting-github
   dependencies: []
