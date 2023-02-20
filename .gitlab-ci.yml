@@ -39,12 +39,13 @@ mvn-sonar:
 .report-status:
   image: curlimages/curl  
   variables:
+    URL: "https://api.github.com/repos/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/statuses/${CI_COMMIT_SHA}"
     STATUS_NAME: snap-ci
-    STATUS: '{"state": ${CI_JOB_NAME}, "context": ${STATUS_NAME}, "target_url": ${CI_PIPELINE_URL}'
   script:
     # For complete details on the GitHub API please see:
     # https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
-    - curl -X POST -H @${GITHUB_CURL_HEADERS} https://api.github.com/repos/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/statuses/${CI_COMMIT_SHA} -d ${STATUS}
+    - |-
+      curl -X POST $URL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"state": "'$CI_JOB_NAME'", "context": "'$STATUS_NAME'", "target_url": "'$CI_PIPELINE_URL'", "description": "The build status"}'
   environment:
     name: reporting-github
   dependencies: []
@@ -59,7 +60,7 @@ success:
   extends:
     - .report-status
 
-failed:
+failure:
   stage: .post
   extends:
     - .report-status
