@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +39,8 @@ import java.util.logging.Logger;
  * @since   5.0.0
  */
 public class OpenJP2Decoder implements AutoCloseable {
-    private static final ExecutorService executor;
+    // SNAP-3436 -  use single thread executor per instance instead of static threadpool (which is hard to shutdown properly)
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();;
 
     private PointerByReference pStream;
     private DecompressParams parameters;
@@ -56,10 +58,6 @@ public class OpenJP2Decoder implements AutoCloseable {
     private Logger logger;
     private final Set<Path> pendingWrites;
     private Function<Path, Void> writeCompletedCallback;
-
-    static {
-        executor = Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 4));
-    }
 
     /**
      * The only constructor of this class.
@@ -157,6 +155,17 @@ public class OpenJP2Decoder implements AutoCloseable {
             if (pStream != null && pStream.getValue() != null) {
                 OpenJp2.opj_stream_destroy(pStream);
             }
+
+            // SNAP-3436 -  make sure to close the thread executor
+            executor.shutdown();
+            while (!executor.isTerminated()) {
+                try {
+                    executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
         } catch (Exception ex) {
             logger.warning(ex.getMessage());
         }
