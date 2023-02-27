@@ -303,7 +303,7 @@ public class JP2ProductReader extends AbstractProductReader {
             } catch (RuntimeException exception) {
                 throw  exception;
             } catch (Exception exception) {
-                throw new IllegalStateException("Failed to create ge geo coding.", exception);
+                throw new IllegalStateException("Failed to create the geocoding.", exception);
             }
         }
         return null;
