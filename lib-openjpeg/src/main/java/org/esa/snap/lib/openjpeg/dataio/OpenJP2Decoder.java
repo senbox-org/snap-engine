@@ -19,12 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class OpenJP2Decoder implements AutoCloseable {
     // SNAP-3436 -  use single thread executor per instance instead of static threadpool (which is hard to shutdown properly)
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private PointerByReference pStream;
     private DecompressParams parameters;
