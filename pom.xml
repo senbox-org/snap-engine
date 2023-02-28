@@ -46,6 +46,9 @@
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.java.binaries>**/classes</sonar.java.binaries>
+        <sonar.exclusions>*/src</sonar.exclusions>
     </properties>
 
     <modules>
@@ -76,7 +79,6 @@
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
-        <!--module>snap-product-library</module-->
         <module>snap-product-library-v2</module>
         <module>snap-dem</module>
         <module>snap-envi-reader</module>
@@ -212,11 +214,6 @@
                 <version>${snap.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.esa.snap</groupId>
-                <artifactId>snap-product-library</artifactId>
-                <version>${snap.version}</version>
             </dependency>
 
             <!-- SNAP Extension Modules -->
@@ -740,7 +737,7 @@
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.8</version>
+                <version>1.4.20</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>
