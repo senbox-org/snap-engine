@@ -311,8 +311,8 @@ public class Band extends AbstractBand {
         if (hasRasterData()) {
             // This code is for backward compatibility only
             final RenderedImage image = ImageUtils.createRenderedImage(getRasterWidth(),
-                    getRasterHeight(),
-                    getRasterData());
+                                                                       getRasterHeight(),
+                                                                       getRasterData());
             return new DefaultMultiLevelImage(new DefaultMultiLevelSource(image, model));
         } else {
             return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
@@ -349,9 +349,9 @@ public class Band extends AbstractBand {
         if (isProductReaderDirectlyUsable()) {
             // Don't go the long way round the source image.
             getProductReader().readBandRasterData(this, offsetX, offsetY,
-                    width, height,
-                    rasterData,
-                    pm);
+                                                  width, height,
+                                                  rasterData,
+                                                  pm);
         } else {
             try {
                 pm.beginTask("Reading raster data...", 100);
@@ -531,8 +531,8 @@ public class Band extends AbstractBand {
             String name = indexCoding.getSampleName(i);
             int value = indexCoding.getSampleValue(i);
             final Color color = new Color(random.nextFloat(),
-                    random.nextFloat(),
-                    random.nextFloat());
+                                          random.nextFloat(),
+                                          random.nextFloat());
             points[i] = new ColorPaletteDef.Point(value, color, name);
         }
         return new ImageInfo(new ColorPaletteDef(points, points.length));
