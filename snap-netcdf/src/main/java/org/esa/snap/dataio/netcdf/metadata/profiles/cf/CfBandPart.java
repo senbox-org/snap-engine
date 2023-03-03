@@ -295,6 +295,8 @@ public class CfBandPart extends ProfilePartIO {
             if (stringValue.endsWith("b")) {
                 // Special management for bytes; Can occur in e.g. ASCAT files from EUMETSAT
                 return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
+            } else if (stringValue.equals("NA")) {
+                return 0;
             } else if (!stringValue.isEmpty()) {
                 return Double.parseDouble(stringValue);
             } else {
