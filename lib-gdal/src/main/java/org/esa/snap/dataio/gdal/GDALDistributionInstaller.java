@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
+import org.apache.commons.lang.SystemUtils;
+import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 import org.esa.snap.core.util.NativeLibraryUtils;
 
@@ -149,15 +151,6 @@ import java.util.logging.Logger;
             logger.log(Level.FINE, "Set the GDAL_DATA environment variable on Linux with '" + gdalPluginsValue.toString() + "'.");
         }
         EnvironmentVariables.setEnvironmentVariable(gdalPluginsValue.toString());
-        Path projDataFolderPath = gdalDistributionRootFolderPath.resolve("share/proj");
-        StringBuilder projDataValue = new StringBuilder();
-        projDataValue.append("PROJ_LIB")
-                .append("=")
-                .append(projDataFolderPath.toString());
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Set the PROJ_LIB environment variable on MacOSX with '" + projDataValue.toString() + "'.");
-        }
-        EnvironmentVariables.setEnvironmentVariable(projDataValue.toString());
     }
 
     /**
@@ -208,15 +201,6 @@ import java.util.logging.Logger;
             logger.log(Level.FINE, "Set the GDAL_DATA environment variable on Windows with '" + gdalPluginsValue.toString() + "'.");
         }
         EnvironmentVariables.setEnvironmentVariable(gdalPluginsValue.toString());
-        Path projDataFolderPath = gdalDistributionRootFolderPath.resolve("projlib");
-        StringBuilder projDataValue = new StringBuilder();
-        projDataValue.append("PROJ_LIB")
-                .append("=")
-                .append(projDataFolderPath.toString());
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Set the PROJ_LIB environment variable on Windows with '" + projDataValue.toString() + "'.");
-        }
-        EnvironmentVariables.setEnvironmentVariable(projDataValue.toString());
     }
 
     /**
@@ -253,6 +237,20 @@ import java.util.logging.Logger;
             installJNI(gdalVersion);
         } else {
             installDistribution(gdalVersion);
+        }
+    }
+
+    /**
+     * Setups the GDAL Proj Lib path to correctly load the proj.db from internal distribution
+     *
+     * @param gdalVersion the GDAL version to be setup
+     */
+    static void setupProj(GDALVersion gdalVersion){
+        if (!gdalVersion.isJni()) {
+            final Path projPath = SystemUtils.IS_OS_LINUX
+                    ? gdalVersion.getZipFilePath().getParent().resolve("share/share/proj")
+                    : gdalVersion.getZipFilePath().getParent().resolve("projlib");
+            OSR.setPROJSearchPath(projPath.toString());
         }
     }
 }
