@@ -32,6 +32,13 @@ stages:
   - infra-prod
   - production
 
+mvn-build:
+  artifacts:
+    paths:
+      - "${MAVEN_PROJECT_DIR}/**/target"
+      - "${MAVEN_PROJECT_DIR}/etc"
+      - "${MAVEN_PROJECT_DIR}/LICENSE.html"
+
 mvn-sonar:
   image: "registry.hub.docker.com/library/maven:3.6.3-jdk-11"
   rules:
