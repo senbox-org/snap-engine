@@ -134,7 +134,7 @@ public class Jp2XmlMetadata extends XmlMetadata {
         return null;
     }
 
-    /**
+    /*
      * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
      * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order
      * Keep in mind that there are JP2 files with values like "  42.788298611111109   23.271622685185189", resulting in empty tokens and tokens starting with white space
@@ -146,54 +146,46 @@ public class Jp2XmlMetadata extends XmlMetadata {
         if (coords != null) {
             final String[] result = Arrays.stream(coords.split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
             if (!isReversedAxisOrder()) {
+                // the usual order
                 origin = new Point2D.Double(Double.parseDouble(result[0]), Double.parseDouble(result[1]));
             }
             else {
+                // reversed order
                 origin = new Point2D.Double(Double.parseDouble(result[1]), Double.parseDouble(result[0]));
             }
         }
         return origin;
     }
 
-    /**
+    /*
      * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
      * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order;
      *                                                             also the values within offsetVector should be considered depending on their logic.
      *  Keep in mind that there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"] for offsetVector
-     * @return
      */
     public double getStepX() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
-        String[] result;
         if (values != null) {
-            if (!isReversedAxisOrder()) {
-                result = Arrays.stream(values[0].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
-            }
-            else {
-                result = Arrays.stream(values[1].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
-            }
+            int index = isReversedAxisOrder() ? 1 : 0;
+            String[] result = Arrays.stream(values[index].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+
             return Double.parseDouble(result[1]) != 0 ? Double.parseDouble(result[1]) : Double.parseDouble(result[0]);
         }
         return 0;
     }
 
-    /**
+    /*
      * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
      * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order;
      *                                                             also the values within offsetVector should be considered depending on their logic.
      *  Keep in mind that there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"] for offsetVector
-     * @return
      */
     public double getStepY() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
-        String[] result;
         if (values != null) {
-            if (!isReversedAxisOrder()) {
-                result = Arrays.stream(values[1].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
-            }
-            else {
-                result = Arrays.stream(values[0].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
-            }
+            int index = isReversedAxisOrder() ? 0 : 1;
+            String[] result = Arrays.stream(values[index].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+
             return Double.parseDouble(result[0]) != 0 ? Double.parseDouble(result[0]) : Double.parseDouble(result[1]);
         }
         return 0;
@@ -227,13 +219,13 @@ public class Jp2XmlMetadata extends XmlMetadata {
     }
 
     /**
-     * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459)
-     * Do not rely on EPSG and check the actual axis name order
+     * Check is the axis order is reversed
+     *    SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459): Do not rely on EPSG and check the actual axis name order
      * @return true is the axis order is reversed (e.g. [y,x] instead of [x,y])
      */
-    private boolean isReversedAxisOrder() {
+    public boolean isReversedAxisOrder() {
         String[] axisName = getAttributeValues(JP2ProductReaderConstants.TAG_AXIS_NAME);
-        return (axisName[0].contains("y") || axisName[0].contains("lat")) ? true : false;
+        return axisName[0].contains("y") || axisName[0].contains("lat");
     }
 
 }
