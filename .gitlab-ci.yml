@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.2"
+    ref: "3.2.3"
     file: "templates/gitlab-ci-maven.yml"
 
 
