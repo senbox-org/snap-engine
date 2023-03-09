@@ -61,6 +61,7 @@ class GDALReflection {
     }
 
     static Class<?> fetchGDALLibraryClass(String className) {
+        GDALLoader.ensureGDALInitialised();
         try {
             return Class.forName(className, false, GDALLoader.getInstance().getGDALVersionLoader());
         } catch (Exception ex) {

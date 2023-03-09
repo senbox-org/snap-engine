@@ -47,7 +47,7 @@ public class GDALDriverInfoTest {
     @Test
     public void testCanExportProduct() {
         assertNotNull(TEST_GDAL_LOADER);
-        TEST_GDAL_LOADER.initGDAL();
+        GDALLoader.ensureGDALInitialised();
         assertTrue(mockDriverInfo.canExportProduct(1));
         assertTrue(mockDriverInfo.canExportProduct(2));
         assertTrue(mockDriverInfo.canExportProduct(3));
