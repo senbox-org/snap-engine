@@ -48,7 +48,7 @@ public enum GDALVersion {
     private static final Logger logger = Logger.getLogger(GDALVersion.class.getName());
 
     private static final GDALVersion INTERNAL_VERSION = retrieveInternalVersion();
-    private static final Map<String,GDALVersion> INSTALLED_VERSIONS = retrieveInstalledVersions();
+    private static final Map<String, GDALVersion> INSTALLED_VERSIONS = retrieveInstalledVersions();
     private static final GDALVersion INSTALLED_VERSION = getSelectedInstalledVersion();
 
     String id;
@@ -71,6 +71,7 @@ public enum GDALVersion {
         this.jni = jni;
         this.cogCapable = cogCapable;
     }
+
     /**
      * Creates the Map with JNI GDAL versions.
      *
@@ -96,12 +97,17 @@ public enum GDALVersion {
      */
     public static GDALVersion getGDALVersion() {
         if (GDALLoaderConfig.getInstance().useInstalledGDALLibrary() && INSTALLED_VERSION != null) {
-            logger.log(Level.INFO, () -> "Installed GDAL " + INSTALLED_VERSION.getId() + " set to be used by SNAP.");
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, () -> "Installed GDAL " + INSTALLED_VERSION.getId() + " set to be used by SNAP.");
+            }
             return INSTALLED_VERSION;
         }
-        logger.log(Level.INFO, () -> "Internal GDAL " + INTERNAL_VERSION.getId() + " set to be used by SNAP.");
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, () -> "Internal GDAL " + INTERNAL_VERSION.getId() + " set to be used by SNAP.");
+        }
         return INTERNAL_VERSION;
     }
+
     /**
      * Gets installed GDAL version.
      *
@@ -118,12 +124,13 @@ public enum GDALVersion {
         }
         return null;
     }
+
     /**
      * Gets installed GDAL version.
      *
      * @return the installed GDAL version or {@code null} if not found
      */
-    public static Map<String,GDALVersion> getInstalledVersions() {
+    public static Map<String, GDALVersion> getInstalledVersions() {
         return INSTALLED_VERSIONS;
     }
 
@@ -165,8 +172,10 @@ public enum GDALVersion {
     private static Map<String,GDALVersion> retrieveInstalledVersions() {
         OSCategory osCategory = OSCategory.getOSCategory();
         String[] installedVersionsPaths = osCategory.getExecutableLocations(GDALINFIO_EXECUTABLE_NAME);
-        if(installedVersionsPaths.length<1){
-            logger.log(Level.INFO, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used. (f0)");
+        if (installedVersionsPaths.length < 1) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
+            }
             return null;
         }
         Map<String,GDALVersion> gdalVersions = new LinkedHashMap<>();
@@ -181,15 +190,17 @@ public enum GDALVersion {
                     gdalVersion.setId(versionId);
                     gdalVersion.setOsCategory(osCategory);
                     gdalVersion.setLocation(installedVersionsPath);
-                    logger.log(Level.INFO, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
+                    }
                     gdalVersions.putIfAbsent(version, gdalVersion);
                 } else {
-                    if (!version.isEmpty()) {
-                        logger.log(Level.INFO, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
+                    if (!version.isEmpty() && logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
                     }
                 }
-            } catch (IOException ignored) {
-                logger.log(Level.INFO, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used. (f1)");
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, () -> "Error occurred while checking installed GDAL version(s): " + ex.getMessage());
             }
         }
         return gdalVersions;

@@ -23,10 +23,6 @@ public class GCP {
         this.jniGCPInstance = jniGCPInstance;
     }
 
-    static Class<?> getJNIInstanceClass() {
-        return GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
-    }
-
     /**
      * Calls the JNI GDAL GCP class getGCPX() method
      *

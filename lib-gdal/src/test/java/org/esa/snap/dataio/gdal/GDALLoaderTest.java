@@ -94,7 +94,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     public void testInitGDAL() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
-            TEST_GDAL_LOADER.initGDAL();
+            GDALLoader.ensureGDALInitialised();
             assertTrue(Files.exists(getExpectedNativeLibrariesRootFolderPath()));
             assertTrue(GDALInstallInfo.INSTANCE.isPresent());
             assertNotNull(GDAL.open(testFilePath.toString(), GDALConst.gaReadonly()));
@@ -107,7 +107,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     public void testGetGDALVersionLoader() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
-            TEST_GDAL_LOADER.initGDAL();
+            GDALLoader.ensureGDALInitialised();
             final URLClassLoader expectedURLClassLoader = getExpectedGDALVersionLoader();
             assertArrayEquals(expectedURLClassLoader.getURLs(), TEST_GDAL_LOADER.getGDALVersionLoader().getURLs());
             assertEquals(expectedURLClassLoader.getParent(), TEST_GDAL_LOADER.getGDALVersionLoader().getParent());
@@ -120,7 +120,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     public void testGetGDALDataType() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
-            TEST_GDAL_LOADER.initGDAL();
+            GDALLoader.ensureGDALInitialised();
             assertEquals(getExpectedGDALDataType(ProductData.TYPE_INT8), TEST_GDAL_LOADER.getGDALDataType(ProductData.TYPE_INT8));
             assertEquals(getExpectedGDALDataType(ProductData.TYPE_UINT8), TEST_GDAL_LOADER.getGDALDataType(ProductData.TYPE_UINT8));
             assertEquals(getExpectedGDALDataType(ProductData.TYPE_INT16), TEST_GDAL_LOADER.getGDALDataType(ProductData.TYPE_INT16));
@@ -137,7 +137,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     @Test
     public void testGetBandDataType() {
         assertNotNull(TEST_GDAL_LOADER);
-        TEST_GDAL_LOADER.initGDAL();
+        GDALLoader.ensureGDALInitialised();
         assertEquals(getExpectedBandDataType(GDALConstConstants.gdtByte()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtByte()));
         assertEquals(getExpectedBandDataType(GDALConstConstants.gdtInt16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtInt16()));
         assertEquals(getExpectedBandDataType(GDALConstConstants.gdtUint16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtUint16()));
@@ -150,7 +150,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     @Test
     public void testGetGDALVersion() {
         assertNotNull(TEST_GDAL_LOADER);
-        TEST_GDAL_LOADER.initGDAL();
+        GDALLoader.ensureGDALInitialised();
         assertEquals(TEST_GDAL_VERSION, TEST_GDAL_LOADER.getGdalVersion());
     }
 

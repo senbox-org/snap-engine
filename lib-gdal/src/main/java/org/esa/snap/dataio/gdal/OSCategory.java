@@ -126,7 +126,7 @@ public enum OSCategory {
                 return executableLocations;
             }
         } catch (IOException ignored) {
-            logger.log(Level.INFO, () -> executableName + " not found");
+            logger.log(Level.WARNING, () -> executableName + " not found");
         }
         return new String[0];
     }
