@@ -63,7 +63,7 @@ public class GDALInstallInfoTest {
 
     @Test
     public void testSetListener() {
-        MockGDALWriterPlugInListener mockGDALWriterPlugInListener = new MockGDALWriterPlugInListener();
+        final MockGDALWriterPlugInListener mockGDALWriterPlugInListener = new MockGDALWriterPlugInListener();
         TEST_INSTANCE.setLocations(Paths.get(VALID_BIN_LOCATION));
         TEST_INSTANCE.setListener(mockGDALWriterPlugInListener);
         assertEquals(CONTROL_STATE, mockGDALWriterPlugInListener.getState());

@@ -28,7 +28,7 @@ public class GDALDistributionInstallerTest {
                 });
 
             }
-            try (Stream<Path> sp = Files.list(target)) {
+            try (final Stream<Path> sp = Files.list(target)) {
                 if (!sp.findAny().isPresent()) {
                     Files.delete(target);
                 }

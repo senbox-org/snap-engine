@@ -17,7 +17,7 @@ public class GDALInstallerTest {
 
     private void deleteFTree(Path target) throws IOException {
         if (Files.isDirectory(target)) {
-            try (Stream<Path> sp = Files.list(target)) {
+            try (final Stream<Path> sp = Files.list(target)) {
                 sp.forEach(target1 -> {
                     try {
                         deleteFTree(target1);
@@ -26,7 +26,7 @@ public class GDALInstallerTest {
                     }
                 });
             }
-            try (Stream<Path> sp = Files.list(target)) {
+            try (final Stream<Path> sp = Files.list(target)) {
                 if (!sp.findAny().isPresent()) {
                     Files.delete(target);
                 }
@@ -73,7 +73,8 @@ public class GDALInstallerTest {
             final GDALVersion gdalVersion = GDALVersion.GDAL_321_FULL;
             final Path nativeLibrariesRootFolderPath = GDALVersionTest.getExpectedNativeLibrariesRootFolderPath();
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
-            assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), new GDALInstaller().copyDistribution(nativeLibrariesRootFolderPath, gdalVersion));
+            assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
+            new GDALInstaller(nativeLibrariesRootFolderPath).copyDistribution(gdalVersion);
             assertTrue(Files.exists(nativeLibrariesRootFolderPath));
             assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
             assertTrue(System.getProperty(JAVA_LIB_PATH).contains(nativeLibrariesRootFolderPath.toString()));

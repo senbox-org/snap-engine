@@ -13,7 +13,7 @@ public class EnvironmentVariables {
      * @param dir the target directory path
      */
     public static void changeCurrentDirectory(String dir) {
-        int result = EnvironmentVariablesNative.chdir(dir);
+        final int result = EnvironmentVariablesNative.chdir(dir);
         if (result != 0) {
             throw new IllegalStateException("Unable to set change the current directory: " + result);
         }
@@ -44,7 +44,7 @@ public class EnvironmentVariables {
      * @param keyEqualValue the key=value environment variable
      */
     public static void setEnvironmentVariable(String keyEqualValue) {
-        int result = EnvironmentVariablesNative.putenv(keyEqualValue);
+        final int result = EnvironmentVariablesNative.putenv(keyEqualValue);
         if (result != 0) {
             throw new IllegalStateException("Unable to set environment variable: " + result);
         }

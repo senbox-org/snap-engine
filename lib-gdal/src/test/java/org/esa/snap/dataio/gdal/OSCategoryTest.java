@@ -48,6 +48,13 @@ public class OSCategoryTest {
     }
 
     @Test
+    public void testGetOSSpecificEnvironmentVariablesFileName() {
+        final OSCategory osCategory = OSCategory.getOSCategory();
+        assertNotNull(osCategory);
+        assertEquals(System.mapLibraryName(ENV_NAME), osCategory.getOSSpecificEnvironmentVariablesFileName());
+    }
+
+    @Test
     public void testGetOperatingSystemName() {
         final OSCategory osCategory = OSCategory.getOSCategory();
         assertNotNull(osCategory);

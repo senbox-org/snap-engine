@@ -18,14 +18,12 @@
 package org.esa.snap.dataio.gdal;
 
 import org.esa.lib.gdal.activator.GDALInstallInfo;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
-import org.esa.snap.core.datamodel.ProductData;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -82,8 +80,7 @@ public final class GDALLoader {
                 this.gdalVersion = GDALVersion.getGDALVersion();
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
                 this.gdalVersionLoader = new URLClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());
-                Path gdalDistributionBinFolderPath = Paths.get(this.gdalVersion.getLocation());
-                GDALInstallInfo.INSTANCE.setLocations(gdalDistributionBinFolderPath);
+                GDALInstallInfo.INSTANCE.setLocations(this.gdalVersion.getLocationPath());
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
                 postGDALInit();
@@ -130,7 +127,7 @@ public final class GDALLoader {
      */
     public int getGDALDataType(int bandDataType) {
         ensureGDALInitialised();
-        Integer gdalResult = this.bandToGDALDataTypes.get(bandDataType);
+        final Integer gdalResult = this.bandToGDALDataTypes.get(bandDataType);
         if (gdalResult != null) {
             return gdalResult;
         }
@@ -145,7 +142,7 @@ public final class GDALLoader {
      */
     public int getBandDataType(int gdalDataType) {
         ensureGDALInitialised();
-        for (Map.Entry<Integer, Integer> entry : this.bandToGDALDataTypes.entrySet()) {
+        for (final Map.Entry<Integer, Integer> entry : this.bandToGDALDataTypes.entrySet()) {
             if (entry.getValue() == gdalDataType) {
                 return entry.getKey();
             }

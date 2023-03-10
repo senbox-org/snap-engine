@@ -72,9 +72,8 @@ public class GDALDriverInfo {
      */
     public boolean canExportProduct(int gdalDataType) {
         boolean allowedDataType = true;
-        String gdalDataTypeName = GDAL.getDataTypeName(gdalDataType);
         if (this.creationDataTypes != null) {
-            allowedDataType = this.creationDataTypes.contains(gdalDataTypeName);
+            allowedDataType = this.creationDataTypes.contains(GDAL.getDataTypeName(gdalDataType));
         }
         return allowedDataType;
     }
