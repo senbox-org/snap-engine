@@ -76,7 +76,7 @@ public class GDALVersionTest {
     }
 
     private static String getExpectedDirectory() {
-        OSCategory osCategory = getExpectedOSCategory();
+        final OSCategory osCategory = getExpectedOSCategory();
         return osCategory.getOperatingSystemName() + "/" + osCategory.getArchitecture();
     }
 
@@ -132,7 +132,7 @@ public class GDALVersionTest {
     }
 
     static String getExpectedEnvironmentVariablesFileName() {
-        return System.mapLibraryName(getExpectedOSCategory().getEnvironmentVariablesFileName());
+        return getExpectedOSCategory().getOSSpecificEnvironmentVariablesFileName();
     }
 
     private static String getExpectedEnvironmentVariablesDirectory() {

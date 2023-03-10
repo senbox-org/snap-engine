@@ -29,9 +29,9 @@ public enum OSCategory {
 
     private static final OSCategory osCategory = retrieveOSCategory();
 
-    private String operatingSystemName;
-    private String architecture;
-    private String findExecutableLocationCmd;
+    private final String operatingSystemName;
+    private final String architecture;
+    private final String findExecutableLocationCmd;
 
     /**
      * Creates new instance for this enum.
@@ -90,6 +90,15 @@ public enum OSCategory {
     }
 
     /**
+     * Gets the OS specific environment variable native library file name for runtime update of OS environment variables.
+     *
+     * @return  the environment variable native library file name
+     */
+    public String getOSSpecificEnvironmentVariablesFileName() {
+        return System.mapLibraryName(getEnvironmentVariablesFileName());
+    }
+
+    /**
      * Gets the name of OS.
      *
      * @return the name of OS
@@ -114,12 +123,12 @@ public enum OSCategory {
      * @return the absolute location of executable
      */
     public String[] getExecutableLocations(String executableName) {
-        try (java.util.Scanner s = new java.util.Scanner(Runtime.getRuntime().exec(this.findExecutableLocationCmd + " " + executableName).getInputStream()).useDelimiter("\\A")) {
-            String executableFilePath = s.hasNext() ? s.next() : "";
+        try (final java.util.Scanner executableOutput = new java.util.Scanner(Runtime.getRuntime().exec(this.findExecutableLocationCmd + " " + executableName).getInputStream()).useDelimiter("\\A")) {
+            String executableFilePath = executableOutput.hasNext() ? executableOutput.next() : "";
             executableFilePath = executableFilePath.replaceAll("\\r?\\n", File.pathSeparator);
             if (!executableFilePath.isEmpty()) {
-                String[] executableFilePaths = executableFilePath.split(File.pathSeparator);
-                String[] executableLocations = new String[executableFilePaths.length];
+                final String[] executableFilePaths = executableFilePath.split(File.pathSeparator);
+                final String[] executableLocations = new String[executableFilePaths.length];
                 for (int i = 0; i < executableFilePaths.length; i++) {
                     executableLocations[i] = Paths.get(executableFilePaths[i]).getParent().toString();
                 }

@@ -32,9 +32,9 @@ public class GDALInstallInfo {
     public synchronized void setLocations(Path binLocation) {
         this.binLocation = binLocation;
         try {
-            Config config = Config.instance(CONFIG_NAME);
+            final Config config = Config.instance(CONFIG_NAME);
             config.load();
-            Preferences preferences = config.preferences();
+            final Preferences preferences = config.preferences();
             preferences.put("gdal.apps.path", this.binLocation.toString());
             preferences.flush();
         } catch (BackingStoreException exception) {

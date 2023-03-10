@@ -17,7 +17,7 @@ public class AbstractGDALTest {
     protected Path libGDALTestsFolderPath;
 
     private static boolean testDataAvailable() {
-        String testDataDir = System.getProperty(PROPERTY_NAME_DATA_DIR);
+        final String testDataDir = System.getProperty(PROPERTY_NAME_DATA_DIR);
         return (testDataDir != null) && !testDataDir.isEmpty() && Files.exists(Paths.get(testDataDir));
     }
 
