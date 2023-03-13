@@ -30,7 +30,7 @@ public class Jp2XmlMetadataTest {
     }
 
     @Test
-    public void testJp2XmlMetadata() throws URISyntaxException, IOException, InterruptedException {
+    public void testJp2XmlMetadata_usual_use_case() throws URISyntaxException, IOException, InterruptedException {
         URL resource = getClass().getResource("S2_subset_sample.jp2");
         XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
         assertNotNull(resource);
@@ -53,5 +53,31 @@ public class Jp2XmlMetadataTest {
         assertEquals(60.0, metadataHeader.getStepX(), 0);
         assertEquals(-60.0, metadataHeader.getStepY(), 0);
         assertEquals("EPSG::32639", metadataHeader.getCrsGeocoding());
+    }
+
+    @Test
+    public void testJp2XmlMetadata_epsg_4326_y_x_axis_use_case() throws URISyntaxException, IOException, InterruptedException {
+        URL resource = getClass().getResource("subset_epsg_4326_axis_order_y_x_300.jp2");
+        XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
+        assertNotNull(resource);
+        File productFile = new File(resource.toURI());
+
+        OpjDumpFile opjDumpFile = new OpjDumpFile();
+        if (OpenJpegUtils.canReadJP2FileHeaderWithOpenJPEG()) {
+            if (!validateOpenJpegExecutables(OpenJpegExecRetriever.getOpjDump(), OpenJpegExecRetriever.getOpjDecompress())) {
+                throw new IOException("Invalid OpenJpeg executables");
+            }
+
+            opjDumpFile.readHeaderWithOpenJPEG(productFile.toPath());
+        } else {
+            opjDumpFile.readHeaderWithInputStream(productFile.toPath(), 5 * 1024, true);
+        }
+        Jp2XmlMetadata metadataHeader = opjDumpFile.getMetadata();
+
+        assertEquals(true, metadataHeader.isReversedAxisOrder());
+        assertEquals(new Point2D.Double(23.2762476851856, 42.7836736111107), metadataHeader.getOrigin());
+        assertEquals(4.62962963E-6, metadataHeader.getStepX(), 0);
+        assertEquals(-4.62962963E-6, metadataHeader.getStepY(), 0);
+        assertEquals("EPSG::4326", metadataHeader.getCrsGeocoding());
     }
 }
