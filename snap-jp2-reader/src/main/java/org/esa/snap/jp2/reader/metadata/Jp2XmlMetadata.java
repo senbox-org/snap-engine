@@ -145,14 +145,9 @@ public class Jp2XmlMetadata extends XmlMetadata {
         String coords = getAttributeValue(JP2ProductReaderConstants.TAG_ORIGIN, null);
         if (coords != null) {
             final String[] result = Arrays.stream(coords.split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
-            if (!isReversedAxisOrder()) {
-                // the usual order
-                origin = new Point2D.Double(Double.parseDouble(result[0]), Double.parseDouble(result[1]));
-            }
-            else {
-                // reversed order
-                origin = new Point2D.Double(Double.parseDouble(result[1]), Double.parseDouble(result[0]));
-            }
+            final String x = !isReversedAxisOrder() ? result[0] : result[1];
+            final String y = !isReversedAxisOrder() ? result[1] : result[0];
+            origin = new Point2D.Double(Double.parseDouble(x), Double.parseDouble(y));
         }
         return origin;
     }
