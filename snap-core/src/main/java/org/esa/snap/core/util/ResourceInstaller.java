@@ -51,6 +51,8 @@ public class ResourceInstaller {
     private final Path sourceBasePath;
     private final Path targetDirPath;
 
+    private boolean keepExistingResource = false;
+
     /**
      * Creates an instance with a given source to a given target.
      *
@@ -122,6 +124,11 @@ public class ResourceInstaller {
         if (!Files.exists(targetFile)) {
             return true;
         }
+
+        if (Files.exists(targetFile) && isKeepExistingResource()) {
+            return false;
+        }
+
         final Path realTargetFile = targetFile.toRealPath();
         final Path realResource = resource.toRealPath();
         final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource) && Files.size(realResource) != 0;
@@ -175,4 +182,11 @@ public class ResourceInstaller {
         }
     }
 
+    public boolean isKeepExistingResource() {
+        return keepExistingResource;
+    }
+
+    public void setKeepExistingResource(boolean keepExistingResource) {
+        this.keepExistingResource = keepExistingResource;
+    }
 }
