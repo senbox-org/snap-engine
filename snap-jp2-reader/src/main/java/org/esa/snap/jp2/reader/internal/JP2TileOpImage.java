@@ -127,7 +127,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
         int dataType = getSampleModel().getDataType();
         try (OpenJP2Decoder decoder = new OpenJP2Decoder(localCacheFolder, localImageFile, this.bandSource.getBandIndex(), dataType, level, LAYER, this.decompressTileIndex)) {
             Dimension levelDecompressedImageSize = decoder.getImageDimensions(); // the whole image size from the specified level
-            if(decoder.getBandNumber()>4 || this.useOpenJp2Jna) {
+            if(decoder.getBandNumber() > 4 || this.useOpenJp2Jna) {
                 Rectangle intersection = computeLevelDirectIntersection(level, levelDecompressedImageSize.width, levelDecompressedImageSize.height, levelDestinationRectangle);
                 if (!intersection.isEmpty()) {
                     Raster readTileImage = decoder.read(intersection);

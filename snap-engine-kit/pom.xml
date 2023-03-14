@@ -107,6 +107,11 @@
             <artifactId>lib-openjpeg</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>lib-gdal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Engine Extension Modules -->
         <dependency>
