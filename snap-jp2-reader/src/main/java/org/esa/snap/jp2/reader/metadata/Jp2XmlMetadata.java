@@ -148,6 +148,13 @@ public class Jp2XmlMetadata extends XmlMetadata {
             else {
                 origin = new Point2D.Double(Double.parseDouble(result[1]), Double.parseDouble(result[0]));
             }
+            // According to https://docs.opengeospatial.org/is/08-085r4/08-085r4.html section 7.5 Coordinate reference systems:
+            // GMLJP2 follows the definition of grids in GML 3.2.1 [OGC 07-036] clause 19.2.2:
+            // “When a grid point is used to represent a sample space (e.g. image pixel), the grid point represents
+            // the center of the sample space (see ISO 19123:2005, 8.2.2)”.
+            // This corresponds with the pixelInCell value of ImageCRS set to CellCenter as specified in ISO 19111.
+            // This can be interpreted as the origin of the RectifiedGrid is the centre point of the corner pixel.
+            origin.setLocation(origin.getX() - getStepX() / 2, origin.getY() - getStepY() / 2);
         }
         return origin;
     }

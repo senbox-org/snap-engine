@@ -358,46 +358,48 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
     }
 
     private static int computeUncompressedTileCount(int imageSize, int tileSize) {
-        int tileCount = ImageUtils.computeTileCount(imageSize, tileSize);
+        /*int tileCount = ImageUtils.computeTileCount(imageSize, tileSize);
         if (tileCount > 1) {
             int lastTileOffsetY = (tileCount - 1) * tileSize;
             int lastTileHeight = imageSize - lastTileOffsetY;
-            if (lastTileHeight <= (0.5f * tileSize)) {
+            //if (lastTileHeight <= (0.5f * tileSize)) {
+            if (lastTileHeight <= (tileSize >> 1)) {
                 tileCount--;
             }
         }
-        return tileCount;
+        return tileCount;*/
+        return Math.round(imageSize / (float) tileSize);
     }
 
     protected static int computeTopLeftDecompressedTileHeight(Rectangle imageCellReadBounds, int decompressedTileHeight) {
         int startTileRowIndex = imageCellReadBounds.y / decompressedTileHeight;
         int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
-        int tileRowIndex = startTileRowIndex;
         int currentImageTileTopY = imageCellReadBounds.y;
-        return computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
+        return computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, startTileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompressedTileHeight);
     }
 
     protected static int computeTopLeftDecompressedTileWidth(Rectangle imageCellReadBounds, int decompressedTileWidth) {
         int startTileColumnIndex = imageCellReadBounds.x / decompressedTileWidth;
         int endTileColumnIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
-        int tileColumnIndex = startTileColumnIndex;
         int currentImageTileLeftX = imageCellReadBounds.x;
-        return computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
+        return computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, startTileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompressedTileWidth);
     }
 
     protected static int computeTopLeftUncompressedTileWidth(Rectangle imageCellReadBounds, int uncompressedTileWidth) {
         int columnTileCount = computeUncompressedTileCount(imageCellReadBounds.width, uncompressedTileWidth);
-        int tileColumnIndex = 0;
+        /*int tileColumnIndex = 0;
         int tileOffsetFromReadBoundsX = tileColumnIndex * uncompressedTileWidth;
         boolean isLastColumn = (tileColumnIndex == columnTileCount - 1);
-        return isLastColumn ? (imageCellReadBounds.width - tileOffsetFromReadBoundsX) : uncompressedTileWidth;
+        return isLastColumn ? (imageCellReadBounds.width - tileOffsetFromReadBoundsX) : uncompressedTileWidth;*/
+        return columnTileCount == 1 ? imageCellReadBounds.width : uncompressedTileWidth;
     }
 
     protected static int computeTopLeftUncompressedTileHeight(Rectangle imageCellReadBounds, int uncompressedTileHeight) {
         int rowTileCount = computeUncompressedTileCount(imageCellReadBounds.height, uncompressedTileHeight);
-        int tileRowIndex = 0;
+        /*int tileRowIndex = 0;
         int tileOffsetFromReadBoundsY = tileRowIndex * uncompressedTileHeight;
         boolean isLastRow = (tileRowIndex == rowTileCount - 1);
-        return isLastRow ? (imageCellReadBounds.height - tileOffsetFromReadBoundsY) : uncompressedTileHeight;
+        return isLastRow ? (imageCellReadBounds.height - tileOffsetFromReadBoundsY) : uncompressedTileHeight;*/
+        return rowTileCount == 1 ? imageCellReadBounds.height : uncompressedTileHeight;
     }
 }
