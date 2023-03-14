@@ -75,7 +75,7 @@ import java.util.logging.Logger;
         version="1.0",
         category = "Menu/Tools",
         autoWriteDisabled = true,
-        description = "The Remote Execution Processor executes on the remote machines a slave graph and then on the host machine it executes a master graph using the products created by the remote machines.",
+        description = "Executes a slave graph on a remote machine and uses the resulted products as an input for the master graph executed on the host machine.",
         authors = "Jean Coravu",
         copyright = "Copyright (C) 2018 by CS ROMANIA")
 public class RemoteExecutionOp extends Operator {
