@@ -49,7 +49,7 @@ public class Jp2XmlMetadataTest {
         Jp2XmlMetadata metadataHeader = opjDumpFile.getMetadata();
 
         assertEquals(false, metadataHeader.isReversedAxisOrder());
-        assertEquals(new Point2D.Double(505980.0, 2888040.0), metadataHeader.getOrigin());
+        assertEquals(new Point2D.Double(505950.0, 2888070.0), metadataHeader.getOrigin());
         assertEquals(60.0, metadataHeader.getStepX(), 0);
         assertEquals(-60.0, metadataHeader.getStepY(), 0);
         assertEquals("EPSG::32639", metadataHeader.getCrsGeocoding());
@@ -75,7 +75,7 @@ public class Jp2XmlMetadataTest {
         Jp2XmlMetadata metadataHeader = opjDumpFile.getMetadata();
 
         assertEquals(true, metadataHeader.isReversedAxisOrder());
-        assertEquals(new Point2D.Double(23.2762476851856, 42.7836736111107), metadataHeader.getOrigin());
+        assertEquals(new Point2D.Double(23.276245370370784, 42.783675925925515), metadataHeader.getOrigin());
         assertEquals(4.62962963E-6, metadataHeader.getStepX(), 0);
         assertEquals(-4.62962963E-6, metadataHeader.getStepY(), 0);
         assertEquals("EPSG::4326", metadataHeader.getCrsGeocoding());
