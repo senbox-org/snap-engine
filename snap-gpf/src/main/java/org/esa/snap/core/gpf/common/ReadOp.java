@@ -40,7 +40,7 @@ import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 import org.locationtech.jts.geom.Geometry;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -86,14 +86,14 @@ public class ReadOp extends Operator {
 
     @Parameter(converter = RectangleConverter.class,
             description = "The subset region in pixel coordinates.\n" +
-                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "Use the following format: {x>,{y>,{width>,{height>\n" +
                     "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
     private Rectangle pixelRegion;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
-                    "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
-                    "(make sure to quote the option due to spaces in <geometry>).\n" +
+                    "e.g. POLYGON(({lon1} {lat1}, {lon2} {lat2}, ..., {lon1} {lat1}))\n" +
+                    "(make sure to quote the option due to spaces in {geometry}).\n" +
                     "If not given, the entire scene is used.")
     private Geometry geometryRegion;
 
