@@ -34,8 +34,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.*;
 
 public class DimapDiscontinuity_ReadAndWriteTest {
 
@@ -57,7 +57,7 @@ public class DimapDiscontinuity_ReadAndWriteTest {
         product.addTiePointGrid(new TiePointGrid("dis360", 10, 15, .5f, .5f, 2, 2, data0to360, TiePointGrid.DISCONT_AT_360));
         writerPlugin = new DimapProductWriterPlugIn();
         readerPlugIn = new DimapProductReaderPlugIn();
-        outDir = GlobalTestConfig.getSnapTestDataOutputDirectory();
+        outDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), this.getClass().getSimpleName());
     }
 
     @After
