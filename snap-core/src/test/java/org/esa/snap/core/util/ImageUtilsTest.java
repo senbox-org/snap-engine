@@ -37,6 +37,43 @@ public class ImageUtilsTest {
        testDouble();
     }
 
+    @Test
+    public void testComputeTileCount() {
+        assertEquals(ImageUtils.computeTileCount(1021,256),computeTileCountPrevImpl(1021,256));
+        assertEquals(ImageUtils.computeTileCount(1024,256),computeTileCountPrevImpl(1024,256));
+        assertEquals(ImageUtils.computeTileCount(1027,256),computeTileCountPrevImpl(1027,256));
+    }
+
+    @Test
+    public void testComputeLevelSizeAsDouble() {
+        assertEquals(ImageUtils.computeLevelSizeAsDouble(1021,2),computeLevelSizeAsDoublePrevImpl(1021,2), 0.01);
+        assertEquals(ImageUtils.computeLevelSizeAsDouble(1024,2),computeLevelSizeAsDoublePrevImpl(1024,2),0.01);
+        assertEquals(ImageUtils.computeLevelSizeAsDouble(1027,2),computeLevelSizeAsDoublePrevImpl(1027,2),0.01);
+    }
+
+    @Test
+    public void testComputeLevelSize() {
+        assertEquals(ImageUtils.computeLevelSize(1021,2),computeLevelSizePrevImpl(1021,2));
+        assertEquals(ImageUtils.computeLevelSize(1024,2),computeLevelSizePrevImpl(1024,2));
+        assertEquals(ImageUtils.computeLevelSize(1027,2),computeLevelSizePrevImpl(1027,2));
+    }
+
+    public static int computeTileCountPrevImpl(int imageSize, int tileSize) {
+        int tileCount = imageSize / tileSize;
+        if (imageSize % tileSize != 0) {
+            tileCount++;
+        }
+        return tileCount;
+    }
+
+    public static double computeLevelSizeAsDoublePrevImpl(int sourceSize, int level) {
+        return sourceSize / Math.pow(2, level);
+    }
+
+    public static int computeLevelSizePrevImpl(int sourceSize, int level) {
+        return (int) Math.ceil(computeLevelSizeAsDoublePrevImpl(sourceSize, level));
+    }
+
     private void testByte() {
         final RenderedImage image = createImage(ProductData.TYPE_UINT8, DataBuffer.TYPE_BYTE,
                                                 new byte[]{12, 23, 34, 45});

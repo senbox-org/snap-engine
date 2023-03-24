@@ -24,21 +24,12 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
-import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureIterator;
-import org.geotools.feature.FeatureTypes;
-import org.geotools.feature.SchemaException;
+import org.geotools.feature.*;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.TopologyException;
+import org.locationtech.jts.geom.*;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
@@ -65,12 +56,12 @@ public class FeatureUtils {
         FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = getFeatureSource(url);
         FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = featureSource.getFeatures();
         return clipCollection(featureCollection,
-                              DefaultGeographicCRS.WGS84,
-                              clipGeometry,
-                              DefaultGeographicCRS.WGS84,
-                              null,
-                              targetCrs,
-                              ProgressMonitor.NULL);
+                DefaultGeographicCRS.WGS84,
+                clipGeometry,
+                DefaultGeographicCRS.WGS84,
+                null,
+                targetCrs,
+                ProgressMonitor.NULL);
     }
 
     public static FeatureSource<SimpleFeatureType, SimpleFeature> getFeatureSource(URL url) throws IOException {
@@ -107,12 +98,12 @@ public class FeatureUtils {
             featureCrs = crsProvider.getFeatureCrs(product);
         }
         return FeatureUtils.clipCollection(featureCollection,
-                                           featureCrs,
-                                           clipGeometry,
-                                           DefaultGeographicCRS.WGS84,
-                                           null,
-                                           targetCrs,
-                                           SubProgressMonitor.create(pm, 80));
+                featureCrs,
+                clipGeometry,
+                DefaultGeographicCRS.WGS84,
+                null,
+                targetCrs,
+                SubProgressMonitor.create(pm, 80));
     }
 
     public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(File shapefile) throws IOException {
@@ -213,14 +204,21 @@ public class FeatureUtils {
                     Geometry clippedSourceGeometry;
                     try {
                         Geometry sourceGeometry = (Geometry) sourceFeature.getDefaultGeometry();
+
+                        if (!sourceGeometry.isValid()) {
+                            sourceGeometry = makeValid(sourceGeometry);
+                        }
+                        if (!clipGeometry.isValid()) {
+                            clipGeometry = makeValid(clipGeometry);
+                        }
                         clippedSourceGeometry = getClippedGeometry(sourceGeometry, clipGeometry);
-                    } catch (TopologyException ignored) {
-                        continue;
+                    } catch (TopologyException e) {
+                        throw new IllegalStateException(e);
                     }
 
                     if (!clippedSourceGeometry.isEmpty()) {
                         SimpleFeature targetFeature = createTargetFeature(clippedSourceGeometry, targetSchema,
-                                                                          sourceFeature, source2TargetTransformer);
+                                sourceFeature, source2TargetTransformer);
                         if (targetFeature != null) {
                             targetCollection.add(targetFeature);
                         }
@@ -232,6 +230,12 @@ public class FeatureUtils {
         } finally {
             pm.done();
         }
+
+    }
+
+    private static Geometry makeValid(Geometry geometry) {
+        // In many cases, by reducing the distance we can get rid of "TopologyException: side location conflict"
+        return geometry.buffer(0);
     }
 
     private static SimpleFeature createTargetFeature(Geometry sourceGeometry, SimpleFeatureType targetSchema,
@@ -283,9 +287,9 @@ public class FeatureUtils {
 
     public static Geometry createGeoBoundaryPolygon(Product product) {
         GeometryFactory gf = new GeometryFactory();
-        GeoPos[] geoPositions = ProductUtils.createGeoBoundary(product, 100);
+        GeoPos[] geoPositions = GeoUtils.createGeoBoundary(product, 100);
         Coordinate[] coordinates;
-        if (geoPositions.length >= 0 && geoPositions.length <= 3) {
+        if (geoPositions.length <= 3) {
             coordinates = new Coordinate[0];
         } else {
             coordinates = new Coordinate[geoPositions.length + 1];

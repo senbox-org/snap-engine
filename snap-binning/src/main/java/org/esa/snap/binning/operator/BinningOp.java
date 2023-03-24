@@ -218,7 +218,7 @@ public class BinningOp extends Operator {
     private ProductCustomizerConfig productCustomizerConfig;
 
     @Parameter(description = "If true, a SeaDAS-style, binned data NetCDF file is written in addition to the\n" +
-                             "target product. The output file name will be <target>-bins.nc",
+            "target product. The output file name will be {target}-bins.nc",
             defaultValue = "false")
     private boolean outputBinnedData;
 
