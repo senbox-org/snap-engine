@@ -166,7 +166,7 @@ public class StringUtils {
      * @throws IllegalArgumentException if one of the arguments was null
      * @see #join(Object[], String)
      */
-    public static String join(List<Object> tokens, String separator) {
+    public static String join(List<? extends Object> tokens, String separator) {
         if (tokens == null) {
             throw new IllegalArgumentException(UtilConstants.MSG_NULL_TOKEN);
         }
