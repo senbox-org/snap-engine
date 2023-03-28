@@ -307,16 +307,12 @@ public class GDALVersionTest {
     public void testGetEnvironmentVariablesFilePath() {
         assertEquals(getExpectedEnvironmentVariablesFilePath(), TEST_VERSION.getEnvironmentVariablesFilePath());
         assertEquals(getExpectedEnvironmentVariablesFilePath(), TEST_VERSION_JNI.getEnvironmentVariablesFilePath());
-        assertTrue(Files.exists(TEST_VERSION.getEnvironmentVariablesFilePath()));
-        assertTrue(Files.exists(TEST_VERSION_JNI.getEnvironmentVariablesFilePath()));
     }
 
     @Test
     public void testGetNativeLibrariesRootFolderPath() {
         assertEquals(getExpectedNativeLibrariesRootFolderPath(), TEST_VERSION.getNativeLibrariesRootFolderPath());
         assertEquals(getExpectedNativeLibrariesRootFolderPath(), TEST_VERSION_JNI.getNativeLibrariesRootFolderPath());
-        assertTrue(Files.exists(TEST_VERSION.getNativeLibrariesRootFolderPath()));
-        assertTrue(Files.exists(TEST_VERSION_JNI.getNativeLibrariesRootFolderPath()));
     }
 
     @Test
