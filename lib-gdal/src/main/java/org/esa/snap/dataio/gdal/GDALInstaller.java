@@ -71,7 +71,7 @@ class GDALInstaller {
                     try {
                         fixUpPermissions(path);
                     } catch (IOException e) {
-                        logger.log(Level.SEVERE, "GDAL configuration error: failed to fix permissions on " + path, e);
+                        logger.log(Level.SEVERE, "GDAL configuration error: failed to fix permissions on " + path);
                     }
                 } else {
                     setExecutablePermissions(path);
@@ -99,7 +99,7 @@ class GDALInstaller {
             } catch (IOException e) {
                 // can't set the permissions for this file, eg. the file was installed as root
                 // send a warning message, user will have to do that by hand.
-                logger.log(Level.SEVERE, "Can't set execution permissions for executable " + executablePathName + ". If required, please ask an authorised user to make the file executable.", e);
+                logger.log(Level.SEVERE, "Can't set execution permissions for executable " + executablePathName + ". If required, please ask an authorised user to make the file executable.");
             }
         }
     }
