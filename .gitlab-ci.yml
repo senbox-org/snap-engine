@@ -1,0 +1,3 @@
+# included templates
+include:
+  - 'https://gitlab.com/senbox-org/snap-engine/raw/master/.gitlab-ci.yml'
