@@ -151,11 +151,16 @@ class GDALInstaller {
             final String fragment = tok.nextToken();
             if (expectingNumber) {
                 expectingNumber = false;
-                final int piece = Integer.parseInt(fragment);
-                if (piece < 0) {
-                    throw new NumberFormatException("Spec version component '" + piece + "' is negative.");
+                try {
+                    final int piece = Integer.parseInt(fragment);
+                    if (piece < 0) {
+                        throw new NumberFormatException("Spec version component '" + piece + "' is negative.");
+                    }
+                    digits[index++] = piece;
+                } catch (NumberFormatException _) {
+                    // be robust against non-numeric version strings
+                    digits[index++] = 0;
                 }
-                digits[index++] = piece;
             } else {
                 if (!".".equals(fragment)) {
                     throw new NumberFormatException("Expected dot in version '" + version + "'.");
