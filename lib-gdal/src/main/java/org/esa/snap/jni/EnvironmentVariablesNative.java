@@ -9,7 +9,13 @@ public class EnvironmentVariablesNative {
 
     static {
         //Loads the native library used by this JNI
-        System.loadLibrary("environment-variables");
+        try {
+            // For an unknown reason with loadLibrary, afterwards using the lib fails on Calvalus.
+            // We do not need to distinguish OS here. The second is fine for all but Unix on Calvalus.
+            System.load(System.getProperty("user.dir") + "/libenvironment-variables.so");
+        } catch (Exception _) {
+            System.loadLibrary("environment-variables");
+        }
     }
 
     public static native int chdir(String dir);
