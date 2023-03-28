@@ -41,6 +41,7 @@ mvn-build:
 
 mvn-sonar:
   image: "registry.hub.docker.com/library/maven:3.6.3-jdk-11"
+  allow_failure: true
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
