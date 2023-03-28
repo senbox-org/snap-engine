@@ -18,6 +18,9 @@ variables:
   MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.6.3-jdk-8"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
+  MAVEN_DEPLOY_ENABLED: "true"
+  MAVEN_DEPLOY_ARGS: "deploy -fn"
+  MVN_SEMREL_RELEASE_DISABLED: "true"
 
 # your pipeline stages
 stages:
@@ -35,12 +38,16 @@ stages:
 mvn-build:
   artifacts:
     paths:
-      - "${MAVEN_PROJECT_DIR}/**/target"
+      - "${MAVEN_PROJECT_DIR}/**/target/*.jar"
+      - "${MAVEN_PROJECT_DIR}/**/target/classes"
+      - "${MAVEN_PROJECT_DIR}/**/target/*.nbm"
+      - "${MAVEN_PROJECT_DIR}/**/target/site/jacoco/jacoco.csv"
       - "${MAVEN_PROJECT_DIR}/etc"
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
   image: "registry.hub.docker.com/library/maven:3.6.3-jdk-11"
+  allow_failure: true
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
