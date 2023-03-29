@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -7,14 +9,14 @@ import java.nio.ByteBuffer;
  *
  * @author Adrian Drăghici
  */
-public class Band {
+public class Band implements Closeable {
 
     /**
      * The name of JNI GDAL Band class
      */
     private static final String CLASS_NAME = "org.gdal.gdal.Band";
 
-    private Object jniBandInstance;
+    private final Object jniBandInstance;
 
     /**
      * Creates new instance for this driver
@@ -291,5 +293,10 @@ public class Band {
      */
     public Integer writeRaster(int xoff, int yoff, int xsize, int ysize, int bufType, double[] array) {
         return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "WriteRaster", Integer.class, this.jniBandInstance, new Class[]{int.class, int.class, int.class, int.class, int.class, double[].class}, new Object[]{xoff, yoff, xsize, ysize, bufType, array});
+    }
+
+    @Override
+    public void close() throws IOException {
+        delete();
     }
 }
