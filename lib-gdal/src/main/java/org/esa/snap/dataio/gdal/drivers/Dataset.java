@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -8,14 +10,14 @@ import java.util.Vector;
  *
  * @author Adrian Drăghici
  */
-public class Dataset {
+public class Dataset implements Closeable {
 
     /**
      * The name of JNI GDAL Dataset class
      */
     private static final String CLASS_NAME = "org.gdal.gdal.Dataset";
 
-    private Object jniDatasetInstance;
+    private final Object jniDatasetInstance;
 
     /**
      * Creates new instance for this driver
@@ -183,4 +185,8 @@ public class Dataset {
         return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "SetGeoTransform", Integer.class, this.jniDatasetInstance, new Class[]{double[].class}, new Object[]{gdalGeoTransform});
     }
 
+    @Override
+    public void close() throws IOException {
+        delete();
+    }
 }
