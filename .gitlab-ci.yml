@@ -5,13 +5,12 @@ include:
     ref: "3.3.1"
     file: "templates/gitlab-ci-maven.yml"
 
-
 # secret variables
 # (define the variables below in your GitLab group/project variables)
 # SONAR_TOKEN: SonarQube authentication [token](https://docs.sonarqube.org/latest/user-guide/user-token/) (depends on your authentication method)
 # SONAR_LOGIN: SonarQube login (depends on your authentication method)
 # SONAR_PASSWORD: SonarQube password (depends on your authentication method)
-
+# MVN_SETTINGS_FILE: File variable at Group level. It is the Maven settings.xml file
 
 # variables
 variables:
@@ -21,6 +20,7 @@ variables:
   MAVEN_DEPLOY_ENABLED: "true"
   MAVEN_DEPLOY_ARGS: "deploy -fn"
   MVN_SEMREL_RELEASE_DISABLED: "true"
+  MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
 
 # your pipeline stages
 stages:
