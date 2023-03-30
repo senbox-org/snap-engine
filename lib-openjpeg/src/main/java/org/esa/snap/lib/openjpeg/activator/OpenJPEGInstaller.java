@@ -28,8 +28,9 @@ public class OpenJPEGInstaller {
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
 
         try {
-            resourceInstaller.install(".*", ProgressMonitor.NULL);
-            fixUpPermissions(auxdataDirectory);
+            if (resourceInstaller.installImpl(".*", ProgressMonitor.NULL)) {
+                fixUpPermissions(auxdataDirectory);
+            }
         } catch (IOException e) {
             SystemUtils.LOG.severe("OpenJPEG configuration error: failed to create " + auxdataDirectory);
             return;

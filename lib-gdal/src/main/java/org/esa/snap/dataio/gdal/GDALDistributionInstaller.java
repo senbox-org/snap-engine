@@ -44,7 +44,7 @@ class GDALDistributionInstaller {
             logger.log(Level.FINE, "Install the GDAL library from the distribution on " + osCategory.getOperatingSystemName() + ".");
         }
 
-        new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
+        boolean someFilesInstalled = new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
         if (logger.isLoggable(Level.FINE)) {
@@ -59,7 +59,9 @@ class GDALDistributionInstaller {
             processInstalledWindowsDistribution(gdalDistributionRootFolderPath);
         } else if (org.apache.commons.lang.SystemUtils.IS_OS_LINUX || org.apache.commons.lang.SystemUtils.IS_OS_MAC_OSX) {
             final String currentFolderPath = EnvironmentVariables.getCurrentDirectory();
-            GDALInstaller.fixUpPermissions(gdalDistributionRootFolderPath);
+            if (someFilesInstalled) {
+                GDALInstaller.fixUpPermissions(gdalDistributionRootFolderPath);
+            }
             try {
                 if (logger.isLoggable(Level.FINE)) {
                     logger.log(Level.FINE, "Process the GDAL library on Linux. The current folder is '" + currentFolderPath + "'.");

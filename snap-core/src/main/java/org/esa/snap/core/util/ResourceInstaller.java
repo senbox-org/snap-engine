@@ -73,6 +73,20 @@ public class ResourceInstaller {
      * @see FileSystem#getPathMatcher(String)
      */
     public void install(String patternString, ProgressMonitor pm) throws IOException {
+        installImpl(patternString, pm);
+    }
+    /**
+     * Installs all resources found, matching the given pattern. Existing resources are left as-is
+     * and are not overwritten.
+     *
+     * @param patternString the search pattern. Specifies the pattern and the syntax for searching for resources.
+     *                      The syntax can either be 'glob:' or 'regex:'. If the syntax does not start with one of the syntax
+     *                      identifiers 'regex:' is pre-pended.
+     * @param pm            progress monitor for indicating progress
+     * @return              whether some files have been installed
+     * @see FileSystem#getPathMatcher(String)
+     */
+    public boolean installImpl(String patternString, ProgressMonitor pm) throws IOException {
         if (!patternString.startsWith("glob:") && !patternString.startsWith("regex:")) {
             patternString = "regex:" + patternString;
         }
@@ -81,7 +95,7 @@ public class ResourceInstaller {
         try {
             Collection<Path> resources = collectResources(patternString);
             pm.worked(20);
-            copyResources(resources, new SubProgressMonitor(pm, 80));
+            return copyResources(resources, new SubProgressMonitor(pm, 80));
         } finally {
             pm.done();
         }
@@ -90,8 +104,9 @@ public class ResourceInstaller {
 
 
 
-    private void copyResources(Collection<Path> resources, ProgressMonitor pm) throws IOException {
+    private boolean copyResources(Collection<Path> resources, ProgressMonitor pm) throws IOException {
         synchronized (ResourceInstaller.class) {
+            boolean something_installed = false;
             pm.beginTask("Copying resources...", resources.size());
             try {
                 for (Path resource : resources) {
@@ -109,12 +124,14 @@ public class ResourceInstaller {
                         if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
                             Files.setPosixFilePermissions(targetFile, rwxr_xr_x);
                         }
+                        something_installed = true;
                     }
                     pm.worked(1);
                 }
             } finally {
                 pm.done();
             }
+            return something_installed;
         }
     }
 

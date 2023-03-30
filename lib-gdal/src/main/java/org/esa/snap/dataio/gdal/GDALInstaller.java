@@ -311,9 +311,10 @@ class GDALInstaller {
      * Copies the GDAL distribution/JNI drivers files from distribution package to the target install directory.
      *
      * @param gdalVersion the GDAL version for which files will be installed
+     * @return whether some files have been installed
      * @throws IOException When IO error occurs
      */
-    final void copyDistribution(GDALVersion gdalVersion) throws IOException {
+    final boolean copyDistribution(GDALVersion gdalVersion) throws IOException {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Copy the GDAL distribution to folder '" + gdalNativeLibrariesFolderPath.toString() + "'.");
         }
@@ -368,6 +369,7 @@ class GDALInstaller {
         }
 
         registerEnvironmentVariablesNativeLibrary(gdalVersion);
+        return canCopyGDALDistribution;
     }
 
 }
