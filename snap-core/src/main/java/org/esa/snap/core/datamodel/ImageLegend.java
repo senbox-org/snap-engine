@@ -21,6 +21,7 @@ import org.esa.snap.core.layer.ColorBarLayerType;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.StringUtils;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -28,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT;
 
@@ -41,7 +43,7 @@ import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZ
  * @version $Revision$ $Date$
  */
 // MAY2021 - Daniel Knowles - Major revisions to Color Bar Legend
-    // todo there is extra unused methods and some commented out code which relates so SeaDAS-BEAM code for defining preset colorbar labels based on a bandname lookup, the commented out and unused methods may be useful in implementing that mechanism later if it is desired.
+// todo there is extra unused methods and some commented out code which relates so SeaDAS-BEAM code for defining preset colorbar labels based on a bandname lookup, the commented out and unused methods may be useful in implementing that mechanism later if it is desired.
 
 public class ImageLegend {
 
@@ -822,57 +824,88 @@ public class ImageLegend {
             }
 
         } else if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
-                distributeEvenly();
+            distributeEvenly();
 
         } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
-                if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
-                    // this will initialize the points
-                    distributeEvenly();
-                    colorBarInfos.clear();
-                }
+            if (getCustomLabelValues() == null || getCustomLabelValues().length() == 0) {
+                // this will initialize the points
+                distributeEvenly();
+                colorBarInfos.clear();
+            }
 
-                String addThese = getCustomLabelValues();
+            String addThese = getCustomLabelValues();
 
-                if (addThese != null && addThese.length() > 0) {
-                    String[] formattedValues = addThese.split(",");
+            if (addThese != null && addThese.length() > 0) {
+                String[] formattedValues = addThese.split(",");
+                int index = 0;
+                for (String formattedValue : formattedValues) {
+                    if (formattedValue != null) {
+                        formattedValue.trim();
+                        if (formattedValue.length() > 0 && scalingFactor != 0) {
 
-
-                    for (String formattedValue : formattedValues) {
-                        if (formattedValue != null) {
-                            formattedValue.trim();
-                            if (formattedValue.length() > 0 && scalingFactor != 0) {
-
-                                String[] valueAndString = formattedValue.split(":");
-                                if (valueAndString.length == 2) {
+                            String[] valueAndString = formattedValue.split(":");
+                            if (valueAndString.length == 2) {
+                                formattedValue = valueAndString[1];
+                                try {
                                     value = Double.valueOf(valueAndString[0]) / getScalingFactor();
-                                    formattedValue = valueAndString[1];
-                                } else {
-                                    value = Double.valueOf(formattedValue) / getScalingFactor();
-                                }
-
-
-                                if (imageInfo.isLogScaled()) {
-                                    if (value == min) {
-                                        weight = 0;
-                                    } else if (value == max) {
-                                        weight = 1;
-                                    } else {
-                                        weight = getLinearWeightFromLogValue(value, min, max);
+                                } catch (Exception e) {
+                                    JOptionPane.showMessageDialog(new JOptionPane(), valueAndString[0]  + " is not a valid (numeric) Label Value).",
+                                            "Color Bar Layer Editor Error",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    String addTheseNew = addThese.replace(valueAndString[0] + ":" + formattedValue + ",", "");
+                                    if (addTheseNew.endsWith(valueAndString[0] + ":" + formattedValue)) {
+                                        addThese = addTheseNew.replace("," + valueAndString[0] + ":" +  formattedValue, "");
+                                    } else{
+                                        addThese = addTheseNew;
                                     }
+                                    formattedValues[index] = String.valueOf(min);
+                                    setCustomLabelValues(addThese);
+                                    index ++;
+                                    continue;
+                                }
+//                                    value = Double.valueOf(valueAndString[0]) / getScalingFactor();
+                            } else {
+                                try {
+                                    value = Double.valueOf(formattedValue) / getScalingFactor();
+                                } catch (Exception e) {
+                                    JOptionPane.showMessageDialog(new JOptionPane(), formattedValue  + " is not a valid (numeric) Label Value).",
+                                            "Color Bar Layer Editor Error",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    String addTheseNew = addThese.replace(formattedValue + ",", "");
+                                    if (addTheseNew.endsWith(formattedValue)) {
+                                        addThese = addTheseNew.replace("," + formattedValue, "");
+                                    } else{
+                                        addThese = addTheseNew;
+                                    }
+                                    formattedValues[index] = String.valueOf(min);
+                                    setCustomLabelValues(addThese);
+                                    index ++;
+                                    continue;
+                                }
+                            }
+                            if (imageInfo.isLogScaled()) {
+                                if (value == min) {
+                                    weight = 0;
+                                } else if (value == max) {
+                                    weight = 1;
                                 } else {
-                                    weight = getLinearWeightFromLinearValue(value, min, max);
+                                    weight = getLinearWeightFromLogValue(value, min, max);
                                 }
+                            } else {
+                                weight = getLinearWeightFromLinearValue(value, min, max);
+                            }
 
-                                weight = getValidWeight(weight);
-                                if (weight >= 0 && weight <= 1) {
-                                    ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
-                                    colorBarInfos.add(colorBarInfo);
-                                }
+                            weight = getValidWeight(weight);
+                            if (weight >= 0 && weight <= 1) {
+                                ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
+                                colorBarInfos.add(colorBarInfo);
                             }
                         }
                     }
+                    index ++;
                 }
             }
+        }
 
     }
 
