@@ -849,7 +849,7 @@ public class ImageLegend {
                                 try {
                                     value = Double.valueOf(valueAndString[0]) / getScalingFactor();
                                 } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(new JOptionPane(), valueAndString[0]  + " is not a valid (numeric) Label Value).",
+                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue  + " is not a valid (numeric) Label Value <br> and the entry has been removed.</html>",
                                             "Color Bar Layer Editor Error",
                                             JOptionPane.WARNING_MESSAGE);
                                     String addTheseNew = addThese.replace(valueAndString[0] + ":" + formattedValue + ",", "");
@@ -868,7 +868,7 @@ public class ImageLegend {
                                 try {
                                     value = Double.valueOf(formattedValue) / getScalingFactor();
                                 } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(new JOptionPane(), formattedValue  + " is not a valid (numeric) Label Value).",
+                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue  + " is not a valid (numeric) Label Value <br> and the entry has been removed.<html>",
                                             "Color Bar Layer Editor Error",
                                             JOptionPane.WARNING_MESSAGE);
                                     String addTheseNew = addThese.replace(formattedValue + ",", "");
