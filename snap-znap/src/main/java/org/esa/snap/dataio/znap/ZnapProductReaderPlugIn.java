@@ -54,7 +54,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
         } else {
             productRoot = inputPath.getParent();
         }
-        final boolean isValidRootDirName = productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_CONTAINER_EXTENSION);
+        final boolean isValidRootDirName = productRoot != null && productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_CONTAINER_EXTENSION);
         if (isValidRootDirName) {
             final boolean productRootIsDirectory = Files.isDirectory(productRoot);
             final Path productHeader = productRoot.resolve(FILENAME_DOT_ZGROUP);
@@ -62,21 +62,19 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
             final boolean productHeaderIsFile = Files.isRegularFile(productHeader);
 
             if (productRootIsDirectory && productHeaderExist && productHeaderIsFile) {
-                try {
-                    final Stream<Path> stream = Files.find(productRoot, 3,
-                                                           (path, basicFileAttributes) -> Files.isRegularFile(path) && path.endsWith(FILENAME_DOT_ZARRAY),
-                                                           FileVisitOption.FOLLOW_LINKS);
+                try (Stream<Path> stream = Files.find(productRoot, 3,
+                        (path, basicFileAttributes) -> Files.isRegularFile(path) && path.endsWith(FILENAME_DOT_ZARRAY),
+                        FileVisitOption.FOLLOW_LINKS)) {
                     final List<Path> pathList = stream.collect(Collectors.toList());
                     if (pathList.size() > 0) {
-                        // TODO: 23.07.2019 SE -- Frage 2 siehe Trello https://trello.com/c/HMw8CxqL/4-fragen-an-norman
                         return DecodeQualification.INTENDED;
                     }
                 } catch (IOException e) {
-                    // ignore
+                    return DecodeQualification.UNABLE;
                 }
             }
         }
-        final boolean isValidZnapZipArchiveName = productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
+        final boolean isValidZnapZipArchiveName = productRoot != null && productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
         if (isValidZnapZipArchiveName) {
             try (ZipStore zipStore = new ZipStore(productRoot)) {
                 final InputStream productHeaderStream = zipStore.getInputStream(FILENAME_DOT_ZGROUP);
