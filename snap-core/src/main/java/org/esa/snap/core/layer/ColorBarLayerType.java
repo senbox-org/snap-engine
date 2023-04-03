@@ -723,7 +723,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_EXPORT_LEGEND_WIDTH_LABEL = "File Size";
     public static final String PROPERTY_EXPORT_LEGEND_WIDTH_TOOLTIP = "Width (in pixels) of legend image file (height if vertical image)";
     private static final String PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS = PROPERTY_LEGEND_EXPORT_ROOT_ALIAS + "LegendSize";
-    public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 1400;
+    public static final int PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT = 2400;
     public static final Class PROPERTY_EXPORT_LEGEND_WIDTH_TYPE = Integer.class;
 
 
