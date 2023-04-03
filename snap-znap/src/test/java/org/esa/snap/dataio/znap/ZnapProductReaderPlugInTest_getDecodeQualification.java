@@ -136,9 +136,9 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
     }
 
     @Test
-    public void decodeQualification_UNABLE_inputHasNoParent_zip() throws IOException {
+    public void decodeQualification_UNABLE_aZGroupFileWhichHasNoParentDir() throws IOException {
         try(FileSystem fileSystem = Jimfs.newFileSystem()) {
-            Path path = fileSystem.getPath("some_archived_product.zip");
+            Path path = fileSystem.getPath("any_zarr_group_file_without_parent.zgroup");
             final DecodeQualification decodeQualification = plugIn.getDecodeQualification(path);
 
             assertThat(decodeQualification, is(equalTo(DecodeQualification.UNABLE)));
