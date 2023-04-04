@@ -28,6 +28,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
 
 
 /**
@@ -115,9 +116,25 @@ public class ColorBarLayer extends Layer {
 
 
             // Tick Label Values
+
             imageLegend.setDistributionType(getLabelValuesMode());
             imageLegend.setTickMarkCount(getLabelValuesCount());
             imageLegend.setCustomLabelValues(getLabelValuesActual());
+
+// todo Color Schemes - this would call methods in snap-desktop so some of those methods would need to be either moved or replicated in snap-engine
+
+//           ColorSchemeInfo schemeInfo = ColorSchemeUtils.getColorPaletteInfoByBandNameLookup(raster.getProduct().getName());
+           ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getProduct().getName());
+
+            if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().length() > 1) {
+                imageLegend.setCustomLabelValues(getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                        ColorBarLayerType.DISTRIB_MANUAL_STR));
+
+                imageLegend.setCustomLabelValues(getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
+                        schemeInfo.getColorBarLabels()));
+            }
+
+
             imageLegend.setScalingFactor(getLabelValuesScalingFactor());
             imageLegend.setDecimalPlaces(getDecimalPlaces());
             imageLegend.setDecimalPlacesForce(getDecimalPlacesForce());
@@ -237,6 +254,26 @@ public class ColorBarLayer extends Layer {
 
             allowImageLegendReset = true;
         }
+    }
+
+
+    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
+
+        ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
+        if (colorSchemeManager != null) {
+
+            bandName = bandName.trim();
+            bandName = bandName.substring(bandName.indexOf(" ")).trim();
+
+            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
+            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
+                if (colorSchemeLookupInfo.isMatch(bandName)) {
+                    return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
+                }
+            }
+        }
+
+        return null;
     }
 
 
