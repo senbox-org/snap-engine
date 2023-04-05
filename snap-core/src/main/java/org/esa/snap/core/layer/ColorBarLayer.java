@@ -259,19 +259,21 @@ public class ColorBarLayer extends Layer {
 
     public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
 
-        ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
-        if (colorSchemeManager != null) {
+        // todo
 
-            bandName = bandName.trim();
-            bandName = bandName.substring(bandName.indexOf(" ")).trim();
-
-            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
-            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
-                if (colorSchemeLookupInfo.isMatch(bandName)) {
-                    return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
-                }
-            }
-        }
+//        ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
+//        if (colorSchemeManager != null) {
+//
+//            bandName = bandName.trim();
+//            bandName = bandName.substring(bandName.indexOf(" ")).trim();
+//
+//            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
+//            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
+//                if (colorSchemeLookupInfo.isMatch(bandName)) {
+//                    return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
+//                }
+//            }
+//        }
 
         return null;
     }
