@@ -19,21 +19,26 @@
 package org.esa.snap.dataio.znap;
 
 import com.bc.zarr.ZarrConstants;
+import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.util.io.TreeDeleter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assume.assumeNotNull;
 
 public class ZnapProductReaderPlugInTest_getDecodeQualification {
 
@@ -95,7 +100,7 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
 
     @Test
     public void decodeQualification_INTENDED_perfectMatch_inputHasNoParent() throws IOException {
-        try(FileSystem fileSystem = Jimfs.newFileSystem()) {
+        try (FileSystem fileSystem = Jimfs.newFileSystem()) {
             Path path = fileSystem.getPath("snap_zarr_product_root_dir.znap");
 
             Path dataDir = path.resolve("a_raster_data_dir");
@@ -127,17 +132,30 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
     }
 
     @Test
-    public void decodeQualification_UNABLE_productRootDoesNotExist() {
-        // No file or directory as expected
+    public void decodeQualification_UNABLE_productRootDoesNotExist() throws IOException {
+        try (FileSystem fileSystem = Jimfs.newFileSystem()) {
+            Path path = fileSystem.getPath("any_not_supported_file.tar");
 
-        final DecodeQualification decodeQualification = plugIn.getDecodeQualification(productRoot);
+            final DecodeQualification decodeQualification = plugIn.getDecodeQualification(path);
+            assertThat(decodeQualification, is(equalTo(DecodeQualification.UNABLE)));
+        }
 
+    }
+
+    @Test()
+    public void decodeQualification_UNABLE_AnyFileAtRootLevel() {
+        String systemDrive = System.getenv("SystemDrive");
+        assumeNotNull(systemDrive); // only on windows not null
+        Path root = Paths.get(systemDrive);
+        Path notValid = root.resolve("any_not_supported_file.notznap");
+
+        final DecodeQualification decodeQualification = plugIn.getDecodeQualification(notValid);
         assertThat(decodeQualification, is(equalTo(DecodeQualification.UNABLE)));
     }
 
     @Test
     public void decodeQualification_UNABLE_aZGroupFileWhichHasNoParentDir() throws IOException {
-        try(FileSystem fileSystem = Jimfs.newFileSystem()) {
+        try (FileSystem fileSystem = Jimfs.newFileSystem()) {
             Path path = fileSystem.getPath("any_zarr_group_file_without_parent.zgroup");
             final DecodeQualification decodeQualification = plugIn.getDecodeQualification(path);
 
