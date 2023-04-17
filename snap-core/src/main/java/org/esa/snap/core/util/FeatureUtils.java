@@ -108,8 +108,16 @@ public class FeatureUtils {
 
     public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(File shapefile) throws IOException {
         final URL shapefileUrl = shapefile.toURI().toURL();
-        FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = getFeatureSource(shapefileUrl);
-        return featureSource.getFeatures();
+
+        FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = null;
+        try {
+            featureSource = getFeatureSource(shapefileUrl);
+            return featureSource.getFeatures();
+        } finally {
+            if (featureSource != null) {
+                featureSource.getDataStore().dispose();
+            }
+        }
     }
 
     public static String createFeatureTypeName(String defaultGeometry) {
