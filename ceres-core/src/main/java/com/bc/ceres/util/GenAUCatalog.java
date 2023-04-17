@@ -15,23 +15,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,31 +44,16 @@ public class GenAUCatalog {
     private static final String ATTRIB_NAME_DOWNLOADSIZE = "downloadsize";
     private static final String ATTRIB_NAME_NAME = "name";
     private static final String XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n" +
-                                           "<!DOCTYPE module_updates PUBLIC \"-//NetBeans//DTD Autoupdate Catalog 2.5//EN\" \"http://www.netbeans.org/dtds/autoupdate-catalog-2_5.dtd\">\r\n\r\n";
+            "<!DOCTYPE module_updates PUBLIC \"-//NetBeans//DTD Autoupdate Catalog 2.5//EN\" \"http://www.netbeans.org/dtds/autoupdate-catalog-2_5.dtd\">\r\n\r\n";
 
     private final Path moduleDir;
     private final SimpleDateFormat timeStampFormat;
-    private Transformer xmlTransformer;
-    private DocumentBuilderFactory builderFactory;
-    private Path catalogXmlPath;
-    private Path catalogXmlGzPath;
+    private final Transformer xmlTransformer;
+    private final DocumentBuilderFactory builderFactory;
+    private final Path catalogXmlPath;
+    private final Path catalogXmlGzPath;
     private String notificationMessage;
     private String notificationURL;
-
-    public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            logErr("Please specify at least a path to a directory which contains NetBeans modules (*.nbm)");
-        }
-        Path moduleDir = Paths.get(args[0]);
-        GenAUCatalog generator = new GenAUCatalog(moduleDir);
-        if (args.length > 1) {
-            generator.setNotificationMessage(args[1]);
-        }
-        if (args.length > 2) {
-            generator.setNotificationURL(args[2]);
-        }
-        generator.run();
-    }
 
     public GenAUCatalog(Path moduleDir) throws Exception {
         this.moduleDir = moduleDir;
@@ -100,6 +74,48 @@ public class GenAUCatalog {
         xmlTransformer = TransformerFactory.newInstance().newTransformer();
         xmlTransformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         xmlTransformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length < 1) {
+            logErr("Please specify at least a path to a directory which contains NetBeans modules (*.nbm)");
+        }
+        Path moduleDir = Paths.get(args[0]);
+        GenAUCatalog generator = new GenAUCatalog(moduleDir);
+        if (args.length > 1) {
+            generator.setNotificationMessage(args[1]);
+        }
+        if (args.length > 2) {
+            generator.setNotificationURL(args[2]);
+        }
+        generator.run();
+    }
+
+    private static void updateDownloadSizeAttribute(Node moduleElement, long sizeInBytes) {
+        NamedNodeMap attributes = moduleElement.getAttributes();
+        if (attributes == null) {
+            return;
+        }
+        Node sizeItem = attributes.getNamedItem(ATTRIB_NAME_DOWNLOADSIZE);
+        if (sizeItem == null) {
+            return;
+        }
+        sizeItem.setNodeValue(String.valueOf(sizeInBytes));
+    }
+
+    private static void logErr(String msg) {
+        System.err.println(msg);
+    }
+
+    private static Node getLicenseElement(Node moduleElement) {
+        final NodeList childNodes = moduleElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            final Node item = childNodes.item(i);
+            if (item.getNodeName().equals(TAG_NAME_LICENSE)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     public void setNotificationMessage(String msg) {
@@ -168,7 +184,7 @@ public class GenAUCatalog {
     private void processModule(Path path, ArrayList<Node> moduleList, HashMap<String, Node> licenseMap) {
         try {
             log("Processing file: " + path.getFileName());
-            final FileSystem nbmFileSystem = FileSystems.newFileSystem(path, null);
+            final FileSystem nbmFileSystem = FileSystems.newFileSystem(path, (java.lang.ClassLoader) null);
             final Path infoFile = nbmFileSystem.getPath(PATH_INFO_XML);
             DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
             // This disables resolving the DTD given in the info.xml file.
@@ -205,35 +221,8 @@ public class GenAUCatalog {
         }
     }
 
-    private static void updateDownloadSizeAttribute(Node moduleElement, long sizeInBytes) {
-        NamedNodeMap attributes = moduleElement.getAttributes();
-        if (attributes == null) {
-            return;
-        }
-        Node sizeItem = attributes.getNamedItem(ATTRIB_NAME_DOWNLOADSIZE);
-        if (sizeItem == null) {
-            return;
-        }
-        sizeItem.setNodeValue(String.valueOf(sizeInBytes));
-    }
-
     private void log(String msg) {
         System.out.println(msg);
-    }
-
-    private static void logErr(String msg) {
-        System.err.println(msg);
-    }
-
-    private static Node getLicenseElement(Node moduleElement) {
-        final NodeList childNodes = moduleElement.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            final Node item = childNodes.item(i);
-            if (item.getNodeName().equals(TAG_NAME_LICENSE)) {
-                return item;
-            }
-        }
-        return null;
     }
 
 }

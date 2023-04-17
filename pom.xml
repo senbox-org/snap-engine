@@ -1191,7 +1191,6 @@
             </plugin>
 
             <!-- .............................................................. -->
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-toolchains-plugin</artifactId>
@@ -1206,13 +1205,12 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>10.0</version>
-                            <vendor>OpenJDK</vendor>
+                            <version>13.0</version>
+                            <vendor>Zulu</vendor>
                         </jdk>
                     </toolchains>
                 </configuration>
             </plugin>
-            -->
             <!-- .............................................................. -->
 
         </plugins>
