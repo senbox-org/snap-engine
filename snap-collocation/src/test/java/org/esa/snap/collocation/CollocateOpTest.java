@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.OperatorException;
@@ -95,9 +96,9 @@ public class CollocateOpTest {
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
         assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
-                     targetProduct.getBandAt(16 + 1).getValidMaskExpression());
+                targetProduct.getBandAt(16 + 1).getValidMaskExpression());
         assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
-                     targetProduct.getBandAt(16 + 2).getValidMaskExpression());
+                targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(4, targetProduct.getMaskGroup().getNodeCount());
         Mask mask1 = targetProduct.getMaskGroup().get(0);
@@ -193,9 +194,9 @@ public class CollocateOpTest {
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
         assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
-                     targetProduct.getBandAt(16 + 1).getValidMaskExpression());
+                targetProduct.getBandAt(16 + 1).getValidMaskExpression());
         assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
-                     targetProduct.getBandAt(16 + 2).getValidMaskExpression());
+                targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(3, targetProduct.getMaskGroup().getNodeCount());
         Mask mask1 = targetProduct.getMaskGroup().get(0);
@@ -271,9 +272,67 @@ public class CollocateOpTest {
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("Target product already contains a raster data node with name 'latitude'. " +
-                                 "Parameter slaveComponentPattern must be set.",
-                         oe.getMessage());
+                            "Parameter slaveComponentPattern must be set.",
+                    oe.getMessage());
         }
+    }
+
+    @Test
+    public void testCollocate_SampleCodingSOfMasterWhenNotRenamingMaster() {
+        final Product masterProduct = createTestProduct1();
+        final Product slaveProduct = createTestProduct1();
+
+        CollocateOp op = new CollocateOp();
+        op.setParameterDefaultValues();
+        op.setRenameMasterComponents(false);
+
+        op.setMasterProduct(masterProduct);
+        op.setSlaveProduct(slaveProduct);
+
+        Product targetProduct = op.getTargetProduct();
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        assertEquals(3, flagCodingGroup.getNodeCount());
+        assertTrue(flagCodingGroup.contains("l1_flags"));
+        assertTrue(flagCodingGroup.contains("l1_flags_S"));
+        assertTrue(flagCodingGroup.contains("collocationFlags"));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags").getFlagCoding()));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_S").getFlagCoding()));
+
+        ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
+        assertEquals(2, indexCodingGroup.getNodeCount());
+        assertTrue(indexCodingGroup.contains("l1_class"));
+        assertTrue(indexCodingGroup.contains("l1_class_S"));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class").getIndexCoding()));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_S").getIndexCoding()));
+    }
+
+    @Test
+    public void testCollocate_SampleCodingOfMasterWhenRenamingMaster() {
+        final Product masterProduct = createTestProduct1();
+        final Product slaveProduct = createTestProduct1();
+
+        CollocateOp op = new CollocateOp();
+        op.setParameterDefaultValues();
+        op.setRenameMasterComponents(true);
+
+        op.setMasterProduct(masterProduct);
+        op.setSlaveProduct(slaveProduct);
+
+        Product targetProduct = op.getTargetProduct();
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        assertEquals(3, flagCodingGroup.getNodeCount());
+        assertTrue(flagCodingGroup.contains("l1_flags_M"));
+        assertTrue(flagCodingGroup.contains("l1_flags_S"));
+        assertTrue(flagCodingGroup.contains("collocationFlags"));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_M").getFlagCoding()));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_S").getFlagCoding()));
+
+        ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
+        assertEquals(2, indexCodingGroup.getNodeCount());
+        assertTrue(indexCodingGroup.contains("l1_class_M"));
+        assertTrue(indexCodingGroup.contains("l1_class_S"));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_M").getIndexCoding()));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_S").getIndexCoding()));
     }
 
     private static final float[] wl = new float[]{

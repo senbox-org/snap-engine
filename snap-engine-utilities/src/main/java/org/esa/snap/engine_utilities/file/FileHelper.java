@@ -183,7 +183,8 @@ public class FileHelper {
                             Path zipEntryAbsolutePath = zipDir.resolve(zipEntryDir);
                             String targetAbsolutePath = new File(zipEntryAbsolutePath.resolve(target).toString()).getCanonicalPath();
                             Path linkPath = zipEntryAbsolutePath.resolve(zipEntryPath.getFileName());
-                            if (targetAbsolutePath.startsWith(zipDir.toString())) {
+                            // make sure we compare two canonical paths
+                            if (targetAbsolutePath.startsWith(new File(zipDir.toString()).getCanonicalPath().toString())) {
                                 Files.createSymbolicLink(linkPath, target);
                                 return true;
                             }

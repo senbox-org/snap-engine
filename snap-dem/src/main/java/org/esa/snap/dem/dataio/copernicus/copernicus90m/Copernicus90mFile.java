@@ -1,10 +1,12 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus90m;
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
+import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
@@ -20,9 +22,28 @@ public class Copernicus90mFile extends ElevationFile {
 
     @Override
     protected ElevationTile createTile(final Product product) throws IOException {
-        final CopernicusElevationTile tile = new CopernicusElevationTile(demModel, product);;
-        tile.setHeight(product.getSceneRasterHeight());
-        tile.setWidth(product.getSceneRasterWidth());
+
+        if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
+
+            ResamplingOp resampler = new ResamplingOp();
+            resampler.setParameter("targetWidth", 1200);
+            resampler.setParameter("targetHeight", 1200);
+            resampler.setParameter("upsampling", "Bilinear");
+            resampler.setParameter("downsampling", "First");
+            resampler.setParameter("flagDownsampling", "First");
+            resampler.setSourceProduct(product);
+            Product resampled = resampler.getTargetProduct();
+            product.getName();
+            resampled.getBandAt(0).readRasterDataFully();
+            ProductIO.writeProduct(resampled, localFile.getAbsolutePath(), "GeoTIFF");
+
+            //System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
+
+            tile = new CopernicusElevationTile(demModel, resampled);
+
+        }else{
+            tile = new CopernicusElevationTile(demModel, product);
+        }
         demModel.updateCache(tile);
         return tile;
     }

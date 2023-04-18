@@ -57,7 +57,7 @@
                     </file>
                     <file name="org-esa-snap-dataio-envisat-ImportErsSARProduct.shadow">
                         <attr name="originalFile" stringvalue="Actions/Readers/org-esa-snap-dataio-envisat-ImportErsSARProduct.instance"/>
-                        <attr name="position" intvalue="550"/>
+                        <attr name="position" intvalue="555"/>
                     </file>
                 </folder>
             </folder>

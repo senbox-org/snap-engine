@@ -36,30 +36,12 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
         return new GeoPos(pixelLat, pixelLon);
     }
 
-    private void init(final GeoPos geoPos) {
-
-        NUM_PIXELS_PER_TILE_X = CopernicusElevationTile.determineWidth(geoPos, getResolution());
-        NUM_PIXELS_PER_TILE_Y = descriptor.getTileHeight();
-
-        NUM_PIXELS_PER_TILE_X_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_X;
-        NUM_PIXELS_PER_TILE_Y_inv = 1.0 / (double) NUM_PIXELS_PER_TILE_Y;
-
-        RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_X;
-        RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE_Y;
-
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_X;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y = DEGREE_RES / (double) NUM_PIXELS_PER_TILE_Y;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X;
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y_inv = 1.0 / DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y;
-    }
-
     @Override
     public synchronized double getElevation(final GeoPos geoPos) throws Exception {
 
         if (geoPos.lon > 180) {
             geoPos.lon -= 360;
         }
-        init(geoPos);
 
         final double pixelY = getIndexY(geoPos);
         if (pixelY < 0 || Double.isNaN(pixelY)) {
