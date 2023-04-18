@@ -6,6 +6,7 @@ import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.dataio.geotiff.Utils;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -72,7 +73,6 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
         return new SnapFileFilter(Constants.FORMAT_NAMES[0], getDefaultFileExtensions(), getDescription(null));
     }
 
-    // @todo 3 tb/tb write test following the original GeoTiff pattern 2015-01-08
     static DecodeQualification getDecodeQualificationImpl(ImageInputStream stream) {
         try {
             String mode = getTiffMode(stream);
@@ -87,15 +87,19 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    static TIFFImageReader getTiffImageReader(ImageInputStream stream) {
+    static TIFFImageReader getTiffImageReader(ImageInputStream stream) throws IOException {
         final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
         TIFFImageReader imageReader = null;
 
         while (imageReaders.hasNext()) {
             final ImageReader reader = imageReaders.next();
             if (reader instanceof TIFFImageReader) {
-                imageReader = (TIFFImageReader) reader;
-                break;
+                TIFFImageReader tiffReader = (TIFFImageReader) reader;
+                tiffReader.setInput(stream);
+                if (!Utils.isCOGGeoTIFF(tiffReader)) {
+                    imageReader = tiffReader;
+                    break;
+                }
             }
         }
 

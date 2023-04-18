@@ -21,7 +21,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>8.0.0-SNAPSHOT</version>
+        <version>10.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-gpf</artifactId>
@@ -84,6 +84,8 @@
         <profile>
             <id>jdk-tools</id>
             <activation>
+                <!-- tools.jar is only necessary in Java 8. Since Java 9 it is integrated into the JDK. -->
+                <jdk>1.8</jdk>
                 <property>
                     <!-- Maybe this needs to be updated when detecting JDK distributions where
                     the following does not apply. Currently, it works for the JDKs from Oracle, Adopt, Azul and Amazon-->

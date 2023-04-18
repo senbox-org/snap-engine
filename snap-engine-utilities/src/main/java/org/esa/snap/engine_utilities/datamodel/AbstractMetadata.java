@@ -35,7 +35,7 @@ public final class AbstractMetadata {
     /**
      * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
      */
-    private static final String METADATA_VERSION = "6.0";
+    private static final String METADATA_VERSION = "7.0";
 
     /**
      * Default no data values
@@ -113,6 +113,8 @@ public final class AbstractMetadata {
     public static final String range_looks = "range_looks";
     public static final String range_spacing = "range_spacing";
     public static final String azimuth_spacing = "azimuth_spacing";
+    public static final String range_window_type = "range_window_type";
+    public static final String range_window_coefficient = "range_window_coefficient";
     public static final String pulse_repetition_frequency = "pulse_repetition_frequency";
     public static final String radar_frequency = "radar_frequency";
     public static final String line_time_interval = "line_time_interval";
@@ -148,6 +150,7 @@ public final class AbstractMetadata {
     public static final String rescaling_factor = "rescaling_factor";
 
     public static final String coregistered_stack = "coregistered_stack";
+    public static final String collocated_stack = "collocated_stack";
     public static final String bistatic_stack = "bistatic_stack";
 
     public static final String external_calibration_file = "external_calibration_file";
@@ -259,6 +262,10 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
+
+        addAbstractedAttribute(absRoot, range_window_type, ProductData.TYPE_ASCII, "", "Range window type");
+        addAbstractedAttribute(absRoot, range_window_coefficient, ProductData.TYPE_FLOAT64, "", "Range window coefficient");
+
         addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "PRF");
         addAbstractedAttribute(absRoot, radar_frequency, ProductData.TYPE_FLOAT64, "MHz", "Radar frequency");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
@@ -807,24 +814,27 @@ public final class AbstractMetadata {
     public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) {
 
         final MetadataElement elemRoot = absRoot.getElement(srgr_coefficients);
-        final MetadataElement[] srgr_coef_listElem = elemRoot.getElements();
-        final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[srgr_coef_listElem.length];
-        int k = 0;
-        for (MetadataElement listElem : srgr_coef_listElem) {
-            final SRGRCoefficientList srgrList = new SRGRCoefficientList();
-            srgrList.time = listElem.getAttributeUTC(srgr_coef_time);
-            srgrList.timeMJD = srgrList.time.getMJD();
-            srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
+        if(elemRoot != null) {
+            final MetadataElement[] srgr_coef_listElem = elemRoot.getElements();
+            final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[srgr_coef_listElem.length];
+            int k = 0;
+            for (MetadataElement listElem : srgr_coef_listElem) {
+                final SRGRCoefficientList srgrList = new SRGRCoefficientList();
+                srgrList.time = listElem.getAttributeUTC(srgr_coef_time);
+                srgrList.timeMJD = srgrList.time.getMJD();
+                srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
 
-            final int numSubElems = listElem.getNumElements();
-            srgrList.coefficients = new double[numSubElems];
-            for (int i = 0; i < numSubElems; ++i) {
-                final MetadataElement coefElem = listElem.getElementAt(i);
-                srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
+                final int numSubElems = listElem.getNumElements();
+                srgrList.coefficients = new double[numSubElems];
+                for (int i = 0; i < numSubElems; ++i) {
+                    final MetadataElement coefElem = listElem.getElementAt(i);
+                    srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
+                }
+                srgrCoefficientList[k++] = srgrList;
             }
-            srgrCoefficientList[k++] = srgrList;
+            return srgrCoefficientList;
         }
-        return srgrCoefficientList;
+        return null;
     }
 
     /**

@@ -23,7 +23,6 @@ package org.esa.snap.core.util.math;
  * no argument checking.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
 public class LinearAlgebra {
 

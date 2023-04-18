@@ -981,6 +981,18 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     public void unloadRasterData() {
     }
 
+    public void removeCachedImageData() {
+        if (isSourceImageSet()) {
+            getSourceImage().reset();
+        }
+        if (isGeophysicalImageSet()) {
+            getGeophysicalImage().reset();
+        }
+        if (isValidMaskImageSet()) {
+            getValidMaskImage().reset();
+        }
+    }
+
     /**
      * Releases all of the resources used by this object instance and all of its owned children. Its primary use is to
      * allow the garbage collector to perform a vanilla job.
@@ -2009,7 +2021,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     /**
-     * Applies the scaling <code>v * scalingFactor + scalingOffset</code> the the given input value. If the
+     * Applies the scaling <code>v * scalingFactor + scalingOffset</code> the given input value. If the
      * <code>log10Scaled</code> property is true, the result is taken to the power of 10 <i>after</i> the actual
      * scaling.
      *
@@ -2026,7 +2038,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     /**
-     * Applies the inverse scaling <code>(v - scalingOffset) / scalingFactor</code> the the given input value. If the
+     * Applies the inverse scaling <code>(v - scalingOffset) / scalingFactor</code> the given input value. If the
      * <code>log10Scaled</code> property is true, the common logarithm is applied to the input <i>before</i> the actual
      * scaling.
      *
@@ -2322,7 +2334,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     private void resetGeophysicalImage() {
-        geophysicalImage = null;
+        if (geophysicalImage != null) {
+            geophysicalImage.dispose();
+            geophysicalImage = null;
+        }
     }
 
     /**

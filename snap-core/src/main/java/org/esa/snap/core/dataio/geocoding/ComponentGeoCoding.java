@@ -1,25 +1,37 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.AbstractGeoCoding;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCoding extends AbstractGeoCoding {
+
+    public static final String SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
 
     private static final GeoPos INVALID_GEO_POS = new GeoPos(Double.NaN, Double.NaN);
     private static final PixelPos INVALID_PIXEL_POS = new PixelPos(Double.NaN, Double.NaN);
@@ -140,7 +152,9 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         transferRequiredRasters(srcScene, destScene, subsetDef);
 
-        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+        // rasters are of same size, we can re-use the one we have in RAM tb 2021-06-10
+        if (srcScene.isSameRasterSize(destScene) ||
+                (subsetDef != null && subsetDef.isEntireProductSelected())) {
             destScene.setGeoCoding(clone());
             return true;
         }
@@ -148,7 +162,14 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final String lonVariableName = this.geoRaster.getLonVariableName();
         final String latVariableName = this.geoRaster.getLatVariableName();
 
-        final GeoRaster geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        final GeoRaster geoRaster;
+        try {
+            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+        } catch (IOException e) {
+            SystemUtils.LOG.warning("error loading geolocation data: " + e.getMessage());
+            return false;
+        }
+
         ForwardCoding forwardCoding = null;
         if (this.forwardCoding != null) {
             forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
@@ -238,7 +259,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     @Override
     @Deprecated
     public Datum getDatum() {
-        throw new NotImplementedException();
+        throw new IllegalStateException("Method not implemented!");
     }
 
     @Override
@@ -257,6 +278,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding clone = new ComponentGeoCoding(geoRaster, cloneForward, cloneInverse, geoChecks);
 
         clone.isInitialized = this.isInitialized;
+        clone.isCrossingAntiMeridian = this.isCrossingAntiMeridian;
 
         return clone;
     }
@@ -302,7 +324,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         return geoRaster;
     }
 
-    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) {
+    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) throws IOException {
         GeoRaster geoRaster;
         final Product destProduct = destScene.getProduct();
         final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);
@@ -333,11 +355,13 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
             subsamplingX = lonTPG.getSubSamplingX();
             subsamplingY = lonTPG.getSubSamplingY();
         } else {
+            // this is based on already subsetted geo-location data, we take
+            // the subset in full resolution of the subset here tb 2021-05-12
             gridWidth = lonRaster.getRasterWidth();
             gridHeight = lonRaster.getRasterHeight();
 
-            longitudes = lonRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-            latitudes = latRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            longitudes = RasterUtils.loadGeoData(lonRaster);
+            latitudes = RasterUtils.loadGeoData(latRaster);
 
             offsetX = 0.5;
             offsetY = 0.5;
@@ -347,7 +371,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
                                   gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
-                                  this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
+                                  // @todo 1 tb/tb this should also take the subsampling in y direction into account
+                                  this.geoRaster.getRasterResolutionInKm() * subsamplingY,
                                   offsetX, offsetY, subsamplingX, subsamplingY);
         return geoRaster;
     }

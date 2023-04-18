@@ -114,9 +114,11 @@ public class GeneralFilterBandPersistableTest extends TestCase {
                 GeneralFilterBandPersistable.ATTRIBUTE_BAND_TYPE));
         assertEquals(GeneralFilterBandPersistable.VERSION_1_2, filterInfo.getAttributeValue(
                 GeneralFilterBandPersistable.ATTRIBUTE_VERSION));
-        assertEquals(3, filterInfo.getChildren().size());
+        assertEquals(4, filterInfo.getChildren().size());
         assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_SOURCE) != null);
         assertEquals(gfb.getSource().getName(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE));
+        assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_ITERATION_COUNT) != null);
+        assertEquals("" + gfb.getIterationCount(), filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_ITERATION_COUNT));
         assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_KERNEL) != null);
         assertTrue(filterInfo.getChild(DimapProductConstants.TAG_FILTER_OP_TYPE) != null);
         assertEquals(gfb.getOpType().toString(),
@@ -126,7 +128,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement(GeneralFilterBandPersistable.VERSION_1_2);
 
-        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
+        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product);
         _product.addBand((Band) object);
 
         final Element xmlFromObject = _generalFilterBandPersistable.createXmlFromObject(object);
@@ -139,7 +141,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
     }
 
     private void assertCreateRightGeneralFilterBand(Element xmlElement) {
-        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
+        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product);
         _product.addBand((Band) object);
 
         assertNotNull(object);
@@ -182,7 +184,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
     }
 
     private Element createXmlElement(final String version) {
-        final List<Element> contentList = new ArrayList<Element>(16);
+        final List<Element> contentList = new ArrayList<>(16);
         contentList.add(createElement(DimapProductConstants.TAG_BAND_INDEX, "1"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_NAME, "filtered_coffee"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_DESCRIPTION, "with milk & sugar"));
@@ -197,7 +199,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE_USED, "true"));
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE,
                                       String.valueOf(_source.getGeophysicalNoDataValue())));
-        final List<Element> filterBandInfoList = new ArrayList<Element>(5);
+        final List<Element> filterBandInfoList = new ArrayList<>(5);
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_SOURCE, "anyBand"));
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_OP_TYPE, "MEAN"));
         final Element filterBandInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
@@ -214,18 +216,17 @@ public class GeneralFilterBandPersistableTest extends TestCase {
         } else {
             // Version 1.2
             filterBandInfo.setAttribute(GeneralFilterBandPersistable.ATTRIBUTE_VERSION, version);
-            final List<Element> filterKernelList = new ArrayList<Element>(5);
+            final List<Element> filterKernelList = new ArrayList<>(5);
             filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_WIDTH, "5"));
             filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_HEIGHT, "5"));
             filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_X_ORIGIN, "2"));
             filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_Y_ORIGIN, "2"));
-            filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_DATA,"" +
-                                                       "0,0,0,0,0," +
-                                                       "0,0,0,0,0," +
-                                                       "0,0,0,0,0," +
-                                                       "0,0,0,0,0," +
-                                                       "0,0,0,0,0"
-            ));
+            filterKernelList.add(createElement(DimapProductConstants.TAG_KERNEL_DATA,
+                                               "0,0,0,0,0," +
+                                               "0,0,0,0,0," +
+                                               "0,0,0,0,0," +
+                                               "0,0,0,0,0," +
+                                               "0,0,0,0,0"));
             final Element kernelElement = new Element(DimapProductConstants.TAG_FILTER_KERNEL);
             kernelElement.addContent(filterKernelList);
             filterBandInfoList.add(kernelElement);

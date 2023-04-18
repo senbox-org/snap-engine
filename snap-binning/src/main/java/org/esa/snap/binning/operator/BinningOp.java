@@ -38,8 +38,8 @@ import org.esa.snap.binning.operator.metadata.MetadataAggregatorFactory;
 import org.esa.snap.binning.support.SpatialDataPeriod;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -176,8 +176,8 @@ public class BinningOp extends Operator {
 
     @Parameter(interval = "[0,24]",
             description = "A sensor-dependent constant given in hours of a day (0 to 24)\n" +
-                          "at which a sensor has a minimum number of observations at the date line (the 180 degree meridian).\n" +
-                          "Only used if parameter 'dataDayMode' is set to 'SPATIOTEMPORAL_DATADAY'.")
+                    "at which a sensor has a minimum number of observations at the date line (the 180 degree meridian).\n" +
+                    "Only used if parameter 'dataDayMode' is set to 'SPATIOTEMPORAL_DATADAY'. This is usually the equator crossing time (ECT)")
     private Double minDataHour;
 
     @Parameter(description = "Number of rows in the (global) planetary grid. Must be even.", defaultValue = "2160")
@@ -218,7 +218,7 @@ public class BinningOp extends Operator {
     private ProductCustomizerConfig productCustomizerConfig;
 
     @Parameter(description = "If true, a SeaDAS-style, binned data NetCDF file is written in addition to the\n" +
-                             "target product. The output file name will be <target>-bins.nc",
+            "target product. The output file name will be {target}-bins.nc",
             defaultValue = "false")
     private boolean outputBinnedData;
 
@@ -737,7 +737,7 @@ public class BinningOp extends Operator {
             subsetOp.setSourceProduct(sourceProduct);
 
             final Rectangle subsetRectangle = SubsetOp.computePixelRegion(sourceProduct, region, 0);
-            if (sourceProduct.getSceneGeoCoding() instanceof PixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
+            if (sourceProduct.getSceneGeoCoding() instanceof BasicPixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
                 // workaround for SNAP-1264
                 // PixelGeoCodings can't work on such small rasters
                 // increase rectangle size by 1 pixel to each side, making sure not to extend source product boundaries

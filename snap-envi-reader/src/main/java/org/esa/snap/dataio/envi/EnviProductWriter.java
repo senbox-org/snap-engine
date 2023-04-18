@@ -37,12 +37,12 @@ public class EnviProductWriter extends AbstractProductWriter {
 
     private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.envi.useCache";
 
-    protected File _outputDir;
-    protected File _outputFile;
-    private Map<Band, ImageOutputStream> _bandOutputStreams;
-    private boolean _incremental = true;
+    protected File outputDir;
+    protected File outputFile;
+    private Map<Band, ImageOutputStream> bandOutputStreams;
+    private boolean incremental = true;
 
-    private boolean useCache;
+    private final boolean useCache;
     private WriteCache writeCache;
 
     /**
@@ -122,7 +122,7 @@ public class EnviProductWriter extends AbstractProductWriter {
 
         ensureNamingConvention();
         getSourceProduct().setProductWriter(this);
-        getSourceProduct().setFileLocation(_outputDir);
+        getSourceProduct().setFileLocation(outputDir);
         deleteRemovedNodes();
     }
 
@@ -136,18 +136,18 @@ public class EnviProductWriter extends AbstractProductWriter {
      */
     protected void initDirs(final File outputFile) {
         final String name = FileUtils.getFilenameWithoutExtension(outputFile);
-        _outputDir = outputFile.getParentFile();
-        if (_outputDir == null) {
-            _outputDir = new File(".");
+        outputDir = outputFile.getParentFile();
+        if (outputDir == null) {
+            outputDir = new File(".");
         }
-        _outputDir = new File(_outputDir, name);
-        _outputDir.mkdirs();
-        _outputFile = new File(_outputDir, outputFile.getName());
+        outputDir = new File(outputDir, name);
+        outputDir.mkdirs();
+        this.outputFile = new File(outputDir, outputFile.getName());
     }
 
     protected void ensureNamingConvention() {
-        if (_outputFile != null) {
-            getSourceProduct().setName(FileUtils.getFilenameWithoutExtension(_outputFile));
+        if (outputFile != null) {
+            getSourceProduct().setName(FileUtils.getFilenameWithoutExtension(outputFile));
         }
     }
 
@@ -206,8 +206,8 @@ public class EnviProductWriter extends AbstractProductWriter {
     public void deleteOutput() throws IOException {
         flush();
         close();
-        if (_outputFile != null && _outputFile.exists() && _outputFile.isFile()) {
-            _outputFile.delete();
+        if (outputFile != null && outputFile.exists() && outputFile.isFile()) {
+            outputFile.delete();
         }
     }
 
@@ -217,13 +217,13 @@ public class EnviProductWriter extends AbstractProductWriter {
      * @throws java.io.IOException on failure
      */
     public void flush() throws IOException {
-        if (_bandOutputStreams == null) {
+        if (bandOutputStreams == null) {
             return;
         }
         if (useCache) {
-            writeCache.flush(_bandOutputStreams);
+            writeCache.flush(bandOutputStreams);
         }
-        for (Object o : _bandOutputStreams.values()) {
+        for (Object o : bandOutputStreams.values()) {
             ((ImageOutputStream) o).flush();
         }
     }
@@ -234,14 +234,14 @@ public class EnviProductWriter extends AbstractProductWriter {
      * @throws java.io.IOException on failure
      */
     public void close() throws IOException {
-        if (_bandOutputStreams == null) {
+        if (bandOutputStreams == null) {
             return;
         }
-        for (Object o : _bandOutputStreams.values()) {
+        for (Object o : bandOutputStreams.values()) {
             ((ImageOutputStream) o).close();
         }
-        _bandOutputStreams.clear();
-        _bandOutputStreams = null;
+        bandOutputStreams.clear();
+        bandOutputStreams = null;
     }
 
     /**
@@ -252,17 +252,17 @@ public class EnviProductWriter extends AbstractProductWriter {
         ImageOutputStream outputStream = getImageOutputStream(band);
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
-            if (_bandOutputStreams == null) {
-                _bandOutputStreams = new HashMap<>();
+            if (bandOutputStreams == null) {
+                bandOutputStreams = new HashMap<>();
             }
-            _bandOutputStreams.put(band, outputStream);
+            bandOutputStreams.put(band, outputStream);
         }
         return outputStream;
     }
 
     private ImageOutputStream getImageOutputStream(Band band) {
-        if (_bandOutputStreams != null) {
-            return (ImageOutputStream) _bandOutputStreams.get(band);
+        if (bandOutputStreams != null) {
+            return bandOutputStreams.get(band);
         }
         return null;
     }
@@ -297,7 +297,7 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     protected File getEnviHeaderFile(Band band) {
-        return new File(_outputDir, createEnviHeaderFilename(band));
+        return new File(outputDir, createEnviHeaderFilename(band));
     }
 
     protected String createEnviHeaderFilename(Band band) {
@@ -305,7 +305,7 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     private File getImageFile(Band band) {
-        return new File(_outputDir, createImageFilename(band));
+        return new File(outputDir, createImageFilename(band));
     }
 
     protected String createImageFilename(Band band) {
@@ -340,7 +340,7 @@ public class EnviProductWriter extends AbstractProductWriter {
      */
     @Override
     public boolean isIncrementalMode() {
-        return _incremental;
+        return incremental;
     }
 
     /**
@@ -351,18 +351,10 @@ public class EnviProductWriter extends AbstractProductWriter {
      */
     @Override
     public void setIncrementalMode(boolean enabled) {
-        _incremental = enabled;
+        incremental = enabled;
     }
 
     /**
-     * Entfernt alle zu l�schenden dateifragmente aus dem Product bevor der header und die b�nder geschrieben werden.
-     * Das ist nur notwendig, f�r den fall da� der Benutzer ein DIMAP-Product ge�ffnet hat, darin eine oderer mehrere
-     * product nodes gel�scht und anschlie�end nodes mit den gleichen namen erzeugt hat. Sind die gel�schten und
-     * wiedererstellten nodes zum Beispiel B�nder, so w�rde der writer diese neu erzeugten Banddaten nicht schreiben,
-     * wenn diese zuvor nicht von der Festplatte gel�scht worden sind. Bevor banddaten von der Festplatte gel�scht
-     * werden k�nnen ist es notwendig den reader zu schlie�en (reader.close()) damit dieser die Dateien zum l�schen frei
-     * gibt.
-     *
      * @throws java.io.IOException if an IOException occurs.
      */
     private void deleteRemovedNodes() throws IOException {
@@ -385,8 +377,8 @@ public class EnviProductWriter extends AbstractProductWriter {
             final String headerFilename = createEnviHeaderFilename(band);
             final String imageFilename = createImageFilename(band);
             File[] files = null;
-            if (_outputDir != null && _outputDir.exists()) {
-                files = _outputDir.listFiles();
+            if (outputDir != null && outputDir.exists()) {
+                files = outputDir.listFiles();
             }
             if (files == null) {
                 return;
@@ -402,6 +394,6 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     protected File getOutputDir() {
-        return _outputDir;
+        return outputDir;
     }
 }

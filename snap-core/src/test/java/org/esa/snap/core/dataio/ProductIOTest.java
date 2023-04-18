@@ -16,12 +16,25 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.esa.snap.core.dataio.dimap.DimapProductWriter;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.DummyProductBuilder;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ProductIOTest extends TestCase {
 
@@ -54,4 +67,32 @@ public class ProductIOTest extends TestCase {
         }
     }
 
+    public void testHeaderIsRewrittenIfModified() throws IOException {
+        final Product product = new DummyProductBuilder().create();
+        final Path tempDirectory = Files.createTempDirectory("test-dir");
+        try {
+            verifyHeaderRewrite(product, tempDirectory.resolve("test1.dim").toFile(), 1);
+
+            addBandWhichSetsProductToModifed(product);
+            verifyHeaderRewrite(product, tempDirectory.resolve("test2.dim").toFile(), 2);
+        } finally {
+            FileUtils.deleteTree(tempDirectory.toFile());
+        }
+    }
+
+    private void verifyHeaderRewrite(Product product, File file, int numberOfInvocations) throws IOException {
+        final DimapProductWriter writer = mock(DimapProductWriter.class);
+        ProductIO.writeProduct(product, file, writer, ProgressMonitor.NULL);
+        verify(writer, times(numberOfInvocations)).writeProductNodes(product, file);
+    }
+
+    private void addBandWhichSetsProductToModifed(Product product) {
+        product.addBand(new Band("modifyingBand", ProductData.TYPE_INT8, product.getSceneRasterWidth(), product.getSceneRasterHeight()) {
+            @Override
+            public void writeRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData, ProgressMonitor pm) throws IOException {
+                super.writeRasterData(offsetX, offsetY, width, height, rasterData, pm);
+                getProduct().setModified(true);
+            }
+        });
+    }
 }

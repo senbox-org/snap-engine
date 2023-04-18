@@ -5,4 +5,6 @@ org.esa.snap.dem.dataio.srtm3_geotiff.SRTM3GeoTiffElevationModelDescriptor
 org.esa.snap.dem.dataio.srtm1_esrigrid.SRTM1GridElevationModelDescriptor
 org.esa.snap.dem.dataio.srtm1_hgt.SRTM1HgtElevationModelDescriptor
 org.esa.snap.dem.dataio.aster.AsterElevationModelDescriptor
+org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor
+org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModelDescriptor
 

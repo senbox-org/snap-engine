@@ -113,7 +113,9 @@ public final class FtpDownloader {
             }
             fos = new BufferedOutputStream(new FileOutputStream(localFile.getAbsolutePath()));
 
-            progressListenerList.fireProcessStarted("Downloading " + localFile.getName() + "... ", 0, fileSize.intValue());
+            if(fileSize != null) {
+                progressListenerList.fireProcessStarted("Downloading " + localFile.getName() + "... ", 0, fileSize.intValue());
+            }
 
             final int size = 4096;
             final byte[] buf = new byte[size];

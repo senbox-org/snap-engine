@@ -130,4 +130,10 @@ final class FixSequenceOfFixCollections extends AbstractSequenceOfCollections {
         }
     }
 
+    @Override
+    public void dispose() throws IOException {
+        if (segment != null) {
+            segment.dispose();
+        }
+    }
 }

@@ -3,3 +3,5 @@ org.esa.snap.binning.aggregators.AggregatorMinMax$Descriptor
 org.esa.snap.binning.aggregators.AggregatorOnMaxSet$Descriptor
 org.esa.snap.binning.aggregators.AggregatorPercentile$Descriptor
 org.esa.snap.binning.aggregators.AggregatorAverageOutlierAware$Descriptor
+org.esa.snap.binning.aggregators.AggregatorSum$Descriptor
+org.esa.snap.binning.aggregators.AggregatorMeanObs$Descriptor

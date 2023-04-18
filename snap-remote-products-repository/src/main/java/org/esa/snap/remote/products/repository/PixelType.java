@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * The data type of the pixels for a downloaded product.
+ *
  * Created by jcoravu on 9/9/2019.
  */
 public enum PixelType {

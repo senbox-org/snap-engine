@@ -174,8 +174,8 @@ public abstract class AbstractLandCoverModel implements LandCoverModel, Resampli
     }
 
     protected static ProductReaderPlugIn getReaderPlugIn(final String formatName) {
-        final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(formatName);
-        return (ProductReaderPlugIn) readerPlugIns.next();
+        final Iterator<ProductReaderPlugIn> readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(formatName);
+        return readerPlugIns.next();
     }
 
     public final boolean getSamples(final int[] x, final int[] y, final double[][] samples) throws Exception {

@@ -9,6 +9,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
 /**
+ * The <code>GeometryUtils</code> class provides utility methods dealing with polygons.
+ *
  * Created by jcoravu on 31/1/2020.
  */
 public class GeometryUtils {

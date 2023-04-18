@@ -17,7 +17,12 @@
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.Assert;
-import com.bc.ceres.core.runtime.*;
+import com.bc.ceres.core.runtime.Dependency;
+import com.bc.ceres.core.runtime.Extension;
+import com.bc.ceres.core.runtime.ExtensionPoint;
+import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.core.runtime.ModuleState;
+import com.bc.ceres.core.runtime.Version;
 
 import java.io.File;
 import java.net.MalformedURLException;

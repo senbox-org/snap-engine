@@ -174,9 +174,6 @@ public abstract class AbstractProductReader implements ProductReader {
         setSubsetDef(subsetDef);
 
         long startTime = System.currentTimeMillis();
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Start reading the product from input '" + input + "' using the '" + getClass().getName() + "' reader class. The subset is '" + subsetDef + "'.");
-        }
 
         final Product product = readProductNodesImpl();
         configurePreferredTileSize(product);
@@ -186,8 +183,20 @@ public abstract class AbstractProductReader implements ProductReader {
         }
 
         if (logger.isLoggable(Level.FINE)) {
-            long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
-            logger.log(Level.FINE, "Finish reading the product from input '" + input + "' using the '" + getClass().getName() + "' reader class. The time elapsed is " + elapsedSeconds + " seconds.");
+            double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0d;
+            StringBuilder message = new StringBuilder();
+            message.append("Finish reading the product: input: ")
+                    .append(input)
+                    .append(", reader: ")
+                    .append(getClass().getName())
+                    .append(", size: ")
+                    .append(product.getSceneRasterWidth())
+                    .append("x")
+                    .append(product.getSceneRasterHeight())
+                    .append(", elapsed time: ")
+                    .append(elapsedSeconds)
+                    .append(" seconds.");
+            logger.log(Level.FINE, message.toString());
         }
 
         return product;

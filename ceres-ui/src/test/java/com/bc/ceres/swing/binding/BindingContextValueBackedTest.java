@@ -192,6 +192,7 @@ public class BindingContextValueBackedTest {
 
         textArea.setText("Bibo");
         textComponentAdapter.actionPerformed(null);
+        Thread.sleep(150);
         assertEquals("Bibo", propertyContainerVB.getValue("stringValue"));
 
         propertyContainerVB.setValue("stringValue", "Samson");

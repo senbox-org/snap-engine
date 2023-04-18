@@ -87,6 +87,9 @@ public class ResourceInstaller {
         }
     }
 
+
+
+
     private void copyResources(Collection<Path> resources, ProgressMonitor pm) throws IOException {
         synchronized (ResourceInstaller.class) {
             pm.beginTask("Copying resources...", resources.size());
@@ -119,10 +122,12 @@ public class ResourceInstaller {
         if (!Files.exists(targetFile)) {
             return true;
         }
-        boolean sizeIsDifferent = Files.size(targetFile) != Files.size(resource);
-        FileTime existingFileModifiedTime = Files.getLastModifiedTime(targetFile);
-        FileTime newFileModifiedTime = Files.getLastModifiedTime(resource);
-        boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
+        final Path realTargetFile = targetFile.toRealPath();
+        final Path realResource = resource.toRealPath();
+        final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource) && Files.size(realResource) != 0;
+        final FileTime existingFileModifiedTime = Files.getLastModifiedTime(realTargetFile);
+        final FileTime newFileModifiedTime = Files.getLastModifiedTime(realResource);
+        final boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0 && Files.size(realResource) != 0;  // access to attributes of files in jars is restricted
         return (newFileIsNewer || sizeIsDifferent) && Files.isRegularFile(resource);
     }
 

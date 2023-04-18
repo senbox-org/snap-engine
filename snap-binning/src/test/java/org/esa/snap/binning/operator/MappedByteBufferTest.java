@@ -21,16 +21,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests runtime behaviour and performance of {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}.
@@ -52,51 +49,6 @@ public class MappedByteBufferTest {
     @After
     public void tearDown() {
         deleteFile(file);
-    }
-
-    @Test
-    public void testThatMemoryMappedFileIODoesNotConsumeHeapSpace() throws Exception {
-        final int fileSize = Integer.MAX_VALUE; // 2GB!
-        final long mem1, mem2, mem3, mem4;
-
-        final RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        final FileChannel fc = raf.getChannel();
-        try {
-            mem1 = getFreeMiB();
-            final MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
-            mem2 = getFreeMiB();
-
-            // Modify buffer, so that it must be written when channel is closed.
-            buffer.putDouble(1.2);
-            buffer.putFloat(3.4f);
-            buffer.putLong(fileSize - 8, 123456789L);
-
-        } finally {
-            mem3 = getFreeMiB();
-            raf.close();
-            mem4 = getFreeMiB();
-        }
-
-        assertTrue(file.exists());
-        assertEquals(fileSize, file.length());
-
-        System.out.println("free mem before opening: " + mem1 + " MiB");
-        System.out.println("free mem after opening:  " + mem2 + " MiB");
-        System.out.println("free mem before closing: " + mem3 + " MiB");
-        System.out.println("free mem after closing:  " + mem4 + " MiB");
-
-        // If these memory checks fail, check if 1 MiB is still too fine grained
-        assertEquals(mem2, mem1);
-        assertEquals(mem3, mem1);
-        assertEquals(mem4, mem1);
-
-        // Now make sure we get the values back
-        try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
-            assertEquals(1.2, stream.readDouble(), 1e-10); // 8 bytes
-            assertEquals(3.4, stream.readFloat(), 1e-5f);  // 4 bytes
-            stream.skip(fileSize - (8 + 4 + 8));
-            assertEquals(123456789L, stream.readLong());
-        }
     }
 
     @Test

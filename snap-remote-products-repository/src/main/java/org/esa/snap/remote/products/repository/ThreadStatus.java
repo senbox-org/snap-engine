@@ -1,6 +1,8 @@
 package org.esa.snap.remote.products.repository;
 
 /**
+ * Check if the thread is finished.
+ *
  * Created by jcoravu on 13/8/2019.
  */
 public interface ThreadStatus {

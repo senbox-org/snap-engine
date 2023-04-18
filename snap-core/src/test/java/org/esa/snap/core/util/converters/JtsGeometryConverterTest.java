@@ -19,6 +19,8 @@ package org.esa.snap.core.util.converters;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -27,10 +29,10 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class JtsGeometryConverterTest {
 
@@ -74,6 +76,12 @@ public class JtsGeometryConverterTest {
         };
         final Polygon polygon = factory.createPolygon(linearRing, new LinearRing[]{factory.createLinearRing(hole)});
         testParsing(polygon);
+    }
+
+    @Test(expected = ConversionException.class)
+    public void testParsing_fails() throws ConversionException {
+        // single quotes are not allowed in WKT
+        new JtsGeometryConverter().parse("'POLYGON((119.50000 31.000000, 124.00000 31.000000, 124.00000 37.000000, 119.50000 37.000000, 119.50000 31.000000))'");
     }
 
     @Test

@@ -23,7 +23,7 @@ import java.awt.Font;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public abstract class BasePropertyMapTest {
 
@@ -200,7 +200,7 @@ public abstract class BasePropertyMapTest {
 
     // Give PropertyMap impl. time to propagate change events
     private void sleep() throws InterruptedException {
-        Thread.sleep(50);
+        Thread.sleep(150);
     }
 
     private static class MyPropertyChangeListener implements PropertyChangeListener {

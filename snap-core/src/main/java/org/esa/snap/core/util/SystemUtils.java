@@ -54,7 +54,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A collection of (BEAM-) system level functions.
+ * A collection of SNAP-system level functions.
  * <p>
  * <p> All functions have been implemented with extreme caution in order to provide a maximum performance.
  *
@@ -383,7 +383,7 @@ public class SystemUtils {
      * @since BEAM 4.8
      */
     public static void init3rdPartyLibs(Class<?> cls) {
-        init3rdPartyLibs(cls != null ? cls.getClassLoader() : Thread.currentThread().getContextClassLoader());
+        init3rdPartyLibsByCl(cls != null ? cls.getClassLoader() : Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -392,7 +392,7 @@ public class SystemUtils {
      * @param cl The most useful class loader.
      * @since SNAP 8.0
      */
-    public static void init3rdPartyLibs(ClassLoader cl) {
+    public static void init3rdPartyLibsByCl(ClassLoader cl) {
         initJAI(cl);
         initGeoTools();
         initNetCdf();
@@ -532,6 +532,14 @@ public class SystemUtils {
         System.gc();
         System.gc();
         System.gc();
+    }
+
+    public static double getMemoryUsed() {
+        final Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+
+        double deltaBytes = runtime.totalMemory() - runtime.freeMemory();
+        return deltaBytes / 1048576.0;
     }
 
     /**

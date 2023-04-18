@@ -213,16 +213,6 @@ public class PixelGeoCoding2Test {
         return createLonGridData(LON_1, LON_2);
     }
 
-    private static float[] createBandData(TiePointGrid grid) {
-        float[] floats = new float[PW * PH];
-        for (int y = 0; y < PH; y++) {
-            for (int x = 0; x < PW; x++) {
-                floats[y * PW + x] = grid.getPixelFloat(x, y);
-            }
-        }
-        return floats;
-    }
-
     private static float[] createLatGridData(float lat0, float lat1) {
         float[] floats = new float[GW * GH];
 
@@ -234,6 +224,16 @@ public class PixelGeoCoding2Test {
             }
         }
 
+        return floats;
+    }
+
+    private static float[] createBandData(TiePointGrid grid) {
+        float[] floats = new float[PW * PH];
+        for (int y = 0; y < PH; y++) {
+            for (int x = 0; x < PW; x++) {
+                floats[y * PW + x] = grid.getPixelFloat(x, y);
+            }
+        }
         return floats;
     }
 

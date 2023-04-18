@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteOrder;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -135,60 +134,30 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
     static DecodeQualification getDecodeQualificationImpl(ImageInputStream stream) {
         try {
-            String mode = getTiffMode(stream);
+            String mode = Utils.getTiffMode(stream);
             if ("Tiff".equals(mode)) {
                 if (isImageReaderAvailable(stream)) {
                     return DecodeQualification.SUITABLE;
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             return DecodeQualification.UNABLE;
         }
         return DecodeQualification.UNABLE;
     }
 
-    private static boolean isImageReaderAvailable(ImageInputStream stream) {
+    private static boolean isImageReaderAvailable(ImageInputStream stream) throws Exception {
         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
         while (imageReaders.hasNext()) {
             final ImageReader reader = imageReaders.next();
             if (reader instanceof TIFFImageReader) {
-                return true;
+                // 2020-07-21 CC Added COG check
+                TIFFImageReader tiffImageReader = (TIFFImageReader) reader;
+                tiffImageReader.setInput(stream);
+                return !Utils.isCOGGeoTIFF(tiffImageReader);
             }
         }
         return false;
-    }
-
-    static String getTiffMode(ImageInputStream stream) throws IOException {
-        try {
-            stream.mark();
-            int byteOrder = stream.readUnsignedShort();
-            switch (byteOrder) {
-                case 0x4d4d:
-                    stream.setByteOrder(ByteOrder.BIG_ENDIAN);
-                    break;
-                case 0x4949:
-                    stream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
-                    break;
-                default:
-                    // Fallback
-                    stream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
-                    break;
-            }
-
-            int magic = stream.readUnsignedShort();
-            switch (magic) {
-                case 43:
-                    // BIG-TIFF
-                    return "BigTiff";
-                case 42:
-                    // normal TIFF
-                    return "Tiff";
-                default:
-                    return "Unknown";
-            }
-        } finally {
-            stream.reset();
-        }
     }
 
     @Override

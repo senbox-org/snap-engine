@@ -16,7 +16,10 @@
 
 package com.bc.ceres.binio.internal;
 
-import com.bc.ceres.binio.*;
+import com.bc.ceres.binio.CollectionData;
+import com.bc.ceres.binio.DataAccessException;
+import com.bc.ceres.binio.DataContext;
+import com.bc.ceres.binio.SimpleType;
 
 import java.io.IOException;
 
@@ -167,6 +170,11 @@ final class SimpleMember implements MemberInstance {
     @Override
     public void flush() throws IOException {
         segment.flushData(context);
+    }
+
+    @Override
+    public void dispose() throws IOException {
+        segment.dispose();
     }
 
     // data access

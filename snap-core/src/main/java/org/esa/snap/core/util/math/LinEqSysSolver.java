@@ -22,7 +22,6 @@ import org.esa.snap.core.util.Debug;
  * A gauss-based solver for linear equation systems.
  *
  * @author Norman Fomferra
- * @version $Revision$ $Date$
  */
 public class LinEqSysSolver {
 

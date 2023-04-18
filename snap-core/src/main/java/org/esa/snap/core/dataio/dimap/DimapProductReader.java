@@ -55,6 +55,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -77,6 +78,7 @@ public class DimapProductReader extends AbstractProductReader {
     private File inputDir;
     private File inputFile;
     private Map<Band, ImageInputStream> bandInputStreams;
+    private Map<TiePointGrid, TpgDomInfo> tiePointGridInfoMap;
 
     private Map<Band, File> bandDataFiles;
     private Set<ReaderExtender> readerExtenders;
@@ -137,7 +139,7 @@ public class DimapProductReader extends AbstractProductReader {
         this.product.setProductReader(this);
 
         if (existingProduct == null) {
-            readTiePointGrids(dom);
+            tiePointGridInfoMap = readTiePointGrids(dom);
         }
 
         bindBandsToFiles(dom);
@@ -167,7 +169,7 @@ public class DimapProductReader extends AbstractProductReader {
                 for (int i = 0; i < geoCodings.length; i++) {
                     final Band band = product.getBandAt(i);
                     if (product.getSceneRasterWidth() == band.getRasterWidth()
-                        && product.getSceneRasterHeight() == band.getRasterHeight()) {
+                            && product.getSceneRasterHeight() == band.getRasterHeight()) {
                         product.setSceneGeoCoding(geoCodings[i]);
                     }
                     band.setGeoCoding(geoCodings[i]);
@@ -200,43 +202,28 @@ public class DimapProductReader extends AbstractProductReader {
         }
     }
 
-    private void readTiePointGrids(Document jDomDocument) throws IOException {
+    private static class TpgDomInfo {
+        final File inputFile;
+        final int dataType;
+
+        private TpgDomInfo(File inputFile, int dataType) {
+            this.inputFile = inputFile;
+            this.dataType = dataType;
+        }
+    }
+
+    private Map<TiePointGrid, TpgDomInfo> readTiePointGrids(Document jDomDocument) {
         final String[] tiePointGridNames = product.getTiePointGridNames();
+        final HashMap<TiePointGrid, TpgDomInfo> tpgInfoMap = new HashMap<>();
         for (String tiePointGridName : tiePointGridNames) {
             final TiePointGrid tiePointGrid = product.getTiePointGrid(tiePointGridName);
             String dataFile = DimapProductHelpers.getTiePointDataFile(jDomDocument, tiePointGrid.getName());
             final int dataType = DimapProductHelpers.getTiePointDataType(jDomDocument.getRootElement(), tiePointGrid.getName());
             dataFile = FileUtils.exchangeExtension(dataFile, DimapProductConstants.IMAGE_FILE_EXTENSION);
-            FileImageInputStream inputStream = null;
-            try {
-                inputStream = new FileImageInputStream(new File(inputDir, dataFile));
-                final float[] gridData = ((float[]) tiePointGrid.getGridData().getElems());
-                inputStream.seek(0);
-                if (dataType == ProductData.TYPE_FLOAT32) {
-                    inputStream.readFully(gridData, 0, gridData.length);
-                } else {
-                    final double[] doubles = new double[gridData.length];
-                    inputStream.readFully(doubles, 0, doubles.length);
-                    int i = 0;
-                    for (double d : doubles) {
-                        gridData[i++] = (float) d;
-                    }
-                }
-                inputStream.close();
-                inputStream = null;
-                // See if we have a -180...+180 or a 0...360 degree discontinuity
-                if (tiePointGrid.getDiscontinuity() != TiePointGrid.DISCONT_NONE) {
-                    tiePointGrid.setDiscontinuity(TiePointGrid.getDiscontinuity(gridData));
-                }
-            } catch (Exception e) {
-                throw new IOException(
-                        MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tiePointGridName), e);
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
+            final File inputFile = new File(inputDir, dataFile);
+            tpgInfoMap.put(tiePointGrid, new TpgDomInfo(inputFile, dataType));
         }
+        return tpgInfoMap;
     }
 
     private Document readDom() throws IOException {
@@ -254,7 +241,7 @@ public class DimapProductReader extends AbstractProductReader {
         return dom;
     }
 
-    private void initInput() throws IOException {
+    private void initInput() {
         if (getInput() instanceof String) {
             inputFile = new File((String) getInput());
         } else if (getInput() instanceof File) {
@@ -306,13 +293,12 @@ public class DimapProductReader extends AbstractProductReader {
 
         final File dataFile = bandDataFiles.get(destBand);
 
-        int destPos = 0;
 
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
         // For each scan in the data source
         try {
-//            synchronized (inputStream) {
             try (ImageInputStream inputStream = new FileImageInputStream(dataFile)) {
+                int destPos = 0;
                 final int type = destBuffer.getType();
                 final boolean longType = ProductData.TYPE_INT64 == type;
                 final ProductData line = ProductData.createInstance(type, sourceWidth);
@@ -323,20 +309,8 @@ public class DimapProductReader extends AbstractProductReader {
                     }
                     final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
                     long inputPos = sourcePosY + sourceOffsetX;
-                    if (sourceStepX == 1) {
-                        destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
-                        destPos += destWidth;
-                    } else {
-                        line.readFrom(0, sourceWidth, inputStream, inputPos);
-                        for (int lineX = 0; lineX < sourceWidth; lineX += sourceStepX) {
-                            if (longType) {
-                                destBuffer.setElemLongAt(destPos, line.getElemLongAt(lineX));
-                            } else {
-                                destBuffer.setElemDoubleAt(destPos, line.getElemDoubleAt(lineX));
-                            }
-                            destPos++;
-                        }
-                    }
+                    destPos = readLineRasterDataImpl(sourceStepX, sourceWidth, destPos, destWidth, destBuffer,
+                                                     inputStream, longType, line, inputPos);
                 }
                 pm.worked(1);
             } catch (IOException e) {
@@ -346,6 +320,61 @@ public class DimapProductReader extends AbstractProductReader {
         } finally {
             pm.done();
         }
+    }
+
+    @Override
+    public void readTiePointGridRasterData(TiePointGrid tpg, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
+        final TpgDomInfo domInfo = tiePointGridInfoMap.get(tpg);
+        try (FileImageInputStream inputStream = new FileImageInputStream(domInfo.inputFile)) {
+            final int gridWidth = tpg.getGridWidth();
+            final float[] fullData = new float[gridWidth * tpg.getGridHeight()];
+            inputStream.seek(0);
+            if (domInfo.dataType == ProductData.TYPE_FLOAT32) {
+                inputStream.readFully(fullData, 0, fullData.length);
+            } else {
+                final double[] doubles = new double[fullData.length];
+                inputStream.readFully(doubles, 0, doubles.length);
+                int i = 0;
+                for (double d : doubles) {
+                    fullData[i++] = (float) d;
+                }
+            }
+            final float[] destData = (float[]) destBuffer.getElems();
+            if (destData.length == fullData.length) {
+                System.arraycopy(fullData, 0, destData, 0, fullData.length);
+            } else {
+                for (int y1 = 0; y1 < destHeight; y1++) {
+                    final int srcPos = gridWidth * (destOffsetY + y1) + destOffsetX;
+                    System.arraycopy(fullData, srcPos, destData, y1 * destWidth, destWidth);
+                }
+            }
+            if (tpg.getDiscontinuity() == TiePointGrid.DISCONT_AUTO) {
+                tpg.setDiscontinuity(TiePointGrid.getDiscontinuity(destData));
+            }
+        } catch (Exception e) {
+            throw new IOException(
+                    MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tpg.getName()), e);
+        }
+    }
+
+
+    private static int readLineRasterDataImpl(int sourceStepX, int sourceWidth, int destPos, int destWidth, ProductData destBuffer,
+                                              ImageInputStream inputStream, boolean longType, ProductData line, long inputPos) throws IOException {
+        if (sourceStepX == 1) {
+            destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
+            destPos += destWidth;
+        } else {
+            line.readFrom(0, sourceWidth, inputStream, inputPos);
+            for (int lineX = 0; lineX < sourceWidth; lineX += sourceStepX) {
+                if (longType) {
+                    destBuffer.setElemLongAt(destPos, line.getElemLongAt(lineX));
+                } else {
+                    destBuffer.setElemDoubleAt(destPos, line.getElemDoubleAt(lineX));
+                }
+                destPos++;
+            }
+        }
+        return destPos;
     }
 
     @Override

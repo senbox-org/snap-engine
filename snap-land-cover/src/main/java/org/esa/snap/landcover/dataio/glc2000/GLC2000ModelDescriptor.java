@@ -49,10 +49,6 @@ public class GLC2000ModelDescriptor extends AbstractLandCoverModelDescriptor {
         return new FileLandCoverModel(this, new File[]{file}, resampling);
     }
 
-    public String createTileFilename(final int minLat, final int minLon) {
-        return file.getName();
-    }
-
     @Override
     public boolean isInstalled() {
         return true;

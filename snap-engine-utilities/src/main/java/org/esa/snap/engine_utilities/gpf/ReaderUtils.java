@@ -106,6 +106,43 @@ public final class ReaderUtils {
         return virtBand;
     }
 
+    public static Band createVirtualIntensityDBBand(final Product product, final Band bandI, final Band bandQ, final String suffix) {
+        return createVirtualIntensityDBBand(product, bandI, bandQ, createName(bandI.getName(), "Intensity"), suffix);
+    }
+
+    public static Band createVirtualIntensityDBBand(final Product product, final Band bandI, final Band bandQ,
+                                                    final String bandName, final String suffix) {
+        final String bandNameI = bandI.getName();
+        final double nodatavalueI = bandI.getNoDataValue();
+        final String bandNameQ = bandQ.getName();
+        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : 10.0*log10(" +
+                bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ + ")";
+
+        String name = bandName;
+        if (!name.endsWith(suffix)) {
+            name += suffix;
+        }
+        final VirtualBand virtBand = new VirtualBand(name + "_db",
+                ProductData.TYPE_FLOAT32,
+                bandI.getRasterWidth(),
+                bandI.getRasterHeight(),
+                expression);
+        virtBand.setUnit(Unit.INTENSITY);
+        virtBand.setDescription("Intensity in dB from complex data");
+        virtBand.setNoDataValueUsed(true);
+        virtBand.setNoDataValue(nodatavalueI);
+        virtBand.setOwner(product);
+        product.addBand(virtBand);
+
+        if (bandI.getGeoCoding() != product.getSceneGeoCoding()) {
+            virtBand.setGeoCoding(bandI.getGeoCoding());
+        }
+        // set as band to use for quicklook
+        product.setQuicklookBandName(virtBand.getName());
+
+        return virtBand;
+    }
+
     /**
      * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
@@ -145,14 +182,14 @@ public final class ReaderUtils {
 
         if (latCorners == null || lonCorners == null) return;
 
-        final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = Math.min(10, Math.max(2, product.getSceneRasterWidth()));
+        final int gridHeight = Math.min(10, Math.max(2, product.getSceneRasterHeight()));
 
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
@@ -184,8 +221,8 @@ public final class ReaderUtils {
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
@@ -336,7 +373,7 @@ public final class ReaderUtils {
 
     private static String[] MONTHS = new String[] {"JAN","FEB","MAR","APR","JUN","JUL","AUG","SEP","OCT","NOV","DEC"};
 
-    private static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
+    public static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
         Guardian.assertNotNull("name", name);
         char[] sortedValidChars;
         if (validChars == null) {

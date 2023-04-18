@@ -38,10 +38,6 @@ public class JavaTypeConverter extends ClassConverter {
         if (text.isEmpty()) {
             throw new ConversionException(text);
         }
-        String fullClassName = getPointPackageName() + "." + text;
-        if (getPointClass().getName().equals(fullClassName)) {
-            return getPointClass();
-        }
         return super.parse(text);
     }
 
@@ -50,11 +46,7 @@ public class JavaTypeConverter extends ClassConverter {
         return super.format(javaType);
     }
 
-    private static Class<?> getPointClass() {
-        return Point.class;
-    }
-
     private static String getPointPackageName() {
-        return getPointClass().getPackage().getName();
+        return Point.class.getPackage().getName();
     }
 }

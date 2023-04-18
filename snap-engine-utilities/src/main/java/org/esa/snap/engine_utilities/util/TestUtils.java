@@ -26,15 +26,19 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.main.GPT;
+import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
+import org.esa.snap.engine_utilities.gpf.ReaderUtils;
+import org.esa.snap.runtime.Config;
 
-import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -60,9 +64,30 @@ public class TestUtils {
 
         try {
             SystemUtils.init3rdPartyLibs(GPT.class);
+            initAuxData();
             testEnvironmentInitialized = true;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void initAuxData() throws Exception {
+        Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
+        }
+        if(!Files.exists(propFile)) {
+            final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(TestUtils.class);
+            propFile = moduleBasePath.resolve("etc/snap.auxdata.properties");
+        }
+        if(propFile.toFile().exists()) {
+            System.out.println("Auxdata properties loaded from "  + propFile);
+            Config.instance(Settings.SNAP_AUXDATA).load(propFile);
+        } else {
+            throw new Exception("etc/snap.auxdata.properties not found");
         }
     }
 
@@ -142,36 +167,116 @@ public class TestUtils {
     public static Product createProduct(final String type, final int w, final int h) {
         final Product product = new Product("name", type, w, h);
 
-        product.setStartTime(AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
-        product.setEndTime(AbstractMetadata.parseUTC("10-MAY-2008 20:35:46.890683"));
+        final ProductData.UTC startTime = AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683");
+        final ProductData.UTC endTime = AbstractMetadata.parseUTC("10-MAY-2008 20:35:46.890683");
+        product.setStartTime(startTime);
+        product.setEndTime(endTime);
         product.setDescription("description");
 
         addGeoCoding(product);
 
-        AbstractMetadata.addAbstractedMetadataHeader(product.getMetadataRoot());
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(product.getMetadataRoot());
+        absRoot.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
+        absRoot.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
+        absRoot.setAttributeDouble(AbstractMetadata.line_time_interval, ReaderUtils.getLineTimeInterval(startTime, endTime, h));
 
         return product;
     }
 
     public static Band createBand(final Product testProduct, final String bandName, final int w, final int h) {
-        final Band band = testProduct.addBand(bandName, ProductData.TYPE_INT32);
-        band.setUnit(Unit.AMPLITUDE);
-        final int[] intValues = new int[w * h];
-        for (int i = 0; i < w * h; i++) {
-            intValues[i] = i + 1;
+        return createBand(testProduct, bandName, ProductData.TYPE_INT32, Unit.AMPLITUDE, w, h, true);
+    }
+
+    public static Band createBand(final Product testProduct, final String bandName, final int dataType,
+                                  final String unit, final int w, final int h, final boolean increasing) {
+        Band band = new Band(bandName, dataType, w, h);
+        testProduct.addBand(band);
+        band.setUnit(unit);
+        final int size = w * h;
+        if(dataType == ProductData.TYPE_FLOAT32) {
+            final float[] floatValues = new float[size];
+            for (int i = 0; i < size; i++) {
+                floatValues[increasing ? i : size-1-i] = i + 1.5f;
+            }
+            band.setData(ProductData.createInstance(floatValues));
+        } else if(dataType == ProductData.TYPE_INT8 || dataType == ProductData.TYPE_UINT8){
+            final byte[] intValues = new byte[size];
+            int val = 0;
+            for (int i = 0; i < size; i++) {
+                if(val > Byte.MAX_VALUE)
+                    val = 0;
+                intValues[increasing ? i : size-1-i] = (byte)val;
+                val += 1;
+            }
+            if(dataType == ProductData.TYPE_UINT8) {
+                band.setData(ProductData.createUnsignedInstance(intValues));
+            } else {
+                band.setData(ProductData.createInstance(intValues));
+            }
+        } else if(dataType == ProductData.TYPE_INT16 || dataType == ProductData.TYPE_UINT16){
+            final short[] intValues = new short[size];
+            int val = 0;
+            for (int i = 0; i < size; i++) {
+                if(val > Short.MAX_VALUE)
+                    val = 0;
+                intValues[increasing ? i : size-1-i] = (short)val;
+                val += 1;
+            }
+            if(dataType == ProductData.TYPE_UINT16) {
+                band.setData(ProductData.createUnsignedInstance(intValues));
+            } else {
+                band.setData(ProductData.createInstance(intValues));
+            }
+        } else {
+            final int[] intValues = new int[size];
+            for (int i = 0; i < size; i++) {
+                intValues[increasing ? i : size-1-i] = i + 1;
+            }
+            band.setData(ProductData.createInstance(intValues));
         }
-        band.setData(ProductData.createInstance(intValues));
         return band;
     }
 
     private static void addGeoCoding(final Product product) {
 
-        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, 2, 2, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, 4, 4, 0.5f, 0.5f,
                                                       product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                      new float[]{10.0f, 10.0f, 5.0f, 5.0f});
-        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, 2, 2, 0.5f, 0.5f,
+                                                      new float[]{
+                                                              46.99964f,
+                                                              47.078053f,
+                                                              47.153496f,
+                                                              47.226784f,
+                                                              46.64042f,
+                                                              46.71869f,
+                                                              46.79402f,
+                                                              46.867233f,
+                                                              46.28112f,
+                                                              46.359253f,
+                                                              46.43448f,
+                                                              46.507614f,
+                                                              45.921745f,
+                                                              45.999744f,
+                                                              46.07487f,
+                                                              46.14794f});
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, 4, 4, 0.5f, 0.5f,
                                                       product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                      new float[]{10.0f, 10.0f, 5.0f, 5.0f},
+                                                      new float[]{
+                                                              11.11786f,
+                                                              10.570571f,
+                                                              10.024274f,
+                                                              9.472965f,
+                                                              11.006959f,
+                                                              10.463262f,
+                                                              9.920575f,
+                                                              9.372928f,
+                                                              10.897017f,
+                                                              10.356847f,
+                                                              9.817702f,
+                                                              9.273651f,
+                                                              10.788004f,
+                                                              10.251297f,
+                                                              9.715628f,
+                                                              9.175106f},
                                                       TiePointGrid.DISCONT_AT_360);
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid);
 

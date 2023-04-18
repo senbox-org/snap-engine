@@ -29,7 +29,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +120,7 @@ public final class CDEMElevationModel extends BaseElevationModel {
     private List<String> getFileURLs(final String path, final String ext) {
         final List<String> fileList = new ArrayList<>();
         try {
-            final Document doc = Jsoup.connect(path).timeout(10*1000).validateTLSCertificates(false).get();
+            final Document doc = Jsoup.connect(path).timeout(10*1000).get();
 
             final Element table = doc.select("table").first();
             final Elements tbRows = table.select("tr");
@@ -156,8 +155,8 @@ public final class CDEMElevationModel extends BaseElevationModel {
 
     @Override
     public GeoPos getGeoPos(final PixelPos pixelPos) {
-        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 60.0;
-        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0;
+        final double pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_Y - 60.0;
+        final double pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE_X - 180.0;
         return new GeoPos(pixelLat, pixelLon);
     }
 

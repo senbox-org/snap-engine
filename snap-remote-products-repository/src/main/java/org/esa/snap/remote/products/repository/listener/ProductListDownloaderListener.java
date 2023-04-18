@@ -5,6 +5,8 @@ import org.esa.snap.remote.products.repository.RepositoryProduct;
 import java.util.List;
 
 /**
+ * Notifies the product count, the available products on searching the product list on a remote repository.
+ *
  * Created by jcoravu on 9/8/2019.
  */
 public interface ProductListDownloaderListener {

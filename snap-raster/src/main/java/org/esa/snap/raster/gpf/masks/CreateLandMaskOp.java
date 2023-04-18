@@ -98,6 +98,12 @@ public class CreateLandMaskOp extends Operator {
             if (shorelineExtension == null) {
                 shorelineExtension = 0;
             }
+            boolean isMultiSizeProducts = sourceProduct.isMultiSize();
+            if(isMultiSizeProducts) {
+                throw new OperatorException("The multi-size source product is not supported."
+                +"Please, use resampling processor before. Or use the default graph 'Raster/Land Sea Mask For Multi-size Source.xml'"
+                +"in the graph builder.");
+            }
 
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);

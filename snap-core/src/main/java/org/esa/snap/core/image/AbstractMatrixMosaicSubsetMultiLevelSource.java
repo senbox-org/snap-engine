@@ -88,4 +88,46 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
         }
         return null;
     }
+
+    protected final MatrixReadBounds computeTopLeftMatrixCellReadBounds() {
+        int lastRowIndex = this.mosaicMatrix.getRowCount() - 1;
+        int lastColumnIndex = this.mosaicMatrix.getColumnCount() - 1;
+        int cellMatrixOffsetY = 0;
+        for (int rowIndex = 0; rowIndex <= lastRowIndex; rowIndex++) {
+            int cellMatrixOffsetX = 0;
+            for (int columnIndex = 0; columnIndex <= lastColumnIndex; columnIndex++) {
+                MosaicMatrix.MatrixCell matrixCell = this.mosaicMatrix.getCellAt(rowIndex, columnIndex);
+                Rectangle cellMatrixBounds = new Rectangle(cellMatrixOffsetX, cellMatrixOffsetY, matrixCell.getCellWidth(), matrixCell.getCellHeight());
+                Rectangle intersectionMatrixBounds = this.imageReadBounds.intersection(cellMatrixBounds);
+                if (!intersectionMatrixBounds.isEmpty()) {
+                    int cellLocalOffsetX = intersectionMatrixBounds.x - cellMatrixBounds.x;
+                    int cellLocalOffsetY = intersectionMatrixBounds.y - cellMatrixBounds.y;
+                    Rectangle cellLocalIntersectionBounds = new Rectangle(cellLocalOffsetX, cellLocalOffsetY, intersectionMatrixBounds.width, intersectionMatrixBounds.height);
+                    return new MatrixReadBounds(cellLocalIntersectionBounds, matrixCell);
+                }
+                cellMatrixOffsetX += matrixCell.getCellWidth();
+            }
+            cellMatrixOffsetY += this.mosaicMatrix.getCellAt(rowIndex, 0).getCellHeight();
+        }
+        return null;
+    }
+
+    protected static class MatrixReadBounds {
+
+        private final Rectangle cellLocalIntersectionBounds;
+        private final MosaicMatrix.MatrixCell matrixCell;
+
+        MatrixReadBounds(Rectangle cellLocalIntersectionBounds, MosaicMatrix.MatrixCell matrixCell) {
+            this.cellLocalIntersectionBounds = cellLocalIntersectionBounds;
+            this.matrixCell = matrixCell;
+        }
+
+        public Rectangle getCellLocalIntersectionBounds() {
+            return cellLocalIntersectionBounds;
+        }
+
+        public MosaicMatrix.MatrixCell getMatrixCell() {
+            return matrixCell;
+        }
+    }
 }

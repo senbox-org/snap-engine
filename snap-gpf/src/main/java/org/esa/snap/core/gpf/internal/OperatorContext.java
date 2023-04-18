@@ -443,8 +443,6 @@ public class OperatorContext {
         // Note: GPF pull-processing is triggered here!
         //
         Raster awtRaster;
-        System.err.println("OperatorContext: No Prefetch!");
-        //image.prefetchTiles(image.getTileIndices(region));
         if (borderExtender != null) {
             awtRaster = image.getExtendedData(region, borderExtender);
         } else {

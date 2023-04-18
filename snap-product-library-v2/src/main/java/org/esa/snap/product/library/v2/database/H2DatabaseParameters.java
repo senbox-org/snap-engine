@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * The parameters to connect to a H2 local database.
+ *
  * Created by jcoravu on 20/1/2020.
  */
 public class H2DatabaseParameters {
@@ -31,7 +33,8 @@ public class H2DatabaseParameters {
 
     public String getUrl() {
         String databaseName = "products";
-        return "jdbc:h2:" + this.parentFolderPath.resolve(databaseName).toString();
+        //https://senbox.atlassian.net/browse/SNAP-1359
+        return "jdbc:h2:" + this.parentFolderPath.resolve(databaseName).toString() + ";AUTO_SERVER=TRUE";
     }
 
     public Path getParentFolderPath() {

@@ -40,6 +40,7 @@ public class DoubleConverterTest extends AbstractConverterTest {
         testParseSuccess(234.0, "234");
         testParseSuccess(-45.789, "-45.789");
         testParseSuccess(0.25, "+0.25");
+        testParseSuccess(0.26, "0.26\n");
         testParseSuccess(null, "");
         testParseSuccess(Double.NaN, "NaN");
 

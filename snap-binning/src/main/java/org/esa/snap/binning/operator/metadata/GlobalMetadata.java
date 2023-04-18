@@ -2,7 +2,6 @@ package org.esa.snap.binning.operator.metadata;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
-import org.locationtech.jts.geom.Geometry;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -18,6 +17,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.locationtech.jts.geom.Geometry;
 
 import java.io.File;
 import java.io.FileReader;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TimeZone;
@@ -83,7 +84,10 @@ public class GlobalMetadata {
             return;
         }
 
-        final VelocityContext vc = new VelocityContext(metaProperties);
+        final VelocityContext vc = new VelocityContext();
+        for (Map.Entry<String, String> entry : metaProperties.entrySet()) {
+            vc.internalPut(entry.getKey(), entry.getValue());
+        }
         vc.put("operator", operator);
         vc.put("targetProduct", targetProduct);
         vc.put("metadataProperties", metaProperties);

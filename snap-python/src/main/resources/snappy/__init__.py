@@ -348,6 +348,7 @@ try:
     SystemUtils = jpy.get_type('org.esa.snap.core.util.SystemUtils')
     ProductIO = jpy.get_type('org.esa.snap.core.dataio.ProductIO')
     ProductUtils = jpy.get_type('org.esa.snap.core.util.ProductUtils')
+    GeoUtils = jpy.get_type('org.esa.snap.core.util.GeoUtils')
     ProgressMonitor = jpy.get_type('com.bc.ceres.core.ProgressMonitor')
     PlainFeatureFactory = jpy.get_type('org.esa.snap.core.datamodel.PlainFeatureFactory')
     FeatureUtils = jpy.get_type('org.esa.snap.core.util.FeatureUtils')

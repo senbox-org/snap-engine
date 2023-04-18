@@ -140,7 +140,7 @@ public class OperatorContextTest {
         assertEquals("(c) 2011 by Brockmann Consult", node0Element.getAttributeString("copyright"));
         assertEquals("SNAP Graph Processing Framework (GPF)", node0Element.getAttributeString("moduleName"));
         assertEquals("Create a spatial and/or spectral subset of a data product.", node0Element.getAttributeString("purpose"));
-        assertEquals("Marco Zuehlke, Norman Fomferra, Marco Peters", node0Element.getAttributeString("authors"));
+        assertEquals("SNAP Developers", node0Element.getAttributeString("authors"));
 
     }
 

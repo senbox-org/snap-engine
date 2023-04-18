@@ -30,6 +30,7 @@ import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.MetadataUtils;
 import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
+import org.esa.snap.runtime.Config;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -249,6 +250,12 @@ public class BeamMetadataPart extends ProfilePartIO {
         for (int i = 0; i < element.getNumElements(); i++) {
             MetadataElement subElement = element.getElementAt(i);
             final String subElementName = subElement.getName();
+            // Including the ADS of some MERIS files breaks the NetCDF. It can't be read by the NetCDF Java library anymore. Other libs can read it.
+            // If not requested the ADS is not written (See SNAP-1473, SNAP 1474)
+            boolean saveADS = Config.instance("snap").preferences().getBoolean("save.product.annotations", false);
+            if (!saveADS && subElementName.toLowerCase().endsWith("ads")) {
+                continue;
+            }
             if (!isGlobalAttributesElement(subElementName)) {
                 final String name;
                 if (prefix.isEmpty()) {

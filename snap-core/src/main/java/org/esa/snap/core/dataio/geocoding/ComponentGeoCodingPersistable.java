@@ -1,18 +1,47 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.awt.*;
+import java.io.IOException;
+import java.util.prefs.Preferences;
 import java.util.stream.IntStream;
 
+/**
+ * @deprecated dont further use this class. Now it is wrapped by {@link ComponentGeoCodingPersistenceConverter}
+ */
+@Deprecated
 public class ComponentGeoCodingPersistable implements DimapPersistable {
 
     public static final String TAG_COMPONENT_GEO_CODING = "ComponentGeoCoding";
@@ -29,7 +58,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
     public static final String TAG_SUBSAMPLING_Y = "SubsamplingY";
 
     @Override
-    public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
+    public Object createObjectFromXml(Element element, Product product) {
         final String gcElemName = element.getName();
 
         final Element codingMain = element.getChild(TAG_COMPONENT_GEO_CODING);
@@ -38,8 +67,8 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             return null;
         }
 
-        final String forwardKey = codingMain.getChildTextTrim(TAG_FORWARD_CODING_KEY);
-        final String inverseKey = codingMain.getChildTextTrim(TAG_INVERSE_CODING_KEY);
+        String forwardKey = codingMain.getChildTextTrim(TAG_FORWARD_CODING_KEY);
+        String inverseKey = codingMain.getChildTextTrim(TAG_INVERSE_CODING_KEY);
         final String geoChecksName = codingMain.getChildTextTrim(TAG_GEO_CHECKS);
         final String geoCrsWKT = codingMain.getChildTextTrim(TAG_GEO_CRS);
         final String lonVarName = codingMain.getChildTextTrim(TAG_LON_VARIABLE_NAME);
@@ -102,15 +131,15 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         }
 
         if (forwardInvalid
-                || inverseInvalid
-                || geoChecksInvalid
-                || lonVarNameInvalid
-                || latVarNameInvalid
-                || resolutionKmInvalid
-                || resolutionInKm == null
-                || geoChecksName == null
-                || invalidValueGeoChecks
-                || geoCRS == null) {
+            || inverseInvalid
+            || geoChecksInvalid
+            || lonVarNameInvalid
+            || latVarNameInvalid
+            || resolutionKmInvalid
+            || resolutionInKm == null
+            || geoChecksName == null
+            || invalidValueGeoChecks
+            || geoCRS == null) {
             SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ".");
             return null;
         }
@@ -156,13 +185,31 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         } else {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
-            final int size = rasterWidth * rasterHeight;
-            final double[] longitudes = lonRaster.getSourceImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-            final double[] latitudes = latRaster.getSourceImage().getImage(0).getData()
-                    .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+            final double[] longitudes;
+            final double[] latitudes;
+
+            try {
+                longitudes = RasterUtils.loadGeoData(lonRaster);
+                latitudes = RasterUtils.loadGeoData(latRaster);
+            } catch (IOException e) {
+                SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ". Reading geo-data failed.");
+                SystemUtils.LOG.severe(e.getMessage());
+                return null;
+            }
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
                                       resolutionInKm);
+        }
+
+        final Preferences snapPreferences = Config.instance("snap").preferences();
+        final boolean isFractionalEnabled = snapPreferences.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        if (isFractionalEnabled && PixelForward.KEY.equals(forwardKey)) {
+            forwardKey = PixelInterpolatingForward.KEY;
+        }
+        if (isFractionalEnabled && PixelQuadTreeInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelQuadTreeInverse.KEY_INTERPOLATING;
+        }
+        if (isFractionalEnabled && PixelGeoIndexInverse.KEY.equals(inverseKey)) {
+            inverseKey = PixelGeoIndexInverse.KEY_INTERPOLATING;
         }
 
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
@@ -231,3 +278,4 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         return codingMain;
     }
 }
+

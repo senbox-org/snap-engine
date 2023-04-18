@@ -15,11 +15,7 @@
  */
 package org.esa.snap.engine_utilities.gpf;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
@@ -36,8 +32,8 @@ public class InputProductValidator {
     private final static String SHOULD_BE_SAR_PRODUCT = "Input should be a SAR product";
     private final static String SHOULD_NOT_BE_LEVEL0 = "Level-0 RAW products are not supported";
     private final static String SHOULD_BE_COREGISTERED = "Input should be a coregistered stack.";
-    private final static String SHOULD_BE_SLC = "Input should be a single look complex SLC product.";
-    private final static String SHOULD_BE_GRD = "Input should be a detected product.";
+    private final static String SHOULD_BE_SLC = "Input should be a Single Look Complex(SLC) product.";
+    private final static String SHOULD_BE_GRD = "Input should be a Ground Range Detected (GRD) product.";
     private final static String SHOULD_BE_S1 = "Input should be a Sentinel-1 product.";
     private final static String SHOULD_BE_DEBURST = "Source product should first be deburst.";
     private final static String SHOULD_BE_MULTISWATH_SLC = "Source product should be multi sub-swath SLC burst product.";
@@ -68,10 +64,28 @@ public class InputProductValidator {
         }
     }
 
+    public boolean isCoregisteredStack() {
+        return StackUtils.isCoregisteredStack(product);
+    }
+
     public void checkIfCoregisteredStack() throws OperatorException {
         if (!StackUtils.isCoregisteredStack(product)) {
             throw new OperatorException(SHOULD_BE_COREGISTERED);
         }
+    }
+
+    public void checkIfCollocatedStack() throws OperatorException {
+        if (!isCollocated()) {
+            throw new OperatorException(SHOULD_BE_COREGISTERED);
+        }
+    }
+
+    public boolean isCollocated() {
+        if (absRoot != null) {
+            MetadataAttribute attrib = absRoot.getAttribute(AbstractMetadata.collocated_stack);
+            return (attrib != null && attrib.getData().getElemBoolean());
+        }
+        return false;
     }
 
     public boolean isComplex() {

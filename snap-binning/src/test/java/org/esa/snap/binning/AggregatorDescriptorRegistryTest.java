@@ -2,9 +2,11 @@ package org.esa.snap.binning;
 
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorAverageOutlierAware;
+import org.esa.snap.binning.aggregators.AggregatorMeanObs;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;
 import org.esa.snap.binning.aggregators.AggregatorPercentile;
+import org.esa.snap.binning.aggregators.AggregatorSum;
 import org.junit.Test;
 
 import java.util.List;
@@ -58,10 +60,26 @@ public class AggregatorDescriptorRegistryTest {
     }
 
     @Test
+    public void testDefaultAggregatorIsRegistered_Sum() {
+        AggregatorDescriptor descriptor = assertRegistered("SUM");
+        Aggregator aggregator = descriptor.createAggregator(ctx, new AggregatorSum.Config("x", "target"));
+        assertNotNull(aggregator);
+        assertEquals(AggregatorSum.class, aggregator.getClass());
+    }
+
+    @Test
+    public void testDefaultAggregatorIsRegistered_MeanObs() {
+        AggregatorDescriptor descriptor = assertRegistered("MEAN_OBS");
+        Aggregator aggregator = descriptor.createAggregator(ctx, new AggregatorMeanObs.Config("x", "target"));
+        assertNotNull(aggregator);
+        assertEquals(AggregatorMeanObs.class, aggregator.getClass());
+    }
+
+    @Test
     public void testGetAllRegisteredAggregatorDescriptors() {
         TypedDescriptorsRegistry registry = TypedDescriptorsRegistry.getInstance();
         List<AggregatorDescriptor> aggregatorDescriptors = registry.getDescriptors(AggregatorDescriptor.class);
-        assertEquals(5, aggregatorDescriptors.size());
+        assertEquals(7, aggregatorDescriptors.size());
     }
 
     private AggregatorDescriptor assertRegistered(String name) {

@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.geocoding.GeoChecks;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Band;
@@ -43,6 +44,7 @@ import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import ucar.ma2.Array;
@@ -54,6 +56,8 @@ import ucar.nc2.Variable;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.List;
+
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
 
 public class CfGeocodingPart extends ProfilePartIO {
 
@@ -360,7 +364,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelBasedGeoCoding(Product product) {
+    private static GeoCoding readPixelBasedGeoCoding(Product product) throws IOException {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -382,29 +386,27 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final int fullSize = width * height;
-
-        // These call seems to violate the encapsulation principle. At this point in code
-        // - I have a band object
-        // - I want the geophysical data
-        //
-        // - I DO NOT want to be forced to know that I require a source image which exposes a getData() method which
-        //   I'm forced to understand the parametrisation  etc ...
-        // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
-        // tb 2020-04-14
-        final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        lonBand.unloadRasterData();
-
-        final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        latBand.unloadRasterData();
+        final double[] longitudes = RasterUtils.loadGeoData(lonBand);
+        final double[] latitudes = RasterUtils.loadGeoData(latBand);
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
 
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                   width, height, resolutionInKm);
 
-        final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
-        final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+        final boolean fractionalAccuracy = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        final ForwardCoding forward;
+        if (fractionalAccuracy) {
+            forward = ComponentFactory.getForward(PixelInterpolatingForward.KEY);
+        } else {
+            forward = ComponentFactory.getForward(PixelForward.KEY);
+        }
+        final InverseCoding inverse;
+        if (fractionalAccuracy) {
+            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING);
+        } else {
+            inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+        }
 
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();

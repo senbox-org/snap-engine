@@ -36,55 +36,20 @@ import java.util.Map;
 
 public class OperatorImageTileStackTest extends TestCase {
 
-    public void testIsBandComputedByThisOperator() {
-        // todo - MarcoP shall implement this test because it is very important to test OperatorImageTileStack.isBandComputedByThisOperator (nf - 20090514)
-        assertTrue(true);
-    }
 
-    public void testTileStackImage() throws Exception {
+    public void testTileStackImage() {
         final SunTileCache tileCache = (SunTileCache) JAI.getDefaultInstance().getTileCache();
         tileCache.flush();
         long cacheTileCount = tileCache.getCacheTileCount();
         assertEquals(0, cacheTileCount);
 
-        Operator operator = new Operator() {
-            @Override
-            public void initialize() throws OperatorException {
-                Product product = new Product("name", "desc", 1, 1);
-
-                RenderedOp d = ConstantDescriptor.create(
-                        (float) product.getSceneRasterWidth(),
-                        (float) product.getSceneRasterHeight(),
-                        new Float[]{0.5f}, null);
-
-                product.addBand("a", ProductData.TYPE_INT32);
-                product.addBand("b", ProductData.TYPE_INT32);
-                product.addBand("c", ProductData.TYPE_INT32);
-                product.addBand("d", ProductData.TYPE_FLOAT32).setSourceImage(d);
-                setTargetProduct(product);
-            }
-
-            @Override
-            public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-                assertEquals(3, targetTiles.size());
-
-                for (Tile tt : targetTiles.values()) {
-                    ProductData dataBuffer = tt.getDataBuffer();
-                    int numElems = dataBuffer.getNumElems();
-                    for (int i = 0; i < numElems; i++) {
-                        dataBuffer.setElemIntAt(i, i);
-                    }
-                }
-
-                assertEquals(0, tileCache.getCacheTileCount());
-            }
-        };
+        Operator operator = new StackTestOperator(tileCache);
 
         Product targetProduct = operator.getTargetProduct();
         assertNotNull(targetProduct);
         assertEquals(4, targetProduct.getNumBands());
 
-        MultiLevelImage sourceImage = targetProduct.getBandAt(0).getSourceImage();
+        MultiLevelImage sourceImage = targetProduct.getBandAt(1).getSourceImage();
         RenderedImage image = sourceImage.getImage(0);
         assertNotNull(image);
         assertEquals(OperatorImageTileStack.class, image.getClass());
@@ -92,6 +57,54 @@ public class OperatorImageTileStackTest extends TestCase {
         image.getData();
 
         cacheTileCount = tileCache.getCacheTileCount();
-        assertEquals(3, cacheTileCount);
+        assertEquals(2, cacheTileCount);
+    }
+
+    private static class StackTestOperator extends Operator {
+        private final SunTileCache tileCache;
+
+        public StackTestOperator(SunTileCache tileCache) {
+            this.tileCache = tileCache;
+        }
+
+        @Override
+        public void initialize() throws OperatorException {
+            Product product = new Product("name", "desc", 1, 1);
+
+            Band bandA = product.addBand("a", ProductData.TYPE_INT32);
+            product.addBand("b", ProductData.TYPE_INT32);
+            product.addBand("c", ProductData.TYPE_INT32);
+            Band bandD = product.addBand("d", ProductData.TYPE_FLOAT32);
+
+            RenderedOp a = ConstantDescriptor.create(
+                    (float) product.getSceneRasterWidth(),
+                    (float) product.getSceneRasterHeight(),
+                    new Integer[]{1}, null);
+            bandA.setSourceImage(a);
+
+            RenderedOp d = ConstantDescriptor.create(
+                    (float) product.getSceneRasterWidth(),
+                    (float) product.getSceneRasterHeight(),
+                    new Float[]{4.0f}, null);
+
+            bandD.setSourceImage(d);
+
+            setTargetProduct(product);
+        }
+
+        @Override
+        public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+            assertEquals(2, targetTiles.size());
+
+            for (Tile tt : targetTiles.values()) {
+                ProductData dataBuffer = tt.getDataBuffer();
+                int numElems = dataBuffer.getNumElems();
+                for (int i = 0; i < numElems; i++) {
+                    dataBuffer.setElemIntAt(i, i);
+                }
+            }
+
+            assertEquals(0, tileCache.getCacheTileCount());
+        }
     }
 }

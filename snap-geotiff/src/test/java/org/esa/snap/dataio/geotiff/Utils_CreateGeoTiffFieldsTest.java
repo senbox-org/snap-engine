@@ -25,7 +25,10 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class Utils_CreateGeoTiffFieldsTest {
 
@@ -138,7 +141,7 @@ public class Utils_CreateGeoTiffFieldsTest {
                 2401, 0, 1, 3456
         };
         assertArrayEquals(expected, dirField.getAsChars());
-        assertEquals(true, Arrays.equals(new double[]{4.5}, doubleField.getAsDoubles()));
+        assertTrue(Arrays.equals(new double[]{4.5}, doubleField.getAsDoubles()));
     }
 
     @Test
@@ -175,7 +178,7 @@ public class Utils_CreateGeoTiffFieldsTest {
                 2401, GeoTIFFTagSet.TAG_GEO_ASCII_PARAMS, 7, 0
         };
         assertArrayEquals(expected, dirField.getAsChars());
-        assertEquals(true, Arrays.equals(new double[]{4.5}, doubleField.getAsDoubles()));
+        assertTrue(Arrays.equals(new double[]{4.5}, doubleField.getAsDoubles()));
         assertEquals("dlkjfg|", asciiField.getAsString(0));
     }
 
@@ -232,7 +235,7 @@ public class Utils_CreateGeoTiffFieldsTest {
         assertEquals(GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE, scaleField.getTag());
         assertEquals(TIFFField.TIFF_DOUBLE, scaleField.getType());
         assertEquals(3, scaleField.getCount());
-        assertEquals(true, Arrays.equals(new double[]{1, 2, 3}, scaleField.getAsDoubles()));
+        assertTrue(Arrays.equals(new double[]{1, 2, 3}, scaleField.getAsDoubles()));
     }
 
     @Test
@@ -260,7 +263,7 @@ public class Utils_CreateGeoTiffFieldsTest {
                 2, 3, 4, 5, 6, 7,
                 3, 4, 5, 6, 7, 8
         };
-        assertEquals(true, Arrays.equals(expected, tiePointField.getAsDoubles()));
+        assertTrue(Arrays.equals(expected, tiePointField.getAsDoubles()));
     }
 
     @Test
@@ -282,7 +285,7 @@ public class Utils_CreateGeoTiffFieldsTest {
         assertEquals(TIFFField.TIFF_DOUBLE, transformField.getType());
         assertEquals(16, transformField.getCount());
         final double[] expected = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-        assertEquals(true, Arrays.equals(expected, transformField.getAsDoubles()));
+        assertTrue(Arrays.equals(expected, transformField.getAsDoubles()));
     }
 
 }

@@ -1,16 +1,14 @@
 package org.esa.snap.jp2.reader;
 
+import org.esa.snap.core.util.ModuleMetadata;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.file.AbstractFile;
 import org.esa.snap.engine_utilities.util.PathUtils;
-import org.esa.snap.core.util.ResourceInstaller;
-import org.esa.snap.core.util.SystemUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 
 import static org.esa.snap.lib.openjpeg.dataio.Utils.getMD5sum;
 
@@ -52,24 +50,17 @@ public class VirtualJP2File extends AbstractFile implements JP2LocalFile {
     }
 
     private static Path buildLocalCacheFolder(Path inputFile, Class clazz) throws IOException {
-        Path versionFile = ResourceInstaller.findModuleCodeBasePath(clazz).resolve("version/version.properties");
-        Properties versionProp = new Properties();
-
-        try (InputStream inputStream = Files.newInputStream(versionFile)) {
-            versionProp.load(inputStream);
+        ModuleMetadata moduleMetadata = SystemUtils.loadModuleMetadata(clazz);
+        if (moduleMetadata == null) {
+            throw new IOException("Unable to load version from module metadata");
         }
-
-        String version = versionProp.getProperty("project.version");
-        if (version == null) {
-            throw new IOException("Unable to get project.version property from " + versionFile);
-        }
-
+        String version = moduleMetadata.getVersion();
         String md5sum = getMD5sum(inputFile.toString());
         if (md5sum == null) {
-            throw new IOException("Unable to get md5sum of path " + inputFile.toString());
+            throw new IOException("Unable to get md5sum of path " + inputFile);
         }
 
-        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "snap", "jp2-reader", version, md5sum, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
+        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "snap", "jp2-reader", version, md5sum);//, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
         if (!Files.exists(localCacheFolder)) {
             Files.createDirectories(localCacheFolder);
         }

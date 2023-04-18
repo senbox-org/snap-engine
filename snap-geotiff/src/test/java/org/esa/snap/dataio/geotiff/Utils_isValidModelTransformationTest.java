@@ -18,23 +18,24 @@ package org.esa.snap.dataio.geotiff;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class Utils_isValidModelTransformationTest {
 
     @Test
     public void testNull() {
-        assertEquals(false, Utils.isValidModelTransformation(null));
+        assertFalse(Utils.isValidModelTransformation(null));
     }
 
     @Test
     public void testBadArraySize() {
-        assertEquals(false, Utils.isValidModelTransformation(new double[]{3, 4}));
+        assertFalse(Utils.isValidModelTransformation(new double[]{3, 4}));
     }
 
     @Test
     public void testAllValuesAreZero() {
-        assertEquals(false, Utils.isValidModelTransformation(new double[]{
+        assertFalse(Utils.isValidModelTransformation(new double[]{
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
@@ -44,7 +45,7 @@ public class Utils_isValidModelTransformationTest {
 
     @Test
     public void testValidTransformationValues() {
-        assertEquals(true, Utils.isValidModelTransformation(new double[]{
+        assertTrue(Utils.isValidModelTransformation(new double[]{
                 1, 2, 0, 3,
                 4, 5, 0, 6,
                 7, 8, 0, 9,

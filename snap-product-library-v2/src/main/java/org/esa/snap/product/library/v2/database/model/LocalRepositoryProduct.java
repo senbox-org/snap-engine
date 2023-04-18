@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * The implementation class for a local repository product.
+ *
  * Created by jcoravu on 5/9/2019.
  */
 public class LocalRepositoryProduct implements RepositoryProduct {
@@ -22,6 +24,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private Path path;
     private long sizeInBytes;
     private org.esa.snap.remote.products.repository.RemoteMission remoteMission;
+    private String metadataMission;
     private List<Attribute> remoteAttributes;
     private List<Attribute> localAttributes;
     private BufferedImage quickLookImage;
@@ -113,6 +116,16 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     @Override
     public RemoteMission getRemoteMission() {
         return this.remoteMission;
+    }
+
+    @Override
+    public String getMetadataMission() {
+        return metadataMission;
+    }
+
+    @Override
+    public void setMetadataMission(String metadataMission) {
+        this.metadataMission = metadataMission;
     }
 
     public void setRemoteAttributes(List<Attribute> remoteAttributes) {

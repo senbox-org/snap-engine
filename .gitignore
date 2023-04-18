@@ -9,3 +9,15 @@ target/
 beam.ids
 src/main/sql/*.jar
 beampy.ini
+
+
+# vscode
+.project
+.settings
+.classpath
+.factorypath
+.vscode
+launch.sh
+snap-desktop.sh
+gpt.sh
+*~

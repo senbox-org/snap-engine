@@ -1,5 +1,6 @@
 package org.esa.snap.vfs.preferences.model;
 
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.runtime.EngineConfig;
 import org.esa.snap.vfs.NioPaths;
 import org.esa.snap.vfs.preferences.validators.RepositoryAddressValidator;
@@ -148,10 +149,25 @@ public final class VFSRemoteFileRepositoriesController {
         }
     }
 
+    private void validateConfig(){
+        if (StringUtils.isNotNullAndNotEmpty(this.remoteRepositoriesIds)) {
+            String[] remoteRepositoriesIdsList = this.remoteRepositoriesIds.split(LIST_ITEM_SEPARATOR);
+            for (String remoteRepositoryId : remoteRepositoriesIdsList) {
+                final String remoteRepositoryName = this.getRemoteRepositoryName(remoteRepositoryId).getValue();
+                final String remoteRepositorySchema = this.getRemoteRepositorySchema(remoteRepositoryId).getValue();
+                final String remoteRepositoryAddress = this.getRemoteRepositoryAddress(remoteRepositoryId).getValue();
+                if(StringUtils.isNullOrEmpty(remoteRepositoryName) || StringUtils.isNullOrEmpty(remoteRepositorySchema) || StringUtils.isNullOrEmpty(remoteRepositoryAddress)){
+                    throw new IllegalArgumentException("Empty repository found.");
+                }
+            }
+        }
+    }
+
     /**
      * Writes the VFS Remote File Repositories Properties on SNAP configuration file.
      */
     public void saveProperties() throws IOException {
+        validateConfig();
         OutputStream outputStream = null;
         try {
             if (!Files.exists(this.vfsConfigFile)) {

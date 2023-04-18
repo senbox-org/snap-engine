@@ -17,8 +17,6 @@ package org.esa.snap.engine_utilities.gpf;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.engine_utilities.gpf.InputProductValidator;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;

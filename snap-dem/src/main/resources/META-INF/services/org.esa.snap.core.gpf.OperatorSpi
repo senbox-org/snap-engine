@@ -1,2 +1,3 @@
 org.esa.snap.dem.gpf.AddElevationOp$Spi
 org.esa.snap.dem.gpf.FillDEMHoleOp$Spi
+org.esa.snap.dem.gpf.ComputeSlopeAspectOp$Spi

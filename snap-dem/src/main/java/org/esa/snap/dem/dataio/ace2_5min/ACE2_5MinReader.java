@@ -186,8 +186,11 @@ class ACE2_5MinReader extends AbstractProductReader {
 
     private static File createCacheDir() throws IOException {
         final File cacheDir = new File(SystemUtils.getCacheDir(), "temp");
-        if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-            throw new IOException("Failed to create directory '" + cacheDir + "'.");
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs();
+            if (!cacheDir.exists()) {
+                throw new IOException(String.format("Failed to create directory '%s'.", cacheDir));
+            }
         }
         return cacheDir;
     }

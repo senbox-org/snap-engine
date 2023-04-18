@@ -68,7 +68,7 @@ public abstract class DataNode extends ProductNode {
 
     public DataNode(String name, ProductData data, boolean readOnly) {
         super(name);
-        Guardian.assertNotNull("data", data);
+        Guardian.assertNotNull("data '" + name + "'", data);
         this.dataType = data.getType();
         this.numElems = data.getNumElems();
         this.data = data;
@@ -139,6 +139,7 @@ public abstract class DataNode extends ProductNode {
 
     /**
      * Sets the data elements of this data node.
+     *
      * @see ProductData#setElems(Object)
      */
     public void setDataElems(Object elems) {
@@ -150,7 +151,7 @@ public abstract class DataNode extends ProductNode {
         checkState();
         if (data == null) {
             if (numElems > Integer.MAX_VALUE) {
-                throw new IllegalStateException("number of elements must be less than "+ (long)Integer.MAX_VALUE + 1);
+                throw new IllegalStateException("number of elements must be less than " + (long) Integer.MAX_VALUE + 1);
             }
             data = createCompatibleProductData((int) numElems);
         }
@@ -206,7 +207,7 @@ public abstract class DataNode extends ProductNode {
         return unit;
     }
 
-//    /**
+    //    /**
 //     * @deprecated since BEAM 4.10 (not used, no replacement)
 //     */
 //    @Deprecated
@@ -214,7 +215,7 @@ public abstract class DataNode extends ProductNode {
         return synthetic;
     }
 
-//    /**
+    //    /**
 //     * @deprecated since BEAM 4.10 (not used, no replacement)
 //     */
 //    @Deprecated
@@ -320,7 +321,7 @@ public abstract class DataNode extends ProductNode {
     }
 
     private void checkState() {
-        if(numElems < 0) {
+        if (numElems < 0) {
             throw new IllegalStateException("number of elements must be at last 1");
         }
     }

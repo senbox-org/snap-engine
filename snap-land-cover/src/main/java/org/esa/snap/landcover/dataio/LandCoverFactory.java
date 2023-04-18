@@ -66,23 +66,7 @@ public class LandCoverFactory {
         return landcover;
     }
 
-    public static void checkIfInstalled(final String name) {
-
-        final LandCoverModelRegistry registry = LandCoverModelRegistry.getInstance();
-        final LandCoverModelDescriptor descriptor = registry.getDescriptor(name);
-        if (descriptor == null) {
-            throw new OperatorException("The land cover '" + name + "' is not supported.");
-        }
-
-        if (!descriptor.isInstalling() && !descriptor.isInstalled()) {
-            if (!descriptor.installFiles()) {
-                throw new OperatorException("Land cover " + name + " must be installed first");
-            }
-        }
-    }
-
     public static String appendAutoDownload(String name) {
-
         return name;
     }
 

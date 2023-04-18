@@ -20,7 +20,6 @@ package org.esa.snap.core.util.math;
  * Matrix factory.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
 public interface MatrixFactory {
 

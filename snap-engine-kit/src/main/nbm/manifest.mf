@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
 OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
-OpenIDE-Module-Display-Category: SNAP Engine
+OpenIDE-Module-Display-Category: SNAP Core
 AutoUpdate-Show-In-Client: true
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Long-Description: The SNAP Engine provides sensor-independent core functionality for remote sensing applications.

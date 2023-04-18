@@ -26,8 +26,12 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.util.MetadataUtils;
 import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
+import ucar.ma2.Array;
+import ucar.nc2.Attribute;
+import ucar.nc2.Group;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CfMetadataPart extends ProfilePartIO {
 
@@ -48,7 +52,7 @@ public class CfMetadataPart extends ProfilePartIO {
             if (!VariableNameHelper.isVariableNameValid(attributeName)) {
                 attributeName = VariableNameHelper.convertToValidName(attributeName);
                 SystemUtils.LOG.warning("Found invalid attribute name '" + attribute.getName() +
-                                                "' - replaced by '" + attributeName + "'.");
+                        "' - replaced by '" + attributeName + "'.");
             }
 
             if (dataType == ProductData.TYPE_ASCII) {
@@ -79,7 +83,100 @@ public class CfMetadataPart extends ProfilePartIO {
                 final long data = (long) attribute.getData().getElemDouble();
                 netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             }
+        }
 
+        if (metadataRoot.getNumElements() > 0) {
+            Group rootGroup = getRootGroup(netcdfFileWriteable);
+            Group metadataGroup = netcdfFileWriteable.addGroup(rootGroup, MetadataUtils.METADATA_GROUP_NAME);
+            // work on a clone as we might modify it to make it compatible with NetCDF conventions
+            MetadataElement deepClone = metadataRoot.createDeepClone();
+            makeCompatible(deepClone);
+            for (MetadataElement element : deepClone.getElements()) {
+                addElementToGroup(netcdfFileWriteable, metadataGroup, element);
+            }
+            deepClone.dispose();
         }
     }
+
+    static void makeCompatible(MetadataElement elem) {
+        String[] subElemNames = elem.getElementNames();
+        // only if the number of distinct elem names is different to the total number of names we need to take action
+        if (Arrays.stream(subElemNames).distinct().count() < subElemNames.length) {
+            MetadataElement[] subElems = elem.getElements();
+            for (MetadataElement subElem : subElems) {
+                MetadataElement[] equalNameElems = Arrays.stream(subElems).filter(s -> s.getName().equals(subElem.getName())).toArray(MetadataElement[]::new);
+                if (equalNameElems.length > 1) {
+                    for (int k = 0; k < equalNameElems.length; k++) {
+                        MetadataElement element = equalNameElems[k];
+                        element.setName(element.getName() + "." + k);
+                    }
+                }
+            }
+        }
+
+        Arrays.stream(elem.getElements()).forEach(CfMetadataPart::makeCompatible);
+
+    }
+
+    private void addElementToGroup(NFileWriteable netcdfFileWriteable, Group ncGroup, MetadataElement root) {
+        final Group newGroup = netcdfFileWriteable.addGroup(ncGroup, root.getName());
+        addAttributesToGroup(newGroup, root.getAttributes());
+        final MetadataElement[] elements = root.getElements();
+        for (MetadataElement element : elements) {
+            addElementToGroup(netcdfFileWriteable, newGroup, element);
+        }
+    }
+
+    private static Group getRootGroup(NFileWriteable netcdfFileWriteable) {
+        // this is a workaround to get the root group
+        return netcdfFileWriteable.addGroup(null, "");
+    }
+
+    private void addAttributesToGroup(Group group, MetadataAttribute[] attributes) {
+        for (MetadataAttribute attribute : attributes) {
+            addAttribute(group, attribute);
+        }
+    }
+
+    private static void addAttribute(Group group, MetadataAttribute attribute) {
+        final ProductData data = attribute.getData();
+        final int type = data.getType();
+        if (data.isScalar()) {
+            switch (type) {
+                case ProductData.TYPE_FLOAT32:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemFloat()));
+                    break;
+                case ProductData.TYPE_FLOAT64:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemDouble()));
+                    break;
+                case ProductData.TYPE_INT8:
+                case ProductData.TYPE_INT16:
+                case ProductData.TYPE_INT32:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemInt()));
+                    break;
+                case ProductData.TYPE_UINT8:
+                case ProductData.TYPE_UINT16:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemInt(), data.isUnsigned()));
+                    break;
+                case ProductData.TYPE_UINT32:
+                case ProductData.TYPE_INT64:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemLong(), data.isUnsigned()));
+                case ProductData.TYPE_UINT64:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemDouble()));
+                    break;
+                case ProductData.TYPE_ASCII:
+                    group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + type);
+            }
+        } else {
+            if (ProductData.TYPE_ASCII == type || ProductData.TYPE_UTC == type) {
+                group.addAttribute(new Attribute(attribute.getName(), data.getElemString()));
+            } else {
+                group.addAttribute(new Attribute(attribute.getName(), Array.makeFromJavaArray(data.getElems())));
+            }
+        }
+    }
+
 }

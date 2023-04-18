@@ -14,6 +14,7 @@ package org.esa.snap.core.datamodel;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+@Deprecated
 public interface BasicPixelGeoCoding extends GeoCoding {
 
     Band getLatBand();

@@ -1,5 +1,7 @@
 package org.esa.snap.core.image;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+
 /**
  * Created by jcoravu on 12/12/2019.
  */
@@ -70,6 +72,26 @@ public class MosaicMatrix {
             }
         }
         return totalWidth;
+    }
+
+    public int computeMinimumLevelCount() {
+        Integer minimumLevelCount = null;
+        for (int columnIndex=0; columnIndex<this.columnCount; columnIndex++) {
+            for (int rowIndex=0; rowIndex<this.rowCount; rowIndex++) {
+                MatrixCell cell = getCellAt(rowIndex, columnIndex);
+                if (cell == null) {
+                    throw new UnsupportedOperationException("Current matrix has unassigned cells!");
+                }
+                int cellLevelCount = DefaultMultiLevelModel.getLevelCount(cell.getCellWidth(), cell.getCellHeight());
+                if (minimumLevelCount == null || minimumLevelCount.intValue() > cellLevelCount) {
+                    minimumLevelCount = cellLevelCount;
+                }
+            }
+        }
+        if (minimumLevelCount == null) {
+            throw new NullPointerException("The minimum level count is null.");
+        }
+        return minimumLevelCount.intValue();
     }
 
     public int computeTotalHeight() {

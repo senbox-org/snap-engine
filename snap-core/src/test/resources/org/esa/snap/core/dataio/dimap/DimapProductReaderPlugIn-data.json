@@ -1,6 +1,11 @@
 {
     "testProducts": [
         {
+            "id": "IntegerExceedingData",
+            "relativePath": "applications/generic_reader/BEAM-DIMAP/IntegerExceedingData.dim",
+            "description": "Size of band exceeds max Integer. Tests that we don't have a NumberOverflow"
+        },
+        {
             "id": "MER_RR__2PRBCM20110802_102509_000001013105_00123_49275_0001",
             "relativePath": "applications/generic_reader/BEAM-DIMAP/band_maths/MER_RR__2PRBCM20110802_102509_000001013105_00123_49275_0001.dim",
             "description": "MERIS Reduced Resolution Geophysical Product, SOFTWARE_VER: MEGS/8.0 L"

@@ -128,9 +128,8 @@ public final class LandCoverMaskOp extends Operator {
             final String targetBandName = srcBand.getName() + "_masked";
             final Band targetBand = new Band(targetBandName,
                     srcBand.getDataType(),
-                    srcBand.getRasterWidth(), //targetProduct.getSceneRasterWidth(),
-                    srcBand.getRasterHeight());//targetProduct.getSceneRasterHeight());
-
+                    srcBand.getRasterWidth(),
+                    srcBand.getRasterHeight());
 
             targetBand.setUnit(srcBand.getUnit());
             targetBand.setNoDataValue(srcBand.getNoDataValue());
@@ -143,7 +142,7 @@ public final class LandCoverMaskOp extends Operator {
     }
 
     private String createExpression(final Band srcBand) {
-        final StringBuilder str = new StringBuilder("");
+        final StringBuilder str = new StringBuilder();
         if (validLandCoverClasses != null && validLandCoverClasses.length > 0) {
             for (int c : validLandCoverClasses) {
                 if (str.length() == 0) {

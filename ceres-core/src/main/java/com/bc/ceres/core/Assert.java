@@ -18,7 +18,7 @@ package com.bc.ceres.core;
 
 
 /**
- * <code>Assert</code> is useful for for embedding runtime sanity checks
+ * <code>Assert</code> is useful for embedding runtime sanity checks
  * in code. The predicate methods all test a condition and throw some
  * type of unchecked exception if the condition does not hold.
  * <p>
@@ -41,13 +41,13 @@ public final class Assert {
      * not <code>true</code>, an <code>IllegalArgumentException</code>
      * is thrown.
      *
-     * @param expression the outcode of the check
+     * @param expression the expression of the check
      * @return <code>true</code> if the check passes (does not return
-     *         if the check fails)
+     * if the check fails)
      * @throws IllegalArgumentException if the legality test failed
      */
     public static boolean argument(boolean expression) {
-        return argument(expression, "Assert.argument(false) called"); //$NON-NLS-1$
+        return argument(expression, "Assert.argument(false) called");
     }
 
     /**
@@ -56,10 +56,10 @@ public final class Assert {
      * is thrown.
      * The given message is included in that exception, to aid debugging.
      *
-     * @param expression the outcode of the check
+     * @param expression the result of the evaluated argument expression
      * @param message    the message to include in the exception
      * @return <code>true</code> if the check passes (does not return
-     *         if the check fails)
+     * if the check fails)
      * @throws IllegalArgumentException if the legality test failed
      */
     public static boolean argument(boolean expression, String message) {
@@ -77,7 +77,7 @@ public final class Assert {
      * @throws NullPointerException if the object is <code>null</code>
      */
     public static void notNull(Object object) {
-        notNull(object, "Assert.notNull(null) called"); //$NON-NLS-1$
+        notNull(object, "Assert.notNull(null) called");
     }
 
     /**
@@ -91,7 +91,7 @@ public final class Assert {
      */
     public static void notNull(Object object, String message) {
         if (object == null) {
-            throw new NullPointerException(message); //$NON-NLS-1$
+            throw new NullPointerException(message);
         }
     }
 
@@ -99,29 +99,30 @@ public final class Assert {
      * Asserts that the given boolean is <code>true</code>. If this
      * is not the case, some kind of unchecked exception is thrown.
      *
-     * @param expression the outcode of the check
+     * @param expression the result of the evaluated state expression
      * @return <code>true</code> if the check passes (does not return
-     *         if the check fails)
+     * if the check fails)
      * @throws IllegalStateException if the given boolean is <code>false</code>
      */
     public static boolean state(boolean expression) {
-        return state(expression, "Assert.state(false) called"); //$NON-NLS-1$
+        return state(expression, "Assert.state(false) called");
     }
 
-    /** Asserts that the given boolean is <code>true</code>. If this
+    /**
+     * Asserts that the given boolean is <code>true</code>. If this
      * is not the case, some kind of unchecked exception is thrown.
      * The given message is included in that exception, to aid debugging.
      *
-     * @param expression the outcode of the check
-     * @param message the message to include in the exception
+     * @param expression the result of the evaluated state expression
+     * @param message    the message to include in the exception
      * @return <code>true</code> if the check passes (does not return
-     *    if the check fails)
+     * if the check fails)
      * @throws IllegalStateException if the given boolean is <code>false</code>
      */
     public static boolean state(boolean expression, String message) {
         if (!expression) {
-            throw new IllegalStateException(message); //$NON-NLS-1$
+            throw new IllegalStateException(message);
         }
         return expression;
-	}
+    }
 }

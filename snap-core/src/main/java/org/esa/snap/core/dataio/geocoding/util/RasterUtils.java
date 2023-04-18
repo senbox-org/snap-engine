@@ -1,10 +1,26 @@
+/*
+ *
+ * Copyright (C) 2020 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.snap.core.dataio.geocoding.util;
 
 import org.esa.snap.core.dataio.geocoding.Discontinuity;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.math.RsMathUtils;
@@ -152,7 +168,7 @@ public class RasterUtils {
         return floats;
     }
 
-    static double[] toDouble(float[] floats) {
+    public static double[] toDouble(float[] floats) {
         final double[] doubles = new double[floats.length];
 
         for (int i = 0; i < floats.length; i++) {
@@ -180,15 +196,36 @@ public class RasterUtils {
         return values;
     }
 
-    // returns al (x/y) positions that have a latitude above the defined pole-angle threshold
-    private static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {
+    /**
+     * loads geo-location data as an array of doubles ready to use by ComponentGeoCoding.
+     * This method optimises the memory impact by disposing whatever is possible after the
+     * reading operation. Please do not use from a context where this is not desired.
+     *
+     * @param dataNode the raster data node providing the geolocation data
+     * @return the scaled array of geo-location values
+     * @throws IOException on disk-access errors
+     */
+    public static double[] loadGeoData(RasterDataNode dataNode) throws IOException {
+        final Dimension rasterSize = dataNode.getRasterSize();
+        final double[] geoData = new double[rasterSize.width * rasterSize.height];
+        dataNode.readPixels(0, 0, rasterSize.width, rasterSize.height, geoData);
+        // cleanup memory, ensure not to keep stuff in cache, we do not need that for the geo-coding tb 2021-05-03
+        dataNode.unloadRasterData();
+        dataNode.removeCachedImageData();
+        return geoData;
+    }
+
+    // returns all (x/y) positions that have a latitude above the defined pole-angle threshold
+    static ArrayList<PixelPos> findPoleCandidates(GeoRaster geoRaster, double maxLat, double minLat) {
         final ArrayList<PixelPos> poleCandidates = new ArrayList<>();
 
         final double[] latitudes = geoRaster.getLatitudes();
         final int rasterWidth = geoRaster.getRasterWidth();
-        for (int y = 0; y < geoRaster.getRasterHeight(); y++) {
+        final int rasterHeight = geoRaster.getRasterHeight();
+        // skip boundary pixels, subsequent longitude iteration will fail, if candidate is on the edge of the scene
+        for (int y = 1; y < rasterHeight - 1; y++) {
             final int lineOffset = y * rasterWidth;
-            for (int x = 0; x < rasterWidth; x++) {
+            for (int x = 1; x < rasterWidth - 1; x++) {
                 final double lat = latitudes[lineOffset + x];
                 if ((lat >= maxLat) || (lat <= minLat)) {
                     poleCandidates.add(new PixelPos(x, y));

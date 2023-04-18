@@ -1,7 +1,7 @@
 package org.esa.snap.remote.products.repository;
 
 import org.apache.http.auth.Credentials;
-import org.esa.snap.remote.products.repository.donwload.RemoteRepositoriesManager;
+import org.esa.snap.remote.products.repository.download.RemoteRepositoriesManager;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The repository provider used to access the remote repository to search, download products.
+ *
  * Created by jcoravu on 26/8/2019.
  */
 public interface RemoteProductsRepositoryProvider {
@@ -26,7 +28,7 @@ public interface RemoteProductsRepositoryProvider {
 
     public List<RepositoryQueryParameter> getMissionParameters(String mission);
 
-    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
+    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, int pageSize, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                        throws Exception;
 

@@ -17,11 +17,18 @@
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.CoreException;
-import com.bc.ceres.core.runtime.*;
+import com.bc.ceres.core.runtime.ConfigurationElement;
+import com.bc.ceres.core.runtime.Dependency;
+import com.bc.ceres.core.runtime.Extension;
+import com.bc.ceres.core.runtime.ExtensionPoint;
+import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.core.runtime.ModuleState;
+import com.bc.ceres.core.runtime.Version;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.XppDomReader;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -51,7 +58,9 @@ public class ModuleManifestParserTest
 
         XppDomReader domReader = new XppDomReader(fooElem);
         Foo foo = new Foo();
-        new XStream().unmarshal(domReader, foo);
+        XStream xStream = new XStream();
+        xStream.addPermission(AnyTypePermission.ANY);
+        xStream.unmarshal(domReader, foo);
 
         assertEquals("Bibo", foo.name);
         assertEquals(41, foo.age);
@@ -77,19 +86,19 @@ public class ModuleManifestParserTest
         try {
             new ModuleManifestParser().parse((String) null);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
 
         try {
             new ModuleManifestParser().parse((InputStream) null);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
 
         try {
             new ModuleManifestParser().parse((Reader) null);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
     }
 
@@ -359,9 +368,9 @@ public class ModuleManifestParserTest
         assertNotNull(module.getExtensions());
         assertEquals(extensionCount, module.getExtensions().length);
 
-        assertEquals(null, module.getActivator());
-        assertEquals(null, module.getRegistry());
-        assertEquals(null, module.getContext());
+        assertNull(module.getActivator());
+        assertNull(module.getRegistry());
+        assertNull(module.getContext());
         assertEquals(ModuleState.NULL, module.getState());
 
         assertNull(module.getImpliciteLibs());

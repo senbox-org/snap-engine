@@ -29,9 +29,7 @@ import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
@@ -359,7 +357,6 @@ public class Band extends AbstractBand {
         Product product = getProductSafe();
         ProductWriter writer = product.getProductWriterSafe();
         writer.writeBandRasterData(this, offsetX, offsetY, width, height, rasterData, pm);
-        removeCachedImageData();
     }
 
     /**
@@ -385,6 +382,7 @@ public class Band extends AbstractBand {
                         final ProductData rasterData = createCompatibleRasterData(rect.width, rect.height);
                         data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
                         writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+                        rasterData.dispose();
                     }
                     pm.worked(1);
                 }
@@ -424,18 +422,6 @@ public class Band extends AbstractBand {
             size += ProductData.getElemSize(getDataType()) * numDataElems;
         }
         return size;
-    }
-
-    private void removeCachedImageData() {
-        if (isSourceImageSet()) {
-            getSourceImage().reset();
-        }
-        if (isGeophysicalImageSet()) {
-            getGeophysicalImage().reset();
-        }
-        if (isValidMaskImageSet()) {
-            getValidMaskImage().reset();
-        }
     }
 
     //////////////////////////////////////////////////////////////////////////

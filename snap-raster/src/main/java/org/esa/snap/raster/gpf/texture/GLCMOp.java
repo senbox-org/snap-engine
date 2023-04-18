@@ -55,7 +55,7 @@ import java.util.Map;
  * 9. GLCM Variance
  * 10. GLCM Correlation
  * <p>
- * [1] Robert M. Haralick, K. Shanmugam, and Its'hak Dinstein. "Textural Features for Image Classification"
+ * [1] Robert M. Haralick, K. Shanmugam, and Its'Hak Dinstein. "Textural Features for Image Classification"
  * IEEE Trans. on Systems, Man and Cybernetics, Vol 3 , No. 6, pp. 610-621, Nov. 1973.
  */
 
@@ -76,7 +76,8 @@ public final class GLCMOp extends Operator {
             label = "Source Bands")
     private String[] sourceBands = null;
 
-    @Parameter(valueSet = {FilterWindow.SIZE_5x5, FilterWindow.SIZE_7x7, FilterWindow.SIZE_9x9, FilterWindow.SIZE_11x11},
+    @Parameter(valueSet = {FilterWindow.SIZE_5x5, FilterWindow.SIZE_7x7, FilterWindow.SIZE_9x9, FilterWindow.SIZE_11x11,
+            FilterWindow.SIZE_13x13, FilterWindow.SIZE_15x15, FilterWindow.SIZE_17x17, FilterWindow.SIZE_21x21},
             defaultValue = FilterWindow.SIZE_9x9, label = "Window Size")
     private String windowSizeStr = FilterWindow.SIZE_9x9;
 
@@ -95,6 +96,9 @@ public final class GLCMOp extends Operator {
 
     @Parameter(description = "Pixel displacement", interval = "[1, 8]", defaultValue = "4", label = "Displacement")
     private int displacement = 4;
+
+    @Parameter(description = "Target product no data value", label = "No Data Value", defaultValue = "-9999.0")
+    private double noDataValue = -9999.0;
 
     @Parameter(description = "Output Contrast", defaultValue = "true", label = "Contrast")
     private Boolean outputContrast = true;
@@ -345,6 +349,7 @@ public final class GLCMOp extends Operator {
         targetBandNames = getTargetBandNames();
         final Band[] bands = OperatorUtils.addBands(targetProduct, targetBandNames, "");
         for (Band band : bands) {
+            band.setNoDataValue(noDataValue);
             band.setNoDataValueUsed(true);
         }
     }
@@ -437,7 +442,8 @@ public final class GLCMOp extends Operator {
             int cnt = 0;
             for (String srcBandName : sourceBands) {
                 final Band sourceBand = sourceProduct.getBand(srcBandName);
-                srcInfoList[cnt] = new SrcInfo(numQuantLevels, sourceBand, getSourceTile(sourceBand, sourceTileRectangle));
+                srcInfoList[cnt] = new SrcInfo(
+                        numQuantLevels, sourceBand, getSourceTile(sourceBand, sourceTileRectangle), noDataValue);
 
                 final List<TileData> tileDataList = new ArrayList<>();
                 for (String targetBandName : targetBandNames) {
@@ -476,14 +482,14 @@ public final class GLCMOp extends Operator {
                             srcInfo.reset(w, h);
                         }
 
-                        computeQuantizedImages(quantizer, srcIndex, x0, y0, xMax, yMax, srcInfoList);
+                        computeQuantizedImages(quantizer, x0, y0, xMax, yMax, srcInfoList);
                         computeGLCM(srcInfoList);
 
                     } else {
 
                         final int xNew = Math.min(tx + halfWindowSize, sourceImageWidth - 1);
                         updateGLCMWithFirstColumnOfQuantizedImageRemoved(srcInfoList);
-                        updateQuantizedImages(quantizer, srcIndex, xNew, y0, yMax, srcInfoList);
+                        updateQuantizedImages(quantizer, xNew, y0, yMax, srcInfoList);
                         updateGLCMWithLastColumnOfQuantizedImageAdded(srcInfoList);
                     }
 
@@ -776,18 +782,20 @@ public final class GLCMOp extends Operator {
         srcInfo.totals.totalCount--;
     }
 
-    private static void computeQuantizedImages(final Quantizer quantizer, final TileIndex srcIndex,
-                                               final int x0, final int y0, final int xMax, final int yMax,
-                                               final SrcInfo[] srcInfoList) {
+    private static void computeQuantizedImages(final Quantizer quantizer, final int x0, final int y0, final int xMax,
+                                               final int yMax, final SrcInfo[] srcInfoList) {
         double v;
+        for (SrcInfo srcInfo : srcInfoList) {
+            final TileIndex srcIndex = new TileIndex(srcInfo.sourceTile);
 
-        for (int y = y0; y < yMax; y++) {
-            int yy = y - y0;
-            srcIndex.calculateStride(y);
-            for (int x = x0; x < xMax; x++) {
-                int xx = x - x0;
-                final int index = srcIndex.getIndex(x);
-                for (SrcInfo srcInfo : srcInfoList) {
+            for (int y = y0; y < yMax; y++) {
+                int yy = y - y0;
+                srcIndex.calculateStride(y);
+
+                for (int x = x0; x < xMax; x++) {
+                    int xx = x - x0;
+                    final int index = srcIndex.getIndex(x);
+
                     v = srcInfo.srcData.getElemDoubleAt(index)*srcInfo.scalingFactor + srcInfo.scalingOffset;
                     srcInfo.quantizedImage[yy][xx] =
                             (Double.isNaN(v) || v == srcInfo.noDataValue) ? -1 : quantizer.compute(v);
@@ -796,14 +804,15 @@ public final class GLCMOp extends Operator {
         }
     }
 
-    private static void updateQuantizedImages(final Quantizer quantizer, final TileIndex srcIndex,
-                                              final int xNew, final int y0, final int yMax,
+    private static void updateQuantizedImages(final Quantizer quantizer, final int xNew, final int y0, final int yMax,
                                               final SrcInfo[] srcInfoList) {
         double v;
 
         for (SrcInfo srcInfo : srcInfoList) {
+            final TileIndex srcIndex = new TileIndex(srcInfo.sourceTile);
             final int h = srcInfo.quantizedImage.length;
             final int w = srcInfo.quantizedImage[0].length;
+
             for (int i = 0; i < w - 1; i++) {
                 for (int j = 0; j < h; j++) {
                     srcInfo.quantizedImage[j][i] = srcInfo.quantizedImage[j][i + 1];
@@ -813,6 +822,7 @@ public final class GLCMOp extends Operator {
             for (int y = y0; y < yMax; y++) {
                 int yy = y - y0;
                 srcIndex.calculateStride(y);
+
                 v = srcInfo.srcData.getElemDoubleAt(srcIndex.getIndex(xNew))*srcInfo.scalingFactor + srcInfo.scalingOffset;
                 srcInfo.quantizedImage[yy][w - 1] =
                         (Double.isNaN(v) || v == srcInfo.noDataValue) ? -1 : quantizer.compute(v);
@@ -1014,7 +1024,7 @@ public final class GLCMOp extends Operator {
         public GLCMElem[] GLCM;
         private final int numQuantLevels;
 
-        public SrcInfo(final int numQuantLevels, final Band srcBand, final Tile srcTile) {
+        public SrcInfo(final int numQuantLevels, final Band srcBand, final Tile srcTile, final double noDataValue) {
             this.numQuantLevels = numQuantLevels;
             this.sourceTile = srcTile;
             this.srcIndex = new TileIndex(sourceTile);

@@ -197,8 +197,8 @@ public class TiePointGrid extends RasterDataNode {
                         int discontinuity) {
         this(name, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY);
         Assert.argument(tiePoints.length == gridWidth * gridHeight, "tiePoints.length == gridWidth * gridHeight");
-        Assert.argument(discontinuity == DISCONT_NONE ||
-                        discontinuity == DISCONT_AT_180 || discontinuity == DISCONT_AT_360,
+        Assert.argument(discontinuity == DISCONT_NONE || discontinuity == DISCONT_AUTO ||
+                                discontinuity == DISCONT_AT_180 || discontinuity == DISCONT_AT_360,
                         "discontinuity");
         this.discontinuity = discontinuity;
         setData(ProductData.createInstance(tiePoints));
@@ -265,7 +265,7 @@ public class TiePointGrid extends RasterDataNode {
     public ProductData getGridData() {
         if (getData() == null) {
             try {
-                setData(readGridData());
+                setData(readGridData(0, 0, getGridWidth(), getGridHeight()));
             } catch (IOException e) {
                 SystemUtils.LOG.severe("Unable to load TPG: " + e.getMessage());
             }
@@ -274,10 +274,28 @@ public class TiePointGrid extends RasterDataNode {
         return getData();
     }
 
-    private ProductData readGridData() throws IOException {
-        ProductData productData = createCompatibleRasterData(getGridWidth(), getGridHeight());
-        getProductReader().readTiePointGridRasterData(this, 0, 0, getGridWidth(), getGridHeight(), productData,
-                                                      ProgressMonitor.NULL);
+    private float[] getTiePoints(int x, int y, int width, int height) {
+        ProductData gridData = getData();
+        float[] tiePoints = new float[width * height];
+        if (gridData != null) {
+            float[] oldTiePoints = (float[]) gridData.getElems();
+            for (int y1 = 0; y1 < height; y1++) {
+                final int srcPos = getGridWidth() * (y + y1) + x;
+                System.arraycopy(oldTiePoints, srcPos, tiePoints, y1 * width, width);
+            }
+        } else {
+            try {
+                tiePoints = (float[]) readGridData(x, y, width, height).getElems();
+            } catch (IOException e) {
+                SystemUtils.LOG.severe("Unable to load TPG: " + e.getMessage());
+            }
+        }
+        return tiePoints;
+    }
+
+    private ProductData readGridData(int x, int y, int width, int height) throws IOException {
+        ProductData productData = createCompatibleRasterData(width, height);
+        getProductReader().readTiePointGridRasterData(this, x, y, width, height, productData, ProgressMonitor.NULL);
         return productData;
     }
 
@@ -1017,12 +1035,7 @@ public class TiePointGrid extends RasterDataNode {
             newTPGHeight = srcTPGHeight - dataOffsetY;
         }
 
-        final float[] oldTiePoints = sourceTiePointGrid.getTiePoints();
-        final float[] tiePoints = new float[newTPGWidth * newTPGHeight];
-        for (int y = 0; y < newTPGHeight; y++) {
-            final int srcPos = srcTPGWidth * (dataOffsetY + y) + dataOffsetX;
-            System.arraycopy(oldTiePoints, srcPos, tiePoints, y * newTPGWidth, newTPGWidth);
-        }
+        final float[] tiePoints = sourceTiePointGrid.getTiePoints(dataOffsetX, dataOffsetY, newTPGWidth, newTPGHeight);
 
         final TiePointGrid tiePointGrid = new TiePointGrid(sourceTiePointGrid.getName(),
                                                            newTPGWidth,

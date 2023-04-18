@@ -29,6 +29,7 @@ import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.xml.XppDomReader;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 
 import java.text.MessageFormat;
 
@@ -257,6 +258,10 @@ public class ConfigurationElementImpl extends ConfigurationElementBaseImpl<Confi
         }
         JavaClassConverter classConverter = new WhitespaceIgnoringJavaClassConverter(classLoaderReference);
         xStream.registerConverter(classConverter, XStream.PRIORITY_VERY_HIGH);
+
+        // since version 1.4.20 or maybe earlier we need to configure permission for security reasons
+        // we don't know all classes which need to be serialised to we need to allow everything
+        xStream.addPermission(AnyTypePermission.ANY);
         return xStream;
     }
 

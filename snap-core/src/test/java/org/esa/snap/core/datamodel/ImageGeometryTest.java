@@ -1,5 +1,6 @@
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.junit.Test;
 
@@ -93,8 +94,14 @@ public class ImageGeometryTest {
 
         ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
                                                                          null, null, null, null, null, null, null, null, null);
-        assertEquals(2.0, imageGeometry.getPixelSizeX(), 1.0e-6);
-        assertEquals(2.0, imageGeometry.getPixelSizeY(), 1.0e-6);
+        final boolean accuracyEnabled = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
+        if (accuracyEnabled) {
+            assertEquals(4.0, imageGeometry.getPixelSizeX(), 1.0e-6);
+            assertEquals(4.0, imageGeometry.getPixelSizeY(), 1.0e-6);
+        } else {
+            assertEquals(2.0, imageGeometry.getPixelSizeX(), 1.0e-6);
+            assertEquals(2.0, imageGeometry.getPixelSizeY(), 1.0e-6);
+        }
     }
 
     @Test
@@ -111,10 +118,18 @@ public class ImageGeometryTest {
 
         Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
 
-        assertEquals(10.5, mapBoundary.getMinX(), 1.0e-6);
-        assertEquals(14.5, mapBoundary.getMaxX(), 1.0e-6);
-        assertEquals(45.5, mapBoundary.getMinY(), 1.0e-6);
-        assertEquals(49.5, mapBoundary.getMaxY(), 1.0e-6);
+        final boolean accuracyEnabled = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
+        if (accuracyEnabled) {
+            assertEquals(8.5, mapBoundary.getMinX(), 1.0e-6);
+            assertEquals(16.5, mapBoundary.getMaxX(), 1.0e-6);
+            assertEquals(43.5, mapBoundary.getMinY(), 1.0e-6);
+            assertEquals(51.5, mapBoundary.getMaxY(), 1.0e-6);
+        } else {
+            assertEquals(10.5, mapBoundary.getMinX(), 1.0e-6);
+            assertEquals(14.5, mapBoundary.getMaxX(), 1.0e-6);
+            assertEquals(45.5, mapBoundary.getMinY(), 1.0e-6);
+            assertEquals(49.5, mapBoundary.getMaxY(), 1.0e-6);
+        }
     }
 
     @Test

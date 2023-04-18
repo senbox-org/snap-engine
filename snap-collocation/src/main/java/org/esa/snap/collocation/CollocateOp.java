@@ -24,12 +24,14 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.gpf.Operator;
@@ -65,9 +67,9 @@ import static java.text.MessageFormat.format;
  */
 @OperatorMetadata(alias = "Collocate",
         category = "Raster/Geometric",
-        version = "1.2",
+        version = "1.3",
         authors = "Ralf Quast, Norman Fomferra",
-        copyright = "(c) 2007-2011 by Brockmann Consult",
+        copyright = "(c) 2007-2022 by Brockmann Consult",
         description = "Collocates two products based on their geo-codings.")
 public class CollocateOp extends Operator {
 
@@ -110,6 +112,10 @@ public class CollocateOp extends Operator {
     @Parameter(defaultValue = "COLLOCATED",
             description = "The product type string for the target product (informal)")
     private String targetProductType;
+
+    @Parameter(defaultValue = "false", label = "Copy metadata of slave products",
+            description = "Copies also the metadata of the secondary (slave) products to the target")
+    private boolean copySecondaryMetadata;
 
     @Parameter(defaultValue = "true",
             description = "Whether or not components of the master product shall be renamed in the target product.")
@@ -160,6 +166,10 @@ public class CollocateOp extends Operator {
 
     public void setTargetProductType(String targetProductType) {
         this.targetProductType = targetProductType;
+    }
+
+    public void setCopySecondaryMetadata(boolean copySecondaryMetadata) {
+        this.copySecondaryMetadata = copySecondaryMetadata;
     }
 
     public boolean getRenameMasterComponents() {
@@ -321,13 +331,39 @@ public class CollocateOp extends Operator {
             targetProduct.setEndTime(new ProductData.UTC(utc2.getMJD()));
         }
 
+        if (copySecondaryMetadata) {
+            final MetadataElement secondaryTargetMetadata = new MetadataElement("SecondaryMetadata");
+            targetProduct.getMetadataRoot().addElement(secondaryTargetMetadata);
+            for (Product secProduct : slaveProducts) {
+                final MetadataElement currentMetadata = new MetadataElement(secProduct.getName());
+                final MetadataElement metadataRoot = secProduct.getMetadataRoot();
+                ProductUtils.copyMetadata(metadataRoot, currentMetadata);
+                secondaryTargetMetadata.addElement(currentMetadata);
+            }
+        }
+
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
 
         // Add master bands
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
         for (Band sourceBand : masterProduct.getBands()) {
             Band targetBand = ProductUtils.copyBand(sourceBand.getName(), masterProduct, targetProduct, true);
-            handleSampleCodings(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            FlagCoding flagCoding = targetBand.getFlagCoding();
+            if (flagCoding != null) {
+                // first remove FlagCoding potentially added by copyBand() then handle the FlagCoding
+                flagCodingGroup.remove(flagCoding);
+                targetBand.setSampleCoding(null);
+                handleFlagCoding(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            }
+            IndexCoding indexCoding = targetBand.getIndexCoding();
+            if (indexCoding != null) {
+                // first remove IndexCoding potentially added by copyBand() then handle the IndexCoding
+                indexCodingGroup.remove(indexCoding);
+                targetBand.setSampleCoding(null);
+                handleIndexCoding(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            }
             sourceRasterMap.put(targetBand, sourceBand);
             if (renameMasterComponents) {
                 targetBand.setName(masterComponentPattern.replace(SOURCE_NAME_REFERENCE, sourceBand.getName()));
@@ -362,8 +398,12 @@ public class CollocateOp extends Operator {
             // Add slave bands
             for (Band sourceBand : slaveProduct.getBands()) {
                 String targetBandName = getTargetBandName(sourceBand, i);
-                Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
+                // first creating the band, then copying the properties and then adding it to the target product
+                // if the
+                Band targetBand = new Band(targetBandName, sourceBand.getDataType(),
+                        targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                targetProduct.addBand(targetBand);
                 handleSampleCodings(sourceBand, targetBand, renameSlaveComponents, slaveComponentPattern);
                 sourceRasterMap.put(targetBand, sourceBand);
                 originalSlaveNames.put(targetBand.getName(), sourceBand.getName());
@@ -398,11 +438,8 @@ public class CollocateOp extends Operator {
 
             // Copy master geo-coding
             ProductUtils.copyGeoCoding(masterProduct, targetProduct);
-
             // Add slave masks
             copyMasks(slaveProduct, renameSlaveComponents, slaveComponentPattern, originalSlaveNames, slaveRasters);
-
-            // Check: one day we may want to copy slave metadata as well
 
             if (renameSlaveComponents) {
                 updateExpressions(originalSlaveNames, slaveRasters);
@@ -414,7 +451,23 @@ public class CollocateOp extends Operator {
         }
 
         setAutoGrouping();
+
+        // Add heading angles (if "Abstract_Metadata" element is present)
+        final MetadataElement abstractedMetadataTarget = targetProduct.getMetadataRoot().getElement("Abstracted_Metadata");
+        if (abstractedMetadataTarget != null) {
+            final MetadataElement slavesHeadingAnglesElem = new MetadataElement("Slaves_Heading_Angles");
+            abstractedMetadataTarget.addElement(slavesHeadingAnglesElem);
+            for (int i = 0; i < slaveProducts.length; i++) {
+                final Product slaveProduct = slaveProducts[i];
+                final MetadataElement abstractedMetadataSource = slaveProduct.getMetadataRoot().getElement("Abstracted_Metadata");
+                if (abstractedMetadataSource != null) {
+                    final double centreHeading = abstractedMetadataSource.getAttributeDouble("centre_heading");
+                    slavesHeadingAnglesElem.setAttributeDouble(String.format("centre_heading_%d", i), centreHeading);
+                }
+            }
+        }
     }
+
 
     private String getTargetBandName(RasterDataNode rasterDataNode, int productIndex) {
         String rasterDataNodeName = rasterDataNode.getName();
@@ -449,9 +502,38 @@ public class CollocateOp extends Operator {
             //System.out.printf("[%s] --> [%s]%n", oldExternalName, newExternalName);
             for (RasterDataNode raster : rasters) {
                 //System.out.printf("  [%s]:%s%n", raster.getName(), raster.getClass().getSimpleName());
-                raster.updateExpression(oldExternalName, newExternalName);
+                raster.setValidPixelExpression(replace(raster.getValidPixelExpression(), oldExternalName, newExternalName));
+                if (raster instanceof Mask) {
+                    Mask mask = (Mask) raster;
+                    Mask.ImageType imageType = mask.getImageType();
+                    if (imageType instanceof Mask.BandMathsType) {
+                        Mask.BandMathsType mathsType = (Mask.BandMathsType) imageType;
+                        mathsType.setExpression(mask, replace(mathsType.getExpression(mask), oldExternalName, newExternalName));
+                    } else {
+                        imageType.handleRename(mask, oldExternalName, newExternalName);
+                    }
+                }
+                if (raster instanceof VirtualBand) {
+                    VirtualBand virtualBand = (VirtualBand) raster;
+                    virtualBand.setExpression(replace(virtualBand.getExpression(), oldExternalName, newName));
+                }
             }
         }
+    }
+
+    private String replace(String expression, String oldName, String newName) {
+        if (expression == null || expression.trim().length() == 0) {
+            return expression;
+        }
+        String[] fragments = expression.split("\\b");
+        for (int i = 0; i < fragments.length; i++) {
+            if (oldName.equals(fragments[i])) {
+                if (i == 0 || !".".equals(fragments[i - 1].trim())) {
+                    fragments[i] = newName;
+                }
+            }
+        }
+        return String.join("", fragments);
     }
 
     private void validateProduct(Product product) {
@@ -684,53 +766,46 @@ public class CollocateOp extends Operator {
     }
 
     private void handleSampleCodings(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        handleFlagCoding(sourceBand, targetBand, renameComponents, renamePattern);
-        handleIndexCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        if (sourceBand.getFlagCoding() != null) {
+            handleFlagCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        }
+        if (sourceBand.getIndexCoding() != null) {
+            handleIndexCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        }
     }
 
     private void handleFlagCoding(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        if (sourceBand.getFlagCoding() != null) {
-            targetBand.getProduct().getFlagCodingGroup().remove(targetBand.getFlagCoding());
-            targetBand.setSampleCoding(null);
-        }
         setFlagCoding(targetBand, sourceBand.getFlagCoding(), renameComponents, renamePattern);
     }
 
     private void handleIndexCoding(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        if (sourceBand.getIndexCoding() != null) {
-            targetBand.getProduct().getIndexCodingGroup().remove(targetBand.getIndexCoding());
-            targetBand.setSampleCoding(null);
-        }
         setIndexCoding(targetBand, sourceBand.getIndexCoding(), renameComponents, renamePattern);
     }
 
     private void setFlagCoding(Band band, FlagCoding flagCoding, boolean rename, String pattern) {
-        if (flagCoding != null) {
-            String flagCodingName = flagCoding.getName();
-            if (rename) {
-                if (slaveProducts.length == 1) {
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
-                } else {
-                    int id = -1;
-                    for (int i = 0; i < slaveProducts.length; i++) {
-                        if (band.getProduct().getName().equals(slaveProducts[i].getName())) {
-                            id = i;
-                            break;
-                        }
+        String flagCodingName = flagCoding.getName();
+        if (rename) {
+            if (slaveProducts.length == 1) {
+                flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
+            } else {
+                int id = -1;
+                for (int i = 0; i < slaveProducts.length; i++) {
+                    if (band.getProduct().getName().equals(slaveProducts[i].getName())) {
+                        id = i;
+                        break;
                     }
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
                 }
+                flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
             }
-            final Product product = band.getProduct();
-            if (!product.getFlagCodingGroup().contains(flagCodingName)) {
-                addFlagCoding(product, flagCoding, flagCodingName);
-            }
-            band.setSampleCoding(product.getFlagCodingGroup().get(flagCodingName));
         }
+        final Product product = band.getProduct();
+        if (!product.getFlagCodingGroup().contains(flagCodingName)) {
+            addFlagCoding(product, flagCoding, flagCodingName);
+        }
+        band.setSampleCoding(product.getFlagCodingGroup().get(flagCodingName));
     }
 
     private void setIndexCoding(Band band, IndexCoding indexCoding, boolean rename, String pattern) {
-        if (indexCoding != null) {
             String indexCodingName = indexCoding.getName();
             if (rename) {
                 if (slaveProducts.length == 1) {
@@ -751,7 +826,6 @@ public class CollocateOp extends Operator {
                 addIndexCoding(product, indexCoding, indexCodingName);
             }
             band.setSampleCoding(product.getIndexCodingGroup().get(indexCodingName));
-        }
     }
 
     private static void addFlagCoding(Product product, FlagCoding flagCoding, String flagCodingName) {

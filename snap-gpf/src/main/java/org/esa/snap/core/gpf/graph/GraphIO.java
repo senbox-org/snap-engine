@@ -145,6 +145,10 @@ public class GraphIO {
         xStream.alias("applicationData", ApplicationData.class);
         xStream.addImplicitCollection(Graph.class, "applicationData", ApplicationData.class);
         xStream.registerConverter(new ApplicationData.AppConverter());
+
+        // since version 1.4.20 or maybe earlier we need to configure permission for security reasons
+        xStream.allowTypesByWildcard(new String[]{"com.bc.ceres.**", "org.esa.snap.core.gpf.**"});
+
         return xStream;
     }
 

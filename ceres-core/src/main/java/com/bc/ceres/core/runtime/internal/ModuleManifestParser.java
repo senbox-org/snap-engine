@@ -22,7 +22,11 @@ import com.bc.ceres.core.runtime.ModuleState;
 import com.bc.ceres.core.runtime.Version;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.converters.*;
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
@@ -201,6 +205,8 @@ public class ModuleManifestParser {
         xstream.addImplicitCollection(ModuleImpl.class, "extensions", "extension", ExtensionImpl.class);
         xstream.addImplicitCollection(ModuleImpl.class, "extensionPoints", "extensionPoint", ExtensionPointImpl.class);
 
+        // since version 1.4.20 or maybe earlier we need to configure permission for security reasons
+        xstream.allowTypesByWildcard(new String[]{"com.bc.ceres.core.runtime.**"});
         return xstream;
     }
 

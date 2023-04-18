@@ -29,8 +29,20 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
-import static org.junit.Assert.*;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_ALPHA;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_BLUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_GREEN;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_RED;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_TYPE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_COLOR;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_DESCRIPTION;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_EXPRESSION;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_NAME;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_TRANSPARENCY;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class BandMathMaskPersistableTest {
 
@@ -89,7 +101,7 @@ public class BandMathMaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("BandMathMask.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
 
         assertNotNull(maskFromXml);
         assertEquals(Mask.BandMathsType.class, maskFromXml.getImageType().getClass());

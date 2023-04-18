@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (c) 2021.  Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,6 +18,7 @@ package org.esa.snap.core.dataio;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
+import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -28,7 +29,9 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
+import javax.media.jai.OpImage;
 import javax.media.jai.PlanarImage;
+import javax.media.jai.TileCache;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
@@ -39,9 +42,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -162,7 +165,6 @@ public class ProductIO {
             if (formatName != null) {
                 final Iterator<ProductReaderPlugIn> it = registry.getReaderPlugIns(formatName);
 
-                selectedPlugIn = null;
                 while (it.hasNext()) {
                     ProductReaderPlugIn plugIn = it.next();
                     DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
@@ -431,6 +433,10 @@ public class ProductIO {
         }
         productWriter.setIncrementalMode(incremental);
 
+        writeProduct(product, file, productWriter, pm);
+    }
+
+    static void writeProduct(Product product, File file, ProductWriter productWriter, ProgressMonitor pm) throws IOException {
         ProductWriter productWriterOld = product.getProductWriter();
         product.setProductWriter(productWriter);
 
@@ -448,8 +454,16 @@ public class ProductIO {
             writeAllBands(product, pm);
             e = System.currentTimeMillis();
             long t2 = e - s;
+            s = System.currentTimeMillis();
+            if (productWriter instanceof DimapProductWriter && product.isModified()) {
+                // If we get here all tiles are written
+                // we can update the header only for DIMAP, so rewrite it, to handle intermediate changes
+                productWriter.writeProductNodes(product, file);
+            }
+            e = System.currentTimeMillis();
+            long t3 = e - s;
             SystemUtils.LOG.fine("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
-            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2));
+            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2 + t3));
         } catch (IOException e) {
             ioException = e;
         } finally {
@@ -505,23 +519,21 @@ public class ProductIO {
 
     private static void writeBandsConcurrent(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
         final int numBands = bandsToWrite.size();
-        final int numThreads = Runtime.getRuntime().availableProcessors();
-        final int threadsPerBand = numThreads / numBands;
-        final int executorSize = threadsPerBand == 0 ? 1 : threadsPerBand;
-        Semaphore semaphore = new Semaphore(numThreads);
+        final CountDownLatch bandsCountDown = new CountDownLatch(numBands);
+
+        final int numThreads = Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
+        final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         List<IOException> ioExceptionCollector = Collections.unmodifiableList(new ArrayList<>());
         for (Band band : bandsToWrite) {
             if (pm.isCanceled()) {
+                bandsCountDown.countDown();
                 break;
             }
-            ExecutorService executor = null;
-            semaphore.acquireUninterruptibly();
-            executor = Executors.newFixedThreadPool(executorSize);
             pm.setSubTaskName("Writing band '" + band.getName() + "'");
             ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
-            writeRasterDataFully(subPM, band, executor, semaphore, ioExceptionCollector);
+            writeRasterDataFully(subPM, band, executor, bandsCountDown, ioExceptionCollector);
         }
-        while (semaphore.availablePermits() < numThreads) {
+        while (bandsCountDown.getCount() > 0) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -529,12 +541,12 @@ public class ProductIO {
                                                      "Method ProductIO.writeAllBands(...)' unexpected termination", e);
             }
         }
+        executor.shutdown();
         for (IOException e : ioExceptionCollector) {
             SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
         }
         if (ioExceptionCollector.size() > 0) {
-            IOException ioException = ioExceptionCollector.get(0);
-            throw ioException;
+            throw ioExceptionCollector.get(0);
         }
     }
 
@@ -544,7 +556,7 @@ public class ProductIO {
                 break;
             }
             pm.setSubTaskName("Writing band '" + band.getName() + "'");
-            ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
+            ProgressMonitor subPM = SubProgressMonitor.createSynchronized(pm, 1);
             writeRasterDataFully(subPM, band, null, null, null);
         }
     }
@@ -555,11 +567,16 @@ public class ProductIO {
     private ProductIO() {
     }
 
-    private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
+    private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, CountDownLatch bandsCountDown, List<IOException> ioExceptionCollector) throws IOException {
         if (band.hasRasterData()) {
-            band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
-            if (semaphore != null) {
-                semaphore.release();
+            try {
+                band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+                band.removeCachedImageData();
+            } finally {
+                pm.done();
+                if (bandsCountDown != null) {
+                    bandsCountDown.countDown();
+                }
             }
         } else {
             final PlanarImage sourceImage = band.getSourceImage();
@@ -568,8 +585,7 @@ public class ProductIO {
             int numTiles = tileIndices.length;
             pm.beginTask("Writing raster data...", numTiles);
             if (executor != null) {
-//                Finisher finisher = new Finisher(band.getName(), pm, semaphore, executor, numTiles);
-                Finisher finisher = new Finisher(pm, semaphore, executor, numTiles);
+                Finisher finisher = new Finisher(pm, bandsCountDown, numTiles);
                 for (Point tileIndex : tileIndices) {
                     executor.execute(() -> {
                         try {
@@ -581,7 +597,11 @@ public class ProductIO {
                             ioExceptionCollector.add(e);
                             pm.setCanceled(true);
                         } finally {
-                            finisher.worked();
+                            try {
+                                finisher.worked();
+                            } catch (IllegalArgumentException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
                 }
@@ -603,9 +623,25 @@ public class ProductIO {
             final Raster data = sourceImage.getData(rect);
             final ProductData rasterData = band.createCompatibleRasterData(rect.width, rect.height);
             data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
-            band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+            try {
+                band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+            } finally {
+                rasterData.dispose();
+                removeCachedTile(sourceImage, tileIndex);
+            }
         }
     }
+
+    private static void removeCachedTile(PlanarImage sourceImage, Point tileIndex) {
+        if (sourceImage instanceof OpImage) {
+            OpImage opImage = (OpImage) sourceImage;
+            TileCache tileCache = opImage.getTileCache();
+            if (tileCache != null) {
+                tileCache.remove(sourceImage, tileIndex.x, tileIndex.y);
+            }
+        }
+    }
+
 
     /**
      * This method is not part of the official API and might change in the future.
@@ -621,6 +657,7 @@ public class ProductIO {
      * @param lvlSupport defines the level (resolution) within the level image pyramid which shall be read
      * @param destRect   the rectangular area which shall be filled with data
      * @param destBuffer the buffer where to put the data
+     *
      * @throws IOException in case an error occurs during reading
      */
     // Todo mp 2020-07-03 - https://senbox.atlassian.net/browse/SNAP-1134
@@ -630,30 +667,24 @@ public class ProductIO {
                                                Rectangle destRect,
                                                ProductData destBuffer) throws IOException {
 
-        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
-        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
-        final int srcX = lvlSupport.getSourceX(destRect.x);
-        final int srcY = lvlSupport.getSourceY(destRect.y);
+        Rectangle srcRect = lvlSupport.getSourceRectangle(destRect);
         final int scale = (int) lvlSupport.getScale();
 
-        reader.readBandRasterDataImpl(srcX, srcY, sourceWidth, sourceHeight, scale, scale, destBand,
+        reader.readBandRasterDataImpl(srcRect.x, srcRect.y, srcRect.width, srcRect.height, scale, scale, destBand,
                                       destRect.x, destRect.y, destRect.width, destRect.height, destBuffer, ProgressMonitor.NULL);
     }
 
     private static class Finisher {
 
         private final ProgressMonitor pm;
-        private final Semaphore semaphore;
-        private final ExecutorService executor;
+        private final CountDownLatch bandsCountDown;
         private final int work;
         private int counter;
 
-        public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
+        public Finisher(ProgressMonitor pm, CountDownLatch bandsCountDown, int counter) {
             this.pm = pm;
-            this.semaphore = semaphore;
-            this.executor = executor;
+            this.bandsCountDown = bandsCountDown;
             this.work = counter;
-
         }
 
         public synchronized void worked() {
@@ -662,11 +693,11 @@ public class ProductIO {
             } finally {
                 counter++;
                 if (counter == work) {
-                    semaphore.release();
-                    executor.shutdown();
+                    bandsCountDown.countDown();
                     pm.done();
                 }
             }
         }
+
     }
 }

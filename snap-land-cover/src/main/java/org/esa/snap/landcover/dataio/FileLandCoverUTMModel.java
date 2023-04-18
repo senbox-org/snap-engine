@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class FileLandCoverUTMModel extends FileLandCoverModel {
 
-    private Map<Integer, FileLandCoverTile> zoneTileMap = new HashMap();
+    private final Map<Integer, FileLandCoverTile> zoneTileMap = new HashMap<>();
 
     public FileLandCoverUTMModel(final LandCoverModelDescriptor descriptor, final File[] files,
                                  final Resampling resamplingMethod) throws IOException {
@@ -67,7 +67,7 @@ public class FileLandCoverUTMModel extends FileLandCoverModel {
             if (file.getName().contains("UTM" + zone)) {
                 final FileLandCoverTile tile = new FileLandCoverTile(this, file, productReaderPlugIn.createReaderInstance());
                 zoneTileMap.put(zone, tile);
-                tileList = zoneTileMap.values().toArray(new FileLandCoverTile[zoneTileMap.size()]);
+                tileList = zoneTileMap.values().toArray(new FileLandCoverTile[0]);
                 return tile;
             }
         }

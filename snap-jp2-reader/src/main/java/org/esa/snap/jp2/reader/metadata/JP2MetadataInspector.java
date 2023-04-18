@@ -26,8 +26,11 @@ import static org.esa.snap.lib.openjpeg.utils.OpenJpegUtils.validateOpenJpegExec
  */
 
 public class JP2MetadataInspector implements MetadataInspector {
-    protected Logger logger = Logger.getLogger(getClass().getName());
 
+    public JP2MetadataInspector() {
+    }
+
+    @Override
     public Metadata getMetadata(Path productPath) throws IOException {
         Metadata metadata = new Metadata();
         XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
@@ -64,10 +67,10 @@ public class JP2MetadataInspector implements MetadataInspector {
     }
 
     private GeoCoding addGeoCoding(Jp2XmlMetadata metadata, int width, int height) {
-        GeoCoding geoCoding= null;
-        if(metadata != null) {
+        GeoCoding geoCoding = null;
+        if (metadata != null) {
             Point2D origin = metadata.getOrigin();
-            geoCoding = JP2ProductReader.computeCrsGeoCoding(origin, metadata, new Dimension(width, height), null);
+            geoCoding = JP2ProductReader.computeCrsGeoCoding(origin, metadata, width, height, null);
             if (geoCoding == null) {
                 Map<String, TiePointGrid> tiePointGrids = JP2ProductReader.computeTiePointGrids(origin, width, height, metadata);
                 if (tiePointGrids != null && !tiePointGrids.isEmpty()) {

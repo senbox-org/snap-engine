@@ -22,7 +22,9 @@ import com.bc.ceres.core.runtime.ConfigurationElement;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.math.Range;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +38,7 @@ import java.util.Properties;
 
 /**
  * A profile used for the creation of RGB images. The profile comprises the band arithmetic expressions
- * for the computation of red, gree, blue and alpha (optional) channels of the resulting image.
+ * for the computation of red, green, blue and alpha (optional) channels of the resulting image.
  */
 public class RGBImageProfile implements ConfigurableExtension {
 
@@ -78,13 +80,18 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     public static final String FILENAME_EXTENSION = ".rgb";
 
-
     public static final String PROPERTY_KEY_NAME = "name";
     public static final String PROPERTY_KEY_RED = "red";
     public static final String PROPERTY_KEY_GREEN = "green";
     public static final String PROPERTY_KEY_BLUE = "blue";
     public static final String PROPERTY_KEY_ALPHA = "alpha";
     public static final String PROPERTY_KEY_INTERNAL = "internal";
+    static final String PROPERTY_KEY_RED_MIN = "red_min";
+    static final String PROPERTY_KEY_RED_MAX = "red_max";
+    static final String PROPERTY_KEY_GREEN_MIN = "green_min";
+    static final String PROPERTY_KEY_GREEN_MAX = "green_max";
+    static final String PROPERTY_KEY_BLUE_MIN = "blue_min";
+    static final String PROPERTY_KEY_BLUE_MAX = "blue_max";
 
     /**
      * Preferences key for RGB profile entries
@@ -98,14 +105,16 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     private String name;
     private boolean internal;
-    private String[] rgbaExpressions;
+    private final RGBChannelDef rgbChannelDef;
     private String[] pattern;
 
-    public RGBImageProfile() {
+    // only for testing 2021-04-27 tb
+    RGBImageProfile() {
         this("");
     }
 
-    public RGBImageProfile(final String name) {
+    // only for testing 2021-04-27 tb
+    RGBImageProfile(final String name) {
         this(name, new String[]{"", "", ""}, null);
     }
 
@@ -113,35 +122,55 @@ public class RGBImageProfile implements ConfigurableExtension {
         this(name, rgbaExpressions, null);
     }
 
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern){
+        this(name, rgbaExpressions, pattern, null);
+    }
+
+
     /**
      * Creates a new RGB profile.
      * In the pattern you can simply use '*' for a sequence of characters or use '?' for a single character.
      * For Example:
      * {@code new String[]{ "MER_*_2*", "MER_*_2*", ""}}
      *
-     * @param name The name of the profile
+     * @param name            The name of the profile
      * @param rgbaExpressions the expressions for the RGBA channels. Only RGB expressions are mandatory, the one for the alpha
      *                        channel can be missing
-     * @param pattern Pattern to check if this profile can be applied to a certain product. Three patterns need to be provided.
-     *                1. Will be matched against the product type
-     *                2. Will be matched against the product name
-     *                3. Will be matched against the description of the product
+     * @param pattern         Pattern to check if this profile can be applied to a certain product. Three patterns need to be provided.
+     *                        1. Will be matched against the product type
+     *                        2. Will be matched against the product name
+     *                        3. Will be matched against the description of the product
      */
-    public RGBImageProfile(final String name, String[] rgbaExpressions, String pattern[]) {
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern, Range[] valueRanges) {
         Assert.argument(name != null, "name != null");
         Assert.argument(rgbaExpressions != null, "rgbaExpressions != null");
         Assert.argument(rgbaExpressions.length == 3 || rgbaExpressions.length == 4,
-                        "rgbaExpressions.length == 3 || rgbaExpressions.length == 4");
+                "rgbaExpressions.length == 3 || rgbaExpressions.length == 4");
         if (pattern != null) {
             Assert.argument(pattern.length == 3, "pattern.length == 3");
         }
+        if (valueRanges != null) {
+            Assert.argument(valueRanges.length == 3, "valueRanges.length == 3");
+        }
+
+        this.rgbChannelDef = new RGBChannelDef(rgbaExpressions);
+        if (valueRanges == null) {
+            this.rgbChannelDef.setMinDisplaySample(R, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(R, Double.NaN);
+            this.rgbChannelDef.setMinDisplaySample(G, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(G, Double.NaN);
+            this.rgbChannelDef.setMinDisplaySample(B, Double.NaN);
+            this.rgbChannelDef.setMaxDisplaySample(B, Double.NaN);
+        } else {
+            this.rgbChannelDef.setMinDisplaySample(R, valueRanges[R].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(R, valueRanges[R].getMax());
+            this.rgbChannelDef.setMinDisplaySample(G, valueRanges[G].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(G, valueRanges[G].getMax());
+            this.rgbChannelDef.setMinDisplaySample(B, valueRanges[B].getMin());
+            this.rgbChannelDef.setMaxDisplaySample(B, valueRanges[B].getMax());
+        }
 
         this.name = name;
-        this.rgbaExpressions = new String[4];
-        this.rgbaExpressions[R] = rgbaExpressions[R];
-        this.rgbaExpressions[G] = rgbaExpressions[G];
-        this.rgbaExpressions[B] = rgbaExpressions[B];
-        this.rgbaExpressions[A] = rgbaExpressions.length == 4 ? rgbaExpressions[A] : "";
         this.pattern = pattern;
     }
 
@@ -153,6 +182,10 @@ public class RGBImageProfile implements ConfigurableExtension {
         this.name = name;
     }
 
+    public RGBChannelDef getRgbChannelDef() {
+        return rgbChannelDef;
+    }
+
     public boolean isInternal() {
         return internal;
     }
@@ -162,12 +195,34 @@ public class RGBImageProfile implements ConfigurableExtension {
     }
 
     public boolean equalExpressions(RGBImageProfile profile) {
-        return equalExpressions(profile.rgbaExpressions);
+        final String[] otherNames = profile.rgbChannelDef.getSourceNames();
+        final String[] sourceNames = rgbChannelDef.getSourceNames();
+
+        if (sourceNames.length != otherNames.length) {
+            return false;
+        }
+
+        for (int i = 0; i < sourceNames.length; i++) {
+            if (!sourceNames[i].equals(otherNames[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
+    /**
+     * This API function exposes internal structure. please use equalExpressions(RGBImageProfile profile)
+     */
+    @Deprecated
     public boolean equalExpressions(String[] rgbaExpressions) {
-        for (int i = 0; i < this.rgbaExpressions.length; i++) {
-            if (!this.rgbaExpressions[i].equals(rgbaExpressions[i])) {
+        final String[] sourceNames = rgbChannelDef.getSourceNames();
+        if (sourceNames.length != rgbaExpressions.length) {
+            return false;
+        }
+
+        for (int i = 0; i < sourceNames.length; i++) {
+            if (!sourceNames[i].equals(rgbaExpressions[i])) {
                 return false;
             }
         }
@@ -184,60 +239,71 @@ public class RGBImageProfile implements ConfigurableExtension {
     }
 
     public String[] getRgbExpressions() {
-        String[] copy = new String[rgbaExpressions.length - 1];
-        copy[R] = rgbaExpressions[R];
-        copy[G] = rgbaExpressions[G];
-        copy[B] = rgbaExpressions[B];
+        final String[] copy = new String[RGB_BAND_NAMES.length];
+        copy[R] = rgbChannelDef.getSourceName(R);
+        copy[G] = rgbChannelDef.getSourceName(G);
+        copy[B] = rgbChannelDef.getSourceName(B);
         return copy;
     }
 
     public void setRgbExpressions(String[] rgbExpressions) {
-        rgbaExpressions[R] = rgbExpressions[R];
-        rgbaExpressions[G] = rgbExpressions[G];
-        rgbaExpressions[B] = rgbExpressions[B];
+        if (rgbExpressions.length != RGB_BAND_NAMES.length) {
+            throw new IllegalArgumentException("Mismatching number of RGB expressions");
+        }
+        rgbChannelDef.setSourceName(R, rgbExpressions[R]);
+        rgbChannelDef.setSourceName(G, rgbExpressions[G]);
+        rgbChannelDef.setSourceName(B, rgbExpressions[B]);
     }
 
     public String[] getRgbaExpressions() {
-        return rgbaExpressions.clone();
+        final String[] copy = new String[RGBA_BAND_NAMES.length];
+        copy[R] = rgbChannelDef.getSourceName(R);
+        copy[G] = rgbChannelDef.getSourceName(G);
+        copy[B] = rgbChannelDef.getSourceName(B);
+        copy[A] = rgbChannelDef.getSourceName(A);
+        return copy;
     }
 
     public void setRgbaExpressions(String[] rgbaExpressions) {
-        this.rgbaExpressions[R] = rgbaExpressions[R];
-        this.rgbaExpressions[G] = rgbaExpressions[G];
-        this.rgbaExpressions[B] = rgbaExpressions[B];
-        this.rgbaExpressions[A] = rgbaExpressions[A];
+        if (rgbaExpressions.length != RGBA_BAND_NAMES.length) {
+            throw new IllegalArgumentException("Mismatching number of RGBA expressions");
+        }
+        rgbChannelDef.setSourceName(R, rgbaExpressions[R]);
+        rgbChannelDef.setSourceName(G, rgbaExpressions[G]);
+        rgbChannelDef.setSourceName(B, rgbaExpressions[B]);
+        rgbChannelDef.setSourceName(A, rgbaExpressions[A]);
     }
 
     public String getRedExpression() {
-        return rgbaExpressions[R];
+        return rgbChannelDef.getSourceName(R);
     }
 
     public void setRedExpression(String expression) {
-        rgbaExpressions[R] = checkAndTrimExpressionArgument(expression);
+        rgbChannelDef.setSourceName(R, checkAndTrimExpressionArgument(expression));
     }
 
     public String getGreenExpression() {
-        return rgbaExpressions[G];
+        return rgbChannelDef.getSourceName(G);
     }
 
     public void setGreenExpression(String expression) {
-        rgbaExpressions[G] = checkAndTrimExpressionArgument(expression);
+        rgbChannelDef.setSourceName(G, checkAndTrimExpressionArgument(expression));
     }
 
     public String getBlueExpression() {
-        return rgbaExpressions[B];
+        return rgbChannelDef.getSourceName(B);
     }
 
     public void setBlueExpression(String expression) {
-        rgbaExpressions[B] = checkAndTrimExpressionArgument(expression);
+        rgbChannelDef.setSourceName(B, checkAndTrimExpressionArgument(expression));
     }
 
     public String getAlphaExpression() {
-        return rgbaExpressions[A];
+        return rgbChannelDef.getSourceName(A);
     }
 
     public void setAlphaExpression(String expression) {
-        rgbaExpressions[A] = checkAndTrimExpressionArgument(expression);
+        rgbChannelDef.setSourceName(A, checkAndTrimExpressionArgument(expression));
     }
 
     public boolean hasAlpha() {
@@ -257,7 +323,6 @@ public class RGBImageProfile implements ConfigurableExtension {
      * if an RGB image can be created from the given product.
      *
      * @param product the product
-     *
      * @return true, if so
      */
     public boolean isApplicableTo(final Product product) {
@@ -276,7 +341,7 @@ public class RGBImageProfile implements ConfigurableExtension {
 
         //check if raster size is the same in all the expressions
         try {
-            if(!BandArithmetic.areRastersEqualInSize(product, expressions)) {
+            if (!BandArithmetic.areRastersEqualInSize(product, expressions)) {
                 return false;
             }
         } catch (ParseException e) {
@@ -309,7 +374,7 @@ public class RGBImageProfile implements ConfigurableExtension {
                 }
             }
         }
-        profile.setRgbExpressions(rgbaExpressions);
+        profile.setRgbaExpressions(rgbaExpressions);
         return profile;
     }
 
@@ -317,9 +382,7 @@ public class RGBImageProfile implements ConfigurableExtension {
      * Loads a profile from the given file using the Java properties file format
      *
      * @param file the file
-     *
      * @return the profile, never null
-     *
      * @throws IOException if an I/O error occurs
      * @see #setProperties(java.util.Properties)
      */
@@ -338,9 +401,7 @@ public class RGBImageProfile implements ConfigurableExtension {
      * Loads a profile from the given url using the Java properties file format
      *
      * @param url the url
-     *
      * @return the profile, never null
-     *
      * @throws IOException if an I/O error occurs
      * @see #setProperties(java.util.Properties)
      */
@@ -350,9 +411,9 @@ public class RGBImageProfile implements ConfigurableExtension {
             properties.load(inStream);
         }
         String urlExtForm = url.toExternalForm();
-        int lastPathSeperatorIndex = urlExtForm.lastIndexOf('/');
+        int lastPathSeparatorIndex = urlExtForm.lastIndexOf('/');
         int extensionDotIndex = urlExtForm.lastIndexOf('.');
-        final String defaultName = urlExtForm.substring(lastPathSeperatorIndex + 1, extensionDotIndex);
+        final String defaultName = urlExtForm.substring(lastPathSeparatorIndex + 1, extensionDotIndex);
         final RGBImageProfile profile = new RGBImageProfile(defaultName);
         profile.setProperties(properties);
         return profile;
@@ -362,7 +423,6 @@ public class RGBImageProfile implements ConfigurableExtension {
      * Stores this profile in the given file using the Java properties file format
      *
      * @param file the file
-     *
      * @throws IOException if an I/O error occurs
      * @see #getProperties(java.util.Properties)
      */
@@ -375,7 +435,7 @@ public class RGBImageProfile implements ConfigurableExtension {
     }
 
     /**
-     * Sets profile properties and accoringly sets them in the given property map.
+     * Sets profile properties and accordingly sets them in the given property map.
      *
      * @param properties the property map which receives the properties of this profiles
      */
@@ -394,6 +454,21 @@ public class RGBImageProfile implements ConfigurableExtension {
         } else {
             properties.remove(PROPERTY_KEY_INTERNAL);
         }
+
+        setRangeProperty(properties, getRedMinMax(), PROPERTY_KEY_RED_MIN, PROPERTY_KEY_RED_MAX);
+        setRangeProperty(properties, getGreenMinMax(), PROPERTY_KEY_GREEN_MIN, PROPERTY_KEY_GREEN_MAX);
+        setRangeProperty(properties, getBlueMinMax(), PROPERTY_KEY_BLUE_MIN, PROPERTY_KEY_BLUE_MAX);
+    }
+
+    private void setRangeProperty(Properties properties, Range redMinMax, String minKey, String maxKey) {
+        final double min = redMinMax.getMin();
+        if (!Double.isNaN(min)) {
+            properties.put(minKey, Double.toString(min));
+        }
+        final double max = redMinMax.getMax();
+        if (!Double.isNaN(max)) {
+            properties.put(maxKey, Double.toString(max));
+        }
     }
 
     /**
@@ -401,7 +476,6 @@ public class RGBImageProfile implements ConfigurableExtension {
      *
      * @param properties the property map which provides the properties for this profiles
      */
-    @SuppressWarnings("LocalVariableHidesMemberVariable")
     public void setProperties(Properties properties) {
         final String name = properties.getProperty(PROPERTY_KEY_NAME);
         final String[] rgbaExpressions = new String[]{
@@ -416,10 +490,26 @@ public class RGBImageProfile implements ConfigurableExtension {
         }
         setInternal(internal);
         setRgbaExpressions(rgbaExpressions);
+
+        rgbChannelDef.setMinDisplaySample(R, getDoubleProperty(properties, PROPERTY_KEY_RED_MIN));
+        rgbChannelDef.setMaxDisplaySample(R, getDoubleProperty(properties, PROPERTY_KEY_RED_MAX));
+        rgbChannelDef.setMinDisplaySample(G, getDoubleProperty(properties, PROPERTY_KEY_GREEN_MIN));
+        rgbChannelDef.setMaxDisplaySample(G, getDoubleProperty(properties, PROPERTY_KEY_GREEN_MAX));
+        rgbChannelDef.setMinDisplaySample(B, getDoubleProperty(properties, PROPERTY_KEY_BLUE_MIN));
+        rgbChannelDef.setMaxDisplaySample(B, getDoubleProperty(properties, PROPERTY_KEY_BLUE_MAX));
+    }
+
+    private double getDoubleProperty(Properties properties, String propertyName) {
+        double value = Double.NaN;
+        final String numberProperty = properties.getProperty(propertyName);
+        if (StringUtils.isNotNullAndNotEmpty(numberProperty)) {
+            value = Double.parseDouble(numberProperty);
+        }
+        return value;
     }
 
     public static void storeRgbaExpressions(final Product product, final String[] rgbaExpressions) {
-        storeRgbaExpressions(product, rgbaExpressions, RGBImageProfile.RGBA_BAND_NAMES);    
+        storeRgbaExpressions(product, rgbaExpressions, RGBImageProfile.RGBA_BAND_NAMES);
     }
 
     public static void storeRgbaExpressions(final Product product, final String[] rgbaExpressions, final String[] bandNames) {
@@ -436,21 +526,22 @@ public class RGBImageProfile implements ConfigurableExtension {
                 if (rgbBand instanceof VirtualBand) {
                     VirtualBand virtualBand = (VirtualBand) rgbBand;
                     virtualBand.setExpression(rgbaExpression);
+
                 } else {
                     product.removeBand(rgbBand);
                     product.addBand(new VirtualBand(rgbBandName,
-                                                    ProductData.TYPE_FLOAT32,
-                                                    product.getSceneRasterWidth(),
-                                                    product.getSceneRasterHeight(),
-                                                    rgbaExpression));
+                            ProductData.TYPE_FLOAT32,
+                            product.getSceneRasterWidth(),
+                            product.getSceneRasterHeight(),
+                            rgbaExpression));
                 }
             } else { // band does not exist
                 if (!alphaChannel || !expressionIsEmpty) { // don't add empty alpha channels
                     product.addBand(new VirtualBand(rgbBandName,
-                                                    ProductData.TYPE_FLOAT32,
-                                                    product.getSceneRasterWidth(),
-                                                    product.getSceneRasterHeight(),
-                                                    rgbaExpression));
+                            ProductData.TYPE_FLOAT32,
+                            product.getSceneRasterWidth(),
+                            product.getSceneRasterHeight(),
+                            rgbaExpression));
                 }
             }
         }
@@ -459,8 +550,8 @@ public class RGBImageProfile implements ConfigurableExtension {
     @Override
     public int hashCode() {
         return getRedExpression().hashCode() +
-               getGreenExpression().hashCode() +
-               getBlueExpression().hashCode();
+                getGreenExpression().hashCode() +
+                getBlueExpression().hashCode();
     }
 
     @Override
@@ -471,7 +562,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         if (obj instanceof RGBImageProfile) {
             RGBImageProfile profile = (RGBImageProfile) obj;
             return getName().equals(profile.getName()) && equalExpressions(profile) &&
-                   Arrays.equals(getPattern(), profile.getPattern());
+                    Arrays.equals(getPattern(), profile.getPattern());
         }
         return false;
     }
@@ -479,12 +570,12 @@ public class RGBImageProfile implements ConfigurableExtension {
     @Override
     public String toString() {
         return getClass().getName() + "[" +
-               "name=" + name + ", " +
-               "r=" + rgbaExpressions[0] + ", " +
-               "g=" + rgbaExpressions[1] + ", " +
-               "b=" + rgbaExpressions[2] + ", " +
-               "a=" + rgbaExpressions[3] +
-               "]";
+                "name=" + name + ", " +
+                "r=" + rgbChannelDef.getSourceName(R) + ", " +
+                "g=" + rgbChannelDef.getSourceName(G) + ", " +
+                "b=" + rgbChannelDef.getSourceName(B) + ", " +
+                "a=" + rgbChannelDef.getSourceName(A) +
+                "]";
     }
 
 
@@ -506,15 +597,19 @@ public class RGBImageProfile implements ConfigurableExtension {
         return value != null ? value : defaultValue;
     }
 
+    /**
+     * @deprecated Not in use anymore. Was used in BEAM. Might be removed in the future. Deprecated since SNAP 9.
+     */
+    @Deprecated()
     public void configure(ConfigurationElement config) throws CoreException {
 
         name = getChildValue(config, "name");
         internal = true;
-        rgbaExpressions[R] = getChildValue(config, "red");
-        rgbaExpressions[G] = getChildValue(config, "green");
-        rgbaExpressions[B] = getChildValue(config, "blue");
+        rgbChannelDef.setSourceName(R, getChildValue(config, "red"));
+        rgbChannelDef.setSourceName(G, getChildValue(config, "green"));
+        rgbChannelDef.setSourceName(B, getChildValue(config, "blue"));
 
-        ConfigurationElement child = config.getChild("alpha");
+        final ConfigurationElement child = config.getChild("alpha");
         String alpha = null;
         if (child != null) {
             alpha = child.getValue();
@@ -522,7 +617,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         if (alpha == null) {
             alpha = "";
         }
-        rgbaExpressions[A] = alpha;
+        rgbChannelDef.setSourceName(A, alpha);
         ConfigurationElement patternConfig = config.getChild("pattern");
         if (patternConfig != null) {
             pattern = new String[3];
@@ -548,5 +643,38 @@ public class RGBImageProfile implements ConfigurableExtension {
         } else {
             throw new CoreException("Configuration element [" + childName + "] does not exist");
         }
+    }
+
+    public void setRedMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(R, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(R, range.getMax());
+    }
+
+    public Range getRedMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(R);
+        final double max = rgbChannelDef.getMaxDisplaySample(R);
+        return new Range(min, max);
+    }
+
+    public void setGreenMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(G, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(G, range.getMax());
+    }
+
+    public Range getGreenMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(G);
+        final double max = rgbChannelDef.getMaxDisplaySample(G);
+        return new Range(min, max);
+    }
+
+    public void setBlueMinMax(Range range) {
+        rgbChannelDef.setMinDisplaySample(B, range.getMin());
+        rgbChannelDef.setMaxDisplaySample(B, range.getMax());
+    }
+
+    public Range getBlueMinMax() {
+        final double min = rgbChannelDef.getMinDisplaySample(B);
+        final double max = rgbChannelDef.getMaxDisplaySample(B);
+        return new Range(min, max);
     }
 }

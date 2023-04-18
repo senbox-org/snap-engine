@@ -4,7 +4,7 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP
+OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>The SNAP Pixel Extraction Tool can
   be used to generate a CSV file from a given pixel location of specif
  ied products. It is implemented as a GPF operator.</p><p><b>Vendor:</

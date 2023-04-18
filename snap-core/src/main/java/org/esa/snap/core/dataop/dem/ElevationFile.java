@@ -17,6 +17,7 @@ package org.esa.snap.core.dataop.dem;
 
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.dataop.downloadable.SSLUtil;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.esa.snap.core.util.SystemUtils;
@@ -172,47 +173,45 @@ public abstract class ElevationFile {
      * @throws IOException if an I/O error occurs
      */
     private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
+        SSLUtil sslUtil = new SSLUtil();
+        sslUtil.disableSSLCertificateCheck();
+
         final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
-        final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength);
-        final OutputStream os;
-        try {
-            os = new BufferedOutputStream(new FileOutputStream(outputFile));
-        } catch (IOException e) {
-            is.close();
-            throw e;
-        }
 
-        try {
-            final StatusProgressMonitor status = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
-            status.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
+        try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength)) {
+            try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
+                try (final OutputStream os = new BufferedOutputStream(fileOS)) {
 
-            final int size = 32768;
-            final byte[] buf = new byte[size];
-            int n;
-            while ((n = is.read(buf, 0, size)) > -1) {
-                os.write(buf, 0, n);
-                status.worked(n);
-            }
-            status.done();
+                    try {
+                        final StatusProgressMonitor status = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
+                        status.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
 
-            while (true) {
-                final int b = is.read();
-                if (b == -1) {
-                    break;
+                        final int size = 32768;
+                        final byte[] buf = new byte[size];
+                        int n;
+                        while ((n = is.read(buf, 0, size)) > -1) {
+                            os.write(buf, 0, n);
+                            status.worked(n);
+                        }
+                        status.done();
+
+                        while (true) {
+                            final int b = is.read();
+                            if (b == -1) {
+                                break;
+                            }
+                            os.write(b);
+                        }
+                    } catch (IOException e) {
+                        outputFile.delete();
+                        throw e;
+                    }
                 }
-                os.write(b);
             }
-        } catch (IOException e) {
-            outputFile.delete();
-            throw e;
         } finally {
-            try {
-                os.close();
-            } finally {
-                is.close();
-            }
+            sslUtil.enableSSLCertificateCheck();
         }
         return outputFile;
     }

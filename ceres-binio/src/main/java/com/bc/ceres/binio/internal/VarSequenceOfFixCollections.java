@@ -17,13 +17,13 @@
 package com.bc.ceres.binio.internal;
 
 import com.bc.ceres.binio.CollectionData;
-import com.bc.ceres.binio.DataAccessException;
-import com.bc.ceres.binio.DataContext;
-import com.bc.ceres.binio.SequenceType;
-import com.bc.ceres.binio.SequenceData;
-import com.bc.ceres.binio.Type;
 import com.bc.ceres.binio.CompoundData;
 import com.bc.ceres.binio.CompoundType;
+import com.bc.ceres.binio.DataAccessException;
+import com.bc.ceres.binio.DataContext;
+import com.bc.ceres.binio.SequenceData;
+import com.bc.ceres.binio.SequenceType;
+import com.bc.ceres.binio.Type;
 
 import java.io.IOException;
 
@@ -61,6 +61,11 @@ final class VarSequenceOfFixCollections extends AbstractSequenceOfCollections {
     @Override
     public void flush() throws IOException {
         // todo - flush modified elements
+    }
+
+    @Override
+    public void dispose() throws IOException {
+
     }
 
     @Override

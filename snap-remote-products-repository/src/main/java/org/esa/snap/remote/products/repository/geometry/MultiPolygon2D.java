@@ -4,6 +4,8 @@ import java.awt.geom.Path2D;
 import java.util.Arrays;
 
 /**
+ * The coordinates of a multi-polygon.
+ *
  * Created by jcoravu on 31/1/2020.
  */
 public class MultiPolygon2D extends AbstractGeometry2D {
