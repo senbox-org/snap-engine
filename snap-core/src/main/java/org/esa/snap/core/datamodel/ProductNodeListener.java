@@ -19,10 +19,10 @@ package org.esa.snap.core.datamodel;
  * A listener which listens to internal data product changes.
  *
  * @author Norman Fomferra
+ * @author Sabine Embacher
  * @version $Revision$ $Date$
  */
 public interface ProductNodeListener {
-
 
     /**
      * Notified when a node changed.
@@ -51,6 +51,15 @@ public interface ProductNodeListener {
      * @param event the product node which the listener to be notified
      */
     void nodeRemoved(ProductNodeEvent event);
+
+    /**
+     * Notified when a node starts its disposal.
+     * Overwrite this method if you want to be notified when a node starts disposal.
+     *
+     * @param event the product node which the listener to be notified
+     */
+    default void nodeDisposing(ProductNodeEvent event) {
+    }
 }
 
 

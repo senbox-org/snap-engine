@@ -16,22 +16,24 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.subset.PixelSubsetRegion;
-import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
-import javax.imageio.stream.FileCacheImageInputStream;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -42,48 +44,41 @@ import static org.junit.Assert.*;
 
 public class GeoTiffProductReaderTest {
 
-    public GeoTiffProductReaderTest() {
-    }
-
     @Test
     public void testReadProduct() throws Exception {
         URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 
-        FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
-        try (GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream)) {
-            String filePath = resource.getFile();
-            String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
+        File productFile = new File(resource.toURI());
+        ProductReader productReader = buildProductReader();
+        Product product = productReader.readProductNodes(productFile, null);
 
-            GeoTiffProductReader productReader = buildProductReader();
+        assertNotNull(product);
+        assertNotNull(product.getFileLocation());
+        assertNotNull(product.getMetadataRoot());
+        assertNotNull(product.getName());
+        assertNull(product.getSceneGeoCoding());
+        assertNotNull(product.getProductReader());
+        assertNotNull(product.getPreferredTileSize());
+        assertEquals(product.getProductReader(), productReader);
+        assertEquals(73, product.getSceneRasterWidth());
+        assertEquals(76, product.getSceneRasterHeight());
+        assertEquals(1, product.getNumBands());
 
-            Product product = productReader.readProduct(geoTiffImageReader, defaultProductName);
-            assertNotNull(product);
-            assertNull(product.getFileLocation());
-            assertNotNull(product.getMetadataRoot());
-            assertNotNull(product.getName());
-            assertNull(product.getSceneGeoCoding());
-            assertNotNull(product.getProductReader());
-            assertNotNull(product.getPreferredTileSize());
-            assertEquals(product.getProductReader(), productReader);
-            assertEquals(73, product.getSceneRasterWidth());
-            assertEquals(76, product.getSceneRasterHeight());
-            assertEquals(1, product.getNumBands());
+        Band band = product.getBandAt(0);
+        assertNotNull(band);
+        assertEquals("band_1", band.getName());
+        assertEquals(73, band.getRasterWidth());
+        assertEquals(76, band.getRasterHeight());
 
-            Band band = product.getBandAt(0);
-            assertNotNull(band);
-            assertEquals("band_1", band.getName());
-            assertEquals(73, band.getRasterWidth());
-            assertEquals(76, band.getRasterHeight());
+        int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
+        band.readPixels(0, 0, band.getRasterWidth(), band.getRasterHeight(), pixels, ProgressMonitor.NULL);
 
-            int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
-            band.readPixels(0, 0, band.getRasterWidth(), band.getRasterHeight(), pixels, ProgressMonitor.NULL);
-
-            assertEquals(52428, pixels[20]);
-            assertEquals(18295, pixels[40]);
-            assertEquals(52418, pixels[60]);
-        }
+        assertEquals(52428, pixels[20]);
+        assertEquals(18295, pixels[40]);
+        assertEquals(52418, pixels[60]);
     }
+
 
     @Test
     public void testReadProductSubset() throws Exception {
@@ -92,10 +87,10 @@ public class GeoTiffProductReaderTest {
 
         File productFile = new File(resource.toURI());
 
-        GeoTiffProductReader productReader = buildProductReader();
+        ProductReader productReader = buildProductReader();
 
         ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setNodeNames(new String[] { "band_1"} );
+        subsetDef.setNodeNames(new String[]{"band_1"});
         subsetDef.setSubsetRegion(new PixelSubsetRegion(new Rectangle(23, 32, 41, 35), 0));
         subsetDef.setSubSampling(1, 1);
 
@@ -143,7 +138,7 @@ public class GeoTiffProductReaderTest {
 
         File productFile = new File(resource.toURI());
 
-        GeoTiffProductReader productReader = buildProductReader();
+        ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, null);
         assertNotNull(product);
         assertNotNull(product.getFileLocation());
@@ -211,8 +206,8 @@ public class GeoTiffProductReaderTest {
         assertEquals(161.32f, band.getSampleFloat(401, 270), 0.0f);
     }
 
-    private static GeoTiffProductReader buildProductReader() {
+    private static ProductReader buildProductReader() {
         GeoTiffProductReaderPlugIn readerPlugIn = new GeoTiffProductReaderPlugIn();
-        return  new GeoTiffProductReader(readerPlugIn);
+        return readerPlugIn.createReaderInstance();
     }
 }

@@ -357,7 +357,6 @@ public class Band extends AbstractBand {
         Product product = getProductSafe();
         ProductWriter writer = product.getProductWriterSafe();
         writer.writeBandRasterData(this, offsetX, offsetY, width, height, rasterData, pm);
-        removeCachedImageData();
     }
 
     /**
@@ -423,18 +422,6 @@ public class Band extends AbstractBand {
             size += ProductData.getElemSize(getDataType()) * numDataElems;
         }
         return size;
-    }
-
-    private void removeCachedImageData() {
-        if (isSourceImageSet()) {
-            getSourceImage().reset();
-        }
-        if (isGeophysicalImageSet()) {
-            getGeophysicalImage().reset();
-        }
-        if (isValidMaskImageSet()) {
-            getValidMaskImage().reset();
-        }
     }
 
     //////////////////////////////////////////////////////////////////////////

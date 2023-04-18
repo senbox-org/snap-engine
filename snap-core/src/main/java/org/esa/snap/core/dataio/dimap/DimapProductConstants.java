@@ -43,7 +43,7 @@ public final class DimapProductConstants {
      * <p>
      * Important note: If you change this number, update the BEAM-DIMAP version history given at {@link DimapProductWriterPlugIn}.
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.12.1";
+    public static final String DIMAP_CURRENT_VERSION = "2.13.0";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";
@@ -313,6 +313,7 @@ public final class DimapProductConstants {
     // Filter bands support -- versions 1.0, 1.1
     public static final String TAG_FILTER_BAND_INFO = "Filter_Band_Info";
     public static final String TAG_FILTER_SOURCE = "FILTER_SOURCE";
+    public static final String TAG_FILTER_ITERATION_COUNT = "ITERATION_COUNT";
     public static final String TAG_FILTER_KERNEL = "Filter_Kernel";
     public static final String TAG_FILTER_OP_TYPE = "FILTER_OP_TYPE";
     public static final String TAG_FILTER_SUB_WINDOW_SIZE = "FILTER_SUB_WINDOW_SIZE";
@@ -369,6 +370,8 @@ public final class DimapProductConstants {
     public static final String TAG_MINIMUM = "MINIMUM";
     public static final String TAG_MAXIMUM = "MAXIMUM";
     public static final String TAG_RASTER = "RASTER";
+    // VectorDataMask
+    public static final String TAG_VECTOR_DATA_NODE = "VECTOR_DATA_NODE";
 
     // BEAM-Dimap bitmask definition tags
     public static final String TAG_BITMASK_DEFINITIONS = "Bitmask_Definitions";

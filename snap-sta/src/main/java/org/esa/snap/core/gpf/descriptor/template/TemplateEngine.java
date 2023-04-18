@@ -72,23 +72,36 @@ public abstract class TemplateEngine<C> {
     }
 
     /**
+     * Creates an instance of a template engine.
+     *
+     * @param descriptor        The operator descriptor
+     * @param templateType      The template type
+     * @param stateful          If <code>true</code>, the scripting engine will be singleton-like.
+     * @return the template engine
+     */
+    public static TemplateEngine createInstance(ToolAdapterOperatorDescriptor descriptor, TemplateType templateType, boolean stateful) {
+        if (templateType == null) {
+            throw new IllegalArgumentException("null template");
+        }
+        switch (templateType) {
+            case JAVASCRIPT:
+                return new JavascriptEngine(descriptor, stateful);
+            case XSLT:
+                return new XsltEngine(descriptor, stateful);
+            case VELOCITY:
+            default:
+                return new ApacheVelocityEngine(descriptor, stateful);
+        }
+    }
+
+    /**
      * Parses the given template without processing it.
      * This method should be used for verifying the syntactical correctness of the template.
      *
-     * @param template  The template to parse
-     * @throws TemplateException
+     * @param template The template to parse
+     * @throws TemplateException in case of an exception during parsing of the template
      */
     public abstract void parse(Template template) throws TemplateException;
-
-    /**
-     * Processes the given template.
-     *
-     * @param template      The template to be processed
-     * @param parameters    Parameters to be passed to the template.
-     * @return              If everything ok, the transformed template
-     * @throws TemplateException
-     */
-    public abstract String execute(Template template, Map<String, Object> parameters) throws TemplateException;
 
     /**
      * Returns the type of the template. Can be either TemplateType.VELOCITY or TemplateType.JAVASCRIPT
@@ -114,35 +127,22 @@ public abstract class TemplateEngine<C> {
     }
 
     /**
-     * Creates an instance of a template engine.
+     * Processes the given template.
      *
-     * @param descriptor        The operator descriptor
-     * @param templateType      The template type
-     * @param stateful          If <code>true</code>, the scripting engine will be singleton-like.
-     * @return
+     * @param template      The template to be processed
+     * @param parameters    Parameters to be passed to the template.
+     * @return If everything ok, the transformed template
+     * @throws TemplateException in case of an exception during processing of the template
      */
-    public static TemplateEngine createInstance(ToolAdapterOperatorDescriptor descriptor, TemplateType templateType, boolean stateful) {
-        if (templateType == null) {
-            throw new IllegalArgumentException("null template");
-        }
-        switch (templateType) {
-            case JAVASCRIPT:
-                return new JavascriptEngine(descriptor, stateful);
-            case XSLT:
-                return new XsltEngine(descriptor, stateful);
-            case VELOCITY:
-            default:
-                return new ApacheVelocityEngine(descriptor, stateful);
-        }
-    }
+    public abstract String execute(Template template, Map<String, Object> parameters) throws TemplateException;
 
     /**
      * Returns the contents of the processed template as a list of strings (lines).
      *
      * @param template      The template to be processed
      * @param parameters    Parameters to be passed to the template engine
-     * @return              A list of strings representing the lines of the processed template
-     * @throws TemplateException
+     * @return A list of strings representing the lines of the processed template
+     * @throws TemplateException in case of an exception during processing of the template
      */
     public List<String> getLines(Template template, Map<String, Object> parameters) throws TemplateException {
         if (template == null) {
@@ -280,11 +280,12 @@ public abstract class TemplateEngine<C> {
                 RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
                 String veloTemplate = this.macroTemplateContents + "\n" +
                         (internalTemplate.isInMemory() ?
-                            internalTemplate.getContents() :
-                            new String(Files.readAllBytes(internalTemplate.getPath().toPath())));
+                                internalTemplate.getContents() :
+                                new String(Files.readAllBytes(internalTemplate.getPath().toPath())));
                 StringReader reader = new StringReader(veloTemplate);
-                SimpleNode node = runtimeServices.parse(reader, internalTemplate.getName());
                 template = new org.apache.velocity.Template();
+                template.setName(internalTemplate.getName());
+                SimpleNode node = runtimeServices.parse(reader, template);
                 template.setRuntimeServices(runtimeServices);
                 template.setData(node);
                 template.initDocument();

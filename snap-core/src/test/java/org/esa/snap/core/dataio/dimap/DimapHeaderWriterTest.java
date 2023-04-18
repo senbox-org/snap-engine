@@ -159,6 +159,7 @@ public class DimapHeaderWriterTest {
                     "            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>" + LS +
                     "            <Filter_Band_Info bandType=\"ConvolutionFilterBand\">" + LS +
                     "                <FILTER_SOURCE>b2</FILTER_SOURCE>" + LS +
+                    "                <ITERATION_COUNT>1</ITERATION_COUNT>" + LS +
                     "                <Filter_Kernel>" + LS +
                     "                    <KERNEL_WIDTH>3</KERNEL_WIDTH>" + LS +
                     "                    <KERNEL_HEIGHT>3</KERNEL_HEIGHT>" + LS +
@@ -185,6 +186,7 @@ public class DimapHeaderWriterTest {
                     "            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>" + LS +
                     "            <Filter_Band_Info bandType=\"GeneralFilterBand\" version=\"1.2\">" + LS +
                     "                <FILTER_SOURCE>b2</FILTER_SOURCE>" + LS +
+                    "                <ITERATION_COUNT>1</ITERATION_COUNT>" + LS +
                     "                <FILTER_OP_TYPE>MEAN</FILTER_OP_TYPE>" + LS +
                     "                <Filter_Kernel>" + LS +
                     "                    <KERNEL_WIDTH>3</KERNEL_WIDTH>" + LS +

@@ -21,7 +21,6 @@ import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.jdom.Element;
 
@@ -31,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i>
+ * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  *
  * @author Marco Peters
  */
@@ -44,7 +43,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
     static final String GENERAL_FILTER_BAND_TYPE = "GeneralFilterBand";
 
     @Override
-    public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
+    public Object createObjectFromXml(Element element, Product product) {
         final Element filterBandInfo = element.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
 
         GeneralFilterBand.OpType opType = parseOpType(filterBandInfo);
@@ -73,9 +72,15 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
         final String sourceName = filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE);
         final RasterDataNode sourceNode = product.getRasterDataNode(sourceName);
         final String bandName = element.getChildTextTrim(DimapProductConstants.TAG_BAND_NAME);
-        Dimension filterBandSize = ImageUtils.computeSceneRasterSize(sourceNode.getRasterWidth(), sourceNode.getRasterHeight(), regionRasterSize);
-        // todo - read iterationCount
-        final GeneralFilterBand gfb = new GeneralFilterBand(bandName, sourceNode, filterBandSize, opType, kernel, 1);
+
+        final int iterationCount;
+        final String iterCountStr = filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_ITERATION_COUNT);
+        if (iterCountStr == null) {
+            iterationCount = 1;
+        } else {
+            iterationCount = Integer.parseInt(iterCountStr);
+        }
+        final GeneralFilterBand gfb = new GeneralFilterBand(bandName, sourceNode, opType, kernel, iterationCount);
 
         gfb.setDescription(element.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION));
         gfb.setUnit(element.getChildTextTrim(DimapProductConstants.TAG_PHYSICAL_UNIT));
@@ -171,6 +176,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE, String.valueOf(gfb.getNoDataValue())));
         final List<Element> filterBandInfoList = new ArrayList<>(5);
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_SOURCE, gfb.getSource().getName()));
+        filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_ITERATION_COUNT, "" + gfb.getIterationCount()));
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_OP_TYPE, gfb.getOpType().toString()));
         filterBandInfoList.add(ConvolutionFilterBandPersistable.convertKernelToElement(gfb.getStructuringElement()));
 

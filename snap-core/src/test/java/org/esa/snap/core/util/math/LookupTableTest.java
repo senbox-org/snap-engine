@@ -31,6 +31,50 @@ import static org.junit.Assert.assertArrayEquals;
 public class LookupTableTest {
 
     @Test
+    public void testInterpolation1D_Increasing() {
+        final double[] dimension = new double[]{1, 2, 3, 4};
+        final double[] values = new double[]{1, 2, 3, 4};
+
+        final LookupTable lut = new LookupTable(values, dimension);
+        assertEquals(1, lut.getDimensionCount());
+
+        assertEquals(1.0, lut.getDimension(0).getMin(), 0.0);
+        assertEquals(4.0, lut.getDimension(0).getMax(), 0.0);
+
+        assertEquals(1.0, lut.getValue(0.5), 0.0);
+        assertEquals(1.0, lut.getValue(1.0), 0.0);
+        assertEquals(1.5, lut.getValue(1.5), 0.0);
+        assertEquals(2.0, lut.getValue(2.0), 0.0);
+        assertEquals(2.5, lut.getValue(2.5), 0.0);
+        assertEquals(3.0, lut.getValue(3.0), 0.0);
+        assertEquals(3.5, lut.getValue(3.5), 0.0);
+        assertEquals(4.0, lut.getValue(4.0), 0.0);
+        assertEquals(4.0, lut.getValue(4.5), 0.0);
+    }
+
+    @Test
+    public void testInterpolation1D_Decreasing() {
+        final double[] dimension = new double[]{4, 3, 2, 1};
+        final double[] values = new double[]{1, 2, 3, 4};
+
+        final LookupTable lut = new LookupTable(values, dimension);
+        assertEquals(1, lut.getDimensionCount());
+
+        assertEquals(1.0, lut.getDimension(0).getMin(), 0.0);
+        assertEquals(4.0, lut.getDimension(0).getMax(), 0.0);
+
+        assertEquals(4.0, lut.getValue(0.5), 0.0);
+        assertEquals(4.0, lut.getValue(1.0), 0.0);
+        assertEquals(3.5, lut.getValue(1.5), 0.0);
+        assertEquals(3.0, lut.getValue(2.0), 0.0);
+        assertEquals(2.5, lut.getValue(2.5), 0.0);
+        assertEquals(2.0, lut.getValue(3.0), 0.0);
+        assertEquals(1.5, lut.getValue(3.5), 0.0);
+        assertEquals(1.0, lut.getValue(4.0), 0.0);
+        assertEquals(1.0, lut.getValue(4.5), 0.0);
+    }
+
+    @Test
     public void testInterpolation1D() {
         final double[] dimension = new double[]{0, 1};
         final double[] values = new double[]{0, 1};

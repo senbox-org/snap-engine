@@ -926,12 +926,16 @@ public class ImageManager {
     }
 
     public static RenderedImage createFormatOp(RenderedImage image, int dataType) {
-        if (image.getSampleModel().getDataType() == dataType) {
+        return createFormatOp(image, dataType, null);
+    }
+
+    public static RenderedImage createFormatOp(RenderedImage image, int dataType, ImageLayout targetLayout) {
+        if (image.getSampleModel().getDataType() == dataType && targetLayout == null) {
             return PlanarImage.wrapRenderedImage(image);
         }
         return FormatDescriptor.create(image,
                                        dataType,
-                                       createDefaultRenderingHints(image, null));
+                                       createDefaultRenderingHints(image, targetLayout));
     }
 
     /**

@@ -3,6 +3,7 @@ package org.esa.snap.core.gpf.common.resample;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.awt.geom.AffineTransform;
@@ -12,6 +13,11 @@ import static org.junit.Assert.*;
 
 public class ResampleUtilsTest {
 
+    @Before
+    public void setup() {
+        System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+    }
+    
     @Test
     public void testAllGridsAlignAtUpperLeft() {
         Band band1 = new Band("x1", ProductData.TYPE_INT8, 2, 2);

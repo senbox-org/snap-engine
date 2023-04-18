@@ -19,21 +19,34 @@ import java.util.ArrayList;
 public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource implements UncompressedTileOpImageCallback<Void>, GeoTiffBandSource {
 
     private final GeoTiffImageReader geoTiffImageReader;
+    private boolean isUnsignedInt;
     private final boolean isGlobalShifted180;
     private final int dataBufferType;
     private final int bandIndex;
     private final Double noDataValue;
     private final Dimension defaultJAIReadTileSize;
 
+    /**
+     * @deprecated use {@link GeoTiffMultiLevelSource#GeoTiffMultiLevelSource(GeoTiffImageReader, int, boolean, Rectangle, Dimension, int, GeoCoding, boolean, Double, Dimension)} instead
+     */
+    @Deprecated
     public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, Rectangle imageReadBounds, Dimension mosaicImageTileSize,
+                                   int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180, Double noDataValue, Dimension defaultJAITileSize) {
+
+        this(geoTiffImageReader, dataBufferType, false, imageReadBounds, mosaicImageTileSize, bandIndex,
+             geoCoding, isGlobalShifted180, noDataValue, defaultJAITileSize);
+    }
+
+    public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, boolean interpretAsUnsignedInt, Rectangle imageReadBounds, Dimension mosaicImageTileSize,
                                    int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180, Double noDataValue, Dimension defaultJAITileSize) {
 
         super(imageReadBounds, mosaicImageTileSize, geoCoding);
 
         this.geoTiffImageReader = geoTiffImageReader;
-        this.isGlobalShifted180 = isGlobalShifted180;
         this.dataBufferType = dataBufferType;
+        this.isUnsignedInt = interpretAsUnsignedInt;
         this.bandIndex = bandIndex;
+        this.isGlobalShifted180 = isGlobalShifted180;
         this.noDataValue = noDataValue;
         this.defaultJAIReadTileSize = defaultJAITileSize;
     }
@@ -42,7 +55,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     public SourcelessOpImage buildTileOpImage(ImageReadBoundsSupport imageReadBoundsSupport, int tileWidth, int tileHeight,
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, Void tileData) {
 
-        return new GeoTiffTileOpImage(this.geoTiffImageReader, this, this.dataBufferType, tileWidth, tileHeight,
+        return new GeoTiffTileOpImage(this.geoTiffImageReader, this, this.dataBufferType, isUnsignedInt, tileWidth, tileHeight,
                                       tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
     }
 

@@ -237,6 +237,9 @@ public class DefaultOperatorDescriptor implements OperatorDescriptor {
         xStream.alias("targetProperty", DefaultTargetPropertyDescriptor.class);
         xStream.aliasField("targetProperties", DefaultOperatorDescriptor.class, "targetPropertyDescriptors");
 
+        // since version 1.4.20 or maybe earlier we need to configure permission for security reasons
+        xStream.allowTypesByWildcard(new String[]{"com.bc.ceres.**", "org.esa.snap.core.gpf.**"});
+
         return xStream;
     }
 

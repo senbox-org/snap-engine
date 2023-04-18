@@ -37,10 +37,6 @@ public class FileLandCoverModelDescriptor extends AbstractLandCoverModelDescript
         return new FileLandCoverModel(this, new File[]{file}, resampling);
     }
 
-    public String createTileFilename(int minLat, int minLon) {
-        return file.getName();
-    }
-
     @Override
     public int getDataType() {
         return ProductData.TYPE_FLOAT32;

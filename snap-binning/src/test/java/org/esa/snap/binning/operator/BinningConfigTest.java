@@ -19,11 +19,7 @@ package org.esa.snap.binning.operator;
 import com.bc.ceres.binding.BindingException;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
-import org.esa.snap.binning.BinManager;
-import org.esa.snap.binning.CellProcessorConfig;
-import org.esa.snap.binning.CompositingType;
-import org.esa.snap.binning.PlanetaryGrid;
-import org.esa.snap.binning.VariableContext;
+import org.esa.snap.binning.*;
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;
@@ -167,7 +163,7 @@ public class BinningConfigTest {
         assertEquals(2, properties.length);
         System.out.println("properties = " + Arrays.toString(properties));
         assertEquals("Selection", propertySet.getProperty("type").getValue());
-        String[] expected = {"tsm_mean", " tsm_sigma", " chl_min", "cmax = chl_max"};
+        String[] expected = {"tsm_mean", "tsm_sigma", "chl_min", "cmax = chl_max"};
         String[] actual = propertySet.getProperty("varNames").getValue();
         assertArrayEquals(expected, actual);
     }

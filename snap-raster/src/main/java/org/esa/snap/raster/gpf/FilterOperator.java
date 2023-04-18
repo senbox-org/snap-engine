@@ -15,7 +15,6 @@
  */
 package org.esa.snap.raster.gpf;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
 import org.esa.snap.core.datamodel.FilterBand;
@@ -23,29 +22,28 @@ import org.esa.snap.core.datamodel.GeneralFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 /**
  * image filter operator
@@ -73,8 +71,7 @@ public class FilterOperator extends Operator {
     @Parameter(description = "The kernel file", label = "Kernel File")
     private File userDefinedKernelFile = null;
 
-    private transient Map<Band, Band> bandMap = new HashMap<>(5);
-    private transient final Map<String, Filter> filterMap = new HashMap<>(5);
+    private final static Map<String, Filter> filterMap = new HashMap<>();
 
     private static final String PRODUCT_SUFFIX = "_Flt";
 
@@ -88,13 +85,8 @@ public class FilterOperator extends Operator {
         populateFilterMap(SMOOTHING_FILTERS);
         populateFilterMap(SHARPENING_FILTERS);
         populateFilterMap(LAPLACIAN_FILTERS);
-        // populateFilterMap(NON_LINEAR_FILTERS);
-    }
-
-    private void populateFilterMap(Filter[] filters) {
-        for (Filter f : filters) {
-            filterMap.put(f.toString(), f);
-        }
+        populateFilterMap(NON_LINEAR_FILTERS);
+        populateFilterMap(MORPHOLOGY_FILTERS);
     }
 
     /**
@@ -112,87 +104,104 @@ public class FilterOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
         ensureSingleRasterSize(sourceProduct);
+        if (userDefinedKernelFile == null && selectedFilterName == null) {
+            // we cannot throw exception here because, in this case the GraphBuilder is not working anymore
+//            throw new OperatorException("Parameter 'userDefinedKernelFile' or 'selectedFilterName' must be specified");
+            // instead we log an error
+            SystemUtils.LOG.severe("Parameter 'userDefinedKernelFile' or 'selectedFilterName' must be specified");
+        }
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            // we cannot throw exception here because, in this case the GraphBuilder is not working anymore
+//            throw new OperatorException("At least one source band must be selected");
+            // instead we log an error
+            SystemUtils.LOG.severe(String.format("[%s] At least one source band must be selected", getId()));
+        }
+
+        Filter selectedFilter = null;
+        if (userDefinedKernelFile != null) {
+            try {
+                selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
+            } catch (IOException ioe) {
+                // we cannot throw exception here because, in this case the GraphBuilder is not working anymore
+//                throw new OperatorException(String.format("Could not load user defined kernel from %s", userDefinedKernelFile), ioe);
+                // instead we log an error
+                SystemUtils.LOG.log(Level.SEVERE, String.format("Could not load user defined kernel from %s", userDefinedKernelFile), ioe);
+            }
+        } else {
+            selectedFilter = filterMap.get(selectedFilterName);
+            if (selectedFilter == null) {
+                // we cannot throw exception here because, in this case the GraphBuilder is not working anymore
+//                throw new OperatorException(String.format("Specified filter name '%s' is unknown", selectedFilterName));
+                // instead we log an error
+                SystemUtils.LOG.log(Level.SEVERE, String.format("Specified filter name '%s' is unknown", selectedFilterName));
+            }
+        }
+
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
+                                    sourceProduct.getProductType(),
+                                    sourceProduct.getSceneRasterWidth(),
+                                    sourceProduct.getSceneRasterHeight());
+        if (selectedFilter == null) {
+            return;
+        }
+        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames, true);
 
         try {
-            targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                    sourceProduct.getProductType(),
-                    sourceProduct.getSceneRasterWidth(),
-                    sourceProduct.getSceneRasterHeight());
-
-            Filter selectedFilter = null;
-            if (userDefinedKernelFile != null) {
-                selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
-            } else if (selectedFilterName != null) {
-                selectedFilter = filterMap.get(selectedFilterName);
-            }
-
-            if (selectedFilter == null)
-                return;
-
-            final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames, true);
-
             for (Band srcBand : sourceBands) {
-                final Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
-                        sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-                targetBand.setUnit(srcBand.getUnit());
-                targetProduct.addBand(targetBand);
-
-                final String filterBandName = "tmp_filter_" + srcBand.getName();
-                final FilterBand filterBand = createFilterBand(selectedFilter, filterBandName, srcBand);
-                bandMap.put(targetBand, filterBand);
-
-                final Band existingBand = sourceProduct.getBand(filterBandName);
-                if (existingBand != null)
-                    sourceProduct.removeBand(existingBand);
-                sourceProduct.addBand(filterBand);
+                targetProduct.addBand(createFilterBand(selectedFilter, srcBand.getName(), srcBand));
             }
-
             ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-
-            targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
-    /**
-     * Called by the framework in order to compute a tile for the given target band.
-     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-     *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws OperatorException If an error occurs during computation of the target raster.
-     */
-    @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final Tile sourceRaster = getSourceTile(bandMap.get(targetBand), targetTileRectangle);
-
-        final ProductData masterData = sourceRaster.getDataBuffer();
-        final ProductData targetData = targetTile.getDataBuffer();
-        for (int y = targetTileRectangle.y; y < targetTileRectangle.y + targetTileRectangle.height; y++) {
-            for (int x = targetTileRectangle.x; x < targetTileRectangle.x + targetTileRectangle.width; x++) {
-                final int index = sourceRaster.getDataBufferIndex(x, y);
-                targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
-            }
-        }
-    }
-
-    private static FilterBand createFilterBand(Filter filter, String bandName, RasterDataNode raster) throws Exception {
-
-        final FilterBand filterBand;
+    private static Band createFilterBand(Filter filter, String bandName, Band band) {
+        FilterBand filterBand;
         if (filter instanceof KernelFilter) {
             final KernelFilter kernelFilter = (KernelFilter) filter;
-            filterBand = new ConvolutionFilterBand(bandName, raster, kernelFilter.kernel, 1);
+            filterBand = new ConvolutionFilterBand(bandName, band, kernelFilter.kernel, 1);
         } else {
-            throw new Exception("unhandled filter type");
-            //final GeneralFilter generalFilter = (GeneralFilter) filter;
-            //filterBand = new GeneralFilterBand(bandName, raster, generalFilter.operator, kernel, 1);
+            final GeneralFilter generalFilter = (GeneralFilter) filter;
+            filterBand = new GeneralFilterBand(bandName, band, generalFilter.operator, getKernel(generalFilter), 1);
         }
-        final String descr = MessageFormat.format("Filter ''{0}''", filter.toString());
-        filterBand.setDescription(descr);
-        return filterBand;
+        final Band targetBand = new Band(bandName, ProductData.TYPE_FLOAT32, band.getRasterWidth(), band.getRasterHeight());
+        filterBand.setUnit(band.getUnit());
+        targetBand.setNoDataValueUsed(filterBand.isNoDataValueUsed());
+        targetBand.setNoDataValue(filterBand.getNoDataValue());
+        filterBand.setValidPixelExpression(band.getValidPixelExpression());
+        ProductUtils.copySpectralBandProperties(band, targetBand);
+        targetBand.setDescription(String.format("Filter ''%s''", filter));
+        targetBand.setSourceImage(filterBand.getSourceImage());
+        return targetBand;
+    }
+
+    private static Band createFilterBand_bak(Filter filter, String bandName, Band band) {
+        FilterBand filterBand;
+        if (filter instanceof KernelFilter) {
+            final KernelFilter kernelFilter = (KernelFilter) filter;
+            filterBand = new ConvolutionFilterBand(bandName, band, kernelFilter.kernel, 1);
+        } else {
+            final GeneralFilter generalFilter = (GeneralFilter) filter;
+            filterBand = new GeneralFilterBand(bandName, band, generalFilter.operator, getKernel(generalFilter), 1);
+        }
+        final Band targetBand = new Band(bandName, ProductData.TYPE_FLOAT32, band.getRasterWidth(), band.getRasterHeight());
+        ProductUtils.copyRasterDataNodeProperties(band, targetBand);
+        ProductUtils.copySpectralBandProperties(band, targetBand);
+        targetBand.setDescription(String.format("Filter ''%s''", filter));
+        targetBand.setSourceImage(filterBand.getSourceImage());
+        return targetBand;
+    }
+
+    private static Kernel getKernel(GeneralFilter filter) {
+        final double[] kernelData = new double[filter.width * filter.height];
+        Arrays.fill(kernelData, 1.0);
+        return new Kernel(filter.width,
+                          filter.height,
+                          filter.width / 2,
+                          filter.height / 2,
+                          1.0,
+                          kernelData);
     }
 
     private static KernelFilter getUserDefinedFilter(File userDefinedKernelFile) throws IOException {
@@ -204,7 +213,7 @@ public class FilterOperator extends Operator {
         int k = 0;
         for (int r = 0; r < filterHeight; r++) {
             for (int c = 0; c < filterWidth; c++) {
-                data[k++] = (double) kernelData[r][c];
+                data[k++] = kernelData[r][c];
             }
         }
         return new KernelFilter("User Defined Filter", new Kernel(filterWidth, filterHeight, data));
@@ -222,7 +231,7 @@ public class FilterOperator extends Operator {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
         // read data from file and save them in 2-D array
-        String line = "";
+        String line;
         StringTokenizer st;
         float[][] array;
         int rowIdx = 0;
@@ -331,6 +340,7 @@ public class FilterOperator extends Operator {
             return false;
         }
     }
+
 
     public static final Filter[] LINE_DETECTION_FILTERS = {
             new KernelFilter("Horizontal Edges", new Kernel(3, 3, new double[]{
@@ -467,12 +477,24 @@ public class FilterOperator extends Operator {
                     -1, +4, -1,
                     +0, -1, +0,
             })),
+            new KernelFilter("Laplace 3x3 (b)", new Kernel(3, 3, new double[]{
+                    -1, -1, -1,
+                    -1, +8, -1,
+                    -1, -1, -1,
+            })),
             new KernelFilter("Laplace 5x5", new Kernel(5, 5, new double[]{
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
                     +1, +1, 24, +1, +1,
                     +1, +1, +1, +1, +1,
                     +1, +1, +1, +1, +1,
+            })),
+            new KernelFilter("Laplace 5x5 (b)", new Kernel(5, 5, new double[]{
+                    -1, -1, -1, -1, -1,
+                    -1, -1, -1, -1, -1,
+                    -1, -1, 24, -1, -1,
+                    -1, -1, -1, -1, -1,
+                    -1, -1, -1, -1, -1,
             })),
     };
 
@@ -485,11 +507,31 @@ public class FilterOperator extends Operator {
             new GeneralFilter("Mean 5x5", 5, 5, GeneralFilterBand.OpType.MEAN),
             new GeneralFilter("Median 3x3", 3, 3, GeneralFilterBand.OpType.MEDIAN),
             new GeneralFilter("Median 5x5", 5, 5, GeneralFilterBand.OpType.MEDIAN),
-            //new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.STDDEV),
-            //new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.STDDEV),
-            //new GeneralFilter("Root-Mean-Square 3x3", 3, 3, GeneralFilterBand.RMS),
-            //new GeneralFilter("Root-Mean-Square 5x5", 5, 5, GeneralFilterBand.RMS),
+            new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.OpType.STDDEV),
+            new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.OpType.STDDEV),
+            new GeneralFilter("Standard Deviation 7x7", 7, 7, GeneralFilterBand.OpType.STDDEV),
     };
+
+    public static final Filter[] MORPHOLOGY_FILTERS = {
+            new GeneralFilter("Erosion 3x3", 3, 3, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Erosion 5x5", 5, 5, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Erosion 7x7", 7, 7, GeneralFilterBand.OpType.EROSION),
+            new GeneralFilter("Dilation 3x3", 3, 3, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Dilation 5x5", 5, 5, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Dilation 7x7", 7, 7, GeneralFilterBand.OpType.DILATION),
+            new GeneralFilter("Opening 3x3", 3, 3, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Opening 5x5", 5, 5, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Opening 7x7", 7, 7, GeneralFilterBand.OpType.OPENING),
+            new GeneralFilter("Closing 3x3", 3, 3, GeneralFilterBand.OpType.CLOSING),
+            new GeneralFilter("Closing 5x5", 5, 5, GeneralFilterBand.OpType.CLOSING),
+            new GeneralFilter("Closing 7x7", 7, 7, GeneralFilterBand.OpType.CLOSING),
+    };
+
+    private static void populateFilterMap(Filter[] filters) {
+        for (Filter f : filters) {
+            filterMap.put(f.toString(), f);
+        }
+    }
 
     /**
      * The SPI is used to register this operator in the graph processing framework

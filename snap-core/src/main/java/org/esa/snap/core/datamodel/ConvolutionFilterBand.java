@@ -25,10 +25,9 @@ import java.awt.image.RenderedImage;
 /**
  * A band that obtains its input data from an underlying source band and filters
  * the raster data using a {@link Kernel}.
- * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i>
+ * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  *
  * @author Norman Fomferra
- * @version $Revision$ $Date$
  */
 public class ConvolutionFilterBand extends FilterBand {
 
@@ -36,13 +35,9 @@ public class ConvolutionFilterBand extends FilterBand {
     private final int iterationCount;
 
     public ConvolutionFilterBand(String name, RasterDataNode source, Kernel kernel, int iterationCount) {
-        super(name,
-              source.getGeophysicalDataType() == ProductData.TYPE_FLOAT64 ? ProductData.TYPE_FLOAT64 : ProductData.TYPE_FLOAT32,
-              source.getRasterWidth(),
-              source.getRasterHeight(),
-              source);
-        this.kernel = kernel;
-        this.iterationCount = iterationCount;
+        this(name, source,
+             new Dimension(source.getRasterWidth(), source.getRasterHeight()),
+             kernel, iterationCount);
     }
 
     public ConvolutionFilterBand(String name, RasterDataNode source, Dimension filterBandSize, Kernel kernel, int iterationCount) {
@@ -58,6 +53,10 @@ public class ConvolutionFilterBand extends FilterBand {
 
     public Kernel getKernel() {
         return kernel;
+    }
+
+    public int getIterationCount() {
+        return iterationCount;
     }
 
     @Override

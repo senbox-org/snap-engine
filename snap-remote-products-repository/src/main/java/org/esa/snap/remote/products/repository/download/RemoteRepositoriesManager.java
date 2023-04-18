@@ -5,7 +5,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.HTTPServerException;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
+import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.geometry.GeometryUtils;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
@@ -40,7 +49,17 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +79,7 @@ public class RemoteRepositoriesManager {
 
     private RemoteRepositoriesManager() {
         ConfigurationManager.setConfigurationProvider(new RemoteConfigurationProvider());
-        Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
+        Set<DataSource<?, ?>> services = DataSourceManager.getInstance().getRegisteredDataSources();
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
         for (DataSource dataSource : services) {
@@ -114,6 +133,7 @@ public class RemoteRepositoriesManager {
         DataSourceComponent downloadStrategy;
         synchronized (this.downloadingProducts) {
             downloadStrategy = this.downloadingProducts.remove(key);
+            this.downloadingProducts.notifyAll();
         }
         if (downloadStrategy == null) {
             // the product is not downloading
@@ -215,28 +235,39 @@ public class RemoteRepositoriesManager {
             additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
             additionalProperties.put("progress.interval", "1500");
 
-            dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
+            int waitTime = 10000;
+            do {
+                dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
 
-            if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
-                // the product has been downloaded
-                String productPath = product.getLocation();
-                if (productPath == null) {
-                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getRemoteMission().getName()+"' mission.");
-                }
-                URI uri = new URI(productPath);
-                return Paths.get(uri);
-            } else {
-                // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
-                boolean downloadingProductCancelled;
-                synchronized (this.downloadingProducts) {
-                    DataSourceComponent previousDataSource = this.downloadingProducts.remove(key);
-                    downloadingProductCancelled = (previousDataSource == null);
-                }
-                if (downloadingProductCancelled) {
-                    throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
+                if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
+                    // the product has been downloaded
+                    String productPath = product.getLocation();
+                    if (productPath == null) {
+                        throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName + "' remote repository using the '" + repositoryProduct.getRemoteMission().getName() + "' mission.");
+                    }
+                    URI uri = new URI(productPath);
+                    return Paths.get(uri);
                 } else {
-                    throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
+                    if (product.getProductStatus() == ProductStatus.QUEUED) {
+                        progressListener.notifyProductStatus(product.getProductStatus().friendlyName());
+                    }
                 }
+                synchronized (this.downloadingProducts) {
+                    this.downloadingProducts.wait(this.downloadingProducts.get(key) != null ? waitTime: 1);
+                }
+                waitTime += 10000;
+            } while (product.getProductStatus() == ProductStatus.QUEUED && this.downloadingProducts.get(key) != null);
+
+            // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
+            boolean downloadingProductCancelled;
+            synchronized (this.downloadingProducts) {
+                DataSourceComponent previousDataSource = this.downloadingProducts.remove(key);
+                downloadingProductCancelled = (previousDataSource == null);
+            }
+            if (downloadingProductCancelled) {
+                throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
+            } else {
+                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
             }
         } finally {
             if (dataSourceComponent != null) {
@@ -337,7 +368,7 @@ public class RemoteRepositoriesManager {
         return parameters;
     }
 
-    public static List<RepositoryProduct> downloadProductList(String dataSourceName, String mission, Credentials credentials, Map<String, Object> parameterValues,
+    public static List<RepositoryProduct> downloadProductList(String dataSourceName, String mission, int pageSize, Credentials credentials, Map<String, Object> parameterValues,
                                                               ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                               throws Exception {
 
@@ -378,13 +409,15 @@ public class RemoteRepositoriesManager {
         } else if (totalProductCount > 0) {
             downloaderListener.notifyProductCount(totalProductCount);
 
-            int pageSize = 100;
             long totalPageNumber = totalProductCount / pageSize;
             if (totalProductCount % pageSize != 0) {
                 totalPageNumber++;
             }
 
             query.setPageSize(pageSize);
+            if(query.supportsPaging()) {
+                query.setMaxResults(pageSize);
+            }
 
             WKTReader wktReader = new WKTReader();
             productList = new ArrayList<>();
@@ -406,6 +439,7 @@ public class RemoteRepositoriesManager {
             }
         } else {
             List<EOProduct> pageResults = query.execute();
+            downloaderListener.notifyProductCount(pageResults.size());
 
             ThreadStatus.checkCancelled(thread);
 
@@ -437,9 +471,9 @@ public class RemoteRepositoriesManager {
 
                 ro.cs.tao.eodata.Polygon2D polygon2D = new ro.cs.tao.eodata.Polygon2D();
                 polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
-                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
                 polygon2D.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
+                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
+                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
                 polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
                 query.addParameter(parameterName, polygon2D);
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
@@ -482,14 +516,20 @@ public class RemoteRepositoriesManager {
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct taoProduct = pageResults.get(i);
 
-            Geometry productGeometry = wktReader.read(taoProduct.getGeometry());
-            AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
+            AbstractGeometry2D geometry = null;
+            if(taoProduct.getGeometry() != null) {
+                Geometry productGeometry = wktReader.read(taoProduct.getGeometry());
+                geometry = GeometryUtils.convertProductGeometry(productGeometry);
+            }
 
             List<ro.cs.tao.eodata.Attribute> taoRemoteAttributes = taoProduct.getAttributes();
-            List<Attribute> remoteAttributes = new ArrayList<>(taoRemoteAttributes.size());
-            for (int k=0; k<taoRemoteAttributes.size(); k++) {
-                ro.cs.tao.eodata.Attribute remoteAttribute = taoRemoteAttributes.get(k);
-                remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
+            List<Attribute> remoteAttributes = new ArrayList<>();
+            if(taoRemoteAttributes != null){
+                remoteAttributes = new ArrayList<>(taoRemoteAttributes.size());
+                for (int k=0; k<taoRemoteAttributes.size(); k++) {
+                    ro.cs.tao.eodata.Attribute remoteAttribute = taoRemoteAttributes.get(k);
+                    remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
+                }
             }
 
             RemoteRepositoryProductImpl repositoryProduct = new RemoteRepositoryProductImpl(taoProduct.getId(), taoProduct.getName(), taoProduct.getLocation(), mission, geometry, taoProduct.getAcquisitionDate(), taoProduct.getApproximateSize());
@@ -584,7 +624,7 @@ public class RemoteRepositoriesManager {
     }
 
     private static DataSource findDataSource(String dataSourceName) {
-        Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
+        Set<DataSource<?, ?>> services = DataSourceManager.getInstance().getRegisteredDataSources();
         for (DataSource dataSource : services) {
             if (dataSource.getId().equals(dataSourceName)) {
                 return dataSource;

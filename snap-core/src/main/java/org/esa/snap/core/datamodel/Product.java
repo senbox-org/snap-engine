@@ -400,6 +400,9 @@ public class Product extends ProductNode {
     }
 
     static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
+        if (listener == null) {
+            return;
+        }
         switch (event.getType()) {
             case ProductNodeEvent.NODE_CHANGED:
                 listener.nodeChanged(event);
@@ -412,6 +415,9 @@ public class Product extends ProductNode {
                 break;
             case ProductNodeEvent.NODE_REMOVED:
                 listener.nodeRemoved(event);
+                break;
+            case ProductNodeEvent.NODE_DISPOSING:
+                listener.nodeDisposing(event);
                 break;
         }
     }
@@ -477,8 +483,8 @@ public class Product extends ProductNode {
      */
     public boolean isSceneCrsASharedModelCrs() {
         return isSceneCrsEqualToModelCrsOf(getBandGroup())
-                && isSceneCrsEqualToModelCrsOf(getTiePointGridGroup())
-                && isSceneCrsEqualToModelCrsOf(getMaskGroup());
+               && isSceneCrsEqualToModelCrsOf(getTiePointGridGroup())
+               && isSceneCrsEqualToModelCrsOf(getMaskGroup());
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -705,6 +711,7 @@ public class Product extends ProductNode {
      */
     @Override
     public void dispose() {
+        fireEvent(this, ProductNodeEvent.NODE_DISPOSING, null);
         try {
             closeIO();
         } catch (IOException ignore) {
@@ -1011,7 +1018,7 @@ public class Product extends ProductNode {
     public void addTiePointGrid(final TiePointGrid tiePointGrid) {
         if (containsRasterDataNode(tiePointGrid.getName())) {
             throw new IllegalArgumentException("The Product '" + getName() + "' already contains " +
-                                                       "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
+                                               "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
         }
         tiePointGridGroup.add(tiePointGrid);
     }
@@ -1116,7 +1123,7 @@ public class Product extends ProductNode {
         Assert.notNull(band, "band");
         Assert.argument(!containsRasterDataNode(band.getName()),
                         "The Product '" + getName() + "' already contains " +
-                                "a band with the name '" + band.getName() + "'.");
+                        "a band with the name '" + band.getName() + "'.");
         bandGroup.add(band);
     }
 
@@ -1403,7 +1410,7 @@ public class Product extends ProductNode {
      */
     public boolean containsPixel(final double x, final double y) {
         return x >= 0.0f && x <= getSceneRasterWidth() &&
-                y >= 0.0f && y <= getSceneRasterHeight();
+               y >= 0.0f && y <= getSceneRasterHeight();
     }
 
     //
@@ -1622,7 +1629,7 @@ public class Product extends ProductNode {
                 listeners = new ArrayList<>();
             }
             if (!listeners.contains(listener)) {
-                listeners.add(listener);
+                listeners.add(0, listener);
                 return true;
             }
         }
@@ -1948,7 +1955,7 @@ public class Product extends ProductNode {
         }
 
         if (pixelX >= 0 && pixelX < getSceneRasterWidth()
-                && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
+            && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
 
             sb.append("\n");
 
@@ -2615,6 +2622,10 @@ public class Product extends ProductNode {
      * @param mask the mask to be added, must not be {@code null}
      */
     public void addMask(Mask mask) {
+        Assert.argument(!containsRasterDataNode(mask.getName()),
+                        String.format("The Product '%s' already contains a raster with the name '%s'.",
+                                      getName(), mask.getName()));
+
         getMaskGroup().add(mask);
     }
 

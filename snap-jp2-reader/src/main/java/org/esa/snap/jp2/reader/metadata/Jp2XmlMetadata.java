@@ -134,27 +134,62 @@ public class Jp2XmlMetadata extends XmlMetadata {
         return null;
     }
 
+    /*
+     * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+     * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order
+     * Keep in mind that there are JP2 files with values like "  42.788298611111109   23.271622685185189", resulting in empty tokens and tokens starting with white space
+     * @return
+     */
     public Point2D getOrigin() {
         Point2D origin = null;
         String coords = getAttributeValue(JP2ProductReaderConstants.TAG_ORIGIN, null);
         if (coords != null) {
-            origin = new Point2D.Double(Double.parseDouble(coords.split(" ")[0]), Double.parseDouble(coords.split(" ")[1]));
+            final String[] result = Arrays.stream(coords.split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+            final String x = !isReversedAxisOrder() ? result[0] : result[1];
+            final String y = !isReversedAxisOrder() ? result[1] : result[0];
+            origin = new Point2D.Double(Double.parseDouble(x), Double.parseDouble(y));
+
+            // According to https://docs.opengeospatial.org/is/08-085r4/08-085r4.html section 7.5 Coordinate reference systems:
+            // GMLJP2 follows the definition of grids in GML 3.2.1 [OGC 07-036] clause 19.2.2:
+            // “When a grid point is used to represent a sample space (e.g. image pixel), the grid point represents
+            // the center of the sample space (see ISO 19123:2005, 8.2.2)”.
+            // This corresponds with the pixelInCell value of ImageCRS set to CellCenter as specified in ISO 19111.
+            // This can be interpreted as the origin of the RectifiedGrid is the centre point of the corner pixel.
+            origin.setLocation(origin.getX() - getStepX() / 2, origin.getY() - getStepY() / 2);
         }
         return origin;
     }
 
+    /*
+     * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+     * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order;
+     *                                                             also the values within offsetVector should be considered depending on their logic.
+     *  Keep in mind that there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"] for offsetVector
+     */
     public double getStepX() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
         if (values != null) {
-            return Double.parseDouble(values[0].split(" ")[0]);
+            int index = isReversedAxisOrder() ? 1 : 0;
+            String[] result = Arrays.stream(values[index].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+
+            return Double.parseDouble(result[1]) != 0 ? Double.parseDouble(result[1]) : Double.parseDouble(result[0]);
         }
         return 0;
     }
 
+    /*
+     * SNAP-1400 (https://senbox.atlassian.net/browse/SNAP-1400)
+     * SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459) - Do not rely on EPSG and check the actual axis name order;
+     *                                                             also the values within offsetVector should be considered depending on their logic.
+     *  Keep in mind that there are JP2 files with values like ["  -0.000004629629630 0", "0    0.000004629629630"] for offsetVector
+     */
     public double getStepY() {
         String[] values = getAttributeValues(JP2ProductReaderConstants.TAG_OFFSET_VECTOR);
         if (values != null) {
-            return Double.parseDouble(values[1].split(" ")[1]);
+            int index = isReversedAxisOrder() ? 0 : 1;
+            String[] result = Arrays.stream(values[index].split(" ")).filter(p -> !StringUtils.isEmpty(p)).map(String::trim).toArray(String[]::new);
+
+            return Double.parseDouble(result[0]) != 0 ? Double.parseDouble(result[0]) : Double.parseDouble(result[1]);
         }
         return 0;
     }
@@ -185,4 +220,15 @@ public class Jp2XmlMetadata extends XmlMetadata {
         }
         return null;
     }
+
+    /**
+     * Check is the axis order is reversed
+     *    SNAP-3459 (https://senbox.atlassian.net/browse/SNAP-3459): Do not rely on EPSG and check the actual axis name order
+     * @return true is the axis order is reversed (e.g. [y,x] instead of [x,y])
+     */
+    public boolean isReversedAxisOrder() {
+        String[] axisName = getAttributeValues(JP2ProductReaderConstants.TAG_AXIS_NAME);
+        return axisName[0].contains("y") || axisName[0].contains("lat");
+    }
+
 }

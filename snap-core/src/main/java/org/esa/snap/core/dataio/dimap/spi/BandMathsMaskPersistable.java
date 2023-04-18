@@ -18,9 +18,11 @@ package org.esa.snap.core.dataio.dimap.spi;
 
 import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
 import org.jdom.Element;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_EXPRESSION;
 
 /**
  * @author Marco Peters
@@ -29,12 +31,12 @@ import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
 class BandMathsMaskPersistable extends MaskPersistable {
 
     @Override
-    protected Mask.BandMathsType createImageType() {
+    protected Mask.ImageType createImageType() {
         return Mask.BandMathsType.INSTANCE;
     }
 
     @Override
-    protected void configureMask(Mask mask, Element element) {
+    protected void configureMask(Mask mask, Element element, Product product) {
         final PropertyContainer imageConfig = mask.getImageConfig();
         final String expression = getChildAttributeValue(element, TAG_EXPRESSION, ATTRIB_VALUE);
         imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, expression);

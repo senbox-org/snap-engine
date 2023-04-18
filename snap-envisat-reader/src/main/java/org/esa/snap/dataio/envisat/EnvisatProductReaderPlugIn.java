@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.RGBImageProfile;
 import org.esa.snap.core.datamodel.RGBImageProfileManager;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.core.util.math.Range;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -44,14 +45,13 @@ import java.util.zip.ZipFile;
  * the actual reader objects.
  *
  * @author Norman Fomferra
-
  * @see org.esa.snap.dataio.envisat.EnvisatProductReader
  */
 public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
 
-     static{
-         registerRGBProfiles();
-     }
+    static {
+        registerRGBProfiles();
+    }
 
     /**
      * Constructs a new ENVISAT product reader plug-in instance.
@@ -111,7 +111,7 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
             final File inputFile = (File) input;
             final String fileName = inputFile.getName().toUpperCase();
             for (String ext : EnvisatConstants.EXTENSIONS) {
-                if (fileName.endsWith(ext) || fileName.endsWith(ext+".ZIP") || fileName.endsWith(ext+".GZ")) {
+                if (fileName.endsWith(ext) || fileName.endsWith(ext + ".ZIP") || fileName.endsWith(ext + ".GZ")) {
                     return DecodeQualification.INTENDED;
                 }
             }
@@ -213,78 +213,78 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
     private static void registerRGBProfiles() {
         RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
         manager.addProfile(new RGBImageProfile("MERIS L1b - Tristimulus",
-                                               new String[]{
-                                                       "log(1.0 + 0.35 * radiance_2 + 0.60 * radiance_5 + radiance_6 + 0.13 * radiance_7)",
-                                                       "log(1.0 + 0.21 * radiance_3 + 0.50 * radiance_4 + radiance_5 + 0.38 * radiance_6)",
-                                                       "log(1.0 + 0.21 * radiance_1 + 1.75 * radiance_2 + 0.47 * radiance_3 + 0.16 * radiance_4)"
-                                               },
-                                               new String[]{
-                                                       "MER_*_1*",
-                                                       "MER_*_1*",
-                                                       "",
-                                               }
+                new String[]{
+                        "log(1.0 + 0.35 * radiance_2 + 0.60 * radiance_5 + radiance_6 + 0.13 * radiance_7)",
+                        "log(1.0 + 0.21 * radiance_3 + 0.50 * radiance_4 + radiance_5 + 0.38 * radiance_6)",
+                        "log(1.0 + 0.21 * radiance_1 + 1.75 * radiance_2 + 0.47 * radiance_3 + 0.16 * radiance_4)"
+                },
+                new String[]{
+                        "MER_*_1*",
+                        "MER_*_1*",
+                        "",
+                }
         ));
         manager.addProfile(new RGBImageProfile("MERIS L2 - Tristimulus",
-                                               new String[]{
-                                                       "log(0.05 + 0.35 * reflec_2 + 0.60 * reflec_5 + reflec_6 + 0.13 * reflec_7)",
-                                                       "log(0.05 + 0.21 * reflec_3 + 0.50 * reflec_4 + reflec_5 + 0.38 * reflec_6)",
-                                                       "log(0.05 + 0.21 * reflec_1 + 1.75 * reflec_2 + 0.47 * reflec_3 + 0.16 * reflec_4)"
-                                               },
-                                               new String[]{
-                                                       "MER_*_2*",
-                                                       "MER_*_2*",
-                                                       "",
-                                               }
+                new String[]{
+                        "log(0.05 + 0.35 * reflec_2 + 0.60 * reflec_5 + reflec_6 + 0.13 * reflec_7)",
+                        "log(0.05 + 0.21 * reflec_3 + 0.50 * reflec_4 + reflec_5 + 0.38 * reflec_6)",
+                        "log(0.05 + 0.21 * reflec_1 + 1.75 * reflec_2 + 0.47 * reflec_3 + 0.16 * reflec_4)"
+                },
+                new String[]{
+                        "MER_*_2*",
+                        "MER_*_2*",
+                        "",
+                }
         ));
         manager.addProfile(new RGBImageProfile("MERIS L1b - 13,5,1",
-                                               new String[]{
-                                                       "radiance_13",
-                                                       "radiance_5",
-                                                       "radiance_1"
-                                               }
+                new String[]{
+                        "radiance_13",
+                        "radiance_5",
+                        "radiance_1"
+                }
         ));
         manager.addProfile(new RGBImageProfile("MERIS L1b - 13,4,2",
-                                               new String[]{
-                                                       "radiance_13",
-                                                       "radiance_4",
-                                                       "radiance_2"
-                                               }
+                new String[]{
+                        "radiance_13",
+                        "radiance_4",
+                        "radiance_2"
+                }
         ));
         manager.addProfile(new RGBImageProfile("MERIS L2 - 13,5,1",
-                                               new String[]{
-                                                       "reflec_13",
-                                                       "reflec_5",
-                                                       "reflec_1"
-                                               }
+                new String[]{
+                        "reflec_13",
+                        "reflec_5",
+                        "reflec_1"
+                }
         ));
         manager.addProfile(new RGBImageProfile("AATSR L1b - False colour",
-                                               new String[]{
-                                                   "reflec_nadir_1600",
-                                                   "reflec_nadir_0870",
-                                                   "reflec_nadir_0670",
-                                               }
+                new String[]{
+                        "reflec_nadir_1600",
+                        "reflec_nadir_0870",
+                        "reflec_nadir_0670",
+                }
         ));
         manager.addProfile(new RGBImageProfile("AATSR L1b - False colour (logarithmic scale)",
-                                               new String[]{
-                                                   "log(reflec_nadir_1600)",
-                                                   "log(reflec_nadir_0870)",
-                                                   "log(reflec_nadir_0670)",
-                                               }
+                new String[]{
+                        "log(reflec_nadir_1600)",
+                        "log(reflec_nadir_0870)",
+                        "log(reflec_nadir_0670)",
+                }
         ));
         manager.addProfile(new RGBImageProfile("AATSR L1b - Nadir, Day",
-                                               new String[]{
-                                                       "reflec_nadir_0870",
-                                                       "reflec_nadir_0670",
-                                                       "reflec_nadir_0550"
-                                               }
+                new String[]{
+                        "reflec_nadir_0870",
+                        "reflec_nadir_0670",
+                        "reflec_nadir_0550"
+                }
         ));
         manager.addProfile(new RGBImageProfile("AATSR L1b - Forward, Day",
-                                               new String[]{
-                                                   "reflec_fward_0870",
-                                                   "reflec_fward_0670",
-                                                   "reflec_fward_0550"
-                                               }
+                new String[]{
+                        "reflec_fward_0870",
+                        "reflec_fward_0670",
+                        "reflec_fward_0550"
+                }
         ));
-   }
+    }
 
 }

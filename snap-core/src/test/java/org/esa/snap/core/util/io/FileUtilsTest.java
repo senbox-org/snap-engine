@@ -253,7 +253,7 @@ public class FileUtilsTest {
 
     @Test
     public void testThatGetUrlAsFileIsTheInverseOfGetFileAsUrl() throws MalformedURLException,
-                                                                        URISyntaxException {
+            URISyntaxException {
         final File file1 = new File("/dummy/hugo/daten").getAbsoluteFile();
         final File file2 = FileUtils.getUrlAsFile(FileUtils.getFileAsUrl(file1));
         assertEquals(file1, file2);
@@ -298,12 +298,21 @@ public class FileUtilsTest {
         FileSystems.newFileSystem(jarURI, Collections.emptyMap());
         Path folder2 = Paths.get(jarURI).resolve("auxdata");
         Path folder2WithSlash = Paths.get(jarURI).resolve("auxdata/");
-        // the trailing slash makes a difference when used in path within a jar file.
-        assertFalse(Files.isSameFile(folder2, folder2WithSlash));
-        Path file2 = Paths.get(jarURI).resolve("auxdata").resolve("file-1.txt");
-        assertEquals("file-1.txt", folder2.relativize(file2).toString());
-        assertEquals("../auxdata/file-1.txt", folder2WithSlash.relativize(file2).toString());
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.8")) {
+            // the trailing slash makes a difference when used in path within a jar file in Java 8
+            assertFalse(Files.isSameFile(folder2, folder2WithSlash));
+            Path file2 = Paths.get(jarURI).resolve("auxdata").resolve("file-1.txt");
+            assertEquals("file-1.txt", folder2.relativize(file2).toString());
+            assertEquals("../auxdata/file-1.txt", folder2WithSlash.relativize(file2).toString());
+        } else {
+            //In versions from 11 onwards the above behavior is fixed.
+            assertTrue(Files.isSameFile(folder2, folder2WithSlash));
+            Path file2 = Paths.get(jarURI).resolve("auxdata").resolve("file-1.txt");
+            assertEquals("file-1.txt", folder2.relativize(file2).toString());
+            assertEquals("file-1.txt", folder2WithSlash.relativize(file2).toString());
 
+        }
     }
 
     @Test

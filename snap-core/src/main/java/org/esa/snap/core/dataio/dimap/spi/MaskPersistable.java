@@ -19,13 +19,23 @@ package org.esa.snap.core.dataio.dimap.spi;
 import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.ImageUtils;
 import org.jdom.Element;
 
 import java.awt.Color;
-import java.awt.Dimension;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_ALPHA;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_BLUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_GREEN;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_RED;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_TYPE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_COLOR;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_DESCRIPTION;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK_RASTER_HEIGHT;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK_RASTER_WIDTH;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_NAME;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_TRANSPARENCY;
 
 /**
  * @author Marco Peters
@@ -34,8 +44,8 @@ import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
 public abstract class MaskPersistable extends RasterDataNodePersistable {
 
     @Override
-    public final Mask createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
-        final String name = getChildAttributeValue(element, TAG_NAME, ATTRIB_VALUE);
+    public final Mask createObjectFromXml(Element element, Product product) {
+        final String maskName = getChildAttributeValue(element, TAG_NAME, ATTRIB_VALUE);
         final int width;
         final int height;
         if (element.getChild(TAG_MASK_RASTER_WIDTH) != null && element.getChild(TAG_MASK_RASTER_HEIGHT) != null) {
@@ -45,16 +55,15 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
             width = product.getSceneRasterWidth();
             height = product.getSceneRasterHeight();
         }
-        Dimension filterBandSize = ImageUtils.computeSceneRasterSize(width, height, regionRasterSize);
 
-        final Mask mask = new Mask(name, filterBandSize.width, filterBandSize.height, createImageType());
+        final Mask mask = new Mask(maskName, width, height, createImageType());
         mask.setDescription(getChildAttributeValue(element, TAG_DESCRIPTION, ATTRIB_VALUE));
         mask.setImageTransparency(Double.parseDouble(getChildAttributeValue(element, TAG_TRANSPARENCY, ATTRIB_VALUE)));
         setImageColor(element, mask);
         setImageToModelTransform(element, mask);
         setAncillaryRelations(element, mask);
         setAncillaryVariables(element, mask, product);
-        configureMask(mask, element);
+        configureMask(mask, element, product);
         return mask;
     }
 
@@ -98,7 +107,7 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
 
     protected abstract Mask.ImageType createImageType();
 
-    protected abstract void configureMask(Mask mask, Element element);
+    protected abstract void configureMask(Mask mask, Element element, Product product);
 
     protected abstract void configureElement(Element root, Mask mask);
 

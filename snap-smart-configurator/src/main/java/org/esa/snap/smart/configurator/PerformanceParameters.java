@@ -360,9 +360,7 @@ public class PerformanceParameters {
                 return false;
             }
         } catch (NumberFormatException ex) {
-            if(dimensionSubstring.compareTo("*") != 0) {
-                return false;
-            }
+            return false;
         }
         return true;
     }

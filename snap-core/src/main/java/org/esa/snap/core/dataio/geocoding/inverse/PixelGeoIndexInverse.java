@@ -21,13 +21,16 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
-import org.esa.snap.core.dataio.geocoding.util.InverseDistanceWeightingInterpolator;
+import org.esa.snap.core.dataio.geocoding.util.InterpolatorFactory;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.util.PreferencesPropertyMap;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.core.util.math.SphericalDistance;
+import org.esa.snap.runtime.Config;
 
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class PixelGeoIndexInverse implements InverseCoding {
@@ -50,12 +53,16 @@ public class PixelGeoIndexInverse implements InverseCoding {
     }
 
     PixelGeoIndexInverse(boolean fractionalAccuracy) {
+        this(fractionalAccuracy, new PreferencesPropertyMap(Config.instance("snap").preferences()).getProperties());
+    }
+
+    PixelGeoIndexInverse(boolean fractionalAccuracy, Properties properties) {
+        this(fractionalAccuracy, InterpolatorFactory.create(properties));
+    }
+
+    PixelGeoIndexInverse(boolean fractionalAccuracy, XYInterpolator interpolator) {
         this.fractionalAccuracy = fractionalAccuracy;
-        if (fractionalAccuracy) {
-            interpolator = new InverseDistanceWeightingInterpolator();
-        } else {
-            interpolator = null;
-        }
+        this.interpolator = interpolator;
     }
 
     @Override
@@ -87,8 +94,8 @@ public class PixelGeoIndexInverse implements InverseCoding {
         if (distance < epsilon) {
             if (fractionalAccuracy) {
                 final InterpolationContext context = InterpolationContext.extract((int) pixelPos.x, (int) pixelPos.y, longitudes, latitudes, geoRaster.getSceneWidth(), geoRaster.getSceneHeight());
-                //noinspection ConstantConditions
-                pixelPos = interpolator.interpolate(geoPos, pixelPos, context);
+                final PixelPos interpolated = interpolator.interpolate(geoPos, pixelPos, context);
+                pixelPos.setLocation(interpolated.x, interpolated.y);
             }
 
             pixelPos.x = pixelPos.x + geoRaster.getOffsetX();
@@ -153,7 +160,7 @@ public class PixelGeoIndexInverse implements InverseCoding {
 
     @Override
     public InverseCoding clone() {
-        final PixelGeoIndexInverse clone = new PixelGeoIndexInverse(fractionalAccuracy);
+        final PixelGeoIndexInverse clone = new PixelGeoIndexInverse(fractionalAccuracy, interpolator);
 
         clone.regionIndex = (TreeMap<Long, RasterRegion>) regionIndex.clone();
         clone.multiplicator = multiplicator;

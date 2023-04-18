@@ -89,4 +89,8 @@ final class Segment {
             setDirty(false);
         }
     }
+
+    public void dispose() {
+        data = null;
+    }
 }

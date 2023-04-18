@@ -1,7 +1,10 @@
 package org.esa.snap.python.gpf;
 
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.descriptor.DefaultOperatorDescriptor;
 import org.esa.snap.core.gpf.main.GPT;
 import org.esa.snap.core.util.io.TreeDeleter;
@@ -11,14 +14,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Norman Fomferra
@@ -107,6 +113,52 @@ public class PyOperatorTest {
 
         assertEquals((120f - 50f) / (120f + 50f), target.getBand("ndvi").readPixels(10, 10, 1, 1, (float[]) null)[0], 1e-5f);
         assertEquals(2, target.getBand("ndvi_flags").readPixels(10, 10, 1, 1, (int[]) null)[0]);
+    }
+
+    @Test
+    public void testPyOperatorWithGraph() throws IOException {
+        URL infoXmlFile = PyOperatorSpi.class.getResource("/snappy_dummy_op/dummy_op-info.xml");
+        DefaultOperatorDescriptor descriptor = DefaultOperatorDescriptor.fromXml(infoXmlFile, getClass().getClassLoader());
+        OperatorSpiRegistry operatorSpiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        operatorSpiRegistry.addOperatorSpi(new PyOperatorSpi(descriptor));
+
+        Product product = null;
+        final File targetFile = File.createTempFile("dummy_py_op_output", ".dim");
+        try {
+
+            File graphFile = getResourceFile("/snappy_dummy_op/dummy_py_op_graph.xml");
+
+            GPT.main(graphFile.getAbsolutePath(),
+                     "-e",
+                     "-t", targetFile.getAbsolutePath(),
+                     "-Sinput=" + getResourceFile("/snappy/testdata/MER_FRS_L1B_SUBSET.dim"));
+
+            assertTrue(targetFile.exists());
+
+            product = ProductIO.readProduct(targetFile);
+            assertEquals(4, product.getNumBands());
+            // It is not sufficient to check the number of bands. It is possible that the
+            //  product has 4 bands but the data files have not been written
+            final float[] nullArray = null;
+            final float mul = product.getBand("mul").readPixels(10, 10, 1, 1, nullArray)[0];
+            assertEquals(4109.292969, mul, 1.0e-6);
+            final float div = product.getBand("div").readPixels(10, 10, 1, 1, nullArray)[0];
+            assertEquals(1.0404007, div, 1.0e-6);
+            final float sub = product.getBand("sub").readPixels(10, 10, 1, 1, nullArray)[0];
+            assertEquals(2.5390549, sub, 1.0e-6);
+            final float add = product.getBand("add").readPixels(10, 10, 1, 1, nullArray)[0];
+            assertEquals(128.232666, add, 1.0e-6);
+
+        } finally {
+            if (product != null) {
+                product.dispose();
+            }
+            final String dataDir = targetFile.getAbsolutePath().replace(".dim", ".data");
+            TreeDeleter.deleteDir(Paths.get(dataDir));
+            targetFile.delete();
+        }
+
+
     }
 
     public static File getResourceFile(String name) {

@@ -812,6 +812,9 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
 
         String newRepoId = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
         assertTrue(newRepoId.matches("^([\\d]{13})$"));
+        vfsRemoteFileRepositoriesController.setRemoteRepositoryName(newRepoId, REPO_1_NAME);
+        vfsRemoteFileRepositoriesController.setRemoteRepositoryAddress(newRepoId, REPO_1_ADDRESS);
+        vfsRemoteFileRepositoriesController.setRemoteRepositorySchema(newRepoId, REPO_1_SCHEMA);
 
         vfsRemoteFileRepositoriesController.saveProperties();
         vfsRemoteFileRepositoriesController = new VFSRemoteFileRepositoriesController(this.newConfigFile);

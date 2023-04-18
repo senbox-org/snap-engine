@@ -36,6 +36,7 @@ public class DoubleArrayConverterTest extends AbstractConverterTest {
     public void testConverter() throws ConversionException {
         testValueType(double[].class);
         testParseSuccess(new double[]{-2.3, -1.1, 0.09, 1.8, 2.1, 3.45, 4.3}, "-2.3,-1.1, 0.09,1.8  \n,2.1,3.45,4.3");
+        testParseSuccess(new double[]{6.7, 7.3, 8.4}, "   6.7, \t    7.3,8.4\n");
         testFormatSuccess("-2.3,-1.1,0.09,1.8,2.1,3.45,4.3", new double[]{-2.3, -1.1, 0.09, 1.8, 2.1, 3.45, 4.3});
         assertNullCorrectlyHandled();
     }

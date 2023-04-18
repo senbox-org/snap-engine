@@ -4,14 +4,8 @@ import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.awt.Rectangle;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
@@ -399,27 +393,26 @@ public class RasterUtils {
                 pixSize = 4;
                 break;
         }
-        try (RandomAccessFile raf = new RandomAccessFile(toFile.toFile(), "rw")) {
-            try (FileChannel file = raf.getChannel()) {
-                ByteBuffer buffer = file.map(FileChannel.MapMode.READ_WRITE, 0, pixSize * values.length + 8);
-                buffer.putInt(width);
-                buffer.putInt(height);
-                if (pixSize == 4) {
-                    for (int v : values) {
-                        buffer.putInt(v);
-                    }
-                } else if (pixSize == 2) {
-                    for (int v : values) {
-                        buffer.putShort((short) v);
-                    }
-                } else {
-                    for (int v : values) {
-                        buffer.put((byte) v);
-                    }
+        try (RandomAccessFile raf = new RandomAccessFile(toFile.toFile(), "rw");
+             FileChannel file = raf.getChannel()) {
+            ByteBuffer buffer = file.map(FileChannel.MapMode.READ_WRITE, 0, (long) pixSize * values.length + 8);
+            buffer.putInt(width);
+            buffer.putInt(height);
+            if (pixSize == 4) {
+                /*for (int v : values) {
+                    buffer.putInt(v);
+                }*/
+                buffer.asIntBuffer().put(values);
+            } else if (pixSize == 2) {
+                for (int v : values) {
+                    buffer.putShort((short) v);
                 }
-                file.close();
+            } else {
+                for (int v : values) {
+                    buffer.put((byte) v);
+                }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (completionCallBack != null) {

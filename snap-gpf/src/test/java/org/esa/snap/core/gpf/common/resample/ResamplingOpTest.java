@@ -8,17 +8,14 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.transform.MathTransform2D;
+import org.esa.snap.core.util.DummyProductBuilder;
 import org.junit.Test;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Tonio Fincke
@@ -44,7 +41,7 @@ public class ResamplingOpTest {
         assertEquals(startTime.getAsDate().getTime(), resampledProduct.getStartTime().getAsDate().getTime());
         assertEquals(endTime.getAsDate().getTime(), resampledProduct.getEndTime().getAsDate().getTime());
         assertNotNull(resampledProduct.getSceneTimeCoding());
-        assertEquals(endTime.getMJD(), resampledProduct.getSceneTimeCoding().getMJD(new PixelPos(0, 1)));
+        assertEquals(endTime.getMJD(), resampledProduct.getSceneTimeCoding().getMJD(new PixelPos(0, 1)), 1.0e-6);
     }
 
     @Test
@@ -140,5 +137,47 @@ public class ResamplingOpTest {
         } catch (OperatorException oe) {
             assertEquals("If targetHeight is set, targetWidth must be set, too.", oe.getMessage());
         }
+    }
+
+    @Test
+    public void testCreateMaskedImage() {
+        // It was reported that createMaskedImage can produce a NullPointerException.
+        // Could not reproduce with this test.
+        // Exception stack trace is:
+        // java.lang.NullPointerException
+        // at org.esa.snap.core.gpf.common.resample.ResamplingOp$1.createImage(ResamplingOp.java:450)
+        // at com.bc.ceres.glevel.support.AbstractMultiLevelSource.getImage(AbstractMultiLevelSource.java:65)
+        // at com.bc.ceres.glevel.support.DefaultMultiLevelImage.<init>(DefaultMultiLevelImage.java:45)
+        // at org.esa.snap.core.gpf.common.resample.ResamplingOp.replaceInvalidValuesByNaN(ResamplingOp.java:446)
+        // at org.esa.snap.core.gpf.common.resample.ResamplingOp.createMaskedImage(ResamplingOp.java:434)
+        // at org.esa.snap.core.gpf.common.resample.ResamplingOp.resampleBands(ResamplingOp.java:380)
+        DummyProductBuilder builder = new DummyProductBuilder();
+        builder.size(DummyProductBuilder.Size.MEDIUM);
+        Product product = builder.create();
+
+        Band noValidationBand = product.addBand("noValidationBand", "X", ProductData.TYPE_INT16);
+        ResamplingOp.createMaskedImage(noValidationBand, Float.NaN);
+
+        Band noDataBand = product.addBand("noDataBand", "X", ProductData.TYPE_INT16);
+        noDataBand.setNoDataValue(5);
+        noDataBand.setNoDataValueUsed(true);
+        ResamplingOp.createMaskedImage(noDataBand, Float.NaN);
+
+        Band expressionBand = product.addBand("expressionBand", "X", ProductData.TYPE_INT16);
+        expressionBand.setValidPixelExpression("expressionBand == 6");
+        ResamplingOp.createMaskedImage(expressionBand, Float.NaN);
+
+        Band noDataExpressionBand = product.addBand("noDataExpressionBand", "X", ProductData.TYPE_INT16);
+        noDataExpressionBand.setNoDataValue(5);
+        noDataExpressionBand.setNoDataValueUsed(true);
+        noDataExpressionBand.setValidPixelExpression("expressionBand == 6");
+        ResamplingOp.createMaskedImage(noDataExpressionBand, Float.NaN);
+
+        Band badExpressionBand = product.addBand("badExpressionBand", "X", ProductData.TYPE_INT16);
+        Band tempNotExisting = product.addBand("notExisting", "Y", ProductData.TYPE_INT16);
+        badExpressionBand.setValidPixelExpression("notExisting == 6");
+        badExpressionBand.getValidMaskImage();
+        product.removeBand(tempNotExisting);
+        ResamplingOp.createMaskedImage(badExpressionBand, Float.NaN);
     }
 }

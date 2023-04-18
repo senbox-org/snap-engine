@@ -20,15 +20,13 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.dimap.DimapHeaderWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.FilterBand;
 import org.esa.snap.core.datamodel.ImageInfo;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.esa.snap.dataio.geotiff.Utils;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.Color;
@@ -196,7 +194,7 @@ public class TiffIFD {
         final Band[] bands = product.getBands();
         final List<Band> bandList = new ArrayList<>(bands.length);
         for (Band band : bands) {
-            if (shouldWriteNode(band)) {
+            if (Utils.shouldWriteNode(band)) {
                 bandList.add(band);
             }
         }
@@ -280,11 +278,11 @@ public class TiffIFD {
         }
         setEntry(new TiffDirectoryEntry(TiffTag.GeoKeyDirectoryTag, directoryTagValues));
         if (!doubleValues.isEmpty()) {
-            final TiffDouble[] tiffDoubles = doubleValues.toArray(new TiffDouble[doubleValues.size()]);
+            final TiffDouble[] tiffDoubles = doubleValues.toArray(new TiffDouble[0]);
             setEntry(new TiffDirectoryEntry(TiffTag.GeoDoubleParamsTag, tiffDoubles));
         }
         if (!asciiValues.isEmpty()) {
-            final String[] tiffAsciies = asciiValues.toArray(new String[asciiValues.size()]);
+            final String[] tiffAsciies = asciiValues.toArray(new String[0]);
             setEntry(new TiffDirectoryEntry(TiffTag.GeoAsciiParamsTag, new GeoTiffAscii(tiffAsciies)));
         }
         double[] modelTransformation = geoTIFFMetadata.getModelTransformation();
@@ -386,9 +384,7 @@ public class TiffIFD {
         }
 
         final TiffShort[] tiffValues = new TiffShort[getNumBands(product)];
-        for (int i = 0; i < tiffValues.length; i++) {
-            tiffValues[i] = sampleFormat;
-        }
+        Arrays.fill(tiffValues, sampleFormat);
 
         return tiffValues;
     }
@@ -440,15 +436,5 @@ public class TiffIFD {
 
     private long getWidth() {
         return ((TiffLong) getEntry(TiffTag.IMAGE_WIDTH).getValues()[0]).getValue();
-    }
-
-    // @todo 1 tb/tb copied from utils class ...
-    static boolean shouldWriteNode(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        } else if (node instanceof FilterBand) {
-            return false;
-        }
-        return true;
     }
 }

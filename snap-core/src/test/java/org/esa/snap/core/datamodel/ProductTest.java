@@ -167,6 +167,14 @@ public class ProductTest {
         assertEquals(0.5, mask.getImageTransparency(), 1e-12);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void maskWithExistingNameCantBeAdded() {
+        final Mask mask = product.addMask("maskName", "sin(X)", "description", Color.BLUE, 0.5);
+        assertNotNull(mask);
+        product.addMask("maskName", "cos(X)", "description", Color.RED, 0.5);
+    }
+
+
     @Test
     public void addMask_FailsWithExpressionInvolvingBandsOfDifferentSizes() {
         product.addBand(new Band("band1", ProductData.TYPE_INT8, _sceneWidth + 5, _sceneHeight + 5));

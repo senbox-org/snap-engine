@@ -47,6 +47,12 @@ class DownloadProductStatusListener implements ProductStatusListener {
         this.downloadMessages.add(message);
     }
 
+    @Override
+    public void downloadQueued(EOProduct eoProduct, String message) {
+        eoProduct.setProductStatus(ProductStatus.QUEUED);
+        this.downloadMessages.add(message);
+    }
+
     public List<String> getDownloadMessages() {
         return this.downloadMessages;
     }

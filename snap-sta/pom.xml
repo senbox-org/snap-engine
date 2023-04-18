@@ -22,7 +22,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>9.0.0-SNAPSHOT</version>
+        <version>10.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-sta</artifactId>
@@ -30,6 +30,10 @@
 
     <name>SNAP Standalone Tool Adapter</name>
     <description>Adapter for external tools invocation from within the Sentinel Toolboxes</description>
+
+    <properties>
+        <net.java.dev.jna.version>5.5.0</net.java.dev.jna.version>
+    </properties>
 
     <dependencies>
         <!-- SNAP dependencies -->
@@ -74,6 +78,17 @@
             <groupId>werken-xpath</groupId>
             <artifactId>werken-xpath</artifactId>
             <version>0.9.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${net.java.dev.jna.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>${net.java.dev.jna.version}</version>
         </dependency>
 
     </dependencies>

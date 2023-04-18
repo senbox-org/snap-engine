@@ -27,7 +27,6 @@ package org.esa.snap.core.util.math;
  * {@link FXYSum#computeZ(double, double)} method.
  *
  * @author Norman Fomferra
- * @version $Revision$ $Date$
  */
 public class FXYSum {
 

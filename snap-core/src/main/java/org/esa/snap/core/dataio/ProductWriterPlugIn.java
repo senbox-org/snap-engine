@@ -19,7 +19,7 @@ import org.esa.snap.core.datamodel.Product;
 
 /**
  * The <code>ProductWriterPlugIn</code> interface is implemented by data product writer plug-ins.
- * <p>XMLCoder plug-ins are used to provide meta-information about a particular data format and to create instances of
+ * <p>ProductWriterPlugIn plug-ins are used to provide meta-information about a particular data format and to create instances of
  * the actual writer objects.
  * <p> A plug-in can register itself in the <code>ProductIO</code> plug-in registry or it is automatically found during
  * a classpath scan.

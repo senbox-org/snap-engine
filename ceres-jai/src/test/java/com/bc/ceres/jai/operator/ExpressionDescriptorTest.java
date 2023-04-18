@@ -64,6 +64,7 @@ public class ExpressionDescriptorTest {
 
     @BeforeClass
     public static void setUpClass() {
+        System.setProperty("com.sun.media.jai.disableMediaLib", "true");
         String classPath = System.getProperty("java.class.path");
         String[] split = classPath.split(File.pathSeparator);
         for (String s : split) {
@@ -77,8 +78,8 @@ public class ExpressionDescriptorTest {
 
         String msg = String.format("Couldn't find %s and/or %s library on classpath", JAI_CORE_NAME, JAI_CODEC_NAME);
         Assume.assumeTrue(msg, jaiCoreLibPath != null || jaiCodecLibPath != null);
-    }
 
+    }
 
     @Test
     public void testDescriptor() {

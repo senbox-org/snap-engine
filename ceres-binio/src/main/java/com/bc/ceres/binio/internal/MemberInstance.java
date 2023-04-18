@@ -16,8 +16,6 @@
 
 package com.bc.ceres.binio.internal;
 
-import com.bc.ceres.binio.Type;
-
 import java.io.IOException;
 
 
@@ -63,4 +61,6 @@ interface MemberInstance {
     CompoundInstance getCompound();
 
     void flush() throws IOException;
+
+    void dispose() throws IOException;
 }

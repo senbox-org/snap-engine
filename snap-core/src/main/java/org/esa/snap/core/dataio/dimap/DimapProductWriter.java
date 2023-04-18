@@ -118,14 +118,14 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     private static long getImageFileSize(Band band) {
         return (long) ProductData.getElemSize(band.getDataType()) *
-                (long) band.getRasterWidth() *
-                (long) band.getRasterHeight();
+               (long) band.getRasterWidth() *
+               (long) band.getRasterHeight();
     }
 
     private static long getImageFileSize(TiePointGrid tpg) {
         return (long) ProductData.getElemSize(tpg.getDataType()) *
-                (long) tpg.getGridWidth() *
-                (long) tpg.getGridHeight();
+               (long) tpg.getGridWidth() *
+               (long) tpg.getGridHeight();
     }
 
     private static String createEnviHeaderFilename(Band band) {
@@ -208,6 +208,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      * product file without an previous call to the saveProductNodes to this product writer.
      *
      * @param outputFile the dimap header file location.
+     *
      * @throws java.io.IOException if an I/O error occurs
      */
     public void initDirs(final File outputFile) throws IOException {
@@ -387,22 +388,14 @@ public class DimapProductWriter extends AbstractProductWriter {
     }
 
     private synchronized ImageOutputStream getOrCreateImageOutputStream(Band band) throws IOException {
-        ImageOutputStream outputStream = getImageOutputStream(band);
-        if (outputStream == null) {
-            outputStream = createImageOutputStream(band);
-            if (bandOutputStreams == null) {
-                bandOutputStreams = new HashMap<>();
-            }
+        if (bandOutputStreams == null) {
+            bandOutputStreams = new HashMap<>();
+        }
+        if (!bandOutputStreams.containsKey(band)) {
+            ImageOutputStream outputStream = createImageOutputStream(band);
             bandOutputStreams.put(band, outputStream);
         }
-        return outputStream;
-    }
-
-    private synchronized ImageOutputStream getImageOutputStream(Band band) {
-        if (bandOutputStreams != null) {
-            return bandOutputStreams.get(band);
-        }
-        return null;
+        return bandOutputStreams.get(band);
     }
 
     private File getValidImageFile(Band band) throws IOException {
@@ -599,6 +592,7 @@ public class DimapProductWriter extends AbstractProductWriter {
          * Returns wether the given product node is to be written.
          *
          * @param node the product node
+         *
          * @return <code>false</code> if the node should not be written
          */
         public abstract boolean vetoableShouldWrite(ProductNode node);

@@ -2,7 +2,6 @@ package org.esa.snap.core.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  * @since 8.0.0
  */
 public class NativeLibraryUtils {
-    private static final String ENV_LIB_PATH = "java.library.path";
+    private static final String JAVA_LIB_PATH = "java.library.path";
 
     public static void registerNativePaths(Path... paths) {
         if (paths == null || paths.length == 0)
@@ -36,7 +35,7 @@ public class NativeLibraryUtils {
     public static void registerNativePaths(String... paths) {
         if (paths == null || paths.length == 0)
             return;
-        String propertyValue = System.getProperty(ENV_LIB_PATH);
+        String propertyValue = System.getProperty(JAVA_LIB_PATH);
         StringBuilder builder = new StringBuilder();
         for (String path : paths) {
             if (!StringUtils.isNullOrEmpty(propertyValue) &&
@@ -50,11 +49,11 @@ public class NativeLibraryUtils {
         } else {
             propertyValue = builder.toString();
         }
-        System.setProperty(ENV_LIB_PATH, propertyValue);
+        System.setProperty(JAVA_LIB_PATH, propertyValue);
         try {
             java.lang.reflect.Method initializePathMethod = PrivilegedAccessor.getMethod(ClassLoader.class, "initializePath", new Class[]{String.class});
             initializePathMethod.setAccessible(true);
-            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, ENV_LIB_PATH);
+            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, JAVA_LIB_PATH);
             PrivilegedAccessor.setStaticValue(ClassLoader.class, "usr_paths", updatedUsrPaths);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -123,7 +122,7 @@ public class NativeLibraryUtils {
         } else if (sysName.contains("mac")) {
             ret = "macosx";
         } else {
-            throw new NotImplementedException();
+            throw new IllegalStateException("Unsupported system name '" + sysName + "'");
         }
         return ret;
     }

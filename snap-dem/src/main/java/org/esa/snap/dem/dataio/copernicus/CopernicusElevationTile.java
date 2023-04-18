@@ -1,19 +1,29 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.BaseElevationTile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.resamp.Resampling;
+import org.esa.snap.dem.dataio.EarthGravitationalModel96;
+import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
+
+import java.io.IOException;
 
 
 public class CopernicusElevationTile extends BaseElevationTile  implements Resampling.Raster {
 
-    public CopernicusElevationTile(ElevationModel demModel, Product product) {
+    private final EarthGravitationalModel96 egm;
+
+    public CopernicusElevationTile(ElevationModel demModel, Product product) throws IOException  {
         super(demModel, product);
+        egm = EarthGravitationalModel96.instance();
     }
+
     @Override
     public int getWidth() {
-        System.out.println(product != null ? product.getSceneRasterWidth() : 0);
         return product != null ? product.getSceneRasterWidth() : 0;
     }
 
@@ -37,5 +47,19 @@ public class CopernicusElevationTile extends BaseElevationTile  implements Resam
         return allValid;
     }
 
+    protected void addGravitationalModel(final int index, final float[] line) throws Exception {
+        final GeoPos geoPos = new GeoPos();
+        final TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, 0, index, line.length, 1);
+        final double[][] v = new double[4][4];
+        for (int i = 0; i < line.length; i++) {
+            if (line[i] != noDataValue) {
+                tileGeoRef.getGeoPos(i, index, geoPos);
+                line[i] += egm.getEGM(geoPos.lat, geoPos.lon, v);
+            }
+        }
+    }
 
+    public GeoCoding getTileGeocoding() {
+        return product != null ? product.getSceneGeoCoding() : null;
+    }
 }

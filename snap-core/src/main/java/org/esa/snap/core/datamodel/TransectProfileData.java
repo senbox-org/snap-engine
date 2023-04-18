@@ -40,7 +40,7 @@ public class TransectProfileData {
     public static final GeoPos NO_GEO_POS = new GeoPos(Float.NaN, Float.NaN);
     private final Point2D[] shapeVertices;
     private final int[] shapeVertexIndexes;
-    private final Point2D[] pixelPositions; // todo - ts02Apr2012 - better use integer point class
+    private final Point2D[] pixelPositions;
     private final GeoPos[] geoPositions;
     private final float[] sampleValues;
     private final float[] sampleSigmas;
@@ -164,6 +164,10 @@ public class TransectProfileData {
         }
     }
 
+    public Config getConfig() {
+        return config;
+    }
+
     public int getNumPixels() {
         return pixelPositions.length;
     }
@@ -204,14 +208,14 @@ public class TransectProfileData {
         return sampleMax;
     }
 
-    static class Config {
+    public static class Config {
 
-        RasterDataNode raster;
-        Shape path;
-        int boxSize;
-        boolean useRoiMask;
-        Mask roiMask;
-        boolean connectVertices;
+        public RasterDataNode raster;
+        public Shape path;
+        public int boxSize;
+        public boolean useRoiMask;
+        public Mask roiMask;
+        public boolean connectVertices;
     }
 
 }

@@ -32,12 +32,14 @@ public final class AsterFile extends ElevationFile {
 
     private final AsterElevationModel demModel;
 
+    private static final String[] ASTERVERSIONS = new String[] {"ASTGTMV003","ASTGTM2"};
+
     public AsterFile(final AsterElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }
 
-    protected Boolean getRemoteFile() throws IOException {
+    protected Boolean getRemoteFile() {
         remoteFileExists = false;
         return false;
     }
@@ -53,24 +55,26 @@ public final class AsterFile extends ElevationFile {
             return true;
         } else {
             final String name = FileUtils.getFilenameWithoutExtension(localFile.getName());
-            // check for version 2
-            final String v2Name = name.replace("ASTGTM", "ASTGTM2");
-            final File v2File = new File(localFile.getParentFile(), v2Name + ".zip");
-            if (v2File.exists()) {
-                localFile = new File(localFile.getParentFile(), v2Name + "_dem.tif");
-                localZipFile = v2File;
-                return true;
-            } else {
-                // check if unzipped
-                final File unzipFile = new File(localFile.getParentFile(), name + "_dem.tif");
-                if (unzipFile.exists()) {
-                    localFile = unzipFile;
+            for(String asterVersion : ASTERVERSIONS) {
+                // check for versions 3 or 2
+                final String versionedName = name.replace("ASTGTM", asterVersion);
+                final File versionedFile = new File(localFile.getParentFile(), versionedName + ".zip");
+                if (versionedFile.exists()) {
+                    localFile = new File(localFile.getParentFile(), versionedName + "_dem.tif");
+                    localZipFile = versionedFile;
                     return true;
                 } else {
-                    final File v2UnzipFile = new File(localFile.getParentFile(), v2Name + "_dem.tif");
-                    if (v2UnzipFile.exists()) {
-                        localFile = v2UnzipFile;
+                    // check if unzipped
+                    final File unzipFile = new File(localFile.getParentFile(), name + "_dem.tif");
+                    if (unzipFile.exists()) {
+                        localFile = unzipFile;
                         return true;
+                    } else {
+                        final File v2UnzipFile = new File(localFile.getParentFile(), versionedName + "_dem.tif");
+                        if (v2UnzipFile.exists()) {
+                            localFile = v2UnzipFile;
+                            return true;
+                        }
                     }
                 }
             }
@@ -80,8 +84,13 @@ public final class AsterFile extends ElevationFile {
 
     protected InputStream getZipInputStream(File dataFile) throws IOException {
         if (!dataFile.exists()) {
-            final String v2Name = dataFile.getName().replace("ASTGTM", "ASTGTM2");
-            dataFile = new File(dataFile.getParentFile(), v2Name);
+            for(String asterVersion : ASTERVERSIONS) {
+                final String v2Name = dataFile.getName().replace("ASTGTM", asterVersion);
+                dataFile = new File(dataFile.getParentFile(), v2Name);
+                if (dataFile.exists()) {
+                    break;
+                }
+            }
         }
         return super.getZipInputStream(dataFile);
     }

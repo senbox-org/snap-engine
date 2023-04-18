@@ -17,7 +17,6 @@ import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.operation.MathTransform;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -432,8 +431,8 @@ public class ComponentGeoCodingTest {
 
         try {
             geoCoding.getDatum();
-            fail("NotImplementedException expected");
-        } catch (NotImplementedException expected) {
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
         }
     }
 }

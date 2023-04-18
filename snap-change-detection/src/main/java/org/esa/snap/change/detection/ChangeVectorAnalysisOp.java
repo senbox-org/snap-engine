@@ -15,6 +15,7 @@ import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 
+import com.bc.ceres.core.Assert;
 /**
  * The <code>ChangeVectorAnalysisOp</code> is change vector analysis operation
  * between two dual bands at two differents dates. Return two products magnitude
@@ -41,6 +42,12 @@ public class ChangeVectorAnalysisOp extends PixelOperator {
     private String sourceBand2;
     @Parameter(label = "Magnitude threshold", defaultValue = "0", description = "No change detection magnitude threshold")
     private String magnitudeThreshold;
+
+    @Override
+    public Product getSourceProduct() {
+        //have to override this function for graph editor compatibility
+        return sourceProduct1;
+    }
 
     private double getMagnitudeThreshold() {
         double magnitudeThresholdValue = Double.parseDouble(magnitudeThreshold);
@@ -125,7 +132,16 @@ public class ChangeVectorAnalysisOp extends PixelOperator {
 
     @Override
     protected Product createTargetProduct() throws OperatorException {
-        final Product targetProduct = super.createTargetProduct();
+        if(sourceProduct1 == null)
+            throw new OperatorException("source product 1 not set");
+        if(sourceProduct2 == null)
+            throw new OperatorException("source product 2 not set");
+        boolean resolutionNOK = sourceProduct1.getSceneRasterHeight() != sourceProduct2.getSceneRasterHeight() 
+                ||  sourceProduct1.getSceneRasterWidth() != sourceProduct2.getSceneRasterWidth();
+        if(resolutionNOK)
+            throw new OperatorException("source products are not the same resolution");
+        final Product targetProduct = new Product (getId(), getClass().getName(),
+                    sourceProduct1.getSceneRasterWidth(), sourceProduct1.getSceneRasterHeight());
         targetProduct.addBand("magnitude", ProductData.TYPE_FLOAT32);
         targetProduct.addBand("direction", ProductData.TYPE_FLOAT32);
         // change target product dimensions if necessary

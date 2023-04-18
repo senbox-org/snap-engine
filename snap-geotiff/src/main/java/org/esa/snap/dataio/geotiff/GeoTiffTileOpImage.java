@@ -5,7 +5,8 @@ import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
@@ -16,15 +17,31 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
     private final GeoTiffRasterRegion geoTiffRasterRegion;
     private final GeoTiffBandSource geoTiffBandSource;
+    private final boolean isUnsignedInt;
+
+    public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffRasterRegion, GeoTiffBandSource geoTiffBandSource, int dataBufferType, boolean interpretAsUnsignedInt,
+                              int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport) {
+        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, geoTiffBandSource.getDefaultJAIReadTileSize());
+        this.geoTiffRasterRegion = geoTiffRasterRegion;
+        this.geoTiffBandSource = geoTiffBandSource;
+        isUnsignedInt = interpretAsUnsignedInt;
+    }
 
     public GeoTiffTileOpImage(GeoTiffRasterRegion geoTiffRasterRegion, GeoTiffBandSource geoTiffBandSource, int dataBufferType, int tileWidth, int tileHeight,
                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, ImageReadBoundsSupport levelImageBoundsSupport) {
-
-        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport, geoTiffBandSource.getDefaultJAIReadTileSize());
-
-        this.geoTiffRasterRegion = geoTiffRasterRegion;
-        this.geoTiffBandSource = geoTiffBandSource;
+        this(geoTiffRasterRegion, geoTiffBandSource, dataBufferType, false, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, levelImageBoundsSupport);
     }
+
+    protected void setSample(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle, int bandIndex, int y, int x, double value) {
+        if (isUnsignedInt) {
+            // For flags using the most-significant bit it is important that the values are specially treated.
+            // It is not necessary for flags with short or byte data type, because there is a next higher data type which can take the value, but for int32 there is none.
+            levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, Float.floatToIntBits((float) value));
+        } else {
+            levelDestinationRaster.setSample(levelDestinationRectangle.x + x, levelDestinationRectangle.y + y, bandIndex, value);
+        }
+    }
+
 
     @Override
     protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {

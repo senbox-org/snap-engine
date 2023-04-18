@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import org.esa.snap.core.image.MosaicMatrix;
-
+import org.esa.snap.core.image.BandMatrixCell;
 import java.awt.image.Raster;
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,13 +10,23 @@ import java.nio.file.Path;
 /**
  * Created by jcoravu on 7/1/2020.
  */
-public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.MatrixCell, GeoTiffRasterRegion, Closeable {
+public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.MatrixCell, GeoTiffRasterRegion, Closeable, BandMatrixCell{
 
     private final int cellWidth;
     private final int cellHeight;
     private final int dataBufferType;
+    private final int numResolutions;
 
     private GeoTiffImageReader geoTiffImageReader;
+
+
+    public GeoTiffMatrixCell(int cellWidth, int cellHeight, int dataBufferType, Path imageParentPath, String imageRelativeFilePath, Path localTempFolder,int numResolutions) {
+        super(imageParentPath, imageRelativeFilePath, true, localTempFolder);
+        this.cellWidth = cellWidth;
+        this.cellHeight = cellHeight;
+        this.dataBufferType = dataBufferType;
+        this.numResolutions = numResolutions;
+    }
 
     public GeoTiffMatrixCell(int cellWidth, int cellHeight, int dataBufferType, Path imageParentPath, String imageRelativeFilePath, Path localTempFolder) {
         super(imageParentPath, imageRelativeFilePath, true, localTempFolder);
@@ -24,6 +34,7 @@ public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.Matri
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
         this.dataBufferType = dataBufferType;
+        this.numResolutions = 1;
     }
 
     @Override
@@ -59,5 +70,9 @@ public class GeoTiffMatrixCell extends GeoTiffFile implements MosaicMatrix.Matri
         }
 
         super.cleanup();
+    }
+
+    public int getResolutionCount() {
+        return this.numResolutions;
     }
 }

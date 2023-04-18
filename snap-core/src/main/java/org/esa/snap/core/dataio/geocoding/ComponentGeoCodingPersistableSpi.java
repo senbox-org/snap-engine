@@ -24,6 +24,10 @@ import org.jdom.Element;
 
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
 
+/**
+ * @deprecated use {@link ComponentGeoCodingPersistenceSpi} instead
+ */
+@Deprecated
 public class ComponentGeoCodingPersistableSpi implements DimapPersistableSpi {
     @Override
     public boolean canDecode(Element element) {

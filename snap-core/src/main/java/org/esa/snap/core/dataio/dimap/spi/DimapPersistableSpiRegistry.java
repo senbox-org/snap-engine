@@ -27,8 +27,9 @@ import java.util.Iterator;
  *
  * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
  *
+ * @deprecated replaced by {@link org.esa.snap.core.dataio.persistence.PersistenceSpiRegistry PersistenceSpiRegistry}
  */
-
+@Deprecated
 public final class DimapPersistableSpiRegistry {
 
     private ServiceRegistry<DimapPersistableSpi> providers;

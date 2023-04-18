@@ -197,4 +197,46 @@ public class PixelInterpolatingForwardTest {
         final ForwardCoding forwardCoding = plugin.create();
         assertTrue(forwardCoding instanceof PixelInterpolatingForward);
     }
+
+    @Test
+    public void testInterpolationX() {
+        final GeoRaster geoRaster = TestData.get_FlatEarth();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final double[] pixelPosX = {
+                5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5
+        };
+        final double[] expGeoLon = {
+                25.0, 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 25.8, 25.9, 26.0
+        };
+        GeoPos geoPos = null;
+        for (int i = 0; i <= 10; i++) {
+            final double x = pixelPosX[i];
+            geoPos = pixelForward.getGeoPos(new PixelPos(x, 5.5), null);
+            assertEquals(expGeoLon[i], geoPos.lon, 1e-8);
+            assertEquals(44.0, geoPos.lat, 1e-8);
+        }
+    }
+
+    @Test
+    public void testInterpolationY() {
+        final GeoRaster geoRaster = TestData.get_FlatEarth();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final double[] pixelPosY = {
+                5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5
+        };
+        final double[] expGeoLat = {
+                44.0, 43.9, 43.8, 43.7, 43.6, 43.5, 43.4, 43.3, 43.2, 43.1, 43.0
+        };
+        GeoPos geoPos = null;
+        for (int i = 0; i <= 10; i++) {
+            final double y = pixelPosY[i];
+            geoPos = pixelForward.getGeoPos(new PixelPos(5.5, y), null);
+            assertEquals(25.0, geoPos.lon, 1e-8);
+            assertEquals(expGeoLat[i], geoPos.lat, 1e-8);
+        }
+    }
 }

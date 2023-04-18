@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -39,8 +39,6 @@ public class TransectProfileDataBuilder {
 
     final TransectProfileData.Config config;
 
-    private VectorDataNode pointData;
-
     public TransectProfileDataBuilder() {
         config = new TransectProfileData.Config();
         setDefaults();
@@ -48,10 +46,6 @@ public class TransectProfileDataBuilder {
 
     public TransectProfileData build() throws IOException {
         validate();
-
-        if (config.path == null) {
-            config.path = createPath(pointData);
-        }
 
         return new TransectProfileData(config);
     }
@@ -68,7 +62,7 @@ public class TransectProfileDataBuilder {
     }
 
     public TransectProfileDataBuilder pointData(VectorDataNode pointData) {
-        this.pointData = pointData;
+        config.path = createPath(pointData);
         return this;
     }
 
@@ -99,13 +93,13 @@ public class TransectProfileDataBuilder {
 
     private void validate() {
         Assert.state(config.raster != null, "raster == null");
-        Assert.state(config.path != null || pointData != null, "path != null || pointData != null");
-        Assert.state(config.path == null && pointData != null
-                     || config.path != null && pointData == null,
-                     "path == null && pointData != null || path != null && pointData == null");
+        Assert.state(config.path != null, "path == null ");
     }
 
     private static Path2D createPath(VectorDataNode pointData) {
+        if (pointData == null) {
+            return null;
+        }
         Path2D.Double path = new Path2D.Double();
         SimpleFeature[] simpleFeatures = pointData.getFeatureCollection().toArray(new SimpleFeature[0]);
         for (int i = 0; i < simpleFeatures.length; i++) {

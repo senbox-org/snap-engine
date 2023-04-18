@@ -31,6 +31,7 @@ public class JP2ProductReaderConstants {
     public static final String TAG_RASTER_DIMENSIONS = "/featurecollection/featuremember/featurecollection/featuremember/rectifiedgridcoverage/rectifiedgriddomain/rectifiedgrid/limits/gridenvelope/@high";
     public static final String TAG_ORIGIN = "/featurecollection/featuremember/featurecollection/featuremember/rectifiedgridcoverage/rectifiedgriddomain/rectifiedgrid/origin/point/@pos";
     public static final String TAG_OFFSET_VECTOR = "/featurecollection/featuremember/featurecollection/featuremember/rectifiedgridcoverage/rectifiedgriddomain/rectifiedgrid/@offsetVector";
+    public static final String TAG_AXIS_NAME = "/featurecollection/featuremember/featurecollection/featuremember/rectifiedgridcoverage/rectifiedgriddomain/rectifiedgrid/@axisName";
     public static final String TAG_CRS_NAME = "/featurecollection/featuremember/featurecollection/featuremember/rectifiedgridcoverage/rectifiedgriddomain/rectifiedgrid/origin/point/@srsname";
     public static final String TYPE = "JPEG-2000";
     public static final String TAG_BAND_NAME = "/featurecollection/featuremember/featurecollection/featuremember/metadataproperty/genericmetadata/band/@name";
