@@ -17,9 +17,7 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.Assert;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductManager;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -167,17 +165,25 @@ public class NodeContext {
         return false;
     }
 
-    public synchronized void dispose() {
-        if (targetProduct != null) {
-            if (!(operator != null && isProductOpened(operator.getProductManager(), targetProduct))) {
-                targetProduct.dispose();
-                targetProduct = null;
+    private void disposeOnProductClose(Product product){
+        product.addProductNodeListener(new ProductNodeListenerAdapter() {
+            @Override
+            public void nodeDisposing(ProductNodeEvent event) {
+                dispose();
             }
-        }
+        });
+    }
+
+    public synchronized void dispose() {
         if (operatorContext != null && !operatorContext.isDisposed()) {
-            operatorContext.dispose(); // disposes operator as well
-            operatorContext = null;
-            operator = null;
+            if (targetProduct != null && operator != null && isProductOpened(operator.getProductManager(), targetProduct)) {
+                disposeOnProductClose(targetProduct);
+            } else {
+                targetProduct = null;
+                operatorContext.dispose(); // disposes operator as well
+                operatorContext = null;
+                operator = null;
+            }
         }
     }
 }
