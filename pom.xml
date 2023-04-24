@@ -42,8 +42,8 @@
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>5.3.1</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>20.0</geotools.version>
-        <org.locationtech.version>1.16.0</org.locationtech.version>
+        <geotools.version>28.2</geotools.version>
+        <org.locationtech.version>1.17.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -387,50 +387,52 @@
             <!-- GeoTools Libraries ############################################# -->
             <!-- Sadly there is no global exclusion so every geotools artifact -->
             <!-- has to exclude the 'wrong' jai version -->
+            <!--
+                        <dependency>
 
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-api</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-referencing</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <!-- this lib is also used in snap-cluster-analysis and in jlinda-core
-                         better have an explicit dependency than rely on the transitive dependency
-                    -->
+                            <groupId>org.geotools</groupId>
+                            <artifactId>gt-api</artifactId>
+                            <version>${geotools.version}</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_core</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_codec</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_imageio</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>xerces</groupId>
+                                    <artifactId>xercesImpl</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                        -->
+                        <dependency>
+                            <groupId>org.geotools</groupId>
+                            <artifactId>gt-referencing</artifactId>
+                            <version>${geotools.version}</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_core</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_codec</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_imageio</artifactId>
+                                </exclusion>
+                                <!-- this lib is also used in snap-cluster-analysis and in jlinda-core
+                                     better have an explicit dependency than rely on the transitive dependency
+                                -->
                     <exclusion>
                         <groupId>org.ejml</groupId>
                         <artifactId>ejml-ddense</artifactId>
@@ -791,6 +793,26 @@
                 <artifactId>jsoup</artifactId>
                 <version>1.15.3</version>
             </dependency>
+
+            <dependency>
+                <groupId>tec.uom</groupId>
+                <artifactId>uom-se</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.measure</groupId>
+                <artifactId>unit-api</artifactId>
+                <version>2.0</version>
+            </dependency>
+
+            <!-- logging framework for GeoTools -->
+            <dependency>
+                <groupId>ch.qos.reload4j</groupId>
+                <artifactId>reload4j</artifactId>
+                <version>1.2.19</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -807,6 +829,11 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
+        </repository>
+
+        <repository>
+            <id>osgeo</id>
+            <url>https://repo.osgeo.org/repository/geotools-releases/</url>
         </repository>
     </repositories>
 
@@ -856,8 +883,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.5.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>11</source>
+                        <target>11</target>
                         <debug>true</debug>
                         <encoding>UTF-8</encoding>
                         <excludes>

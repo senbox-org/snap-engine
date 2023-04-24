@@ -62,10 +62,12 @@
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-api</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
@@ -120,7 +122,6 @@
         <dependency>
             <groupId>javax.measure</groupId>
             <artifactId>unit-api</artifactId>
-            <version>1.0</version>
         </dependency>
 
         <dependency>
@@ -174,6 +175,10 @@
             <groupId>net.coobird</groupId>
             <artifactId>thumbnailator</artifactId>
             <version>0.4.5</version>
+        </dependency>
+        <dependency>
+            <groupId>tec.uom</groupId>
+            <artifactId>uom-se</artifactId>
         </dependency>
 
         <!-- Only for tests -->

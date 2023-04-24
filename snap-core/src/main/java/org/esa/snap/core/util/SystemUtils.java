@@ -17,9 +17,10 @@ package org.esa.snap.core.util;
 
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
-import org.geotools.factory.GeoTools;
-import org.geotools.factory.Hints;
-import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
+import org.geotools.util.factory.GeoTools;
+import org.geotools.util.factory.Hints;
+import org.geotools.referencing.factory.epsg.hsql.HsqlEpsgDatabase;
+import org.geotools.util.logging.Log4JLoggerFactory;
 import org.geotools.util.logging.LoggerFactory;
 import org.geotools.util.logging.Logging;
 
@@ -407,10 +408,11 @@ public class SystemUtils {
     }
 
     public static void initGeoTools() {
-        // setting longitude first so we can, rely on the order
-        GeoTools.init(new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true));
-
+        // new GeoTools relies on logger factory be set BEFORE init() tb 2023-04-21
         Logging.ALL.setLoggerFactory(new GeoToolsLoggerFactory());
+
+        // setting longitude first, so we can, rely on the order
+        GeoTools.init(new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true));
 
         // Must store EPSG database in application data dir, otherwise it will be deleted from default temp location (Unix!, Windows?)
         File epsgDir = new File(SystemUtils.getApplicationDataDir(true), EPSG_DATABASE_DIR_NAME);

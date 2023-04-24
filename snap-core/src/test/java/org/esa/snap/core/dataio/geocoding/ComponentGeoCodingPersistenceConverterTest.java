@@ -49,7 +49,8 @@ public class ComponentGeoCodingPersistenceConverterTest {
                                                    "  PRIMEM[\"Greenwich\", 0.0], " + LS +
                                                    "  UNIT[\"degree\", 0.017453292519943295], " + LS +
                                                    "  AXIS[\"Geodetic longitude\", EAST], " + LS +
-                                                   "  AXIS[\"Geodetic latitude\", NORTH]]";
+                                                   "  AXIS[\"Geodetic latitude\", NORTH], " + LS +
+                                                   "  AUTHORITY[\"EPSG\",\"4326\"]]";
 
     @Before
     public void setUp() throws Exception {

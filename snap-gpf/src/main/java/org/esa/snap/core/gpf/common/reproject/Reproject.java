@@ -17,7 +17,9 @@ package org.esa.snap.core.gpf.common.reproject;
 
 
 import org.esa.snap.core.datamodel.ImageGeometry;
-import org.geotools.factory.Hints;
+import org.geotools.image.util.ImageUtilities;
+import org.geotools.metadata.i18n.ErrorKeys;
+import org.geotools.metadata.i18n.Errors;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.operation.AbstractCoordinateOperationFactory;
@@ -25,30 +27,15 @@ import org.geotools.referencing.operation.matrix.XAffineTransform;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.referencing.operation.transform.DimensionFilter;
 import org.geotools.referencing.operation.transform.WarpTransform2D;
-import org.geotools.resources.XArray;
-import org.geotools.resources.i18n.ErrorKeys;
-import org.geotools.resources.i18n.Errors;
-import org.geotools.resources.image.ImageUtilities;
+import org.geotools.util.XArray;
+import org.geotools.util.factory.Hints;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.CoordinateOperation;
-import org.opengis.referencing.operation.CoordinateOperationFactory;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.MathTransform2D;
-import org.opengis.referencing.operation.MathTransformFactory;
-import org.opengis.referencing.operation.TransformException;
+import org.opengis.referencing.operation.*;
 
-import javax.media.jai.BorderExtender;
-import javax.media.jai.BorderExtenderConstant;
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.OpImage;
-import javax.media.jai.Warp;
-import javax.media.jai.WarpAffine;
+import javax.media.jai.*;
 import javax.media.jai.operator.MosaicDescriptor;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
@@ -90,9 +77,7 @@ final class Reproject {
      * @param hints           The rendering hints.
      * @param targetLevel     the image level the reproject will operate on
      * @param tileSize        the size of the tiles of the target image
-     *
      * @return The new grid coverage, or {@code sourceCoverage} if no resampling was needed.
-     *
      * @throws FactoryException   if a transformation step can't be created.
      * @throws TransformException if a transformation failed.
      */
@@ -102,7 +87,7 @@ final class Reproject {
                                    double backgroundValue,
                                    final Interpolation interpolation,
                                    final Hints hints, int targetLevel, Dimension tileSize) throws FactoryException,
-                                                                                                  TransformException {
+            TransformException {
 
         ////////////////////////////////////////////////////////////////////////////////////////
         ////                                                                                ////
@@ -203,7 +188,7 @@ final class Reproject {
         final String operation;
         final ParameterBlock paramBlk = new ParameterBlock().addSource(sourceImage);
         if (allSteps.isIdentity() || (allSteps instanceof AffineTransform &&
-                                      XAffineTransform.isIdentity((AffineTransform) allSteps, EPS))) {
+                XAffineTransform.isIdentity((AffineTransform) allSteps, EPS))) {
 
             final Rectangle sourceBB = sourceGeometry.getImageRect();
             final Rectangle targetBB = targetGeometry.getImageRect();
@@ -254,9 +239,7 @@ final class Reproject {
      *
      * @param transform The transform.
      * @param mtFactory The factory to use for extracting the sub-transform.
-     *
      * @return The {@link MathTransform2D} part of {@code transform}.
-     *
      * @throws FactoryException If {@code transform} is not separable.
      */
     private static MathTransform2D toMathTransform2D(final MathTransform transform,

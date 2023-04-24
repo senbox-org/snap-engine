@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -24,8 +24,8 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.map.DefaultMapContext;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
+import org.geotools.map.MapViewport;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.builder.GridToEnvelopeMapper;
 import org.geotools.renderer.lite.StreamingRenderer;
@@ -43,8 +43,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.*;
 import java.net.URL;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +72,6 @@ class ShapeFileRasterizer {
      *
      * @param args Three arguments are needed: 1) directory containing shapefiles. 2) target directory.
      *             3) resolution in meters / pixel.
-     *
      * @throws java.io.IOException If some IO error occurs.
      */
     public static void main(String[] args) throws IOException {
@@ -117,7 +116,7 @@ class ShapeFileRasterizer {
             File shapeFile = zippedShapeFiles[i];
             int shapeFileIndex = i + 1;
             ShapeFileRunnable runnable = new ShapeFileRunnable(shapeFile, tileSize, shapeFileIndex,
-                                                           zippedShapeFiles.length, createImage);
+                    zippedShapeFiles.length, createImage);
             executorService.submit(runnable);
         }
         executorService.shutdown();
@@ -134,18 +133,26 @@ class ShapeFileRasterizer {
         CoordinateReferenceSystem crs = DefaultGeographicCRS.WGS84;
         final String shapeFileName = shapeFile.getName();
         final ReferencedEnvelope referencedEnvelope = parseEnvelopeFromShapeFileName(shapeFileName, crs);
-        MapContext context = new DefaultMapContext(crs);
+
+        final MapViewport viewport = new MapViewport();
+        viewport.setBounds(referencedEnvelope);
+        viewport.setCoordinateReferenceSystem(crs);
+
+        //MapContext context = new DefaultMapContext(crs);
+        MapContent mapContent = new MapContent();
+        mapContent.setViewport(viewport);
 
         final URL shapeFileUrl = shapeFile.toURI().toURL();
 
         final FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = getFeatureSource(shapeFileUrl);
-        context.addLayer(featureSource, createPolygonStyle());
+        org.geotools.map.FeatureLayer featureLayer = new org.geotools.map.FeatureLayer(featureSource, createPolygonStyle());
+        mapContent.addLayer(featureLayer);
 
         BufferedImage landMaskImage = new BufferedImage(tileSize, tileSize, BufferedImage.TYPE_BYTE_BINARY);
         Graphics2D graphics = landMaskImage.createGraphics();
 
         StreamingRenderer renderer = new StreamingRenderer();
-        renderer.setContext(context);
+        renderer.setMapContent(mapContent);
 
         Rectangle paintArea = new Rectangle(0, 0, tileSize, tileSize);
         // the transform is computed here, because it ensures that the pixel anchor is in the pixel center and
@@ -228,7 +235,7 @@ class ShapeFileRasterizer {
     }
 
     private List<File> unzipTempFiles(ZipFile zipFile, Enumeration<? extends ZipEntry> entries) throws
-                                                                                                IOException {
+            IOException {
         List<File> files = new ArrayList<File>();
         while (entries.hasMoreElements()) {
             final ZipEntry entry = entries.nextElement();

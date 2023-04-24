@@ -14,8 +14,8 @@ import static org.junit.Assert.*;
  */
 public class AreaCalculatorTest {
 
-    private static final double SIZE_FIRST_LAST_LINE = 1.0813948123130877E8;
-    private static final double SIZE_CENTER_LINE = 1.2391557179979538E10;
+    private static final double SIZE_FIRST_LAST_LINE = 1.0789750344884583E8;
+    private static final double SIZE_CENTER_LINE = 1.2363829272525827E10;
 
     private AreaCalculator areaCalculator;
 
