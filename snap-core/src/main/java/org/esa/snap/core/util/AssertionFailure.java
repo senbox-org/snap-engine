@@ -16,7 +16,7 @@
 package org.esa.snap.core.util;
 
 /**
- * The <code>AssertionFailure</code> class is an error caused by a failed program assertion.
+ * The {@code AssertionFailure} class is an error caused by a failed program assertion.
  *
  * @author Norman Fomferra
  * @version $Revision$ $Date$
@@ -26,15 +26,6 @@ package org.esa.snap.core.util;
  */
 public class AssertionFailure extends Error {
     private static final long serialVersionUID = 1799159745096232860L;
-
-    /**
-     * Constructs a new assertion failure. Calls <code>this(null)</code>
-     *
-     * @see #AssertionFailure(String)
-     */
-    public AssertionFailure() {
-        this(null);
-    }
 
     /**
      * Constructs a new assertion failure with the given associated error message.

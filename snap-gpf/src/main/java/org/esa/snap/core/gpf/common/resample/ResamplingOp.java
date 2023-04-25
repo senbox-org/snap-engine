@@ -428,7 +428,7 @@ public class ResamplingOp extends Operator {
         }
     }
 
-    private static MultiLevelImage createMaskedImage(final RasterDataNode node, Number maskValue) {
+    static MultiLevelImage createMaskedImage(final RasterDataNode node, Number maskValue) {
         MultiLevelImage varImage = node.getSourceImage();
         if (node.getValidPixelExpression() != null) {
             varImage = replaceInvalidValuesByNaN(node, varImage, node.getValidMaskImage(), maskValue);
