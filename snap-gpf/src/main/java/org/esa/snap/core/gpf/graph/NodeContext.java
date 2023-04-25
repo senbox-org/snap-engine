@@ -16,7 +16,6 @@
 
 package org.esa.snap.core.gpf.graph;
 
-import com.bc.ceres.core.Assert;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -41,7 +40,6 @@ public class NodeContext {
     private Operator operator;
     private OperatorContext operatorContext;
     private int referenceCount;
-    private Product targetProduct;
 
     NodeContext(GraphContext graphContext, Node node) throws GraphException {
         this.graphContext = graphContext;
@@ -72,15 +70,14 @@ public class NodeContext {
 
     public void initTargetProduct() throws GraphException {
         try {
-            targetProduct = operator.getTargetProduct();
+            getTargetProduct();
         } catch (OperatorException e) {
             throw new GraphException("[NodeId: " + node.getId() + "] " + e.getMessage(), e);
         }
     }
 
     public Product getTargetProduct() {
-        Assert.notNull(targetProduct, "targetProduct");
-        return targetProduct;
+        return operator.getTargetProduct();
     }
 
     PlanarImage getTargetImage(Band band) {
@@ -176,10 +173,10 @@ public class NodeContext {
 
     public synchronized void dispose() {
         if (operatorContext != null && !operatorContext.isDisposed()) {
-            if (targetProduct != null && operator != null && isProductOpened(operator.getProductManager(), targetProduct)) {
+            final Product targetProduct = getTargetProduct();
+            if (targetProduct != null && isProductOpened(operator.getProductManager(), targetProduct)) {
                 disposeOnProductClose(targetProduct);
             } else {
-                targetProduct = null;
                 operatorContext.dispose(); // disposes operator as well
                 operatorContext = null;
                 operator = null;
