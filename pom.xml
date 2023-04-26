@@ -853,7 +853,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.11.0</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -867,7 +867,7 @@
 
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.5.0</version>
                 </plugin>
 
                 <plugin>
@@ -885,7 +885,7 @@
 
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                             <phase>verify</phase>
@@ -902,7 +902,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.0.0</version>
                     <configuration>
                         <!--
                              If enabled some assertions in GeoTools fail.
@@ -930,7 +930,7 @@
 
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.3.1</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                     </configuration>
@@ -959,7 +959,7 @@
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.3</version>
+                    <version>3.5.0</version>
                     <configuration>
                         <aggregate>true</aggregate>
                         <subpackages>org.esa.snap.core:com.bc.ceres</subpackages>
@@ -1014,7 +1014,7 @@
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.5.1</version>
+                    <version>1.6.13</version>
                     <executions>
                         <execution>
                             <id>default-deploy</id>
@@ -1065,7 +1065,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.10</version>
+                    <version>3.3.0</version>
                     <executions>
                         <execution>
                             <id>create-nbmSpecVersion</id>
