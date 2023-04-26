@@ -363,7 +363,8 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.3.3.2-SNAP</version>
+                <version>1.4.7</version>
+                <!--
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
@@ -382,6 +383,7 @@
                         <artifactId>xercesImpl</artifactId>
                     </exclusion>
                 </exclusions>
+                -->
             </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
@@ -413,26 +415,26 @@
                             </exclusions>
                         </dependency>
                         -->
-                        <dependency>
-                            <groupId>org.geotools</groupId>
-                            <artifactId>gt-referencing</artifactId>
-                            <version>${geotools.version}</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_core</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_codec</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_imageio</artifactId>
-                                </exclusion>
-                                <!-- this lib is also used in snap-cluster-analysis and in jlinda-core
-                                     better have an explicit dependency than rely on the transitive dependency
-                                -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-referencing</artifactId>
+                <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <!-- this lib is also used in snap-cluster-analysis and in jlinda-core
+                         better have an explicit dependency than rely on the transitive dependency
+                    -->
                     <exclusion>
                         <groupId>org.ejml</groupId>
                         <artifactId>ejml-ddense</artifactId>
@@ -442,6 +444,29 @@
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
+                <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-opengis</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
                     <exclusion>
