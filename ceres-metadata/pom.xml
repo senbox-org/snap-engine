@@ -12,7 +12,8 @@
     <packaging>nbm</packaging>
 
     <name>Ceres Metadata handling Library</name>
-    <description>The Ceres Metadata handling Library provides common access to velocity for metadata processing.</description>
+    <description>The Ceres Metadata handling Library provides common access to velocity for metadata processing.
+    </description>
 
     <dependencies>
         <dependency>
@@ -22,12 +23,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-			<scope>test</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-			<scope>test</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -37,20 +38,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
                     <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                         <manifest>
                             <mainClass>com.bc.monitoring.console.Starter</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
