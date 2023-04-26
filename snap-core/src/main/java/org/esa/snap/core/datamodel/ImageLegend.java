@@ -23,13 +23,13 @@ import org.esa.snap.core.util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.esa.snap.core.layer.ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT;
 
@@ -158,6 +158,11 @@ public class ImageLegend {
     private int palettePosEnd;
     private ArrayList<ColorBarInfo> colorBarInfos = new ArrayList<ColorBarInfo>();
 
+    public enum FONT_SCRIPT {
+        NORMAL,
+        SUPER_SCRIPT,
+        SUBSCRIPT
+    }
 
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
         this.imageInfo = imageInfo;
@@ -278,9 +283,6 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_WEIGHT_TOLERANCE_DEFAULT));
 
 
-
-
-
         // Sizing and Location
         setColorBarLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT));
@@ -346,6 +348,7 @@ public class ImageLegend {
         if (ColorBarLayerType.NULL_SPECIAL.equals(unitsTextDefault)) {
             String unit = raster.getUnit();
             if (unit != null && unit.length() > 0) {
+//                unitsText = raster.getUnit();
                 unitsText = "(" + raster.getUnit() + ")";
             }
         } else {
@@ -454,9 +457,6 @@ public class ImageLegend {
 
         setBackdropBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
-
-
-
 
 
         setLayerScaling(100.0);
@@ -849,18 +849,18 @@ public class ImageLegend {
                                 try {
                                     value = Double.valueOf(valueAndString[0]) / getScalingFactor();
                                 } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue  + " is not a valid (numeric) Label Value <br> and the entry has been removed.</html>",
+                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue + " is not a valid (numeric) Label Value <br> and the entry has been removed.</html>",
                                             "Color Bar Layer Editor Error",
                                             JOptionPane.WARNING_MESSAGE);
                                     String addTheseNew = addThese.replace(valueAndString[0] + ":" + formattedValue + ",", "");
                                     if (addTheseNew.endsWith(valueAndString[0] + ":" + formattedValue)) {
-                                        addThese = addTheseNew.replace("," + valueAndString[0] + ":" +  formattedValue, "");
-                                    } else{
+                                        addThese = addTheseNew.replace("," + valueAndString[0] + ":" + formattedValue, "");
+                                    } else {
                                         addThese = addTheseNew;
                                     }
                                     formattedValues[index] = String.valueOf(min);
                                     setCustomLabelValues(addThese);
-                                    index ++;
+                                    index++;
                                     continue;
                                 }
 //                                    value = Double.valueOf(valueAndString[0]) / getScalingFactor();
@@ -868,18 +868,18 @@ public class ImageLegend {
                                 try {
                                     value = Double.valueOf(formattedValue) / getScalingFactor();
                                 } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue  + " is not a valid (numeric) Label Value <br> and the entry has been removed.<html>",
+                                    JOptionPane.showMessageDialog(new JOptionPane(), "<html>" + formattedValue + " is not a valid (numeric) Label Value <br> and the entry has been removed.<html>",
                                             "Color Bar Layer Editor Error",
                                             JOptionPane.WARNING_MESSAGE);
                                     String addTheseNew = addThese.replace(formattedValue + ",", "");
                                     if (addTheseNew.endsWith(formattedValue)) {
                                         addThese = addTheseNew.replace("," + formattedValue, "");
-                                    } else{
+                                    } else {
                                         addThese = addTheseNew;
                                     }
                                     formattedValues[index] = String.valueOf(min);
                                     setCustomLabelValues(addThese);
-                                    index ++;
+                                    index++;
                                     continue;
                                 }
                             }
@@ -902,15 +902,12 @@ public class ImageLegend {
                             }
                         }
                     }
-                    index ++;
+                    index++;
                 }
             }
         }
 
     }
-
-
-
 
 
     private double getValidWeight(double weight) {
@@ -1027,9 +1024,6 @@ public class ImageLegend {
             palettePosStart = paletteRect.x + paletteGap;
             palettePosEnd = paletteRect.x + paletteRect.width - (int) discreteBooster;
 
-            // todo a piece of the old beam code, see what adjust does
-            //   Math.max(_MIN_LEGEND_WIDTH, adjust(legendWidth, 16));
-
         } else {
 
 
@@ -1109,10 +1103,12 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
                         getColorBarLength());
+
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
+
                 paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getTitleGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
@@ -1121,10 +1117,12 @@ public class ImageLegend {
 
 
             } else { // VERTICAL_TITLE_RIGHT
+
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
                         getColorBarLength());
+
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
             }
@@ -1178,17 +1176,46 @@ public class ImageLegend {
         Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(getTitleText(), g2d);
         Rectangle2D titleSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
+        AffineTransform transformOrig = g2d.getTransform();
+        double origTransX = g2d.getTransform().getTranslateX();
+        double origTransY = g2d.getTransform().getTranslateY();
+        drawTitle(g2d, false);
+        double titleTransX = g2d.getTransform().getTranslateX();
+        double titleTransY = g2d.getTransform().getTranslateY();
+//        System.out.println("origTransX = " + origTransX);
+//        System.out.println("origTransY = " + origTransY);
+//        System.out.println("titleTransX = " + titleTransX);
+//        System.out.println("titleTransY = " + titleTransY);
+        g2d.setTransform(transformOrig);
+
+//        System.out.println("titleRectangle.getHeight() = " + titleRectangle.getHeight());
+//        System.out.println("titleRectangle.getWidth() = " + titleRectangle.getWidth());
+
+
         double titleParameterHeight = titleRectangle.getHeight();
-        double titleParameterWidth = titleRectangle.getWidth();
+//        double titleParameterWidth = titleRectangle.getWidth();
+        double titleParameterWidth = titleTransX - origTransX;
         double titleParameterSingleLetterWidth = titleSingleLetterRectangle.getWidth();
+        titleParameterWidth = titleParameterWidth + 2 * titleParameterSingleLetterWidth; // add a buffer
+
 
         g2d.setFont(getTitleUnitsFont());
         Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getUnitsText(), g2d);
         Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
+
+        drawUnits(g2d, false);
+        double unitsTransX = g2d.getTransform().getTranslateX();
+        double unitsTransY = g2d.getTransform().getTranslateY();
+        g2d.setTransform(transformOrig);
+
+
         double titleUnitsHeight = unitsRectangle.getHeight();
-        double titleUnitsWidth = unitsRectangle.getWidth();
+//        double titleUnitsWidth = unitsRectangle.getWidth();
+        double titleUnitsWidth = unitsTransX - origTransX;
         double titleUnitsSingleLetterWidth = unitsSingleLetterRectangle.getWidth();
+        titleUnitsWidth = titleUnitsWidth + 2 * titleUnitsSingleLetterWidth;  // add a buffer
+
 
         double titleToUnitsVerticalGap = 0.0;
         double titleToUnitsHorizontalGap = 0.0;
@@ -1370,6 +1397,9 @@ public class ImageLegend {
 
     private void drawHeaderText(Graphics2D g2d) {
         if (hasTitleParameter() || hasTitleUnits()) {
+
+            AffineTransform transformOrig = g2d.getTransform();
+
             Font origFont = g2d.getFont();
             Paint origPaint = g2d.getPaint();
 
@@ -1381,34 +1411,16 @@ public class ImageLegend {
                 double translateTitleX = x0;
                 double translateTitleY = y0 - getTitleGap();
 
-                double translateUnitsX = 0;
-                double translateUnitsY = 0;
-
                 g2d.translate(translateTitleX, translateTitleY);
 
-
                 if (hasTitleParameter()) {
-                    g2d.setFont(getTitleParameterFont());
-                    g2d.setPaint(getTitleColor());
-                    g2d.drawString(titleText, 0, 0);
-
-                    translateUnitsX = getTitleWidth() + getTitleToUnitsHorizontalGap();
+                    drawTitle(g2d, true);
+                    g2d.translate(getTitleToUnitsHorizontalGap(), 0);
                 }
-
-
-                g2d.translate(translateUnitsX, translateUnitsY);
 
                 if (hasTitleUnits()) {
-                    g2d.setFont(getTitleUnitsFont());
-                    g2d.setPaint(getUnitsColor());
-                    g2d.drawString(getUnitsText(), 0, 0);
+                    drawUnits(g2d, true);
                 }
-
-
-                g2d.translate(-translateUnitsX, -translateUnitsY);
-                g2d.translate(-translateTitleX, -translateTitleY);
-
-
             } else {
 
                 g2d.setFont(getTitleUnitsFont());
@@ -1445,9 +1457,6 @@ public class ImageLegend {
                 if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor()) ||
                         ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
 
-                    double translateY2 = 0;
-
-
                     if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                         if (hasTitleParameter() && hasTitleUnits()) {
                             translateY = y0 - getTitleGap() - labelOverhangHeight - getUnitsHeight() - 0.5 * getTitleHeight() - getTitleToUnitsVerticalGap();
@@ -1461,23 +1470,14 @@ public class ImageLegend {
                     g2d.translate(translateX, translateY);
 
                     if (hasTitleParameter()) {
-                        g2d.setFont(getTitleParameterFont());
-                        g2d.setPaint(getTitleColor());
-                        g2d.drawString(titleText, 0, 0);
-                        translateY2 = getTitleHeight() + getTitleToUnitsVerticalGap();
+                        drawTitle(g2d, true);
+                        g2d.translate(0, getTitleToUnitsVerticalGap());
                     }
-
-
-                    g2d.translate(0, translateY2);
 
                     if (hasTitleUnits()) {
-                        g2d.setFont(getTitleUnitsFont());
-                        g2d.setPaint(getUnitsColor());
-                        g2d.drawString(getUnitsText(), 0, 0);
+                        drawUnits(g2d, true);
                     }
 
-                    g2d.translate(0, -translateY2);
-                    g2d.translate(-translateX, -translateY);
 
 
                 } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
@@ -1485,47 +1485,342 @@ public class ImageLegend {
 
                 } else { // VERTICAL_TITLE_RIGHT || VERTICAL_TITLE_LEFT
                     translateY = y0 + getColorBarLength();
-                    double translateY2 = 0;
+//                    translateY = y0 + paletteRect.height - getBorderGap() - labelOverhangHeight - 500;
+                    double width1 = getColorBarLength();
+                    double width2 = getTitleWidth() + getTitleToUnitsHorizontalGap() + getUnitsWidth() - getBorderGap();
+                    translateY = y0 + Math.max(width1, width2);
+
+                    // todo Danny   fixing offset
+
+
+
+
 
 
                     double rotate = -Math.PI / 2.0;
                     g2d.translate(translateX, translateY);
 
-
                     if (hasTitleParameter()) {
                         g2d.rotate(rotate);
-                        g2d.setFont(getTitleParameterFont());
-                        g2d.setPaint(getTitleColor());
-                        g2d.drawString(titleText, 0, 0);
+                        drawTitle(g2d, true);
+
+                        g2d.translate(getTitleToUnitsHorizontalGap(), 0);
                         g2d.rotate(-rotate);
-
-                        translateY2 = -getTitleWidth() - getTitleToUnitsHorizontalGap();
                     }
-
-
-                    g2d.translate(0, translateY2);
 
                     if (hasTitleUnits()) {
                         g2d.rotate(rotate);
-                        g2d.setFont(getTitleUnitsFont());
-                        g2d.setPaint(getUnitsColor());
-                        g2d.drawString(getUnitsText(), 0, 0);
+                        drawUnits(g2d, true);
                         g2d.rotate(-rotate);
                     }
-
-                    g2d.translate(0, -translateY2);
-                    g2d.translate(-translateX, -translateY);
-
                 }
-
-
             }
 
 
             // Restore font graphics
             g2d.setPaint(origPaint);
             g2d.setFont(origFont);
+
+            g2d.setTransform(transformOrig);
         }
+    }
+
+
+
+    private void drawTitle(Graphics2D g2d, boolean draw) {
+        Font origFont = g2d.getFont();
+        Paint origPaint = g2d.getPaint();
+
+        g2d.setFont(getTitleParameterFont());
+        g2d.setPaint(getTitleColor());
+
+        String titleString = getTitleText();
+
+        drawHeaderSubMethod(g2d, titleString, draw);
+
+        g2d.setFont(origFont);
+        g2d.setPaint(origPaint);
+    }
+
+
+    private void drawUnits(Graphics2D g2d, boolean draw) {
+        Font origFont = g2d.getFont();
+        Paint origPaint = g2d.getPaint();
+
+        g2d.setFont(getTitleUnitsFont());
+        g2d.setPaint(getUnitsColor());
+
+        String unitsString = getUnitsText();
+
+        drawHeaderSubMethod(g2d, unitsString, draw);
+
+        g2d.setFont(origFont);
+        g2d.setPaint(origPaint);
+    }
+
+
+
+
+    private void drawHeaderSubMethod(Graphics2D g2d, String headerString, boolean draw) {
+
+//        double wave = getRaster().getProduct().getBand(getRaster().getName()).getSpectralWavelength();
+//        String waveString = Double.toString(wave);
+//        if (wave > 0) {
+//            unitsString = getUnitsText() + " wave=" + waveString;
+//        }
+
+        Font origFont = g2d.getFont();
+
+        int openParenthesisStartedSuper = 0;
+        boolean currentIdxIsSuperScript = false;  // indicates whether current idx is a superscript
+        boolean currentIdxIsSubScript = false;  // indicates whether current idx is a superscript
+        boolean containsSuperScript = false;
+        boolean italicsOverride = false;
+        boolean boldOverride = false;
+        boolean prevIdxNormal = true; // used to determine if subscript or superscript immediately follow normal
+        boolean caratAwaitingEntry = false;
+
+        if (headerString.contains("^") || headerString.contains("[super]") || headerString.contains("[sub]")) {
+            containsSuperScript = true;
+        }
+
+        for (int idx = 0; idx < headerString.length(); idx++) {
+            boolean ignoreThisIdx = false;
+
+            String charStringCurrent = headerString.substring(idx, idx + 1);
+            char charCurrent = headerString.charAt(idx);
+
+            if (charStringCurrent.equals("^")) {
+                currentIdxIsSuperScript = true;
+                caratAwaitingEntry = true;
+                ignoreThisIdx = true;
+            }
+
+            if (isStartSuperScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSuperScript = true;
+            }
+
+            if (isEndSuperScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSuperScript = false;
+            }
+
+            if (isStartSubScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSubScript = true;
+            }
+
+            if (isEndSubScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSubScript = false;
+            }
+
+
+            if (isStartItalics(headerString, idx)) {
+                ignoreThisIdx = true;
+                italicsOverride = true;
+            }
+
+            if (isEndItalics(headerString, idx)) {
+                ignoreThisIdx = true;
+                italicsOverride = false;
+            }
+
+            if (isStartBold(headerString, idx)) {
+                ignoreThisIdx = true;
+                boldOverride = true;
+            }
+
+            if (isEndBold(headerString, idx)) {
+                ignoreThisIdx = true;
+                boldOverride = false;
+            }
+
+
+            if (!ignoreThisIdx) {
+                if (Character.isWhitespace(charCurrent)) {
+                    if (openParenthesisStartedSuper <= 0 && !caratAwaitingEntry) {
+                        currentIdxIsSuperScript = false;
+                    }
+                } else {
+                    if (caratAwaitingEntry) {
+                        caratAwaitingEntry = false;
+                    }
+                }
+
+                if (charStringCurrent.equals("(")) {
+                    if (currentIdxIsSuperScript) {
+                        openParenthesisStartedSuper++;
+                    }
+                }
+
+                if (charStringCurrent.equals(")")) {
+                    if (currentIdxIsSuperScript) {
+                        if (openParenthesisStartedSuper > 0) {
+                            openParenthesisStartedSuper--;
+                        } else {
+                            currentIdxIsSuperScript = false;
+                        }
+                    }
+                }
+
+                if (charStringCurrent.equals("(") || charStringCurrent.equals(")")) {
+                    if (!currentIdxIsSuperScript && containsSuperScript) {
+                        int parenthesisFontSize = (int) Math.ceil(g2d.getFont().getSize() * 1.2);
+                        Font parenthesisFont = new Font(g2d.getFont().getName(), g2d.getFont().getStyle(), parenthesisFontSize);
+                        g2d.setFont(parenthesisFont);
+                    }
+                }
+
+
+                if (italicsOverride) {
+                    int fontType = ColorBarLayer.getFontType(true, g2d.getFont().isBold());
+                    Font italicsFont = new Font(g2d.getFont().getName(), fontType, g2d.getFont().getSize());
+                    g2d.setFont(italicsFont);
+                }
+
+                if (boldOverride) {
+                    int fontType = ColorBarLayer.getFontType(g2d.getFont().isItalic(), true);
+                    Font boldFont = new Font(g2d.getFont().getName(), fontType, g2d.getFont().getSize());
+                    g2d.setFont(boldFont);
+                }
+
+                FONT_SCRIPT font_script;
+                if (currentIdxIsSuperScript) {
+                    font_script = FONT_SCRIPT.SUPER_SCRIPT;
+                } else if (currentIdxIsSubScript) {
+                    font_script = FONT_SCRIPT.SUBSCRIPT;
+                } else {
+                    font_script = FONT_SCRIPT.NORMAL;
+                }
+
+                // give a little space in front of subscript or superscript
+                if ((currentIdxIsSuperScript || currentIdxIsSubScript) && prevIdxNormal) {
+                        Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
+                        double translateUnitsX = singleLetter.getWidth() * (0.1);
+                        g2d.translate(translateUnitsX, 0);
+                }
+
+                drawHeaderSingleChar(g2d, charStringCurrent, font_script, true);
+
+                g2d.setFont(origFont);
+
+                if ((currentIdxIsSuperScript || currentIdxIsSubScript)) {
+                    prevIdxNormal = false;
+                } else {
+                    prevIdxNormal = true;
+                }
+
+            }
+        }
+    }
+
+
+    private boolean isStartSubScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "[sub]") || isStringOnIndex(text, idx, "<sub>");
+    }
+    private boolean isEndSubScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "[/sub]") || isStringOnIndex(text, idx, "</sub>");
+    }
+
+    private boolean isStartSuperScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "[sup]") || isStringOnIndex(text, idx, "<sup>");
+    }
+    private boolean isEndSuperScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "[/sup]") || isStringOnIndex(text, idx, "</sup>");
+    }
+
+    private boolean isStartItalics(String text, int idx) {
+        return isStringOnIndex(text, idx, "[i]") || isStringOnIndex(text, idx, "<i>");
+    }
+    private boolean isEndItalics(String text, int idx) {
+       return isStringOnIndex(text, idx, "[/i]") || isStringOnIndex(text, idx, "</i>");
+    }
+
+    private boolean isStartBold(String text, int idx) {
+        return isStringOnIndex(text, idx, "[b]") || isStringOnIndex(text, idx, "<b>");
+    }
+    private boolean isEndBold(String text, int idx) {
+        return isStringOnIndex(text, idx, "[/b]") || isStringOnIndex(text, idx, "</b>");
+    }
+
+
+
+
+    private boolean isStringOnIndex(String text, int idx, String subtext) {
+
+        if (text == null || subtext == null) {
+            return false;
+        }
+
+        int offset = 0;
+
+        for (int i=subtext.length(); i > 0; i--) {
+            if (text.length() >= idx + i && idx >= offset) {
+                String charStringCurrent = text.substring(idx - offset, idx + i);
+                if (charStringCurrent.equals(subtext)) {
+                    return true;
+                }
+            }
+
+            offset++;
+        }
+
+        return false;
+    }
+
+
+
+
+    private void drawHeaderSingleChar(Graphics2D g2d, String text, FONT_SCRIPT fontScript, boolean draw) {
+
+        double translateX = 0;
+        double translateY = 0;
+
+        if (fontScript == FONT_SCRIPT.NORMAL) {
+            if (draw) {
+                g2d.drawString(text, 0, 0);
+            }
+
+            Rectangle2D textRectangle = g2d.getFontMetrics().getStringBounds(text, g2d);
+            translateX = textRectangle.getWidth();
+            g2d.translate(translateX, 0);
+            return;
+        }
+
+        Font fontOrig = g2d.getFont();
+
+        int fontSize;
+        if (fontScript == FONT_SCRIPT.SUPER_SCRIPT) {
+//            int superScriptHeight = (int) Math.ceil(singleLetter.getHeight() * 0.3);
+            int superScriptHeight = (int) Math.ceil(g2d.getFont().getSize() * 0.3);
+
+            translateY = -superScriptHeight;
+            fontSize = (int) Math.ceil(g2d.getFont().getSize() * 0.75);
+        } else { // it is subscript
+//            int subScriptHeight = (int) Math.ceil(singleLetter.getHeight() * 0.1);
+            int subScriptHeight = (int) Math.ceil(g2d.getFont().getSize() * 0.2);
+            translateY = subScriptHeight;
+            fontSize = (int) Math.ceil(g2d.getFont().getSize() * 0.75);
+        }
+
+        g2d.translate(0, translateY);
+
+        Font superScriptFont = new Font(g2d.getFont().getName(), g2d.getFont().getStyle(), fontSize);
+        g2d.setFont(superScriptFont);
+
+        if (draw) {
+            g2d.drawString(text, 0, 0);
+        }
+
+        Rectangle2D textRectangle = g2d.getFontMetrics().getStringBounds(text, g2d);
+        translateX = textRectangle.getWidth();
+        translateY = -translateY;
+
+        g2d.translate(translateX, translateY);
+
+        g2d.setFont(fontOrig);
     }
 
 
@@ -1717,7 +2012,6 @@ public class ImageLegend {
             if (getTickmarkLength() > 0) {
                 tickOffset = getTickmarkLength();
             }
-
 
 
             if (orientation == HORIZONTAL) {
