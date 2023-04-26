@@ -18,7 +18,11 @@ public class ColorSchemeInfo {
     private String cpdFilenameStandard;
     private String cpdFilenameColorBlind;
     private String colorBarTitle;
+    private String colorBarTitleAlt;
     private String colorBarLabels;
+    private String colorBarUnits;
+    private String colorBarLengthStr;
+    private String colorBarLabelScalingStr;
     private double minValue;
     private double maxValue;
     private boolean isLogScaled;
@@ -30,9 +34,16 @@ public class ColorSchemeInfo {
 
     private boolean useDisplayName = true;
 
-
     public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
+        this(name, primary, divider, displayName, description, cpdFilenameStandard, minValue, maxValue,
+                isLogScaled, enabled, cpdFilenameColorBlind, colorBarTitle, null, colorBarLabels, null, null, null, colorPaletteDir);
+
+    }
+
+    public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+                           boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarTitleAlt, String colorBarLabels,
+                           String colorBarUnits, String colorBarLabelScalingStr, String colorBarLengthStr, File colorPaletteDir) {
         this.setName(name);
 
         this.primary = primary;
@@ -47,6 +58,10 @@ public class ColorSchemeInfo {
         this.cpdFilenameColorBlind = cpdFilenameColorBlind;
         this.colorBarLabels = colorBarLabels;
         this.colorBarTitle = colorBarTitle;
+        this.colorBarTitleAlt = colorBarTitleAlt;
+        this.colorBarUnits = colorBarUnits;
+        this.colorBarLabelScalingStr = colorBarLabelScalingStr;
+        this.colorBarLengthStr = colorBarLengthStr;
         this.setColorPaletteDir(colorPaletteDir);
     }
 
@@ -171,12 +186,28 @@ public class ColorSchemeInfo {
         return colorBarTitle;
     }
 
+    public String getColorBarTitleAlt() {
+        return colorBarTitleAlt;
+    }
+
     public void setColorBarTitle(String colorBarTitle) {
         this.colorBarTitle = colorBarTitle;
     }
 
     public String getColorBarLabels() {
         return colorBarLabels;
+    }
+
+    public String getColorBarLabelScalingStr() {
+        return colorBarLabelScalingStr;
+    }
+
+    public String getColorBarLengthStr() {
+        return colorBarLengthStr;
+    }
+
+    public String getColorBarUnits() {
+        return colorBarUnits;
     }
 
     public void setColorBarLabels(String colorBarLabels) {

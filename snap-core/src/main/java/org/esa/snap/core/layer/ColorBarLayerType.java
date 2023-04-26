@@ -160,6 +160,15 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
+    private static final String PROPERTY_SCHEME_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".scheme.band.lookup";
+    private static final String PROPERTY_SCHEME_ALIAS_SUFFIX = PROPERTY_ROOT_ALIAS + ".scheme.band.lookup";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".auto.apply";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Auto-Apply Scheme (Band Lookup)";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Auto-Apply Scheme (Band Lookup)";
+    private static final String PROPERTY_SCHEME_AUTO_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + ".auto.apply";
+    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
+    public static final Class PROPERTY_SCHEME_AUTO_APPLY_TYPE = Boolean.class;
+
     public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".populate.values.textfield";
     public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_LABEL = "Auto-Fill Label Values Textfield";
     public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_TOOLTIP = "Auto-populate the values field with the generated values";
@@ -349,7 +358,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_COLORBAR_WIDTH_TYPE = Integer.class;
 
 
-    
+
 
 
 
@@ -826,6 +835,10 @@ public class ColorBarLayerType extends LayerType {
         final Property labelValuesSectionModel = Property.create(PROPERTY_LABEL_VALUES_SECTION_KEY, Boolean.class, true, true);
         labelValuesSectionModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SECTION_ALIAS);
         vc.addProperty(labelValuesSectionModel);
+
+        final Property autoApplySchemesModel = Property.create(PROPERTY_SCHEME_AUTO_APPLY_KEY, Boolean.class, PROPERTY_SCHEME_AUTO_APPLY_DEFAULT, true);
+        autoApplySchemesModel.getDescriptor().setAlias(PROPERTY_SCHEME_AUTO_APPLY_ALIAS);
+        vc.addProperty(autoApplySchemesModel);
 
         final Property labelValuesModeModel = Property.create(PROPERTY_LABEL_VALUES_MODE_KEY, String.class, PROPERTY_LABEL_VALUES_MODE_DEFAULT, true);
         labelValuesModeModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_MODE_ALIAS);
