@@ -2,6 +2,9 @@ package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.datamodel.ColorSchemeInfo;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * Contains all info for a color scheme lookup
@@ -93,35 +96,41 @@ public class ColorSchemeLookupInfo {
         if (bandName == null || bandName.length() == 0) { return false; }
         if (regex == null || regex.length() == 0) { return false; }
 
-        final String WILDCARD = new String("*");
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(bandName);
+        match = matcher.find();
 
-        regex = regex.trim();
+        if (!match) {
+            final String WILDCARD = new String("*");
 
-        if (bandName.equals(regex)) {
-            match = true;
-        } else if (regex.contains(WILDCARD)) {
-            if (!regex.startsWith(WILDCARD) && regex.endsWith(WILDCARD)) {
-                String basename = regex.substring(0, regex.length() - 1);
-                if (bandName.startsWith(basename)) {
-                    match = true;
-                }
-            } else if (regex.startsWith(WILDCARD) && !regex.endsWith(WILDCARD)) {
-                String basename = regex.substring(1, regex.length());
-                if (bandName.endsWith(basename)) {
-                    match = true;
-                }
-            } else if (regex.startsWith(WILDCARD) && regex.endsWith(WILDCARD)) {
-                String basename = regex.substring(1, regex.length() - 1);
-                if (bandName.contains(basename)) {
-                    match = true;
-                }
-            } else {
-                String basename = regex;
-                String wildcard = "\\*";
-                String basenameSplit[] = basename.split(wildcard);
-                if (basenameSplit.length == 2 && basenameSplit[0].length() > 0 && basenameSplit[1].length() > 0) {
-                    if (bandName.startsWith(basenameSplit[0]) && bandName.endsWith(basenameSplit[1])) {
+            regex = regex.trim();
+
+            if (bandName.equals(regex)) {
+                match = true;
+            } else if (regex.contains(WILDCARD)) {
+                if (!regex.startsWith(WILDCARD) && regex.endsWith(WILDCARD)) {
+                    String basename = regex.substring(0, regex.length() - 1);
+                    if (bandName.startsWith(basename)) {
                         match = true;
+                    }
+                } else if (regex.startsWith(WILDCARD) && !regex.endsWith(WILDCARD)) {
+                    String basename = regex.substring(1, regex.length());
+                    if (bandName.endsWith(basename)) {
+                        match = true;
+                    }
+                } else if (regex.startsWith(WILDCARD) && regex.endsWith(WILDCARD)) {
+                    String basename = regex.substring(1, regex.length() - 1);
+                    if (bandName.contains(basename)) {
+                        match = true;
+                    }
+                } else {
+                    String basename = regex;
+                    String wildcard = "\\*";
+                    String basenameSplit[] = basename.split(wildcard);
+                    if (basenameSplit.length == 2 && basenameSplit[0].length() > 0 && basenameSplit[1].length() > 0) {
+                        if (bandName.startsWith(basenameSplit[0]) && bandName.endsWith(basenameSplit[1])) {
+                            match = true;
+                        }
                     }
                 }
             }

@@ -238,4 +238,48 @@ public class ColorSchemeInfo {
     public void setPrimary(boolean primary) {
         this.primary = primary;
     }
+
+
+    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, boolean allowWavelengthZero) {
+        
+        String wavelengthString = "";
+        if (wavelength > 0.0) {
+            if (Math.ceil(wavelength) == Math.round(wavelength)) {
+                wavelengthString = String.valueOf(Math.round(wavelength));
+            } else {
+                wavelengthString = String.valueOf(wavelength);
+            }
+        }
+
+        // Allow "%d" to become [WAVELENGTH] but only in the description
+        if (description != null && description.contains("%d")) {
+            while (colorBarTitle.contains("%d")) {
+                colorBarTitle = colorBarTitle.replace("%d", "[WAVELENGTH]");
+            }
+        }
+
+        if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
+            while(colorBarTitle.contains("[DESCRIPTION]")) {
+                colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
+            }
+
+            while(colorBarTitle.contains("[BANDNAME]")) {
+                colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
+            }
+
+            if (colorBarTitle.contains("[WAVELENGTH]")) {
+                if (wavelength > 0.0) {
+                    while (colorBarTitle.contains("[WAVELENGTH]")) {
+                        colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wavelengthString);
+                    }
+                } else {
+                    if (!allowWavelengthZero) {
+                        colorBarTitle = "";
+                    }
+                }
+            }
+        }
+
+        return  colorBarTitle;
+    }
 }

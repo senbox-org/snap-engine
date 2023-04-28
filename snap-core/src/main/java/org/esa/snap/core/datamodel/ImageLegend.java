@@ -67,6 +67,16 @@ public class ImageLegend {
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
 
+    public static final double LEFT_SIDE_BORDER_GAP = 0.6;  // left side gap is oriented and is relative to colorbar and not to the scene image
+    public static final double RIGHT_SIDE_BORDER_GAP = 0.6; // right side gap is oriented and is relative to colorbar and not to the scene image
+    public static final double TOP_BORDER_GAP = 0.2; // top gap is oriented and is relative to colorbar and not to the scene image
+    public static final double BOTTOM_BORDER_GAP = 0.5; // bottom gap is oriented and is relative to colorbar and not to the scene image
+//    public static final double LEFT_SIDE_BORDER_GAP = 5.0;  // left-right is oriented and is relative to colorbar and not the scene image
+//    public static final double RIGHT_SIDE_BORDER_GAP = 0.0; // left-right is oriented and is relative to colorbar and not the scene image
+//    public static final double TOP_BORDER_GAP = 5.0; // top-bottom is oriented and is relative to colorbar and not the scene image
+//    public static final double BOTTOM_BORDER_GAP = 0.0; // top-bottom is oriented and is relative to colorbar and not the scene image
+
+
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
 
     private double weightTolerance;
@@ -145,7 +155,10 @@ public class ImageLegend {
 
     private String titleOverRide = null;
 
-    private int borderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
+    private int leftSideBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
+    private int rightSideBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
+    private int topBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
+    private int bottomBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP
     private int titleGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
 
@@ -986,7 +999,7 @@ public class ImageLegend {
             double requiredWidth = Math.max(colorBarWithLabelsRequiredLength,
                     headerRequiredDimension.getWidth());
 
-            requiredWidth = getBorderGap() + requiredWidth + getBorderGap();
+            requiredWidth = getLeftSideBorderGap() + requiredWidth + getRightSideBorderGap();
 
 
             if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
@@ -999,22 +1012,22 @@ public class ImageLegend {
             int requiredLabelsHeight = (int) Math.ceil(labelsRequiredDimension.getHeight());
 
 
-            int requiredHeight = getBorderGap()
+            int requiredHeight = getTopBorderGap()
                     + requiredHeaderHeight
                     + getTitleGap()
                     + getColorBarWidth()
                     + getLabelGap()
                     + tickOffset
                     + requiredLabelsHeight
-                    + getBorderGap();
+                    + getBottomBorderGap();
 
 
             legendSize = new Dimension((int) requiredWidth, requiredHeight);
 
 
-            paletteRect = new Rectangle(getBorderGap() + firstLabelOverhangWidth,
-                    getBorderGap() + requiredHeaderHeight + getTitleGap(),
-                    legendSize.width - getBorderGap() - getBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
+            paletteRect = new Rectangle(getLeftSideBorderGap() + firstLabelOverhangWidth,
+                    getTopBorderGap() + requiredHeaderHeight + getTitleGap(),
+                    legendSize.width - getLeftSideBorderGap() - getRightSideBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
                     getColorBarWidth());
 
             legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
@@ -1042,17 +1055,17 @@ public class ImageLegend {
 
                 requiredWidth = Math.max(headerRequiredDimension.getWidth(), colorBarAndLabelsRequiredWidth);
 
-                requiredWidth = getBorderGap() + requiredWidth + getBorderGap();
+                requiredWidth = getTopBorderGap() + requiredWidth + getBottomBorderGap();
 
 
                 double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
 
 
-                requiredHeight = getBorderGap() +
+                requiredHeight = getLeftSideBorderGap() +
                         colorBarWithLabelsRequiredHeight +
                         getTitleGap() +
                         headerRequiredDimension.getHeight()
-                        + getBorderGap();
+                        + getRightSideBorderGap();
 
 
                 if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
@@ -1066,20 +1079,20 @@ public class ImageLegend {
 
             } else {
 
-                requiredWidth = getBorderGap()
+                requiredWidth = getTopBorderGap()
                         + getTitleHeight()
                         + getColorBarWidth()
                         + tickOffset
                         + getLabelGap()
                         + getLongestLabelWidth(g2dTmp)
                         + getTitleGap()
-                        + getBorderGap();
+                        + getBottomBorderGap();
 
 
                 double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
 
                 requiredHeight = Math.max(colorBarWithLabelsRequiredHeight, headerRequiredDimension.getHeight());
-                requiredHeight = getBorderGap() + requiredHeight + getBorderGap();
+                requiredHeight = getLeftSideBorderGap() + requiredHeight + getRightSideBorderGap();
 
                 if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
                     discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
@@ -1091,16 +1104,16 @@ public class ImageLegend {
 
 
             if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
-                paletteRect = new Rectangle(getBorderGap(),
-                        getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getTitleGap(),
+                paletteRect = new Rectangle(getTopBorderGap(),
+                        getRightSideBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getTitleGap(),
                         getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
-                paletteRect = new Rectangle(getBorderGap(),
-                        getBorderGap() + labelOverhangHeight,
+                paletteRect = new Rectangle(getTopBorderGap(),
+                        getRightSideBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
                         getColorBarLength());
 
@@ -1109,8 +1122,8 @@ public class ImageLegend {
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
 
-                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getTitleGap(),
-                        getBorderGap() + labelOverhangHeight,
+                paletteRect = new Rectangle(getTopBorderGap() + headerRequiredDimension.width + getTitleGap(),
+                        getRightSideBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
                         getColorBarLength());
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
@@ -1118,8 +1131,8 @@ public class ImageLegend {
 
             } else { // VERTICAL_TITLE_RIGHT
 
-                paletteRect = new Rectangle(getBorderGap(),
-                        getBorderGap() + labelOverhangHeight,
+                paletteRect = new Rectangle(getTopBorderGap(),
+                        getRightSideBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
                         getColorBarLength());
 
@@ -1228,8 +1241,11 @@ public class ImageLegend {
         g2d.setFont(getTitleUnitsFont());
         Rectangle2D labelSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
-        int headerGap = (int) Math.round(0.5 * getTitleFontSize());
-        int borderGap = (int) Math.round(0.3 * getTitleFontSize());
+        int headerGap = (int) Math.round(0.4 * getTitleFontSize());
+        int sideBorderGap = (int) Math.round(LEFT_SIDE_BORDER_GAP * getTitleFontSize());
+        int rightSideBorderGap = (int) Math.round(RIGHT_SIDE_BORDER_GAP * getTitleFontSize());
+        int topBorderGap = (int) Math.round(TOP_BORDER_GAP * getTitleFontSize());
+        int bottomBorderGap = (int) Math.round(BOTTOM_BORDER_GAP * getTitleFontSize());
 
 
         setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
@@ -1248,7 +1264,10 @@ public class ImageLegend {
         setLabelSingleLetterWidth(labelSingleLetterRectangle.getWidth());
 
         setTitleGap(headerGap);
-        setBorderGap(borderGap);
+        setLeftSideBorderGap(sideBorderGap);
+        setRightSideBorderGap(rightSideBorderGap);
+        setTopBorderGap(topBorderGap);
+        setBottomBorderGap(bottomBorderGap);
 
 
         g2d.setFont(originalFont);
@@ -1487,7 +1506,7 @@ public class ImageLegend {
                     translateY = y0 + getColorBarLength();
 //                    translateY = y0 + paletteRect.height - getBorderGap() - labelOverhangHeight - 500;
                     double width1 = getColorBarLength();
-                    double width2 = getTitleWidth() + getTitleToUnitsHorizontalGap() + getUnitsWidth() - getBorderGap();
+                    double width2 = getTitleWidth() + getTitleToUnitsHorizontalGap() + getUnitsWidth() - getRightSideBorderGap();
                     translateY = y0 + Math.max(width1, width2);
 
                     // todo Danny   fixing offset
@@ -2323,17 +2342,55 @@ public class ImageLegend {
     }
 
 
-    public int getBorderGap() {
-        if (borderGap != NULL_INT) {
-            return borderGap;
+    public int getLeftSideBorderGap() {
+        if (leftSideBorderGap != NULL_INT) {
+            return leftSideBorderGap;
         } else {
-            return (int) Math.round(0.3 * getLabelsFontSize());
+            return (int) Math.round(LEFT_SIDE_BORDER_GAP * getTitleFontSize());
         }
     }
 
-    public void setBorderGap(int borderGap) {
-        this.borderGap = borderGap;
+    public void setLeftSideBorderGap(int leftSideBorderGap) {
+        this.leftSideBorderGap = leftSideBorderGap;
     }
+
+    public int getRightSideBorderGap() {
+        if (rightSideBorderGap != NULL_INT) {
+            return rightSideBorderGap;
+        } else {
+            return (int) Math.round(RIGHT_SIDE_BORDER_GAP * getTitleFontSize());
+        }
+    }
+
+    public void setRightSideBorderGap(int rightSideBorderGap) {
+        this.rightSideBorderGap = rightSideBorderGap;
+    }
+
+    public int getTopBorderGap() {
+        if (topBorderGap != NULL_INT) {
+            return topBorderGap;
+        } else {
+            return (int) Math.round(TOP_BORDER_GAP * getTitleFontSize());
+        }
+    }
+
+    public void setTopBorderGap(int topBorderGap) {
+        this.topBorderGap = topBorderGap;
+    }
+
+    public int getBottomBorderGap() {
+        if (bottomBorderGap != NULL_INT) {
+            return bottomBorderGap;
+        } else {
+            return (int) Math.round(BOTTOM_BORDER_GAP * getTitleFontSize());
+        }
+    }
+
+    public void setBottomBorderGap(int bottomeBorderGap) {
+        this.bottomBorderGap = bottomeBorderGap;
+    }
+
+
 
     public int getLabelGap() {
         if (labelGap != NULL_INT) {

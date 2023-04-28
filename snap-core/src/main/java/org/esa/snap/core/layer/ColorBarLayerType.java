@@ -299,7 +299,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Anchor";
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_TOOLTIP = "Where to place title on vertical legend";
     private static final String PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleAnchor";
-    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_TOP;
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_RIGHT;
     public static final Class PROPERTY_LOCATION_TITLE_VERTICAL_TYPE = String.class;
     public static final Object PROPERTY_LOCATION_TITLE_VERTICAL_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
     public static final boolean PROPERTY_LOCATION_TITLE_VERTICAL_ENABLED = false;
@@ -327,7 +327,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 60.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 80.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;
@@ -354,7 +354,7 @@ public class ColorBarLayerType extends LayerType {
     public static final int PROPERTY_COLORBAR_WIDTH_MIN = 5;
     public static final int PROPERTY_COLORBAR_WIDTH_MAX = 1000;
     public static final String PROPERTY_COLORBAR_WIDTH_INTERVAL = "[" + ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_MIN + "," + ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_MAX + "]";
-    public static final int PROPERTY_COLORBAR_WIDTH_DEFAULT = 70;
+    public static final int PROPERTY_COLORBAR_WIDTH_DEFAULT = 55;
     public static final Class PROPERTY_COLORBAR_WIDTH_TYPE = Integer.class;
 
 
@@ -449,7 +449,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_UNITS_FONT_SIZE_LABEL = "Units Size";
     public static final String PROPERTY_UNITS_FONT_SIZE_TOOLTIP = "Set size of the title units";
     private static final String PROPERTY_UNITS_FONT_SIZE_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_UNITS_FONT_SIZE_DEFAULT = 35;
+    public static final int PROPERTY_UNITS_FONT_SIZE_DEFAULT = 30;
     public static final Class PROPERTY_UNITS_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MIN = 10;
     public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MAX = 200;
