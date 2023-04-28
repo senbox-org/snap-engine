@@ -16,7 +16,7 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -99,7 +99,6 @@
         <module>snap-smart-configurator</module>
         <module>snap-statistics</module>
         <module>snap-temporal-percentile</module>
-        <module>snap-unmix</module>
         <module>snap-virtual-file-system</module>
         <module>snap-watermask</module>
         <module>blue-marble-worldmap</module>
@@ -724,7 +723,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.13.1</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
 
@@ -1257,28 +1256,26 @@
             </plugin>
 
             <!-- .............................................................. -->
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>toolchain</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <toolchains>
-                        <jdk>
-                            <version>10.0</version>
-                            <vendor>OpenJDK</vendor>
-                        </jdk>
-                    </toolchains>
-                </configuration>
-            </plugin>
-            -->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-toolchains-plugin</artifactId>-->
+            <!--                <version>1.1</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>toolchain</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <toolchains>-->
+            <!--                        <jdk>-->
+            <!--                            <version>13.0</version>-->
+            <!--                            <vendor>Zulu</vendor>-->
+            <!--                        </jdk>-->
+            <!--                    </toolchains>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
             <!-- .............................................................. -->
 
         </plugins>
