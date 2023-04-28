@@ -29,6 +29,7 @@ public class ResamplingOpTest {
         ProductData.UTC startTime = ProductData.UTC.create(new Date(date.getTime() - 5000), 0);
         ProductData.UTC endTime = ProductData.UTC.create(new Date(date.getTime()), 0);
         product.setSceneTimeCoding(new LineTimeCoding(2, startTime.getMJD(), endTime.getMJD()));
+        product.setDescription("description");
 
         product.setStartTime(startTime);
         product.setEndTime(endTime);
@@ -42,6 +43,7 @@ public class ResamplingOpTest {
         assertEquals(endTime.getAsDate().getTime(), resampledProduct.getEndTime().getAsDate().getTime());
         assertNotNull(resampledProduct.getSceneTimeCoding());
         assertEquals(endTime.getMJD(), resampledProduct.getSceneTimeCoding().getMJD(new PixelPos(0, 1)), 1.0e-6);
+        assertEquals(product.getDescription(), resampledProduct.getDescription());
     }
 
     @Test
