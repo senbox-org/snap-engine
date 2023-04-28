@@ -16,14 +16,14 @@
 
 package org.esa.snap.lib.openjpeg.utils;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.BucketMap;
 import org.esa.snap.lib.openjpeg.dataio.Utils;
-import org.esa.snap.lib.openjpeg.jp2.TileLayout;
 import org.esa.snap.lib.openjpeg.header.CODMarkerSegment;
 import org.esa.snap.lib.openjpeg.header.ContiguousCodestreamBox;
 import org.esa.snap.lib.openjpeg.header.JP2FileReader;
 import org.esa.snap.lib.openjpeg.header.SIZMarkerSegment;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.lib.openjpeg.jp2.TileLayout;
 
 import java.awt.image.DataBuffer;
 import java.io.BufferedReader;
@@ -79,7 +79,7 @@ public class OpenJpegUtils {
         }
 
         String pathToImageFile = jp2FilePath.toAbsolutePath().toString();
-        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             pathToImageFile = Utils.GetIterativeShortPathNameW(pathToImageFile);
         }
 

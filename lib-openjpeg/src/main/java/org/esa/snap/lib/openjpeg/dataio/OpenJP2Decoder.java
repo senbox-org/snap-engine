@@ -89,9 +89,9 @@ public class OpenJP2Decoder implements AutoCloseable {
                 + "_" + tileIndex + "_" + resolution + "_" + this.bandIndex + ".raw");
         String tileFileName="";
         try {
-            if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-                    tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
-                            + tileFile.getName(tileFile.getNameCount() - 1);
+            if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
+                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
+                        + tileFile.getName(tileFile.getNameCount() - 1);
                 this.tileFile = cacheDir.resolve(tileFileName);
             }
             pStream = OpenJp2.opj_stream_create_default_file_stream(Utils.GetIterativeShortPathNameW(file.toString()), Constants.OPJ_STREAM_READ);

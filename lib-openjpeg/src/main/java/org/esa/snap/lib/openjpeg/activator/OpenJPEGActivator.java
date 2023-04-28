@@ -21,8 +21,6 @@ import org.esa.snap.runtime.Activator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-
 /**
  * Activator class for deploying OpenJPEG binaries to the aux data dir
  *

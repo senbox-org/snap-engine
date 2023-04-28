@@ -1,7 +1,6 @@
 package org.esa.snap.remote.products.repository;
 
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.esa.snap.remote.products.repository.download.RemoteRepositoriesManager;
@@ -13,11 +12,12 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by jcoravu on 20/1/2020.
@@ -27,45 +27,66 @@ public class RemoteRepositoriesManagerTest {
     public RemoteRepositoriesManagerTest() {
     }
 
-    private void testGetRemoteProductsRepositoryProvider(RemoteProductsRepositoryProvider remoteProductsRepositoryProvider){
-        String[] missions = remoteProductsRepositoryProvider.getAvailableMissions();
+    private static void downloadRepositoryProviderProductList(Credentials credentials, RemoteProductsRepositoryProvider repositoryProvider, String[] ignoredMissions) throws Exception {
+        List<String> ignoredMissionsList = Arrays.asList(ignoredMissions);
+        String[] missions = repositoryProvider.getAvailableMissions();
         assertNotNull(missions);
-        assertEquals(true, missions.length > 0);
+        assertTrue(missions.length > 0);
 
-        for (int k=0; k<missions.length; k++) {
-            List<RepositoryQueryParameter> queryParameters = RemoteRepositoriesManager.getMissionParameters(remoteProductsRepositoryProvider.getRepositoryName(), missions[k]);
-            assertNotNull(queryParameters);
-            assertEquals(true, queryParameters.size() >= 3);
+        ProductListDownloaderListener downloaderListener = buildEmptyDownloaderListener();
+        ThreadStatus threadStatus = buildEmptyThreadStatus();
 
-            RepositoryQueryParameter parameter = findQueryParameterByName("footprint", queryParameters);
-            assertNotNull(parameter);
-            assertEquals(true, parameter.isRequired());
+        Rectangle2D.Double footPrintBounds = new Rectangle2D.Double(3.9594738673210834, 45.65147715288581, 4.00006689474366, 2.684463401953984);
 
-            parameter = findQueryParameterByName("startDate", queryParameters);
-            assertNotNull(parameter);
-            assertEquals(true, parameter.isRequired());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.DAY_OF_MONTH, -7); // one week ago
+        Date endDate = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, -7); // two weeks ago
+        Date startDate = calendar.getTime();
 
-            parameter = findQueryParameterByName("endDate", queryParameters);
-            assertNotNull(parameter);
-            assertEquals(true, parameter.isRequired());
+        Map<String, Object> parameterValues = new HashMap<>();
+        parameterValues.put("footprint", footPrintBounds);
+        parameterValues.put("startDate", startDate);
+        parameterValues.put("endDate", endDate);
+
+        for (String mission : missions) {
+            if (ignoredMissionsList.contains(mission)) {
+                continue;
+            }
+            List<RepositoryQueryParameter> missionParameters = repositoryProvider.getMissionParameters(mission);
+            assertNotNull(missionParameters);
+            assertTrue(missionParameters.size() > 0);
+
+            List<RepositoryProduct> remoteProducts = repositoryProvider.downloadProductList(credentials, mission, 100, parameterValues, downloaderListener, threadStatus);
+            assertNotNull(remoteProducts);
+
+            for (RepositoryProduct remoteProduct : remoteProducts) {
+                String quickLookImageURL = remoteProduct.getDownloadQuickLookImageURL();
+                if (!StringUtils.isBlank(quickLookImageURL)) {
+                    repositoryProvider.downloadProductQuickLookImage(credentials, quickLookImageURL, threadStatus);
+                    break;
+                }
+            }
         }
     }
 
-    @Test
-    public void testGetRemoteProductsRepositoryProviders() {
+    private static RemoteProductsRepositoryProvider findRepositoryProviderByName(String repositoryNameToFind) {
         RemoteRepositoriesManager repositoryManager = RemoteRepositoriesManager.getInstance();
         RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = repositoryManager.getRemoteProductsRepositoryProviders();
-        assertNotNull(remoteRepositoryProductProviders);
-        assertEquals(true, remoteRepositoryProductProviders.length > 0);
 
-        for(RemoteProductsRepositoryProvider remoteProductsRepositoryProvider:remoteRepositoryProductProviders){
-            switch (remoteProductsRepositoryProvider.getRepositoryName()){
-                case "FedEO":
-                    break;
-                default:
-                    testGetRemoteProductsRepositoryProvider(remoteProductsRepositoryProvider);
+        assertNotNull(remoteRepositoryProductProviders);
+        assertTrue(remoteRepositoryProductProviders.length > 0);
+
+        for (RemoteProductsRepositoryProvider remoteRepositoryProductProvider : remoteRepositoryProductProviders) {
+            String existingRepositoryName = remoteRepositoryProductProvider.getRepositoryName();
+            assertNotNull(existingRepositoryName);
+
+            if (repositoryNameToFind.equals(existingRepositoryName)) {
+                return remoteRepositoryProductProvider;
             }
         }
+        return null;
     }
 
     @Test
@@ -171,85 +192,55 @@ public class RemoteRepositoriesManagerTest {
         downloadRepositoryProviderProductList(credentials, scientificDataHubRepositoryProvider, new String[]{});
     }
 
-    private static void downloadRepositoryProviderProductList(Credentials credentials, RemoteProductsRepositoryProvider repositoryProvider, String[] ignoredMissions) throws Exception {
-        List<String> ignoredMissionsList = Arrays.asList(ignoredMissions);
-        String[] missions = repositoryProvider.getAvailableMissions();
-        assertNotNull(missions);
-        assertEquals(true, missions.length > 0);
-
-        ProductListDownloaderListener downloaderListener = buildEmptyDownloaderListener();
-        ThreadStatus threadStatus = buildEmptyThreadStatus();
-
-        Rectangle2D.Double footPrintBounds = new Rectangle2D.Double(3.9594738673210834, 45.65147715288581, 4.00006689474366, 2.684463401953984);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.DAY_OF_MONTH, -7); // one week ago
-        Date endDate = calendar.getTime();
-        calendar.add(Calendar.DAY_OF_MONTH, -7); // two weeks ago
-        Date startDate = calendar.getTime();
-
-        Map<String, Object> parameterValues = new HashedMap();
-        parameterValues.put("footprint", footPrintBounds);
-        parameterValues.put("startDate", startDate);
-        parameterValues.put("endDate", endDate);
-
-        for (int i=0; i<missions.length; i++) {
-            if(ignoredMissionsList.contains(missions[i])){
-                continue;
-            }
-            List<RepositoryQueryParameter> missionParameters = repositoryProvider.getMissionParameters(missions[i]);
-            assertNotNull(missionParameters);
-            assertEquals(true, missionParameters.size() > 0);
-
-            List<RepositoryProduct> remoteProducts = repositoryProvider.downloadProductList(credentials, missions[i], 100, parameterValues, downloaderListener, threadStatus);
-            assertNotNull(remoteProducts);
-            //assertEquals(true, remoteProducts.size() > 0);
-
-            for (int k = 0; k < remoteProducts.size(); k++) {
-                String quickLookImageURL = remoteProducts.get(k).getDownloadQuickLookImageURL();
-                if (!StringUtils.isBlank(quickLookImageURL)) {
-                    repositoryProvider.downloadProductQuickLookImage(credentials, quickLookImageURL, threadStatus);
-                    break;
-                }
-            }
-        }
-    }
-
-    private static RemoteProductsRepositoryProvider findRepositoryProviderByName(String repositoryNameToFind) {
-        RemoteRepositoriesManager repositoryManager = RemoteRepositoriesManager.getInstance();
-        RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = repositoryManager.getRemoteProductsRepositoryProviders();
-
-        assertNotNull(remoteRepositoryProductProviders);
-        assertEquals(true, remoteRepositoryProductProviders.length > 0);
-
-        for (int i=0;i<remoteRepositoryProductProviders.length; i++) {
-            String existingRepositoryName = remoteRepositoryProductProviders[i].getRepositoryName();
-            assertNotNull(existingRepositoryName);
-
-            if (repositoryNameToFind.equals(existingRepositoryName)) {
-                return remoteRepositoryProductProviders[i];
-            }
-        }
-        return null;
-    }
-
     private static RepositoryQueryParameter findQueryParameterByName(String name, List<RepositoryQueryParameter> queryParameters) {
-        for (int i=0;i<queryParameters.size(); i++) {
-            if (name.equals(queryParameters.get(i).getName())) {
-                return queryParameters.get(i);
+        for (RepositoryQueryParameter queryParameter : queryParameters) {
+            if (name.equals(queryParameter.getName())) {
+                return queryParameter;
             }
         }
         return null;
     }
 
     private static ThreadStatus buildEmptyThreadStatus() {
-        return new ThreadStatus() {
-            @Override
-            public boolean isFinished() {
-                return false;
+        return () -> false;
+    }
+
+    private void testGetRemoteProductsRepositoryProvider(RemoteProductsRepositoryProvider remoteProductsRepositoryProvider) {
+        String[] missions = remoteProductsRepositoryProvider.getAvailableMissions();
+        assertNotNull(missions);
+        assertTrue(missions.length > 0);
+
+        for (String mission : missions) {
+            List<RepositoryQueryParameter> queryParameters = RemoteRepositoriesManager.getMissionParameters(remoteProductsRepositoryProvider.getRepositoryName(), mission);
+            assertNotNull(queryParameters);
+            assertTrue(queryParameters.size() >= 3);
+
+            RepositoryQueryParameter parameter = findQueryParameterByName("footprint", queryParameters);
+            assertNotNull(parameter);
+            assertTrue(parameter.isRequired());
+
+            parameter = findQueryParameterByName("startDate", queryParameters);
+            assertNotNull(parameter);
+            assertTrue(parameter.isRequired());
+
+            parameter = findQueryParameterByName("endDate", queryParameters);
+            assertNotNull(parameter);
+            assertTrue(parameter.isRequired());
+        }
+    }
+
+    @Test
+    public void testGetRemoteProductsRepositoryProviders() {
+        RemoteRepositoriesManager repositoryManager = RemoteRepositoriesManager.getInstance();
+        RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = repositoryManager.getRemoteProductsRepositoryProviders();
+        assertNotNull(remoteRepositoryProductProviders);
+        assertTrue(remoteRepositoryProductProviders.length > 0);
+
+        for (RemoteProductsRepositoryProvider remoteProductsRepositoryProvider : remoteRepositoryProductProviders) {
+            if (!remoteProductsRepositoryProvider.getRepositoryName().equals("FedEO")) {
+                testGetRemoteProductsRepositoryProvider(remoteProductsRepositoryProvider);
             }
-        };
+        }
     }
 
     private static ProductListDownloaderListener buildEmptyDownloaderListener() {

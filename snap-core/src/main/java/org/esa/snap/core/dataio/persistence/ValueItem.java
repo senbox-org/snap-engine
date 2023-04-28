@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.splitByWholeSeparator;
+
 public abstract class ValueItem<E> extends Item {
     private final E value;
 
@@ -51,8 +53,7 @@ public abstract class ValueItem<E> extends Item {
         if (str.contains(delimiter)) {
             str = str.startsWith("\"") ? str.substring(1) : str;
             str = str.endsWith("\"") ? str.substring(0, str.length() - 1) : str;
-            final String[] strings = org.apache.commons.lang.StringUtils.splitByWholeSeparator(str, delimiter);
-            return strings;
+            return splitByWholeSeparator(str, delimiter);
         }
         return new String[]{str};
     }
@@ -63,7 +64,7 @@ public abstract class ValueItem<E> extends Item {
 
     public Double[] getValueDoubles() {
         if (value != null && value.getClass().isArray()) {
-            if (value.getClass().getComponentType().getName() == "double") {
+            if ("double".equals(value.getClass().getComponentType().getName())) {
                 final double[] doubles = (double[]) this.value;
                 final Double[] Doubles = new Double[doubles.length];
                 for (int i = 0; i < doubles.length; i++) {
@@ -76,7 +77,7 @@ public abstract class ValueItem<E> extends Item {
             }
         }
         if (value instanceof List) {
-            final List list = (List) value;
+            final List<?> list = (List<?>) value;
             final Stream<Double> stream = list.stream().map(ValueItem::getaDouble);
             return stream.toArray(Double[]::new);
         }
@@ -110,7 +111,7 @@ public abstract class ValueItem<E> extends Item {
             return Arrays.stream(v).map(ValueItem::getaLong).toArray(Long[]::new);
         }
         if (value instanceof List) {
-            final List list = (List) value;
+            final List<?> list = (List<?>) value;
             final Stream<Long> stream = list.stream().map(ValueItem::getaLong);
             return stream.toArray(Long[]::new);
         }

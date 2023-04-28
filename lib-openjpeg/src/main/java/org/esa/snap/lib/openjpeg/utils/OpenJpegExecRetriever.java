@@ -23,7 +23,7 @@ import org.esa.snap.core.util.SystemUtils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang3.SystemUtils.*;
 
 /**
  * Utility class to get executables from OpenJpeg module

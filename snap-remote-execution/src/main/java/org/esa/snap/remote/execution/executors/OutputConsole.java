@@ -1,6 +1,6 @@
 package org.esa.snap.remote.execution.executors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by jcoravu on 22/1/2019.
