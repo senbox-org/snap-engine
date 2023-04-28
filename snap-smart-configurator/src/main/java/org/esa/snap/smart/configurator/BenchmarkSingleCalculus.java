@@ -16,8 +16,6 @@
 
 package org.esa.snap.smart.configurator;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * Benchmark calcul (test one processing with a set of parameters)
  *

@@ -1,6 +1,6 @@
 package org.esa.snap.remote.products.repository;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.esa.snap.remote.products.repository.download.RemoteRepositoriesManager;

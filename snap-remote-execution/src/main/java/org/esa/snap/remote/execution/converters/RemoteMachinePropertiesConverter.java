@@ -3,7 +3,7 @@ package org.esa.snap.remote.execution.converters;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.remote.execution.RemoteExecutionOp;
 import org.esa.snap.remote.execution.machines.RemoteMachineProperties;
 
