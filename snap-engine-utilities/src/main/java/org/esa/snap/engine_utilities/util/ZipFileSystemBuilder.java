@@ -14,7 +14,7 @@ public class ZipFileSystemBuilder {
     }
 
     public static FileSystem newZipFileSystem(Path zipPath) throws IOException {
-        return FileSystems.newFileSystem(zipPath, null);
+        return FileSystems.newFileSystem(zipPath, (java.lang.ClassLoader) null);
     }
 
     public static Path buildZipEntryPath(Path zipArchiveRoot, String zipEntryPath) {

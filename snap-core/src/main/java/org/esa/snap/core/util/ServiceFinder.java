@@ -6,20 +6,12 @@ import org.esa.snap.runtime.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
-import static org.esa.snap.core.util.SystemUtils.*;
+import static org.esa.snap.core.util.SystemUtils.LOG;
 
 /**
  * A finder for service provider interface (SPI) registries.
@@ -51,6 +43,15 @@ public class ServiceFinder {
     public ServiceFinder(String serviceName) {
         servicesPath = "META-INF/services/" + serviceName;
         searchPaths = new ArrayList<>();
+    }
+
+    private static Path subtract(Path resourcePath, int nameCount) {
+        Path moduleRoot = resourcePath;
+        for (int i = 0; i < nameCount; i++) {
+            moduleRoot = moduleRoot.resolve("..");
+        }
+        moduleRoot = moduleRoot.normalize();
+        return moduleRoot;
     }
 
     /**
@@ -153,8 +154,8 @@ public class ServiceFinder {
     private void addSearchPathsFromPreferencesValue(String extraPaths) {
         if (extraPaths != null) {
             addSearchPaths(Stream.of(extraPaths.split(File.pathSeparator))
-                                   .map(s -> Paths.get(s))
-                                   .toArray(Path[]::new));
+                    .map(s -> Paths.get(s))
+                    .toArray(Path[]::new));
         }
     }
 
@@ -176,7 +177,7 @@ public class ServiceFinder {
                     String extension = FileUtils.getExtension(entry.toString());
                     if (".jar".compareToIgnoreCase(extension) == 0 || ".zip".compareToIgnoreCase(extension) == 0) {
                         try {
-                            try (FileSystem fs = FileSystems.newFileSystem(entry, null)) {
+                            try (FileSystem fs = FileSystems.newFileSystem(entry, (java.lang.ClassLoader) null)) {
                                 parseServiceRegistry(fs.getPath(servicesPath), modules);
                             }
                         } catch (IOException e) {
@@ -218,15 +219,6 @@ public class ServiceFinder {
         if (!services.isEmpty()) {
             modules.add(new Module(moduleRoot, services));
         }
-    }
-
-    private static Path subtract(Path resourcePath, int nameCount) {
-        Path moduleRoot = resourcePath;
-        for (int i = 0; i < nameCount; i++) {
-            moduleRoot = moduleRoot.resolve("..");
-        }
-        moduleRoot = moduleRoot.normalize();
-        return moduleRoot;
     }
 
     @Deprecated
