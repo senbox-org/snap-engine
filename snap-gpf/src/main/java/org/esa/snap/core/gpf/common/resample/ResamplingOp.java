@@ -176,6 +176,7 @@ public class ResamplingOp extends Operator {
         transferGeoCoding(targetProduct);
         copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
+        targetProduct.setDescription(sourceProduct.getDescription());
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         targetProduct.setPreferredTileSize(referenceTileSize);
     }
