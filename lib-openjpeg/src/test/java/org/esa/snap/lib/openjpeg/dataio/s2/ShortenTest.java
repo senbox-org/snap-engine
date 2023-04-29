@@ -17,9 +17,9 @@
 
 package org.esa.snap.lib.openjpeg.dataio.s2;
 
-import org.apache.commons.lang.SystemUtils;
-import org.esa.snap.lib.openjpeg.dataio.Utils;
+import org.apache.commons.lang3.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.lib.openjpeg.dataio.Utils;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -40,11 +40,9 @@ public class ShortenTest {
     /**
      * Test we can shorten a long directory name. Can't test with a very long directory name since
      * it is not valid on Windows.
-     *
-     * @throws Exception
      */
     @Test
-    public void testLongDirectoryName() throws Exception {
+    public void testLongDirectoryName() {
         String mediumPath = "C:\\5A3AA7c3-475c-42a5-9a25-94d6a93c67b7\\S2A_OPER_PRD_MSIL1C_PDMC_20130621T120000_R065_V20091211T165928_20091211T170025";
         File directory = new File(mediumPath);
 
@@ -58,8 +56,6 @@ public class ShortenTest {
     /**
      * Test we can shorten a long file name. Can't test with a very long file name since
      * it is not valid on Windows.
-     *
-     * @throws Exception
      */
     @Test
     public void testLongFileName() throws Exception {
@@ -75,8 +71,6 @@ public class ShortenTest {
     /**
      * Test GetIterativeShortPathNameW returns "" when the path does not exist.
      * It also tests we cleaned well the files created
-     *
-     * @throws Exception
      */
     @Test
     public void testVeryLongFileName2() throws Exception {

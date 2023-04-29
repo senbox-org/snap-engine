@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.s3;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.esa.snap.vfs.NioPaths;
 import org.esa.snap.vfs.VFS;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
@@ -36,10 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -90,7 +86,7 @@ public class S3FileSystemTest extends AbstractVFSTest {
             assumeTrue(Files.exists(serviceRootPath));
             this.mockService.start();
         } catch (Exception e) {
-            Logger.getLogger(S3FileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage() + "\n" + ExceptionUtils.getFullStackTrace(e));
+            Logger.getLogger(S3FileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage(), e);
             assumeTrue(false);
         }
     }
@@ -114,7 +110,7 @@ public class S3FileSystemTest extends AbstractVFSTest {
         List<BasicFileAttributes> items;
 
         S3Walker walker = new S3Walker(getAddress(), getBucket(), "/", s3Repo.getRoot(), fileSystemProvider);
-        items = walker.walk(VFSPath.toRemotePath(NioPaths.get(s3Repo.getRoot() + "")));
+        items = walker.walk(VFSPath.toRemotePath(NioPaths.get(s3Repo.getRoot())));
         assertEquals(2, items.size());
 
         walker = new S3Walker(getAddress(), getBucket(), "/", s3Repo.getRoot(), fileSystemProvider);

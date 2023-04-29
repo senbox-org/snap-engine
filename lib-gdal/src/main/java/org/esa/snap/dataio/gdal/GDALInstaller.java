@@ -38,7 +38,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_UNIX;
 import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
 
 /**
