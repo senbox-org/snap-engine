@@ -1,6 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
@@ -51,13 +51,13 @@ class GDALDistributionInstaller {
             logger.log(Level.FINE, "The GDAL library has been copied on the local disk.");
         }
 
-        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Process the GDAL library on Windows.");
             }
 
             processInstalledWindowsDistribution(gdalDistributionRootFolderPath);
-        } else if (org.apache.commons.lang.SystemUtils.IS_OS_LINUX || org.apache.commons.lang.SystemUtils.IS_OS_MAC_OSX) {
+        } else if (org.apache.commons.lang3.SystemUtils.IS_OS_LINUX || org.apache.commons.lang3.SystemUtils.IS_OS_MAC_OSX) {
             final String currentFolderPath = EnvironmentVariables.getCurrentDirectory();
             GDALInstaller.fixUpPermissions(gdalDistributionRootFolderPath);
             try {

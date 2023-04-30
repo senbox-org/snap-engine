@@ -17,10 +17,16 @@
 
 package org.esa.snap.jp2.reader.metadata;
 
-import org.esa.snap.core.metadata.GenericXmlMetadata;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.metadata.GenericXmlMetadata;
 import org.esa.snap.lib.openjpeg.dataio.Utils;
-import org.esa.snap.lib.openjpeg.header.*;
+import org.esa.snap.lib.openjpeg.header.CODMarkerSegment;
+import org.esa.snap.lib.openjpeg.header.ContiguousCodestreamBox;
+import org.esa.snap.lib.openjpeg.header.IMarkers;
+import org.esa.snap.lib.openjpeg.header.JP2FileReader;
+import org.esa.snap.lib.openjpeg.header.QCDMarkerSegment;
+import org.esa.snap.lib.openjpeg.header.RGNMarkerSegment;
+import org.esa.snap.lib.openjpeg.header.SIZMarkerSegment;
 import org.esa.snap.lib.openjpeg.utils.CommandOutput;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
@@ -165,7 +171,7 @@ public class OpjDumpFile {
 
     public void readHeaderWithOpenJPEG(Path localJp2File) throws InterruptedException, IOException {
         String pathToImageFile = localJp2File.toString();
-        if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             pathToImageFile = Utils.GetIterativeShortPathNameW(pathToImageFile);
         }
 
