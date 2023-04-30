@@ -20,15 +20,14 @@
 package org.esa.snap.smart.configurator;
 
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
 import javax.media.jai.JAI;
-import javax.media.jai.TileCache;
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

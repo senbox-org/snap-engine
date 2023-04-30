@@ -42,8 +42,8 @@
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>5.3.1</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>20.0</geotools.version>
-        <org.locationtech.version>1.16.0</org.locationtech.version>
+        <geotools.version>28.2</geotools.version>
+        <org.locationtech.version>1.17.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -322,9 +322,14 @@
             <!-- Apache ############################################# -->
 
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.12.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.6</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -362,7 +367,8 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.3.3.2-SNAP</version>
+                <version>1.4.7</version>
+                <!--
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
@@ -381,52 +387,43 @@
                         <artifactId>xercesImpl</artifactId>
                     </exclusion>
                 </exclusions>
+                -->
             </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
             <!-- Sadly there is no global exclusion so every geotools artifact -->
             <!-- has to exclude the 'wrong' jai version -->
+            <!--
+                        <dependency>
 
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-api</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+                            <groupId>org.geotools</groupId>
+                            <artifactId>gt-api</artifactId>
+                            <version>${geotools.version}</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_core</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_codec</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>javax.media</groupId>
+                                    <artifactId>jai_imageio</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                    <groupId>xerces</groupId>
+                                    <artifactId>xercesImpl</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                        -->
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
                     <!-- this lib is also used in snap-cluster-analysis and in jlinda-core
                          better have an explicit dependency than rely on the transitive dependency
                     -->
@@ -440,194 +437,47 @@
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-opengis</artifactId>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>it.geosolutions.imageio-ext</groupId>
-                        <artifactId>imageio-ext-tiff</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>it.geosolutions.imageio-ext</groupId>
-                        <artifactId>imageio-ext-utilities</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>it.geosolutions.imageio-ext</groupId>
-                        <artifactId>imageio-ext-tiff</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>it.geosolutions.imageio-ext</groupId>
-                        <artifactId>imageio-ext-utilities</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools.xsd</groupId>
                 <artifactId>gt-xsd-gml3</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xml-apis</groupId>
-                        <artifactId>xml-apis</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xml-apis</groupId>
-                        <artifactId>xml-apis-xerces</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
 
@@ -677,6 +527,20 @@
                 <version>1.0.3</version>
             </dependency>
 
+            <!-- XML helper ############################################# -->
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.15.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.15.0</version>
+            </dependency>
+
             <!-- Test Libraries ############################################# -->
 
             <dependency>
@@ -703,7 +567,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.10.17</version>
+                <version>1.10.19</version>
                 <scope>test</scope>
             </dependency>
 
@@ -790,6 +654,26 @@
                 <artifactId>jsoup</artifactId>
                 <version>1.15.3</version>
             </dependency>
+
+            <dependency>
+                <groupId>tec.uom</groupId>
+                <artifactId>uom-se</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.measure</groupId>
+                <artifactId>unit-api</artifactId>
+                <version>2.0</version>
+            </dependency>
+
+            <!-- logging framework for GeoTools -->
+            <dependency>
+                <groupId>ch.qos.reload4j</groupId>
+                <artifactId>reload4j</artifactId>
+                <version>1.2.19</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -806,6 +690,11 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
+        </repository>
+
+        <repository>
+            <id>osgeo</id>
+            <url>https://repo.osgeo.org/repository/geotools-releases/</url>
         </repository>
     </repositories>
 
@@ -855,8 +744,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>11</source>
+                        <target>11</target>
                         <debug>true</debug>
                         <encoding>UTF-8</encoding>
                         <excludes>
@@ -960,13 +849,14 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.5.0</version>
                     <configuration>
-                        <aggregate>true</aggregate>
                         <subpackages>org.esa.snap.core:com.bc.ceres</subpackages>
                         <!-- Not possible to exclude packages; it is not considered by the plugin (as of v2.10.3, 18.11.2015) -->
-                        <!--<excludePackageNames>org.esa.snap.core.gpf.internal:*.internal:*.impl:*.experimental</excludePackageNames>-->
-                        <additionalparam>-exclude
-                            com.bc.ceres.core.runtime:com.bc.ceres.swing:org.esa.snap.core.param.validators:org.esa.snap.core.param.editors:org.esa.snap.core.param:org.esa.snap.core.draw:org.esa.snap.core.dataop.projection:com.bc.ceres.binio.internal:com.bc.ceres.compiler:com.bc.ceres.swing.binding.internal:com.bc.ceres.core.runtime.internal:com.bc.ceres.jai.js:com.bc.ceres.launcher:com.bc.ceres.launcher.internal:com.bc.ceres.metadata:com.bc.ceres.nbmgen:com.bc.ceres.resource:com.bc.ceres.standalone:org.esa.snap.core.dataop.downloadable:org.esa.snap.core.dataop.maptransf.geotools:org.esa.snap.core.dataop.maptransf:org.esa.snap.core.gpf.doclet:org.esa.snap.core.gpf.internal:org.esa.snap.core.gpf.experimental:org.esa.snap.core.gpf.operators.tooladapter:org.esa.snap.core.jexp.impl
-                        </additionalparam>
+                        <!-- Maybe this works with v3.5.0 -->
+                        <excludePackageNames>org.esa.snap.core.gpf.internal:*.internal:*.impl:*.experimental
+                        </excludePackageNames>
+                        <!--                        <additionalparam>-exclude-->
+                        <!--                            com.bc.ceres.core.runtime:com.bc.ceres.swing:org.esa.snap.core.param.validators:org.esa.snap.core.param.editors:org.esa.snap.core.param:org.esa.snap.core.draw:org.esa.snap.core.dataop.projection:com.bc.ceres.binio.internal:com.bc.ceres.compiler:com.bc.ceres.swing.binding.internal:com.bc.ceres.core.runtime.internal:com.bc.ceres.jai.js:com.bc.ceres.launcher:com.bc.ceres.launcher.internal:com.bc.ceres.metadata:com.bc.ceres.nbmgen:com.bc.ceres.resource:com.bc.ceres.standalone:org.esa.snap.core.dataop.downloadable:org.esa.snap.core.dataop.maptransf.geotools:org.esa.snap.core.dataop.maptransf:org.esa.snap.core.gpf.doclet:org.esa.snap.core.gpf.internal:org.esa.snap.core.gpf.experimental:org.esa.snap.core.gpf.operators.tooladapter:org.esa.snap.core.jexp.impl-->
+                        <!--                        </additionalparam>-->
                         <maxmemory>512M</maxmemory>
                         <doctitle>SNAP Engine API</doctitle>
                         <windowtitle>SNAP Engine API</windowtitle>
@@ -1213,6 +1103,32 @@
 
         </plugins>
     </build>
+
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <reportSets>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                    <reportSet>
+                        <id>default</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <developers>
         <developer>

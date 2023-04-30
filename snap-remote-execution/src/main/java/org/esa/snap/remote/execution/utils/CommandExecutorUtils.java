@@ -1,7 +1,7 @@
 package org.esa.snap.remote.execution.utils;
 
 import com.jcraft.jsch.JSchException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.remote.execution.executors.OutputConsole;
 import org.esa.snap.remote.execution.executors.ProcessExecutor;
 import org.esa.snap.remote.execution.executors.SSHConnection;

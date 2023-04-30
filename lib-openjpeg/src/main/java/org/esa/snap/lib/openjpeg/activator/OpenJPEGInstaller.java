@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_UNIX;
 
 public class OpenJPEGInstaller {
 

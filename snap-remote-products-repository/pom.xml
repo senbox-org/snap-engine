@@ -33,6 +33,14 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <!-- Add the 'org.geotools:gt-epsg-hsql' dependency here used by the TAO modules. -->
         <dependency>
             <groupId>org.geotools</groupId>
@@ -68,6 +76,10 @@
                 <exclusion>
                     <groupId>org.ejml</groupId>
                     <artifactId>ejml-ddense</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

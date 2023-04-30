@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.http;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.esa.snap.vfs.NioPaths;
 import org.esa.snap.vfs.VFS;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
@@ -36,10 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeTrue;
 
@@ -81,7 +77,7 @@ public class HttpFileSystemTest extends AbstractVFSTest {
             assumeTrue(Files.exists(serviceRootPath));
             this.mockService.start();
         } catch (Exception e) {
-            Logger.getLogger(HttpFileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage() + "\n" + ExceptionUtils.getFullStackTrace(e));
+            Logger.getLogger(HttpFileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage() + "\n", e);
             assumeTrue(false);
         }
     }

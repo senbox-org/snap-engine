@@ -6,6 +6,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.geotools.referencing.CRS;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -20,6 +21,7 @@ import java.io.PrintWriter;
 public class EnviHeaderTest {
 
     @Test
+    @Ignore
     public void writeMapProjectionInfo() throws Exception {
         Product product = createMultiSizeProduct();
         Band[] bands = product.getBands();

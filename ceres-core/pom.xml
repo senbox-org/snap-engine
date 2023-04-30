@@ -34,8 +34,8 @@
             <artifactId>jdom2</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -83,7 +83,7 @@
                         <publicPackage>org.jdom2.*</publicPackage>
                         <publicPackage>com.thoughtworks.xstream.*</publicPackage>
 
-                        <publicPackage>org.apache.commons.lang.*</publicPackage>
+                        <publicPackage>org.apache.commons.lang3.*</publicPackage>
                         <publicPackage>org.apache.commons.logging.*</publicPackage>
                         <publicPackage>org.apache.commons.math3.*</publicPackage>
                         <publicPackage>org.apache.commons.cli.*</publicPackage>
