@@ -11,10 +11,19 @@ import org.esa.snap.lib.openjpeg.dataio.struct.DecompressParams;
 import org.esa.snap.lib.openjpeg.dataio.struct.DecompressionCodec;
 import org.esa.snap.lib.openjpeg.dataio.struct.Image;
 import org.esa.snap.lib.openjpeg.dataio.struct.ImageComponent;
-import sun.awt.image.SunWritableRaster;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferShort;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.PixelInterleavedSampleModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -354,7 +363,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         SampleModel sampleModel = new PixelInterleavedSampleModel(this.dataType, width, height, 1, width, bandOffsets);
         WritableRaster raster = null;
         try {
-            raster = new SunWritableRaster(sampleModel, buffer, new Point(0, 0));
+            raster = Raster.createWritableRaster(sampleModel, buffer, new Point(0, 0));
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
