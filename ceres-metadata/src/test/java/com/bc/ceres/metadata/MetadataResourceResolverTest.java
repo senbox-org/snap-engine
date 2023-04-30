@@ -17,28 +17,29 @@
 package com.bc.ceres.metadata;
 
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 import java.util.SortedMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MetadataResourceResolverTest {
 
     @Test
-    public void testRemovefileExtension() throws Exception {
+    public void testRemovefileExtension() {
         SimpleFileSystem fileSystem = mock(SimpleFileSystem.class);
         MetadataResourceResolver metadataResourceResolver = new MetadataResourceResolver(fileSystem);
 
-        when(fileSystem.isFile(Matchers.anyString())).thenReturn(true);
+        when(fileSystem.isFile(Mockito.anyString())).thenReturn(true);
         // existing files
         assertEquals("foo", metadataResourceResolver.removeFileExtension("foo.txt"));
         assertEquals("foo", metadataResourceResolver.removeFileExtension("foo"));
         assertEquals("foo/bar", metadataResourceResolver.removeFileExtension("foo/bar.baz"));
         assertEquals("foo\\bar", metadataResourceResolver.removeFileExtension("foo\\bar.baz"));
 
-        when(fileSystem.isFile(Matchers.anyString())).thenReturn(false );
+        when(fileSystem.isFile(Mockito.anyString())).thenReturn(false);
         // not existing
         assertEquals("bar.foo", metadataResourceResolver.removeFileExtension("bar.foo")); // not existing file
 
@@ -84,9 +85,9 @@ public class MetadataResourceResolverTest {
         SimpleFileSystem fileSystem = mock(SimpleFileSystem.class);
         MetadataResourceResolver resolver = new MetadataResourceResolver(fileSystem);
 
-        when(fileSystem.isFile(anyString())).thenReturn(true);
-        when(fileSystem.list(anyString())).thenReturn(new String[]{"file1", "product-file2.xml", "file3", "product-file4.properties"});
-        SortedMap<String,String> sourceMetadataPaths= resolver.getSourceMetadataPaths("/bla/bli/product.dim");
+        when(fileSystem.isFile(Mockito.anyString())).thenReturn(true);
+        when(fileSystem.list(Mockito.anyString())).thenReturn(new String[]{"file1", "product-file2.xml", "file3", "product-file4.properties"});
+        SortedMap<String, String> sourceMetadataPaths = resolver.getSourceMetadataPaths("/bla/bli/product.dim");
 
         assertEquals(2, sourceMetadataPaths.size());
         assertEquals("/bla/bli/product-file2.xml", sourceMetadataPaths.get("file2.xml"));

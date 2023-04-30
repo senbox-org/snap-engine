@@ -43,19 +43,19 @@ public class WriteVirtualBandWithWriteOpTest {
             writeOp.dispose();
 
             Mockito.verify(mockedWriter, Mockito.times(1)).writeBandRasterData(Mockito.argThat(new IsBand("virtband")),
-                                                                                Mockito.eq(0),
-                                                                                Mockito.anyInt(),
-                                                                                Mockito.eq(10),
-                                                                                Mockito.anyInt(),
-                                                                                Mockito.argThat(new HasValidValue(12, 3)),
-                                                                                Mockito.any(ProgressMonitor.class));
+                    Mockito.eq(0),
+                    Mockito.anyInt(),
+                    Mockito.eq(10),
+                    Mockito.anyInt(),
+                    Mockito.argThat(new HasValidValue(12, 3)),
+                    Mockito.any(ProgressMonitor.class));
 
         } finally {
             registry.removeWriterPlugIn(mockPlugin);
         }
     }
 
-    private class IsBand extends ArgumentMatcher<Band> {
+    private static class IsBand implements ArgumentMatcher<Band> {
 
         private final String bandName;
 
@@ -64,12 +64,13 @@ public class WriteVirtualBandWithWriteOpTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
-            return bandName.equals(((Band) argument).getName());
+        public boolean matches(Band band) {
+            return bandName.equals(band.getName());
         }
+
     }
 
-    private class HasValidValue extends ArgumentMatcher<ProductData> {
+    private static class HasValidValue implements ArgumentMatcher<ProductData> {
 
 
         private final float expectedValue;
@@ -81,8 +82,8 @@ public class WriteVirtualBandWithWriteOpTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
-            float actualValue = ((ProductData) argument).getElemFloatAt(atIndex);
+        public boolean matches(ProductData argument) {
+            float actualValue = argument.getElemFloatAt(atIndex);
             return Float.compare(expectedValue, actualValue) == 0;
         }
     }

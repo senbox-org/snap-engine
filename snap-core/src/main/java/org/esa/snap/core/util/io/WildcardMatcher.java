@@ -58,7 +58,7 @@ public class WildcardMatcher {
     public static File[] glob(String filePattern) throws IOException {
         Set<File> fileSet = new TreeSet<>();
         glob(filePattern, fileSet);
-        return fileSet.toArray(new File[fileSet.size()]);
+        return fileSet.toArray(new File[0]);
     }
 
     public static void glob(String filePattern, Set<File> fileSet) throws IOException {
@@ -109,26 +109,26 @@ public class WildcardMatcher {
         if (iswindows) {
             filePattern = filePattern.replace("\\", "/");
         }
-        String basePath = filePattern.startsWith("/") ? "/" : "";
+        StringBuilder basePath = new StringBuilder(filePattern.startsWith("/") ? "/" : "");
         String[] parts = filePattern.split("/");
         int firstPatternIndex = 0;
         for (int i = 0; i < parts.length && !containsWildcardChar(parts[i]); i++) {
             if (!parts[i].isEmpty()) {
-                basePath += parts[i];
+                basePath.append(parts[i]);
                 if (i < parts.length - 1) {
-                    basePath += "/";
+                    basePath.append("/");
                 }
                 firstPatternIndex = i + 1;
             }
         }
-        String patterPath = "";
+        StringBuilder patterPath = new StringBuilder();
         for (int i = firstPatternIndex; i < parts.length ; i++) {
-            patterPath += parts[i];
+            patterPath.append(parts[i]);
             if (i < parts.length - 1) {
-                patterPath += "/";
+                patterPath.append("/");
             }
         }
-        return new String[] {basePath, patterPath};
+        return new String[]{basePath.toString(), patterPath.toString()};
     }
 
     private static boolean containsWildcardChar(String part) {

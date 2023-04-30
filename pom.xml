@@ -566,8 +566,8 @@
 
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>1.10.19</version>
+                <artifactId>mockito-core</artifactId>
+                <version>5.3.1</version>
                 <scope>test</scope>
             </dependency>
 
@@ -1000,6 +1000,7 @@
                             <configuration>
                                 <name>snap.buildDate</name>
                                 <pattern>yyyy-MM-dd</pattern>
+                                <locale>en,UK</locale>
                             </configuration>
                         </execution>
                     </executions>

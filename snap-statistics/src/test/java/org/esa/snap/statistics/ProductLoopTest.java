@@ -6,13 +6,13 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.internal.matchers.EndsWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class ProductLoopTest {
@@ -211,7 +211,7 @@ public class ProductLoopTest {
     }
 
     @Test
-    public void testThatLoopWorksIfAlreadyLoadedProductsContainsNullValues() throws IOException {
+    public void testThatLoopWorksIfAlreadyLoadedProductsContainsNullValues() {
         //preparation
         final Product[] alreadyLoadedProducts = {validProductMock1, null, validProductMock2};
 
@@ -225,8 +225,8 @@ public class ProductLoopTest {
         verify(validProductMock2, never()).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertThat(productNames[0], endsWith(validProductMock1.getFileLocation().getName()));
-        assertThat(productNames[1], endsWith(validProductMock2.getFileLocation().getName()));
+        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getName()));
+        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getName()));
     }
 
     @Test
@@ -251,8 +251,8 @@ public class ProductLoopTest {
         verify(validProductMock2, times(1)).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertThat(productNames[0], endsWith(file1.getName()));
-        assertThat(productNames[1], endsWith(file2.getName()));
+        assertTrue(productNames[0].endsWith(file1.getName()));
+        assertTrue(productNames[1].endsWith(file2.getName()));
     }
 
     @Test
@@ -275,8 +275,8 @@ public class ProductLoopTest {
         verify(validProductMock2, never()).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertThat(productNames[0], endsWith(validProductMock1.getFileLocation().getName()));
-        assertThat(productNames[1], endsWith(validProductMock2.getFileLocation().getName()));
+        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getName()));
+        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getName()));
     }
 
     private Product createTimeValidProductMock(int startOffset, int numObservationDays) {
@@ -321,7 +321,4 @@ public class ProductLoopTest {
         return new File(location.toString());
     }
 
-    private EndsWith endsWith(final String suffix) {
-        return new EndsWith(suffix);
-    }
 }
