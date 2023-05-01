@@ -537,6 +537,11 @@
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.15.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>2.15.0</version>
             </dependency>
@@ -659,6 +664,19 @@
                 <groupId>tec.uom</groupId>
                 <artifactId>uom-se</artifactId>
                 <version>1.0.10</version>
+            </dependency>
+
+            <dependency>
+                <!--required by gt-opengis, packages need to be exported-->
+                <groupId>si.uom</groupId>
+                <artifactId>si-units</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <!--required by gt-opengis, packages need to be exported-->
+                <groupId>si.uom</groupId>
+                <artifactId>si-quantity</artifactId>
+                <version>2.0.1</version>
             </dependency>
 
             <dependency>
