@@ -12,7 +12,7 @@
     <packaging>nbm</packaging>
 
     <name>Ceres Binary I/O Library</name>
-    <description>The Ceres Binary I/O Library provides a generic access to binary data structures.</description>
+    <description>The Ceres Binary I/O Library provides generic access to binary data structures.</description>
 
     <dependencies>
         <dependency>
