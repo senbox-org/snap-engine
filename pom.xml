@@ -987,7 +987,7 @@
                             <configuration>
                                 <name>snap.nbmSpecVersion</name>
                                 <value>${project.version}</value>
-                                <regex>(-SNAPSHOT)|(-rc[0-9]+)</regex>
+                                <regex>(-JDK11SHOT)|(-SNAPSHOT)|(-rc[0-9]+)</regex>
                                 <replacement>.0</replacement>
                                 <failIfNoMatch>false</failIfNoMatch>
                             </configuration>
@@ -1000,7 +1000,7 @@
                             <configuration>
                                 <name>snap.nbmImplVersion</name>
                                 <value>${project.version}</value>
-                                <regex>(-SNAPSHOT)|(-rc[0-9]+)</regex>
+                                <regex>(-JDK11SHOT)|(-SNAPSHOT)|(-rc[0-9]+)</regex>
                                 <replacement>.${buildDate}</replacement>
                                 <failIfNoMatch>false</failIfNoMatch>
                             </configuration>
