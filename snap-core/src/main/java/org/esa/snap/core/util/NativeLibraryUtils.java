@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +69,7 @@ public class NativeLibraryUtils {
      * @throws IOException If temporary file creation or read/write operation fails
      */
     public static void loadLibrary(String path, String libraryName) throws IOException {
-        path = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        path = URLDecoder.decode(path, "UTF-8");
         String mappedLibName = System.mapLibraryName(libraryName);
         if (path.startsWith("/")) {
             path = path.substring(1);

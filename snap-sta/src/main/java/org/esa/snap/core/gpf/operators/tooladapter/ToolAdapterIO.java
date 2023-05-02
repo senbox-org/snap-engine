@@ -450,7 +450,7 @@ public class ToolAdapterIO {
      */
     public static void deleteFolder(Path location) throws IOException {
         if (Files.exists(location)) {
-            Files.walkFileTree(location, new SimpleFileVisitor<>() {
+            Files.walkFileTree(location, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     Files.deleteIfExists(dir);
@@ -594,7 +594,7 @@ public class ToolAdapterIO {
     public static void copy(Path source, Path destination) throws IOException{
         Set<FileVisitOption> options = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
         final CopyOption[] copyOptions = new CopyOption[] { StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING };
-        Files.walkFileTree(source, options, 3, new FileVisitor<>() {
+        Files.walkFileTree(source, options, 3, new FileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 Path newDirectory = destination.resolve(source.relativize(dir));
