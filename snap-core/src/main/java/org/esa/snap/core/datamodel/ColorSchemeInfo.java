@@ -240,7 +240,7 @@ public class ColorSchemeInfo {
     }
 
 
-    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, boolean allowWavelengthZero) {
+    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, String units, boolean allowWavelengthZero) {
         
         String wavelengthString = "";
         if (wavelength > 0.0) {
@@ -250,6 +250,13 @@ public class ColorSchemeInfo {
                 wavelengthString = String.valueOf(wavelength);
             }
         }
+
+        if (units == null) {
+            units = "";
+        }
+//        if (units != null && units.length() > 0) {
+//            units = "dimensionless";
+//        }
 
         // Allow "%d" to become [WAVELENGTH] but only in the description
         if (description != null && description.contains("%d")) {
@@ -265,6 +272,12 @@ public class ColorSchemeInfo {
 
             while(colorBarTitle.contains("[BANDNAME]")) {
                 colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
+            }
+
+            if (units != null) {
+                while (colorBarTitle.contains("[UNITS]")) {
+                    colorBarTitle = colorBarTitle.replace("[UNITS]", units);
+                }
             }
 
             if (colorBarTitle.contains("[WAVELENGTH]")) {

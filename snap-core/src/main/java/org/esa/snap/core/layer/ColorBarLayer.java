@@ -22,7 +22,6 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.util.SystemUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -92,23 +91,146 @@ public class ColorBarLayer extends Layer {
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
-            String title = (ColorBarLayerType.NULL_SPECIAL.equals(getTitle())) ? raster.getName() : getTitle();
+//            String title = (ColorBarLayerType.NULL_SPECIAL.equals(getTitle())) ? raster.getName() : getTitle();
+
+//            imageLegend.setTitleText(title);
 
 
-            String unitsText = "";
-            if (ColorBarLayerType.NULL_SPECIAL.equals(getUnits())) {
-                String unit = raster.getUnit();
-                if (unit != null && unit.length() > 0) {
-                    unitsText = "(" + raster.getUnit() + ")";
+
+
+
+
+            if (!imageLegendInitialized) {
+
+                // todo add these Preferences
+                String nullUnitsReplacement = "dimensionless";
+                String defaultTitle = "[DESCRIPTION]";
+                String defaultTitleAlt = "[BANDNAME]";
+                boolean useAlternateTitle = false;
+                String defaultUnits = "[BANDNAME]; [UNITS]";
+                String defaultUnitsAlt =  "[UNITS]";
+                boolean useAlternateUnits = false;
+                // todo end Preferences
+
+
+
+                String colorBarTitle = "";
+                String colorBarUnits = "";
+
+                String description = raster.getDescription();
+                String bandname = raster.getName();
+                String units = raster.getUnit();
+
+                if (units == null || units.length() == 0) {
+                    units = nullUnitsReplacement;
                 }
-            } else {
-                unitsText = getUnits();
+
+                float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+
+                boolean allowWavelengthZero = false;
+
+                boolean colorBarTitleDetermined = false;
+                boolean colorBarUnitsDetermined = false;
+
+
+                if (isAutoApplySchemes()) {//auto-apply
+                    ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getName());
+
+                    if (schemeInfo != null) {
+                        if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().trim().length() > 0) {
+                            setLabelValuesActual(schemeInfo.getColorBarLabels());
+                            setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+                            setPopulateLabelsTextfield(true);
+                        }
+
+
+                        if (schemeInfo.getColorBarTitle() != null && schemeInfo.getColorBarTitle().trim().length() > 0) {
+                            colorBarTitle = schemeInfo.getColorBarTitle();
+                            colorBarTitleDetermined = true;
+
+//
+//                            colorBarTitle = ColorSchemeInfo.getColorBarTitle(colorBarTitle, bandname, description, wavelength, units, allowWavelengthZero);
+//                            if (colorBarTitle != null || colorBarTitle.trim().length() > 0) {
+//                                colorBarTitleDetermined = true;
+//                            } else {
+//                                colorBarTitle = schemeInfo.getColorBarTitleAlt();
+//                                colorBarTitle = ColorSchemeInfo.getColorBarTitle(colorBarTitle, bandname, description, wavelength, units, allowWavelengthZero);
+//
+//                                if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
+//                                    colorBarTitleDetermined = true;
+//                                }
+//                            }
+                        }
+
+                        if (schemeInfo.getColorBarUnits() != null && schemeInfo.getColorBarUnits().trim().length() > 0) {
+                            colorBarUnits = schemeInfo.getColorBarUnits();
+                            colorBarUnitsDetermined = true;
+//
+//
+//                            allowWavelengthZero = false;
+//
+//                            colorBarUnits = ColorSchemeInfo.getColorBarTitle(colorBarUnits, bandname, description, wavelength, units, allowWavelengthZero);
+//                            if (colorBarUnits == null || colorBarUnits.trim().length() == 0) {
+//                                if (colorBarUnits != null && colorBarUnits.trim().length() > 0) {
+//                                    colorBarUnitsDetermined = true;
+//                                }
+//                            }
+                        }
+
+                        if (schemeInfo.getColorBarLengthStr() != null && schemeInfo.getColorBarLengthStr().trim().length() > 0) {
+                            setColorBarLength(Integer.valueOf(schemeInfo.getColorBarLengthStr()));
+                        }
+                        if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
+                            setLabelValuesScalingFactor(Double.valueOf(schemeInfo.getColorBarLabelScalingStr()));
+                        }
+                    }
+                }
+
+                if (!colorBarTitleDetermined) {
+                    if (useAlternateTitle) {
+                        colorBarTitle = defaultTitleAlt;
+                    } else {
+                        colorBarTitle = defaultTitle;
+                    }
+//
+//                    allowWavelengthZero = true;
+//
+//                    colorBarTitle = ColorSchemeInfo.getColorBarTitle(colorBarTitle, bandname, description, wavelength, units, allowWavelengthZero);
+                }
+
+
+                if (!colorBarUnitsDetermined) {
+                    if (useAlternateUnits) {
+                        colorBarUnits = defaultUnitsAlt;
+                    } else {
+                        colorBarUnits = defaultUnits;
+                    }
+//
+//                    allowWavelengthZero = true;
+//
+//                    colorBarUnits = ColorSchemeInfo.getColorBarTitle(colorBarUnits, bandname, description, wavelength, units, allowWavelengthZero);
+                }
+
+
+
+                if (colorBarUnits != null && colorBarUnits.length() > 0) {
+                    if (isUnitsParenthesis()) {
+                        colorBarUnits = "(" + colorBarUnits + ")";
+                    }
+                }
+
+                setTitle(colorBarTitle);
+                setUnits(colorBarUnits);
+
+                imageLegendInitialized = true;
             }
 
 
             // Title & Units Text
-            imageLegend.setTitleText(title);
-            imageLegend.setUnitsText(unitsText);
+            imageLegend.setTitleText(getTitle());
+            imageLegend.setUnitsText(getUnits());
+            imageLegend.setConvertCaret(isConvertCaret());
+            imageLegend.setUnitsParenthesis(isUnitsParenthesis());
 
 
             // Orientation
@@ -118,135 +240,6 @@ public class ColorBarLayer extends Layer {
 
 
             // Tick Label Values
-
-//             todo Color Schemes - this would call methods in snap-desktop so some of those methods would need to be either moved or replicated in snap-engine
-            if (!imageLegendInitialized) {
-                if (isAutoApplySchmes()) {//auto-apply
-                    ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getName());
-                    if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().trim().length() > 1) {
-                        setLabelValuesActual(schemeInfo.getColorBarLabels());
-                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
-                        setPopulateLabelsTextfield(true);
-                    }
-                    // color bar title
-                    String colorBarTitle = schemeInfo.getColorBarTitle();
-                    boolean colorBarTitleReplaceFailed = false;
-                    String description = schemeInfo.getDescription();
-                    String bandname = raster.getName();
-                    float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
-
-                    boolean allowWavelengthZero = false;
-
-                    colorBarTitle = ColorSchemeInfo.getColorBarTitle(colorBarTitle, bandname, description, wavelength,  allowWavelengthZero);
-                    if (colorBarTitle == null || colorBarTitle.trim().length() == 0) {
-                        colorBarTitle = schemeInfo.getColorBarTitleAlt();
-                        colorBarTitle = getColorBarTitle(colorBarTitle, bandname, description, wavelength,  allowWavelengthZero);
-
-                        if (colorBarTitle == null || colorBarTitle.trim().length() == 0) {
-                            colorBarTitle = raster.getName();
-                        }
-                    }
-//
-//                    String wvlStr = "";
-//                    if (wavelength > 0.0) {
-//                        if (Math.ceil(wavelength) == Math.round(wavelength)) {
-//                            wvlStr = String.valueOf(Math.round(wavelength));
-//                        } else {
-//                            wvlStr = String.valueOf(wavelength);
-//                        }
-//                    }
-//                    if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
-//                        if (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
-//                            if (wavelength > 0.0) {
-//                                while (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
-//                                    colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wvlStr);
-//                                    colorBarTitle = colorBarTitle.replace("%d", wvlStr);
-//                                }
-//                            } else {
-//                                colorBarTitleReplaceFailed = true;
-//                            }
-//                        }
-//
-//                        if (!colorBarTitleReplaceFailed && colorBarTitle.length() == 0) {
-//                            colorBarTitleReplaceFailed = true;
-//                        }
-//                    }  else {
-//                        colorBarTitleReplaceFailed = true;
-//                    }
-//
-//                    if (colorBarTitleReplaceFailed) {
-//                        colorBarTitle = schemeInfo.getColorBarTitleAlt();
-//                        colorBarTitleReplaceFailed = false;
-//                        if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
-//                            if (colorBarTitle.contains("[WAVELENGTH]")) {
-//                                if (wavelength > 0.0) {
-//                                    while (colorBarTitle.contains("[WAVELENGTH]")) {
-//                                        colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wvlStr);
-//                                    }
-//                                } else {
-//                                    colorBarTitleReplaceFailed = true;
-//                                }
-//                            }
-//                            if (!colorBarTitleReplaceFailed) {
-//                                while(colorBarTitle.contains("[DESCRIPTION]")) {
-//                                    colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
-//                                }
-//                                while(colorBarTitle.contains("[BANDNAME]")) {
-//                                    colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
-//                                }
-//                                if (colorBarTitle.length() == 0) {
-//                                    colorBarTitleReplaceFailed = true;
-//                                }
-//                            }
-//                        } else {
-//                            colorBarTitleReplaceFailed = true;
-//                        }
-//                    }
-//                    if (colorBarTitleReplaceFailed) {
-//                        colorBarTitle = raster.getName();
-//                    }
-                    setTitle(colorBarTitle);
-                    imageLegend.setTitleText(colorBarTitle);
-                    if (schemeInfo.getColorBarUnits() != null && schemeInfo.getColorBarUnits().trim().length() > 0) {
-                        setUnits(schemeInfo.getColorBarUnits());
-                        imageLegend.setUnitsText(schemeInfo.getColorBarUnits());
-                    } else {
-                        String unit = raster.getUnit();
-                        if (unit != null && unit.length() > 0) {
-                            unitsText = "(" + raster.getUnit() + ")";
-                        } else {
-                            unitsText = "";
-                        }
-                        setUnits(unitsText);
-                        imageLegend.setUnitsText(unitsText);
-                    }
-                    if (schemeInfo.getColorBarLengthStr() != null && schemeInfo.getColorBarLengthStr().trim().length() > 0) {
-                        setColorBarLength(Integer.valueOf(schemeInfo.getColorBarLengthStr()));
-                    }
-                    if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
-                        setLabelValuesScalingFactor(Double.valueOf(schemeInfo.getColorBarLabelScalingStr()));
-                    }
-                    imageLegendInitialized = true;
-                } else {
-//                    setLabelValuesActual(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT);
-//                    setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
-//                    setPopulateLabelsTextfield(ColorBarLayerType.PROPERTY_POPULATE_VALUES_TEXTFIELD_DEFAULT);
-//                    setColorBarLength(ColorBarLayerType.PROPERTY_COLORBAR_LENGTH_DEFAULT);
-//                    setLabelValuesScalingFactor(ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_DEFAULT);
-                    setTitle(raster.getName());
-                    imageLegend.setTitleText(raster.getName());
-                    String unit = raster.getUnit();
-                    if (unit != null && unit.length() > 0) {
-                        unitsText = "(" + raster.getUnit() + ")";
-                    } else {
-                        unitsText = "";
-                    }
-                    setUnits(unitsText);
-                    imageLegend.setUnitsText(unitsText);
-                    imageLegendInitialized = true;
-                }
-            }
-
             imageLegend.setDistributionType(getLabelValuesMode());
             if (getLabelValuesMode().equals(ColorBarLayerType.DISTRIB_MANUAL_STR)) {
                 setPopulateLabelsTextfield(true);
@@ -318,10 +311,16 @@ public class ColorBarLayer extends Layer {
             imageLegend.setBackdropColor(getBackdropColor());
 
 
+            imageLegend.setTopBorderGapFactor(getBorderGapFactorTop());
+            imageLegend.setBottomBorderGapFactor(getBorderGapFactorBottom());
+            imageLegend.setLeftSideBorderGapFactor(getBorderGapFactorLeftside());
+            imageLegend.setRightSideBorderGapFactor(getBorderGapFactorRightside());
+            imageLegend.setTitleGapFactor(getTitleGapFactor());
+            imageLegend.setLabelGapFactor(getLabelGapFactor());
+
 
             imageLegend.setTransparencyEnabled(true);
             imageLegend.setAntialiasing((Boolean) true);
-
 
 
             int imageHeight = raster.getRasterHeight();
@@ -377,42 +376,42 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, boolean allowWavelengthZero) {
-
-        String wvlStr = "";
-        if (wavelength > 0.0) {
-            if (Math.ceil(wavelength) == Math.round(wavelength)) {
-                wvlStr = String.valueOf(Math.round(wavelength));
-            } else {
-                wvlStr = String.valueOf(wavelength);
-            }
-        }
-
-        if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
-            while(colorBarTitle.contains("[DESCRIPTION]")) {
-                colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
-            }
-
-            while(colorBarTitle.contains("[BANDNAME]")) {
-                colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
-            }
-
-            if (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
-                if (wavelength > 0.0) {
-                    while (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
-                        colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wvlStr);
-                        colorBarTitle = colorBarTitle.replace("%d", wvlStr);
-                    }
-                } else {
-                    if (!allowWavelengthZero) {
-                        colorBarTitle = "";
-                    }
-                }
-            }
-        }
-
-        return  colorBarTitle;
-    }
+//    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, boolean allowWavelengthZero) {
+//
+//        String wvlStr = "";
+//        if (wavelength > 0.0) {
+//            if (Math.ceil(wavelength) == Math.round(wavelength)) {
+//                wvlStr = String.valueOf(Math.round(wavelength));
+//            } else {
+//                wvlStr = String.valueOf(wavelength);
+//            }
+//        }
+//
+//        if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
+//            while(colorBarTitle.contains("[DESCRIPTION]")) {
+//                colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
+//            }
+//
+//            while(colorBarTitle.contains("[BANDNAME]")) {
+//                colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
+//            }
+//
+//            if (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
+//                if (wavelength > 0.0) {
+//                    while (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("%d")) {
+//                        colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wvlStr);
+//                        colorBarTitle = colorBarTitle.replace("%d", wvlStr);
+//                    }
+//                } else {
+//                    if (!allowWavelengthZero) {
+//                        colorBarTitle = "";
+//                    }
+//                }
+//            }
+//        }
+//
+//        return  colorBarTitle;
+//    }
 
 
     public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
@@ -679,8 +678,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
     // Title & Units Text
 
     private String getTitle() {
@@ -701,7 +698,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private String getUnits() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
@@ -719,7 +715,15 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    private boolean isConvertCaret() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY,
+                ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT);
+    }
 
+    private boolean isUnitsParenthesis() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT);
+    }
 
 
     // Orientation
@@ -747,10 +751,9 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     // Tick Label Values
 
-    private boolean isAutoApplySchmes() {
+    private boolean isAutoApplySchemes() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_KEY,
                 ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_DEFAULT);
     }
@@ -826,7 +829,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     // Placement Location
 
     private boolean isColorBarLocationInside() {
@@ -849,7 +851,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_SHIFT_DEFAULT);
     }
-
 
 
     // Size & Scaling
@@ -882,7 +883,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_WIDTH_DEFAULT);
     }
-
 
 
     // Title Format
@@ -924,8 +924,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
     // Units Format
 
     private boolean isShowTitleUnits() {
@@ -942,6 +940,7 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_BOLD_DEFAULT);
     }
+
     private Boolean isTitleUnitsFontItalic() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_ITALIC_DEFAULT);
@@ -960,7 +959,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_FONT_COLOR_DEFAULT);
     }
-
 
 
     // Tick Label Format
@@ -1001,8 +999,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
     // Tickmarks
 
     private boolean isTickmarksShow() {
@@ -1027,7 +1023,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     // Palette Border
 
     private boolean isBorderShow() {
@@ -1044,7 +1039,6 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_KEY,
                 ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_DEFAULT);
     }
-
 
 
     // Legend Border
@@ -1065,7 +1059,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     // Legend Backdrop
 
     private boolean isBackdropShow() {
@@ -1084,8 +1077,37 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    // Legend Border Gap
 
+    private double getBorderGapFactorTop() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_TOP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_TOP_DEFAULT);
+    }
 
+    private double getBorderGapFactorBottom() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_BOTTOM_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT);
+    }
+
+    private double getBorderGapFactorLeftside() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT);
+    }
+
+    private double getBorderGapFactorRightside() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT);
+    }
+
+    private double getTitleGapFactor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_TITLE_GAP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_TITLE_GAP_DEFAULT);
+    }
+
+    private double getLabelGapFactor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_LABEL_GAP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_LABEL_GAP_DEFAULT);
+    }
 
     // Some general font methods
 
@@ -1102,7 +1124,7 @@ public class ColorBarLayer extends Layer {
     }
 
     public static boolean isFontTypeBold(int fontType) {
-        if (fontType  == (Font.ITALIC | Font.BOLD) || fontType == Font.BOLD) {
+        if (fontType == (Font.ITALIC | Font.BOLD) || fontType == Font.BOLD) {
             return true;
         } else {
             return false;
@@ -1110,22 +1132,12 @@ public class ColorBarLayer extends Layer {
     }
 
     public static boolean isFontTypeItalic(int fontType) {
-        if (fontType  == (Font.ITALIC | Font.BOLD) || fontType == Font.ITALIC) {
+        if (fontType == (Font.ITALIC | Font.BOLD) || fontType == Font.ITALIC) {
             return true;
         } else {
             return false;
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 
     private class ProductNodeHandler extends ProductNodeListenerAdapter {

@@ -69,7 +69,7 @@ public class ImageLegend {
 
     public static final double LEFT_SIDE_BORDER_GAP = 0.6;  // left side gap is oriented and is relative to colorbar and not to the scene image
     public static final double RIGHT_SIDE_BORDER_GAP = 0.6; // right side gap is oriented and is relative to colorbar and not to the scene image
-    public static final double TOP_BORDER_GAP = 0.2; // top gap is oriented and is relative to colorbar and not to the scene image
+    public static final double TOP_BORDER_GAP = 0.3; // top gap is oriented and is relative to colorbar and not to the scene image
     public static final double BOTTOM_BORDER_GAP = 0.5; // bottom gap is oriented and is relative to colorbar and not to the scene image
 //    public static final double LEFT_SIDE_BORDER_GAP = 5.0;  // left-right is oriented and is relative to colorbar and not the scene image
 //    public static final double RIGHT_SIDE_BORDER_GAP = 0.0; // left-right is oriented and is relative to colorbar and not the scene image
@@ -101,6 +101,8 @@ public class ImageLegend {
     private boolean showUnits;
     private String titleText;
     private String unitsText;
+    private boolean convertCaret;
+    private boolean unitsParenthesis;
     private int orientation;
     private String distributionType;
     private int tickMarkCount;
@@ -159,6 +161,14 @@ public class ImageLegend {
     private int rightSideBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int topBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int bottomBorderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
+
+    private double leftSideBorderGapFactor;
+    private double rightSideBorderGapFactor;
+    private double topBorderGapFactor;
+    private double bottomBorderGapFactor;
+    private double titleGapFactor;
+    private double labelGapFactor;
+
     private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP
     private int titleGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
 
@@ -255,6 +265,18 @@ public class ImageLegend {
 
 
     public void initLegendWithPreferences(PropertyMap configuration, RasterDataNode raster) {
+
+
+        boolean convertCaret = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY,
+                ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT);
+
+        setConvertCaret(convertCaret);
+
+
+        boolean unitsParenthesis = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT);
+
+        setUnitsParenthesis(unitsParenthesis);
 
 
         // Orientation Parameters
@@ -361,8 +383,10 @@ public class ImageLegend {
         if (ColorBarLayerType.NULL_SPECIAL.equals(unitsTextDefault)) {
             String unit = raster.getUnit();
             if (unit != null && unit.length() > 0) {
-//                unitsText = raster.getUnit();
-                unitsText = "(" + raster.getUnit() + ")";
+                unitsText = raster.getUnit();
+                if (isUnitsParenthesis()) {
+                    unitsText = "(" + unitsText + ")";
+                }
             }
         } else {
             unitsText = unitsTextDefault;
@@ -472,6 +496,26 @@ public class ImageLegend {
                 ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
 
 
+        // Legend Border Gap
+
+        setLeftSideBorderGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT));
+
+        setRightSideBorderGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT));
+
+        setTopBorderGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_TOP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_TOP_DEFAULT));
+
+        setBottomBorderGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_BOTTOM_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT));
+
+        setTitleGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_TITLE_GAP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_TITLE_GAP_DEFAULT));
+
+        setLabelGapFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LEGEND_LABEL_GAP_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_LABEL_GAP_DEFAULT));
+
         setLayerScaling(100.0);
 
 
@@ -566,6 +610,15 @@ public class ImageLegend {
     public void setUnitsText(String unitsText) {
         this.unitsText = unitsText;
     }
+
+
+
+    public boolean isConvertCaret() {return convertCaret;}
+    public void setConvertCaret(boolean convertCaret) {this.convertCaret = convertCaret;}
+
+    public boolean isUnitsParenthesis() {return unitsParenthesis;}
+    public void setUnitsParenthesis(boolean unitsParenthesis) {this.unitsParenthesis = unitsParenthesis;}
+
 
     public int getOrientation() {
         return orientation;
@@ -1125,7 +1178,7 @@ public class ImageLegend {
                 paletteRect = new Rectangle(getTopBorderGap() + headerRequiredDimension.width + getTitleGap(),
                         getRightSideBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
-                        getColorBarLength());
+                        legendSize.height - getLeftSideBorderGap() - getRightSideBorderGap() - labelOverhangHeight - labelOverhangHeight);
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
@@ -1134,9 +1187,14 @@ public class ImageLegend {
                 paletteRect = new Rectangle(getTopBorderGap(),
                         getRightSideBorderGap() + labelOverhangHeight,
                         getColorBarWidth(),
-                        getColorBarLength());
+                        legendSize.height - getLeftSideBorderGap() - getRightSideBorderGap() - labelOverhangHeight - labelOverhangHeight);
 
                 legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
+
+//                paletteRect = new Rectangle(getLeftSideBorderGap() + firstLabelOverhangWidth,
+//                        getTopBorderGap() + requiredHeaderHeight + getTitleGap(),
+//                        legendSize.width - getLeftSideBorderGap() - getRightSideBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
+//                        getColorBarWidth());
 
             }
 
@@ -1241,11 +1299,13 @@ public class ImageLegend {
         g2d.setFont(getTitleUnitsFont());
         Rectangle2D labelSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
-        int headerGap = (int) Math.round(0.4 * getTitleFontSize());
-        int sideBorderGap = (int) Math.round(LEFT_SIDE_BORDER_GAP * getTitleFontSize());
-        int rightSideBorderGap = (int) Math.round(RIGHT_SIDE_BORDER_GAP * getTitleFontSize());
-        int topBorderGap = (int) Math.round(TOP_BORDER_GAP * getTitleFontSize());
-        int bottomBorderGap = (int) Math.round(BOTTOM_BORDER_GAP * getTitleFontSize());
+        int headerGap = (int) Math.round(getTitleGapFactor() * getTitleFontSize());
+
+
+        int sideBorderGap = (int) Math.round(getLeftSideBorderGapFactor() * getTitleFontSize());
+        int rightSideBorderGap = (int) Math.round(getRightSideBorderGapFactor() * getTitleFontSize());
+        int topBorderGap = (int) Math.round(getTopBorderGapFactor() * getTitleFontSize());
+        int bottomBorderGap = (int) Math.round(getBottomBorderGapFactor() * getTitleFontSize());
 
 
         setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
@@ -1455,17 +1515,27 @@ public class ImageLegend {
                     translateX = x0;
 
                 } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
-                    translateX = x0 - getTitleGap() - 0.5 * getTitleHeight();
+                    translateX = x0 - getTopBorderGap() - 0.5 * getTitleHeight();
+                    translateX = x0 - getTitleGap();
 
 
                 } else { // VERTICAL_TITLE_RIGHT
+//                    translateX = x0
+//                            + getTopBorderGap()
+//                            + 0.5 * getTitleHeight()
+//                            + getColorBarWidth()
+//                            + getTickmarkLength()
+//                            + getLabelGap()
+//                            + getLongestLabelWidth(g2d)
+//                            + getTitleGap();
+
                     translateX = x0
-                            + 0.5 * getTitleHeight()
+                            + getTitleHeight()
+                            + getTitleGap()
                             + getColorBarWidth()
                             + getTickmarkLength()
                             + getLabelGap()
-                            + getLongestLabelWidth(g2d)
-                            + getTitleGap();
+                            + getLongestLabelWidth(g2d);
 
                 }
 
@@ -1555,7 +1625,15 @@ public class ImageLegend {
 
         String titleString = getTitleText();
 
-        drawHeaderSubMethod(g2d, titleString, draw);
+        String description = raster.getDescription();
+        String bandname = raster.getName();
+        String units = raster.getUnit();
+        float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        boolean allowWavelengthZero = true;
+
+        titleString = ColorSchemeInfo.getColorBarTitle(titleString, bandname, description, wavelength, units, allowWavelengthZero);
+
+        drawHeaderSubMethod(g2d, titleString, draw, isConvertCaret());
 
         g2d.setFont(origFont);
         g2d.setPaint(origPaint);
@@ -1571,7 +1649,24 @@ public class ImageLegend {
 
         String unitsString = getUnitsText();
 
-        drawHeaderSubMethod(g2d, unitsString, draw);
+        String description = raster.getDescription();
+        String bandname = raster.getName();
+        String units = raster.getUnit();
+        float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        boolean allowWavelengthZero = true;
+
+        unitsString = ColorSchemeInfo.getColorBarTitle(unitsString, bandname, description, wavelength, units, allowWavelengthZero);
+
+
+        if (isUnitsParenthesis() && unitsString != null) {
+            if (unitsString.trim().startsWith("(") && unitsString.trim().endsWith(")")) {
+                // it already has parenthesis so leave it alone
+            } else {
+                unitsString = "("+ unitsString + ")";
+            }
+        }
+
+        drawHeaderSubMethod(g2d, unitsString, draw, isConvertCaret());
 
         g2d.setFont(origFont);
         g2d.setPaint(origPaint);
@@ -1580,7 +1675,7 @@ public class ImageLegend {
 
 
 
-    private void drawHeaderSubMethod(Graphics2D g2d, String headerString, boolean draw) {
+    private void drawHeaderSubMethod(Graphics2D g2d, String headerString, boolean draw, boolean convertCaret) {
 
 //        double wave = getRaster().getProduct().getBand(getRaster().getName()).getSpectralWavelength();
 //        String waveString = Double.toString(wave);
@@ -1599,7 +1694,7 @@ public class ImageLegend {
         boolean prevIdxNormal = true; // used to determine if subscript or superscript immediately follow normal
         boolean caratAwaitingEntry = false;
 
-        if (headerString.contains("^") || headerString.contains("[super]") || headerString.contains("[sub]")) {
+        if ((headerString.contains("^") && convertCaret) || headerString.contains("[sup]") || headerString.contains("[sub]")) {
             containsSuperScript = true;
         }
 
@@ -1609,7 +1704,7 @@ public class ImageLegend {
             String charStringCurrent = headerString.substring(idx, idx + 1);
             char charCurrent = headerString.charAt(idx);
 
-            if (charStringCurrent.equals("^")) {
+            if (charStringCurrent.equals("^") && convertCaret) {
                 currentIdxIsSuperScript = true;
                 caratAwaitingEntry = true;
                 ignoreThisIdx = true;
@@ -2342,12 +2437,61 @@ public class ImageLegend {
     }
 
 
+
+    public double getLeftSideBorderGapFactor() {
+            return leftSideBorderGapFactor;
+    }
+
+    public void setLeftSideBorderGapFactor(double leftSideBorderGapFactor) {
+        this.leftSideBorderGapFactor = leftSideBorderGapFactor;
+    }
+
+
+    public double getRightSideBorderGapFactor() {
+        return rightSideBorderGapFactor;
+    }
+
+    public void setRightSideBorderGapFactor(double rightSideBorderGapFactor) {
+        this.rightSideBorderGapFactor = rightSideBorderGapFactor;
+    }
+
+    public double getTopBorderGapFactor() {
+        return topBorderGapFactor;
+    }
+
+    public void setTopBorderGapFactor(double topBorderGapFactor) {
+        this.topBorderGapFactor = topBorderGapFactor;
+    }
+
+    public double getBottomBorderGapFactor() {
+        return bottomBorderGapFactor;
+    }
+    public void setBottomBorderGapFactor(double bottomBorderGapFactor) {
+        this.bottomBorderGapFactor = bottomBorderGapFactor;
+    }
+
+    public double getTitleGapFactor() {
+        return titleGapFactor;
+    }
+    public void setTitleGapFactor(double titleGapFactor) {
+        this.titleGapFactor = titleGapFactor;
+    }
+
+
+    public double getLabelGapFactor() {
+        return labelGapFactor;
+    }
+    public void setLabelGapFactor(double labelGapFactor) {
+        this.labelGapFactor = labelGapFactor;
+    }
+
+
     public int getLeftSideBorderGap() {
-        if (leftSideBorderGap != NULL_INT) {
-            return leftSideBorderGap;
-        } else {
-            return (int) Math.round(LEFT_SIDE_BORDER_GAP * getTitleFontSize());
-        }
+//        if (leftSideBorderGap != NULL_INT) {
+//            return leftSideBorderGap;
+//        } else {
+            return (int) Math.round(getLeftSideBorderGapFactor() * getTitleFontSize());
+//        }
     }
 
     public void setLeftSideBorderGap(int leftSideBorderGap) {
@@ -2355,11 +2499,11 @@ public class ImageLegend {
     }
 
     public int getRightSideBorderGap() {
-        if (rightSideBorderGap != NULL_INT) {
-            return rightSideBorderGap;
-        } else {
-            return (int) Math.round(RIGHT_SIDE_BORDER_GAP * getTitleFontSize());
-        }
+//        if (rightSideBorderGap != NULL_INT) {
+//            return rightSideBorderGap;
+//        } else {
+            return (int) Math.round(getRightSideBorderGapFactor() * getTitleFontSize());
+//        }
     }
 
     public void setRightSideBorderGap(int rightSideBorderGap) {
@@ -2367,11 +2511,11 @@ public class ImageLegend {
     }
 
     public int getTopBorderGap() {
-        if (topBorderGap != NULL_INT) {
-            return topBorderGap;
-        } else {
-            return (int) Math.round(TOP_BORDER_GAP * getTitleFontSize());
-        }
+//        if (topBorderGap != NULL_INT) {
+//            return topBorderGap;
+//        } else {
+            return (int) Math.round(getTopBorderGapFactor() * getTitleFontSize());
+//        }
     }
 
     public void setTopBorderGap(int topBorderGap) {
@@ -2379,11 +2523,11 @@ public class ImageLegend {
     }
 
     public int getBottomBorderGap() {
-        if (bottomBorderGap != NULL_INT) {
-            return bottomBorderGap;
-        } else {
-            return (int) Math.round(BOTTOM_BORDER_GAP * getTitleFontSize());
-        }
+//        if (bottomBorderGap != NULL_INT) {
+//            return bottomBorderGap;
+//        } else {
+            return (int) Math.round(getBottomBorderGapFactor() * getTitleFontSize());
+//        }
     }
 
     public void setBottomBorderGap(int bottomeBorderGap) {
@@ -2393,23 +2537,25 @@ public class ImageLegend {
 
 
     public int getLabelGap() {
-        if (labelGap != NULL_INT) {
-            return labelGap;
-        } else {
-            return (int) Math.round(0.3 * getLabelsFontSize());
-        }
+//        if (labelGap != NULL_INT) {
+//            return labelGap;
+//        } else {
+//            return (int) Math.round(getLabelGapFactor() * getLabelsFontSize());
+            return (int) Math.round(getLabelGapFactor() * getTitleFontSize());
+//        }
     }
+
 
     public void setLabelGap(int labelGap) {
         this.labelGap = labelGap;
     }
 
     public int getTitleGap() {
-        if (titleGap != NULL_INT) {
-            return titleGap;
-        } else {
-            return (int) Math.round(0.5 * getTitleFontSize());
-        }
+//        if (titleGap != NULL_INT) {
+//            return titleGap;
+//        } else {
+            return (int) Math.round(getTitleGapFactor() * getTitleFontSize());
+//        }
     }
 
     public void setTitleGap(int titleGap) {

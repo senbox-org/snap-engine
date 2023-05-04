@@ -82,6 +82,19 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_UNITS_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_UNITS_TEXT_TYPE = String.class;
 
+    public static final String PROPERTY_CONVERT_CARET_KEY = PROPERTY_TITLE_TEXT_ROOT_KEY + ".convert.caret";
+    public static final String PROPERTY_CONVERT_CARET_LABEL = "Convert Caret";
+    public static final String PROPERTY_CONVERT_CARET_TOOLTIP = "Convert any caret (^) symbols found in the text into a formatted superscript";
+    public static final String PROPERTY_CONVERT_CARET_ALIAS = PROPERTY_TITLE_TEXT_ROOT_ALIAS + "ConvertCaret";
+    public static final boolean PROPERTY_CONVERT_CARET_DEFAULT = true;
+    public static final Class PROPERTY_CONVERT_CARET_TYPE = Boolean.class;
+
+    public static final String PROPERTY_UNITS_PARENTHESIS_KEY = PROPERTY_TITLE_TEXT_ROOT_KEY + ".units.parenthesis";
+    public static final String PROPERTY_UNITS_PARENTHESIS_LABEL = "Units Parenthesis";
+    public static final String PROPERTY_UNITS_PARENTHESIS_TOOLTIP = "Embed units displayed within a parenthesis";
+    public static final String PROPERTY_UNITS_PARENTHESIS_ALIAS = PROPERTY_TITLE_TEXT_ROOT_ALIAS + "UnitsParenthesis";
+    public static final boolean PROPERTY_UNITS_PARENTHESIS_DEFAULT = true;
+    public static final Class PROPERTY_UNITS_PARENTHESIS_TYPE = Boolean.class;
 
 
     // Orientation
@@ -90,27 +103,21 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_ORIENTATION_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
 
     public static final String PROPERTY_ORIENTATION_SECTION_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".section";
-    public static final String PROPERTY_ORIENTATION_SECTION_LABEL = "Orientation";
+    public static final String PROPERTY_ORIENTATION_SECTION_LABEL = "Location & Orientation";
     public static final String PROPERTY_ORIENTATION_SECTION_TOOLTIP = "Orientation options for the " + COLOR_LOWER_CASE + " bar legend";
     public static final String PROPERTY_ORIENTATION_SECTION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_ORIENTATION_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".orientation";
-    public static final String PROPERTY_ORIENTATION_LABEL = "Alignment";
-    public static final String PROPERTY_ORIENTATION_TOOLTIP = "Alignment (vertical/horizontal) of the " + COLOR_LOWER_CASE + " bar legend";
+    public static final String PROPERTY_ORIENTATION_LABEL = "Orientation";
+    public static final String PROPERTY_ORIENTATION_TOOLTIP = "Orientation (vertical/horizontal) of the " + COLOR_LOWER_CASE + " bar legend";
     public static final Class PROPERTY_ORIENTATION_TYPE = String.class;
-    public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Alignment";
+    public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Orientation";
     public static final String PROPERTY_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
     public static final String PROPERTY_ORIENTATION_OPTION2 = OPTION_VERTICAL;
-    public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_HORIZONTAL;
+    public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_VERTICAL;
     public static final Object PROPERTY_ORIENTATION_VALUE_SET[] = {PROPERTY_ORIENTATION_OPTION1, PROPERTY_ORIENTATION_OPTION2};
 
 
-    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".reverse.palette";
-    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_LABEL = "Reverse Palette & Labels";
-    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_TOOLTIP = "Reverse direction of palette and labels";
-    private static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "ReversePalette";
-    public static final boolean PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT = false;
-    public static final Class PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE = Boolean.class;
 
 
 
@@ -219,6 +226,13 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_WEIGHT_TOLERANCE_TYPE = Double.class;
 
 
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".reverse.palette";
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_LABEL = "Reverse Palette & Labels";
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_TOOLTIP = "Reverse direction of palette and labels";
+    private static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "ReversePalette";
+    public static final boolean PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT = false;
+    public static final Class PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE = Boolean.class;
+
 
 
     // ColorBar Location Section
@@ -261,21 +275,21 @@ public class ColorBarLayerType extends LayerType {
     }
 
     public static final String PROPERTY_LOCATION_PLACEMENT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Scene Anchor";
+    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Location";
     public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place " + COLOR_LOWER_CASE + " bar on image";
     private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
+    public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_CENTER;
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
-    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Scene Anchor Offset";
+    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
-    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Scene Anchor Shift";
+    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Location Shift";
     public static final String PROPERTY_LOCATION_SHIFT_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend along the anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar width)";
     private static final String PROPERTY_LOCATION_SHIFT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Shift";
     public static final Double PROPERTY_LOCATION_SHIFT_DEFAULT = 0.0;
@@ -288,21 +302,31 @@ public class ColorBarLayerType extends LayerType {
     public static final String VERTICAL_TITLE_BOTTOM = "Bottom";
 
 
+//    public static Object[] VERTICAL_TITLE_LOCATION_VALUE_SET = {
+//            VERTICAL_TITLE_LEFT,
+//            VERTICAL_TITLE_RIGHT,
+//            VERTICAL_TITLE_TOP,
+//            VERTICAL_TITLE_BOTTOM
+//    };
+
     public static Object[] VERTICAL_TITLE_LOCATION_VALUE_SET = {
             VERTICAL_TITLE_LEFT,
-            VERTICAL_TITLE_RIGHT,
-            VERTICAL_TITLE_TOP,
-            VERTICAL_TITLE_BOTTOM
+            VERTICAL_TITLE_RIGHT
     };
 
+
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
-    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Anchor";
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Placement";
     public static final String PROPERTY_LOCATION_TITLE_VERTICAL_TOOLTIP = "Where to place title on vertical legend";
     private static final String PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleAnchor";
-    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_RIGHT;
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_LEFT;
     public static final Class PROPERTY_LOCATION_TITLE_VERTICAL_TYPE = String.class;
     public static final Object PROPERTY_LOCATION_TITLE_VERTICAL_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
     public static final boolean PROPERTY_LOCATION_TITLE_VERTICAL_ENABLED = false;
+
+
+
+
 
 
 
@@ -449,7 +473,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_UNITS_FONT_SIZE_LABEL = "Units Size";
     public static final String PROPERTY_UNITS_FONT_SIZE_TOOLTIP = "Set size of the title units";
     private static final String PROPERTY_UNITS_FONT_SIZE_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_UNITS_FONT_SIZE_DEFAULT = 30;
+    public static final int PROPERTY_UNITS_FONT_SIZE_DEFAULT = 40;
     public static final Class PROPERTY_UNITS_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MIN = 10;
     public static final int PROPERTY_UNITS_FONT_SIZE_VALUE_MAX = 200;
@@ -513,7 +537,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_FONT_SIZE_LABEL = "Labels Size";
     public static final String PROPERTY_LABELS_FONT_SIZE_TOOLTIP = "Set the size of the tick-mark labels";
     private static final String PROPERTY_LABELS_FONT_SIZE_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_LABELS_FONT_SIZE_DEFAULT = 35;
+    public static final int PROPERTY_LABELS_FONT_SIZE_DEFAULT = 30;
     public static final Class PROPERTY_LABELS_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_LABELS_FONT_SIZE_VALUE_MIN = 10;
     public static final int PROPERTY_LABELS_FONT_SIZE_VALUE_MAX = 200;
@@ -660,6 +684,59 @@ public class ColorBarLayerType extends LayerType {
     public static final Color PROPERTY_LEGEND_BORDER_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_LEGEND_BORDER_COLOR_TYPE = Color.class;
 
+
+
+    // Legend Border Gap Section
+
+    private static final String PROPERTY_LEGEND_BORDER_GAP_ROOT_KEY = PROPERTY_ROOT_KEY + ".legend.border.gap";
+    private static final String PROPERTY_LEGEND_BORDER_GAP_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "LegendBorderGap";
+
+    public static final String PROPERTY_LEGEND_BORDER_GAP_SECTION_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".section";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_SECTION_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_SECTION_LABEL = "Margins & Spacing";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_SECTION_TOOLTIP = "Configuration options for adding gap within the border around the full legend";
+
+    public static final String PROPERTY_LEGEND_BORDER_GAP_TOP_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.gap.top";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_TOP_LABEL = "Top Margin";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_TOP_TOOLTIP = "Adjusts the top margin (relative to color bar orientation)";
+    private static final String PROPERTY_LEGEND_BORDER_GAP_TOP_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderGapTop";
+    public static final double PROPERTY_LEGEND_BORDER_GAP_TOP_DEFAULT = 0.3;
+    public static final Class PROPERTY_LEGEND_BORDER_GAP_TOP_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.gap.bottom";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_LABEL = "Bottom Margin";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_TOOLTIP = "Adjusts the bottom margin (relative to color bar orientation)d";
+    private static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderGapBottom";
+    public static final double PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT = 0.5;
+    public static final Class PROPERTY_LEGEND_BORDER_GAP_BOTTOM_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.gap.leftside";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_LABEL = "Left Margin";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_TOOLTIP = "Adjusts the left-side margin (relative to color bar orientation)";
+    private static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderGapLeftSide";
+    public static final double PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT = 0.6;
+    public static final Class PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.gap.rightside";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_LABEL = "Right Margin";
+    public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_TOOLTIP = "Adjusts the right-side margin (relative to color bar orientation)";
+    private static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderGapRightSide";
+    public static final double PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT = 0.6;
+    public static final Class PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_TITLE_GAP_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".title.gap";
+    public static final String PROPERTY_LEGEND_TITLE_GAP_LABEL = "Title Gap";
+    public static final String PROPERTY_LEGEND_TITLE_GAP_TOOLTIP = "Gap between title and color bar palette";
+    private static final String PROPERTY_LEGEND_TITLE_GAP_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "TitleGap";
+    public static final double PROPERTY_LEGEND_TITLE_GAP_DEFAULT = 0.6;
+    public static final Class PROPERTY_LEGEND_TITLE_GAP_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_LABEL_GAP_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".label.gap";
+    public static final String PROPERTY_LEGEND_LABEL_GAP_LABEL = "Label Gap";
+    public static final String PROPERTY_LEGEND_LABEL_GAP_TOOLTIP = "Gap between labels and color bar palette";
+    private static final String PROPERTY_LEGEND_LABEL_GAP_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "LabelGap";
+    public static final double PROPERTY_LEGEND_LABEL_GAP_DEFAULT = 0.6;
+    public static final Class PROPERTY_LEGEND_LABEL_GAP_TYPE = Double.class;
 
 
 
@@ -810,6 +887,23 @@ public class ColorBarLayerType extends LayerType {
                 true);
         titleUnitsTextModel.getDescriptor().setAlias(PROPERTY_UNITS_TEXT_ALIAS);
         vc.addProperty(titleUnitsTextModel);
+
+
+        final Property convertCaretModel = Property.create(PROPERTY_CONVERT_CARET_KEY,
+                PROPERTY_CONVERT_CARET_TYPE,
+                PROPERTY_CONVERT_CARET_DEFAULT,
+                true);
+        convertCaretModel.getDescriptor().setAlias(PROPERTY_CONVERT_CARET_ALIAS);
+        vc.addProperty(convertCaretModel);
+
+        final Property unitsParenthesisModel = Property.create(PROPERTY_UNITS_PARENTHESIS_KEY,
+                PROPERTY_UNITS_PARENTHESIS_TYPE,
+                PROPERTY_UNITS_PARENTHESIS_DEFAULT,
+                true);
+        unitsParenthesisModel.getDescriptor().setAlias(PROPERTY_UNITS_PARENTHESIS_ALIAS);
+        vc.addProperty(unitsParenthesisModel);
+
+
 
 
 
@@ -1169,6 +1263,38 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(backdropBorderColorModel);
 
 
+        // Legend Border Gap Section
+
+        final Property borderGapSectionModel = Property.create(PROPERTY_LEGEND_BORDER_GAP_SECTION_KEY, Boolean.class, true, true);
+        borderGapSectionModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_GAP_SECTION_ALIAS);
+        vc.addProperty(borderGapSectionModel);
+
+        final Property borderGapLeftsideModel = Property.create(PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_KEY, Double.class, PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT, true);
+        borderGapLeftsideModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_ALIAS);
+        vc.addProperty(borderGapLeftsideModel);
+
+        final Property borderGapRightsideModel = Property.create(PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_KEY, Double.class, PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT, true);
+        borderGapRightsideModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_ALIAS);
+        vc.addProperty(borderGapRightsideModel);
+
+        final Property borderGapTopModel = Property.create(PROPERTY_LEGEND_BORDER_GAP_TOP_KEY, Double.class, PROPERTY_LEGEND_BORDER_GAP_TOP_DEFAULT, true);
+        borderGapTopModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_GAP_TOP_ALIAS);
+        vc.addProperty(borderGapTopModel);
+
+        final Property borderGapBottomModel = Property.create(PROPERTY_LEGEND_BORDER_GAP_BOTTOM_KEY, Double.class, PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT, true);
+        borderGapBottomModel.getDescriptor().setAlias(PROPERTY_LEGEND_BORDER_GAP_BOTTOM_ALIAS);
+        vc.addProperty(borderGapBottomModel);
+
+        final Property titleGapModel = Property.create(PROPERTY_LEGEND_TITLE_GAP_KEY, Double.class, PROPERTY_LEGEND_TITLE_GAP_DEFAULT, true);
+        titleGapModel.getDescriptor().setAlias(PROPERTY_LEGEND_TITLE_GAP_ALIAS);
+        vc.addProperty(titleGapModel);
+
+        final Property labelGapModel = Property.create(PROPERTY_LEGEND_LABEL_GAP_KEY, Double.class, PROPERTY_LEGEND_LABEL_GAP_DEFAULT, true);
+        labelGapModel.getDescriptor().setAlias(PROPERTY_LEGEND_LABEL_GAP_ALIAS);
+        vc.addProperty(labelGapModel);
+
+
+
 
 
         // Legend Border Section
@@ -1192,6 +1318,8 @@ public class ColorBarLayerType extends LayerType {
         final Property exportLegendWidthModel = Property.create(PROPERTY_EXPORT_LEGEND_WIDTH_KEY, Integer.class, PROPERTY_EXPORT_LEGEND_WIDTH_DEFAULT, true);
         exportLegendWidthModel.getDescriptor().setAlias(PROPERTY_EXPORT_LEGEND_WIDTH_ALIAS);
         vc.addProperty(exportLegendWidthModel);
+
+
 
 
 
