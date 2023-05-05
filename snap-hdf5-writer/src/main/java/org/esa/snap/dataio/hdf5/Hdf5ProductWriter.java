@@ -38,12 +38,7 @@ import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
 
@@ -127,10 +122,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
         try {
             Debug.trace("creating HDF5 file " + outputFile.getPath());
-            fileID = H5.H5Fcreate(outputFile.getPath(),
-                                  HDF5Constants.H5F_ACC_TRUNC,
-                                  HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+            fileID = H5.H5Fcreate(outputFile.getPath(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         } catch (HDF5LibraryException e) {
             throw new ProductIOException(createErrorMessage(e), e);
         }
@@ -207,9 +199,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
                 final MapTransformDescriptor mapTransformDescriptor = mapTransform.getDescriptor();
                 final Parameter[] parameters = mapTransformDescriptor.getParameters();
                 for (int i = 0; i < parameters.length; i++) {
-                    createScalarAttribute(paramsID,
-                                          parameters[i].getName(),
-                                          mapTransform.getParameterValues()[i]);
+                    createScalarAttribute(paramsID, parameters[i].getName(), mapTransform.getParameterValues()[i]);
                 }
             } finally {
                 closeH5G(paramsID);
@@ -226,18 +216,11 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     /**
      * {@inheritDoc}
      */
-    public void writeBandRasterData(Band sourceBand,
-                                    int sourceOffsetX,
-                                    int sourceOffsetY,
-                                    int sourceWidth,
-                                    int sourceHeight,
-                                    ProductData sourceBuffer,
-                                    ProgressMonitor pm) throws IOException {
+    public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
         final int sourceBandWidth = sourceBand.getRasterWidth();
         final int sourceBandHeight = sourceBand.getRasterHeight();
-        checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
-                                          sourceOffsetY);
+        checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX, sourceOffsetY);
 
         int memTypeID = -1;
         int memSpaceID = -1;
@@ -259,24 +242,15 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             memStart[1] = 0;
             memCount[0] = sourceHeight;
             memCount[1] = sourceWidth;
-            H5.H5Sselect_hyperslab(memSpaceID,
-                                   HDF5Constants.H5S_SELECT_SET,
-                                   memStart, null, memCount, null);
+            H5.H5Sselect_hyperslab(memSpaceID, HDF5Constants.H5S_SELECT_SET, memStart, null, memCount, null);
 
             fileStart[0] = sourceOffsetY;
             fileStart[1] = sourceOffsetX;
             fileCount[0] = sourceHeight;
             fileCount[1] = sourceWidth;
-            H5.H5Sselect_hyperslab(fileSpaceID,
-                                   HDF5Constants.H5S_SELECT_SET,
-                                   fileStart, null, fileCount, null);
+            H5.H5Sselect_hyperslab(fileSpaceID, HDF5Constants.H5S_SELECT_SET, fileStart, null, fileCount, null);
 
-            H5.H5Dwrite(datasetID,
-                        memTypeID,
-                        memSpaceID,
-                        fileSpaceID,
-                        HDF5Constants.H5P_DEFAULT,
-                        sourceBuffer.getElems());
+            H5.H5Dwrite(datasetID, memTypeID, memSpaceID, fileSpaceID, HDF5Constants.H5P_DEFAULT, sourceBuffer.getElems());
 
             pm.worked(1);
         } catch (HDF5Exception e) {
@@ -384,8 +358,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight,
-                                                   final int sourceBandHeight, int sourceOffsetX, int sourceOffsetY) {
+    private void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight, final int sourceBandHeight, int sourceOffsetX, int sourceOffsetY) {
         Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
         Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
         Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
@@ -516,34 +489,20 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
     private void writeMetadataAttribute(int locationID, MetadataAttribute attribute) throws IOException {
         int productDataType = attribute.getDataType();
-        if (attribute.getData() instanceof ProductData.ASCII
-            || attribute.getData() instanceof ProductData.UTC) {
-            createScalarAttribute(locationID,
-                                  attribute.getName(),
-                                  attribute.getData().getElemString());
+        if (attribute.getData() instanceof ProductData.ASCII || attribute.getData() instanceof ProductData.UTC) {
+            createScalarAttribute(locationID, attribute.getName(), attribute.getData().getElemString());
         } else if (attribute.getData().isScalar()) {
-            createScalarAttribute(locationID,
-                                  attribute.getName(),
-                                  getH5DataType(productDataType),
-                                  attribute.getData().getElems());
+            createScalarAttribute(locationID, attribute.getName(), getH5DataType(productDataType), attribute.getData().getElems());
         } else {
-            createArrayAttribute(locationID,
-                                 attribute.getName(),
-                                 getH5DataType(productDataType),
-                                 attribute.getData().getNumElems(),
-                                 attribute.getData().getElems());
+            createArrayAttribute(locationID, attribute.getName(), getH5DataType(productDataType), attribute.getData().getNumElems(), attribute.getData().getElems());
         }
         if (metadataAnnotated) {
             if (attribute.getUnit() != null) {
-                createScalarAttribute(locationID,
-                                      attribute.getName() + ".unit",
-                                      attribute.getUnit());
+                createScalarAttribute(locationID, attribute.getName() + ".unit", attribute.getUnit());
             }
 
             if (attribute.getDescription() != null) {
-                createScalarAttribute(locationID,
-                                      attribute.getName() + ".descr",
-                                      attribute.getDescription());
+                createScalarAttribute(locationID, attribute.getName() + ".descr", attribute.getDescription());
             }
         }
     }
@@ -573,13 +532,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             dataTypeID = createH5TypeID(grid.getDataType());
             dataSpaceID = H5.H5Screate_simple(2, dims, null);
             String dataSetPath = path + "/" + grid.getName();
-            datasetID = H5.H5Dcreate(fileID,
-                                     dataSetPath,
-                                     dataTypeID,
-                                     dataSpaceID,
-                                     HDF5Constants.H5P_DEFAULT,
-                                     HDF5Constants.H5P_DEFAULT,
-                                     HDF5Constants.H5P_DEFAULT);
+            datasetID = H5.H5Dcreate(fileID, dataSetPath, dataTypeID, dataSpaceID, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             // Very important attributes
             createScalarAttribute(datasetID, "scene_raster_width", grid.getRasterWidth());
@@ -602,12 +555,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
                 Debug.trace("failed to create attribute: " + e.getMessage());
             }
 
-            H5.H5Dwrite(datasetID,
-                        dataTypeID,
-                        HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT,
-                        grid.getGridData().getElems());
+            H5.H5Dwrite(datasetID, dataTypeID, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, grid.getGridData().getElems());
 
         } catch (HDF5Exception e) {
             throw new ProductIOException(createErrorMessage(e), e);
@@ -640,15 +588,8 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         createScalarAttribute(locationID, name, jh5DataType, -1, value);
     }
 
-    private void createScalarAttribute(int locationID, String name, int jh5DataType, int typeSize, Object value) throws
-            IOException {
-        Debug.trace("Hdf5ProductWriter.createScalarAttribute("
-                    + "locationID=" + locationID
-                    + ", name=" + name
-                    + ", jh5DataType=" + jh5DataType
-                    + ", typeSize=" + typeSize
-                    + ", value=" + value
-                    + ")");
+    private void createScalarAttribute(int locationID, String name, int jh5DataType, int typeSize, Object value) throws IOException {
+        Debug.trace("Hdf5ProductWriter.createScalarAttribute(" + "locationID=" + locationID + ", name=" + name + ", jh5DataType=" + jh5DataType + ", typeSize=" + typeSize + ", value=" + value + ")");
         int attrTypeID = -1;
         int attrSpaceID = -1;
         int attributeID = -1;
@@ -673,8 +614,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         createArrayAttribute(locationID, name, HDF5Constants.H5T_NATIVE_FLOAT, values.length, values);
     }
 
-    private void createArrayAttribute(int locationID, String name, int jh5DataType, int arraySize, Object value) throws
-            IOException {
+    private void createArrayAttribute(int locationID, String name, int jh5DataType, int arraySize, Object value) throws IOException {
         //Debug.trace("creating array attribute " + name + ", JH5 type " + jh5DataType + ", size " + arraySize);
         int attrTypeID = -1;
         int attrSpaceID = -1;
@@ -698,16 +638,18 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
      * fed into the hash map
      */
     private Integer getOrCreateBandH5D(Band band) throws IOException {
-        Integer bandID = getBandH5D(band);
-        if (bandID == null) {
-            if (bandIDs == null) {
-                bandIDs = new HashMap<>();
-                createGroup("/bands");
+        synchronized (this) {
+            Integer bandID = getBandH5D(band);
+            if (bandID == null) {
+                if (bandIDs == null) {
+                    bandIDs = new HashMap<>();
+                    createGroup("/bands");
+                }
+                bandID = createBandH5D(band);
+                bandIDs.put(band, bandID);
             }
-            bandID = createBandH5D(band);
-            bandIDs.put(band, bandID);
+            return bandID;
         }
-        return bandID;
     }
 
     private Integer getBandH5D(Band band) {
@@ -730,13 +672,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         try {
             fileTypeID = createH5TypeID(band.getDataType());
             fileSpaceID = H5.H5Screate_simple(2, dims, null);
-            datasetID = H5.H5Dcreate(fileID,
-                                     "/bands/" + band.getName(),
-                                     fileTypeID,
-                                     fileSpaceID,
-                                     HDF5Constants.H5P_DEFAULT,
-                                     HDF5Constants.H5P_DEFAULT,
-                                     HDF5Constants.H5P_DEFAULT);
+            datasetID = H5.H5Dcreate(fileID, "/bands/" + band.getName(), fileTypeID, fileSpaceID, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             try {
                 createScalarAttribute(datasetID, "raster_width", band.getRasterWidth());
@@ -765,10 +701,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
                 }
                 if (band.getImageInfo() != null) {
                     final ColorPaletteDef paletteDef = band.getImageInfo().getColorPaletteDef();
-                    float[] minmax = new float[]{
-                            (float) paletteDef.getMinDisplaySample(),
-                            (float) paletteDef.getMaxDisplaySample()
-                    };
+                    float[] minmax = new float[]{(float) paletteDef.getMinDisplaySample(), (float) paletteDef.getMaxDisplaySample()};
                     createArrayAttribute(datasetID, "IMAGE_MINMAXRANGE", minmax);
                 }
             } catch (IOException e) {
