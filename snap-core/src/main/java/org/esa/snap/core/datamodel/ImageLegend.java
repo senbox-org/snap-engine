@@ -99,8 +99,13 @@ public class ImageLegend {
     private final RasterDataNode raster;
     private boolean showTitle;
     private boolean showUnits;
+    private boolean unitsAltUse;
+    private boolean titleAltUse;
     private String titleText;
+    private String titleAlt;
     private String unitsText;
+    private String unitsAlt;
+    private String unitsNull;
     private boolean convertCaret;
     private boolean unitsParenthesis;
     private int orientation;
@@ -206,14 +211,21 @@ public class ImageLegend {
         imageLegendCopy.setReversePalette(isReversePalette());
 
         imageLegendCopy.setShowTitle(isShowTitle());
-        imageLegendCopy.setTitleText(getTitleText());
+        imageLegendCopy.setTitle(getTitleText());
+        imageLegendCopy.setTitleAlt(getTitleAlt());
+        imageLegendCopy.setTitleAltUse(isTitleAltUse());
         imageLegendCopy.setTitleFontSize(getTitleFontSize());
         imageLegendCopy.setTitleColor(getTitleColor());
         imageLegendCopy.setTitleFontName(getTitleFontName());
         imageLegendCopy.setTitleFontType(getTitleFontType());
 
         imageLegendCopy.setShowUnits(isShowUnits());
-        imageLegendCopy.setUnitsText(getUnitsText());
+        imageLegendCopy.setUnits(getUnitsText());
+        imageLegendCopy.setUnitsAlt(getUnitsAlt());
+        imageLegendCopy.setUnitsNull(getUnitsNull());
+        imageLegendCopy.setUnitsParenthesis(isUnitsParenthesis());
+        imageLegendCopy.setConvertCaret(isConvertCaret());
+        imageLegendCopy.setUnitsAltUse(isUnitsAltUse());
         imageLegendCopy.setUnitsFontSize(getUnitsFontSize());
         imageLegendCopy.setUnitsColor(getUnitsColor());
         imageLegendCopy.setUnitsFontName(getUnitsFontName());
@@ -258,6 +270,14 @@ public class ImageLegend {
         imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
         imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
 
+
+        imageLegendCopy.setBottomBorderGapFactor(getBottomBorderGapFactor());
+        imageLegendCopy.setTopBorderGapFactor(getTopBorderGapFactor());
+        imageLegendCopy.setLeftSideBorderGapFactor(getLeftSideBorderGapFactor());
+        imageLegendCopy.setRightSideBorderGapFactor(getRightSideBorderGapFactor());
+        imageLegendCopy.setTitleGapFactor(getTitleGapFactor());
+        imageLegendCopy.setLabelGapFactor(getLabelGapFactor());
+
         imageLegendCopy.setWeightTolerance(getWeightTolerance());
 
         return imageLegendCopy;
@@ -266,17 +286,18 @@ public class ImageLegend {
 
     public void initLegendWithPreferences(PropertyMap configuration, RasterDataNode raster) {
 
+        setTitle(configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_KEY, ColorBarLayerType.PROPERTY_TITLE_DEFAULT));
+        setTitleAltUse(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_ALT_USE_KEY, ColorBarLayerType.PROPERTY_TITLE_ALT_USE_DEFAULT));
+        setTitleAlt(configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_ALT_KEY, ColorBarLayerType.PROPERTY_TITLE_ALT_DEFAULT));
 
-        boolean convertCaret = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY,
-                ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT);
+        setUnits(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_KEY, ColorBarLayerType.PROPERTY_UNITS_DEFAULT));
+        setUnitsAltUse(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_ALT_USE_KEY, ColorBarLayerType.PROPERTY_UNITS_ALT_USE_DEFAULT));
+        setUnitsAlt(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_ALT_KEY, ColorBarLayerType.PROPERTY_UNITS_ALT_DEFAULT));
 
-        setConvertCaret(convertCaret);
+        setUnitsNull(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT));
 
-
-        boolean unitsParenthesis = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT);
-
-        setUnitsParenthesis(unitsParenthesis);
+        setConvertCaret(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY, ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT));
+        setUnitsParenthesis(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY, ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT));
 
 
         // Orientation Parameters
@@ -335,13 +356,10 @@ public class ImageLegend {
                 configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
                         ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT));
 
-
-        String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
-
-        String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
-
-        setTitleText(titleText);
+//        setTitleText(
+//                configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_KEY,
+//                        ColorBarLayerType.PROPERTY_TITLE_DEFAULT)
+//        );
 
 
         setTitleFontSize(
@@ -375,26 +393,11 @@ public class ImageLegend {
                         ColorBarLayerType.PROPERTY_UNITS_SHOW_DEFAULT));
 
 
-        String unitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_TEXT_DEFAULT);
-
-
-        String unitsText = "";
-        if (ColorBarLayerType.NULL_SPECIAL.equals(unitsTextDefault)) {
-            String unit = raster.getUnit();
-            if (unit != null && unit.length() > 0) {
-                unitsText = raster.getUnit();
-                if (isUnitsParenthesis()) {
-                    unitsText = "(" + unitsText + ")";
-                }
-            }
-        } else {
-            unitsText = unitsTextDefault;
-        }
-
-
-        setUnitsText(unitsText);
-
+//        setUnitsText(
+//                configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_KEY,
+//                        ColorBarLayerType.PROPERTY_UNITS_DEFAULT)
+//        );
+//
 
         setUnitsFontSize(
                 configuration.getPropertyInt(ColorBarLayerType.PROPERTY_UNITS_FONT_SIZE_KEY,
@@ -584,19 +587,41 @@ public class ImageLegend {
         this.showTitle = usingHeader;
     }
 
-    public String getTitleText() {
-        return (titleText == null) ? "null-test" : titleText;
-        // todo possible Color Bar Scheme could go here in the future
-//        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
-//            return titleOverRide;
-//        } else {
-//            return headerText;
-//        }
-//        return headerText;
+    public boolean isTitleAltUse() {
+        return titleAltUse;
     }
 
-    public void setTitleText(String titleText) {
+    public void setTitleAltUse(boolean titleAltUse) {
+        this.titleAltUse = titleAltUse;
+    }
+
+    public String getTitleText() {
+        return (titleText == null) ? "null-test" : titleText;
+    }
+
+    public void setTitle(String titleText) {
         this.titleText = titleText;
+    }
+
+    public String getTitleAlt() {
+        if (titleAlt == null || titleAlt.length() == 0) {
+            return "";
+        } else {
+            return titleAlt;
+        }
+    }
+
+    public void setTitleAlt(String titleAlt) {
+        this.titleAlt = titleAlt;
+    }
+
+
+    public boolean isUnitsAltUse() {
+        return unitsAltUse;
+    }
+
+    public void setUnitsAltUse(boolean unitsAltUse) {
+        this.unitsAltUse = unitsAltUse;
     }
 
     public String getUnitsText() {
@@ -607,9 +632,36 @@ public class ImageLegend {
         }
     }
 
-    public void setUnitsText(String unitsText) {
+    public void setUnits(String unitsText) {
         this.unitsText = unitsText;
     }
+
+    public String getUnitsAlt() {
+        if (unitsAlt == null || unitsAlt.length() == 0) {
+            return "";
+        } else {
+            return unitsAlt;
+        }
+    }
+
+    public void setUnitsAlt(String unitsAlt) {
+        this.unitsAlt = unitsAlt;
+    }
+
+
+    public String getUnitsNull() {
+        if (unitsNull == null || unitsNull.length() == 0) {
+            return "";
+        } else {
+            return unitsNull;
+        }
+    }
+
+    public void setUnitsNull(String unitsNull) {
+        this.unitsNull = unitsNull;
+    }
+
+
 
 
 
@@ -1244,7 +1296,15 @@ public class ImageLegend {
         Font originalFont = g2d.getFont();
 
         g2d.setFont(getTitleParameterFont());
-        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(getTitleText(), g2d);
+
+
+        String titleString;
+        if (isTitleAltUse()) {
+            titleString = getTitleAlt();
+        } else {
+            titleString = getTitleText();
+        }
+        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(titleString, g2d);
         Rectangle2D titleSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
         AffineTransform transformOrig = g2d.getTransform();
@@ -1271,7 +1331,20 @@ public class ImageLegend {
 
 
         g2d.setFont(getTitleUnitsFont());
-        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getUnitsText(), g2d);
+        String unitsString;
+        if (isUnitsAltUse()) {
+            unitsString = getUnitsAlt();
+        } else {
+            unitsString = getUnitsText();
+        }
+
+        if (unitsString != null && unitsString.length() > 0) {
+            if (isUnitsParenthesis()) {
+                unitsString = "(" + unitsString + ")";
+            }
+        }
+
+        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(unitsString, g2d);
         Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
 
@@ -1623,7 +1696,12 @@ public class ImageLegend {
         g2d.setFont(getTitleParameterFont());
         g2d.setPaint(getTitleColor());
 
-        String titleString = getTitleText();
+        String titleString;
+        if (isTitleAltUse()) {
+            titleString = getTitleAlt();
+        } else {
+            titleString = getTitleText();
+        }
 
         String description = raster.getDescription();
         String bandname = raster.getName();
@@ -1647,7 +1725,19 @@ public class ImageLegend {
         g2d.setFont(getTitleUnitsFont());
         g2d.setPaint(getUnitsColor());
 
-        String unitsString = getUnitsText();
+        g2d.setFont(getTitleUnitsFont());
+        String unitsString;
+        if (isUnitsAltUse()) {
+            unitsString = getUnitsAlt();
+        } else {
+            unitsString = getUnitsText();
+        }
+
+        if (unitsString != null && unitsString.length() > 0) {
+            if (isUnitsParenthesis()) {
+                unitsString = "(" + unitsString + ")";
+            }
+        }
 
         String description = raster.getDescription();
         String bandname = raster.getName();
