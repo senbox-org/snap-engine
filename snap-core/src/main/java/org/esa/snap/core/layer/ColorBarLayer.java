@@ -132,6 +132,22 @@ public class ColorBarLayer extends Layer {
             }
 
 
+            String description = raster.getDescription();
+            String bandname = raster.getName();
+            String units = raster.getUnit();
+            float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+            boolean allowWavelengthZero = true;
+
+            String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
+            setTitle(convertedTitle);
+            String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, units, allowWavelengthZero);
+            setTitleAlt(convertedTitleAlt);
+            String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, units, allowWavelengthZero);
+            setUnits(convertedUnits);
+            String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, units, allowWavelengthZero);
+            setUnitsAlt(convertedUnitsAlt);
+
+
             // Title & Units Text
             imageLegend.setTitleAltUse(isTitleAltUse());
             imageLegend.setTitle(getTitle());

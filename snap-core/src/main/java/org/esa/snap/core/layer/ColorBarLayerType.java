@@ -57,78 +57,89 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-    // Title
+    // Header Title
 
-    private static final String PROPERTY_HEADER_ROOT_KEY = PROPERTY_ROOT_KEY + ".header";
-    private static final String PROPERTY_HEADER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Header";
+    private static final String PROPERTY_HEADER_TITLE_ROOT_KEY = PROPERTY_ROOT_KEY + ".header.title";
+    private static final String PROPERTY_HEADER_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "HeaderTitle";
 
-    public static final String PROPERTY_TITLE_TEXT_SECTION_KEY = PROPERTY_HEADER_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_TEXT_SECTION_LABEL = "Header";
-    public static final String PROPERTY_TITLE_TEXT_SECTION_TOOLTIP = "Header for the " + COLOR_LOWER_CASE + " bar legend";
-    public static final String PROPERTY_TITLE_TEXT_SECTION_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".section";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_LABEL = "Header Title";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_TOOLTIP = "Header title for the " + COLOR_LOWER_CASE + " bar legend";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Section";
 
-    public static final String PROPERTY_TITLE_KEY = PROPERTY_HEADER_ROOT_KEY + ".title";
+    public static final String PROPERTY_TITLE_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY;
     public static final String PROPERTY_TITLE_LABEL = "Title";
     public static final String PROPERTY_TITLE_TOOLTIP = "Title text for the header of the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_TITLE_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "Title";
+    public static final String PROPERTY_TITLE_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS;
     public static final String PROPERTY_TITLE_DEFAULT = "[DESCRIPTION]";
     public static final Class PROPERTY_TITLE_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_ALT_KEY = PROPERTY_HEADER_ROOT_KEY + ".title.alt";
+    public static final String PROPERTY_TITLE_ALT_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt";
     public static final String PROPERTY_TITLE_ALT_LABEL = "Title (Alternate)";
     public static final String PROPERTY_TITLE_ALT_TOOLTIP = "Alternate title for the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_TITLE_ALT_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "TitleAlt";
+    public static final String PROPERTY_TITLE_ALT_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Alt";
     public static final String PROPERTY_TITLE_ALT_DEFAULT = "[BANDNAME]";
     public static final Class PROPERTY_TITLE_ALT_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_ALT_USE_KEY = PROPERTY_HEADER_ROOT_KEY + ".title.alt.use";
+    public static final String PROPERTY_TITLE_ALT_USE_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt.use";
     public static final String PROPERTY_TITLE_ALT_USE_LABEL = "Use Title (Alternate)";
     public static final String PROPERTY_TITLE_ALT_USE_TOOLTIP = "Use Title (Alternate) instead of Title";
-    public static final String PROPERTY_TITLE_ALT_USE_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "TitleAltUse";
+    public static final String PROPERTY_TITLE_ALT_USE_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "AltUse";
     public static final boolean PROPERTY_TITLE_ALT_USE_DEFAULT = false;
     public static final Class PROPERTY_TITLE_ALT_USE_TYPE = Boolean.class;
 
 
-    public static final String PROPERTY_UNITS_KEY = PROPERTY_HEADER_ROOT_KEY + ".units";
+
+    // Header Units
+
+    private static final String PROPERTY_HEADER_UNITS_ROOT_KEY = PROPERTY_ROOT_KEY + ".header.units";
+    private static final String PROPERTY_HEADER_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "HeaderUnits";
+
+    public static final String PROPERTY_HEADER_UNITS_SECTION_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".section";
+    public static final String PROPERTY_HEADER_UNITS_SECTION_LABEL = "Header Units";
+    public static final String PROPERTY_HEADER_UNITS_SECTION_TOOLTIP = "Header units for the " + COLOR_LOWER_CASE + " bar legend";
+    public static final String PROPERTY_HEADER_UNITS_SECTION_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Section";
+
+    public static final String PROPERTY_UNITS_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY;
     public static final String PROPERTY_UNITS_LABEL = "Units";
     public static final String PROPERTY_UNITS_TOOLTIP = "Units text for the header of the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_UNITS_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "Units";
+    public static final String PROPERTY_UNITS_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS;
     public static final String PROPERTY_UNITS_DEFAULT = "[UNITS]";
     public static final Class PROPERTY_UNITS_TYPE = String.class;
 
-    public static final String PROPERTY_UNITS_ALT_KEY = PROPERTY_HEADER_ROOT_KEY + ".units.alt";
+    public static final String PROPERTY_UNITS_ALT_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt";
     public static final String PROPERTY_UNITS_ALT_LABEL = "Units (Alternate)";
     public static final String PROPERTY_UNITS_ALT_TOOLTIP = "Alternate units for the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_UNITS_ALT_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "UnitsAlt";
+    public static final String PROPERTY_UNITS_ALT_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Alt";
     public static final String PROPERTY_UNITS_ALT_DEFAULT = "[BANDNAME]; [UNITS]";
     public static final Class PROPERTY_UNITS_ALT_TYPE = String.class;
 
-    public static final String PROPERTY_UNITS_ALT_USE_KEY = PROPERTY_HEADER_ROOT_KEY + ".units.alt.use";
+    public static final String PROPERTY_UNITS_ALT_USE_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt.use";
     public static final String PROPERTY_UNITS_ALT_USE_LABEL = "Use Units (Alternate)";
     public static final String PROPERTY_UNITS_ALT_USE_TOOLTIP = "Use Units (Alternate) instead of Units";
-    public static final String PROPERTY_UNITS_ALT_USE_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "UnitsAltUse";
+    public static final String PROPERTY_UNITS_ALT_USE_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "AltUse";
     public static final boolean PROPERTY_UNITS_ALT_USE_DEFAULT = false;
     public static final Class PROPERTY_UNITS_ALT_USE_TYPE = Boolean.class;
 
-    public static final String PROPERTY_UNITS_NULL_KEY = PROPERTY_HEADER_ROOT_KEY + ".units.null";
+    public static final String PROPERTY_UNITS_NULL_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null";
     public static final String PROPERTY_UNITS_NULL_LABEL = "Units Null Value";
     public static final String PROPERTY_UNITS_NULL_TOOLTIP = "Text to display as units when they are null";
-    public static final String PROPERTY_UNITS_NULL_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "UnitsNull";
+    public static final String PROPERTY_UNITS_NULL_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Null";
     public static final String PROPERTY_UNITS_NULL_DEFAULT = "dimensionless";
     public static final Class PROPERTY_UNITS_NULL_TYPE = String.class;
 
 
-    public static final String PROPERTY_CONVERT_CARET_KEY = PROPERTY_HEADER_ROOT_KEY + ".convert.caret";
+    public static final String PROPERTY_CONVERT_CARET_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".convert.caret";
     public static final String PROPERTY_CONVERT_CARET_LABEL = "Convert Carets to Superscripts";
     public static final String PROPERTY_CONVERT_CARET_TOOLTIP = "Convert any caret (^) symbols found in the text into a formatted superscript";
-    public static final String PROPERTY_CONVERT_CARET_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "ConvertCaret";
+    public static final String PROPERTY_CONVERT_CARET_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "ConvertCaret";
     public static final boolean PROPERTY_CONVERT_CARET_DEFAULT = true;
     public static final Class PROPERTY_CONVERT_CARET_TYPE = Boolean.class;
 
-    public static final String PROPERTY_UNITS_PARENTHESIS_KEY = PROPERTY_HEADER_ROOT_KEY + ".units.parenthesis";
+    public static final String PROPERTY_UNITS_PARENTHESIS_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".parenthesis";
     public static final String PROPERTY_UNITS_PARENTHESIS_LABEL = "Add Units Parenthesis";
     public static final String PROPERTY_UNITS_PARENTHESIS_TOOLTIP = "Add Parenthesis around Units";
-    public static final String PROPERTY_UNITS_PARENTHESIS_ALIAS = PROPERTY_HEADER_ROOT_ALIAS + "UnitsParenthesis";
+    public static final String PROPERTY_UNITS_PARENTHESIS_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Parenthesis";
     public static final boolean PROPERTY_UNITS_PARENTHESIS_DEFAULT = true;
     public static final Class PROPERTY_UNITS_PARENTHESIS_TYPE = Boolean.class;
 
@@ -905,9 +916,12 @@ public class ColorBarLayerType extends LayerType {
 
         // Title Section
 
-        final Property titleSectionModel = Property.create(PROPERTY_TITLE_TEXT_SECTION_KEY, Boolean.class, true, true);
-        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_SECTION_ALIAS);
+        final Property titleSectionModel = Property.create(PROPERTY_HEADER_TITLE_SECTION_KEY, Boolean.class, true, true);
+        titleSectionModel.getDescriptor().setAlias(PROPERTY_HEADER_TITLE_SECTION_ALIAS);
         vc.addProperty(titleSectionModel);
+
+
+
 
         final Property titleModel = Property.create(PROPERTY_TITLE_KEY,
                 PROPERTY_TITLE_TYPE,
@@ -929,6 +943,11 @@ public class ColorBarLayerType extends LayerType {
                 true);
         titleAltUseModel.getDescriptor().setAlias(PROPERTY_TITLE_ALT_USE_ALIAS);
         vc.addProperty(titleAltUseModel);
+
+
+        final Property headerUnitsSectionModel = Property.create(PROPERTY_HEADER_UNITS_SECTION_KEY, Boolean.class, true, true);
+        headerUnitsSectionModel.getDescriptor().setAlias(PROPERTY_HEADER_UNITS_SECTION_ALIAS);
+        vc.addProperty(headerUnitsSectionModel);
 
         final Property unitsModel = Property.create(PROPERTY_UNITS_KEY,
                 PROPERTY_UNITS_TYPE,
