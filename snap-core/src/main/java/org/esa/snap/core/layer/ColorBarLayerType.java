@@ -56,6 +56,16 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_ROOT_ALIAS = "colorBarLegend";
 
 
+    private static final String PROPERTY_SCHEME_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".scheme";
+    private static final String PROPERTY_SCHEME_ALIAS_SUFFIX = PROPERTY_ROOT_ALIAS + "Scheme";
+
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".apply";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Apply Scheme (Band Lookup)";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Apply Scheme (Band Lookup)";
+    private static final String PROPERTY_SCHEME_AUTO_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "Apply";
+    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
+    public static final Class PROPERTY_SCHEME_AUTO_APPLY_TYPE = Boolean.class;
+
 
     // Header Title
 
@@ -63,7 +73,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_HEADER_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "HeaderTitle";
 
     public static final String PROPERTY_HEADER_TITLE_SECTION_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".section";
-    public static final String PROPERTY_HEADER_TITLE_SECTION_LABEL = "Header Title";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_LABEL = "Title";
     public static final String PROPERTY_HEADER_TITLE_SECTION_TOOLTIP = "Header title for the " + COLOR_LOWER_CASE + " bar legend";
     public static final String PROPERTY_HEADER_TITLE_SECTION_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Section";
 
@@ -96,7 +106,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_HEADER_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "HeaderUnits";
 
     public static final String PROPERTY_HEADER_UNITS_SECTION_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".section";
-    public static final String PROPERTY_HEADER_UNITS_SECTION_LABEL = "Header Units";
+    public static final String PROPERTY_HEADER_UNITS_SECTION_LABEL = "Units";
     public static final String PROPERTY_HEADER_UNITS_SECTION_TOOLTIP = "Header units for the " + COLOR_LOWER_CASE + " bar legend";
     public static final String PROPERTY_HEADER_UNITS_SECTION_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Section";
 
@@ -214,14 +224,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
-    private static final String PROPERTY_SCHEME_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".scheme.band.lookup";
-    private static final String PROPERTY_SCHEME_ALIAS_SUFFIX = PROPERTY_ROOT_ALIAS + ".scheme.band.lookup";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".auto.apply";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Auto-Apply Scheme (Band Lookup)";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Auto-Apply Scheme (Band Lookup)";
-    private static final String PROPERTY_SCHEME_AUTO_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + ".auto.apply";
-    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
-    public static final Class PROPERTY_SCHEME_AUTO_APPLY_TYPE = Boolean.class;
+
 
     public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".populate.values.textfield";
     public static final String PROPERTY_POPULATE_VALUES_TEXTFIELD_LABEL = "Auto-Fill Label Values Textfield";
@@ -296,7 +299,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_INSIDE_LABEL = "Place " + COLOR_MIXED_CASE + " Bar Inside Image";
     public static final String PROPERTY_LOCATION_INSIDE_TOOLTIP = "Place " + COLOR_LOWER_CASE + " bar inside/outside scene image bounds";
     private static final String PROPERTY_LOCATION_INSIDE_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Inside";
-    public static final boolean PROPERTY_LOCATION_INSIDE_DEFAULT = true;
+    public static final boolean PROPERTY_LOCATION_INSIDE_DEFAULT = false;
     public static final Class PROPERTY_LOCATION_INSIDE_TYPE = Boolean.class;
 
 
@@ -325,14 +328,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Location";
     public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place " + COLOR_LOWER_CASE + " bar on image";
     private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_CENTER;
+    public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
     public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
+    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 50.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
@@ -398,7 +401,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 80.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 75.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;
@@ -714,7 +717,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Border";
     public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_SHOW_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderShow";
-    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = false;
     public static final Class PROPERTY_LEGEND_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.width";
@@ -914,6 +917,11 @@ public class ColorBarLayerType extends LayerType {
         final PropertyContainer vc = new PropertyContainer();
 
 
+        final Property autoApplySchemesModel = Property.create(PROPERTY_SCHEME_AUTO_APPLY_KEY, Boolean.class, PROPERTY_SCHEME_AUTO_APPLY_DEFAULT, true);
+        autoApplySchemesModel.getDescriptor().setAlias(PROPERTY_SCHEME_AUTO_APPLY_ALIAS);
+        vc.addProperty(autoApplySchemesModel);
+
+
         // Title Section
 
         final Property titleSectionModel = Property.create(PROPERTY_HEADER_TITLE_SECTION_KEY, Boolean.class, true, true);
@@ -1018,9 +1026,7 @@ public class ColorBarLayerType extends LayerType {
         labelValuesSectionModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SECTION_ALIAS);
         vc.addProperty(labelValuesSectionModel);
 
-        final Property autoApplySchemesModel = Property.create(PROPERTY_SCHEME_AUTO_APPLY_KEY, Boolean.class, PROPERTY_SCHEME_AUTO_APPLY_DEFAULT, true);
-        autoApplySchemesModel.getDescriptor().setAlias(PROPERTY_SCHEME_AUTO_APPLY_ALIAS);
-        vc.addProperty(autoApplySchemesModel);
+
 
         final Property labelValuesModeModel = Property.create(PROPERTY_LABEL_VALUES_MODE_KEY, String.class, PROPERTY_LABEL_VALUES_MODE_DEFAULT, true);
         labelValuesModeModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_MODE_ALIAS);

@@ -51,6 +51,22 @@ public class ColorBarLayer extends Layer {
     private boolean allowImageLegendReset = true;
     private boolean imageLegendInitialized = false;
 
+    boolean autoApplyPrevious;
+    String titlePreferences;
+    String titleAltPreferences;
+    String unitsPreferences;
+    String unitsAltPreferences;
+    String labelValuesActual;
+    String labelValuesMode;
+    boolean populateLabelsTextfield;
+    int colorBarLength;
+    double labelValuesScalingFactor;
+    boolean colorBarLocationInsidePrevious;
+    boolean colorBarLocationInsidePreference;
+    double locationOffsetPreference;
+
+
+
 
     public ColorBarLayer(RasterDataNode raster) {
         this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
@@ -85,13 +101,29 @@ public class ColorBarLayer extends Layer {
     public void renderLayer(Rendering rendering) {
 //        System.out.println("Rendering Layer");
 
-        if (allowImageLegendReset == true) {
+        if (!imageLegendInitialized) {
+            autoApplyPrevious = isAutoApplySchemes();
+            titlePreferences = getTitle();
+            titleAltPreferences = getTitleAlt();
+            unitsPreferences = getUnits();
+            unitsAltPreferences = getUnitsAlt();
+            labelValuesActual = getLabelValuesActual();
+            labelValuesMode = getLabelValuesMode();
+            populateLabelsTextfield = getPopulateLabelsTextfield();
+            colorBarLength =  getColorBarLength();
+            labelValuesScalingFactor = getLabelValuesScalingFactor();
+            colorBarLocationInsidePrevious = isColorBarLocationInside();
+            colorBarLocationInsidePreference = isColorBarLocationInside();
+            locationOffsetPreference = getLocationOffset();
+        }
+
+        if (allowImageLegendReset == true ) {
             allowImageLegendReset = false;
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
 
-            if (!imageLegendInitialized) {
+            if (!imageLegendInitialized || (isAutoApplySchemes() != autoApplyPrevious)) {
                 if (isAutoApplySchemes()) {//auto-apply
                     ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getName());
 
@@ -126,9 +158,37 @@ public class ColorBarLayer extends Layer {
                             setLabelValuesScalingFactor(Double.valueOf(schemeInfo.getColorBarLabelScalingStr()));
                         }
                     }
+                } else {
+                    setTitle(titlePreferences);
+                    setTitleAlt(titleAltPreferences);
+                    setUnits(unitsPreferences);
+                    setUnitsAlt(unitsAltPreferences);
+                    setLabelValuesActual(labelValuesActual);
+                    setLabelValuesMode(labelValuesMode);
+                    setPopulateLabelsTextfield(populateLabelsTextfield);
+                    setColorBarLength(colorBarLength);
+                    setLabelValuesScalingFactor(labelValuesScalingFactor);
                 }
 
                 imageLegendInitialized = true;
+                autoApplyPrevious = isAutoApplySchemes();
+            }
+
+            if (isColorBarLocationInside() != colorBarLocationInsidePrevious) {
+                if (isColorBarLocationInside() == colorBarLocationInsidePreference) {
+                    setLocationOffset(locationOffsetPreference);
+//                    setLocationShift(0.0);
+                } else {
+                    if (isColorBarLocationInside()) {
+                            setLocationOffset(0.0);
+//                            setLocationShift(0.0);
+                    } else {
+                        setLocationOffset(50.0);
+//                        setLocationShift(0.0);
+                    }
+                }
+
+                colorBarLocationInsidePrevious = isColorBarLocationInside();
             }
 
 
@@ -606,6 +666,13 @@ public class ColorBarLayer extends Layer {
     }
 
 
+
+    private boolean isAutoApplySchemes() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_KEY,
+                ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_DEFAULT);
+    }
+
+
     // Title & Units Text
 
     private boolean isTitleAltUse() {
@@ -621,9 +688,9 @@ public class ColorBarLayer extends Layer {
     private void setTitle(String value) {
         try {
             String valueCurrent = getTitle();
-            System.out.println("Current title = " + valueCurrent);
+//            System.out.println("Current title = " + valueCurrent);
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                System.out.println("Inside and setting title to " + value);
+//                System.out.println("Inside and setting title to " + value);
                 getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {
@@ -741,10 +808,7 @@ public class ColorBarLayer extends Layer {
 
     // Tick Label Values
 
-    private boolean isAutoApplySchemes() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_KEY,
-                ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_DEFAULT);
-    }
+
 
     private String getLabelValuesMode() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
@@ -835,9 +899,23 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LOCATION_OFFSET_DEFAULT);
     }
 
+    private void setLocationOffset(double value) {
+        try {
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_OFFSET_KEY).setValue((Object) value);
+        } catch (ValidationException v) {
+        }
+    }
+
     private Double getLocationShift() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_SHIFT_DEFAULT);
+    }
+
+    private void setLocationShift(double value) {
+        try {
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_SHIFT_KEY).setValue((Object) value);
+        } catch (ValidationException v) {
+        }
     }
 
 
