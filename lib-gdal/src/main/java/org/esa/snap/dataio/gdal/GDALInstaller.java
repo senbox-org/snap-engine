@@ -24,10 +24,14 @@ import org.esa.snap.runtime.Config;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.StringTokenizer;
@@ -50,6 +54,7 @@ import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
 class GDALInstaller {
 
     private static final String PREFERENCE_KEY_INSTALLER_VERSION = "gdal.installer";
+    private static final String PREFERENCE_KEY_DISTRIBUTION_HASH = "gdal.distribution.hash";
     private static final Logger logger = Logger.getLogger(GDALInstaller.class.getName());
 
     private final Path gdalNativeLibrariesFolderPath;
@@ -178,6 +183,49 @@ class GDALInstaller {
         return config.preferences().get(PREFERENCE_KEY_INSTALLER_VERSION, null);
     }
 
+    private static boolean isModuleUpdated(String moduleVersion){
+        final String savedVersion = fetchSavedModuleSpecificationVersion();
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "The saved GDAL distribution folder version is '" + savedVersion + "'.");
+        }
+
+        return StringUtils.isNullOrEmpty(savedVersion) || compareVersions(savedVersion, moduleVersion) < 0;
+    }
+
+    private static boolean isDistributionInstalled(Path gdalNativeLibrariesFolderPath, GDALVersion gdalVersion){
+        final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
+        if (Files.exists(gdalNativeLibrariesFolderPath)) {
+            boolean isDistributionRootFolderEmpty = true;
+            try (final Stream<Path> distributionRootFolderContents = Files.list(gdalDistributionRootFolderPath)) {
+                isDistributionRootFolderEmpty = !distributionRootFolderContents.findAny().isPresent();
+            } catch (Exception ignored) {
+                //nothing to do
+            }
+            return Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(gdalVersion.getEnvironmentVariablesFilePath());
+        }
+        return false;
+    }
+
+    /**
+     * Fetches the saved distribution hash from SNAP config.
+     *
+     * @return the saved distribution hash
+     */
+    private static String fetchSavedDistributionHash() {
+        final Config config = Config.instance(CONFIG_NAME);
+        config.load();
+        return config.preferences().get(PREFERENCE_KEY_DISTRIBUTION_HASH, null);
+    }
+
+    private static boolean isDistributionUpdated(String distributionHash){
+        final String savedDistributionHash = fetchSavedDistributionHash();
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "The saved GDAL distribution hash is '" + savedDistributionHash + "'.");
+        }
+        return !distributionHash.equals(savedDistributionHash);
+    }
+
     /**
      * Sets the saved module specification version to SNAP config.
      */
@@ -186,6 +234,21 @@ class GDALInstaller {
         config.load();
         final Preferences preferences = config.preferences();
         preferences.put(PREFERENCE_KEY_INSTALLER_VERSION, newModuleSpecificationVersion);
+        try {
+            preferences.flush();
+        } catch (BackingStoreException exception) {
+            // ignore exception
+        }
+    }
+
+    /**
+     * Sets the saved distribution hash to SNAP config.
+     */
+    private static void setSavedDistributionHash(String newDistributionHash) {
+        final Config config = Config.instance(CONFIG_NAME);
+        config.load();
+        final Preferences preferences = config.preferences();
+        preferences.put(PREFERENCE_KEY_DISTRIBUTION_HASH, newDistributionHash);
         try {
             preferences.flush();
         } catch (BackingStoreException exception) {
@@ -232,14 +295,7 @@ class GDALInstaller {
         }
     }
 
-    /**
-     * Copies and extracts the GDAL distribution archive on specified directory.
-     *
-     * @param gdalDistributionRootFolderPath the GDAL distribution root directory for install
-     * @param gdalVersion                    the GDAL version to which GDAL distribution be installed
-     * @throws IOException When IO error occurs
-     */
-    private static void copyDistributionArchiveAndInstall(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
+    private static void copyDistributionArchive(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
         if (!Files.exists(gdalDistributionRootFolderPath)) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "create the distribution root folder '" + gdalDistributionRootFolderPath + "'.");
@@ -250,16 +306,19 @@ class GDALInstaller {
             logger.log(Level.FINE, "The distribution root folder '" + gdalDistributionRootFolderPath + "' exists on the local disk.");
         }
         final Path zipFilePath = gdalVersion.getZipFilePath();
-        try {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Copy the zip archive to folder '" + zipFilePath + "'.");
-            }
-            final URL zipFileURLFromSources = gdalVersion.getZipFileURLFromSources();
-            if (zipFileURLFromSources == null) {
-                throw new ExceptionInInitializerError("No GDAL distribution drivers provided for this OS.");
-            }
-            FileHelper.copyFile(zipFileURLFromSources, zipFilePath);
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Copy the zip archive to folder '" + zipFilePath + "'.");
+        }
+        final URL zipFileURLFromSources = gdalVersion.getZipFileURLFromSources();
+        if (zipFileURLFromSources == null) {
+            throw new ExceptionInInitializerError("No GDAL distribution drivers provided for this OS.");
+        }
+        FileHelper.copyFile(zipFileURLFromSources, zipFilePath);
+    }
 
+    private static void installDistribution(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
+        final Path zipFilePath = gdalVersion.getZipFilePath();
+        try {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Decompress the zip archive to folder '" + gdalDistributionRootFolderPath + "'.");
             }
@@ -270,6 +329,51 @@ class GDALInstaller {
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "GDAL configuration error: failed to delete the zip archive after decompression.", e);
             }
+        }
+    }
+
+    private static void deleteDistribution(Path gdalNativeLibrariesFolderPath){
+        if (Files.exists(gdalNativeLibrariesFolderPath)) {
+            if (!FileUtils.deleteTree(gdalNativeLibrariesFolderPath.toFile())) {
+                logger.log(Level.WARNING, () -> "Failed to delete the GDAL distribution folder '" + gdalNativeLibrariesFolderPath + "'.");
+            }
+        }
+    }
+
+    /**
+     * Copies and extracts the GDAL distribution archive on specified directory.
+     *
+     * @param gdalDistributionRootFolderPath the GDAL distribution root directory for install
+     * @param gdalVersion                    the GDAL version to which GDAL distribution be installed
+     * @throws IOException When IO error occurs
+     */
+    private static void copyDistributionArchiveAndInstall(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
+        copyDistributionArchive(gdalDistributionRootFolderPath, gdalVersion);
+        installDistribution(gdalDistributionRootFolderPath, gdalVersion);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        final StringBuilder hex = new StringBuilder();
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
+    }
+    private static String computeDistributionHash(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
+        copyDistributionArchive(gdalDistributionRootFolderPath, gdalVersion);
+        final Path zipFilePath = gdalVersion.getZipFilePath();
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
+        try (InputStream is = Files.newInputStream(zipFilePath);  DigestInputStream dis = new DigestInputStream(is, md)){
+            while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
+            md = dis.getMessageDigest();
+            return bytesToHex(md.digest());
+        } finally {
+            Files.delete(zipFilePath);
         }
     }
 
@@ -318,6 +422,8 @@ class GDALInstaller {
             logger.log(Level.FINE, "The module version is '" + moduleVersion + "'.");
         }
 
+        String distributionHash = null;
+
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Check the GDAL distribution folder from the local disk.");
         }
@@ -326,32 +432,19 @@ class GDALInstaller {
 
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
-        if (Files.exists(this.gdalNativeLibrariesFolderPath)) {
-            // the GDAL distribution folder already exists on the local disk
-            final String savedVersion = fetchSavedModuleSpecificationVersion();
-
+        if (isDistributionInstalled(gdalNativeLibrariesFolderPath, gdalVersion)) {
+            canCopyGDALDistribution = isModuleUpdated(moduleVersion);
+        }
+        if (canCopyGDALDistribution) {
+            distributionHash = computeDistributionHash(gdalNativeLibrariesFolderPath, gdalVersion);
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "The saved GDAL distribution folder version is '" + savedVersion + "'.");
+                logger.log(Level.FINE, "The distribution hash is '" + distributionHash + "'.");
             }
-
-            boolean isDistributionRootFolderEmpty = true;
-            try (final Stream<Path> distributionRootFolderContents = Files.list(gdalDistributionRootFolderPath)) {
-                isDistributionRootFolderEmpty = !distributionRootFolderContents.findAny().isPresent();
-            } catch (Exception ignored) {
-                //nothing to do
-            }
-
-            if (!StringUtils.isNullOrEmpty(savedVersion) && compareVersions(savedVersion, moduleVersion) >= 0 && Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(gdalVersion.getEnvironmentVariablesFilePath())) {
-                canCopyGDALDistribution = false;
-            } else {
-                // different module versions and delete the library saved on the local disk
-                if (!FileUtils.deleteTree(this.gdalNativeLibrariesFolderPath.toFile())) {
-                    logger.log(Level.WARNING, () -> "Failed to delete the GDAL distribution folder '" + this.gdalNativeLibrariesFolderPath + "'.");
-                }
-            }
+            canCopyGDALDistribution = isDistributionUpdated(distributionHash);
         }
 
         if (canCopyGDALDistribution) {
+            deleteDistribution(this.gdalNativeLibrariesFolderPath);
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "create the folder '" + this.gdalNativeLibrariesFolderPath + "' to copy the GDAL distribution.");
             }
@@ -360,6 +453,7 @@ class GDALInstaller {
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
             fixUpPermissions(this.gdalNativeLibrariesFolderPath);
             setSavedModuleSpecificationVersion(moduleVersion);
+            setSavedDistributionHash(distributionHash);
         }
 
         registerEnvironmentVariablesNativeLibrary(gdalVersion);
