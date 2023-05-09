@@ -56,11 +56,11 @@ public class ColorBarLayer extends Layer {
     String titleAltPreferences;
     String unitsPreferences;
     String unitsAltPreferences;
-    String labelValuesActual;
-    String labelValuesMode;
-    boolean populateLabelsTextfield;
-    int colorBarLength;
-    double labelValuesScalingFactor;
+    String labelValuesActualPreferences;
+    String labelValuesModePreferences;
+    boolean populateLabelsTextfieldPreferences;
+    int colorBarLengthPreferences;
+    double labelValuesScalingFactorPreferences;
     boolean colorBarLocationInsidePrevious;
     boolean colorBarLocationInsidePreference;
     double locationOffsetPreference;
@@ -101,29 +101,56 @@ public class ColorBarLayer extends Layer {
     public void renderLayer(Rendering rendering) {
 //        System.out.println("Rendering Layer");
 
-        if (!imageLegendInitialized) {
-            autoApplyPrevious = isAutoApplySchemes();
-            titlePreferences = getTitle();
-            titleAltPreferences = getTitleAlt();
-            unitsPreferences = getUnits();
-            unitsAltPreferences = getUnitsAlt();
-            labelValuesActual = getLabelValuesActual();
-            labelValuesMode = getLabelValuesMode();
-            populateLabelsTextfield = getPopulateLabelsTextfield();
-            colorBarLength =  getColorBarLength();
-            labelValuesScalingFactor = getLabelValuesScalingFactor();
-            colorBarLocationInsidePrevious = isColorBarLocationInside();
-            colorBarLocationInsidePreference = isColorBarLocationInside();
-            locationOffsetPreference = getLocationOffset();
-        }
+        String description = raster.getDescription();
+        String bandname = raster.getName();
+        String units = raster.getUnit();
+        float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        boolean allowWavelengthZero = true;
 
         if (allowImageLegendReset == true ) {
             allowImageLegendReset = false;
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
+            if (!imageLegendInitialized) {
+
+                String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
+                setTitle(convertedTitle);
+                String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, units, allowWavelengthZero);
+                setTitleAlt(convertedTitleAlt);
+                String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, units, allowWavelengthZero);
+                setUnits(convertedUnits);
+                String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, units, allowWavelengthZero);
+                setUnitsAlt(convertedUnitsAlt);
+
+
+                autoApplyPrevious = isAutoApplySchemes();
+                titlePreferences = getTitle();
+                titleAltPreferences = getTitleAlt();
+                unitsPreferences = getUnits();
+                unitsAltPreferences = getUnitsAlt();
+                labelValuesActualPreferences = getLabelValuesActual();
+                labelValuesModePreferences = getLabelValuesMode();
+                populateLabelsTextfieldPreferences = getPopulateLabelsTextfield();
+                colorBarLengthPreferences =  getColorBarLength();
+                labelValuesScalingFactorPreferences = getLabelValuesScalingFactor();
+                colorBarLocationInsidePrevious = isColorBarLocationInside();
+                colorBarLocationInsidePreference = isColorBarLocationInside();
+                locationOffsetPreference = getLocationOffset();
+            }
+
 
             if (!imageLegendInitialized || (isAutoApplySchemes() != autoApplyPrevious)) {
+                setLabelValuesActual(labelValuesActualPreferences);
+                setLabelValuesMode(labelValuesModePreferences);
+                setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+                setTitle(titlePreferences);
+                setTitleAlt(titleAltPreferences);
+                setUnits(unitsPreferences);
+                setUnitsAlt(unitsAltPreferences);
+                setColorBarLength(colorBarLengthPreferences);
+                setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+
                 if (isAutoApplySchemes()) {//auto-apply
                     ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getName());
 
@@ -158,16 +185,6 @@ public class ColorBarLayer extends Layer {
                             setLabelValuesScalingFactor(Double.valueOf(schemeInfo.getColorBarLabelScalingStr()));
                         }
                     }
-                } else {
-                    setTitle(titlePreferences);
-                    setTitleAlt(titleAltPreferences);
-                    setUnits(unitsPreferences);
-                    setUnitsAlt(unitsAltPreferences);
-                    setLabelValuesActual(labelValuesActual);
-                    setLabelValuesMode(labelValuesMode);
-                    setPopulateLabelsTextfield(populateLabelsTextfield);
-                    setColorBarLength(colorBarLength);
-                    setLabelValuesScalingFactor(labelValuesScalingFactor);
                 }
 
                 imageLegendInitialized = true;
@@ -191,12 +208,6 @@ public class ColorBarLayer extends Layer {
                 colorBarLocationInsidePrevious = isColorBarLocationInside();
             }
 
-
-            String description = raster.getDescription();
-            String bandname = raster.getName();
-            String units = raster.getUnit();
-            float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
-            boolean allowWavelengthZero = true;
 
             String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
             setTitle(convertedTitle);
