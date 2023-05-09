@@ -16,7 +16,7 @@ public class ColorManipulationDefaults {
 
     public static final boolean COLOR_MANIPULATION_DEBUG = false;
 
-    public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manipulation";
+    public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manager";
 
 
     // Directory names
