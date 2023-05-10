@@ -236,7 +236,7 @@ public class RemoteRepositoriesManagerTest {
         assertNotNull(remoteRepositoryProductProviders);
         assertTrue(remoteRepositoryProductProviders.length > 0);
 
-        for (RemoteProductsRepositoryProvider remoteProductsRepositoryProvider : remoteRepositoryProductProviders) {
+        for(RemoteProductsRepositoryProvider remoteProductsRepositoryProvider:remoteRepositoryProductProviders) {
             if (!remoteProductsRepositoryProvider.getRepositoryName().equals("FedEO")) {
                 testGetRemoteProductsRepositoryProvider(remoteProductsRepositoryProvider);
             }

@@ -18,13 +18,16 @@ package org.esa.snap.binning.operator;
 
 import org.esa.snap.binning.DataPeriod;
 import org.esa.snap.core.datamodel.Product;
+import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Thomas Storm
@@ -38,7 +41,7 @@ public class SpatialDataDaySourceProductFilterTest {
     @Before
     public void setUp() throws Exception {
         parent = mock(BinningProductFilter.class);
-        when(parent.accept(any(Product.class))).thenReturn(true);
+        when(parent.accept(Mockito.any(Product.class))).thenReturn(true);
         dataPeriod = TestUtils.createSpatialDataPeriod();
         filter = new SpatialDataDaySourceProductFilter(parent, dataPeriod);
     }
@@ -59,13 +62,13 @@ public class SpatialDataDaySourceProductFilterTest {
     @Test
     public void testRejectProduct_IfParentFilterDoNotAcceptTheProduct() {
         //preparation
-        when(parent.accept(any(Product.class))).thenReturn(false);
+        when(parent.accept(Mockito.any(Product.class))).thenReturn(false);
         when(parent.getReason()).thenReturn("parent reason");
 
         //execution
         //verification
-        assertThat(filter.accept(mock(Product.class)), is(false));
-        assertThat(filter.getReason(), is("parent reason"));
+        MatcherAssert.assertThat(filter.accept(mock(Product.class)), is(false));
+        MatcherAssert.assertThat(filter.getReason(), is("parent reason"));
     }
 
     private Product createProduct(DataPeriod.Membership firstPeriod, DataPeriod.Membership lastPeriod) {

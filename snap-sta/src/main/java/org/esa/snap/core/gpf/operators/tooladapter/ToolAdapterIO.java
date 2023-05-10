@@ -229,7 +229,7 @@ public class ToolAdapterIO {
     /**
      * Creates a copy of the adapter folder.
      *
-     * @param operatorDescriptor The operator descriptor for which to backup the folder
+     * @param operatorDescriptor    The operator descriptor for which to backup the folder
      * @return The path of the backup folder
      * @throws IOException in case of an IO error
      */
@@ -450,7 +450,7 @@ public class ToolAdapterIO {
      */
     public static void deleteFolder(Path location) throws IOException {
         if (Files.exists(location)) {
-            Files.walkFileTree(location, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(location, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     Files.deleteIfExists(dir);
@@ -594,7 +594,7 @@ public class ToolAdapterIO {
     public static void copy(Path source, Path destination) throws IOException{
         Set<FileVisitOption> options = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
         final CopyOption[] copyOptions = new CopyOption[] { StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING };
-        Files.walkFileTree(source, options, 3, new FileVisitor<Path>() {
+        Files.walkFileTree(source, options, 3, new FileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 Path newDirectory = destination.resolve(source.relativize(dir));

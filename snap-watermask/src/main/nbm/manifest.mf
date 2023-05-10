@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Java-Dependencies: Java > 11
 OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
 OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}

@@ -21,7 +21,7 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.watermask.util.ImageDescriptor;
 import org.esa.snap.watermask.util.ImageDescriptorBuilder;
-import org.geotools.resources.image.ImageUtilities;
+import org.geotools.image.util.ImageUtilities;
 
 import javax.imageio.ImageIO;
 import javax.media.jai.NullOpImage;

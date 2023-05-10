@@ -32,7 +32,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
             "  <ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
             "  <InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +
             "  <GeoChecks>ANTIMERIDIAN</GeoChecks>" +
-            "  <GeoCRS>GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS>" +
+            "  <GeoCRS>GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]</GeoCRS>" +
             "  <LonVariableName>Lon</LonVariableName>" +
             "  <LatVariableName>Lat</LatVariableName>" +
             "  <RasterResolutionKm>300.0</RasterResolutionKm>" +

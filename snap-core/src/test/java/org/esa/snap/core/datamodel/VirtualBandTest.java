@@ -17,7 +17,6 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -141,17 +140,17 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         // try to set null will be ignored
         vb.setExpression(null);
         assertEquals("2", vb.getExpression()); // still unchanged
-        Mockito.verifyZeroInteractions(listener);
+        Mockito.verifyNoInteractions(listener);
 
         // try to set empty expression will be ignored
         vb.setExpression("   ");
         assertEquals("2", vb.getExpression()); // still unchanged
-        Mockito.verifyZeroInteractions(listener);
+        Mockito.verifyNoInteractions(listener);
 
         // try to set equal expression will be ignored
         vb.setExpression("2");
         assertEquals("2", vb.getExpression()); // still unchanged
-        Mockito.verifyZeroInteractions(listener);
+        Mockito.verifyNoInteractions(listener);
 
         // try to set different expression is allowed
         vb.setExpression("3");

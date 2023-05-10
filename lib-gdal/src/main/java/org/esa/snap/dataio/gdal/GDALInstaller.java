@@ -289,7 +289,7 @@ class GDALInstaller {
 
             boolean isDistributionRootFolderEmpty = true;
             try (final Stream<Path> distributionRootFolderContents = Files.list(gdalDistributionRootFolderPath)) {
-                isDistributionRootFolderEmpty = !distributionRootFolderContents.findAny().isPresent();
+                isDistributionRootFolderEmpty = distributionRootFolderContents.findAny().isEmpty();
             } catch (Exception ignored) {
                 //nothing to do
             }

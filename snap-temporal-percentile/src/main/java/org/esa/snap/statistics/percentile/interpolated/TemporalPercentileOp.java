@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -310,7 +311,7 @@ public class TemporalPercentileOp extends Operator {
                 throw new OperatorException("The CRS settings result in a too large product (" + width + " * " + height + " pixels). " +
                                             "Please choose a smaller scene.");
             } else {
-                final int needed = (int) Math.ceil((meanBandRawStorageSize + baseMemoryRequirement) / _1Gb);
+                final int needed = (int) Math.ceil((double) (meanBandRawStorageSize + baseMemoryRequirement) / _1Gb);
                 throw new OperatorException("The CRS settings result in a too large product (" + width + " * " + height + " pixels). " +
                                             "The memory needed to compute such a product is " + needed + " GB. " +
                                             "Please choose a smaller scene or increase the Java VM heap space parameter '-Xmx' accordingly.");
@@ -363,7 +364,7 @@ public class TemporalPercentileOp extends Operator {
         for (long mjd : dailyGroupedSourceProducts.keySet()) {
 
             final List<Product> dailyGroupedProducts = dailyGroupedSourceProducts.get(mjd);
-            getLogger().info("Compute collocated mean band for products: " + getProductNames(dailyGroupedProducts) + "");
+            getLogger().info("Compute collocated mean band for products: " + getProductNames(dailyGroupedProducts));
 
             final List<Product> collocatedProducts = createCollocatedProducts(dailyGroupedProducts);
 
@@ -410,14 +411,10 @@ public class TemporalPercentileOp extends Operator {
     }
 
     private RenderedImage createDailyMeanSourceImage(List<Product> collocatedProducts) {
-        final Vector<RenderedImage> sources = new Vector<RenderedImage>();
+        final Vector<RenderedImage> sources = new Vector<>();
         for (Product collocatedProduct : collocatedProducts) {
             final Band band;
-            if (sourceBandName != null) {
-                band = collocatedProduct.getBand(sourceBandName);
-            } else {
-                band = collocatedProduct.getBand(BAND_MATH_EXPRESSION_BAND_NAME);
-            }
+            band = collocatedProduct.getBand(Objects.requireNonNullElse(sourceBandName, BAND_MATH_EXPRESSION_BAND_NAME));
             MultiLevelImage nanImage = ImageManager.createMaskedGeophysicalImage(band, Float.NaN);
             sources.add(nanImage);
         }
@@ -548,7 +545,7 @@ public class TemporalPercentileOp extends Operator {
      * These time series have the form of bands where the timestamp of the band is
      * encoded as suffix of the band's name.
      *
-     * @param bandName
+     * @param bandName the band name
      */
     private void addExpectedMetadataForTimeSeriesTool(final String bandName) {
         timeSeriesDataProduct.setProductType(TIME_SERIES_PRODUCT_TYPE);
@@ -636,10 +633,10 @@ public class TemporalPercentileOp extends Operator {
     }
 
     private List<Product> createCollocatedProducts(List<Product> dailyGroupedProducts) {
-        final ArrayList<Product> collocatedProducts = new ArrayList<Product>();
+        final ArrayList<Product> collocatedProducts = new ArrayList<>();
         final HashMap<String, Object> projectionParameters = createProjectionParameters();
         for (Product product : dailyGroupedProducts) {
-            HashMap<String, Product> productToBeReprojectedMap = new HashMap<String, Product>();
+            HashMap<String, Product> productToBeReprojectedMap = new HashMap<>();
             productToBeReprojectedMap.put("source", product);
             productToBeReprojectedMap.put("collocateWith", timeSeriesDataProduct);
             final Product collocatedProduct = GPF.createProduct("Reproject", projectionParameters, productToBeReprojectedMap);
@@ -668,7 +665,7 @@ public class TemporalPercentileOp extends Operator {
     }
 
     private HashMap<String, Object> createProjectionParameters() {
-        HashMap<String, Object> projParameters = new HashMap<String, Object>();
+        HashMap<String, Object> projParameters = new HashMap<>();
         projParameters.put("resamplingName", resamplingMethodName);
         projParameters.put("includeTiePointGrids", false);
         return projParameters;
@@ -729,13 +726,13 @@ public class TemporalPercentileOp extends Operator {
     }
 
     private String[] getAbsoluteInputProductPaths() {
-        final ArrayList<String> absolutePaths = new ArrayList<String>();
+        final ArrayList<String> absolutePaths = new ArrayList<>();
         for (List<Product> products : dailyGroupedSourceProducts.values()) {
             for (Product product : products) {
                 absolutePaths.add(product.getFileLocation().getAbsolutePath());
             }
         }
-        return absolutePaths.toArray(new String[absolutePaths.size()]);
+        return absolutePaths.toArray(new String[0]);
     }
 
     private Product createTargetProduct() {
