@@ -363,7 +363,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 50.0;
+    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 150.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";

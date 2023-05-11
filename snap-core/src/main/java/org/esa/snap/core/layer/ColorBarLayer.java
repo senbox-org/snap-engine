@@ -52,6 +52,8 @@ public class ColorBarLayer extends Layer {
     private boolean imageLegendInitialized = false;
 
     boolean autoApplyPrevious;
+    int orientationPrevious;
+    String locationPrevious;
     String titlePreferences;
     String titleAltPreferences;
     String unitsPreferences;
@@ -64,8 +66,7 @@ public class ColorBarLayer extends Layer {
     boolean colorBarLocationInsidePrevious;
     boolean colorBarLocationInsidePreference;
     double locationOffsetPreference;
-
-
+    double locationShiftPreference;
 
 
     public ColorBarLayer(RasterDataNode raster) {
@@ -107,12 +108,13 @@ public class ColorBarLayer extends Layer {
         float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
         boolean allowWavelengthZero = true;
 
-        if (allowImageLegendReset == true ) {
+        if (allowImageLegendReset == true) {
             allowImageLegendReset = false;
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
             if (!imageLegendInitialized) {
+
 
                 String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
                 setTitle(convertedTitle);
@@ -125,6 +127,8 @@ public class ColorBarLayer extends Layer {
 
 
                 autoApplyPrevious = isAutoApplySchemes();
+                orientationPrevious = getOrientation();
+                locationPrevious = getColorBarLocationPlacement();
                 titlePreferences = getTitle();
                 titleAltPreferences = getTitleAlt();
                 unitsPreferences = getUnits();
@@ -132,11 +136,35 @@ public class ColorBarLayer extends Layer {
                 labelValuesActualPreferences = getLabelValuesActual();
                 labelValuesModePreferences = getLabelValuesMode();
                 populateLabelsTextfieldPreferences = getPopulateLabelsTextfield();
-                colorBarLengthPreferences =  getColorBarLength();
+                colorBarLengthPreferences = getColorBarLength();
                 labelValuesScalingFactorPreferences = getLabelValuesScalingFactor();
                 colorBarLocationInsidePrevious = isColorBarLocationInside();
                 colorBarLocationInsidePreference = isColorBarLocationInside();
                 locationOffsetPreference = getLocationOffset();
+                locationShiftPreference = getLocationShift();
+
+
+                // todo Preference
+                boolean autoDetermineOrientation = true;
+                boolean autoDetermineOffsetShift = true;
+
+                if (autoDetermineOrientation) {
+                    if (raster.getRasterWidth() > raster.getRasterHeight()) {
+                        setOrientation(ImageLegend.HORIZONTAL);
+                    } else {
+                        setOrientation(ImageLegend.VERTICAL);
+                    }
+                }
+
+                if (getOrientation() == ImageLegend.HORIZONTAL) {
+                    // todo Preference placement (horizontal)
+                    setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
+                } else {
+                    // todo Preference  placement (vertical)
+                    setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
+                }
+
+
             }
 
 
@@ -179,10 +207,10 @@ public class ColorBarLayer extends Layer {
                         }
 
                         if (schemeInfo.getColorBarLengthStr() != null && schemeInfo.getColorBarLengthStr().trim().length() > 0) {
-                            setColorBarLength(Integer.valueOf(schemeInfo.getColorBarLengthStr()));
+                            setColorBarLength(Integer.parseInt(schemeInfo.getColorBarLengthStr()));
                         }
                         if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
-                            setLabelValuesScalingFactor(Double.valueOf(schemeInfo.getColorBarLabelScalingStr()));
+                            setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
                         }
                     }
                 }
@@ -191,21 +219,74 @@ public class ColorBarLayer extends Layer {
                 autoApplyPrevious = isAutoApplySchemes();
             }
 
-            if (isColorBarLocationInside() != colorBarLocationInsidePrevious) {
-                if (isColorBarLocationInside() == colorBarLocationInsidePreference) {
-                    setLocationOffset(locationOffsetPreference);
-//                    setLocationShift(0.0);
-                } else {
-                    if (isColorBarLocationInside()) {
-                            setLocationOffset(0.0);
-//                            setLocationShift(0.0);
+
+            if ((isColorBarLocationInside() != colorBarLocationInsidePrevious) ||
+                    (orientationPrevious != getOrientation()) ||
+                    (getColorBarLocationPlacement() != null & !getColorBarLocationPlacement().equals(locationPrevious))
+            ) {
+                if (orientationPrevious != getOrientation()) {
+                    if (getOrientation() == ImageLegend.HORIZONTAL) {
+                        // todo Preference placement (horizontal)
+                        setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
                     } else {
-                        setLocationOffset(50.0);
-//                        setLocationShift(0.0);
+                        // todo Preference  placement (vertical)
+                        setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
                     }
                 }
 
+
+                if (isColorBarLocationInside()) {
+                    setLocationOffset(0.0);
+                    setLocationShift(0.0);
+                } else {
+                    // todo some Preferences
+                    double offsetShiftMultiplicationFactor = 0.1;
+                    double imageAverageSize = (raster.getRasterWidth() + raster.getRasterHeight()) / 2;
+
+                    if (getOrientation() == ImageLegend.HORIZONTAL) {
+                        if (ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(offsetShiftMultiplicationFactor * imageAverageSize);
+//                                setLocationOffset(offsetShiftMultiplicationFactor * getTitleFontSize());
+                            setLocationShift(0.0);
+                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(-(offsetShiftMultiplicationFactor * imageAverageSize));
+                            setLocationShift(0.0);
+                        } else if (ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(0.0);
+                            setLocationShift(-(offsetShiftMultiplicationFactor * imageAverageSize));
+                        } else if (ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(0.0);
+                            setLocationShift(offsetShiftMultiplicationFactor * imageAverageSize);
+                        }
+                    } else {
+                        if (ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(offsetShiftMultiplicationFactor * imageAverageSize);
+                            setLocationShift(0.0);
+                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(-(offsetShiftMultiplicationFactor * imageAverageSize));
+                            setLocationShift(0.0);
+                        } else if (ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(0.0);
+                            setLocationShift(-(offsetShiftMultiplicationFactor * imageAverageSize));
+                        } else if (ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationPlacement())) {
+                            setLocationOffset(0.0);
+                            setLocationShift(offsetShiftMultiplicationFactor * imageAverageSize);
+                        }
+                    }
+                }
+
+
                 colorBarLocationInsidePrevious = isColorBarLocationInside();
+                orientationPrevious = getOrientation();
+                locationPrevious = getColorBarLocationPlacement();
             }
 
 
@@ -451,7 +532,6 @@ public class ColorBarLayer extends Layer {
 
     private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
 
-
         int colorBarImageWidth = colorBarImage.getWidth();
         int colorBarImageHeight = colorBarImage.getHeight();
 
@@ -459,8 +539,10 @@ public class ColorBarLayer extends Layer {
         int rasterHeight = raster.getRasterHeight();
 
 
-        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
-        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLocationShift() / 100) : -(colorBarImageHeight * getLocationShift() / 100);
+        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(getLocationOffset()) : (getLocationOffset());
+        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (getLocationShift()) : -(getLocationShift());
+//        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(getTitleFontSize() * getLocationOffset() / 100) : (getTitleFontSize() * getLocationOffset() / 100);
+//        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (getTitleFontSize() * getLocationShift() / 100) : -(getTitleFontSize() * getLocationShift() / 100);
 
         double offsetAdjust = 0;
         double shiftAdjust = 0;
@@ -677,7 +759,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private boolean isAutoApplySchemes() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_KEY,
                 ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_DEFAULT);
@@ -805,6 +886,27 @@ public class ColorBarLayer extends Layer {
         }
     }
 
+    // todo Danny
+
+
+    private void setOrientation(int value) {
+        try {
+            int valueCurrent = getOrientation();
+
+            if (valueCurrent != value) {
+                String orientationString;
+                if (ImageLegend.HORIZONTAL == value) {
+                    orientationString = ColorBarLayerType.OPTION_HORIZONTAL;
+                } else {
+                    orientationString = ColorBarLayerType.OPTION_VERTICAL;
+                }
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY).setValue((Object) orientationString);
+            }
+        } catch (ValidationException v) {
+        }
+    }
+
+
     private String getTitleVerticalAnchor() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT);
@@ -818,7 +920,6 @@ public class ColorBarLayer extends Layer {
 
 
     // Tick Label Values
-
 
 
     private String getLabelValuesMode() {
@@ -904,6 +1005,15 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_DEFAULT);
     }
+
+
+    private void setColorBarLocationPlacement(String value) {
+        try {
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY).setValue((Object) value);
+        } catch (ValidationException v) {
+        }
+    }
+
 
     private Double getLocationOffset() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_OFFSET_KEY,

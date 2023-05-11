@@ -129,9 +129,13 @@ public class ColorBarSchemeManager {
 
     private boolean createPrimaryAndAdditionalColorSchemeInfos() {
 
+        // todo When this fails maybe warn user
         if (colorSchemesUserFile.exists()) {
             Document domCustom = getFileDocument(colorSchemesUserFile);
+            if (domCustom == null) { return false; }
             Element rootElementCustom = domCustom.getDocumentElement();
+            if (rootElementCustom == null) { return false; }
+
             NodeList schemeNodeListCustom = rootElementCustom.getElementsByTagName("Scheme");
 
             if (schemeNodeListCustom != null && schemeNodeListCustom.getLength() > 0) {
@@ -143,7 +147,11 @@ public class ColorBarSchemeManager {
         }
 
         Document dom = getFileDocument(colorSchemesFile);
+        if (dom == null) { return false; }
+
         Element rootElement = dom.getDocumentElement();
+        if (rootElement == null) { return false; }
+
         NodeList schemeNodeList = rootElement.getElementsByTagName("Scheme");
 
         if (schemeNodeList != null && schemeNodeList.getLength() > 0) {
@@ -152,8 +160,6 @@ public class ColorBarSchemeManager {
                 addPrimaryAndAdditionalColorSchemeInfos(schemeElement);
             }
         }
-
-
 
         return true;
     }
