@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>10.0.0-JDK11SHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -981,7 +981,7 @@
                             <configuration>
                                 <name>snap.nbmSpecVersion</name>
                                 <value>${project.version}</value>
-                                <regex>(-JDK11SHOT)|(-SNAPSHOT)|(-rc[0-9]+)</regex>
+                                <regex>(-SNAPSHOT)|(-rc[0-9]+)</regex>
                                 <replacement>.0</replacement>
                                 <failIfNoMatch>false</failIfNoMatch>
                             </configuration>
@@ -994,7 +994,7 @@
                             <configuration>
                                 <name>snap.nbmImplVersion</name>
                                 <value>${project.version}</value>
-                                <regex>(-JDK11SHOT)|(-SNAPSHOT)|(-rc[0-9]+)</regex>
+                                <regex>(-SNAPSHOT)|(-rc[0-9]+)</regex>
                                 <replacement>.${buildDate}</replacement>
                                 <failIfNoMatch>false</failIfNoMatch>
                             </configuration>
