@@ -177,12 +177,12 @@ public class ColorBarLayerType extends LayerType {
     public static final Object PROPERTY_ORIENTATION_VALUE_SET[] = {PROPERTY_ORIENTATION_OPTION1, PROPERTY_ORIENTATION_OPTION2,PROPERTY_ORIENTATION_OPTION3};
 
 
-    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_RATIO_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".best.fit.aspect.ratio";
-    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_LABEL = "Scene Aspect Ratio (Best Fit)";
-    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_TOOLTIP = "For Best Fit: Scene aspect ratio which triggers determination of horizontal or vertical color bar";
-    private static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "BestFitAspectRatio";
-    public static final boolean PROPERTY_ANGLE_BEST_FIT_ASPECT_DEFAULT = true;
-    public static final Class PROPERTY_ANGLE_BEST_FIT_ASPECT_TYPE = Boolean.class;
+    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".scene.aspect.best.fit";
+    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_LABEL = "Scene Aspect Ratio (Best Fit)";
+    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_TOOLTIP = "For Best Fit: Scene aspect ratio which triggers determination of horizontal or vertical color bar";
+    private static final String PROPERTY_SCENE_ASPECT_BEST_FIT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "SceneAspectBestFit";
+    public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.5;
+    public static final Class PROPERTY_SCENE_ASPECT_BEST_FIT_TYPE = Double.class;
 
 
     public static final String VERTICAL_TITLE_LEFT = "Left";
@@ -1034,6 +1034,10 @@ public class ColorBarLayerType extends LayerType {
         final Property formattingOrientationModel = Property.create(PROPERTY_ORIENTATION_KEY, PROPERTY_ORIENTATION_TYPE, true, true);
         formattingOrientationModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_ALIAS);
         vc.addProperty(formattingOrientationModel);
+
+        final Property sceneAspectBestFitModel = Property.create(PROPERTY_SCENE_ASPECT_BEST_FIT_KEY, PROPERTY_SCENE_ASPECT_BEST_FIT_TYPE, true, true);
+        sceneAspectBestFitModel.getDescriptor().setAlias(PROPERTY_SCENE_ASPECT_BEST_FIT_ALIAS);
+        vc.addProperty(sceneAspectBestFitModel);
 
         final Property reversePaletteModel = Property.create(PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY, PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE, true, true);
         reversePaletteModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS);

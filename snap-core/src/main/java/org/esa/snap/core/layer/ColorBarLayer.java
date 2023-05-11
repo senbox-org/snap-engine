@@ -53,6 +53,7 @@ public class ColorBarLayer extends Layer {
 
     boolean autoApplyPrevious;
     String orientationPrevious;
+    double sceneAspectBestFitPrevious;
     String locationPrevious;
     String titlePreferences;
     String titleAltPreferences;
@@ -128,6 +129,7 @@ public class ColorBarLayer extends Layer {
 
                 autoApplyPrevious = isAutoApplySchemes();
                 orientationPrevious = getOrientation();
+                sceneAspectBestFitPrevious = getSceneAspectBestFit();
                 locationPrevious = getColorBarLocationPlacement();
                 titlePreferences = getTitle();
                 titleAltPreferences = getTitleAlt();
@@ -145,16 +147,8 @@ public class ColorBarLayer extends Layer {
 
 
                 // todo Preference
-                boolean autoDetermineOrientation = true;
                 boolean autoDetermineOffsetShift = true;
 
-//                if (autoDetermineOrientation) {
-//                    if (raster.getRasterWidth() > raster.getRasterHeight()) {
-//                        setOrientation(ImageLegend.HORIZONTAL);
-//                    } else {
-//                        setOrientation(ImageLegend.VERTICAL);
-//                    }
-//                }
 
                 if (isHorizontalColorBar()) {
                     // todo Preference placement (horizontal)
@@ -222,9 +216,11 @@ public class ColorBarLayer extends Layer {
 
             if ((isColorBarLocationInside() != colorBarLocationInsidePrevious) ||
                     (getOrientation() != null && !getOrientation().equals(orientationPrevious)) ||
+                    (getSceneAspectBestFit() != sceneAspectBestFitPrevious) ||
                     (getColorBarLocationPlacement() != null & !getColorBarLocationPlacement().equals(locationPrevious))
             ) {
-                if (getOrientation() != null && !getOrientation().equals(orientationPrevious)) {
+                if (getOrientation() != null && !getOrientation().equals(orientationPrevious) ||
+                        (getSceneAspectBestFit() != sceneAspectBestFitPrevious)) {
                     if (isHorizontalColorBar()) {
                         // todo Preference placement (horizontal)
                         setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
@@ -285,7 +281,7 @@ public class ColorBarLayer extends Layer {
 
 
                 colorBarLocationInsidePrevious = isColorBarLocationInside();
-                orientationPrevious = getOrientation();
+                sceneAspectBestFitPrevious = getSceneAspectBestFit();
                 locationPrevious = getColorBarLocationPlacement();
             }
 
@@ -314,6 +310,7 @@ public class ColorBarLayer extends Layer {
 
             // Orientation
             imageLegend.setOrientation(getOrientation());
+            imageLegend.setSceneAspectBestFit(getSceneAspectBestFit());
             imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
             imageLegend.setReversePalette(isReversePalette());
 
@@ -907,11 +904,10 @@ public class ColorBarLayer extends Layer {
 
     public boolean isHorizontalColorBar() {
         if (ColorBarLayerType.OPTION_BEST_FIT.equals(getOrientation())) {
-            double triggerAspectRatio = 1.0;
-            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? raster.getRasterWidth() / raster.getRasterHeight(): 1.0;
+            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? (double) raster.getRasterWidth() / (double) raster.getRasterHeight(): 1.0;
             // todo Preference on aspectRatio for best fit
 //            if (raster.getRasterWidth() > raster.getRasterHeight()) {
-            if (sceneAspectRatio > triggerAspectRatio) {
+            if (sceneAspectRatio > getSceneAspectBestFit()) {
                 return true;
             } else {
                 return false;
@@ -926,6 +922,10 @@ public class ColorBarLayer extends Layer {
     };
 
 
+    private double getSceneAspectBestFit() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCENE_ASPECT_BEST_FIT_KEY,
+                ColorBarLayerType.PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT);
+    }
 
     private String getTitleVerticalAnchor() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,

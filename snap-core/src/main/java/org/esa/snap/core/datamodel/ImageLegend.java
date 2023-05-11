@@ -115,6 +115,7 @@ public class ImageLegend {
 
     private String titleVerticalAnchor;
     private boolean reversePalette = true;
+    private double sceneAspectBestFit;
 
     private Color tickmarkColor;
     private int tickmarkLength = NULL_INT;
@@ -209,6 +210,7 @@ public class ImageLegend {
 
         imageLegendCopy.setOrientation(getOrientation());
         imageLegendCopy.setReversePalette(isReversePalette());
+        imageLegendCopy.setSceneAspectBestFit(getSceneAspectBestFit());
 
         imageLegendCopy.setShowTitle(isShowTitle());
         imageLegendCopy.setTitle(getTitleText());
@@ -305,6 +307,8 @@ public class ImageLegend {
         setOrientation(configuration.getPropertyString(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT));
 
+        setSceneAspectBestFit(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_SCENE_ASPECT_BEST_FIT_KEY,
+                ColorBarLayerType.PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT));
 
         setReversePalette(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT));
@@ -677,11 +681,10 @@ public class ImageLegend {
 
     public boolean isHorizontalColorBar() {
         if (ColorBarLayerType.OPTION_BEST_FIT.equals(getOrientation())) {
-            double triggerAspectRatio = 1.0;
-            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? raster.getRasterWidth() / raster.getRasterHeight(): 1.0;
+            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? (double) raster.getRasterWidth() / (double) raster.getRasterHeight(): 1.0;
             // todo Preference on aspectRatio for best fit
 //            if (raster.getRasterWidth() > raster.getRasterHeight()) {
-            if (sceneAspectRatio > triggerAspectRatio) {
+            if (sceneAspectRatio > getSceneAspectBestFit()) {
                 return true;
             } else {
                 return false;
@@ -2942,6 +2945,15 @@ public class ImageLegend {
 
     public void setLabelsShow(boolean labelsShow) {
         this.labelsShow = labelsShow;
+    }
+
+
+    public double getSceneAspectBestFit() {
+        return sceneAspectBestFit;
+    }
+
+    public void setSceneAspectBestFit(double sceneAspectBestFit) {
+        this.sceneAspectBestFit = sceneAspectBestFit;
     }
 
     public boolean isReversePalette() {
