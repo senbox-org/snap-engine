@@ -108,7 +108,7 @@ public class ImageLegend {
     private String unitsNull;
     private boolean convertCaret;
     private boolean unitsParenthesis;
-    private int orientation;
+    private String orientation;
     private String distributionType;
     private int tickMarkCount;
 
@@ -302,14 +302,9 @@ public class ImageLegend {
 
         // Orientation Parameters
 
-        String orientationString = configuration.getPropertyString(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
-                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
+        setOrientation(configuration.getPropertyString(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT));
 
-        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientationString)) {
-            setOrientation(ImageLegend.VERTICAL);
-        } else {
-            setOrientation(ImageLegend.HORIZONTAL);
-        }
 
         setReversePalette(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT));
@@ -672,13 +667,34 @@ public class ImageLegend {
     public void setUnitsParenthesis(boolean unitsParenthesis) {this.unitsParenthesis = unitsParenthesis;}
 
 
-    public int getOrientation() {
+    public String getOrientation() {
         return orientation;
     }
 
-    public void setOrientation(int orientation) {
+    public void setOrientation(String orientation) {
         this.orientation = orientation;
     }
+
+    public boolean isHorizontalColorBar() {
+        if (ColorBarLayerType.OPTION_BEST_FIT.equals(getOrientation())) {
+            double triggerAspectRatio = 1.0;
+            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? raster.getRasterWidth() / raster.getRasterHeight(): 1.0;
+            // todo Preference on aspectRatio for best fit
+//            if (raster.getRasterWidth() > raster.getRasterHeight()) {
+            if (sceneAspectRatio > triggerAspectRatio) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (ColorBarLayerType.OPTION_HORIZONTAL.equals(getOrientation())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
 
     public String getDistributionType() {
         return distributionType;
@@ -775,7 +791,7 @@ public class ImageLegend {
             initDrawing();
 
             double oneHundredPercentScalingFactor;
-            if (orientation == HORIZONTAL) {
+            if (isHorizontalColorBar()) {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
             } else {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
@@ -1063,7 +1079,7 @@ public class ImageLegend {
 
         Dimension headerRequiredDimension;
 
-        if (orientation == HORIZONTAL) {
+        if (isHorizontalColorBar()) {
             headerRequiredDimension = getTitleRequiredDimension(false, false);
         } else {
             if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor()) ||
@@ -1094,7 +1110,7 @@ public class ImageLegend {
             tickOffset = getTickmarkLength();
         }
 
-        if (orientation == HORIZONTAL) {
+        if (isHorizontalColorBar()) {
 
 
             Dimension labelsRequiredDimension = getHorizontalLabelsRequiredDimension(g2dTmp);
@@ -1559,7 +1575,7 @@ public class ImageLegend {
             int y0 = paletteRect.y;
 
 
-            if (orientation == HORIZONTAL) {
+            if (isHorizontalColorBar()) {
                 double translateTitleX = x0;
                 double translateTitleY = y0 - getTitleGap();
 
@@ -2036,7 +2052,7 @@ public class ImageLegend {
         g2d.setStroke(new BasicStroke(1));
 
 
-        if (orientation == HORIZONTAL) {
+        if (isHorizontalColorBar()) {
             int xStart = paletteRect.x;
             int xEnd = paletteRect.x + paletteRect.width;
             int y1 = paletteRect.y;
@@ -2176,7 +2192,7 @@ public class ImageLegend {
 
             double tickMarkRelativePosition = weight * (palettePosEnd - palettePosStart);
 
-            if (orientation == HORIZONTAL) {
+            if (isHorizontalColorBar()) {
                 translateY = paletteRect.y + paletteRect.height;
 
                 if (isReversePalette()) {
@@ -2218,7 +2234,7 @@ public class ImageLegend {
             }
 
 
-            if (orientation == HORIZONTAL) {
+            if (isHorizontalColorBar()) {
                 x0 = -0.5f * labelWidth;
                 y0 = getLabelGap() + tickOffset + fontMetrics.getMaxAscent();
             } else {
@@ -2410,7 +2426,7 @@ public class ImageLegend {
 
     private Shape createTickMarkShape() {
         GeneralPath path = new GeneralPath();
-        if (orientation == HORIZONTAL) {
+        if (isHorizontalColorBar()) {
             path.moveTo(0.0F, 1.0F * getTickmarkLength());
             path.lineTo(0.0F, 0.0F);
         } else {

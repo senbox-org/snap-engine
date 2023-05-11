@@ -32,6 +32,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String COLOR_BAR_LEGEND_NAME = COLOR_MIXED_CASE + " Bar Legend";
     public static final String COLOR_BAR_LEGEND_NAME_LOWER_CASE = COLOR_LOWER_CASE + " bar legend";
 
+    public static final String OPTION_BEST_FIT = "Best Fit";
     public static final String OPTION_HORIZONTAL = "Horizontal";
     public static final String OPTION_VERTICAL = "Vertical";
 
@@ -169,10 +170,19 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_ORIENTATION_TOOLTIP = "Orientation (vertical/horizontal) of the " + COLOR_LOWER_CASE + " bar legend";
     public static final Class PROPERTY_ORIENTATION_TYPE = String.class;
     public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Orientation";
-    public static final String PROPERTY_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
-    public static final String PROPERTY_ORIENTATION_OPTION2 = OPTION_VERTICAL;
-    public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_VERTICAL;
-    public static final Object PROPERTY_ORIENTATION_VALUE_SET[] = {PROPERTY_ORIENTATION_OPTION1, PROPERTY_ORIENTATION_OPTION2};
+    public static final String PROPERTY_ORIENTATION_OPTION1 = OPTION_BEST_FIT;
+    public static final String PROPERTY_ORIENTATION_OPTION2 = OPTION_HORIZONTAL;
+    public static final String PROPERTY_ORIENTATION_OPTION3 = OPTION_VERTICAL;
+    public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_BEST_FIT;
+    public static final Object PROPERTY_ORIENTATION_VALUE_SET[] = {PROPERTY_ORIENTATION_OPTION1, PROPERTY_ORIENTATION_OPTION2,PROPERTY_ORIENTATION_OPTION3};
+
+
+    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_RATIO_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".best.fit.aspect.ratio";
+    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_LABEL = "Scene Aspect Ratio (Best Fit)";
+    public static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_TOOLTIP = "For Best Fit: Scene aspect ratio which triggers determination of horizontal or vertical color bar";
+    private static final String PROPERTY_ANGLE_BEST_FIT_ASPECT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "BestFitAspectRatio";
+    public static final boolean PROPERTY_ANGLE_BEST_FIT_ASPECT_DEFAULT = true;
+    public static final Class PROPERTY_ANGLE_BEST_FIT_ASPECT_TYPE = Boolean.class;
 
 
     public static final String VERTICAL_TITLE_LEFT = "Left";

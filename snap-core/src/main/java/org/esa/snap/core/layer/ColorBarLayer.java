@@ -52,7 +52,7 @@ public class ColorBarLayer extends Layer {
     private boolean imageLegendInitialized = false;
 
     boolean autoApplyPrevious;
-    int orientationPrevious;
+    String orientationPrevious;
     String locationPrevious;
     String titlePreferences;
     String titleAltPreferences;
@@ -148,15 +148,15 @@ public class ColorBarLayer extends Layer {
                 boolean autoDetermineOrientation = true;
                 boolean autoDetermineOffsetShift = true;
 
-                if (autoDetermineOrientation) {
-                    if (raster.getRasterWidth() > raster.getRasterHeight()) {
-                        setOrientation(ImageLegend.HORIZONTAL);
-                    } else {
-                        setOrientation(ImageLegend.VERTICAL);
-                    }
-                }
+//                if (autoDetermineOrientation) {
+//                    if (raster.getRasterWidth() > raster.getRasterHeight()) {
+//                        setOrientation(ImageLegend.HORIZONTAL);
+//                    } else {
+//                        setOrientation(ImageLegend.VERTICAL);
+//                    }
+//                }
 
-                if (getOrientation() == ImageLegend.HORIZONTAL) {
+                if (isHorizontalColorBar()) {
                     // todo Preference placement (horizontal)
                     setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
                 } else {
@@ -221,11 +221,11 @@ public class ColorBarLayer extends Layer {
 
 
             if ((isColorBarLocationInside() != colorBarLocationInsidePrevious) ||
-                    (orientationPrevious != getOrientation()) ||
+                    (getOrientation() != null && !getOrientation().equals(orientationPrevious)) ||
                     (getColorBarLocationPlacement() != null & !getColorBarLocationPlacement().equals(locationPrevious))
             ) {
-                if (orientationPrevious != getOrientation()) {
-                    if (getOrientation() == ImageLegend.HORIZONTAL) {
+                if (getOrientation() != null && !getOrientation().equals(orientationPrevious)) {
+                    if (isHorizontalColorBar()) {
                         // todo Preference placement (horizontal)
                         setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
                     } else {
@@ -243,7 +243,7 @@ public class ColorBarLayer extends Layer {
                     double offsetShiftMultiplicationFactor = 0.1;
                     double imageAverageSize = (raster.getRasterWidth() + raster.getRasterHeight()) / 2;
 
-                    if (getOrientation() == ImageLegend.HORIZONTAL) {
+                    if (isHorizontalColorBar()) {
                         if (ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationPlacement()) ||
                                 ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationPlacement()) ||
                                 ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationPlacement())) {
@@ -539,8 +539,8 @@ public class ColorBarLayer extends Layer {
         int rasterHeight = raster.getRasterHeight();
 
 
-        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(getLocationOffset()) : (getLocationOffset());
-        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (getLocationShift()) : -(getLocationShift());
+        double offset = (isHorizontalColorBar()) ? -(getLocationOffset()) : (getLocationOffset());
+        double shift = (isHorizontalColorBar()) ? (getLocationShift()) : -(getLocationShift());
 //        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? -(getTitleFontSize() * getLocationOffset() / 100) : (getTitleFontSize() * getLocationOffset() / 100);
 //        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (getTitleFontSize() * getLocationShift() / 100) : -(getTitleFontSize() * getLocationShift() / 100);
 
@@ -548,7 +548,7 @@ public class ColorBarLayer extends Layer {
         double shiftAdjust = 0;
 
 
-        if (getOrientation() == ImageLegend.HORIZONTAL) {
+        if (isHorizontalColorBar()) {
             if (isColorBarLocationInside()) {
                 switch (getColorBarLocationPlacement()) {
 
@@ -715,8 +715,8 @@ public class ColorBarLayer extends Layer {
             }
         }
 
-        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + offsetAdjust : shift + shiftAdjust;
-        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + shiftAdjust : rasterWidth + offset + offsetAdjust;
+        double y_axis_translation = (isHorizontalColorBar()) ? rasterHeight + offset + offsetAdjust : shift + shiftAdjust;
+        double x_axis_translation = (isHorizontalColorBar()) ? shift + shiftAdjust : rasterWidth + offset + offsetAdjust;
 
         double[] flatmatrix = {1, 0.0, 0.0, 1, x_axis_translation, y_axis_translation};
 
@@ -875,36 +875,56 @@ public class ColorBarLayer extends Layer {
 
     // Orientation
 
-    private int getOrientation() {
+    private String getOrientation() {
         String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
                 ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
 
-        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
-            return ImageLegend.VERTICAL;
-        } else {
-            return ImageLegend.HORIZONTAL;
-        }
+        return orientation;
+
+//        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
+//            return ImageLegend.VERTICAL;
+//        } else {
+//            return ImageLegend.HORIZONTAL;
+//        }
     }
 
     // todo Danny
 
 
-    private void setOrientation(int value) {
+    private void setOrientation(String value) {
         try {
-            int valueCurrent = getOrientation();
+            String valueCurrent = getOrientation();
 
-            if (valueCurrent != value) {
-                String orientationString;
-                if (ImageLegend.HORIZONTAL == value) {
-                    orientationString = ColorBarLayerType.OPTION_HORIZONTAL;
-                } else {
-                    orientationString = ColorBarLayerType.OPTION_VERTICAL;
-                }
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY).setValue((Object) orientationString);
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {
         }
     }
+
+
+
+
+    public boolean isHorizontalColorBar() {
+        if (ColorBarLayerType.OPTION_BEST_FIT.equals(getOrientation())) {
+            double triggerAspectRatio = 1.0;
+            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? raster.getRasterWidth() / raster.getRasterHeight(): 1.0;
+            // todo Preference on aspectRatio for best fit
+//            if (raster.getRasterWidth() > raster.getRasterHeight()) {
+            if (sceneAspectRatio > triggerAspectRatio) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (ColorBarLayerType.OPTION_HORIZONTAL.equals(getOrientation())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
 
 
     private String getTitleVerticalAnchor() {
