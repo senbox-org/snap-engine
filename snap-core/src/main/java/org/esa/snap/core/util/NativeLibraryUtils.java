@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,30 +35,47 @@ public class NativeLibraryUtils {
     }
 
     public static void registerNativePaths(String... paths) {
-        if (paths == null || paths.length == 0)
+        if (paths == null || paths.length == 0) {
             return;
+        }
+
         String propertyValue = System.getProperty(JAVA_LIB_PATH);
         StringBuilder builder = new StringBuilder();
         for (String path : paths) {
-            if (!StringUtils.isNullOrEmpty(propertyValue) &&
-                    (!propertyValue.contains(path) ||
-                            propertyValue.contains(path + File.separator))) {
+            if (StringUtils.isNullOrEmpty(propertyValue)) {
+                continue;
+            }
+            if (!propertyValue.contains(path) || propertyValue.contains(path + File.separator)) {
                 builder.append(path).append(File.pathSeparator);
             }
         }
         if (!StringUtils.isNullOrEmpty(propertyValue)) {
-            propertyValue = builder.toString() + propertyValue;
-        } else {
-            propertyValue = builder.toString();
+            builder.append(propertyValue);
         }
+
+        propertyValue = builder.toString();
         System.setProperty(JAVA_LIB_PATH, propertyValue);
+
+        boolean initialized = true;
         try {
-            java.lang.reflect.Method initializePathMethod = PrivilegedAccessor.getMethod(ClassLoader.class, "initializePath", new Class[]{String.class});
-            initializePathMethod.setAccessible(true);
-            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, JAVA_LIB_PATH);
-            PrivilegedAccessor.setStaticValue(ClassLoader.class, "usr_paths", updatedUsrPaths);
+            // try to re-trigger library path loading - JDK 11 approach
+            Method initLibraryPaths = ClassLoader.class.getDeclaredMethod("initLibraryPaths");
+            initLibraryPaths.setAccessible(true);
+            initLibraryPaths.invoke(null);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            initialized = false;
+        }
+
+        if (!initialized) {
+            try {
+                // try to re-trigger library path loading - JDK 8 approach
+                java.lang.reflect.Method initializePathMethod = PrivilegedAccessor.getMethod(ClassLoader.class, "initializePath", new Class[]{String.class});
+                initializePathMethod.setAccessible(true);
+                String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, JAVA_LIB_PATH);
+                PrivilegedAccessor.setStaticValue(ClassLoader.class, "usr_paths", updatedUsrPaths);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
