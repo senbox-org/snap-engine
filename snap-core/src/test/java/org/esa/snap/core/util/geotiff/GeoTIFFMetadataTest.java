@@ -16,7 +16,7 @@
 package org.esa.snap.core.util.geotiff;
 
 import junit.framework.TestCase;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.util.List;
 

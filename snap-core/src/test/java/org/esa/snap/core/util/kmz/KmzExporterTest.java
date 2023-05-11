@@ -18,10 +18,10 @@ package org.esa.snap.core.util.kmz;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.DOMBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.input.DOMBuilder;
 import org.junit.Test;
 import org.opengis.geometry.BoundingBox;
 import org.xml.sax.SAXException;
@@ -35,7 +35,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class KmzExporterTest {
 
@@ -168,7 +169,7 @@ public class KmzExporterTest {
     }
 
     private Document convertToDocument(String xmlString) throws ParserConfigurationException, SAXException,
-                                                                IOException {
+            IOException {
 
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();

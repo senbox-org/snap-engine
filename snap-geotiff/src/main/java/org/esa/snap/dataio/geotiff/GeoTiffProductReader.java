@@ -28,24 +28,7 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.GcpDescriptor;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Placemark;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.subset.PixelSubsetRegion;
@@ -55,8 +38,8 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.jdom.Document;
-import org.jdom.input.DOMBuilder;
+import org.jdom2.Document;
+import org.jdom2.input.DOMBuilder;
 import org.xml.sax.SAXException;
 
 import javax.imageio.spi.ImageInputStreamSpi;
@@ -65,9 +48,7 @@ import javax.media.jai.JAI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
@@ -77,11 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class GeoTiffProductReader extends AbstractProductReader {
 
@@ -163,14 +140,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
                                           Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight,
                                           ProductData destBuffer, ProgressMonitor pm)
-                                          throws IOException {
+            throws IOException {
 
         if (this.geoTiffImageReader == null) {
             throw new NullPointerException("The image reader is null.");
         }
 
-        DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage)destBand.getSourceImage();
-        GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource)defaultMultiLevelImage.getSource();
+        DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage) destBand.getSourceImage();
+        GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource) defaultMultiLevelImage.getSource();
         Raster data;
         synchronized (this.geoTiffImageReader) {
             data = this.geoTiffImageReader.readRect(geoTiffMultiLevelSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
@@ -219,7 +196,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName) throws Exception {
-        return readProduct(geoTiffImageReader, productName, (ProductSubsetDef)null);
+        return readProduct(geoTiffImageReader, productName, (ProductSubsetDef) null);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName, ProductSubsetDef subsetDef) throws Exception {
@@ -251,7 +228,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds,
                                Double noDataValue, ProductSubsetDef subsetDef)
-                               throws Exception {
+            throws Exception {
 
         if (geoTiffImageReader == null) {
             throw new NullPointerException("The image reader is null.");
@@ -333,7 +310,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     // It is not necessary for flags with short or byte data type, because thre is a next higher data type which can take the value, but for int32 there is none.
                     boolean interpretAsUnsignedInt = dataBufferType >= DataBuffer.TYPE_INT && ProductData.isUIntType(band.getDataType());
                     GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, interpretAsUnsignedInt, productBounds, mosaicImageTileSize, bandIndex,
-                                                                                           band.getGeoCoding(), isGlobalShifted180, noDataValue, defaultJAIReadTileSize);
+                            band.getGeoCoding(), isGlobalShifted180, noDataValue, defaultJAIReadTileSize);
                     ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
                 }
@@ -344,7 +321,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 if (product.removeBand(band)) {
                     i--;
                 } else {
-                    throw new IllegalStateException("Failed to remove the band '" + band.getName()+"' at index " + i + " from the product.");
+                    throw new IllegalStateException("Failed to remove the band '" + band.getName() + "' at index " + i + " from the product.");
                 }
             }
         }
@@ -468,7 +445,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
-                                          throws Exception {
+            throws Exception {
 
         boolean isGlobalShifted180 = false;
         if (info.containsField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT)) {

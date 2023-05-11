@@ -17,11 +17,7 @@ package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
@@ -30,9 +26,9 @@ import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.geotools.referencing.CRS;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -42,7 +38,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
@@ -76,7 +72,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                 try {
                     final SAXBuilder saxBuilder = new SAXBuilder();
                     String stripped = xml.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
-                    final org.jdom.Document build = saxBuilder.build(new StringReader(stripped));
+                    final org.jdom2.Document build = saxBuilder.build(new StringReader(stripped));
                     final Element rootElement = build.getRootElement();
                     final Element parent = new Element("parent");
                     parent.addContent(rootElement.detach());

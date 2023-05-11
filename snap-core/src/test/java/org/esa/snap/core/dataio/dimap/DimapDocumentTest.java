@@ -16,52 +16,25 @@
 package org.esa.snap.core.dataio.dimap;
 
 import org.esa.snap.GlobalTestTools;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.StxFactory;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.LambertConformalConicDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
-import org.jdom.Document;
-import org.jdom.Element;
+import org.jdom2.Document;
+import org.jdom2.Element;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.Color;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.awt.*;
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class DimapDocumentTest {
 
@@ -177,7 +150,7 @@ public class DimapDocumentTest {
         } catch (IllegalArgumentException e) {
             final String expectedString = "dom";
             assertTrue("Error message must contain '" + expectedString + "'",
-                       e.getMessage().indexOf(expectedString) > -1);
+                    e.getMessage().indexOf(expectedString) > -1);
         }
 
         //Test product ist null
@@ -187,7 +160,7 @@ public class DimapDocumentTest {
         } catch (IllegalArgumentException e) {
             final String expectedString = "product";
             assertTrue("Error message must contain '" + expectedString + "'",
-                       e.getMessage().indexOf(expectedString) > -1);
+                    e.getMessage().indexOf(expectedString) > -1);
         }
 
         //Test inputDir ist null
@@ -197,7 +170,7 @@ public class DimapDocumentTest {
         } catch (IllegalArgumentException e) {
             final String expectedString = "inputDir";
             assertTrue("Error message must contain '" + expectedString + "'",
-                       e.getMessage().indexOf(expectedString) > -1);
+                    e.getMessage().indexOf(expectedString) > -1);
         }
     }
 
@@ -271,7 +244,7 @@ public class DimapDocumentTest {
         final MetadataAttribute attribute4 = new MetadataAttribute("attrib4", productData4, true);
         mdElem1.addAttribute(attribute4);
         MetadataAttribute stringAttrib = new MetadataAttribute("StringAttrib",
-                                                               ProductData.createInstance("StringAttribValue"), true);
+                ProductData.createInstance("StringAttribValue"), true);
         mdElem1.addAttribute(stringAttrib);
 
         final ProductData productData5 = ProductData.createInstance(ProductData.TYPE_UTC);
@@ -304,18 +277,18 @@ public class DimapDocumentTest {
                 final double[] lats = new double[]{4.0, 5.0, 6.0};
 
                 final GcpGeoCoding gcpGeoCoding = new GcpGeoCoding(GcpGeoCoding.Method.POLYNOMIAL1, x, y, lons, lats,
-                                                                   product.getSceneRasterWidth(),
-                                                                   product.getSceneRasterHeight(),
-                                                                   Datum.WGS_84);
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(),
+                        Datum.WGS_84);
                 gcpGeoCoding.setOriginalGeoCoding(new TiePointGeoCoding(product.getTiePointGrid("tpg1"),
-                                                                        product.getTiePointGrid("tpg2"),
-                                                                        Datum.WGS_84));
+                        product.getTiePointGrid("tpg2"),
+                        Datum.WGS_84));
                 product.setSceneGeoCoding(gcpGeoCoding);
                 break;
             default:
                 final TiePointGeoCoding tiePointGeoCoding = new TiePointGeoCoding(product.getTiePointGrid("tpg1"),
-                                                                                  product.getTiePointGrid("tpg2"),
-                                                                                  Datum.WGS_84);
+                        product.getTiePointGrid("tpg2"),
+                        Datum.WGS_84);
                 product.setSceneGeoCoding(tiePointGeoCoding);
         }
     }
@@ -324,15 +297,15 @@ public class DimapDocumentTest {
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
         final TiePointGrid tiePointGrid = createTiePointGrid("tpg1", sceneRasterWidth, sceneRasterHeight, 21.1, 14.2,
-                                                             16.3, 32.004,
-                                                             false);
+                16.3, 32.004,
+                false);
         product.addTiePointGrid(tiePointGrid);
 
         tiePointGrid.getOverlayMaskGroup().add(product.getMaskGroup().get("name2"));
         tiePointGrid.getOverlayMaskGroup().add(product.getMaskGroup().get("name3"));
 
         product.addTiePointGrid(
-                    createTiePointGrid("tpg2", sceneRasterWidth, sceneRasterHeight, 21.1, 14.2, 16.3, 32.004, true));
+                createTiePointGrid("tpg2", sceneRasterWidth, sceneRasterHeight, 21.1, 14.2, 16.3, 32.004, true));
     }
 
     private TiePointGrid createTiePointGrid(String name, int sceneW, int sceneH, double offX, double offY, double stepX,
@@ -346,17 +319,17 @@ public class DimapDocumentTest {
         TiePointGrid tpg = null;
         if (!cyclic) {
             tpg = new TiePointGrid(name,
-                                   gridWidth, gridHeight,
-                                   offX, offY,
-                                   stepX, stepY,
-                                   floats);
+                    gridWidth, gridHeight,
+                    offX, offY,
+                    stepX, stepY,
+                    floats);
         } else {
             tpg = new TiePointGrid(name,
-                                   gridWidth, gridHeight,
-                                   offX, offY,
-                                   stepX, stepY,
-                                   floats,
-                                   TiePointGrid.DISCONT_AT_180);
+                    gridWidth, gridHeight,
+                    offX, offY,
+                    stepX, stepY,
+                    floats,
+                    TiePointGrid.DISCONT_AT_180);
         }
         tpg.setDescription(name + "-Description");
         tpg.setUnit(name + "-unit");
@@ -437,7 +410,7 @@ public class DimapDocumentTest {
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
         VirtualBand virtualBand = new VirtualBand("vb1", ProductData.TYPE_FLOAT32, sceneRasterWidth, sceneRasterHeight,
-                                                  "radiance_8");
+                "radiance_8");
         virtualBand.setNoDataValue(3f);
         virtualBand.setNoDataValueUsed(true);
         virtualBand.setDescription("VirtualBand-Description");
@@ -446,12 +419,12 @@ public class DimapDocumentTest {
 
     private Stx createStx() {
         return new StxFactory()
-                    .withMinimum(-0.2)
-                    .withMaximum(3)
-                    .withMean(5.5)
-                    .withStandardDeviation(3.67)
-                    .withHistogramBins(new int[]{4, 5, 4, 7, 5, 8})
-                    .create();
+                .withMinimum(-0.2)
+                .withMaximum(3)
+                .withMean(5.5)
+                .withStandardDeviation(3.67)
+                .withHistogramBins(new int[]{4, 5, 4, 7, 5, 8})
+                .create();
     }
 
     private ImageInfo createImageInfo() {
@@ -806,33 +779,9 @@ public class DimapDocumentTest {
         pw.println("        </Mask_Usage>");
         pw.println("    </Image_Display>");
         pw.println("    <Masks>");
-        pw.println("        <Mask type=\"Maths\">");
-        pw.println("            <NAME value=\"name1\" />");
-        pw.println("            <MASK_RASTER_WIDTH value=\"1121\" />");
-        pw.println("            <MASK_RASTER_HEIGHT value=\"2241\" />");
-        pw.println("            <DESCRIPTION value=\"mask.description1\" />");
-        pw.println("            <COLOR red=\"0\" green=\"0\" blue=\"0\" alpha=\"255\" />");
-        pw.println("            <TRANSPARENCY value=\"1.0\" />");
-        pw.println("            <EXPRESSION value=\"mask.expression1\" />");
-        pw.println("        </Mask>");
-        pw.println("        <Mask type=\"Maths\">");
-        pw.println("            <NAME value=\"name2\" />");
-        pw.println("            <MASK_RASTER_WIDTH value=\"1121\" />");
-        pw.println("            <MASK_RASTER_HEIGHT value=\"2241\" />");
-        pw.println("            <DESCRIPTION value=\"mask.description2\" />");
-        pw.println("            <COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" />");
-        pw.println("            <TRANSPARENCY value=\"0.75\" />");
-        pw.println("            <EXPRESSION value=\"mask.expression2\" />");
-        pw.println("        </Mask>");
-        pw.println("        <Mask type=\"Maths\">");
-        pw.println("            <NAME value=\"name3\" />");
-        pw.println("            <MASK_RASTER_WIDTH value=\"1121\" />");
-        pw.println("            <MASK_RASTER_HEIGHT value=\"2241\" />");
-        pw.println("            <DESCRIPTION value=\"mask.description3\" />");
-        pw.println("            <COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" />");
-        pw.println("            <TRANSPARENCY value=\"0.23409999907016754\" />");
-        pw.println("            <EXPRESSION value=\"mask.expression3\" />");
-        pw.println("        </Mask>");
+        pw.println("        <Mask type=\"Maths\"><NAME value=\"name1\" /><MASK_RASTER_WIDTH value=\"1121\" /><MASK_RASTER_HEIGHT value=\"2241\" /><DESCRIPTION value=\"mask.description1\" /><COLOR red=\"0\" green=\"0\" blue=\"0\" alpha=\"255\" /><TRANSPARENCY value=\"1.0\" /><EXPRESSION value=\"mask.expression1\" /></Mask>");
+        pw.println("        <Mask type=\"Maths\"><NAME value=\"name2\" /><MASK_RASTER_WIDTH value=\"1121\" /><MASK_RASTER_HEIGHT value=\"2241\" /><DESCRIPTION value=\"mask.description2\" /><COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" /><TRANSPARENCY value=\"0.75\" /><EXPRESSION value=\"mask.expression2\" /></Mask>");
+        pw.println("        <Mask type=\"Maths\"><NAME value=\"name3\" /><MASK_RASTER_WIDTH value=\"1121\" /><MASK_RASTER_HEIGHT value=\"2241\" /><DESCRIPTION value=\"mask.description3\" /><COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" /><TRANSPARENCY value=\"0.23409999907016754\" /><EXPRESSION value=\"mask.expression3\" /></Mask>");
         pw.println("    </Masks>");
         pw.println("    <Image_Interpretation>");
         pw.println("        <Spectral_Band_Info>");
@@ -1071,10 +1020,10 @@ public class DimapDocumentTest {
                     mdAttr.setAttribute(DimapProductConstants.ATTRIB_MODE, "rw");
                 }
                 if (attribute.getNumDataElems() > 1 &&
-                    !ProductData.TYPESTRING_ASCII.equals(dataTypeString) &&
-                    !ProductData.TYPESTRING_UTC.equals(dataTypeString)) {
+                        !ProductData.TYPESTRING_ASCII.equals(dataTypeString) &&
+                        !ProductData.TYPESTRING_UTC.equals(dataTypeString)) {
                     mdAttr.setAttribute(DimapProductConstants.ATTRIB_ELEMS,
-                                        String.valueOf(attribute.getNumDataElems()));
+                            String.valueOf(attribute.getNumDataElems()));
                 }
                 if (ProductData.TYPESTRING_ASCII.equals(dataTypeString)) {
                     mdAttr.setText(new String((byte[]) attribute.getDataElems()));
@@ -1104,11 +1053,11 @@ public class DimapDocumentTest {
         private void addDataAccessElements() { //Übernommen
             Element dataAccess = new Element(DimapProductConstants.TAG_DATA_ACCESS);
             JDomHelper.addElement(DimapProductConstants.TAG_DATA_FILE_FORMAT, DimapProductConstants.DATA_FILE_FORMAT,
-                                  dataAccess);
+                    dataAccess);
             JDomHelper.addElement(DimapProductConstants.TAG_DATA_FILE_FORMAT_DESC,
-                                  DimapProductConstants.DATA_FILE_FORMAT_DESCRIPTION, dataAccess);
+                    DimapProductConstants.DATA_FILE_FORMAT_DESCRIPTION, dataAccess);
             JDomHelper.addElement(DimapProductConstants.TAG_DATA_FILE_ORGANISATION,
-                                  DimapProductConstants.DATA_FILE_ORGANISATION, dataAccess);
+                    DimapProductConstants.DATA_FILE_ORGANISATION, dataAccess);
 
 
             String[] names = getProduct().getBandNames();
@@ -1116,7 +1065,7 @@ public class DimapDocumentTest {
                 Element dataFile = new Element(DimapProductConstants.TAG_DATA_FILE);
                 Element dataFilePath = new Element(DimapProductConstants.TAG_DATA_FILE_PATH);
                 dataFilePath.setAttribute(DimapProductConstants.ATTRIB_HREF,
-                                          nameDataDirectory + "/" + names[i] + EnviHeader.FILE_EXTENSION);
+                        nameDataDirectory + "/" + names[i] + EnviHeader.FILE_EXTENSION);
                 dataFile.addContent(dataFilePath);
                 JDomHelper.addElement(DimapProductConstants.TAG_BAND_INDEX, i, dataFile);
                 dataAccess.addContent(dataFile);
@@ -1128,7 +1077,7 @@ public class DimapDocumentTest {
                 Element dataFile = new Element(DimapProductConstants.TAG_TIE_POINT_GRID_FILE);
                 Element dataFilePath = new Element(DimapProductConstants.TAG_TIE_POINT_GRID_FILE_PATH);
                 dataFilePath.setAttribute(DimapProductConstants.ATTRIB_HREF,
-                                          nameDataDirectory + "/" + DimapProductConstants.TIE_POINT_GRID_DIR_NAME + "/" + names1[i] + EnviHeader.FILE_EXTENSION);
+                        nameDataDirectory + "/" + DimapProductConstants.TIE_POINT_GRID_DIR_NAME + "/" + names1[i] + EnviHeader.FILE_EXTENSION);
                 dataFile.addContent(dataFilePath);
                 JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_GRID_INDEX, i, dataFile);
                 dataAccess.addContent(dataFile);
@@ -1143,7 +1092,7 @@ public class DimapDocumentTest {
             if (numTiePointGrids > 0) {
                 Element tiePointGrids = new Element(DimapProductConstants.TAG_TIE_POINT_GRIDS);
                 JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_NUM_TIE_POINT_GRIDS, numTiePointGrids,
-                                      tiePointGrids);
+                        tiePointGrids);
                 root.addContent(tiePointGrids);
                 String[] gridNames = getProduct().getTiePointGridNames();
                 for (int i = 0; i < gridNames.length; i++) {
@@ -1152,25 +1101,25 @@ public class DimapDocumentTest {
                     Element tiePointGridInfo = new Element(DimapProductConstants.TAG_TIE_POINT_GRID_INFO);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_GRID_INDEX, i, tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_DESCRIPTION,
-                                          tiePointGrid.getDescription(), tiePointGridInfo);
+                            tiePointGrid.getDescription(), tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_PHYSICAL_UNIT, tiePointGrid.getUnit(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_GRID_NAME, tiePointGrid.getName(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_DATA_TYPE,
-                                          ProductData.getTypeString(tiePointGrid.getDataType()), tiePointGridInfo);
+                            ProductData.getTypeString(tiePointGrid.getDataType()), tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_NCOLS, tiePointGrid.getGridWidth(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_NROWS, tiePointGrid.getGridHeight(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_OFFSET_X, tiePointGrid.getOffsetX(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_OFFSET_Y, tiePointGrid.getOffsetY(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_STEP_X, tiePointGrid.getSubSamplingX(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     JDomHelper.addElement(DimapProductConstants.TAG_TIE_POINT_STEP_Y, tiePointGrid.getSubSamplingY(),
-                                          tiePointGridInfo);
+                            tiePointGridInfo);
                     tiePointGrids.addContent(tiePointGridInfo);
                 }
             }
@@ -1188,26 +1137,26 @@ public class DimapDocumentTest {
                     JDomHelper.addElement(DimapProductConstants.TAG_BAND_INDEX, i, bandStatisticsElem);
                     if (band.isStxSet()) {
                         JDomHelper.addElement(DimapProductConstants.TAG_STX_MIN, band.getStx().getMinimum(),
-                                              bandStatisticsElem);
+                                bandStatisticsElem);
                         JDomHelper.addElement(DimapProductConstants.TAG_STX_MAX, band.getStx().getMaximum(),
-                                              bandStatisticsElem);
+                                bandStatisticsElem);
                         JDomHelper.addElement(DimapProductConstants.TAG_STX_MEAN, band.getStx().getMean(),
-                                              bandStatisticsElem);
+                                bandStatisticsElem);
                         JDomHelper.addElement(DimapProductConstants.TAG_STX_STDDEV,
-                                              band.getStx().getStandardDeviation(),
-                                              bandStatisticsElem);
+                                band.getStx().getStandardDeviation(),
+                                bandStatisticsElem);
                         JDomHelper.addElement(DimapProductConstants.TAG_STX_LEVEL, band.getStx().getResolutionLevel(),
-                                              bandStatisticsElem);
+                                bandStatisticsElem);
 
                         final int[] bins = band.getStx().getHistogramBins();
                         if (bins != null && bins.length > 0) {
                             JDomHelper.addElement(DimapProductConstants.TAG_HISTOGRAM, StringUtils.arrayToCsv(bins),
-                                                  bandStatisticsElem);
+                                    bandStatisticsElem);
                         }
                     }
                     JDomHelper.addElement(DimapProductConstants.TAG_NUM_COLORS,
-                                          imageInfo.getColorPaletteDef().getNumColors(),
-                                          bandStatisticsElem);
+                            imageInfo.getColorPaletteDef().getNumColors(),
+                            bandStatisticsElem);
                     ColorPaletteDef paletteDefinition = imageInfo.getColorPaletteDef();
 
                     //addColorPalettePoints(paletteDefinition, bandStatisticsElem);
@@ -1217,7 +1166,7 @@ public class DimapDocumentTest {
                         Element colorPalettePointElem = new Element(DimapProductConstants.TAG_COLOR_PALETTE_POINT);
                         bandStatisticsElem.addContent(colorPalettePointElem);
                         JDomHelper.addElement(DimapProductConstants.TAG_SAMPLE, point.getSample(),
-                                              colorPalettePointElem);
+                                colorPalettePointElem);
                         colorPalettePointElem.addContent(createColorElement(point.getColor()));
                     }
                 }
@@ -1268,7 +1217,7 @@ public class DimapDocumentTest {
                 JDomHelper.addElement(DimapProductConstants.TAG_BAND_DESCRIPTION, band.getDescription(), sbiElem);
                 JDomHelper.addElement(DimapProductConstants.TAG_BAND_NAME, band.getName(), sbiElem);
                 JDomHelper.addElement(DimapProductConstants.TAG_DATA_TYPE,
-                                      ProductData.getTypeString(band.getDataType()), sbiElem);
+                        ProductData.getTypeString(band.getDataType()), sbiElem);
                 final String unit = band.getUnit();
                 if (unit != null && unit.length() > 0) {
                     JDomHelper.addElement(DimapProductConstants.TAG_PHYSICAL_UNIT, unit, sbiElem);
@@ -1276,7 +1225,7 @@ public class DimapDocumentTest {
                 JDomHelper.addElement(DimapProductConstants.TAG_SOLAR_FLUX, band.getSolarFlux(), sbiElem);
                 if (band.getSpectralBandIndex() > -1) {
                     JDomHelper.addElement(DimapProductConstants.TAG_SPECTRAL_BAND_INDEX, band.getSpectralBandIndex(),
-                                          sbiElem);
+                            sbiElem);
                 }
                 JDomHelper.addElement(DimapProductConstants.TAG_BAND_WAVELEN, band.getSpectralWavelength(), sbiElem);
                 FlagCoding flagCoding = band.getFlagCoding();
@@ -1296,7 +1245,7 @@ public class DimapDocumentTest {
             Element metadataID = new Element(DimapProductConstants.TAG_METADATA_ID);
             addMetadataFormatElement(metadataID);
             JDomHelper.addElement(DimapProductConstants.TAG_METADATA_PROFILE,
-                                  DimapProductConstants.DIMAP_METADATA_PROFILE, metadataID);
+                    DimapProductConstants.DIMAP_METADATA_PROFILE, metadataID);
             root.addContent(metadataID);
         }
 
@@ -1310,7 +1259,7 @@ public class DimapDocumentTest {
             Element rasterDimension = new Element(DimapProductConstants.TAG_RASTER_DIMENSIONS);
             JDomHelper.addElement(DimapProductConstants.TAG_NCOLS, getProduct().getSceneRasterWidth(), rasterDimension);
             JDomHelper.addElement(DimapProductConstants.TAG_NROWS, getProduct().getSceneRasterHeight(),
-                                  rasterDimension);
+                    rasterDimension);
             JDomHelper.addElement(DimapProductConstants.TAG_NBANDS, getProduct().getNumBands(), rasterDimension);
             root.addContent(rasterDimension);
         }
@@ -1318,7 +1267,7 @@ public class DimapDocumentTest {
         private void addProductionElements() { //Übernommen
             Element production = new Element(DimapProductConstants.TAG_PRODUCTION);
             JDomHelper.addElement(DimapProductConstants.TAG_DATASET_PRODUCER_NAME,
-                                  DimapProductConstants.DATASET_PRODUCER_NAME, production);
+                    DimapProductConstants.DATASET_PRODUCER_NAME, production);
             JDomHelper.addElement(DimapProductConstants.TAG_PRODUCT_TYPE, getProduct().getProductType(), production);
             root.addContent(production);
         }
@@ -1360,7 +1309,7 @@ public class DimapDocumentTest {
         private void addDatasetIdElements() {  //Übernommen
             Element datasetID = new Element(DimapProductConstants.TAG_DATASET_ID);
             JDomHelper.addElement(DimapProductConstants.TAG_DATASET_SERIES, DimapProductConstants.DIMAP_DATASET_SERIES,
-                                  datasetID);
+                    datasetID);
             JDomHelper.addElement(DimapProductConstants.TAG_DATASET_NAME, getProduct().getName(), datasetID);
             final String description = getProduct().getDescription();
             if (description != null && description.length() > 0) {

@@ -26,9 +26,9 @@ import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.util.math.FXYSum;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,7 +74,7 @@ public class GcpGeoCodingPersistenceConverterTest {
         final FXYSum.Linear latFunction = new FXYSum.Linear(new double[]{3, 4, 5});
         final FXYSum.Linear lonFunction = new FXYSum.Linear(new double[]{4, 5, 6});
         _originalGC = new FXYGeoCoding(pixelOffsetX, pixelOffsetY, pixelSizeX, pixelSizeY,
-                                       xFunction, yFunction, latFunction, lonFunction, datum);
+                xFunction, yFunction, latFunction, lonFunction, datum);
         _gcpGeoCoding.setOriginalGeoCoding(_originalGC);
 
         _testProduct = new Product("PName", "PType", width, height);
@@ -186,165 +186,165 @@ public class GcpGeoCodingPersistenceConverterTest {
 
     private String getExpectedXML() {
         return "<GcpGeoCoding>\n" +
-               "  <Coordinate_Reference_System>\n" +
-               "    <Horizontal_CS>\n" +
-               "      <Geographic_CS>\n" +
-               "        <Horizontal_Datum>\n" +
-               "          <Ellipsoid>\n" +
-               "            <Ellipsoid_Parameters>\n" +
-               "              <ELLIPSOID_MAJ_AXIS>\n" +
-               "                <unit>M</unit>\n" +
-               "                <value>6378137.0</value>\n" +
-               "              </ELLIPSOID_MAJ_AXIS>\n" +
-               "              <ELLIPSOID_MIN_AXIS>\n" +
-               "                <unit>M</unit>\n" +
-               "                <value>6356752.3</value>\n" +
-               "              </ELLIPSOID_MIN_AXIS>\n" +
-               "            </Ellipsoid_Parameters>\n" +
-               "            <ELLIPSOID_NAME>WGS-84</ELLIPSOID_NAME>\n" +
-               "          </Ellipsoid>\n" +
-               "          <HORIZONTAL_DATUM_NAME>WGS-84</HORIZONTAL_DATUM_NAME>\n" +
-               "        </Horizontal_Datum>\n" +
-               "      </Geographic_CS>\n" +
-               "      <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>\n" +
-               "    </Horizontal_CS>\n" +
-               "  </Coordinate_Reference_System>\n" +
-               "  <Geoposition>\n" +
-               "    <Geoposition_Points>\n" +
-               "      <Original_Geocoding>\n" +
-               "        <FXYGeoCoding>\n" +
-               "          <Coordinate_Reference_System>\n" +
-               "            <Horizontal_CS>\n" +
-               "              <Geographic_CS>\n" +
-               "                <Horizontal_Datum>\n" +
-               "                  <Ellipsoid>\n" +
-               "                    <Ellipsoid_Parameters>\n" +
-               "                      <ELLIPSOID_MAJ_AXIS>\n" +
-               "                        <unit>M</unit>\n" +
-               "                        <value>6378137.0</value>\n" +
-               "                      </ELLIPSOID_MAJ_AXIS>\n" +
-               "                      <ELLIPSOID_MIN_AXIS>\n" +
-               "                        <unit>M</unit>\n" +
-               "                        <value>6356752.3</value>\n" +
-               "                      </ELLIPSOID_MIN_AXIS>\n" +
-               "                    </Ellipsoid_Parameters>\n" +
-               "                    <ELLIPSOID_NAME>WGS-84</ELLIPSOID_NAME>\n" +
-               "                  </Ellipsoid>\n" +
-               "                  <HORIZONTAL_DATUM_NAME>WGS-84</HORIZONTAL_DATUM_NAME>\n" +
-               "                </Horizontal_Datum>\n" +
-               "              </Geographic_CS>\n" +
-               "              <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>\n" +
-               "            </Horizontal_CS>\n" +
-               "          </Coordinate_Reference_System>\n" +
-               "          <Geoposition>\n" +
-               "            <Geoposition_Insert>\n" +
-               "              <ULXMAP>1.0</ULXMAP>\n" +
-               "              <ULYMAP>2.0</ULYMAP>\n" +
-               "              <XDIM>3.0</XDIM>\n" +
-               "              <YDIM>4.0</YDIM>\n" +
-               "            </Geoposition_Insert>\n" +
-               "            <Simplified_Location_Model>\n" +
-               "              <Direct_Location_Model order=\"1\">\n" +
-               "                <lc_List>4.0, 5.0, 6.0</lc_List>\n" +
-               "                <pc_List>3.0, 4.0, 5.0</pc_List>\n" +
-               "              </Direct_Location_Model>\n" +
-               "              <Reverse_Location_Model order=\"1\">\n" +
-               "                <ic_List>1.0, 2.0, 3.0</ic_List>\n" +
-               "                <jc_List>2.0, 3.0, 4.0</jc_List>\n" +
-               "              </Reverse_Location_Model>\n" +
-               "            </Simplified_Location_Model>\n" +
-               "          </Geoposition>\n" +
-               "          <___persistence_id___>FXYGC:1</___persistence_id___>\n" +
-               "        </FXYGeoCoding>\n" +
-               "      </Original_Geocoding>\n" +
-               "      <INTERPOLATION_METHOD>POLYNOMIAL1</INTERPOLATION_METHOD>\n" +
-               "    </Geoposition_Points>\n" +
-               "  </Geoposition>\n" +
-               "  <___persistence_id___>GcpGC:1</___persistence_id___>\n" +
-               "</GcpGeoCoding>";
+                "  <Coordinate_Reference_System>\n" +
+                "    <Horizontal_CS>\n" +
+                "      <Geographic_CS>\n" +
+                "        <Horizontal_Datum>\n" +
+                "          <Ellipsoid>\n" +
+                "            <Ellipsoid_Parameters>\n" +
+                "              <ELLIPSOID_MAJ_AXIS>\n" +
+                "                <unit>M</unit>\n" +
+                "                <value>6378137.0</value>\n" +
+                "              </ELLIPSOID_MAJ_AXIS>\n" +
+                "              <ELLIPSOID_MIN_AXIS>\n" +
+                "                <unit>M</unit>\n" +
+                "                <value>6356752.3</value>\n" +
+                "              </ELLIPSOID_MIN_AXIS>\n" +
+                "            </Ellipsoid_Parameters>\n" +
+                "            <ELLIPSOID_NAME>WGS-84</ELLIPSOID_NAME>\n" +
+                "          </Ellipsoid>\n" +
+                "          <HORIZONTAL_DATUM_NAME>WGS-84</HORIZONTAL_DATUM_NAME>\n" +
+                "        </Horizontal_Datum>\n" +
+                "      </Geographic_CS>\n" +
+                "      <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>\n" +
+                "    </Horizontal_CS>\n" +
+                "  </Coordinate_Reference_System>\n" +
+                "  <Geoposition>\n" +
+                "    <Geoposition_Points>\n" +
+                "      <Original_Geocoding>\n" +
+                "        <FXYGeoCoding>\n" +
+                "          <Coordinate_Reference_System>\n" +
+                "            <Horizontal_CS>\n" +
+                "              <Geographic_CS>\n" +
+                "                <Horizontal_Datum>\n" +
+                "                  <Ellipsoid>\n" +
+                "                    <Ellipsoid_Parameters>\n" +
+                "                      <ELLIPSOID_MAJ_AXIS>\n" +
+                "                        <unit>M</unit>\n" +
+                "                        <value>6378137.0</value>\n" +
+                "                      </ELLIPSOID_MAJ_AXIS>\n" +
+                "                      <ELLIPSOID_MIN_AXIS>\n" +
+                "                        <unit>M</unit>\n" +
+                "                        <value>6356752.3</value>\n" +
+                "                      </ELLIPSOID_MIN_AXIS>\n" +
+                "                    </Ellipsoid_Parameters>\n" +
+                "                    <ELLIPSOID_NAME>WGS-84</ELLIPSOID_NAME>\n" +
+                "                  </Ellipsoid>\n" +
+                "                  <HORIZONTAL_DATUM_NAME>WGS-84</HORIZONTAL_DATUM_NAME>\n" +
+                "                </Horizontal_Datum>\n" +
+                "              </Geographic_CS>\n" +
+                "              <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>\n" +
+                "            </Horizontal_CS>\n" +
+                "          </Coordinate_Reference_System>\n" +
+                "          <Geoposition>\n" +
+                "            <Geoposition_Insert>\n" +
+                "              <ULXMAP>1.0</ULXMAP>\n" +
+                "              <ULYMAP>2.0</ULYMAP>\n" +
+                "              <XDIM>3.0</XDIM>\n" +
+                "              <YDIM>4.0</YDIM>\n" +
+                "            </Geoposition_Insert>\n" +
+                "            <Simplified_Location_Model>\n" +
+                "              <Direct_Location_Model order=\"1\">\n" +
+                "                <lc_List>4.0, 5.0, 6.0</lc_List>\n" +
+                "                <pc_List>3.0, 4.0, 5.0</pc_List>\n" +
+                "              </Direct_Location_Model>\n" +
+                "              <Reverse_Location_Model order=\"1\">\n" +
+                "                <ic_List>1.0, 2.0, 3.0</ic_List>\n" +
+                "                <jc_List>2.0, 3.0, 4.0</jc_List>\n" +
+                "              </Reverse_Location_Model>\n" +
+                "            </Simplified_Location_Model>\n" +
+                "          </Geoposition>\n" +
+                "          <___persistence_id___>FXYGC:1</___persistence_id___>\n" +
+                "        </FXYGeoCoding>\n" +
+                "      </Original_Geocoding>\n" +
+                "      <INTERPOLATION_METHOD>POLYNOMIAL1</INTERPOLATION_METHOD>\n" +
+                "    </Geoposition_Points>\n" +
+                "  </Geoposition>\n" +
+                "  <___persistence_id___>GcpGC:1</___persistence_id___>\n" +
+                "</GcpGeoCoding>";
     }
 
     private String getExpectedJson() {
         return "{\n" +
-               "  \"GcpGeoCoding\" : {\n" +
-               "    \"___persistence_id___\" : \"GcpGC:1\",\n" +
-               "    \"Coordinate_Reference_System\" : {\n" +
-               "      \"Horizontal_CS\" : {\n" +
-               "        \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
-               "        \"Geographic_CS\" : {\n" +
-               "          \"Horizontal_Datum\" : {\n" +
-               "            \"HORIZONTAL_DATUM_NAME\" : \"WGS-84\",\n" +
-               "            \"Ellipsoid\" : {\n" +
-               "              \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
-               "              \"Ellipsoid_Parameters\" : {\n" +
-               "                \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-               "                  \"unit\" : \"M\",\n" +
-               "                  \"value\" : \"6378137.0\"\n" +
-               "                },\n" +
-               "                \"ELLIPSOID_MIN_AXIS\" : {\n" +
-               "                  \"unit\" : \"M\",\n" +
-               "                  \"value\" : \"6356752.3\"\n" +
-               "                }\n" +
-               "              }\n" +
-               "            }\n" +
-               "          }\n" +
-               "        }\n" +
-               "      }\n" +
-               "    },\n" +
-               "    \"Geoposition\" : {\n" +
-               "      \"Geoposition_Points\" : {\n" +
-               "        \"INTERPOLATION_METHOD\" : \"POLYNOMIAL1\",\n" +
-               "        \"Original_Geocoding\" : {\n" +
-               "          \"FXYGeoCoding\" : {\n" +
-               "            \"___persistence_id___\" : \"FXYGC:1\",\n" +
-               "            \"Coordinate_Reference_System\" : {\n" +
-               "              \"Horizontal_CS\" : {\n" +
-               "                \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
-               "                \"Geographic_CS\" : {\n" +
-               "                  \"Horizontal_Datum\" : {\n" +
-               "                    \"HORIZONTAL_DATUM_NAME\" : \"WGS-84\",\n" +
-               "                    \"Ellipsoid\" : {\n" +
-               "                      \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
-               "                      \"Ellipsoid_Parameters\" : {\n" +
-               "                        \"ELLIPSOID_MAJ_AXIS\" : {\n" +
-               "                          \"unit\" : \"M\",\n" +
-               "                          \"value\" : \"6378137.0\"\n" +
-               "                        },\n" +
-               "                        \"ELLIPSOID_MIN_AXIS\" : {\n" +
-               "                          \"unit\" : \"M\",\n" +
-               "                          \"value\" : \"6356752.3\"\n" +
-               "                        }\n" +
-               "                      }\n" +
-               "                    }\n" +
-               "                  }\n" +
-               "                }\n" +
-               "              }\n" +
-               "            },\n" +
-               "            \"Geoposition\" : {\n" +
-               "              \"Geoposition_Insert\" : {\n" +
-               "                \"ULXMAP\" : 1.0,\n" +
-               "                \"ULYMAP\" : 2.0,\n" +
-               "                \"XDIM\" : 3.0,\n" +
-               "                \"YDIM\" : 4.0\n" +
-               "              },\n" +
-               "              \"Simplified_Location_Model\" : {\n" +
-               "                \"Direct_Location_Model\" : {\n" +
-               "                  \"_$ATT$_order\" : 1,\n" +
-               "                  \"lc_List\" : [ 4.0, 5.0, 6.0 ],\n" +
-               "                  \"pc_List\" : [ 3.0, 4.0, 5.0 ]\n" +
-               "                },\n" +
-               "                \"Reverse_Location_Model\" : {\n" +
-               "                  \"_$ATT$_order\" : \"1\",\n" +
-               "                  \"ic_List\" : [ 1.0, 2.0, 3.0 ],\n" +
-               "                  \"jc_List\" : [ 2.0, 3.0, 4.0 ]\n" +
-               "                }\n" +
-               "              }\n" +
-               "            }\n" +
-               "          }\n" +
-               "        }\n" +
-               "      }\n" +
-               "    }\n" +
-               "  }\n" +
-               "}";
+                "  \"GcpGeoCoding\" : {\n" +
+                "    \"___persistence_id___\" : \"GcpGC:1\",\n" +
+                "    \"Coordinate_Reference_System\" : {\n" +
+                "      \"Horizontal_CS\" : {\n" +
+                "        \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
+                "        \"Geographic_CS\" : {\n" +
+                "          \"Horizontal_Datum\" : {\n" +
+                "            \"HORIZONTAL_DATUM_NAME\" : \"WGS-84\",\n" +
+                "            \"Ellipsoid\" : {\n" +
+                "              \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
+                "              \"Ellipsoid_Parameters\" : {\n" +
+                "                \"ELLIPSOID_MAJ_AXIS\" : {\n" +
+                "                  \"unit\" : \"M\",\n" +
+                "                  \"value\" : \"6378137.0\"\n" +
+                "                },\n" +
+                "                \"ELLIPSOID_MIN_AXIS\" : {\n" +
+                "                  \"unit\" : \"M\",\n" +
+                "                  \"value\" : \"6356752.3\"\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"Geoposition\" : {\n" +
+                "      \"Geoposition_Points\" : {\n" +
+                "        \"INTERPOLATION_METHOD\" : \"POLYNOMIAL1\",\n" +
+                "        \"Original_Geocoding\" : {\n" +
+                "          \"FXYGeoCoding\" : {\n" +
+                "            \"___persistence_id___\" : \"FXYGC:1\",\n" +
+                "            \"Coordinate_Reference_System\" : {\n" +
+                "              \"Horizontal_CS\" : {\n" +
+                "                \"HORIZONTAL_CS_TYPE\" : \"GEOGRAPHIC\",\n" +
+                "                \"Geographic_CS\" : {\n" +
+                "                  \"Horizontal_Datum\" : {\n" +
+                "                    \"HORIZONTAL_DATUM_NAME\" : \"WGS-84\",\n" +
+                "                    \"Ellipsoid\" : {\n" +
+                "                      \"ELLIPSOID_NAME\" : \"WGS-84\",\n" +
+                "                      \"Ellipsoid_Parameters\" : {\n" +
+                "                        \"ELLIPSOID_MAJ_AXIS\" : {\n" +
+                "                          \"unit\" : \"M\",\n" +
+                "                          \"value\" : \"6378137.0\"\n" +
+                "                        },\n" +
+                "                        \"ELLIPSOID_MIN_AXIS\" : {\n" +
+                "                          \"unit\" : \"M\",\n" +
+                "                          \"value\" : \"6356752.3\"\n" +
+                "                        }\n" +
+                "                      }\n" +
+                "                    }\n" +
+                "                  }\n" +
+                "                }\n" +
+                "              }\n" +
+                "            },\n" +
+                "            \"Geoposition\" : {\n" +
+                "              \"Geoposition_Insert\" : {\n" +
+                "                \"ULXMAP\" : 1.0,\n" +
+                "                \"ULYMAP\" : 2.0,\n" +
+                "                \"XDIM\" : 3.0,\n" +
+                "                \"YDIM\" : 4.0\n" +
+                "              },\n" +
+                "              \"Simplified_Location_Model\" : {\n" +
+                "                \"Direct_Location_Model\" : {\n" +
+                "                  \"_$ATT$_order\" : 1,\n" +
+                "                  \"lc_List\" : [ 4.0, 5.0, 6.0 ],\n" +
+                "                  \"pc_List\" : [ 3.0, 4.0, 5.0 ]\n" +
+                "                },\n" +
+                "                \"Reverse_Location_Model\" : {\n" +
+                "                  \"_$ATT$_order\" : \"1\",\n" +
+                "                  \"ic_List\" : [ 1.0, 2.0, 3.0 ],\n" +
+                "                  \"jc_List\" : [ 2.0, 3.0, 4.0 ]\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
     }
 }

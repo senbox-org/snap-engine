@@ -22,14 +22,14 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.ProductData;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
 
 import java.util.ArrayList;
 
 public class ConvolutionFilterBandPersistableSpiTest extends TestCase {
 
-       private ConvolutionFilterBandPersistableSpi _persistableSpi;
+    private ConvolutionFilterBandPersistableSpi _persistableSpi;
 
     @Override
     public void setUp() {
@@ -81,7 +81,7 @@ public class ConvolutionFilterBandPersistableSpiTest extends TestCase {
     public void testCanPersist() {
         final Band source = new Band("b", ProductData.TYPE_INT8, 2, 2);
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("test", source,
-                                                                    new Kernel(2, 2, new double[]{0, 1, 2, 3}), 1);
+                new Kernel(2, 2, new double[]{0, 1, 2, 3}), 1);
 
         assertTrue(_persistableSpi.canPersist(cfb));
 

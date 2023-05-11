@@ -22,8 +22,8 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeneralFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.ProductData;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
 
 import java.util.ArrayList;
 

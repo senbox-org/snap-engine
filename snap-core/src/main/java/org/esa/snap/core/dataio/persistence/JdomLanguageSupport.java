@@ -19,7 +19,7 @@
 package org.esa.snap.core.dataio.persistence;
 
 import org.esa.snap.core.util.StringUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.util.List;
 
@@ -74,8 +74,8 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
         }
     }
 
-    private void addAttributes(AttributeContainer attCon, List<org.jdom.Attribute> attributes) {
-        for (org.jdom.Attribute jdomA : attributes) {
+    private void addAttributes(AttributeContainer attCon, List<org.jdom2.Attribute> attributes) {
+        for (org.jdom2.Attribute jdomA : attributes) {
             final String name = jdomA.getName();
             if (ATTR___THE_UNCHANGED_NAME.equals(name)) {
                 continue;
@@ -139,7 +139,7 @@ public class JdomLanguageSupport implements MarkupLanguageSupport<Element> {
     }
 
     static String fetchNameFrom(Element element) {
-        final org.jdom.Attribute unmodifiedName = element.getAttribute(ATTR___THE_UNCHANGED_NAME);
+        final org.jdom2.Attribute unmodifiedName = element.getAttribute(ATTR___THE_UNCHANGED_NAME);
         if (unmodifiedName != null) {
             return unmodifiedName.getValue();
         }

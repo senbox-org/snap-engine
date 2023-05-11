@@ -30,7 +30,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -131,15 +131,15 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         }
 
         if (forwardInvalid
-            || inverseInvalid
-            || geoChecksInvalid
-            || lonVarNameInvalid
-            || latVarNameInvalid
-            || resolutionKmInvalid
-            || resolutionInKm == null
-            || geoChecksName == null
-            || invalidValueGeoChecks
-            || geoCRS == null) {
+                || inverseInvalid
+                || geoChecksInvalid
+                || lonVarNameInvalid
+                || latVarNameInvalid
+                || resolutionKmInvalid
+                || resolutionInKm == null
+                || geoChecksName == null
+                || invalidValueGeoChecks
+                || geoCRS == null) {
             SystemUtils.LOG.warning("Unable to create " + TAG_COMPONENT_GEO_CODING + ".");
             return null;
         }
@@ -180,8 +180,8 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
             final double subsamplingY = lonTPG.getSubSamplingY();
 
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, gridWidth, gridHeight,
-                                      sceneWidth, sceneHeight, resolutionInKm,
-                                      offsetX, offsetY, subsamplingX, subsamplingY);
+                    sceneWidth, sceneHeight, resolutionInKm,
+                    offsetX, offsetY, subsamplingX, subsamplingY);
         } else {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
@@ -197,7 +197,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
                 return null;
             }
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
-                                      resolutionInKm);
+                    resolutionInKm);
         }
 
         final Preferences snapPreferences = Config.instance("snap").preferences();
