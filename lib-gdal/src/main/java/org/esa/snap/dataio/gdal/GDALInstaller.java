@@ -26,15 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -218,6 +216,16 @@ class GDALInstaller {
         return config.preferences().get(PREFERENCE_KEY_DISTRIBUTION_HASH, null);
     }
 
+    private static String fetchDistributionDirectoryHash(GDALVersion gdalVersion) throws Exception {
+        final URL sha256FileURLFromSources = gdalVersion.getSHA256FileURLFromSources();
+        if (sha256FileURLFromSources != null) {
+            try (Stream<String> lines = Files.lines(Paths.get(sha256FileURLFromSources.toURI()))) {
+                return lines.findFirst().orElse(null);
+            }
+        }
+        return null;
+    }
+
     private static boolean isDistributionUpdated(String distributionHash){
         final String savedDistributionHash = fetchSavedDistributionHash();
         if (logger.isLoggable(Level.FINE)) {
@@ -359,21 +367,61 @@ class GDALInstaller {
         }
         return hex.toString();
     }
-    private static String computeDistributionHash(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
-        copyDistributionArchive(gdalDistributionRootFolderPath, gdalVersion);
-        final Path zipFilePath = gdalVersion.getZipFilePath();
-        MessageDigest md;
+
+    private static String computeHashForFile(Path targetFile) throws IOException {
         try {
-            md = MessageDigest.getInstance("SHA-256");
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (InputStream is = Files.newInputStream(targetFile);  DigestInputStream dis = new DigestInputStream(is, md)){
+                while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
+                return bytesToHex(md.digest());
+            }
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
         }
-        try (InputStream is = Files.newInputStream(zipFilePath);  DigestInputStream dis = new DigestInputStream(is, md)){
-            while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
-            md = dis.getMessageDigest();
+    }
+
+    private static String computeHashForDirectory(Path targetDirectory) throws IOException {
+        try {
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            Files.walkFileTree(targetDirectory, new SimpleFileVisitor<Path>(){
+                @Override
+                public FileVisitResult visitFile(Path targetFile, BasicFileAttributes attributes) throws IOException {
+                    if (attributes.isRegularFile()) {
+                        md.update(targetFile.getFileName().toString().getBytes());
+                        try (InputStream is = Files.newInputStream(targetFile);  DigestInputStream dis = new DigestInputStream(is, md)){
+                            while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
             return bytesToHex(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private static String computeDistributionHash(Path gdalDistributionRootFolderPath, GDALVersion gdalVersion) throws IOException {
+        copyDistributionArchive(gdalDistributionRootFolderPath, gdalVersion);
+        final Path zipFilePath = gdalVersion.getZipFilePath();
+        try {
+            return computeHashForFile(zipFilePath);
         } finally {
             Files.delete(zipFilePath);
+        }
+    }
+
+    private static void checkDistributionIntegrity(GDALVersion gdalVersion) {
+        final Path distributionDirectory = gdalVersion.getLocationPath();
+        try {
+
+            final String installedDistributionDirectoryHash = computeHashForDirectory(distributionDirectory);
+            final String distributionDirectoryHash = fetchDistributionDirectoryHash(gdalVersion);
+            if (!installedDistributionDirectoryHash.equals(distributionDirectoryHash)) {
+                throw new IllegalStateException("hash mismatch");
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Internal GDAL distribution install integrity check FAILED! Reason: " + e.getMessage());
         }
     }
 
@@ -451,6 +499,7 @@ class GDALInstaller {
             Files.createDirectories(this.gdalNativeLibrariesFolderPath);
             copyEnvironmentVariablesNativeLibrary(gdalVersion);
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
+            checkDistributionIntegrity(gdalVersion);
             fixUpPermissions(this.gdalNativeLibrariesFolderPath);
             setSavedModuleSpecificationVersion(moduleVersion);
             setSavedDistributionHash(distributionHash);

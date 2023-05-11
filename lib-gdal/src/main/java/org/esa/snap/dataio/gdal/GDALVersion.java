@@ -37,6 +37,7 @@ public enum GDALVersion {
     static final String JNI_NAME = "{jni}";
     static final String DIR_NAME = "gdal-" + VERSION_NAME + JNI_NAME;
     static final String ZIP_NAME = DIR_NAME + ".zip";
+    static final String SHA256_NAME = DIR_NAME + ".sha256";
     static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
     static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
     static final String GDAL_JNI_LIBRARY_FILE = "java/gdal.jar";
@@ -339,6 +340,19 @@ public enum GDALVersion {
     }
 
     /**
+     * Gets the name of SHA256 file for this version.
+     *
+     * @return the name of SHA256 file for this version
+     */
+    private String getSHA256Name() {
+        if (isJni()) {
+            return SHA256_NAME.replace(VERSION_NAME, this.name).replace(JNI_NAME, "-jni");
+        } else {
+            return SHA256_NAME.replace(VERSION_NAME, this.name).replace(JNI_NAME, "");
+        }
+    }
+
+    /**
      * Gets the relative path of the directory based on OS category for this version.
      *
      * @return the relative path of the directory based on OS category for this version
@@ -359,6 +373,23 @@ public enum GDALVersion {
                 logger.log(Level.FINE, "version zip archive URL from sources: '" + zipFileDirectoryFromSources + "'.");
             }
             return getClass().getClassLoader().getResource(zipFileDirectoryFromSources.replace(File.separator, "/"));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the SHA256 file URL from SNAP distribution packages for this version.
+     *
+     * @return the SHA256 file URL from SNAP distribution packages for this version
+     */
+    public URL getSHA256FileURLFromSources() {
+        final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + getSHA256Name();
+        try {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
+            }
+            return getClass().getClassLoader().getResource(sha256FileDirectoryFromSources.replace(File.separator, "/"));
         } catch (Exception ignored) {
             return null;
         }

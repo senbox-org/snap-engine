@@ -66,7 +66,7 @@ public final class GDALLoader {
         if (!GDALInstallInfo.INSTANCE.isPresent()) {
             getInstance().initGDAL();
             if (!GDALInstallInfo.INSTANCE.isPresent()) {
-                throw new IllegalStateException("GDAL NOT initialised!");
+                throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
             }
         }
     }
