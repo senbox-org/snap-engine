@@ -18,13 +18,9 @@ package org.esa.snap.core.dataio.dimap.spi;
 
 import junit.framework.TestCase;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ConvolutionFilterBand;
-import org.esa.snap.core.datamodel.Kernel;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ArrayUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +73,13 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(3, cfb.getKernel().getHeight());
         assertEquals(1.7, cfb.getKernel().getFactor(), EPS);
         assertTrue(ArrayUtils.equalArrays(new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0},
-                                          cfb.getKernel().getKernelData(null), EPS));
+                cfb.getKernel().getKernelData(null), EPS));
     }
 
     public void testCreateXmlFromObject() {
         final double[] kernelData = new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("filteredBand", _source,
-                                                                    new Kernel(3, 3, 1.7, kernelData), 1);
+                new Kernel(3, 3, 1.7, kernelData), 1);
         cfb.setDescription("somehow explainig");
         cfb.setUnit("someUnit");
         _product.addBand(cfb);
@@ -195,8 +191,8 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_HEIGHT, "3"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_FACTOR, "1.7"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_DATA,
-                                         ConvolutionFilterBandPersistable.toCsv(
-                                                 new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0})));
+                ConvolutionFilterBandPersistable.toCsv(
+                        new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0})));
 
         final Element filterKernel = new Element(DimapProductConstants.TAG_FILTER_KERNEL);
         filterKernel.setContent(kernelInfoList);

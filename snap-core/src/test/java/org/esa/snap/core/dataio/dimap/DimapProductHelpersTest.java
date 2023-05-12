@@ -16,35 +16,21 @@
 package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FXYGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.esa.snap.core.dataop.maptransf.LambertConformalConicDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
-import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.ArrayUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.FXYSum;
 import org.geotools.referencing.CRS;
-import org.jdom.Document;
+import org.jdom2.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,11 +39,7 @@ import java.util.Vector;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotSame;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DimapProductHelpersTest {
 
@@ -91,163 +73,163 @@ public class DimapProductHelpersTest {
 
     private final String[] _xmlMapGeocodingStringStyleV1_4_0 = new String[]{
             "<" + DimapProductConstants.TAG_ROOT + ">" + LS,
-        /*  1 */
+            /*  1 */
             "    <Coordinate_Reference_System>" + LS,
-        /*  2 */
+            /*  2 */
             "        <GEO_TABLES version=\"1.0\">CUSTOM</GEO_TABLES>" + LS,
             // notMandatory
-        /*  3 */
+            /*  3 */
             "        <Horizontal_CS>" + LS,
-        /*  4 */
+            /*  4 */
             "            <HORIZONTAL_CS_TYPE>PROJECTED</HORIZONTAL_CS_TYPE>" + LS,
             // notMandatory
-        /*  5 */
+            /*  5 */
             "            <HORIZONTAL_CS_NAME>" + _projectionName + "</HORIZONTAL_CS_NAME>" + LS,
             // notMandatory
-        /*  6 */
+            /*  6 */
             "            <Geographic_CS>" + LS,
-        /*  7 */
+            /*  7 */
             "                <GEOGRAPHIC_CS_NAME>" + _projectionName + "</GEOGRAPHIC_CS_NAME>" + LS,
             // notMandatory
-        /*  8 */
+            /*  8 */
             "                <Horizontal_Datum>" + LS,
-        /*  9 */
+            /*  9 */
             "                    <HORIZONTAL_DATUM_NAME>" + _datumName + "</HORIZONTAL_DATUM_NAME>" + LS,
-        /* 10 */
+            /* 10 */
             "                    <Ellipsoid>" + LS,
-        /*  1 */
+            /*  1 */
             "                        <ELLIPSOID_NAME>" + _ellipsoidName + "</ELLIPSOID_NAME>" + LS,
-        /*  2 */
+            /*  2 */
             "                        <Ellipsoid_Parameters>" + LS,
-        /*  3 */
+            /*  3 */
             "                            <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _semiMajor + "</ELLIPSOID_MAJ_AXIS>" + LS,
-        /*  4 */
+            /*  4 */
             "                            <ELLIPSOID_MIN_AXIS unit=\"M\">" + _semiMinor + "</ELLIPSOID_MIN_AXIS>" + LS,
-        /*  5 */
+            /*  5 */
             "                        </Ellipsoid_Parameters>" + LS,
-        /*  6 */
+            /*  6 */
             "                    </Ellipsoid>" + LS,
-        /*  7 */
+            /*  7 */
             "                </Horizontal_Datum>" + LS,
-        /*  8 */
+            /*  8 */
             "            </Geographic_CS>" + LS,
-        /*  9 */
+            /*  9 */
             "            <Projection>" + LS,
-        /* 20 */
+            /* 20 */
             "                <NAME>" + _projectionName + "</NAME>" + LS,
-        /*  1 */
+            /*  1 */
             "                <Projection_CT_Method>" + LS,
-        /*  2 */
+            /*  2 */
             "                    <PROJECTION_CT_NAME>" + _typeId + "</PROJECTION_CT_NAME>" + LS,
-        /*  3 */
+            /*  3 */
             "                    <Projection_Parameters>" + LS,
-        /*  4 */
+            /*  4 */
             "                        <Projection_Parameter>" + LS,
-        /*  5 */
+            /*  5 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[0] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /*  6 */
+            /*  6 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[0] + "\">" + _expValues[0] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  7 */
+            /*  7 */
             "                        </Projection_Parameter>" + LS,
-        /*  8 */
+            /*  8 */
             "                        <Projection_Parameter>" + LS,
-        /*  9 */
+            /*  9 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[1] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /* 30 */
+            /* 30 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[1] + "\">" + _expValues[1] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  1 */
+            /*  1 */
             "                        </Projection_Parameter>" + LS,
-        /*  2 */
+            /*  2 */
             "                        <Projection_Parameter>" + LS,
-        /*  3 */
+            /*  3 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[2] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /*  4 */
+            /*  4 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[2] + "\">" + _expValues[2] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  5 */
+            /*  5 */
             "                        </Projection_Parameter>" + LS,
-        /*  6 */
+            /*  6 */
             "                        <Projection_Parameter>" + LS,
-        /*  7 */
+            /*  7 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[3] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /*  8 */
+            /*  8 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[3] + "\">" + _expValues[3] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  9 */
+            /*  9 */
             "                        </Projection_Parameter>" + LS,
-        /* 40 */
+            /* 40 */
             "                        <Projection_Parameter>" + LS,
-        /*  1 */
+            /*  1 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[4] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /*  2 */
+            /*  2 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[4] + "\">" + _expValues[4] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  3 */
+            /*  3 */
             "                        </Projection_Parameter>" + LS,
-        /*  4 */
+            /*  4 */
             "                        <Projection_Parameter>" + LS,
-        /*  5 */
+            /*  5 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[5] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /*  6 */
+            /*  6 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[5] + "\">" + _expValues[5] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  7 */
+            /*  7 */
             "                        </Projection_Parameter>" + LS,
-        /*  8 */
+            /*  8 */
             "                        <Projection_Parameter>" + LS,
-        /*  9 */
+            /*  9 */
             "                            <PROJECTION_PARAMETER_NAME>" + _paramNames[6] + "</PROJECTION_PARAMETER_NAME>" + LS,
             // notMandatory
-        /* 50 */
+            /* 50 */
             "                            <PROJECTION_PARAMETER_VALUE unit=\"" + _paramUnit[6] + "\">" + _expValues[6] + "</PROJECTION_PARAMETER_VALUE>" + LS,
-        /*  1 */
+            /*  1 */
             "                        </Projection_Parameter>" + LS,
-        /*  2 */
+            /*  2 */
             "                    </Projection_Parameters>" + LS,
-        /*  3 */
+            /*  3 */
             "                </Projection_CT_Method>" + LS,
-        /*  4 */
+            /*  4 */
             "            </Projection>" + LS,
-        /*  5 */
+            /*  5 */
             "            <MAP_INFO>" + LS +
-        /*  5 */ "                <PIXEL_X value=\"" + _pixelX + "\" />" + LS,
-        /*  6 */
+                    /*  5 */ "                <PIXEL_X value=\"" + _pixelX + "\" />" + LS,
+            /*  6 */
             "                <PIXEL_Y value=\"" + _pixelY + "\" />" + LS,
-        /*  7 */
+            /*  7 */
             "                <EASTING value=\"" + _easting + "\" />" + LS,
-        /*  8 */
+            /*  8 */
             "                <NORTHING value=\"" + _northing + "\" />" + LS,
-        /*  9 */
+            /*  9 */
             "                <ORIENTATION value=\"" + _orientation + "\" />" + LS,
-        /* 60 */
+            /* 60 */
             "                <PIXELSIZE_X value=\"" + _pixelSizeX + "\" />" + LS,
-        /*  1 */
+            /*  1 */
             "                <PIXELSIZE_Y value=\"" + _pixelSizeY + "\" />" + LS,
-        /*  2 */
+            /*  2 */
             "                <NODATA_VALUE value=\"" + _noDataValue + "\" />" + LS,
-        /*  3 */
+            /*  3 */
             "                <MAPUNIT value=\"" + _mapUnit + "\" />" + LS,
-        /*  4 */
+            /*  4 */
             "                <ORTHORECTIFIED value=\"" + _orthorectified + "\" />" + LS,
-        /*  5 */
+            /*  5 */
             "                <ELEVATION_MODEL value=\"" + _elevModelName + "\" />" + LS,
-        /*  6 */
+            /*  6 */
             "                <SCENE_FITTED value=\"" + _sceneFitted + "\" />" + LS,
-        /*  7 */
+            /*  7 */
             "                <SCENE_WIDTH value=\"" + _sceneWidth + "\" />" + LS,
-        /*  8 */
+            /*  8 */
             "                <SCENE_HEIGHT value=\"" + _sceneHeight + "\" />" + LS,
-        /*  9 */
+            /*  9 */
             "                <RESAMPLING value=\"" + _resamplingName + "\" />" + LS,
-        /* 70 */
+            /* 70 */
             "            </MAP_INFO>" + LS,
-        /*  1 */
+            /*  1 */
             "        </Horizontal_CS>" + LS,
-        /*  2 */
+            /*  2 */
             "    </Coordinate_Reference_System>" + LS,
-        /*  3 */
+            /*  3 */
             "</" + DimapProductConstants.TAG_ROOT + ">" + LS
     };
 
@@ -258,178 +240,178 @@ public class DimapProductHelpersTest {
     private final double[] _latCoefficients = new double[]{6, 7, 8};
     private final double[] _lonCoefficients = new double[]{9, 10, 11};
     private final FXYGeoCoding fxyGeoCoding = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
-                                                               FXYSum.createFXYSum(1, _xCoefficients),
-                                                               FXYSum.createFXYSum(1, _yCoefficients),
-                                                               FXYSum.createFXYSum(1, _latCoefficients),
-                                                               FXYSum.createFXYSum(1, _lonCoefficients),
-                                                               _datum);
+            FXYSum.createFXYSum(1, _xCoefficients),
+            FXYSum.createFXYSum(1, _yCoefficients),
+            FXYSum.createFXYSum(1, _latCoefficients),
+            FXYSum.createFXYSum(1, _lonCoefficients),
+            _datum);
 
     private final String _xmlFXYGeoCodingString =
             "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
-            "    <Coordinate_Reference_System>" + LS +
-            "        <Horizontal_CS>" + LS +
-            "            <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
-            "            <Geographic_CS>" + LS +
-            "                <Horizontal_Datum>" + LS +
-            "                    <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
-            "                    <Ellipsoid>" + LS +
-            "                        <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
-            "                        <Ellipsoid_Parameters>" + LS +
-            "                            <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
-            "                            <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
-            "                        </Ellipsoid_Parameters>" + LS +
-            "                    </Ellipsoid>" + LS +
-            "                </Horizontal_Datum>" + LS +
-            "            </Geographic_CS>" + LS +
-            "        </Horizontal_CS>" + LS +
-            "    </Coordinate_Reference_System>" + LS +
-            "    <Geoposition>" + LS +
-            "        <Geoposition_Insert>" + LS +
-            "            <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
-            "            <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
-            "            <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
-            "            <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
-            "        </Geoposition_Insert>" + LS +
-            "        <Simplified_Location_Model>" + LS +
-            "            <Direct_Location_Model order=\"" + fxyGeoCoding.getPixelXFunction().getOrder() + "\">" + LS +
-            "                <lc_List>" + LS +
-            "                    <lc index=\"0\">" + _lonCoefficients[0] + "</lc>" + LS +
-            "                    <lc index=\"1\">" + _lonCoefficients[1] + "</lc>" + LS +
-            "                    <lc index=\"2\">" + _lonCoefficients[2] + "</lc>" + LS +
-            "                </lc_List>" + LS +
-            "                <pc_List>" + LS +
-            "                    <pc index=\"0\">" + _latCoefficients[0] + "</pc>" + LS +
-            "                    <pc index=\"1\">" + _latCoefficients[1] + "</pc>" + LS +
-            "                    <pc index=\"2\">" + _latCoefficients[2] + "</pc>" + LS +
-            "                </pc_List>" + LS +
-            "            </Direct_Location_Model>" + LS +
-            "            <Reverse_Location_Model order=\"" + fxyGeoCoding.getLatFunction().getOrder() + "\">" + LS +
-            "                <ic_List>" + LS +
-            "                    <ic index=\"0\">" + _xCoefficients[0] + "</ic>" + LS +
-            "                    <ic index=\"1\">" + _xCoefficients[1] + "</ic>" + LS +
-            "                    <ic index=\"2\">" + _xCoefficients[2] + "</ic>" + LS +
-            "                </ic_List>" + LS +
-            "                <jc_List>" + LS +
-            "                    <jc index=\"0\">" + _yCoefficients[0] + "</jc>" + LS +
-            "                    <jc index=\"1\">" + _yCoefficients[1] + "</jc>" + LS +
-            "                    <jc index=\"2\">" + _yCoefficients[2] + "</jc>" + LS +
-            "                </jc_List>" + LS +
-            "            </Reverse_Location_Model>" + LS +
-            "        </Simplified_Location_Model>" + LS +
-            "    </Geoposition>" + LS +
-            "</" + DimapProductConstants.TAG_ROOT + ">";
+                    "    <Coordinate_Reference_System>" + LS +
+                    "        <Horizontal_CS>" + LS +
+                    "            <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
+                    "            <Geographic_CS>" + LS +
+                    "                <Horizontal_Datum>" + LS +
+                    "                    <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
+                    "                    <Ellipsoid>" + LS +
+                    "                        <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
+                    "                        <Ellipsoid_Parameters>" + LS +
+                    "                            <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
+                    "                            <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
+                    "                        </Ellipsoid_Parameters>" + LS +
+                    "                    </Ellipsoid>" + LS +
+                    "                </Horizontal_Datum>" + LS +
+                    "            </Geographic_CS>" + LS +
+                    "        </Horizontal_CS>" + LS +
+                    "    </Coordinate_Reference_System>" + LS +
+                    "    <Geoposition>" + LS +
+                    "        <Geoposition_Insert>" + LS +
+                    "            <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
+                    "            <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
+                    "            <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
+                    "            <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
+                    "        </Geoposition_Insert>" + LS +
+                    "        <Simplified_Location_Model>" + LS +
+                    "            <Direct_Location_Model order=\"" + fxyGeoCoding.getPixelXFunction().getOrder() + "\">" + LS +
+                    "                <lc_List>" + LS +
+                    "                    <lc index=\"0\">" + _lonCoefficients[0] + "</lc>" + LS +
+                    "                    <lc index=\"1\">" + _lonCoefficients[1] + "</lc>" + LS +
+                    "                    <lc index=\"2\">" + _lonCoefficients[2] + "</lc>" + LS +
+                    "                </lc_List>" + LS +
+                    "                <pc_List>" + LS +
+                    "                    <pc index=\"0\">" + _latCoefficients[0] + "</pc>" + LS +
+                    "                    <pc index=\"1\">" + _latCoefficients[1] + "</pc>" + LS +
+                    "                    <pc index=\"2\">" + _latCoefficients[2] + "</pc>" + LS +
+                    "                </pc_List>" + LS +
+                    "            </Direct_Location_Model>" + LS +
+                    "            <Reverse_Location_Model order=\"" + fxyGeoCoding.getLatFunction().getOrder() + "\">" + LS +
+                    "                <ic_List>" + LS +
+                    "                    <ic index=\"0\">" + _xCoefficients[0] + "</ic>" + LS +
+                    "                    <ic index=\"1\">" + _xCoefficients[1] + "</ic>" + LS +
+                    "                    <ic index=\"2\">" + _xCoefficients[2] + "</ic>" + LS +
+                    "                </ic_List>" + LS +
+                    "                <jc_List>" + LS +
+                    "                    <jc index=\"0\">" + _yCoefficients[0] + "</jc>" + LS +
+                    "                    <jc index=\"1\">" + _yCoefficients[1] + "</jc>" + LS +
+                    "                    <jc index=\"2\">" + _yCoefficients[2] + "</jc>" + LS +
+                    "                </jc_List>" + LS +
+                    "            </Reverse_Location_Model>" + LS +
+                    "        </Simplified_Location_Model>" + LS +
+                    "    </Geoposition>" + LS +
+                    "</" + DimapProductConstants.TAG_ROOT + ">";
 
     private final double[] _xCoefficients1 = new double[]{0, 1, 2};
     private final double[] _yCoefficients1 = new double[]{3, 4, 5};
     private final double[] _latCoefficients1 = new double[]{6, 7, 8};
     private final double[] _lonCoefficients1 = new double[]{9, 10, 11};
     private final FXYGeoCoding _fxyGeoCoding1 = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
-                                                                 FXYSum.createFXYSum(1, _xCoefficients1),
-                                                                 FXYSum.createFXYSum(1, _yCoefficients1),
-                                                                 FXYSum.createFXYSum(1, _latCoefficients1),
-                                                                 FXYSum.createFXYSum(1, _lonCoefficients1),
-                                                                 _datum);
+            FXYSum.createFXYSum(1, _xCoefficients1),
+            FXYSum.createFXYSum(1, _yCoefficients1),
+            FXYSum.createFXYSum(1, _latCoefficients1),
+            FXYSum.createFXYSum(1, _lonCoefficients1),
+            _datum);
     private final double[] _xCoefficients2 = new double[]{12, 13, 14};
     private final double[] _yCoefficients2 = new double[]{15, 16, 17};
     private final double[] _latCoefficients2 = new double[]{18, 19, 20};
     private final double[] _lonCoefficients2 = new double[]{21, 22, 23};
     private final FXYGeoCoding _fxyGeoCoding2 = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
-                                                                 FXYSum.createFXYSum(1, _xCoefficients2),
-                                                                 FXYSum.createFXYSum(1, _yCoefficients2),
-                                                                 FXYSum.createFXYSum(1, _latCoefficients2),
-                                                                 FXYSum.createFXYSum(1, _lonCoefficients2),
-                                                                 _datum);
+            FXYSum.createFXYSum(1, _xCoefficients2),
+            FXYSum.createFXYSum(1, _yCoefficients2),
+            FXYSum.createFXYSum(1, _latCoefficients2),
+            FXYSum.createFXYSum(1, _lonCoefficients2),
+            _datum);
 
     private final String _xmlBandedFXYGeoCodingString =
             "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
-            "    <Coordinate_Reference_System>" + LS +
-            "        <Horizontal_CS>" + LS +
-            "            <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
-            "            <Geographic_CS>" + LS +
-            "                <Horizontal_Datum>" + LS +
-            "                    <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
-            "                    <Ellipsoid>" + LS +
-            "                        <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
-            "                        <Ellipsoid_Parameters>" + LS +
-            "                            <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
-            "                            <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
-            "                        </Ellipsoid_Parameters>" + LS +
-            "                    </Ellipsoid>" + LS +
-            "                </Horizontal_Datum>" + LS +
-            "            </Geographic_CS>" + LS +
-            "        </Horizontal_CS>" + LS +
-            "    </Coordinate_Reference_System>" + LS +
-            "    <Geoposition>" + LS +
-            "        <BAND_INDEX>0</BAND_INDEX>" + LS +
-            "        <Geoposition_Insert>" + LS +
-            "             <ULXMAP>" + _pixelX + "</ULXMAP>" + LS +
-            "             <ULYMAP>" + _pixelY + "</ULYMAP>" + LS +
-            "             <XDIM>" + _pixelSizeX + "</XDIM>" + LS +
-            "             <YDIM>" + _pixelSizeY + "</YDIM>" + LS +
-            "        </Geoposition_Insert>" + LS +
-            "         <Simplified_Location_Model>" + LS +
-            "             <Direct_Location_Model order=\"" + _fxyGeoCoding1.getPixelXFunction().getOrder() + "\">" + LS +
-            "                <lc_List>" + LS +
-            "                    <lc index=\"0\">" + _lonCoefficients1[0] + "</lc>" + LS +
-            "                    <lc index=\"1\">" + _lonCoefficients1[1] + "</lc>" + LS +
-            "                    <lc index=\"2\">" + _lonCoefficients1[2] + "</lc>" + LS +
-            "                </lc_List>" + LS +
-            "                <pc_List>" + LS +
-            "                    <pc index=\"0\">" + _latCoefficients1[0] + "</pc>" + LS +
-            "                    <pc index=\"1\">" + _latCoefficients1[1] + "</pc>" + LS +
-            "                    <pc index=\"2\">" + _latCoefficients1[2] + "</pc>" + LS +
-            "                </pc_List>" + LS +
-            "            </Direct_Location_Model>" + LS +
-            "            <Reverse_Location_Model order=\"" + _fxyGeoCoding1.getLatFunction().getOrder() + "\">" + LS +
-            "                <ic_List>" + LS +
-            "                    <ic index=\"0\">" + _xCoefficients1[0] + "</ic>" + LS +
-            "                    <ic index=\"1\">" + _xCoefficients1[1] + "</ic>" + LS +
-            "                    <ic index=\"2\">" + _xCoefficients1[2] + "</ic>" + LS +
-            "                </ic_List>" + LS +
-            "                <jc_List>" + LS +
-            "                    <jc index=\"0\">" + _yCoefficients1[0] + "</jc>" + LS +
-            "                    <jc index=\"1\">" + _yCoefficients1[1] + "</jc>" + LS +
-            "                    <jc index=\"2\">" + _yCoefficients1[2] + "</jc>" + LS +
-            "                </jc_List>" + LS +
-            "            </Reverse_Location_Model>" + LS +
-            "        </Simplified_Location_Model>" + LS +
-            "    </Geoposition>" + LS +
-            "    <Geoposition>" + LS +
-            "        <BAND_INDEX>1</BAND_INDEX>" + LS +
-            "        <Geoposition_Insert>" + LS +
-            "             <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
-            "             <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
-            "             <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
-            "             <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
-            "        </Geoposition_Insert>" + LS +
-            "         <Simplified_Location_Model>" + LS +
-            "             <Direct_Location_Model order=\"" + _fxyGeoCoding2.getPixelXFunction().getOrder() + "\">" + LS +
-            "                <lc_List>" + LS +
-            "                    <lc index=\"0\">" + _lonCoefficients2[0] + "</lc>" + LS +
-            "                    <lc index=\"1\">" + _lonCoefficients2[1] + "</lc>" + LS +
-            "                    <lc index=\"2\">" + _lonCoefficients2[2] + "</lc>" + LS +
-            "                </lc_List>" + LS +
-            "                <pc_List>" + LS +
-            "                    <pc index=\"0\">" + _latCoefficients2[0] + "</pc>" + LS +
-            "                    <pc index=\"1\">" + _latCoefficients2[1] + "</pc>" + LS +
-            "                    <pc index=\"2\">" + _latCoefficients2[2] + "</pc>" + LS +
-            "                </pc_List>" + LS +
-            "            </Direct_Location_Model>" + LS +
-            "            <Reverse_Location_Model order=\"" + _fxyGeoCoding2.getLatFunction().getOrder() + "\">" + LS +
-            "                <ic_List>" + LS +
-            "                    <ic index=\"0\">" + _xCoefficients2[0] + "</ic>" + LS +
-            "                    <ic index=\"1\">" + _xCoefficients2[1] + "</ic>" + LS +
-            "                    <ic index=\"2\">" + _xCoefficients2[2] + "</ic>" + LS +
-            "                </ic_List>" + LS +
-            "                <jc_List>" + LS +
-            "                    <jc index=\"0\">" + _yCoefficients2[0] + "</jc>" + LS +
-            "                    <jc index=\"1\">" + _yCoefficients2[1] + "</jc>" + LS +
-            "                    <jc index=\"2\">" + _yCoefficients2[2] + "</jc>" + LS +
-            "                </jc_List>" + LS +
-            "            </Reverse_Location_Model>" + LS +
-            "        </Simplified_Location_Model>" + LS +
-            "    </Geoposition>" + LS +
-            "</" + DimapProductConstants.TAG_ROOT + ">";
+                    "    <Coordinate_Reference_System>" + LS +
+                    "        <Horizontal_CS>" + LS +
+                    "            <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
+                    "            <Geographic_CS>" + LS +
+                    "                <Horizontal_Datum>" + LS +
+                    "                    <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
+                    "                    <Ellipsoid>" + LS +
+                    "                        <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
+                    "                        <Ellipsoid_Parameters>" + LS +
+                    "                            <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
+                    "                            <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
+                    "                        </Ellipsoid_Parameters>" + LS +
+                    "                    </Ellipsoid>" + LS +
+                    "                </Horizontal_Datum>" + LS +
+                    "            </Geographic_CS>" + LS +
+                    "        </Horizontal_CS>" + LS +
+                    "    </Coordinate_Reference_System>" + LS +
+                    "    <Geoposition>" + LS +
+                    "        <BAND_INDEX>0</BAND_INDEX>" + LS +
+                    "        <Geoposition_Insert>" + LS +
+                    "             <ULXMAP>" + _pixelX + "</ULXMAP>" + LS +
+                    "             <ULYMAP>" + _pixelY + "</ULYMAP>" + LS +
+                    "             <XDIM>" + _pixelSizeX + "</XDIM>" + LS +
+                    "             <YDIM>" + _pixelSizeY + "</YDIM>" + LS +
+                    "        </Geoposition_Insert>" + LS +
+                    "         <Simplified_Location_Model>" + LS +
+                    "             <Direct_Location_Model order=\"" + _fxyGeoCoding1.getPixelXFunction().getOrder() + "\">" + LS +
+                    "                <lc_List>" + LS +
+                    "                    <lc index=\"0\">" + _lonCoefficients1[0] + "</lc>" + LS +
+                    "                    <lc index=\"1\">" + _lonCoefficients1[1] + "</lc>" + LS +
+                    "                    <lc index=\"2\">" + _lonCoefficients1[2] + "</lc>" + LS +
+                    "                </lc_List>" + LS +
+                    "                <pc_List>" + LS +
+                    "                    <pc index=\"0\">" + _latCoefficients1[0] + "</pc>" + LS +
+                    "                    <pc index=\"1\">" + _latCoefficients1[1] + "</pc>" + LS +
+                    "                    <pc index=\"2\">" + _latCoefficients1[2] + "</pc>" + LS +
+                    "                </pc_List>" + LS +
+                    "            </Direct_Location_Model>" + LS +
+                    "            <Reverse_Location_Model order=\"" + _fxyGeoCoding1.getLatFunction().getOrder() + "\">" + LS +
+                    "                <ic_List>" + LS +
+                    "                    <ic index=\"0\">" + _xCoefficients1[0] + "</ic>" + LS +
+                    "                    <ic index=\"1\">" + _xCoefficients1[1] + "</ic>" + LS +
+                    "                    <ic index=\"2\">" + _xCoefficients1[2] + "</ic>" + LS +
+                    "                </ic_List>" + LS +
+                    "                <jc_List>" + LS +
+                    "                    <jc index=\"0\">" + _yCoefficients1[0] + "</jc>" + LS +
+                    "                    <jc index=\"1\">" + _yCoefficients1[1] + "</jc>" + LS +
+                    "                    <jc index=\"2\">" + _yCoefficients1[2] + "</jc>" + LS +
+                    "                </jc_List>" + LS +
+                    "            </Reverse_Location_Model>" + LS +
+                    "        </Simplified_Location_Model>" + LS +
+                    "    </Geoposition>" + LS +
+                    "    <Geoposition>" + LS +
+                    "        <BAND_INDEX>1</BAND_INDEX>" + LS +
+                    "        <Geoposition_Insert>" + LS +
+                    "             <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
+                    "             <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
+                    "             <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
+                    "             <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
+                    "        </Geoposition_Insert>" + LS +
+                    "         <Simplified_Location_Model>" + LS +
+                    "             <Direct_Location_Model order=\"" + _fxyGeoCoding2.getPixelXFunction().getOrder() + "\">" + LS +
+                    "                <lc_List>" + LS +
+                    "                    <lc index=\"0\">" + _lonCoefficients2[0] + "</lc>" + LS +
+                    "                    <lc index=\"1\">" + _lonCoefficients2[1] + "</lc>" + LS +
+                    "                    <lc index=\"2\">" + _lonCoefficients2[2] + "</lc>" + LS +
+                    "                </lc_List>" + LS +
+                    "                <pc_List>" + LS +
+                    "                    <pc index=\"0\">" + _latCoefficients2[0] + "</pc>" + LS +
+                    "                    <pc index=\"1\">" + _latCoefficients2[1] + "</pc>" + LS +
+                    "                    <pc index=\"2\">" + _latCoefficients2[2] + "</pc>" + LS +
+                    "                </pc_List>" + LS +
+                    "            </Direct_Location_Model>" + LS +
+                    "            <Reverse_Location_Model order=\"" + _fxyGeoCoding2.getLatFunction().getOrder() + "\">" + LS +
+                    "                <ic_List>" + LS +
+                    "                    <ic index=\"0\">" + _xCoefficients2[0] + "</ic>" + LS +
+                    "                    <ic index=\"1\">" + _xCoefficients2[1] + "</ic>" + LS +
+                    "                    <ic index=\"2\">" + _xCoefficients2[2] + "</ic>" + LS +
+                    "                </ic_List>" + LS +
+                    "                <jc_List>" + LS +
+                    "                    <jc index=\"0\">" + _yCoefficients2[0] + "</jc>" + LS +
+                    "                    <jc index=\"1\">" + _yCoefficients2[1] + "</jc>" + LS +
+                    "                    <jc index=\"2\">" + _yCoefficients2[2] + "</jc>" + LS +
+                    "                </jc_List>" + LS +
+                    "            </Reverse_Location_Model>" + LS +
+                    "        </Simplified_Location_Model>" + LS +
+                    "    </Geoposition>" + LS +
+                    "</" + DimapProductConstants.TAG_ROOT + ">";
 
 
     private Product product;
@@ -457,12 +439,12 @@ public class DimapProductHelpersTest {
 
         final String xmlMapGeocodingStringStyleOldFormat =
                 "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
-                /*  1 */ "    <Coordinate_Reference_System>" + LS +
-                /*  2 */ "        <Geocoding_Map>" + LS +
-                /*  3 */ "            <MAP_INFO>" + projectionName + ", " + pixelX + ", " + pixelY + ", " + easting + ", " + northing + ", " + pixelSizeX + ", " + pixelSizeY + ", " + datumName + ", units=meter, " + sceneWidth + ", " + sceneHeight + "</MAP_INFO>" + LS +
-                /*  4 */ "        </Geocoding_Map>" + LS +
-                /*  5 */ "    </Coordinate_Reference_System>" + LS +
-                /*  6 */ "</" + DimapProductConstants.TAG_ROOT + ">" + LS;
+                        /*  1 */ "    <Coordinate_Reference_System>" + LS +
+                        /*  2 */ "        <Geocoding_Map>" + LS +
+                        /*  3 */ "            <MAP_INFO>" + projectionName + ", " + pixelX + ", " + pixelY + ", " + easting + ", " + northing + ", " + pixelSizeX + ", " + pixelSizeY + ", " + datumName + ", units=meter, " + sceneWidth + ", " + sceneHeight + "</MAP_INFO>" + LS +
+                        /*  4 */ "        </Geocoding_Map>" + LS +
+                        /*  5 */ "    </Coordinate_Reference_System>" + LS +
+                        /*  6 */ "</" + DimapProductConstants.TAG_ROOT + ">" + LS;
 
         final Ellipsoid expEllipsoid = Ellipsoid.WGS_84;
         final LambertConformalConicDescriptor expDescriptor = new LambertConformalConicDescriptor();
@@ -703,7 +685,7 @@ public class DimapProductHelpersTest {
             latBand.setDataElems(bandData);
             lonBand.setDataElems(bandData);
             final PixelGeoCoding sourcePixelGeoCoding = new PixelGeoCoding(latBand, lonBand,
-                                                                           "Not NaN", 4, ProgressMonitor.NULL);
+                    "Not NaN", 4, ProgressMonitor.NULL);
             final byte[] bytes = createPixelGeoCodingString(sourcePixelGeoCoding).getBytes();
             final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
             final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
@@ -727,7 +709,7 @@ public class DimapProductHelpersTest {
     @Test
     public void testCreateGeoCodingForCrsGeoCoding() throws Exception {
         final Rectangle imageBounds = new Rectangle(product.getSceneRasterWidth(),
-                                                    product.getSceneRasterHeight());
+                product.getSceneRasterHeight());
         final AffineTransform expectedI2m = new AffineTransform(0.12, 1.23, 2.34, 3.45, 4.56, 5.67);
         final CoordinateReferenceSystem expectedCrs = CRS.decode("EPSG:4326");
         final byte[] bytes = createCrsGeoCodingString(
@@ -751,7 +733,7 @@ public class DimapProductHelpersTest {
         final int productWidth = product.getSceneRasterWidth();
         final int productHeight = product.getSceneRasterHeight();
 
-        final Rectangle imageBounds1 = new Rectangle(productWidth / 2,productHeight / 2);
+        final Rectangle imageBounds1 = new Rectangle(productWidth / 2, productHeight / 2);
         final AffineTransform i2m1 = new AffineTransform(0.23, 1.45, 2.67, 3.89, 4.01, 5.23);
         final CoordinateReferenceSystem crs1 = CRS.decode("EPSG:4326");
         final CrsGeoCoding crsGeoCoding1 = new CrsGeoCoding(crs1, imageBounds1, i2m1);
@@ -761,7 +743,7 @@ public class DimapProductHelpersTest {
         final CoordinateReferenceSystem crs2 = CRS.decode("EPSG:4326");
         final CrsGeoCoding crsGeoCoding2 = new CrsGeoCoding(crs2, imageBounds2, i2m2);
 
-        final CoordinateReferenceSystem[] expectedCrs = new CoordinateReferenceSystem[] {crs1, crs2};
+        final CoordinateReferenceSystem[] expectedCrs = new CoordinateReferenceSystem[]{crs1, crs2};
         final AffineTransform[] i2ms = new AffineTransform[]{i2m1, i2m2};
         final byte[] bytes = createCrsGeoCodingString(new CrsGeoCoding[]{crsGeoCoding1, crsGeoCoding2}).getBytes();
 
@@ -807,23 +789,23 @@ public class DimapProductHelpersTest {
     private void assertEqual(final FXYGeoCoding expectedGeoCoding, final FXYGeoCoding actualGeoCoding) {
         assertEquals(expectedGeoCoding.getDatum().getName(), actualGeoCoding.getDatum().getName());
         assertEquals(expectedGeoCoding.getDatum().getEllipsoid().getName(),
-                     actualGeoCoding.getDatum().getEllipsoid().getName());
+                actualGeoCoding.getDatum().getEllipsoid().getName());
         assertEquals(expectedGeoCoding.getDatum().getEllipsoid().getSemiMajor(),
-                     actualGeoCoding.getDatum().getEllipsoid().getSemiMajor(), 1.0e-6);
+                actualGeoCoding.getDatum().getEllipsoid().getSemiMajor(), 1.0e-6);
         assertEquals(expectedGeoCoding.getDatum().getEllipsoid().getSemiMinor(),
-                     actualGeoCoding.getDatum().getEllipsoid().getSemiMinor(), 1.0e-6);
+                actualGeoCoding.getDatum().getEllipsoid().getSemiMinor(), 1.0e-6);
         assertEquals(expectedGeoCoding.getLatFunction().getOrder(), actualGeoCoding.getLatFunction().getOrder());
         assertTrue(ArrayUtils.equalArrays(expectedGeoCoding.getLatFunction().getCoefficients(),
-                                          actualGeoCoding.getLatFunction().getCoefficients(), 1.0e-6));
+                actualGeoCoding.getLatFunction().getCoefficients(), 1.0e-6));
         assertEquals(expectedGeoCoding.getLonFunction().getOrder(), actualGeoCoding.getLonFunction().getOrder());
         assertTrue(ArrayUtils.equalArrays(expectedGeoCoding.getLonFunction().getCoefficients(),
-                                          actualGeoCoding.getLonFunction().getCoefficients(), 1.0e-6));
+                actualGeoCoding.getLonFunction().getCoefficients(), 1.0e-6));
         assertEquals(expectedGeoCoding.getPixelXFunction().getOrder(), actualGeoCoding.getPixelXFunction().getOrder());
         assertTrue(ArrayUtils.equalArrays(expectedGeoCoding.getPixelXFunction().getCoefficients(),
-                                          actualGeoCoding.getPixelXFunction().getCoefficients(), 1.0e-6));
+                actualGeoCoding.getPixelXFunction().getCoefficients(), 1.0e-6));
         assertEquals(expectedGeoCoding.getPixelYFunction().getOrder(), actualGeoCoding.getPixelYFunction().getOrder());
         assertTrue(ArrayUtils.equalArrays(expectedGeoCoding.getPixelYFunction().getCoefficients(),
-                                          actualGeoCoding.getPixelYFunction().getCoefficients(), 1.0e-6));
+                actualGeoCoding.getPixelYFunction().getCoefficients(), 1.0e-6));
         assertEquals(expectedGeoCoding.getPixelOffsetX(), actualGeoCoding.getPixelOffsetX(), 1.0e-6);
         assertEquals(expectedGeoCoding.getPixelOffsetY(), actualGeoCoding.getPixelOffsetY(), 1.0e-6);
         assertEquals(expectedGeoCoding.getPixelSizeX(), actualGeoCoding.getPixelSizeX(), 1.0e-6);
@@ -884,66 +866,66 @@ public class DimapProductHelpersTest {
 
     private String createPixelGeoCodingString(BasicPixelGeoCoding geoCoding) {
         return "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
-               "    <Geoposition>" + LS +
-               "        <LATITUDE_BAND>" + geoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-               "        <LONGITUDE_BAND>" + geoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-               "        <VALID_MASK_EXPRESSION>" + geoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-               "        <SEARCH_RADIUS>" + geoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
-               "        <Pixel_Position_Estimator>" + LS +
-               "            <Coordinate_Reference_System>" + LS +
-               "                <Horizontal_CS>" + LS +
-               "                    <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
-               "                    <Geographic_CS>" + LS +
-               "                        <Horizontal_Datum>" + LS +
-               "                            <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
-               "                            <Ellipsoid>" + LS +
-               "                                <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
-               "                                <Ellipsoid_Parameters>" + LS +
-               "                                    <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
-               "                                    <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
-               "                                </Ellipsoid_Parameters>" + LS +
-               "                            </Ellipsoid>" + LS +
-               "                        </Horizontal_Datum>" + LS +
-               "                    </Geographic_CS>" + LS +
-               "                </Horizontal_CS>" + LS +
-               "            </Coordinate_Reference_System>" + LS +
-               "            <Geoposition>" + LS +
-               "                <Geoposition_Insert>" + LS +
-               "                    <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
-               "                    <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
-               "                    <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
-               "                    <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
-               "                </Geoposition_Insert>" + LS +
-               "                <Simplified_Location_Model>" + LS +
-               "                    <Direct_Location_Model order=\"" + fxyGeoCoding.getPixelXFunction().getOrder() + "\">" + LS +
-               "                        <lc_List>" + LS +
-               "                            <lc index=\"0\">" + _lonCoefficients[0] + "</lc>" + LS +
-               "                            <lc index=\"1\">" + _lonCoefficients[1] + "</lc>" + LS +
-               "                            <lc index=\"2\">" + _lonCoefficients[2] + "</lc>" + LS +
-               "                        </lc_List>" + LS +
-               "                        <pc_List>" + LS +
-               "                            <pc index=\"0\">" + _latCoefficients[0] + "</pc>" + LS +
-               "                            <pc index=\"1\">" + _latCoefficients[1] + "</pc>" + LS +
-               "                            <pc index=\"2\">" + _latCoefficients[2] + "</pc>" + LS +
-               "                        </pc_List>" + LS +
-               "                    </Direct_Location_Model>" + LS +
-               "                    <Reverse_Location_Model order=\"" + fxyGeoCoding.getLatFunction().getOrder() + "\">" + LS +
-               "                        <ic_List>" + LS +
-               "                            <ic index=\"0\">" + _xCoefficients[0] + "</ic>" + LS +
-               "                            <ic index=\"1\">" + _xCoefficients[1] + "</ic>" + LS +
-               "                            <ic index=\"2\">" + _xCoefficients[2] + "</ic>" + LS +
-               "                        </ic_List>" + LS +
-               "                        <jc_List>" + LS +
-               "                            <jc index=\"0\">" + _yCoefficients[0] + "</jc>" + LS +
-               "                            <jc index=\"1\">" + _yCoefficients[1] + "</jc>" + LS +
-               "                            <jc index=\"2\">" + _yCoefficients[2] + "</jc>" + LS +
-               "                        </jc_List>" + LS +
-               "                    </Reverse_Location_Model>" + LS +
-               "                </Simplified_Location_Model>" + LS +
-               "            </Geoposition>" + LS +
-               "        </Pixel_Position_Estimator>" + LS +
-               "    </Geoposition>" + LS +
-               "</" + DimapProductConstants.TAG_ROOT + ">";
+                "    <Geoposition>" + LS +
+                "        <LATITUDE_BAND>" + geoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + geoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
+                "        <VALID_MASK_EXPRESSION>" + geoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
+                "        <SEARCH_RADIUS>" + geoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <Pixel_Position_Estimator>" + LS +
+                "            <Coordinate_Reference_System>" + LS +
+                "                <Horizontal_CS>" + LS +
+                "                    <HORIZONTAL_CS_TYPE>GEOGRAPHIC</HORIZONTAL_CS_TYPE>" + LS +
+                "                    <Geographic_CS>" + LS +
+                "                        <Horizontal_Datum>" + LS +
+                "                            <HORIZONTAL_DATUM_NAME>" + _datum.getName() + "</HORIZONTAL_DATUM_NAME>" + LS +
+                "                            <Ellipsoid>" + LS +
+                "                                <ELLIPSOID_NAME>" + _datum.getEllipsoid().getName() + "</ELLIPSOID_NAME>" + LS +
+                "                                <Ellipsoid_Parameters>" + LS +
+                "                                    <ELLIPSOID_MAJ_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMajor() + "</ELLIPSOID_MAJ_AXIS>" + LS +
+                "                                    <ELLIPSOID_MIN_AXIS unit=\"M\">" + _datum.getEllipsoid().getSemiMinor() + "</ELLIPSOID_MIN_AXIS>" + LS +
+                "                                </Ellipsoid_Parameters>" + LS +
+                "                            </Ellipsoid>" + LS +
+                "                        </Horizontal_Datum>" + LS +
+                "                    </Geographic_CS>" + LS +
+                "                </Horizontal_CS>" + LS +
+                "            </Coordinate_Reference_System>" + LS +
+                "            <Geoposition>" + LS +
+                "                <Geoposition_Insert>" + LS +
+                "                    <ULXMAP unit=\"M\">" + _pixelX + "</ULXMAP>" + LS +
+                "                    <ULYMAP unit=\"M\">" + _pixelY + "</ULYMAP>" + LS +
+                "                    <XDIM unit=\"M\">" + _pixelSizeX + "</XDIM>" + LS +
+                "                    <YDIM unit=\"M\">" + _pixelSizeY + "</YDIM>" + LS +
+                "                </Geoposition_Insert>" + LS +
+                "                <Simplified_Location_Model>" + LS +
+                "                    <Direct_Location_Model order=\"" + fxyGeoCoding.getPixelXFunction().getOrder() + "\">" + LS +
+                "                        <lc_List>" + LS +
+                "                            <lc index=\"0\">" + _lonCoefficients[0] + "</lc>" + LS +
+                "                            <lc index=\"1\">" + _lonCoefficients[1] + "</lc>" + LS +
+                "                            <lc index=\"2\">" + _lonCoefficients[2] + "</lc>" + LS +
+                "                        </lc_List>" + LS +
+                "                        <pc_List>" + LS +
+                "                            <pc index=\"0\">" + _latCoefficients[0] + "</pc>" + LS +
+                "                            <pc index=\"1\">" + _latCoefficients[1] + "</pc>" + LS +
+                "                            <pc index=\"2\">" + _latCoefficients[2] + "</pc>" + LS +
+                "                        </pc_List>" + LS +
+                "                    </Direct_Location_Model>" + LS +
+                "                    <Reverse_Location_Model order=\"" + fxyGeoCoding.getLatFunction().getOrder() + "\">" + LS +
+                "                        <ic_List>" + LS +
+                "                            <ic index=\"0\">" + _xCoefficients[0] + "</ic>" + LS +
+                "                            <ic index=\"1\">" + _xCoefficients[1] + "</ic>" + LS +
+                "                            <ic index=\"2\">" + _xCoefficients[2] + "</ic>" + LS +
+                "                        </ic_List>" + LS +
+                "                        <jc_List>" + LS +
+                "                            <jc index=\"0\">" + _yCoefficients[0] + "</jc>" + LS +
+                "                            <jc index=\"1\">" + _yCoefficients[1] + "</jc>" + LS +
+                "                            <jc index=\"2\">" + _yCoefficients[2] + "</jc>" + LS +
+                "                        </jc_List>" + LS +
+                "                    </Reverse_Location_Model>" + LS +
+                "                </Simplified_Location_Model>" + LS +
+                "            </Geoposition>" + LS +
+                "        </Pixel_Position_Estimator>" + LS +
+                "    </Geoposition>" + LS +
+                "</" + DimapProductConstants.TAG_ROOT + ">";
     }
 
     private String createCrsGeoCodingString(CrsGeoCoding geoCoding) {
@@ -954,16 +936,16 @@ public class DimapProductHelpersTest {
         }
 
         return "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
-               "    <Coordinate_Reference_System>" + LS +
-               "        <WKT>" + LS +
-               geoCoding.getMapCRS().toString() +
-               "        </WKT>" + LS +
-               "    </Coordinate_Reference_System>" + LS +
-               "    <Geoposition>" + LS +
-               "        <IMAGE_TO_MODEL_TRANSFORM>" + StringUtils.arrayToCsv(
+                "    <Coordinate_Reference_System>" + LS +
+                "        <WKT>" + LS +
+                geoCoding.getMapCRS().toString() +
+                "        </WKT>" + LS +
+                "    </Coordinate_Reference_System>" + LS +
+                "    <Geoposition>" + LS +
+                "        <IMAGE_TO_MODEL_TRANSFORM>" + StringUtils.arrayToCsv(
                 matrix) + "</IMAGE_TO_MODEL_TRANSFORM>" + LS +
-               "    </Geoposition>" + LS +
-               "</" + DimapProductConstants.TAG_ROOT + ">";
+                "    </Geoposition>" + LS +
+                "</" + DimapProductConstants.TAG_ROOT + ">";
     }
 
     private String createCrsGeoCodingString(CrsGeoCoding[] geoCodings) {

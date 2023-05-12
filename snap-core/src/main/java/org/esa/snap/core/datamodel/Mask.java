@@ -31,10 +31,9 @@ import org.esa.snap.core.jexp.impl.Tokenizer;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 
-import java.awt.Color;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeListener;
@@ -120,7 +119,6 @@ public class Mask extends Band {
      * Calls {@link ImageType#createImage(Mask) createImage(this)} in this mask's image type.
      *
      * @return The mask's source image.
-     *
      * @see #getImageType()
      */
     @Override
@@ -188,7 +186,6 @@ public class Mask extends Band {
          * Creates the mask's source image.
          *
          * @param mask The mask which requests creation of its source image.
-         *
          * @return The image.
          */
         public abstract MultiLevelImage createImage(Mask mask);
@@ -326,9 +323,9 @@ public class Mask extends Band {
             Band sourceRaster = sourceProduct.getBand(rasterName);
             Band targetRaster = targetProduct.getBand(rasterName);
             if (sourceRaster != null && targetRaster != null && sourceRaster.isFlagBand() && targetRaster.isFlagBand()) {
-                    String flagCodingName = sourceRaster.getFlagCoding().getName();
-                    return isFlagCodingExpression(flagCodingName, attribute, sourceProduct) ||
-                            isFlagCodingExpression(flagCodingName, attribute, targetProduct);
+                String flagCodingName = sourceRaster.getFlagCoding().getName();
+                return isFlagCodingExpression(flagCodingName, attribute, sourceProduct) ||
+                        isFlagCodingExpression(flagCodingName, attribute, targetProduct);
             }
             return false;
         }
@@ -436,7 +433,6 @@ public class Mask extends Band {
          * @param element A DOM element
          * @param width   The width of the mask
          * @param height  The height of the mask
-         *
          * @return a mask
          */
         public static Mask createFromBitmaskDef(Element element, int width, int height) {
@@ -506,7 +502,6 @@ public class Mask extends Band {
          * Creates the image.
          *
          * @param mask The mask which requests creation of its image.
-         *
          * @return The image.
          */
         @Override

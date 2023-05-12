@@ -243,6 +243,11 @@
             <!-- Miscellaneous 3rd party libraries ############################################# -->
 
             <dependency>
+                <groupId>javax.help</groupId>
+                <artifactId>javahelp</artifactId>
+                <version>${javahelp.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>ncsa.hdf</groupId>
                 <artifactId>lib-hdf</artifactId>
                 <version>${hdf.version}</version>
@@ -306,12 +311,6 @@
             </dependency>
 
             <!-- JDOM Library ############################################# -->
-
-            <dependency>
-                <groupId>org.jdom</groupId>
-                <artifactId>jdom</artifactId>
-                <version>1.1</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.jdom</groupId>

@@ -17,16 +17,7 @@ package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -37,15 +28,11 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.ReaderUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
+import org.esa.snap.dataio.netcdf.util.*;
 import org.geotools.referencing.CRS;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -56,7 +43,7 @@ import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
@@ -97,11 +84,11 @@ public class BeamBandPart extends ProfilePartIO {
             final int height = dimensions.get(yDimIndex).getLength();
             Band band;
             if (height == p.getSceneRasterHeight()
-                && width == p.getSceneRasterWidth()) {
+                    && width == p.getSceneRasterWidth()) {
                 band = p.addBand(variable.getFullName(), rasterDataType);
             } else {
                 if (dimensions.get(xDimIndex).getFullName().startsWith("tp_") ||
-                    dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
+                        dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
                     continue;
                 }
                 band = new Band(variable.getFullName(), rasterDataType, width, height);
@@ -156,7 +143,7 @@ public class BeamBandPart extends ProfilePartIO {
                 try {
                     final SAXBuilder saxBuilder = new SAXBuilder();
                     String xml = geoCodingValue.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
-                    final org.jdom.Document build = saxBuilder.build(new StringReader(xml));
+                    final org.jdom2.Document build = saxBuilder.build(new StringReader(xml));
                     final Element rootElement = build.getRootElement();
                     final Element parent = new Element("parent");
                     parent.addContent(rootElement.detach());
@@ -172,8 +159,8 @@ public class BeamBandPart extends ProfilePartIO {
             } else {
                 final String[] tpGridNames = geoCodingValue.split(" ");
                 if (tpGridNames.length == 2
-                    && p.containsTiePointGrid(tpGridNames[LON_INDEX])
-                    && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
+                        && p.containsTiePointGrid(tpGridNames[LON_INDEX])
+                        && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
                     final TiePointGrid lon = p.getTiePointGrid(tpGridNames[LON_INDEX]);
                     final TiePointGrid lat = p.getTiePointGrid(tpGridNames[LAT_INDEX]);
                     band.setGeoCoding(new TiePointGeoCoding(lat, lon));
@@ -238,11 +225,11 @@ public class BeamBandPart extends ProfilePartIO {
                     dimMap.put(key, dimString);
                 }
                 final java.awt.Dimension tileSize = JAIUtils.computePreferredTileSize(bandSceneRasterWidth, bandSceneRasterHeight, 1);
-                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, dimString);
+                variable = ncFile.addVariable(variableName, ncDataType, ncDataType.isUnsigned(), tileSize, dimString);
                 encodeGeoCoding(ncFile, band, p, variable);
             } else {
                 final java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, productDimensions);
+                variable = ncFile.addVariable(variableName, ncDataType, ncDataType.isUnsigned(), tileSize, productDimensions);
             }
             CfBandPart.writeCfBandAttributes(band, variable);
             writeBeamBandAttributes(band, variable);

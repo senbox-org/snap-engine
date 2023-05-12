@@ -18,31 +18,11 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ForwardCoding;
-import org.esa.snap.core.dataio.geocoding.GeoChecks;
-import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
 import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.GcpDescriptor;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Placemark;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
@@ -63,8 +43,9 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
-import org.jdom.Document;
-import org.jdom.input.DOMBuilder;
+import org.geotools.util.factory.Hints;
+import org.jdom2.Document;
+import org.jdom2.input.DOMBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -83,25 +64,14 @@ import javax.media.jai.operator.FormatDescriptor;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.DataBuffer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
+import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 
 import static org.esa.snap.core.dataio.geocoding.util.RasterUtils.toFloat;
@@ -145,15 +115,15 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         if (isGlobalShifted180) {
             // SPECIAL CASE of a global geographic lat/lon with lon from 0..360 instead of -180..180
             readBandRasterDataImplGlobalShifted180(sourceOffsetX, sourceOffsetY,
-                                                   sourceStepX, sourceStepY, destBand, destOffsetX, destOffsetY,
-                                                   destWidth, destHeight, destBuffer, pm);
+                    sourceStepX, sourceStepY, destBand, destOffsetX, destOffsetY,
+                    destWidth, destHeight, destBuffer, pm);
         } else {
             // the normal case!!
             final int destSize = destWidth * destHeight;
             pm.beginTask("Reading data...", 3);
             try {
                 final Raster data = readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
-                                             destOffsetX, destOffsetY, destWidth, destHeight);
+                        destOffsetX, destOffsetY, destWidth, destHeight);
                 pm.worked(1);
 
                 Integer bandIdx = bandMap.get(destBand);
@@ -204,9 +174,9 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         try {
 
             final Raster dataLeft = readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
-                                             destOffsetX, destOffsetY, destWidth / 2, destHeight);
+                    destOffsetX, destOffsetY, destWidth / 2, destHeight);
             final Raster dataRight = readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
-                                              destOffsetX + destWidth / 2, destOffsetY, destWidth / 2, destHeight);
+                    destOffsetX + destWidth / 2, destOffsetY, destWidth / 2, destHeight);
             pm.worked(1);
 
             double[] dArrayLeft = new double[destSize / 2];
@@ -556,7 +526,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
             final GeoPos geoPos = new GeoPos(lat, lon);
 
             final Placemark gcp = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i, "",
-                                                                 pixelPos, geoPos, product.getSceneGeoCoding());
+                    pixelPos, geoPos, product.getSceneGeoCoding());
             gcpGroup.add(gcp);
         }
 
@@ -680,9 +650,9 @@ class BigGeoTiffProductReader extends AbstractProductReader {
             final String gdalMetadataXmlString = gdalMetadataTiffField.getAsString(0);
             try {
                 final Band[] bandsFromGdalMetadata = Utils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
-                                                                                      productDataType,
-                                                                                      product.getSceneRasterWidth(),
-                                                                                      product.getSceneRasterHeight());
+                        productDataType,
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight());
                 if (bandsFromGdalMetadata.length == numBands) {
                     for (Band bandsFromGdalMetadatum : bandsFromGdalMetadata) {
                         product.addBand(bandsFromGdalMetadatum);
@@ -813,7 +783,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         final Dimension dimension;
         if (isBadTiling(imageReader)) {
             dimension = JAIUtils.computePreferredTileSize(imageReader.getWidth(FIRST_IMAGE),
-                                                          imageReader.getHeight(FIRST_IMAGE), 1);
+                    imageReader.getHeight(FIRST_IMAGE), 1);
         } else {
             dimension = new Dimension(imageReader.getTileWidth(FIRST_IMAGE), imageReader.getTileHeight(FIRST_IMAGE));
         }
@@ -855,8 +825,8 @@ class BigGeoTiffProductReader extends AbstractProductReader {
                     final int bottomBorder = expectedImageBounds.height - bandImage.getHeight();
 
                     bandImage = BorderDescriptor.create(bandImage, 0, rightBorder, 0, bottomBorder,
-                                                        BorderExtender.createInstance(BorderExtender.BORDER_COPY),
-                                                        null);
+                            BorderExtender.createInstance(BorderExtender.BORDER_COPY),
+                            null);
                 }
                 Dimension expectedTileSize = band.getProduct().getPreferredTileSize();
                 if (bandImage.getTileWidth() != expectedTileSize.width

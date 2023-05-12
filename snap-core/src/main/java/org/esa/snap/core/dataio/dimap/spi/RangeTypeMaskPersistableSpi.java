@@ -18,7 +18,7 @@ package org.esa.snap.core.dataio.dimap.spi;
 
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Mask;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * @author Marco Peters

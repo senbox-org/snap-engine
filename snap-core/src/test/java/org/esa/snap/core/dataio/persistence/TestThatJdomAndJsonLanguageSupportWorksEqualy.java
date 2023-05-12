@@ -23,19 +23,14 @@ import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -271,17 +266,17 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         final String xmlOut2 = xmlOut(jdomElems2);
         assertThat(xmlOut1).isEqualToIgnoringNewLines(
                 "<root>" +
-                "  <an_invalid_name ATTR___THE_UNCHANGED_NAME=\"an invalid name\">" +
-                "    <some>name</some>" +
-                "    <int>42</int>" +
-                "  </an_invalid_name>" +
-                "  <c2>" +
-                "    <c3 name=\"att\">" +
-                "      <propC3>16, 176, 42, 8</propC3>" +
-                "    </c3>" +
-                "    <propC2>3230523.41331</propC2>" +
-                "  </c2>" +
-                "</root>"
+                        "  <an_invalid_name ATTR___THE_UNCHANGED_NAME=\"an invalid name\">" +
+                        "    <some>name</some>" +
+                        "    <int>42</int>" +
+                        "  </an_invalid_name>" +
+                        "  <c2>" +
+                        "    <c3 name=\"att\">" +
+                        "      <propC3>16, 176, 42, 8</propC3>" +
+                        "    </c3>" +
+                        "    <propC2>3230523.41331</propC2>" +
+                        "  </c2>" +
+                        "</root>"
         );
         assertThat(xmlOut2).isEqualTo(xmlOut1);
 
@@ -289,21 +284,21 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
         final String jsonOut2 = jsonOut(jsonElems2);
         assertThat(jsonOut1).isEqualToIgnoringNewLines(
                 "{\n" +
-                "  \"root\" : [ {\n" +
-                "    \"an invalid name\" : {\n" + // this name is invalid in XML case only
-                "      \"some\" : \"name\",\n" +
-                "      \"int\" : 42\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"c2\" : {\n" +
-                "      \"propC2\" : 3230523.41331,\n" +
-                "      \"c3\" : {\n" +
-                "        \"_$ATT$_name\" : \"att\",\n" +
-                "        \"propC3\" : [ 16, 176, 42, 8 ]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  } ]\n" +
-                "}"
+                        "  \"root\" : [ {\n" +
+                        "    \"an invalid name\" : {\n" + // this name is invalid in XML case only
+                        "      \"some\" : \"name\",\n" +
+                        "      \"int\" : 42\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"c2\" : {\n" +
+                        "      \"propC2\" : 3230523.41331,\n" +
+                        "      \"c3\" : {\n" +
+                        "        \"_$ATT$_name\" : \"att\",\n" +
+                        "        \"propC3\" : [ 16, 176, 42, 8 ]\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  } ]\n" +
+                        "}"
         );
         assertThat(jsonOut2).isEqualTo(jsonOut1);
 

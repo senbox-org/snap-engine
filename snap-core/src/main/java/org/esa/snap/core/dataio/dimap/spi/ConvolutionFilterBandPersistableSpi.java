@@ -17,7 +17,7 @@ package org.esa.snap.core.dataio.dimap.spi;
 
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i>
@@ -35,11 +35,11 @@ public class ConvolutionFilterBandPersistableSpi implements DimapPersistableSpi 
     @Override
     public boolean canDecode(Element element) {
         final String elementName = element.getName();
-        if(elementName.equals(DimapProductConstants.TAG_SPECTRAL_BAND_INFO)) {
+        if (elementName.equals(DimapProductConstants.TAG_SPECTRAL_BAND_INFO)) {
             final Element filterInfo = element.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
-            if(filterInfo != null) {
+            if (filterInfo != null) {
                 final String bandType = filterInfo.getAttributeValue(DimapProductConstants.ATTRIB_BAND_TYPE);
-                if(bandType != null) {
+                if (bandType != null) {
                     return "ConvolutionFilterBand".equalsIgnoreCase(bandType.trim());
                 }
             }

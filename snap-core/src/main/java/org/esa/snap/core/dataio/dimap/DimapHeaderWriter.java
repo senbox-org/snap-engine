@@ -55,7 +55,7 @@ import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.geom.AffineTransform;

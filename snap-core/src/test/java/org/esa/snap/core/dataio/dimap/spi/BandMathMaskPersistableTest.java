@@ -18,29 +18,18 @@ package org.esa.snap.core.dataio.dimap.spi;
 
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Attribute;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.junit.Test;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_ALPHA;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_BLUE;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_GREEN;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_RED;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_TYPE;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_COLOR;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_DESCRIPTION;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_EXPRESSION;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_MASK;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_NAME;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_TRANSPARENCY;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -58,7 +47,7 @@ public class BandMathMaskPersistableTest {
     @Test
     public void testXmlCreation() {
         Mask mask = Mask.BandMathsType.create("Bibo", "A big yellow bird is in the pixel.", 10, 10,
-                                             "false", new Color(17, 11, 67), 0.7);
+                "false", new Color(17, 11, 67), 0.7);
 
         final DimapPersistable persistable = new BandMathsMaskPersistable();
 

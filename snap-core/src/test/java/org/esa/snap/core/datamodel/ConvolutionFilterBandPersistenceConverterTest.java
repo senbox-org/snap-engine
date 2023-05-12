@@ -22,24 +22,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.jxpath.xml.JDOMParser;
+import org.esa.snap.core.dataio.dimap.JDomHelper;
 import org.esa.snap.core.dataio.dimap.spi.DimapHistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.esa.snap.core.datamodel.ConvolutionFilterBandPersistenceConverter.*;
 
 public class ConvolutionFilterBandPersistenceConverterTest {
@@ -192,14 +195,12 @@ public class ConvolutionFilterBandPersistenceConverterTest {
     }
 
     @Test
-    public void canDecodeHistoricalDimapOutput() {
+    public void canDecodeHistoricalDimapOutput() throws IOException, JDOMException {
         //preparation
         final byte[] historicalBytes = historicDimapOutput.getBytes(StandardCharsets.UTF_8);
         final InputStream inputStream = new ByteArrayInputStream(historicalBytes);
-        final Object xml = new JDOMParser().parseXML(inputStream);
-        assertThat(xml).isInstanceOf(Document.class);
-        final Document document = (Document) xml;
-        final Item item = _jdomLanguageSupport.translateToItem(document.getRootElement());
+        final Document xml = JDomHelper.parse(inputStream);
+        final Item item = _jdomLanguageSupport.translateToItem(xml.getRootElement());
 
         //execution
         assertThat(_persistenceConverter.canDecode(item)).isTrue();
@@ -231,7 +232,7 @@ public class ConvolutionFilterBandPersistenceConverterTest {
     private ConvolutionFilterBand createFilterBand() {
         final double[] kernelData = new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("filteredBand", _source,
-                                                                    new Kernel(3, 3, 1.7, kernelData), 1);
+                new Kernel(3, 3, 1.7, kernelData), 1);
         cfb.setDescription("somehow explainig");
         cfb.setUnit("someUnit");
         return cfb;
@@ -239,29 +240,29 @@ public class ConvolutionFilterBandPersistenceConverterTest {
 
     private final String historicDimapOutput =
             "<Spectral_Band_Info>\n" +
-            "  <BAND_INDEX>1</BAND_INDEX>\n" +
-            "  <BAND_NAME>filteredBand</BAND_NAME>\n" +
-            "  <BAND_DESCRIPTION>somehow explainig</BAND_DESCRIPTION>\n" +
-            "  <DATA_TYPE>float32</DATA_TYPE>\n" +
-            "  <PHYSICAL_UNIT>someUnit</PHYSICAL_UNIT>\n" +
-            "  <SOLAR_FLUX>0.0</SOLAR_FLUX>\n" +
-            "  <BAND_WAVELEN>0.0</BAND_WAVELEN>\n" +
-            "  <BANDWIDTH>0.0</BANDWIDTH>\n" +
-            "  <SCALING_FACTOR>1.0</SCALING_FACTOR>\n" +
-            "  <SCALING_OFFSET>0.0</SCALING_OFFSET>\n" +
-            "  <LOG10_SCALED>false</LOG10_SCALED>\n" +
-            "  <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>\n" +
-            "  <NO_DATA_VALUE>NaN</NO_DATA_VALUE>\n" +
-            "  <Filter_Band_Info bandType=\"ConvolutionFilterBand\">\n" +
-            "    <FILTER_SOURCE>anyBand</FILTER_SOURCE>\n" +
-            "    <Filter_Kernel>\n" +
-            "      <KERNEL_WIDTH>3</KERNEL_WIDTH>\n" +
-            "      <KERNEL_HEIGHT>3</KERNEL_HEIGHT>\n" +
-            "      <KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN>\n" +
-            "      <KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN>\n" +
-            "      <KERNEL_FACTOR>1.7</KERNEL_FACTOR>\n" +
-            "      <KERNEL_DATA>1,2,3,4,5,6,7,8,9</KERNEL_DATA>\n" +
-            "    </Filter_Kernel>\n" +
-            "  </Filter_Band_Info>\n" +
-            "</Spectral_Band_Info>";
+                    "  <BAND_INDEX>1</BAND_INDEX>\n" +
+                    "  <BAND_NAME>filteredBand</BAND_NAME>\n" +
+                    "  <BAND_DESCRIPTION>somehow explainig</BAND_DESCRIPTION>\n" +
+                    "  <DATA_TYPE>float32</DATA_TYPE>\n" +
+                    "  <PHYSICAL_UNIT>someUnit</PHYSICAL_UNIT>\n" +
+                    "  <SOLAR_FLUX>0.0</SOLAR_FLUX>\n" +
+                    "  <BAND_WAVELEN>0.0</BAND_WAVELEN>\n" +
+                    "  <BANDWIDTH>0.0</BANDWIDTH>\n" +
+                    "  <SCALING_FACTOR>1.0</SCALING_FACTOR>\n" +
+                    "  <SCALING_OFFSET>0.0</SCALING_OFFSET>\n" +
+                    "  <LOG10_SCALED>false</LOG10_SCALED>\n" +
+                    "  <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>\n" +
+                    "  <NO_DATA_VALUE>NaN</NO_DATA_VALUE>\n" +
+                    "  <Filter_Band_Info bandType=\"ConvolutionFilterBand\">\n" +
+                    "    <FILTER_SOURCE>anyBand</FILTER_SOURCE>\n" +
+                    "    <Filter_Kernel>\n" +
+                    "      <KERNEL_WIDTH>3</KERNEL_WIDTH>\n" +
+                    "      <KERNEL_HEIGHT>3</KERNEL_HEIGHT>\n" +
+                    "      <KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN>\n" +
+                    "      <KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN>\n" +
+                    "      <KERNEL_FACTOR>1.7</KERNEL_FACTOR>\n" +
+                    "      <KERNEL_DATA>1,2,3,4,5,6,7,8,9</KERNEL_DATA>\n" +
+                    "    </Filter_Kernel>\n" +
+                    "  </Filter_Band_Info>\n" +
+                    "</Spectral_Band_Info>";
 }

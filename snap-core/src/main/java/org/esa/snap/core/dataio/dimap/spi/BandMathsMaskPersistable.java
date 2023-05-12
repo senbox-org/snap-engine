@@ -19,7 +19,7 @@ package org.esa.snap.core.dataio.dimap.spi;
 import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_EXPRESSION;

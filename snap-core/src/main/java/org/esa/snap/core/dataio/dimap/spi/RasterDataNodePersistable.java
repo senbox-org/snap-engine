@@ -12,8 +12,8 @@ import org.esa.snap.core.datamodel.ProductNodeEvent;
 import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.StringUtils;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
 
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
