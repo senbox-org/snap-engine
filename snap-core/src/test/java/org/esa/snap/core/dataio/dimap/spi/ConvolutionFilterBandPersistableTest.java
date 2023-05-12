@@ -16,36 +16,42 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ArrayUtils;
 import org.jdom2.Element;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvolutionFilterBandPersistableTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ConvolutionFilterBandPersistableTest {
 
     private ConvolutionFilterBandPersistable _convolutionFilterBandPersistable;
     private static final double EPS = 1e-6;
     private Product _product;
     private Band _source;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _convolutionFilterBandPersistable = new ConvolutionFilterBandPersistable();
         _product = new Product("p", "doesntMatter", 2, 2);
         _source = _product.addBand("anyBand", ProductData.TYPE_UINT16);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         _convolutionFilterBandPersistable = null;
         _product = null;
         _source = null;
     }
 
+    @Test
     public void testCreateObjectFromXml() {
         final Element xmlElement = createXmlElement();
 
@@ -76,6 +82,8 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
                 cfb.getKernel().getKernelData(null), EPS));
     }
 
+    @Test
+    @STTM("SNAP-3481")
     public void testCreateXmlFromObject() {
         final double[] kernelData = new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("filteredBand", _source,
@@ -138,6 +146,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(ConvolutionFilterBandPersistable.toCsv(kernel.getKernelData(null)), kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_DATA));
     }
 
+    @Test
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement();
 
@@ -212,5 +221,4 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         elem.setText(text);
         return elem;
     }
-
 }

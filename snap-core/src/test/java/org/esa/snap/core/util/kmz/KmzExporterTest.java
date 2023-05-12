@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.util.kmz;
 
+import com.bc.ceres.annotation.STTM;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.jdom2.Document;
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertNotNull;
 public class KmzExporterTest {
 
     @Test
+    @STTM("SNAP-3481")
     public void testKmlHierarchy() throws ParserConfigurationException, IOException, SAXException {
         RenderedImage layer = new DummyTestOpImage(10, 10);
         final BoundingBox boundBox = new ReferencedEnvelope(0, 20, 70, 30, DefaultGeographicCRS.WGS84);
@@ -100,6 +102,7 @@ public class KmzExporterTest {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testKmlPlacemarks() throws IOException, SAXException, ParserConfigurationException {
         KmlDocument doc1 = new KmlDocument("pins", null);
         doc1.addChild(new KmlPlacemark("placemark 1", null, new Point2D.Double(80.0, 89.0)));
@@ -126,6 +129,7 @@ public class KmzExporterTest {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testLegend() throws IOException, SAXException, ParserConfigurationException {
         final String xml = KmzExporter.createKml(new KmlScreenOverlay("Legend", new DummyTestOpImage(4, 10)));
         final Document document = convertToDocument(xml);
@@ -175,6 +179,4 @@ public class KmzExporterTest {
         final DocumentBuilder builder = factory.newDocumentBuilder();
         return new DOMBuilder().build(builder.parse(new ByteArrayInputStream(xmlString.getBytes())));
     }
-
-
 }

@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.jdom2.Attribute;
@@ -45,6 +46,7 @@ public class BandMathMaskPersistableTest {
     </Mask>
     */
     @Test
+    @STTM("SNAP-3481")
     public void testXmlCreation() {
         Mask mask = Mask.BandMathsType.create("Bibo", "A big yellow bird is in the pixel.", 10, 10,
                 "false", new Color(17, 11, 67), 0.7);

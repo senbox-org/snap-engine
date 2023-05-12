@@ -18,6 +18,7 @@
 
 package org.esa.snap.core.dataio.persistence;
 
+import com.bc.ceres.annotation.STTM;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -46,6 +47,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testSingleValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
@@ -154,6 +156,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testArrayValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
@@ -239,6 +242,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testContainer() throws JsonProcessingException {
         //preparation
         final Container c1 = new Container("an invalid name");

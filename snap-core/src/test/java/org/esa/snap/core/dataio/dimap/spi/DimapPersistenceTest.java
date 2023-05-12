@@ -16,14 +16,20 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.*;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.junit.Test;
 
-public class DimapPersistenceTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+public class DimapPersistenceTest {
+
+    @Test
+    @STTM("SNAP-3481")
     public void testGetPersistabelByElement() {
 
         final DimapPersistable gfbPersistable = DimapPersistence.getPersistable(createFilterBandElement(
@@ -38,6 +44,8 @@ public class DimapPersistenceTest extends TestCase {
 
     }
 
+    @Test
+    @STTM("SNAP-3481")
     public void testGetPersistabelByObject() {
         final GeneralFilterBand gfb = new GeneralFilterBand("test1", new Band("b", ProductData.TYPE_UINT16, 2, 2), GeneralFilterBand.OpType.MAX, new Kernel(1, 1, new double[1]), 1);
         final DimapPersistable gfbPersistable = DimapPersistence.getPersistable(gfb);
@@ -60,5 +68,4 @@ public class DimapPersistenceTest extends TestCase {
         bandInfo.setContent(filterInfo);
         return bandInfo;
     }
-
 }

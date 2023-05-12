@@ -16,46 +16,54 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.*;
 import org.jdom2.Element;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeneralFilterBandPersistableTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class GeneralFilterBandPersistableTest {
 
     private GeneralFilterBandPersistable _generalFilterBandPersistable;
     private static final double EPS = 1e-6;
     private Product _product;
     private Band _source;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _generalFilterBandPersistable = new GeneralFilterBandPersistable();
         _product = new Product("p", "doesntMatter", 2, 2);
         _source = _product.addBand("anyBand", ProductData.TYPE_UINT16);
-
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         _generalFilterBandPersistable = null;
         _product = null;
         _source = null;
     }
 
+    @Test
     public void testCreateObjectFromXml_Version_1_0() {
         Element xmlElement = createXmlElement(GeneralFilterBandPersistable.VERSION_1_0);
         assertCreateRightGeneralFilterBand(xmlElement);
     }
 
+    @Test
     public void testCreateObjectFromXml_Version_1_1() {
         final Element xmlElement = createXmlElement(GeneralFilterBandPersistable.VERSION_1_1);
         assertCreateRightGeneralFilterBand(xmlElement);
     }
 
+    @Test
+    @STTM("SNAP-3481")
     public void testCreateXmlFromObject() {
         final GeneralFilterBand gfb = new GeneralFilterBand("filteredBand", _source, GeneralFilterBand.OpType.MAX, new Kernel(2, 2, new double[2 * 2]), 1);
         gfb.setDescription("somehow explainig");
@@ -121,6 +129,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
                 filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_OP_TYPE));
     }
 
+    @Test
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement(GeneralFilterBandPersistable.VERSION_1_2);
 
@@ -160,7 +169,6 @@ public class GeneralFilterBandPersistableTest extends TestCase {
         assertEquals(5, gfb.getStructuringElement().getHeight());
         assertEquals(gfb.getOpType(), GeneralFilterBand.OpType.MEAN);
     }
-
 
     private static void assertEqualElement(Element expElement, Element actElement) {
         assertNotNull(expElement);
