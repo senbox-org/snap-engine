@@ -179,9 +179,9 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".scene.aspect.best.fit";
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_LABEL = "Scene Aspect Ratio (Best Fit)";
-    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_TOOLTIP = "For Best Fit: Scene aspect ratio which triggers determination of horizontal or vertical color bar";
+    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_TOOLTIP = "For Best Fit: Scene aspect ratio (width/height) which triggers determination of horizontal or vertical color bar";
     private static final String PROPERTY_SCENE_ASPECT_BEST_FIT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "SceneAspectBestFit";
-    public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.5;
+    public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.25;
     public static final Class PROPERTY_SCENE_ASPECT_BEST_FIT_TYPE = Double.class;
 
 
@@ -341,6 +341,8 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LOCATION_INSIDE_TYPE = Boolean.class;
 
 
+
+
     public static final String LOCATION_UPPER_LEFT = "Upper Left";
     public static final String LOCATION_UPPER_CENTER = "Upper Center";
     public static final String LOCATION_UPPER_RIGHT = "Upper Right";
@@ -349,31 +351,55 @@ public class ColorBarLayerType extends LayerType {
     public static final String LOCATION_LOWER_RIGHT = "Lower Right";
     public static final String LOCATION_LEFT_CENTER = "Left Side Center";
     public static final String LOCATION_RIGHT_CENTER = "Right Side Center";
-    public static String[] getColorBarLocationArray() {
+
+
+    public static String[] getColorBarLocationHorizontalArray() {
         return  new String[]{
                 LOCATION_UPPER_LEFT,
                 LOCATION_UPPER_CENTER,
                 LOCATION_UPPER_RIGHT,
                 LOCATION_LOWER_LEFT,
                 LOCATION_LOWER_CENTER,
-                LOCATION_LOWER_RIGHT,
+                LOCATION_LOWER_RIGHT
+        };
+    }
+//    LOCATION_LEFT_CENTER,
+//    LOCATION_RIGHT_CENTER
+
+    public static final String PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor.horizontal";
+    public static final String PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_LABEL = "Location (Horizontal)";
+    public static final String PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_TOOLTIP = "Where to place the horizontal " + COLOR_LOWER_CASE + " bar on image";
+    private static final String PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "AnchorHorizontal";
+    public static final String PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_DEFAULT = LOCATION_LOWER_CENTER;
+    public static final Class PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_TYPE = String.class;
+
+
+    public static String[] getColorBarLocationVerticalArray() {
+        return  new String[]{
+                LOCATION_UPPER_LEFT,
                 LOCATION_LEFT_CENTER,
-                LOCATION_RIGHT_CENTER
+                LOCATION_LOWER_LEFT,
+                LOCATION_UPPER_RIGHT,
+                LOCATION_RIGHT_CENTER,
+                LOCATION_LOWER_RIGHT
         };
     }
 
-    public static final String PROPERTY_LOCATION_PLACEMENT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Location";
-    public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place " + COLOR_LOWER_CASE + " bar on image";
-    private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
-    public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
+    public static final String PROPERTY_LOCATION_PLACEMENT_VERTICAL_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor.vertical";
+    public static final String PROPERTY_LOCATION_PLACEMENT_VERTICAL_LABEL = "Location (Vertical)";
+    public static final String PROPERTY_LOCATION_PLACEMENT_VERTICAL_TOOLTIP = "Where to place the vertical " + COLOR_LOWER_CASE + " bar on image";
+    private static final String PROPERTY_LOCATION_PLACEMENT_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "AnchorVertical";
+    public static final String PROPERTY_LOCATION_PLACEMENT_VERTICAL_DEFAULT = LOCATION_LOWER_RIGHT;
+    public static final Class PROPERTY_LOCATION_PLACEMENT_VERTICAL_TYPE = String.class;
+
+
+
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
     public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 150.0;
+    public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
@@ -1098,10 +1124,16 @@ public class ColorBarLayerType extends LayerType {
         locationInsideModel.getDescriptor().setAlias(PROPERTY_LOCATION_INSIDE_ALIAS);
         vc.addProperty(locationInsideModel);
 
-        final Property locationEdgeModel = Property.create(PROPERTY_LOCATION_PLACEMENT_KEY,
-                PROPERTY_LOCATION_PLACEMENT_TYPE, true, true);
-        locationEdgeModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_ALIAS);
-        vc.addProperty(locationEdgeModel);
+        final Property locationHorizontalModel = Property.create(PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_KEY,
+                PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_TYPE, true, true);
+        locationHorizontalModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_ALIAS);
+        vc.addProperty(locationHorizontalModel);
+
+        final Property locationVerticalModel = Property.create(PROPERTY_LOCATION_PLACEMENT_VERTICAL_KEY,
+                PROPERTY_LOCATION_PLACEMENT_VERTICAL_TYPE, true, true);
+        locationVerticalModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_VERTICAL_ALIAS);
+        vc.addProperty(locationVerticalModel);
+
 
         final Property locationOffsetModel = Property.create(PROPERTY_LOCATION_OFFSET_KEY, PROPERTY_LOCATION_OFFSET_TYPE, true, true);
         locationOffsetModel.getDescriptor().setAlias(PROPERTY_LOCATION_OFFSET_ALIAS);

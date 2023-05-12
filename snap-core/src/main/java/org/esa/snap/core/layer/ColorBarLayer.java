@@ -55,6 +55,7 @@ public class ColorBarLayer extends Layer {
     String orientationPrevious;
     double sceneAspectBestFitPrevious;
     String locationPrevious;
+    String locationVerticalPrevious;
     String titlePreferences;
     String titleAltPreferences;
     String unitsPreferences;
@@ -130,7 +131,8 @@ public class ColorBarLayer extends Layer {
                 autoApplyPrevious = isAutoApplySchemes();
                 orientationPrevious = getOrientation();
                 sceneAspectBestFitPrevious = getSceneAspectBestFit();
-                locationPrevious = getColorBarLocationPlacement();
+                locationPrevious = getColorBarLocationHorizontalPlacement();
+                locationVerticalPrevious = getColorBarLocationVerticalPlacement();
                 titlePreferences = getTitle();
                 titleAltPreferences = getTitleAlt();
                 unitsPreferences = getUnits();
@@ -150,13 +152,13 @@ public class ColorBarLayer extends Layer {
                 boolean autoDetermineOffsetShift = true;
 
 
-                if (isHorizontalColorBar()) {
-                    // todo Preference placement (horizontal)
-                    setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
-                } else {
-                    // todo Preference  placement (vertical)
-                    setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
-                }
+//                if (isHorizontalColorBar()) {
+//                    // todo Preference placement (horizontal)
+//                    setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
+//                } else {
+//                    // todo Preference  placement (vertical)
+//                    setColorBarLocationVerticalPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
+//                }
 
 
             }
@@ -217,17 +219,18 @@ public class ColorBarLayer extends Layer {
             if ((isColorBarLocationInside() != colorBarLocationInsidePrevious) ||
                     (getOrientation() != null && !getOrientation().equals(orientationPrevious)) ||
                     (getSceneAspectBestFit() != sceneAspectBestFitPrevious) ||
-                    (getColorBarLocationPlacement() != null & !getColorBarLocationPlacement().equals(locationPrevious))
+                    (getColorBarLocationHorizontalPlacement() != null & !getColorBarLocationHorizontalPlacement().equals(locationPrevious))  ||
+                            (getColorBarLocationVerticalPlacement() != null & !getColorBarLocationVerticalPlacement().equals(locationVerticalPrevious))
             ) {
                 if (getOrientation() != null && !getOrientation().equals(orientationPrevious) ||
                         (getSceneAspectBestFit() != sceneAspectBestFitPrevious)) {
-                    if (isHorizontalColorBar()) {
-                        // todo Preference placement (horizontal)
-                        setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
-                    } else {
-                        // todo Preference  placement (vertical)
-                        setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
-                    }
+//                    if (isHorizontalColorBar()) {
+//                        // todo Preference placement (horizontal)
+//                        setColorBarLocationPlacement(ColorBarLayerType.LOCATION_LOWER_CENTER);
+//                    } else {
+//                        // todo Preference  placement (vertical)
+//                        setColorBarLocationVerticalPlacement(ColorBarLayerType.LOCATION_LOWER_RIGHT);
+//                    }
                 }
 
 
@@ -240,39 +243,39 @@ public class ColorBarLayer extends Layer {
                     double imageAverageSize = (raster.getRasterWidth() + raster.getRasterHeight()) / 2;
 
                     if (isHorizontalColorBar()) {
-                        if (ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationPlacement())) {
+                        if (ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationHorizontalPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationHorizontalPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationHorizontalPlacement())) {
                             setLocationOffset(offsetShiftMultiplicationFactor * imageAverageSize);
 //                                setLocationOffset(offsetShiftMultiplicationFactor * getTitleFontSize());
                             setLocationShift(0.0);
-                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationHorizontalPlacement()) ||
+                                ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationHorizontalPlacement()) ||
+                                ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationHorizontalPlacement())) {
                             setLocationOffset(-(offsetShiftMultiplicationFactor * imageAverageSize));
                             setLocationShift(0.0);
-                        } else if (ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationHorizontalPlacement())) {
                             setLocationOffset(0.0);
                             setLocationShift(-(offsetShiftMultiplicationFactor * imageAverageSize));
-                        } else if (ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationHorizontalPlacement())) {
                             setLocationOffset(0.0);
                             setLocationShift(offsetShiftMultiplicationFactor * imageAverageSize);
                         }
                     } else {
-                        if (ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationPlacement())) {
+                        if (ColorBarLayerType.LOCATION_LOWER_RIGHT.equals(getColorBarLocationVerticalPlacement()) ||
+                                ColorBarLayerType.LOCATION_RIGHT_CENTER.equals(getColorBarLocationVerticalPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_RIGHT.equals(getColorBarLocationVerticalPlacement())) {
                             setLocationOffset(offsetShiftMultiplicationFactor * imageAverageSize);
                             setLocationShift(0.0);
-                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationPlacement()) ||
-                                ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_LOWER_LEFT.equals(getColorBarLocationVerticalPlacement()) ||
+                                ColorBarLayerType.LOCATION_LEFT_CENTER.equals(getColorBarLocationVerticalPlacement()) ||
+                                ColorBarLayerType.LOCATION_UPPER_LEFT.equals(getColorBarLocationVerticalPlacement())) {
                             setLocationOffset(-(offsetShiftMultiplicationFactor * imageAverageSize));
                             setLocationShift(0.0);
-                        } else if (ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_LOWER_CENTER.equals(getColorBarLocationVerticalPlacement())) {
                             setLocationOffset(0.0);
                             setLocationShift(-(offsetShiftMultiplicationFactor * imageAverageSize));
-                        } else if (ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationPlacement())) {
+                        } else if (ColorBarLayerType.LOCATION_UPPER_CENTER.equals(getColorBarLocationVerticalPlacement())) {
                             setLocationOffset(0.0);
                             setLocationShift(offsetShiftMultiplicationFactor * imageAverageSize);
                         }
@@ -282,7 +285,9 @@ public class ColorBarLayer extends Layer {
 
                 colorBarLocationInsidePrevious = isColorBarLocationInside();
                 sceneAspectBestFitPrevious = getSceneAspectBestFit();
-                locationPrevious = getColorBarLocationPlacement();
+                locationPrevious = getColorBarLocationHorizontalPlacement();
+                locationVerticalPrevious = getColorBarLocationVerticalPlacement();
+                orientationPrevious = getOrientation();
             }
 
 
@@ -547,7 +552,7 @@ public class ColorBarLayer extends Layer {
 
         if (isHorizontalColorBar()) {
             if (isColorBarLocationInside()) {
-                switch (getColorBarLocationPlacement()) {
+                switch (getColorBarLocationHorizontalPlacement()) {
 
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         offsetAdjust = -colorBarImageHeight;
@@ -590,7 +595,7 @@ public class ColorBarLayer extends Layer {
 
 
             } else {
-                switch (getColorBarLocationPlacement()) {
+                switch (getColorBarLocationHorizontalPlacement()) {
 
                     case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         offsetAdjust = 0;
@@ -634,7 +639,7 @@ public class ColorBarLayer extends Layer {
             if (isColorBarLocationInside()) {
                 offset = -offset;
 
-                switch (getColorBarLocationPlacement()) {
+                switch (getColorBarLocationVerticalPlacement()) {
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         offsetAdjust = -rasterWidth;
                         shiftAdjust = 0;
@@ -672,7 +677,7 @@ public class ColorBarLayer extends Layer {
                         shiftAdjust = rasterHeight - colorBarImageHeight;
                 }
             } else {
-                switch (getColorBarLocationPlacement()) {
+                switch (getColorBarLocationVerticalPlacement()) {
                     case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         offsetAdjust = -rasterWidth - colorBarImageWidth;
                         shiftAdjust = 0;
@@ -1021,15 +1026,28 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private String getColorBarLocationPlacement() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY,
-                ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_DEFAULT);
+    private String getColorBarLocationHorizontalPlacement() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_DEFAULT);
     }
 
 
-    private void setColorBarLocationPlacement(String value) {
+    private void setColorBarLocationHorizontalPlacement(String value) {
         try {
-            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY).setValue((Object) value);
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_HORIZONTAL_KEY).setValue((Object) value);
+        } catch (ValidationException v) {
+        }
+    }
+
+    private String getColorBarLocationVerticalPlacement() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_VERTICAL_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_VERTICAL_DEFAULT);
+    }
+
+
+    private void setColorBarLocationVerticalPlacement(String value) {
+        try {
+            getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_VERTICAL_KEY).setValue((Object) value);
         } catch (ValidationException v) {
         }
     }
