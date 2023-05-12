@@ -394,6 +394,16 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_KEY = PROPERTY_LOCATION_ROOT_KEY + ".gap.factor";
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Gap Factor";
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage factor to place " + COLOR_LOWER_CASE + " bar legend away from anchored axis)";
+    private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
+    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 0.1;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = 0.0;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 1.0;
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";
+    public static final Class PROPERTY_LOCATION_GAP_FACTOR_TYPE = Double.class;
+
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
     public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
@@ -1133,6 +1143,11 @@ public class ColorBarLayerType extends LayerType {
                 PROPERTY_LOCATION_PLACEMENT_VERTICAL_TYPE, true, true);
         locationVerticalModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_VERTICAL_ALIAS);
         vc.addProperty(locationVerticalModel);
+
+        final Property locationGapFactorModel = Property.create(PROPERTY_LOCATION_GAP_FACTOR_KEY, PROPERTY_LOCATION_GAP_FACTOR_TYPE, true, true);
+        locationGapFactorModel.getDescriptor().setAlias(PROPERTY_LOCATION_GAP_FACTOR_ALIAS);
+        vc.addProperty(locationGapFactorModel);
+
 
 
         final Property locationOffsetModel = Property.create(PROPERTY_LOCATION_OFFSET_KEY, PROPERTY_LOCATION_OFFSET_TYPE, true, true);
