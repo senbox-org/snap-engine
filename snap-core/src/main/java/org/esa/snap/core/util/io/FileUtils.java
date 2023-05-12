@@ -19,20 +19,16 @@ import com.bc.ceres.core.Assert;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 
 /**
@@ -550,5 +546,46 @@ public class FileUtils {
             uri = URI.create("jar:" + baseUri + "!/");
         }
         return uri;
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        final StringBuilder hex = new StringBuilder();
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
+    }
+
+    public static String computeHashForFile(Path targetFile) throws IOException {
+        try {
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (InputStream is = Files.newInputStream(targetFile); DigestInputStream dis = new DigestInputStream(is, md)){
+                while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
+                return bytesToHex(md.digest());
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static String computeHashForDirectory(Path targetDirectory) throws IOException {
+        try {
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            Files.walkFileTree(targetDirectory, new SimpleFileVisitor<Path>(){
+                @Override
+                public FileVisitResult visitFile(Path targetFile, BasicFileAttributes attributes) throws IOException {
+                    if (attributes.isRegularFile()) {
+                        md.update(targetFile.getFileName().toString().getBytes());
+                        try (InputStream is = Files.newInputStream(targetFile);  DigestInputStream dis = new DigestInputStream(is, md)){
+                            while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            return bytesToHex(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 }
