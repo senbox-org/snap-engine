@@ -15,22 +15,16 @@
  */
 package org.esa.snap.core.util;
 
-import org.jdom.Element;
-import org.jdom.Text;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.Text;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * Utility class for writing XML.
+ *
  * @deprecated since BEAM 4.2, XML shall only be written via a DOM (e.g. JDOM). Used by BEAM-DIMAP product writer.
  */
 @Deprecated

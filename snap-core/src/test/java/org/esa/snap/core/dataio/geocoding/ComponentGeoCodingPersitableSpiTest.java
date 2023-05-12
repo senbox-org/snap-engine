@@ -1,12 +1,13 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ComponentGeoCodingPersitableSpiTest {

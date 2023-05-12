@@ -1,9 +1,9 @@
 package org.esa.snap.remote.execution.file.system;
 
-import org.apache.commons.lang.StringUtils;
-import org.esa.snap.remote.execution.utils.CommandExecutorUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.remote.execution.executors.OutputConsole;
 import org.esa.snap.remote.execution.executors.ProcessExecutor;
+import org.esa.snap.remote.execution.utils.CommandExecutorUtils;
 
 import java.io.IOException;
 import java.util.logging.Level;

@@ -16,18 +16,20 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ConvolutionFilterBand;
-import org.esa.snap.core.datamodel.GeneralFilterBand;
-import org.esa.snap.core.datamodel.Kernel;
-import org.esa.snap.core.datamodel.ProductData;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.esa.snap.core.datamodel.*;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+import org.junit.Test;
 
-public class DimapPersistenceTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+public class DimapPersistenceTest {
+
+    @Test
+    @STTM("SNAP-3481")
     public void testGetPersistabelByElement() {
 
         final DimapPersistable gfbPersistable = DimapPersistence.getPersistable(createFilterBandElement(
@@ -42,15 +44,17 @@ public class DimapPersistenceTest extends TestCase {
 
     }
 
+    @Test
+    @STTM("SNAP-3481")
     public void testGetPersistabelByObject() {
-        final GeneralFilterBand gfb = new GeneralFilterBand("test1", new Band("b", ProductData.TYPE_UINT16, 2, 2), GeneralFilterBand.OpType.MAX, new Kernel(1,1,new double[1]), 1);
+        final GeneralFilterBand gfb = new GeneralFilterBand("test1", new Band("b", ProductData.TYPE_UINT16, 2, 2), GeneralFilterBand.OpType.MAX, new Kernel(1, 1, new double[1]), 1);
         final DimapPersistable gfbPersistable = DimapPersistence.getPersistable(gfb);
         assertNotNull(gfbPersistable);
         assertTrue(gfbPersistable instanceof GeneralFilterBandPersistable);
 
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("test2",
-                                                                    new Band("b", ProductData.TYPE_INT8, 3, 3),
-                                                                    new Kernel(2, 2, new double[4]), 1);
+                new Band("b", ProductData.TYPE_INT8, 3, 3),
+                new Kernel(2, 2, new double[4]), 1);
         final DimapPersistable cfbPersistable = DimapPersistence.getPersistable(cfb);
         assertNotNull(cfbPersistable);
         assertTrue(cfbPersistable instanceof ConvolutionFilterBandPersistable);
@@ -64,5 +68,4 @@ public class DimapPersistenceTest extends TestCase {
         bandInfo.setContent(filterInfo);
         return bandInfo;
     }
-
 }

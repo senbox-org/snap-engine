@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.swift;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.esa.snap.vfs.NioPaths;
 import org.esa.snap.vfs.VFS;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
@@ -37,10 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -141,7 +137,7 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
             this.mockService.start();
             this.authMockService.start();
         } catch (Exception e) {
-            Logger.getLogger(SwiftFileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage() + "\n" + ExceptionUtils.getFullStackTrace(e));
+            Logger.getLogger(SwiftFileSystemTest.class.getName()).log(Level.WARNING, "Testing requirements are not met. " + e.getMessage() + "\n", e);
             assumeTrue(false);
         }
     }
@@ -168,7 +164,7 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
         List<BasicFileAttributes> items;
 
         SwiftWalker walker = new SwiftWalker(getAddress(), getContainer(), "/", swiftRepo.getRoot(), fileSystemProvider);
-        items = walker.walk(VFSPath.toRemotePath(NioPaths.get(swiftRepo.getRoot() + "")));
+        items = walker.walk(VFSPath.toRemotePath(NioPaths.get(swiftRepo.getRoot())));
         assertEquals(2, items.size());
 
         walker = new SwiftWalker(getAddress(), getContainer(), "/", swiftRepo.getRoot(), fileSystemProvider);

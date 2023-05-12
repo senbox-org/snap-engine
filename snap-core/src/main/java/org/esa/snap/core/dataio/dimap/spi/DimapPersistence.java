@@ -15,13 +15,13 @@
  */
 package org.esa.snap.core.dataio.dimap.spi;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.util.Iterator;
 
 /**
  * <p><i>Note that this class is not yet public API. Interface may change in future releases.</i>
- * 
+ *
  * @author Marco Peters
  * @deprecated use {@link org.esa.snap.core.dataio.persistence.Persistence Persistence} instead.
  */
@@ -48,9 +48,9 @@ public class DimapPersistence {
     }
 
     private static boolean checkUsability(DimapPersistableSpi persistableSpi, Object object) {
-        if(object instanceof Element) {
+        if (object instanceof Element) {
             return persistableSpi.canDecode((Element) object);
-        }else {
+        } else {
             return persistableSpi.canPersist(object);
         }
     }

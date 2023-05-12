@@ -6,9 +6,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_LINUX;
-import static org.apache.commons.lang.SystemUtils.IS_OS_MAC_OSX;
-import static org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS;
+import static org.apache.commons.lang3.SystemUtils.*;
 
 /**
  * GDAL OS category enum for defining GDAL compatible operating systems types with SNAP.

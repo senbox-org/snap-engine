@@ -4,7 +4,7 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Layer: org/esa/snap/worldmap/layer.xml
-OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Java-Dependencies: Java > 11
 OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>This module provides a NASA Blue M
  arble world map layer in WGS84.</p><p><b>Vendor:</b> Brockmann Consul

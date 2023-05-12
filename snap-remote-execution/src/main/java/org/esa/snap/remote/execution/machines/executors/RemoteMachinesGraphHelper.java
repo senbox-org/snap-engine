@@ -2,12 +2,7 @@ package org.esa.snap.remote.execution.machines.executors;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
-import org.apache.commons.lang.StringUtils;
-import org.esa.snap.remote.execution.exceptions.ExecutionExceptionType;
-import org.esa.snap.remote.execution.exceptions.OperatorExecutionException;
-import org.esa.snap.remote.execution.file.system.ILocalMachineFileSystem;
-import org.esa.snap.remote.execution.file.system.IRemoteMachineFileSystem;
-import org.esa.snap.remote.execution.machines.RemoteMachineProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.common.ReadOp;
 import org.esa.snap.core.gpf.common.WriteOp;
@@ -16,6 +11,11 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
+import org.esa.snap.remote.execution.exceptions.ExecutionExceptionType;
+import org.esa.snap.remote.execution.exceptions.OperatorExecutionException;
+import org.esa.snap.remote.execution.file.system.ILocalMachineFileSystem;
+import org.esa.snap.remote.execution.file.system.IRemoteMachineFileSystem;
+import org.esa.snap.remote.execution.machines.RemoteMachineProperties;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

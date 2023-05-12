@@ -16,40 +16,42 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ConvolutionFilterBand;
-import org.esa.snap.core.datamodel.Kernel;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ArrayUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvolutionFilterBandPersistableTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ConvolutionFilterBandPersistableTest {
 
     private ConvolutionFilterBandPersistable _convolutionFilterBandPersistable;
     private static final double EPS = 1e-6;
     private Product _product;
     private Band _source;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _convolutionFilterBandPersistable = new ConvolutionFilterBandPersistable();
         _product = new Product("p", "doesntMatter", 2, 2);
         _source = _product.addBand("anyBand", ProductData.TYPE_UINT16);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         _convolutionFilterBandPersistable = null;
         _product = null;
         _source = null;
     }
 
+    @Test
     public void testCreateObjectFromXml() {
         final Element xmlElement = createXmlElement();
 
@@ -77,13 +79,15 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(3, cfb.getKernel().getHeight());
         assertEquals(1.7, cfb.getKernel().getFactor(), EPS);
         assertTrue(ArrayUtils.equalArrays(new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0},
-                                          cfb.getKernel().getKernelData(null), EPS));
+                cfb.getKernel().getKernelData(null), EPS));
     }
 
+    @Test
+    @STTM("SNAP-3481")
     public void testCreateXmlFromObject() {
         final double[] kernelData = new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("filteredBand", _source,
-                                                                    new Kernel(3, 3, 1.7, kernelData), 1);
+                new Kernel(3, 3, 1.7, kernelData), 1);
         cfb.setDescription("somehow explainig");
         cfb.setUnit("someUnit");
         _product.addBand(cfb);
@@ -142,6 +146,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(ConvolutionFilterBandPersistable.toCsv(kernel.getKernelData(null)), kernelInfo.getChildTextTrim(DimapProductConstants.TAG_KERNEL_DATA));
     }
 
+    @Test
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement();
 
@@ -195,8 +200,8 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_HEIGHT, "3"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_FACTOR, "1.7"));
         kernelInfoList.add(createElement(DimapProductConstants.TAG_KERNEL_DATA,
-                                         ConvolutionFilterBandPersistable.toCsv(
-                                                 new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0})));
+                ConvolutionFilterBandPersistable.toCsv(
+                        new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0})));
 
         final Element filterKernel = new Element(DimapProductConstants.TAG_FILTER_KERNEL);
         filterKernel.setContent(kernelInfoList);
@@ -216,5 +221,4 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         elem.setText(text);
         return elem;
     }
-
 }

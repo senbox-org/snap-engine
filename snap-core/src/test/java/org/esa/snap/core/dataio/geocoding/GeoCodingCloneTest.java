@@ -6,15 +6,10 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 public class GeoCodingCloneTest {
 
@@ -48,7 +43,7 @@ public class GeoCodingCloneTest {
         assertSame(geoRaster, cloneRaster);
         assertSame(original, clone);
 
-        verify(inverse, times(1)).initialize(any(GeoRaster.class), anyBoolean(), anyObject());
+        verify(inverse, times(1)).initialize(Mockito.any(GeoRaster.class), Mockito.anyBoolean(), Mockito.any());
         verify(inverse, times(1)).clone();
         verifyNoMoreInteractions(inverse);
     }
@@ -67,7 +62,7 @@ public class GeoCodingCloneTest {
         assertSame(geoRaster, cloneRaster);
         assertSame(original, clone);
 
-        verify(forward, times(1)).initialize(any(GeoRaster.class), anyBoolean(), anyObject());
+        verify(forward, times(1)).initialize(Mockito.any(GeoRaster.class), Mockito.anyBoolean(), Mockito.any());
         verify(forward, times(1)).clone();
         verifyNoMoreInteractions(forward);
     }
@@ -87,12 +82,12 @@ public class GeoCodingCloneTest {
 
         clone.dispose();
 
-        verify(forward, times(1)).initialize(any(GeoRaster.class), anyBoolean(), anyObject());
+        verify(forward, times(1)).initialize(Mockito.any(GeoRaster.class), Mockito.anyBoolean(), Mockito.any());
         verify(forward, times(1)).clone();
         verify(forward, times(1)).dispose();
         verifyNoMoreInteractions(forward);
 
-        verify(inverse, times(1)).initialize(any(GeoRaster.class), anyBoolean(), anyObject());
+        verify(inverse, times(1)).initialize(Mockito.any(GeoRaster.class), Mockito.anyBoolean(), Mockito.any());
         verify(inverse, times(1)).clone();
         verify(inverse, times(1)).dispose();
         verifyNoMoreInteractions(inverse);

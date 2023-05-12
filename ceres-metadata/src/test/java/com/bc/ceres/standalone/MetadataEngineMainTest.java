@@ -3,7 +3,6 @@ package com.bc.ceres.standalone;
 import com.bc.ceres.metadata.MetadataResourceEngine;
 import com.bc.ceres.metadata.SimpleFileSystem;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.StringReader;
@@ -145,7 +144,7 @@ public class MetadataEngineMainTest {
         Mockito.when(fileSystem.createWriter("/my/chl-a-my-template.xml")).thenReturn(metadataResult);
         Mockito.when(fileSystem.createWriter("/my/chl-a-yours.txt")).thenReturn(metadataResultXml);
 
-        Mockito.when(fileSystem.isFile(Matchers.anyString())).thenReturn(true);
+        Mockito.when(fileSystem.isFile(Mockito.anyString())).thenReturn(true);
 
         //execution
         metadataEngineMain.processMetadata();

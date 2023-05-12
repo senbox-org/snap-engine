@@ -4,7 +4,7 @@ OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Layer: org/esa/snap/dataio/envi/layer.xml
-OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Java-Dependencies: Java > 11
 OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>Enables SNAP to read data products
   in ESRI-ENVI format including products of HICO.</p><p><b>Funding:</b

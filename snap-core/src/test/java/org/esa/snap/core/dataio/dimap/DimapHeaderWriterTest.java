@@ -143,61 +143,8 @@ public class DimapHeaderWriterTest {
                     "            <VIRTUAL_BAND>true</VIRTUAL_BAND>" + LS +
                     "            <EXPRESSION>b1 * 0.4 + 1</EXPRESSION>" + LS +
                     "        </Spectral_Band_Info>" + LS +
-                    "        <Spectral_Band_Info>" + LS +
-                    "            <BAND_INDEX>3</BAND_INDEX>" + LS +
-                    "            <BAND_NAME>cfb1</BAND_NAME>" + LS +
-                    "            <BAND_DESCRIPTION />" + LS +
-                    "            <DATA_TYPE>float32</DATA_TYPE>" + LS +
-                    "            <PHYSICAL_UNIT />" + LS +
-                    "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
-                    "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
-                    "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
-                    "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
-                    "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
-                    "            <LOG10_SCALED>false</LOG10_SCALED>" + LS +
-                    "            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>" + LS +
-                    "            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>" + LS +
-                    "            <Filter_Band_Info bandType=\"ConvolutionFilterBand\">" + LS +
-                    "                <FILTER_SOURCE>b2</FILTER_SOURCE>" + LS +
-                    "                <ITERATION_COUNT>1</ITERATION_COUNT>" + LS +
-                    "                <Filter_Kernel>" + LS +
-                    "                    <KERNEL_WIDTH>3</KERNEL_WIDTH>" + LS +
-                    "                    <KERNEL_HEIGHT>3</KERNEL_HEIGHT>" + LS +
-                    "                    <KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN>" + LS +
-                    "                    <KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN>" + LS +
-                    "                    <KERNEL_FACTOR>1.0</KERNEL_FACTOR>" + LS +
-                    "                    <KERNEL_DATA>1,2,3,4,5,6,7,8,9</KERNEL_DATA>" + LS +
-                    "                </Filter_Kernel>" + LS +
-                    "            </Filter_Band_Info>" + LS +
-                    "        </Spectral_Band_Info>" + LS +
-                    "        <Spectral_Band_Info>" + LS +
-                    "            <BAND_INDEX>4</BAND_INDEX>" + LS +
-                    "            <BAND_NAME>gfb1</BAND_NAME>" + LS +
-                    "            <BAND_DESCRIPTION />" + LS +
-                    "            <DATA_TYPE>float32</DATA_TYPE>" + LS +
-                    "            <PHYSICAL_UNIT />" + LS +
-                    "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
-                    "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
-                    "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
-                    "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
-                    "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
-                    "            <LOG10_SCALED>false</LOG10_SCALED>" + LS +
-                    "            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>" + LS +
-                    "            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>" + LS +
-                    "            <Filter_Band_Info bandType=\"GeneralFilterBand\" version=\"1.2\">" + LS +
-                    "                <FILTER_SOURCE>b2</FILTER_SOURCE>" + LS +
-                    "                <ITERATION_COUNT>1</ITERATION_COUNT>" + LS +
-                    "                <FILTER_OP_TYPE>MEAN</FILTER_OP_TYPE>" + LS +
-                    "                <Filter_Kernel>" + LS +
-                    "                    <KERNEL_WIDTH>3</KERNEL_WIDTH>" + LS +
-                    "                    <KERNEL_HEIGHT>3</KERNEL_HEIGHT>" + LS +
-                    "                    <KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN>" + LS +
-                    "                    <KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN>" + LS +
-                    "                    <KERNEL_FACTOR>1.0</KERNEL_FACTOR>" + LS +
-                    "                    <KERNEL_DATA>1,1,1,0,1,0,1,1,1</KERNEL_DATA>" + LS +
-                    "                </Filter_Kernel>" + LS +
-                    "            </Filter_Band_Info>" + LS +
-                    "        </Spectral_Band_Info>" + LS +
+                    "        <Spectral_Band_Info><BAND_INDEX>3</BAND_INDEX><BAND_NAME>cfb1</BAND_NAME><BAND_DESCRIPTION /><DATA_TYPE>float32</DATA_TYPE><PHYSICAL_UNIT /><SOLAR_FLUX>0.0</SOLAR_FLUX><BAND_WAVELEN>0.0</BAND_WAVELEN><BANDWIDTH>0.0</BANDWIDTH><SCALING_FACTOR>1.0</SCALING_FACTOR><SCALING_OFFSET>0.0</SCALING_OFFSET><LOG10_SCALED>false</LOG10_SCALED><NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED><NO_DATA_VALUE>NaN</NO_DATA_VALUE><Filter_Band_Info bandType=\"ConvolutionFilterBand\"><FILTER_SOURCE>b2</FILTER_SOURCE><ITERATION_COUNT>1</ITERATION_COUNT><Filter_Kernel><KERNEL_WIDTH>3</KERNEL_WIDTH><KERNEL_HEIGHT>3</KERNEL_HEIGHT><KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN><KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN><KERNEL_FACTOR>1.0</KERNEL_FACTOR><KERNEL_DATA>1,2,3,4,5,6,7,8,9</KERNEL_DATA></Filter_Kernel></Filter_Band_Info></Spectral_Band_Info>" + LS +
+                    "        <Spectral_Band_Info><BAND_INDEX>4</BAND_INDEX><BAND_NAME>gfb1</BAND_NAME><BAND_DESCRIPTION /><DATA_TYPE>float32</DATA_TYPE><PHYSICAL_UNIT /><SOLAR_FLUX>0.0</SOLAR_FLUX><BAND_WAVELEN>0.0</BAND_WAVELEN><BANDWIDTH>0.0</BANDWIDTH><SCALING_FACTOR>1.0</SCALING_FACTOR><SCALING_OFFSET>0.0</SCALING_OFFSET><LOG10_SCALED>false</LOG10_SCALED><NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED><NO_DATA_VALUE>NaN</NO_DATA_VALUE><Filter_Band_Info bandType=\"GeneralFilterBand\" version=\"1.2\"><FILTER_SOURCE>b2</FILTER_SOURCE><ITERATION_COUNT>1</ITERATION_COUNT><FILTER_OP_TYPE>MEAN</FILTER_OP_TYPE><Filter_Kernel><KERNEL_WIDTH>3</KERNEL_WIDTH><KERNEL_HEIGHT>3</KERNEL_HEIGHT><KERNEL_X_ORIGIN>1</KERNEL_X_ORIGIN><KERNEL_Y_ORIGIN>1</KERNEL_Y_ORIGIN><KERNEL_FACTOR>1.0</KERNEL_FACTOR><KERNEL_DATA>1,1,1,0,1,0,1,1,1</KERNEL_DATA></Filter_Kernel></Filter_Band_Info></Spectral_Band_Info>" + LS +
                     "    </Image_Interpretation>" + LS;
 
     private static final String footer = "</Dimap_Document>";
@@ -427,24 +374,8 @@ public class DimapHeaderWriterTest {
         return header +
                 getRasterDimensions() +
                 "    <Masks>" + LS +
-                "        <Mask type=\"Maths\">" + LS +
-                "            <NAME value=\"bitmaskDef1\" />" + LS +
-                "            <MASK_RASTER_WIDTH value=\"200\" />" + LS +
-                "            <MASK_RASTER_HEIGHT value=\"300\" />" + LS +
-                "            <DESCRIPTION value=\"description1\" />" + LS +
-                "            <COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" />" + LS +
-                "            <TRANSPARENCY value=\"0.75\" />" + LS +
-                "            <EXPRESSION value=\"sin(X) + cos(Y)\" />" + LS +
-                "        </Mask>" + LS +
-                "        <Mask type=\"Maths\">" + LS +
-                "            <NAME value=\"bitmaskDef2\" />" + LS +
-                "            <MASK_RASTER_WIDTH value=\"200\" />" + LS +
-                "            <MASK_RASTER_HEIGHT value=\"300\" />" + LS +
-                "            <DESCRIPTION value=\"description2\" />" + LS +
-                "            <COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" />" + LS +
-                "            <TRANSPARENCY value=\"0.5\" />" + LS +
-                "            <EXPRESSION value=\"tanh(X)\" />" + LS +
-                "        </Mask>" + LS +
+                "        <Mask type=\"Maths\"><NAME value=\"bitmaskDef1\" /><MASK_RASTER_WIDTH value=\"200\" /><MASK_RASTER_HEIGHT value=\"300\" /><DESCRIPTION value=\"description1\" /><COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" /><TRANSPARENCY value=\"0.75\" /><EXPRESSION value=\"sin(X) + cos(Y)\" /></Mask>" + LS +
+                "        <Mask type=\"Maths\"><NAME value=\"bitmaskDef2\" /><MASK_RASTER_WIDTH value=\"200\" /><MASK_RASTER_HEIGHT value=\"300\" /><DESCRIPTION value=\"description2\" /><COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" /><TRANSPARENCY value=\"0.5\" /><EXPRESSION value=\"tanh(X)\" /></Mask>" + LS +
                 "    </Masks>" + LS +
                 footer;
     }

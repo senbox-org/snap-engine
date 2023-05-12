@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.core.runtime.Version;
 import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
@@ -30,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.StringTokenizer;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +38,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_UNIX;
 import static org.esa.snap.dataio.gdal.GDALLoaderConfig.CONFIG_NAME;
 
 /**
@@ -107,64 +107,17 @@ class GDALInstaller {
     /**
      * Compares module version strings.
      *
-     * @param currentModuleVersion the current module version string
-     * @param savedModuleVersion   the saved module version string
+     * @param currentModuleText the current module version string
+     * @param savedModuleText   the saved module version string
      * @return comparision result index where:
      * >0 when current module version greater than saved module version
      * 0 when current module version same as saved module version
      * <0 when current module version lower than saved module version
      */
-    private static int compareVersions(String currentModuleVersion, String savedModuleVersion) {
-        final int[] moduleVersionFragments = parseVersion(currentModuleVersion);
-        final int[] savedVersionFragments = parseVersion(savedModuleVersion);
-
-        final int max = Math.max(moduleVersionFragments.length, savedVersionFragments.length);
-        for (int i = 0; i < max; ++i) {
-            final int d1 = (i < moduleVersionFragments.length) ? moduleVersionFragments[i] : 0;
-            final int d2 = (i < savedVersionFragments.length) ? savedVersionFragments[i] : 0;
-            if (d1 != d2) {
-                return d1 - d2;
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * Parses the module version string
-     *
-     * @param version the module version string
-     * @return parsed module version array
-     */
-    private static int[] parseVersion(String version) {
-        if (version.toLowerCase().contentEquals("unknown")) {
-            return new int[]{};
-        }
-        final StringTokenizer tok = new StringTokenizer(version, ".", true);
-        final int len = tok.countTokens();
-        if (len % 2 == 0) {
-            throw new NumberFormatException("Even number of pieces in a spec version: `" + version + "'");
-        }
-        final int[] digits = new int[len / 2 + 1];
-        int index = 0;
-        boolean expectingNumber = true;
-        while (tok.hasMoreTokens()) {
-            final String fragment = tok.nextToken();
-            if (expectingNumber) {
-                expectingNumber = false;
-                final int piece = Integer.parseInt(fragment);
-                if (piece < 0) {
-                    throw new NumberFormatException("Spec version component '" + piece + "' is negative.");
-                }
-                digits[index++] = piece;
-            } else {
-                if (!".".equals(fragment)) {
-                    throw new NumberFormatException("Expected dot in version '" + version + "'.");
-                }
-                expectingNumber = true;
-            }
-        }
-
-        return digits;
+    private static int compareVersions(String currentModuleText, String savedModuleText) {
+        Version currentModuleVersion = Version.parseVersion(currentModuleText);
+        Version savedModuleVersion = Version.parseVersion(savedModuleText);
+        return currentModuleVersion.compareTo(savedModuleVersion);
     }
 
     /**
@@ -336,7 +289,7 @@ class GDALInstaller {
 
             boolean isDistributionRootFolderEmpty = true;
             try (final Stream<Path> distributionRootFolderContents = Files.list(gdalDistributionRootFolderPath)) {
-                isDistributionRootFolderEmpty = !distributionRootFolderContents.findAny().isPresent();
+                isDistributionRootFolderEmpty = distributionRootFolderContents.findAny().isEmpty();
             } catch (Exception ignored) {
                 //nothing to do
             }

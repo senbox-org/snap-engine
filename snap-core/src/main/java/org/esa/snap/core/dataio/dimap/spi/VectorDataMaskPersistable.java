@@ -23,7 +23,7 @@ import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.datamodel.ProductNodeEvent;
 import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.VectorDataNode;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_VECTOR_DATA_NODE;

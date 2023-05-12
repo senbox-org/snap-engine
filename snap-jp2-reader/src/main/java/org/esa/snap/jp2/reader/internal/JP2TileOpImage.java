@@ -16,7 +16,8 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -195,8 +196,8 @@ public class JP2TileOpImage extends SourcelessOpImage {
         Path tileFile = PathUtils.get(this.bandData.getLocalCacheFolder(), imageFileName);
         if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), localImageFile.toFile()) < 0L)) {
             String tileFileName;
-            if (org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator + tileFile.getName(tileFile.getNameCount()-1);
+            if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
+                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator + tileFile.getName(tileFile.getNameCount() - 1);
             } else {
                 tileFileName = tileFile.toString();
             }

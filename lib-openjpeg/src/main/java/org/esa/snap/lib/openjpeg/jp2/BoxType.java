@@ -17,8 +17,8 @@
 
 package org.esa.snap.lib.openjpeg.jp2;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.esa.snap.lib.openjpeg.jp2.boxes.BitsPerComponentBox;
 import org.esa.snap.lib.openjpeg.jp2.boxes.ColorSpecificationBox;
 import org.esa.snap.lib.openjpeg.jp2.boxes.ContiguousCodestreamBox;

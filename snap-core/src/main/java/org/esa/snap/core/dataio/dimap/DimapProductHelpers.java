@@ -22,36 +22,7 @@ import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
 import org.esa.snap.core.dataio.persistence.PersistenceDecoder;
 import org.esa.snap.core.dataio.placemark.PlacemarkIO;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FXYGeoCoding;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GcpDescriptor;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PinDescriptor;
-import org.esa.snap.core.datamodel.Placemark;
-import org.esa.snap.core.datamodel.PlacemarkGroup;
-import org.esa.snap.core.datamodel.PointingFactory;
-import org.esa.snap.core.datamodel.PointingFactoryRegistry;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.SampleCoding;
-import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.StxFactory;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.Ellipsoid;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
@@ -70,12 +41,12 @@ import org.esa.snap.core.util.XmlWriter;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.math.FXYSum;
 import org.geotools.referencing.CRS;
-import org.jdom.Content;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.DOMBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Content;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.DOMBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
@@ -102,6 +73,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class defines some static methods used to create and access BEAM DIMAP XML documents.
@@ -1153,7 +1126,7 @@ public class DimapProductHelpers {
         }
 
         private Product createProduct(String defaultProductType, Dimension regionRasterSize) {
-            if (org.apache.commons.lang.StringUtils.isBlank(defaultProductType)) {
+            if (isBlank(defaultProductType)) {
                 throw new NullPointerException("The default product type is null or empty.");
             }
             this.ancillaryVariables = new HashMap<>();
@@ -1161,7 +1134,7 @@ public class DimapProductHelpers {
             Dimension productSize = ImageUtils.computeSceneRasterSize(getSceneRasterWidth(), getSceneRasterHeight(), regionRasterSize);
             String productName = getProductName();
             String productType = getProductType();
-            if (org.apache.commons.lang.StringUtils.isBlank(productType)) {
+            if (isBlank(productType)) {
                 productType = defaultProductType;
             }
             this.product = new Product(productName, productType, productSize.width, productSize.height);

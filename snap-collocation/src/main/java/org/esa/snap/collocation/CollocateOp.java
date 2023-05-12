@@ -346,9 +346,24 @@ public class CollocateOp extends Operator {
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
 
         // Add master bands
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
         for (Band sourceBand : masterProduct.getBands()) {
             Band targetBand = ProductUtils.copyBand(sourceBand.getName(), masterProduct, targetProduct, true);
-            handleSampleCodings(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            FlagCoding flagCoding = targetBand.getFlagCoding();
+            if (flagCoding != null) {
+                // first remove FlagCoding potentially added by copyBand() then handle the FlagCoding
+                flagCodingGroup.remove(flagCoding);
+                targetBand.setSampleCoding(null);
+                handleFlagCoding(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            }
+            IndexCoding indexCoding = targetBand.getIndexCoding();
+            if (indexCoding != null) {
+                // first remove IndexCoding potentially added by copyBand() then handle the IndexCoding
+                indexCodingGroup.remove(indexCoding);
+                targetBand.setSampleCoding(null);
+                handleIndexCoding(sourceBand, targetBand, renameMasterComponents, masterComponentPattern);
+            }
             sourceRasterMap.put(targetBand, sourceBand);
             if (renameMasterComponents) {
                 targetBand.setName(masterComponentPattern.replace(SOURCE_NAME_REFERENCE, sourceBand.getName()));
@@ -383,8 +398,12 @@ public class CollocateOp extends Operator {
             // Add slave bands
             for (Band sourceBand : slaveProduct.getBands()) {
                 String targetBandName = getTargetBandName(sourceBand, i);
-                Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
+                // first creating the band, then copying the properties and then adding it to the target product
+                // if the
+                Band targetBand = new Band(targetBandName, sourceBand.getDataType(),
+                        targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                targetProduct.addBand(targetBand);
                 handleSampleCodings(sourceBand, targetBand, renameSlaveComponents, slaveComponentPattern);
                 sourceRasterMap.put(targetBand, sourceBand);
                 originalSlaveNames.put(targetBand.getName(), sourceBand.getName());
@@ -449,6 +468,7 @@ public class CollocateOp extends Operator {
         }
     }
 
+
     private String getTargetBandName(RasterDataNode rasterDataNode, int productIndex) {
         String rasterDataNodeName = rasterDataNode.getName();
         if (renameSlaveComponents) {
@@ -457,7 +477,7 @@ public class CollocateOp extends Operator {
             if (StringUtils.isNullOrEmpty(slaveComponentPattern)) {
                 throw new OperatorException(format(
                         "Target product already contains a raster data node with name ''{0}''. " +
-                        "Parameter 'slaveComponentPattern' must be set.",
+                                "Parameter 'slaveComponentPattern' must be set.",
                         rasterDataNodeName));
             }
             return rename(rasterDataNodeName, productIndex);
@@ -654,7 +674,7 @@ public class CollocateOp extends Operator {
 
                         if (sourcePixelPos != null) {
                             resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
+                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
                             double sample;
                             if (resampling == Resampling.NEAREST_NEIGHBOUR) {
                                 sample = sourceTile.getSampleDouble((int) resamplingIndex.i0, (int) resamplingIndex.j0);
@@ -717,9 +737,9 @@ public class CollocateOp extends Operator {
             if (!targetProduct.getMaskGroup().contains(sourceMask.getName())) {
                 Mask.ImageType imageType = sourceMask.getImageType();
                 Mask targetMask = new Mask(sourceMask.getName(),
-                                           targetProduct.getSceneRasterWidth(),
-                                           targetProduct.getSceneRasterHeight(),
-                                           imageType);
+                        targetProduct.getSceneRasterWidth(),
+                        targetProduct.getSceneRasterHeight(),
+                        imageType);
                 targetMask.setDescription(sourceMask.getDescription());
                 for (Property property : sourceMask.getImageConfig().getProperties()) {
                     targetMask.getImageConfig().setValue(property.getDescriptor().getName(), property.getValue());
@@ -746,53 +766,46 @@ public class CollocateOp extends Operator {
     }
 
     private void handleSampleCodings(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        handleFlagCoding(sourceBand, targetBand, renameComponents, renamePattern);
-        handleIndexCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        if (sourceBand.getFlagCoding() != null) {
+            handleFlagCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        }
+        if (sourceBand.getIndexCoding() != null) {
+            handleIndexCoding(sourceBand, targetBand, renameComponents, renamePattern);
+        }
     }
 
     private void handleFlagCoding(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        if (sourceBand.getFlagCoding() != null) {
-            targetBand.getProduct().getFlagCodingGroup().remove(targetBand.getFlagCoding());
-            targetBand.setSampleCoding(null);
-        }
         setFlagCoding(targetBand, sourceBand.getFlagCoding(), renameComponents, renamePattern);
     }
 
     private void handleIndexCoding(Band sourceBand, Band targetBand, boolean renameComponents, String renamePattern) {
-        if (sourceBand.getIndexCoding() != null) {
-            targetBand.getProduct().getIndexCodingGroup().remove(targetBand.getIndexCoding());
-            targetBand.setSampleCoding(null);
-        }
         setIndexCoding(targetBand, sourceBand.getIndexCoding(), renameComponents, renamePattern);
     }
 
     private void setFlagCoding(Band band, FlagCoding flagCoding, boolean rename, String pattern) {
-        if (flagCoding != null) {
-            String flagCodingName = flagCoding.getName();
-            if (rename) {
-                if (slaveProducts.length == 1) {
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
-                } else {
-                    int id = -1;
-                    for (int i = 0; i < slaveProducts.length; i++) {
-                        if (band.getProduct().getName().equals(slaveProducts[i].getName())) {
-                            id = i;
-                            break;
-                        }
+        String flagCodingName = flagCoding.getName();
+        if (rename) {
+            if (slaveProducts.length == 1) {
+                flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, "");
+            } else {
+                int id = -1;
+                for (int i = 0; i < slaveProducts.length; i++) {
+                    if (band.getProduct().getName().equals(slaveProducts[i].getName())) {
+                        id = i;
+                        break;
                     }
-                    flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
                 }
+                flagCodingName = pattern.replace(SOURCE_NAME_REFERENCE, flagCodingName).replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(id));
             }
-            final Product product = band.getProduct();
-            if (!product.getFlagCodingGroup().contains(flagCodingName)) {
-                addFlagCoding(product, flagCoding, flagCodingName);
-            }
-            band.setSampleCoding(product.getFlagCodingGroup().get(flagCodingName));
         }
+        final Product product = band.getProduct();
+        if (!product.getFlagCodingGroup().contains(flagCodingName)) {
+            addFlagCoding(product, flagCoding, flagCodingName);
+        }
+        band.setSampleCoding(product.getFlagCodingGroup().get(flagCodingName));
     }
 
     private void setIndexCoding(Band band, IndexCoding indexCoding, boolean rename, String pattern) {
-        if (indexCoding != null) {
             String indexCodingName = indexCoding.getName();
             if (rename) {
                 if (slaveProducts.length == 1) {
@@ -813,7 +826,6 @@ public class CollocateOp extends Operator {
                 addIndexCoding(product, indexCoding, indexCodingName);
             }
             band.setSampleCoding(product.getIndexCodingGroup().get(indexCodingName));
-        }
     }
 
     private static void addFlagCoding(Product product, FlagCoding flagCoding, String flagCodingName) {

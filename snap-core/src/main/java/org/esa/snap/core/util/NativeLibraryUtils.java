@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,30 +35,47 @@ public class NativeLibraryUtils {
     }
 
     public static void registerNativePaths(String... paths) {
-        if (paths == null || paths.length == 0)
+        if (paths == null || paths.length == 0) {
             return;
+        }
+
         String propertyValue = System.getProperty(JAVA_LIB_PATH);
         StringBuilder builder = new StringBuilder();
         for (String path : paths) {
-            if (!StringUtils.isNullOrEmpty(propertyValue) &&
-                    (!propertyValue.contains(path) ||
-                            propertyValue.contains(path + File.separator))) {
+            if (StringUtils.isNullOrEmpty(propertyValue)) {
+                continue;
+            }
+            if (!propertyValue.contains(path) || propertyValue.contains(path + File.separator)) {
                 builder.append(path).append(File.pathSeparator);
             }
         }
         if (!StringUtils.isNullOrEmpty(propertyValue)) {
-            propertyValue = builder.toString() + propertyValue;
-        } else {
-            propertyValue = builder.toString();
+            builder.append(propertyValue);
         }
+
+        propertyValue = builder.toString();
         System.setProperty(JAVA_LIB_PATH, propertyValue);
+
+        boolean initialized = true;
         try {
-            java.lang.reflect.Method initializePathMethod = PrivilegedAccessor.getMethod(ClassLoader.class, "initializePath", new Class[]{String.class});
-            initializePathMethod.setAccessible(true);
-            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, JAVA_LIB_PATH);
-            PrivilegedAccessor.setStaticValue(ClassLoader.class, "usr_paths", updatedUsrPaths);
+            // try to re-trigger library path loading - JDK 11 approach
+            Method initLibraryPaths = ClassLoader.class.getDeclaredMethod("initLibraryPaths");
+            initLibraryPaths.setAccessible(true);
+            initLibraryPaths.invoke(null);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            initialized = false;
+        }
+
+        if (!initialized) {
+            try {
+                // try to re-trigger library path loading - JDK 8 approach
+                java.lang.reflect.Method initializePathMethod = PrivilegedAccessor.getMethod(ClassLoader.class, "initializePath", new Class[]{String.class});
+                initializePathMethod.setAccessible(true);
+                String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, JAVA_LIB_PATH);
+                PrivilegedAccessor.setStaticValue(ClassLoader.class, "usr_paths", updatedUsrPaths);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -69,7 +88,7 @@ public class NativeLibraryUtils {
      * @throws IOException If temporary file creation or read/write operation fails
      */
     public static void loadLibrary(String path, String libraryName) throws IOException {
-        path = URLDecoder.decode(path, "UTF-8");
+        path = URLDecoder.decode(path, StandardCharsets.UTF_8);
         String mappedLibName = System.mapLibraryName(libraryName);
         if (path.startsWith("/")) {
             path = path.substring(1);
@@ -78,25 +97,26 @@ public class NativeLibraryUtils {
         if (path.contains(".jar")) {
             int contentsSeparatorIndex = path.indexOf("!");
             String jarPath = path.substring(0, contentsSeparatorIndex);
-            JarFile jarFile = new JarFile(jarPath);
-            Enumeration<JarEntry> entries = jarFile.entries();
-            JarEntry jarEntry = null;
-            while (entries.hasMoreElements()) {
-                JarEntry currentEntry = entries.nextElement();
-                if (org.apache.commons.lang.StringUtils.containsIgnoreCase(currentEntry.getName(), libraryName)) {
-                    jarEntry = currentEntry;
-                    break;
+            try (JarFile jarFile = new JarFile(jarPath)) {
+                Enumeration<JarEntry> entries = jarFile.entries();
+                JarEntry jarEntry = null;
+                while (entries.hasMoreElements()) {
+                    JarEntry currentEntry = entries.nextElement();
+                    if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(currentEntry.getName(), libraryName)) {
+                        jarEntry = currentEntry;
+                        break;
+                    }
                 }
-            }
-            if (jarEntry == null) {
-                throw new IOException(String.format("Library %s could not be found in the jar file %s", libraryName, path));
-            }
-            try (InputStream in = jarFile.getInputStream(jarEntry)) {
-                Path tmpPath = Paths.get(System.getProperty("java.io.tmpdir"), "lib", getOSFamily(), mappedLibName);
-                try (OutputStream out = FileUtils.openOutputStream(tmpPath.toFile())) {
-                    IOUtils.copy(in, out);
+                if (jarEntry == null) {
+                    throw new IOException(String.format("Library %s could not be found in the jar file %s", libraryName, path));
                 }
-                path = tmpPath.toAbsolutePath().toString();
+                try (InputStream in = jarFile.getInputStream(jarEntry)) {
+                    Path tmpPath = Paths.get(System.getProperty("java.io.tmpdir"), "lib", getOSFamily(), mappedLibName);
+                    try (OutputStream out = FileUtils.openOutputStream(tmpPath.toFile())) {
+                        IOUtils.copy(in, out);
+                    }
+                    path = tmpPath.toAbsolutePath().toString();
+                }
             }
         } else {
             if (!Files.exists(Paths.get(path, mappedLibName))) {

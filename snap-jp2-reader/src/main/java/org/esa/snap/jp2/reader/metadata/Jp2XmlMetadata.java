@@ -17,10 +17,10 @@
 
 package org.esa.snap.jp2.reader.metadata;
 
-import org.apache.commons.lang.StringUtils;
-import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
-import org.esa.snap.core.metadata.XmlMetadata;
+import org.apache.commons.lang3.StringUtils;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.metadata.XmlMetadata;
+import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;

@@ -2,30 +2,13 @@ package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.datamodel.Product;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_FORWARD_CODING_KEY;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CHECKS;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CRS;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_INVERSE_CODING_KEY;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LAT_VARIABLE_NAME;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LON_VARIABLE_NAME;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_X;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_Y;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_RASTER_RESOLUTION_KM;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_X;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_Y;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithTiePoints;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotSame;
@@ -42,7 +25,8 @@ public class ComponentGeoCodingPersistableTest {
             "  PRIMEM[\"Greenwich\", 0.0], " + LS +
             "  UNIT[\"degree\", 0.017453292519943295], " + LS +
             "  AXIS[\"Geodetic longitude\", EAST], " + LS +
-            "  AXIS[\"Geodetic latitude\", NORTH]]";
+            "  AXIS[\"Geodetic latitude\", NORTH], " + LS +
+            "  AUTHORITY[\"EPSG\",\"4326\"]]";
 
     @Before
     public void setUp() throws Exception {

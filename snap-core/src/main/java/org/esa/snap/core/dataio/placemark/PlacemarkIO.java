@@ -40,9 +40,9 @@ import org.esa.snap.core.util.kmz.ExtendedData;
 import org.esa.snap.core.util.kmz.KmlDocument;
 import org.esa.snap.core.util.kmz.KmlPlacemark;
 import org.esa.snap.core.util.kmz.KmzExporter;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.DOMBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.DOMBuilder;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

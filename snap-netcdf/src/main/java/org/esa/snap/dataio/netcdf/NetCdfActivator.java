@@ -33,7 +33,7 @@ public class NetCdfActivator implements Activator {
                 SystemUtils.LOG.fine("installing NetCDF resources from " + sourceDirPath + " into " + auxdataDirectory);
                 resourceInstaller.install(".*", ProgressMonitor.NULL);
             } catch (IOException e) {
-                SystemUtils.LOG.severe("Native libraries for NetCDF could not be extracted to" + auxdataDirectory);
+                SystemUtils.LOG.severe("Native libraries for NetCDF could not be extracted to " + auxdataDirectory);
                 return;
             }
 

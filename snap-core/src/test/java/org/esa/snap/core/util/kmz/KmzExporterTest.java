@@ -16,12 +16,13 @@
 
 package org.esa.snap.core.util.kmz;
 
+import com.bc.ceres.annotation.STTM;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.DOMBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.input.DOMBuilder;
 import org.junit.Test;
 import org.opengis.geometry.BoundingBox;
 import org.xml.sax.SAXException;
@@ -35,11 +36,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class KmzExporterTest {
 
     @Test
+    @STTM("SNAP-3481")
     public void testKmlHierarchy() throws ParserConfigurationException, IOException, SAXException {
         RenderedImage layer = new DummyTestOpImage(10, 10);
         final BoundingBox boundBox = new ReferencedEnvelope(0, 20, 70, 30, DefaultGeographicCRS.WGS84);
@@ -99,6 +102,7 @@ public class KmzExporterTest {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testKmlPlacemarks() throws IOException, SAXException, ParserConfigurationException {
         KmlDocument doc1 = new KmlDocument("pins", null);
         doc1.addChild(new KmlPlacemark("placemark 1", null, new Point2D.Double(80.0, 89.0)));
@@ -125,6 +129,7 @@ public class KmzExporterTest {
     }
 
     @Test
+    @STTM("SNAP-3481")
     public void testLegend() throws IOException, SAXException, ParserConfigurationException {
         final String xml = KmzExporter.createKml(new KmlScreenOverlay("Legend", new DummyTestOpImage(4, 10)));
         final Document document = convertToDocument(xml);
@@ -168,12 +173,10 @@ public class KmzExporterTest {
     }
 
     private Document convertToDocument(String xmlString) throws ParserConfigurationException, SAXException,
-                                                                IOException {
+            IOException {
 
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();
         return new DOMBuilder().build(builder.parse(new ByteArrayInputStream(xmlString.getBytes())));
     }
-
-
 }

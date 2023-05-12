@@ -15,18 +15,12 @@
  */
 package org.esa.snap.core.util.geotiff;
 
-import org.jdom.Element;
-import org.jdom.input.DOMBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.input.DOMBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
-import javax.imageio.IIOException;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriter;
+import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -49,9 +43,7 @@ public class IIOUtils {
      * <code>File</code>; that may be accomplished using <code>IIORegistry</code> and <code>ImageReaderSpi</code>.
      *
      * @param input a <code>File</code> to readImage from.
-     *
      * @return a <code>BufferedImage</code> containing the decoded contents of the input, or <code>null</code>.
-     *
      * @throws IllegalArgumentException if <code>input</code> is <code>null</code>.
      * @throws java.io.IOException      if an error occurs during reading.
      */
@@ -76,9 +68,7 @@ public class IIOUtils {
      * <code>ImageReader</code> claims to be able to readImage the stream, <code>null</code> is returned.
      *
      * @param stream an <code>ImageInputStream</code> to readImage from.
-     *
      * @return a <code>BufferedImage</code> containing the decoded contents of the input, or <code>null</code>.
-     *
      * @throws IllegalArgumentException if <code>stream</code> is <code>null</code>.
      * @throws IOException              if an error occurs during reading.
      */
@@ -110,9 +100,7 @@ public class IIOUtils {
      * @param iioImage   the image data to be written.
      * @param formatName a <code>String</code> containg the informal name of the format.
      * @param output     a <code>File</code> to be written to.
-     *
      * @return <code>false</code> if no appropriate writer is found.
-     *
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws IOException              if an error occurs during writing.
      */
@@ -144,9 +132,7 @@ public class IIOUtils {
      * @param iioImage   the image data to be written.
      * @param formatName a <code>String</code> containg the informal name of the format.
      * @param output     an <code>ImageOutputStream</code> to be written to.
-     *
      * @return <code>false</code> if no appropriate writer is found.
-     *
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws IOException              if an error occurs during writing.
      */
@@ -182,7 +168,6 @@ public class IIOUtils {
      *
      * @param imageType       the type of the image to be written later
      * @param imageFormatName the image format name, e.g. "TIFF"
-     *
      * @return a suitable image writer, or <code>null</code> if no writer is found
      */
     public static ImageWriter getImageWriter(ImageTypeSpecifier imageType, String imageFormatName) {
@@ -197,7 +182,6 @@ public class IIOUtils {
      * @param imageFormatName    the image format name, e.g. "TIFF"
      * @param metadataFormatName the metadata format name, e.g. "com_sun_media_imageio_plugins_tiff_image_1.0", or
      *                           <code>null</code>
-     *
      * @return a suitable image writer, or <code>null</code> if no writer is found
      */
     public static ImageWriter getImageWriter(ImageTypeSpecifier imageType,

@@ -19,18 +19,18 @@ package org.esa.snap.core.datamodel;
 import java.awt.geom.Point2D;
 
 /**
- * A <code>PixelPos</code> represents a position or point in a pixel coordinate system.
+ * A {@code PixelPos} represents a position or point in a pixel coordinate system.
  */
 public class PixelPos extends Point2D.Double {
 
     /**
-     * Constructs and initializes a <code>PixelPos</code> with coordinate (0,&nbsp;0).
+     * Constructs and initializes a {@code PixelPos} with coordinate (0,&nbsp;0).
      */
     public PixelPos() {
     }
 
     /**
-     * Constructs and initializes a <code>PixelPos</code> with the specified coordinate.
+     * Constructs and initializes a {@code PixelPos} with the specified coordinate.
      *
      * @param x the x component of the coordinate
      * @param y the y component of the coordinate

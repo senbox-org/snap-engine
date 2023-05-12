@@ -55,7 +55,7 @@ class RegionProductFilter extends BinningProductFilter {
     }
 
     private Geometry getPolygon(GeneralPath geoBoundaryPath) {
-        Geometry boundary = JTS.shapeToGeometry(geoBoundaryPath, factory);
+        Geometry boundary = JTS.toGeometry(geoBoundaryPath, factory);
         if (boundary instanceof LinearRing) {
             boundary = factory.createPolygon((LinearRing) boundary, null);
         }

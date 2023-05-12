@@ -40,7 +40,7 @@ public class Utils {
     }
 
     public static String GetShortPathNameW(String path) {
-        if (!org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (!org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             return path;
         }
 
@@ -59,7 +59,7 @@ public class Utils {
 
 
     public static String GetLongPathNameW(String path) {
-        if (!org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (!org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             return path;
         }
 
@@ -78,7 +78,7 @@ public class Utils {
 
 
     public static String GetIterativeShortPathNameW(String path) throws IOException{
-        if (!org.apache.commons.lang.SystemUtils.IS_OS_WINDOWS) {
+        if (!org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             return path;
         }
 

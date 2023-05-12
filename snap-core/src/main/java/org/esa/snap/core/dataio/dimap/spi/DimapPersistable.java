@@ -16,7 +16,7 @@
 package org.esa.snap.core.dataio.dimap.spi;
 
 import org.esa.snap.core.datamodel.Product;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.awt.Dimension;
 

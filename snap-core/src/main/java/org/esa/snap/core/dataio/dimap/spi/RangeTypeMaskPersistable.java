@@ -20,7 +20,7 @@ import com.bc.ceres.binding.PropertyContainer;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import static org.esa.snap.core.datamodel.Mask.RangeType.*;
 
