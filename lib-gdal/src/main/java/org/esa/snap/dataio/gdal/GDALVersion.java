@@ -100,14 +100,10 @@ public enum GDALVersion {
      */
     public static GDALVersion getGDALVersion() {
         if (GDALLoaderConfig.getInstance().useInstalledGDALLibrary() && INSTALLED_VERSION != null) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, () -> "Installed GDAL " + INSTALLED_VERSION.getId() + " set to be used by SNAP.");
-            }
+            logger.log(Level.FINE, () -> "Installed GDAL " + INSTALLED_VERSION.getId() + " set to be used by SNAP.");
             return INSTALLED_VERSION;
         }
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, () -> "Internal GDAL " + INTERNAL_VERSION.getId() + " set to be used by SNAP.");
-        }
+        logger.log(Level.FINE, () -> "Internal GDAL " + INTERNAL_VERSION.getId() + " set to be used by SNAP.");
         return INTERNAL_VERSION;
     }
 
@@ -169,9 +165,7 @@ public enum GDALVersion {
      */
     private static boolean isInternalVersionDetectedAsInstalledVersion(String installedVersionPath){
         if (installedVersionPath.equals(INTERNAL_VERSION.getLocation())) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, () -> "Skipping detected internal GDAL " + INTERNAL_VERSION.id + " from distribution.");
-            }
+            logger.log(Level.FINE, () -> "Skipping detected internal GDAL " + INTERNAL_VERSION.id + " from distribution.");
             return true;
         }
         return false;
@@ -186,9 +180,7 @@ public enum GDALVersion {
         final OSCategory osCategory = OSCategory.getOSCategory();
         final String[] installedVersionsPaths = osCategory.getExecutableLocations(GDALINFIO_EXECUTABLE_NAME);
         if (installedVersionsPaths.length < 1) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
-            }
+            logger.log(Level.FINE, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
             return null;
         }
         final Map<String, GDALVersion> gdalVersions = new LinkedHashMap<>();
@@ -205,14 +197,10 @@ public enum GDALVersion {
                     gdalVersion.setId(versionId);
                     gdalVersion.setOsCategory(osCategory);
                     gdalVersion.setLocation(installedVersionsPath);
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.FINE, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
-                    }
+                    logger.log(Level.FINE, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
                     gdalVersions.putIfAbsent(version, gdalVersion);
                 } else {
-                    if (!version.isEmpty() && logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.FINE, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
-                    }
+                    logger.log(Level.FINE, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
                 }
             } catch (IOException ex) {
                 logger.log(Level.WARNING, () -> "Error occurred while checking installed GDAL version(s): " + ex.getMessage());
@@ -369,9 +357,7 @@ public enum GDALVersion {
     public URL getZipFileURLFromSources() {
         final String zipFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + getZipName();
         try {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "version zip archive URL from sources: '" + zipFileDirectoryFromSources + "'.");
-            }
+            logger.log(Level.FINE, "version zip archive URL from sources: '" + zipFileDirectoryFromSources + "'.");
             return getClass().getClassLoader().getResource(zipFileDirectoryFromSources.replace(File.separator, "/"));
         } catch (Exception ignored) {
             return null;
@@ -386,9 +372,7 @@ public enum GDALVersion {
     public URL getSHA256FileURLFromSources() {
         final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + getSHA256Name();
         try {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
-            }
+            logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
             return getClass().getClassLoader().getResource(sha256FileDirectoryFromSources.replace(File.separator, "/"));
         } catch (Exception ignored) {
             return null;
