@@ -49,22 +49,23 @@ public class OpenJP2Decoder implements AutoCloseable {
     // SNAP-3436 -  use single thread executor per instance instead of static threadpool (which is hard to shutdown properly)
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private PointerByReference pStream;
-    private DecompressParams parameters;
-    private DecompressionCodec pCodec;
-    private PointerByReference pImage;
-    private int width;
-    private int height;
+    private final PointerByReference pStream;
+    private final DecompressParams parameters;
+    private final DecompressionCodec pCodec;
+    private final PointerByReference pImage;
+    private final int width;
+    private final int height;
     private Path tileFile;
-    private int resolution;
-    private int layer;
-    private int dataType;
-    private int tileIndex;
-    private int bandIndex;
-    private int numBands;
-    private Logger logger;
+    private final int resolution;
+    private final int layer;
+    private final int dataType;
+    private final int tileIndex;
+    private final int bandIndex;
+    private final int numBands;
+    private final Logger logger;
     private final Set<Path> pendingWrites;
-    private Function<Path, Void> writeCompletedCallback;
+    private final Function<Path, Void> writeCompletedCallback;
+    private final Object monitor = new Object();
 
     /**
      * The only constructor of this class.
@@ -115,6 +116,7 @@ public class OpenJP2Decoder implements AutoCloseable {
             if (value != null) {
                 pendingWrites.remove(value);
             }
+            monitor.notifyAll();
             return null;
         };
     }
@@ -286,8 +288,13 @@ public class OpenJP2Decoder implements AutoCloseable {
         int height;
         int[] pixels;
         // Maybe this tile file is written by other thread, so let's wait if so
-        while (this.pendingWrites.contains(this.tileFile)) {
-            Thread.yield();
+        if (this.pendingWrites.contains(this.tileFile)) {
+            //Thread.yield();
+            try {
+                monitor.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         int[] bandOffsets = new int[this.numBands];
         Arrays.fill(bandOffsets,0);
