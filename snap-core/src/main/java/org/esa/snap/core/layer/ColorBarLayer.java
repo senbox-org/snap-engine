@@ -57,6 +57,12 @@ public class ColorBarLayer extends Layer {
     String locationPrevious;
     String locationVerticalPrevious;
     double locationGapFactorPrevious;
+    double paletteMinPrevious;
+    double paletteMaxPrevious;
+    boolean paletteLogPrevious;
+
+
+
     String titlePreferences;
     String titleAltPreferences;
     String unitsPreferences;
@@ -130,6 +136,13 @@ public class ColorBarLayer extends Layer {
                 setUnits(convertedUnits);
                 String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, units, allowWavelengthZero);
                 setUnitsAlt(convertedUnitsAlt);
+
+
+
+
+                paletteMinPrevious = raster.getImageInfo().getColorPaletteDef().getMinDisplaySample();
+                paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
+                paletteLogPrevious = raster.getImageInfo().isLogScaled();
 
 
                 autoApplyPrevious = isAutoApplySchemes();
@@ -220,6 +233,21 @@ public class ColorBarLayer extends Layer {
 //                autoApplyPrevious = isAutoApplySchemes();
             }
 
+            // reset to even distribution if the palette gets altered
+
+
+            if (paletteMinPrevious != raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() ||
+                    paletteMaxPrevious != raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() ||
+                    paletteLogPrevious != raster.getImageInfo().isLogScaled()
+
+            ) {
+                if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
+                    setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
+                    setAutoApplySchemes(false); // todo This needs to be split out to just the color bar labels schemes
+                }
+            }
+
+
 
             if (!imageLegendInitialized ||
                     (isColorBarLocationInside() != colorBarLocationInsidePrevious) ||
@@ -302,6 +330,10 @@ public class ColorBarLayer extends Layer {
                 locationVerticalPrevious = getColorBarLocationVerticalPlacement();
                 locationGapFactorPrevious = getLocationGapFactor();
                 orientationPrevious = getOrientation();
+
+                paletteMinPrevious = raster.getImageInfo().getColorPaletteDef().getMinDisplaySample();
+                paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
+                paletteLogPrevious = raster.getImageInfo().isLogScaled();
             }
 
 
@@ -785,6 +817,17 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_DEFAULT);
     }
 
+    private void setAutoApplySchemes(boolean value) {
+        try {
+            boolean valueCurrent = isAutoApplySchemes();
+
+            if (valueCurrent != value) {
+//                System.out.println("Inside and setting title to " + value);
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_SCHEME_AUTO_APPLY_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
+    }
 
     // Title & Units Text
 
