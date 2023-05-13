@@ -111,7 +111,7 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_GENERAL_CUSTOM_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".enable";
     public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Enable";
-    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Ude following scheme parameters as default<br>" +
+    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Use following scheme parameters as default<br>" +
             " when opening a band<br>otherwise use settings from the file reader.</html>";
     public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
 
