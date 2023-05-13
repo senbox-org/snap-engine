@@ -194,7 +194,7 @@ public class ColorBarLayer extends Layer {
                 setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
 
                 if (isAutoApplySchemes()) {//auto-apply
-                    ColorSchemeInfo schemeInfo = getColorPaletteInfoByBandNameLookup(raster.getName());
+                    ColorSchemeInfo schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
 
                     if (schemeInfo != null) {
                         if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().trim().length() > 0) {
@@ -547,26 +547,26 @@ public class ColorBarLayer extends Layer {
 //    }
 
 
-    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
-
-        // todo
-
-        ColorBarSchemeManager colorBarSchemeManager = ColorBarSchemeManager.getDefault();
-        if (colorBarSchemeManager != null) {
-
-            bandName = bandName.trim();
-//            bandName = bandName.substring(bandName.indexOf(" ")).trim();
-
-            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorBarSchemeManager.getColorSchemeLookupInfos();
-            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
-                if (colorSchemeLookupInfo.isMatch(bandName)) {
-                    return colorBarSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
-                }
-            }
-        }
-
-        return null;
-    }
+//    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
+//
+//        // todo
+//
+//        ColorBarSchemeManager colorBarSchemeManager = ColorBarSchemeManager.getDefault();
+//        if (colorBarSchemeManager != null) {
+//
+//            bandName = bandName.trim();
+////            bandName = bandName.substring(bandName.indexOf(" ")).trim();
+//
+//            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorBarSchemeManager.getColorSchemeLookupInfos();
+//            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
+//                if (colorSchemeLookupInfo.isMatch(bandName)) {
+//                    return colorBarSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
+//                }
+//            }
+//        }
+//
+//        return null;
+//    }
 
 
     private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {

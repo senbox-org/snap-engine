@@ -3,6 +3,7 @@ package org.esa.snap.core.datamodel;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Contains all info for a color scheme
@@ -300,5 +301,25 @@ public class ColorSchemeInfo {
         }
 
         return  colorBarTitle;
+    }
+
+    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
+
+        ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
+        if (colorSchemeManager != null) {
+
+            if (bandName != null) {
+                bandName.trim();
+            }
+
+            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
+            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
+                if (colorSchemeLookupInfo.isMatch(bandName)) {
+                    return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
+                }
+            }
+        }
+
+        return null;
     }
 }
