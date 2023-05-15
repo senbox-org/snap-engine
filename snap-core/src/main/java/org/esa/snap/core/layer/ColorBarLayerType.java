@@ -68,6 +68,22 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_SCHEME_AUTO_APPLY_TYPE = Boolean.class;
 
 
+    public static final String PROPERTY_SCHEME_LABELS_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".labels.apply";
+    public static final String PROPERTY_SCHEME_LABELS_APPLY_LABEL = "Apply Scheme Labels (Band Lookup)";
+    public static final String PROPERTY_SCHEME_LABELS_APPLY_TOOLTIP = "Apply Scheme Labels (Band Lookup)";
+    private static final String PROPERTY_SCHEME_LABELS_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsApply";
+    public static boolean PROPERTY_SCHEME_LABELS_APPLY_DEFAULT = true;
+    public static final Class PROPERTY_SCHEME_LABELS_APPLY_TYPE = Boolean.class;
+
+
+    public static final String PROPERTY_SCHEME_LABELS_RESTRICT_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".labels.restrict";
+    public static final String PROPERTY_SCHEME_LABELS_RESTRICT_LABEL = "Restrict Scheme Labels";
+    public static final String PROPERTY_SCHEME_LABELS_RESTRICT_TOOLTIP = "Restrict Scheme Labels such that they only are applied if palette min, max, log matches scheme min, max, log";
+    private static final String PROPERTY_SCHEME_LABELS_RESTRICT_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsRestrict";
+    public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = true;
+    public static final Class PROPERTY_SCHEME_LABELS_RESTRICT_TYPE = Boolean.class;
+
+
     // Header Title
 
     private static final String PROPERTY_HEADER_TITLE_ROOT_KEY = PROPERTY_ROOT_KEY + ".header.title";
@@ -398,7 +414,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Gap Factor";
     public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage factor to place " + COLOR_LOWER_CASE + " bar legend away from anchored axis)";
     private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 0.1;
+    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 0.05;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = 0.0;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 1.0;
     public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";

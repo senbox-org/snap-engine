@@ -107,6 +107,7 @@ public class ColorBarLayer extends Layer {
         return raster;
     }
 
+    ColorSchemeInfo schemeInfo = null;
 
 
     @Override
@@ -182,6 +183,7 @@ public class ColorBarLayer extends Layer {
             }
 
 
+
             if (!imageLegendInitialized || (isAutoApplySchemes() != autoApplyPrevious)) {
                 setLabelValuesActual(labelValuesActualPreferences);
                 setLabelValuesMode(labelValuesModePreferences);
@@ -193,8 +195,9 @@ public class ColorBarLayer extends Layer {
                 setColorBarLength(colorBarLengthPreferences);
                 setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
 
+
                 if (isAutoApplySchemes()) {//auto-apply
-                    ColorSchemeInfo schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
+                    schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
 
                     if (schemeInfo != null) {
                         if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().trim().length() > 0) {
@@ -235,15 +238,29 @@ public class ColorBarLayer extends Layer {
 
             // reset to even distribution if the palette gets altered
 
+            boolean restrictSchemeLabels = true;
 
-            if (paletteMinPrevious != raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() ||
-                    paletteMaxPrevious != raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() ||
-                    paletteLogPrevious != raster.getImageInfo().isLogScaled()
+            if (isAutoApplySchemes() && autoApplyPrevious != false){  // user just click on schemes  //todo maybe change this to remove autoApplyPrevious != false
+                if (schemeInfo != null && restrictSchemeLabels) {
+                    if (raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() != schemeInfo.getMinValue() ||
+                            raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() != schemeInfo.getMaxValue() ||
+                            raster.getImageInfo().getColorPaletteDef().isLogScaled() != schemeInfo.isLogScaled()
 
-            ) {
-                if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
-                    setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
-                    setAutoApplySchemes(false); // todo This needs to be split out to just the color bar labels schemes
+                    ) {
+                        System.out.println("raster.getImageInfo().getColorPaletteDef().getMinDisplaySample()=" +raster.getImageInfo().getColorPaletteDef().getMinDisplaySample());
+                        System.out.println("schemeInfo.getMinValue()=" + schemeInfo.getMinValue());
+                        System.out.println("raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample()=" +raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample());
+                        System.out.println("schemeInfo.getMaxValue()=" + schemeInfo.getMaxValue());
+
+                        System.out.println("raster.getImageInfo().getColorPaletteDef().isLogScaled()=" +raster.getImageInfo().getColorPaletteDef().isLogScaled());
+                        System.out.println("schemeInfo.isLogScaled()=" + schemeInfo.isLogScaled());
+
+                        if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
+                            setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
+                            setAutoApplySchemes(false); // todo This needs to be split out to just the color bar labels schemes
+                        }
+                    }
+
                 }
             }
 
