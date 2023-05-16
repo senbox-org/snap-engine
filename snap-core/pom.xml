@@ -58,7 +58,6 @@
                     <publicPackages>
                         <publicPackage>com.fasterxml.jackson.*</publicPackage>
                         <publicPackage>org.hsqldb.*</publicPackage>
-                        <publicPackage>javax.activation.*</publicPackage>
                         <publicPackage>javax.annotation.*</publicPackage>
                         <publicPackage>javax.measure.*</publicPackage>
                         <publicPackage>javax.vecmath.*</publicPackage>

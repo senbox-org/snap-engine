@@ -93,7 +93,7 @@
         <module>snap-pconvert</module>
         <module>snap-pgx-reader</module>
         <module>snap-pixel-extraction</module>
-<!--        <module>snap-python</module>-->
+        <!--        <module>snap-python</module>-->
         <module>snap-raster</module>
         <module>snap-rtp-codec</module>
         <module>snap-smart-configurator</module>
@@ -318,6 +318,22 @@
                 <version>2.0.6.1</version>
             </dependency>
 
+            <dependency>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_core</artifactId>
+                <version>1.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_codec</artifactId>
+                <version>1.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_imageio</artifactId>
+                <version>1.1</version>
+            </dependency>
+
             <!-- Apache ############################################# -->
 
             <dependency>
@@ -367,57 +383,8 @@
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
                 <version>1.4.7</version>
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
 
-            <!-- GeoTools Libraries ############################################# -->
-            <!-- Sadly there is no global exclusion so every geotools artifact -->
-            <!-- has to exclude the 'wrong' jai version -->
-            <!--
-                        <dependency>
-
-                            <groupId>org.geotools</groupId>
-                            <artifactId>gt-api</artifactId>
-                            <version>${geotools.version}</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_core</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_codec</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>javax.media</groupId>
-                                    <artifactId>jai_imageio</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>xerces</groupId>
-                                    <artifactId>xercesImpl</artifactId>
-                                </exclusion>
-                            </exclusions>
-                        </dependency>
-                        -->
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
@@ -479,36 +446,6 @@
                 <version>${geotools.version}</version>
             </dependency>
 
-
-            <!-- JAI Libraries ############################################# -->
-
-            <dependency>
-                <groupId>javax.media.jai</groupId>
-                <artifactId>jai-core-openjdk</artifactId>
-                <version>1.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.media.jai</groupId>
-                <artifactId>jai-codec-openjdk</artifactId>
-                <version>1.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.media.jai</groupId>
-                <artifactId>mlibwrapper-jai-openjdk</artifactId>
-                <version>1.1.4</version>
-            </dependency>
-            <dependency>
-                <!-- This artifact is build by our own. It fixes the vendorName == null! problem.
-                     The issue is known to NetBeans but not fixed yet. https://netbeans.org/bugzilla/show_bug.cgi?id=247795 -->
-                <groupId>com.sun.media</groupId>
-                <artifactId>jai-imageio</artifactId>
-                <version>1.2-SNAP-20150402</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.media</groupId>
-                <artifactId>clibwrapper-jiio</artifactId>
-                <version>1.2-20090918</version>
-            </dependency>
 
             <!-- BC Neural Network Library ############################################# -->
 

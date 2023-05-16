@@ -20,47 +20,24 @@
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jai_core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jai_codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jai_imageio</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core-openjdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec-openjdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>mlibwrapper-jai-openjdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>clibwrapper-jiio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>jai-imageio</artifactId>
-        </dependency>
-        <dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-tiff</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_imageio</artifactId>
-                </exclusion>
-            </exclusions>
-
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
