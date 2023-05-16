@@ -562,7 +562,7 @@
             <dependency>
                 <groupId>org.jfree</groupId>
                 <artifactId>jfreechart</artifactId>
-                <version>1.0.14</version>
+                <version>1.5.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>xml-apis</groupId>
@@ -577,7 +577,7 @@
             <dependency>
                 <groupId>org.jfree</groupId>
                 <artifactId>jcommon</artifactId>
-                <version>1.0.17</version>
+                <version>1.0.24</version>
             </dependency>
 
             <!-- Smart configurator support ######################################## -->
