@@ -143,10 +143,6 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-binio</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
@@ -162,16 +158,6 @@
         <dependency>
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-opengis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
