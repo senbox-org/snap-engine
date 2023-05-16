@@ -994,6 +994,16 @@ public class ColorBarLayerType extends LayerType {
         autoApplySchemesModel.getDescriptor().setAlias(PROPERTY_SCHEME_AUTO_APPLY_ALIAS);
         vc.addProperty(autoApplySchemesModel);
 
+        final Property schemeLabelsApplyModel = Property.create(PROPERTY_SCHEME_LABELS_APPLY_KEY, Boolean.class, PROPERTY_SCHEME_LABELS_APPLY_DEFAULT, true);
+        schemeLabelsApplyModel.getDescriptor().setAlias(PROPERTY_SCHEME_LABELS_APPLY_ALIAS);
+        vc.addProperty(schemeLabelsApplyModel);
+
+        final Property schemeLabelsRestrictModel = Property.create(PROPERTY_SCHEME_LABELS_RESTRICT_KEY, Boolean.class, PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT, true);
+        schemeLabelsRestrictModel.getDescriptor().setAlias(PROPERTY_SCHEME_LABELS_RESTRICT_ALIAS);
+        vc.addProperty(schemeLabelsRestrictModel);
+
+
+
 
         // Title Section
 
