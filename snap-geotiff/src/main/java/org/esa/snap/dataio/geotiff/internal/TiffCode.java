@@ -25,7 +25,7 @@ package org.esa.snap.dataio.geotiff.internal;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class TiffCode {
+public class TiffCode {
 
     // Compression Codes
     public static final int COMPRESSION_UNCOMPRESSED = 1;

@@ -78,7 +78,7 @@ public class TiffHeader {
         this.bigEndianOrder = bigEndianOrder;
     }
 
-    private long computeNextIfdOffset(final int i, final long offset, final TiffIFD ifd) {
+    public long computeNextIfdOffset(final int i, final long offset, final TiffIFD ifd) {
         if (i < ifds.length - 1) {
             return offset + ifd.getRequiredEntireSize();
         }

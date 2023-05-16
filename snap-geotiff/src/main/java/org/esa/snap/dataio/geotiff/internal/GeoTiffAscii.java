@@ -24,7 +24,7 @@ package org.esa.snap.dataio.geotiff.internal;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class GeoTiffAscii extends TiffAscii {
+public class GeoTiffAscii extends TiffAscii {
 
     public GeoTiffAscii(final String ... values) {
         super(appendTerminator(values));

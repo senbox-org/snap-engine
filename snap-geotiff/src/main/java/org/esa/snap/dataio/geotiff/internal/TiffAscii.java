@@ -26,7 +26,7 @@ import org.esa.snap.core.datamodel.ProductData;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class TiffAscii extends TiffValue {
+public class TiffAscii extends TiffValue {
 
     public TiffAscii(final String... values) {
         final StringBuffer buffer = new StringBuffer();

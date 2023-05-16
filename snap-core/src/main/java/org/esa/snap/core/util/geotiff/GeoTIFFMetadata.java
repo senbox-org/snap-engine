@@ -626,7 +626,7 @@ public class GeoTIFFMetadata {
 
         private double[] data;
 
-        private TiePoint(double i, double j, double k, double x, double y, double z) {
+        public TiePoint(double i, double j, double k, double x, double y, double z) {
             data = new double[6];
             set(i, j, k, x, y, z);
         }

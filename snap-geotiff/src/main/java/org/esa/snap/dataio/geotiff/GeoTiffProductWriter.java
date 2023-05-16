@@ -42,7 +42,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
 
     private File outputFile;
     private ImageOutputStream outputStream;
-    private GeoTiffBandWriter bandWriter;
+    protected GeoTiffBandWriter bandWriter;
 
     /**
      * Construct a new instance of a product writer for the given GeoTIFF product writer plug-in.

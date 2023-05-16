@@ -28,7 +28,7 @@ import org.esa.snap.core.util.Guardian;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class TiffType {
+public class TiffType {
 
     /**
      * 8-bit unsigned integer,

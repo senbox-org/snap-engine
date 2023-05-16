@@ -27,7 +27,7 @@ import org.esa.snap.core.util.Guardian;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class TiffValueRangeChecker {
+public class TiffValueRangeChecker {
 
     private static final long UNSIGNED_INT_MAX = 0xffffffffL;
     private static final int UNSIGNED_SHORT_MAX = 0xffff;

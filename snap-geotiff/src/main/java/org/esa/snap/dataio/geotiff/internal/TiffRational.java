@@ -26,7 +26,7 @@ import org.esa.snap.core.datamodel.ProductData;
  * @author Norman Fomferra
  * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
-class TiffRational extends TiffValue {
+public class TiffRational extends TiffValue {
 
     private static final int NUMERATOR_INDEX = 0;
     private static final int DENOMINATOR_INDEX = 1;

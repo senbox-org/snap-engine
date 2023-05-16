@@ -37,14 +37,14 @@ import java.util.ArrayList;
  * @author Norman Fomferra
  * @version $Revision$ $Date$
  */
-class GeoTiffBandWriter {
+public class GeoTiffBandWriter {
 
     private ImageOutputStream ios;
     private TiffIFD ifd;
     private Product tempProduct;
     private ArrayList<Band> bandsList;
 
-    GeoTiffBandWriter(final TiffIFD ifd, final ImageOutputStream ios, final Product product) {
+    public GeoTiffBandWriter(final TiffIFD ifd, final ImageOutputStream ios, final Product product) {
         this.ifd = ifd;
         this.ios = ios;
         tempProduct = product;
@@ -188,5 +188,9 @@ class GeoTiffBandWriter {
 
     private int getStripIndex(Band sourceBand) {
         return bandsList.indexOf(sourceBand);
+    }
+
+    public void setOutputStream(ImageOutputStream stream){
+        this.ios = stream;
     }
 }

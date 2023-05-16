@@ -38,7 +38,7 @@ import java.util.SortedMap;
  * @version $Revision: $ $Date: $
  * @since BEAM 4.5
  */
-class TiffTagToMetadataConverter {
+public class TiffTagToMetadataConverter {
 
     private static final int[] PROCESSED_GEO_TIFF_TAGS = new int[]{
                 GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE,
