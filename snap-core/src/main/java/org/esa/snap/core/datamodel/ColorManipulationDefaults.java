@@ -34,7 +34,9 @@ public class ColorManipulationDefaults {
 
     // xml files used by the color scheme manager
     public static final String COLOR_SCHEME_LOOKUP_FILENAME = "color_palette_scheme_lookup.xml";
+    public static final String COLOR_SCHEME_LOOKUP_USER_FILENAME = "color_palette_scheme_lookup_user.xml";
     public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.xml";
+    public static final String COLOR_SCHEMES_USER_FILENAME = "color_palette_schemes_user.xml";
 
     // Indicates which color palette contained within the color scheme xml to use
     public static final String OPTION_COLOR_STANDARD_SCHEME = "From Scheme STANDARD";
@@ -109,7 +111,7 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_GENERAL_CUSTOM_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".enable";
     public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Enable";
-    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Ude following scheme parameters as default<br>" +
+    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Use following scheme parameters as default<br>" +
             " when opening a band<br>otherwise use settings from the file reader.</html>";
     public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
 
