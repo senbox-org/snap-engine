@@ -1153,7 +1153,7 @@ public class DimapProductHelpers {
         }
 
         private Product createProduct(String defaultProductType, Dimension regionRasterSize) {
-            if (org.apache.commons.lang.StringUtils.isBlank(defaultProductType)) {
+            if (org.apache.commons.lang3.StringUtils.isBlank(defaultProductType)) {
                 throw new NullPointerException("The default product type is null or empty.");
             }
             this.ancillaryVariables = new HashMap<>();
@@ -1161,7 +1161,7 @@ public class DimapProductHelpers {
             Dimension productSize = ImageUtils.computeSceneRasterSize(getSceneRasterWidth(), getSceneRasterHeight(), regionRasterSize);
             String productName = getProductName();
             String productType = getProductType();
-            if (org.apache.commons.lang.StringUtils.isBlank(productType)) {
+            if (org.apache.commons.lang3.StringUtils.isBlank(productType)) {
                 productType = defaultProductType;
             }
             this.product = new Product(productName, productType, productSize.width, productSize.height);
