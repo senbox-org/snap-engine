@@ -17,17 +17,13 @@
 package org.esa.snap.lib.openjpeg.utils;
 
 
-import org.esa.snap.core.util.ResourceInstaller;
+import org.esa.snap.core.util.ModuleMetadata;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang3.SystemUtils.*;
 
 /**
  * Utility class to get executables from OpenJpeg module
@@ -68,23 +64,12 @@ public class OpenJpegExecRetriever {
     }
 
     public static Path getOpenJPEGAuxDataPath() {
-        Path versionFile = ResourceInstaller.findModuleCodeBasePath(OpenJpegExecRetriever.class).resolve("version").resolve("version.properties");
-        Properties versionProp = new Properties();
-
-        try (InputStream inputStream = Files.newInputStream(versionFile)){
-            versionProp.load(inputStream);
-        } catch (IOException e) {
-            SystemUtils.LOG.severe("OpenJPEG configuration error: failed to read " + versionFile.toString());
+        ModuleMetadata moduleMetadata = SystemUtils.loadModuleMetadata(OpenJpegExecRetriever.class);
+        if (moduleMetadata == null) {
+            SystemUtils.LOG.severe("OpenJPEG configuration error: Unable to get version from module metadata");
             return null;
         }
-
-        String version = versionProp.getProperty("project.version");
-        if (version == null)
-        {
-            SystemUtils.LOG.severe("OpenJPEG configuration error: unable to get property project.version from " + versionFile.toString());
-            return null;
-        }
-
+        String version = moduleMetadata.getVersion();
         return SystemUtils.getAuxDataPath().resolve("openjpeg").resolve(version);
     }
 

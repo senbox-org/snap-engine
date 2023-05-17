@@ -17,14 +17,10 @@ package org.esa.snap.core.util.geotiff;
 
 import com.sun.media.imageio.plugins.tiff.GeoTIFFTagSet;
 import com.sun.media.imageio.plugins.tiff.TIFFTag;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class GeoTIFFMetadata {
 
@@ -60,8 +56,8 @@ public class GeoTIFFMetadata {
 
     public GeoTIFFMetadata() {
         this(DEFAULT_GEOTIFF_VERSION,
-             DEFAULT_KEY_REVISION_MAJOR,
-             DEFAULT_KEY_REVISION_MINOR);
+                DEFAULT_KEY_REVISION_MAJOR,
+                DEFAULT_KEY_REVISION_MINOR);
     }
 
     public GeoTIFFMetadata(final int geoTIFFVersion, final int keyRevisionMajor, final int keyRevisionMinor) {

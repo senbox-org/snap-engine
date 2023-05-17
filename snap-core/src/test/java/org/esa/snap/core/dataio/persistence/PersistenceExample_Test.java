@@ -26,23 +26,20 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.awt.*;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -99,39 +96,39 @@ public class PersistenceExample_Test {
         final String out = xmlOutputter.outputString(root);
         assertThat(out).isEqualToIgnoringNewLines(
                 "<nodeWhereTheGeneratedElementsShouldBeAdded>\n" +
-                "  <mask>\n" +
-                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
-                "    <name>mask1</name>\n" +
-                "    <expression>(X * Y + X) &gt; 111</expression>\n" +
-                "    <description>decr1</description>\n" +
-                "    <color_rgb>255, 0, 0</color_rgb>\n" +
-                "    <image_transparency>0.6</image_transparency>\n" +
-                "  </mask>\n" +
-                "  <mask>\n" +
-                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
-                "    <name>mask2</name>\n" +
-                "    <expression>(X * Y + X) &gt; 222</expression>\n" +
-                "    <description>decr2</description>\n" +
-                "    <color_rgb>0, 255, 0</color_rgb>\n" +
-                "    <image_transparency>0.5</image_transparency>\n" +
-                "  </mask>\n" +
-                "  <mask>\n" +
-                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
-                "    <name>mask3</name>\n" +
-                "    <expression>(X * Y + X) &gt; 333</expression>\n" +
-                "    <description>decr3</description>\n" +
-                "    <color_rgb>0, 0, 255</color_rgb>\n" +
-                "    <image_transparency>0.4</image_transparency>\n" +
-                "  </mask>\n" +
-                "  <mask>\n" +
-                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
-                "    <name>mask4</name>\n" +
-                "    <expression>(X * Y + X) &gt; 444</expression>\n" +
-                "    <description>decr4</description>\n" +
-                "    <color_rgb>128, 128, 128</color_rgb>\n" +
-                "    <image_transparency>0.3</image_transparency>\n" +
-                "  </mask>\n" +
-                "</nodeWhereTheGeneratedElementsShouldBeAdded>"
+                        "  <mask>\n" +
+                        "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
+                        "    <name>mask1</name>\n" +
+                        "    <expression>(X * Y + X) &gt; 111</expression>\n" +
+                        "    <description>decr1</description>\n" +
+                        "    <color_rgb>255, 0, 0</color_rgb>\n" +
+                        "    <image_transparency>0.6</image_transparency>\n" +
+                        "  </mask>\n" +
+                        "  <mask>\n" +
+                        "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
+                        "    <name>mask2</name>\n" +
+                        "    <expression>(X * Y + X) &gt; 222</expression>\n" +
+                        "    <description>decr2</description>\n" +
+                        "    <color_rgb>0, 255, 0</color_rgb>\n" +
+                        "    <image_transparency>0.5</image_transparency>\n" +
+                        "  </mask>\n" +
+                        "  <mask>\n" +
+                        "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
+                        "    <name>mask3</name>\n" +
+                        "    <expression>(X * Y + X) &gt; 333</expression>\n" +
+                        "    <description>decr3</description>\n" +
+                        "    <color_rgb>0, 0, 255</color_rgb>\n" +
+                        "    <image_transparency>0.4</image_transparency>\n" +
+                        "  </mask>\n" +
+                        "  <mask>\n" +
+                        "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>\n" +
+                        "    <name>mask4</name>\n" +
+                        "    <expression>(X * Y + X) &gt; 444</expression>\n" +
+                        "    <description>decr4</description>\n" +
+                        "    <color_rgb>128, 128, 128</color_rgb>\n" +
+                        "    <image_transparency>0.3</image_transparency>\n" +
+                        "  </mask>\n" +
+                        "</nodeWhereTheGeneratedElementsShouldBeAdded>"
         );
     }
 
@@ -145,39 +142,39 @@ public class PersistenceExample_Test {
         final Product product = new Product("B", "T", RASTER_WIDTH, RASTER_HEIGHT);
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped = "<root-element>" +
-                                  "  <mask>" +
-                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
-                                  "    <name>mask1</name>" +
-                                  "    <expression>(X * Y + X) &gt; 111</expression>" +
-                                  "    <description>decr1</description>" +
-                                  "    <color_rgb>255, 0, 0</color_rgb>" +
-                                  "    <image_transparency>0.6</image_transparency>" +
-                                  "  </mask>" +
-                                  "  <mask>" +
-                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
-                                  "    <name>mask2</name>" +
-                                  "    <expression>(X * Y + X) &gt; 222</expression>" +
-                                  "    <description>decr2</description>" +
-                                  "    <color_rgb>0, 255, 0</color_rgb>" +
-                                  "    <image_transparency>0.5</image_transparency>" +
-                                  "  </mask>" +
-                                  "  <mask>" +
-                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
-                                  "    <name>mask3</name>" +
-                                  "    <expression>(X * Y + X) &gt; 333</expression>" +
-                                  "    <description>decr3</description>" +
-                                  "    <color_rgb>0, 0, 255</color_rgb>" +
-                                  "    <image_transparency>0.4</image_transparency>" +
-                                  "  </mask>" +
-                                  "  <mask>" +
-                                  "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
-                                  "    <name>mask4</name>" +
-                                  "    <expression>(X * Y + X) &gt; 444</expression>" +
-                                  "    <description>decr4</description>" +
-                                  "    <color_rgb>128, 128, 128</color_rgb>" +
-                                  "    <image_transparency>0.3</image_transparency>" +
-                                  "  </mask>" +
-                                  "</root-element>";
+                "  <mask>" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
+                "    <name>mask1</name>" +
+                "    <expression>(X * Y + X) &gt; 111</expression>" +
+                "    <description>decr1</description>" +
+                "    <color_rgb>255, 0, 0</color_rgb>" +
+                "    <image_transparency>0.6</image_transparency>" +
+                "  </mask>" +
+                "  <mask>" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
+                "    <name>mask2</name>" +
+                "    <expression>(X * Y + X) &gt; 222</expression>" +
+                "    <description>decr2</description>" +
+                "    <color_rgb>0, 255, 0</color_rgb>" +
+                "    <image_transparency>0.5</image_transparency>" +
+                "  </mask>" +
+                "  <mask>" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
+                "    <name>mask3</name>" +
+                "    <expression>(X * Y + X) &gt; 333</expression>" +
+                "    <description>decr3</description>" +
+                "    <color_rgb>0, 0, 255</color_rgb>" +
+                "    <image_transparency>0.4</image_transparency>" +
+                "  </mask>" +
+                "  <mask>" +
+                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +
+                "    <name>mask4</name>" +
+                "    <expression>(X * Y + X) &gt; 444</expression>" +
+                "    <description>decr4</description>" +
+                "    <color_rgb>128, 128, 128</color_rgb>" +
+                "    <image_transparency>0.3</image_transparency>" +
+                "  </mask>" +
+                "</root-element>";
 
         final SAXBuilder builder = new SAXBuilder();
         final Document document = builder.build(new StringReader(xmlSnipped));
@@ -231,44 +228,44 @@ public class PersistenceExample_Test {
 
         assertThat(out).isEqualToIgnoringNewLines(
                 "{\n" +
-                "  \"masks\" : [ {\n" +  // node where the generated json should be added
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask1\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 111\",\n" +
-                "      \"description\" : \"decr1\",\n" +
-                "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
-                "      \"image_transparency\" : 0.6\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask2\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 222\",\n" +
-                "      \"description\" : \"decr2\",\n" +
-                "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
-                "      \"image_transparency\" : 0.5\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask3\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 333\",\n" +
-                "      \"description\" : \"decr3\",\n" +
-                "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
-                "      \"image_transparency\" : 0.4\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask4\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 444\",\n" +
-                "      \"description\" : \"decr4\",\n" +
-                "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
-                "      \"image_transparency\" : 0.3\n" +
-                "    }\n" +
-                "  } ]\n" +
-                "}"
+                        "  \"masks\" : [ {\n" +  // node where the generated json should be added
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask1\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 111\",\n" +
+                        "      \"description\" : \"decr1\",\n" +
+                        "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
+                        "      \"image_transparency\" : 0.6\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask2\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 222\",\n" +
+                        "      \"description\" : \"decr2\",\n" +
+                        "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
+                        "      \"image_transparency\" : 0.5\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask3\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 333\",\n" +
+                        "      \"description\" : \"decr3\",\n" +
+                        "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
+                        "      \"image_transparency\" : 0.4\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask4\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 444\",\n" +
+                        "      \"description\" : \"decr4\",\n" +
+                        "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
+                        "      \"image_transparency\" : 0.3\n" +
+                        "    }\n" +
+                        "  } ]\n" +
+                        "}"
         );
     }
 
@@ -283,44 +280,44 @@ public class PersistenceExample_Test {
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped =
                 "{\n" +
-                "  \"masks\" : [ {\n" +  // node where the generated json should be added
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask1\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 111\",\n" +
-                "      \"description\" : \"decr1\",\n" +
-                "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
-                "      \"image_transparency\" : 0.6\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask2\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 222\",\n" +
-                "      \"description\" : \"decr2\",\n" +
-                "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
-                "      \"image_transparency\" : 0.5\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask3\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 333\",\n" +
-                "      \"description\" : \"decr3\",\n" +
-                "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
-                "      \"image_transparency\" : 0.4\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"mask\" : {\n" +
-                "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
-                "      \"name\" : \"mask4\",\n" +
-                "      \"expression\" : \"(X * Y + X) > 444\",\n" +
-                "      \"description\" : \"decr4\",\n" +
-                "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
-                "      \"image_transparency\" : 0.3\n" +
-                "    }\n" +
-                "  } ]\n" +
-                "}";
+                        "  \"masks\" : [ {\n" +  // node where the generated json should be added
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask1\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 111\",\n" +
+                        "      \"description\" : \"decr1\",\n" +
+                        "      \"color_rgb\" : [ 255, 0, 0 ],\n" +
+                        "      \"image_transparency\" : 0.6\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask2\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 222\",\n" +
+                        "      \"description\" : \"decr2\",\n" +
+                        "      \"color_rgb\" : [ 0, 255, 0 ],\n" +
+                        "      \"image_transparency\" : 0.5\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask3\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 333\",\n" +
+                        "      \"description\" : \"decr3\",\n" +
+                        "      \"color_rgb\" : [ 0, 0, 255 ],\n" +
+                        "      \"image_transparency\" : 0.4\n" +
+                        "    }\n" +
+                        "  }, {\n" +
+                        "    \"mask\" : {\n" +
+                        "      \"___persistence_id___\" : \"TestMaskPersistenceConverter:2\",\n" +
+                        "      \"name\" : \"mask4\",\n" +
+                        "      \"expression\" : \"(X * Y + X) > 444\",\n" +
+                        "      \"description\" : \"decr4\",\n" +
+                        "      \"color_rgb\" : [ 128, 128, 128 ],\n" +
+                        "      \"image_transparency\" : 0.3\n" +
+                        "    }\n" +
+                        "  } ]\n" +
+                        "}";
 
         final ObjectMapper objectMapper = new ObjectMapper();
         final HashMap<String, List<Map<String, Object>>> content = objectMapper.reader().readValue(new StringReader(xmlSnipped), HashMap.class);
@@ -350,31 +347,31 @@ public class PersistenceExample_Test {
         assertThat(product.getMaskGroup().getNodeCount()).isEqualTo(0);
         final String xmlSnipped =
                 "<root-element>" +
-                "  <mask>" +
-                //                                                                                       no persistence ID
-                "    <name>mask1</name>" +
-                "    <expr>(X * Y + X) &gt; 111</expr>" +                                             // old expression tag
-                "    <description>decr1</description>" +
-                "    <color_rgb>255, 0, 0</color_rgb>" +
-                "    <image_transparency>0.6</image_transparency>" +
-                "  </mask>" +
-                "  <mask>" +
-                "    <___persistence_id___>MyMaskPersistenceConverter:1</___persistence_id___>" +     // old persistence ID
-                "    <name>mask2</name>" +
-                "    <expr>(X * Y + X) &gt; 222</expr>" +                                             // old expression tag
-                "    <description>decr2</description>" +
-                "    <color_rgb>0, 255, 0</color_rgb>" +
-                "    <image_transparency>0.5</image_transparency>" +
-                "  </mask>" +
-                "  <mask>" +
-                "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +   // new persistence ID
-                "    <name>mask3</name>" +
-                "    <expression>(X * Y + X) &gt; 333</expression>" +                                  // new expression tag
-                "    <description>decr3</description>" +
-                "    <color_rgb>0, 0, 255</color_rgb>" +
-                "    <image_transparency>0.4</image_transparency>" +
-                "  </mask>" +
-                "</root-element>";
+                        "  <mask>" +
+                        //                                                                                       no persistence ID
+                        "    <name>mask1</name>" +
+                        "    <expr>(X * Y + X) &gt; 111</expr>" +                                             // old expression tag
+                        "    <description>decr1</description>" +
+                        "    <color_rgb>255, 0, 0</color_rgb>" +
+                        "    <image_transparency>0.6</image_transparency>" +
+                        "  </mask>" +
+                        "  <mask>" +
+                        "    <___persistence_id___>MyMaskPersistenceConverter:1</___persistence_id___>" +     // old persistence ID
+                        "    <name>mask2</name>" +
+                        "    <expr>(X * Y + X) &gt; 222</expr>" +                                             // old expression tag
+                        "    <description>decr2</description>" +
+                        "    <color_rgb>0, 255, 0</color_rgb>" +
+                        "    <image_transparency>0.5</image_transparency>" +
+                        "  </mask>" +
+                        "  <mask>" +
+                        "    <___persistence_id___>TestMaskPersistenceConverter:2</___persistence_id___>" +   // new persistence ID
+                        "    <name>mask3</name>" +
+                        "    <expression>(X * Y + X) &gt; 333</expression>" +                                  // new expression tag
+                        "    <description>decr3</description>" +
+                        "    <color_rgb>0, 0, 255</color_rgb>" +
+                        "    <image_transparency>0.4</image_transparency>" +
+                        "  </mask>" +
+                        "</root-element>";
 
         final SAXBuilder builder = new SAXBuilder();
         final Document document = builder.build(new StringReader(xmlSnipped));

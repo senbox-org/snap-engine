@@ -6,7 +6,7 @@ import com.bc.ceres.jai.GeneralFilterFunction;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.geotools.resources.XArray;
+import org.geotools.util.XArray;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.BorderExtenderConstant;

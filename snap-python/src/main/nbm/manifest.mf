@@ -3,7 +3,7 @@ OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
 OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Java-Dependencies: Java > 11
 OpenIDE-Module-Display-Category: SNAP Core
 OpenIDE-Module-Long-Description: <p>This modules allows for integratin
  g new data processors written entirely in Python 2.7 or 3.3+. As it u

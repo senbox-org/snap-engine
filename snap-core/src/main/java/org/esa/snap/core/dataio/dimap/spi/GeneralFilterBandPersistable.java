@@ -22,7 +22,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.SystemUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import java.awt.Dimension;
 import java.util.ArrayList;

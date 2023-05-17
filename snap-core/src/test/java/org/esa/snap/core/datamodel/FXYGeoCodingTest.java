@@ -24,16 +24,14 @@ import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.math.FXYSum;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("ConstantConditions")
 public class FXYGeoCodingTest {
@@ -48,9 +46,9 @@ public class FXYGeoCodingTest {
         final FXYSum.Linear lonFunc = new FXYSum.Linear(new double[]{0, 1, 0});
 
         _geoCoding = new FXYGeoCoding(0, 0, 1, 1,
-                                      xFunc, yFunc,
-                                      latFunc, lonFunc,
-                                      Datum.WGS_84);
+                xFunc, yFunc,
+                latFunc, lonFunc,
+                Datum.WGS_84);
 
     }
 
@@ -248,12 +246,12 @@ public class FXYGeoCodingTest {
         assertEquals(_geoCoding.getPixelSizeY() * subset.getSubSamplingY(), subsetGeoCoding.getPixelSizeY(), 1.e-6);
 
         assertTrue(Arrays.equals(_geoCoding.getPixelXFunction().getCoefficients(),
-                                 subsetGeoCoding.getPixelXFunction().getCoefficients()));
+                subsetGeoCoding.getPixelXFunction().getCoefficients()));
         assertTrue(Arrays.equals(_geoCoding.getPixelYFunction().getCoefficients(),
-                                 subsetGeoCoding.getPixelYFunction().getCoefficients()));
+                subsetGeoCoding.getPixelYFunction().getCoefficients()));
         assertTrue(Arrays.equals(_geoCoding.getLatFunction().getCoefficients(),
-                                 subsetGeoCoding.getLatFunction().getCoefficients()));
+                subsetGeoCoding.getLatFunction().getCoefficients()));
         assertTrue(Arrays.equals(_geoCoding.getLonFunction().getCoefficients(),
-                                 subsetGeoCoding.getLonFunction().getCoefficients()));
+                subsetGeoCoding.getLonFunction().getCoefficients()));
     }
 }

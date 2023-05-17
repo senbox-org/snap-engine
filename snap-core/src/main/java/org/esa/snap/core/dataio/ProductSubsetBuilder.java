@@ -35,6 +35,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.runtime.Config;
 
 import javax.media.jai.Histogram;
 import java.awt.Dimension;
@@ -52,12 +53,15 @@ import java.util.Map;
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
+    private static boolean prefetchTiles = false;
+
     public ProductSubsetBuilder() {
         this(false);
     }
 
     public ProductSubsetBuilder(boolean sourceProductOwner) {
         super(sourceProductOwner);
+        prefetchTiles = Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true);
     }
 
     public static Product createProductSubset(Product sourceProduct, ProductSubsetDef subsetDef, String name,
@@ -77,9 +81,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         try {
             final MetadataElement srcRoot = sourceProduct.getMetadataRoot();
             final MetadataElement srcAbsRoot = srcRoot.getElement("Abstracted_Metadata");
-            if (srcAbsRoot == null)
+            if (srcAbsRoot == null) {
                 return;
-
+            }
             final MetadataElement trgRoot = targetProduct.getMetadataRoot();
             MetadataElement trgAbsRoot = trgRoot.getElement("Abstracted_Metadata");
             if (trgAbsRoot == null) {
@@ -90,24 +94,29 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             final Rectangle region = subsetDef.getRegion();
             final MetadataAttribute height = trgAbsRoot.getAttribute("num_output_lines");
-            if (height != null)
+            if (height != null) {
                 height.getData().setElemUInt(targetProduct.getSceneRasterHeight());
+            }
 
             final MetadataAttribute width = trgAbsRoot.getAttribute("num_samples_per_line");
-            if (width != null)
+            if (width != null) {
                 width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
+            }
 
             final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
-            if (offsetX != null && region != null)
+            if (offsetX != null && region != null) {
                 offsetX.getData().setElemUInt(region.x);
+            }
 
             final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
-            if (offsetY != null && region != null)
+            if (offsetY != null && region != null) {
                 offsetY.getData().setElemUInt(region.y);
+            }
 
             boolean isSARProduct = trgAbsRoot.getAttributeDouble("radar_frequency", 99999) != 99999;
-            if (!isSARProduct)
+            if (!isSARProduct) {
                 return;
+            }
 
             // update subset metadata for SAR products
 
@@ -133,8 +142,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             }
 
             final MetadataAttribute totalSize = trgAbsRoot.getAttribute("total_size");
-            if (totalSize != null)
+            if (totalSize != null) {
                 totalSize.getData().setElemUInt(targetProduct.getRawStorageSize());
+            }
 
             if (nearRangeOnLeft) {
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_near_lat", "first_near_long", 0.5f, 0.5f);
@@ -182,7 +192,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                             slantRangeDist = slantRangeToFirstPixel + region.x * rangeSpacing;
                         } else {
                             slantRangeDist = slantRangeToFirstPixel +
-                                    (targetProduct.getSceneRasterWidth() - region.x - 1) * rangeSpacing;
+                                             (targetProduct.getSceneRasterWidth() - region.x - 1) * rangeSpacing;
                         }
                         slantRange.getData().setElemDouble(slantRangeDist);
                     }
@@ -222,7 +232,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                     ground_range_origin_subset = grO + colIndex * rangeSpacing;
                 } else {
                     final double colIndexFromRight = sourceProduct.getSceneRasterWidth() - colIndex -
-                            targetProduct.getSceneRasterWidth();
+                                                     targetProduct.getSceneRasterWidth();
                     ground_range_origin_subset = grO + colIndexFromRight * rangeSpacing;
                 }
                 srgrList.setAttributeDouble("ground_range_origin", ground_range_origin_subset);
@@ -234,15 +244,19 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                            final String tagLat, final String tagLon, final float x, final float y) {
         final PixelPos pixelPos = new PixelPos(x, y);
         final GeoPos geoPos = new GeoPos();
-        if (product.getSceneGeoCoding() == null) return;
+        if (product.getSceneGeoCoding() == null) {
+            return;
+        }
         product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos);
 
         final MetadataAttribute lat = absRoot.getAttribute(tagLat);
-        if (lat != null)
+        if (lat != null) {
             lat.getData().setElemDouble(geoPos.getLat());
+        }
         final MetadataAttribute lon = absRoot.getAttribute(tagLon);
-        if (lon != null)
+        if (lon != null) {
             lon.getData().setElemDouble(geoPos.getLon());
+        }
     }
 
     /**
@@ -310,7 +324,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (sourceBand.getRasterData() != null) {
             // if the destination region equals the entire raster
             if (sourceBand.getRasterWidth() == destWidth
-                    && sourceBand.getRasterHeight() == destHeight) {
+                && sourceBand.getRasterHeight() == destHeight) {
                 copyBandRasterDataFully(sourceBand,
                                         destBuffer,
                                         destWidth, destHeight);
@@ -326,7 +340,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         } else {
             // if the desired destination region equals the source raster
             if (sourceWidth == destWidth
-                    && sourceHeight == destHeight) {
+                && sourceHeight == destHeight) {
                 readBandRasterDataRegion(sourceBand,
                                          sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
@@ -344,10 +358,22 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
     private static void readBandRasterDataSubsampled(Band band, ProductData destData, Rectangle destRect, int sourceOffsetX, int sourceOffsetY,
                                                      int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY) throws IOException {
 
-        Point[] tileIndices = band.getSourceImage().getTileIndices(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+        if (band.getProductReader() instanceof AbstractProductReader && band.isProductReaderDirectlyUsable()) {
+            AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
+            if (reader.isSubsetReadingFullySupported()) {
+                reader.readBandRasterDataImpl(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                                              band, destRect.x, destRect.y, destRect.width, destRect.height, destData, ProgressMonitor.NULL);
+                return;
+            }
+        }
+        MultiLevelImage sourceImage = band.getSourceImage();
+        Point[] tileIndices = sourceImage.getTileIndices(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+        if (prefetchTiles) {
+            sourceImage.prefetchTiles(tileIndices);
+        }
         HashMap<Rectangle, ProductData> tileMap = new HashMap<>();
         for (Point tileIndex : tileIndices) {
-            Rectangle tileRect = band.getSourceImage().getTileRect(tileIndex.x, tileIndex.y);
+            Rectangle tileRect = sourceImage.getTileRect(tileIndex.x, tileIndex.y);
             if (tileRect.isEmpty()) {
                 continue;
             }
@@ -749,14 +775,14 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
         if (subsetDef.getRegionMap() == null) {
             return subsetDef.getRegion() == null
-                    || subsetDef.getRegion().equals(sourceRegion)
-                    && subsetDef.getSubSamplingX() == 1
-                    && subsetDef.getSubSamplingY() == 1;
+                   || subsetDef.getRegion().equals(sourceRegion)
+                      && subsetDef.getSubSamplingX() == 1
+                      && subsetDef.getSubSamplingY() == 1;
         }
         return subsetDef.getRegionMap().get(rasterDataNode.getName()) == null
-                || subsetDef.getRegionMap().get(rasterDataNode.getName()).equals(sourceRegion)
-                && subsetDef.getSubSamplingX() == 1
-                && subsetDef.getSubSamplingY() == 1;
+               || subsetDef.getRegionMap().get(rasterDataNode.getName()).equals(sourceRegion)
+                  && subsetDef.getSubSamplingX() == 1
+                  && subsetDef.getSubSamplingY() == 1;
     }
 
     protected void addGeoCodingToProduct(final Product product) {
@@ -769,8 +795,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (getSubsetDef() != null && getSubsetDef().getRegionMap() != null) {
             for (RasterDataNode rasterDataNode : product.getRasterDataNodes()) {
                 if (rasterDataNode.getRasterWidth() == product.getSceneRasterSize().getWidth() &&
-                        rasterDataNode.getRasterHeight() == product.getSceneRasterSize().getHeight()
-                        && rasterDataNode.getGeoCoding() != null) {
+                    rasterDataNode.getRasterHeight() == product.getSceneRasterSize().getHeight()
+                    && rasterDataNode.getGeoCoding() != null) {
                     ProductUtils.copyGeoCoding(rasterDataNode, product);
                 }
             }

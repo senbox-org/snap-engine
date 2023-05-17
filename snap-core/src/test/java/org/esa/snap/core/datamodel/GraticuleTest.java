@@ -2,21 +2,13 @@ package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.util.math.Range;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 public class GraticuleTest {
@@ -122,7 +114,7 @@ public class GraticuleTest {
     @Test
     public void testGetLonCornerTextGlyph_invalidPxPos() {
         final GeoCoding geoCoding = mock(GeoCoding.class);
-        when(geoCoding.getGeoPos(any(PixelPos.class), eq(null))).thenReturn(new GeoPos(12.3, 13.4));
+        when(geoCoding.getGeoPos(Mockito.any(PixelPos.class), Mockito.eq(null))).thenReturn(new GeoPos(12.3, 13.4));
 
         final Graticule.TextGlyph glyph = Graticule.getLonCornerTextGlyph(geoCoding, new PixelPos(Double.NaN, 3), new PixelPos(4, 5), true, true);
         assertNull(glyph);
@@ -131,7 +123,7 @@ public class GraticuleTest {
     @Test
     public void testGetLonCornerTextGlyph() {
         final GeoCoding geoCoding = mock(GeoCoding.class);
-        when(geoCoding.getGeoPos(any(PixelPos.class), eq(null))).thenReturn(new GeoPos(13.4, 14.5));
+        when(geoCoding.getGeoPos(Mockito.any(PixelPos.class), Mockito.eq(null))).thenReturn(new GeoPos(13.4, 14.5));
 
         final Graticule.TextGlyph glyph = Graticule.getLonCornerTextGlyph(geoCoding, new PixelPos(3, 4), new PixelPos(5, 6), true, false);
         assertEquals("14°30' E", glyph.getText());
@@ -149,7 +141,7 @@ public class GraticuleTest {
     @Test
     public void testGetLatCornerTextGlyph_invalidPxPos() {
         final GeoCoding geoCoding = mock(GeoCoding.class);
-        when(geoCoding.getGeoPos(any(PixelPos.class), eq(null))).thenReturn(new GeoPos(13.4, 14.5));
+        when(geoCoding.getGeoPos(Mockito.any(PixelPos.class), Mockito.eq(null))).thenReturn(new GeoPos(13.4, 14.5));
 
         final Graticule.TextGlyph glyph = Graticule.getLatCornerTextGlyph(geoCoding, new PixelPos(4, Double.NaN), new PixelPos(5, 6), false, false);
         assertNull(glyph);
@@ -158,7 +150,7 @@ public class GraticuleTest {
     @Test
     public void testGetLatCornerTextGlyph() {
         final GeoCoding geoCoding = mock(GeoCoding.class);
-        when(geoCoding.getGeoPos(any(PixelPos.class), eq(null))).thenReturn(new GeoPos(14.5, 15.6));
+        when(geoCoding.getGeoPos(Mockito.any(PixelPos.class), Mockito.eq(null))).thenReturn(new GeoPos(14.5, 15.6));
 
         final Graticule.TextGlyph glyph = Graticule.getLatCornerTextGlyph(geoCoding, new PixelPos(4, 5), new PixelPos(6, 7), true, false);
         assertEquals("14°30' N", glyph.getText());

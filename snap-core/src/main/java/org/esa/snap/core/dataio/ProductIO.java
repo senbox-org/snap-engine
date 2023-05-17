@@ -39,7 +39,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -523,7 +522,7 @@ public class ProductIO {
 
         final int numThreads = Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
         final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        List<IOException> ioExceptionCollector = Collections.unmodifiableList(new ArrayList<>());
+        List<IOException> ioExceptionCollector = new ArrayList<>();
         for (Band band : bandsToWrite) {
             if (pm.isCanceled()) {
                 bandsCountDown.countDown();

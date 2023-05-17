@@ -39,8 +39,8 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
-import org.jdom.Document;
-import org.jdom.input.DOMBuilder;
+import org.jdom2.Document;
+import org.jdom2.input.DOMBuilder;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 

@@ -176,6 +176,7 @@ public class ResamplingOp extends Operator {
         transferGeoCoding(targetProduct);
         copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
+        targetProduct.setDescription(sourceProduct.getDescription());
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         targetProduct.setPreferredTileSize(referenceTileSize);
     }
@@ -428,7 +429,7 @@ public class ResamplingOp extends Operator {
         }
     }
 
-    private static MultiLevelImage createMaskedImage(final RasterDataNode node, Number maskValue) {
+    static MultiLevelImage createMaskedImage(final RasterDataNode node, Number maskValue) {
         MultiLevelImage varImage = node.getSourceImage();
         if (node.getValidPixelExpression() != null) {
             varImage = replaceInvalidValuesByNaN(node, varImage, node.getValidMaskImage(), maskValue);

@@ -16,7 +16,7 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * The service provider interface (SPI) for <code>DimapPersistable</code>s.

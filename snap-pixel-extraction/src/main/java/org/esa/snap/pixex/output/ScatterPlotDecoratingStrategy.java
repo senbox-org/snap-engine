@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -23,7 +23,7 @@ import org.esa.snap.measurement.Measurement;
 import org.esa.snap.measurement.writer.FormatStrategy;
 import org.esa.snap.pixex.PixExOp;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
@@ -41,12 +41,11 @@ import java.util.Map;
  */
 public class ScatterPlotDecoratingStrategy implements FormatStrategy {
 
+    final Map<Long, Map<String, Integer>> rasterNamesIndices = new HashMap<Long, Map<String, Integer>>();
+    final Map<Long, Map<PixExOp.VariableCombination, JFreeChart>> plotMaps = new HashMap<Long, Map<PixExOp.VariableCombination, JFreeChart>>();
     private final Measurement[] originalMeasurements;
     private final FormatStrategy decoratedStrategy;
     private final PixExOp.VariableCombination[] scatterPlotVariableCombinations;
-
-    final Map<Long, Map<String, Integer>> rasterNamesIndices = new HashMap<Long, Map<String, Integer>>();
-    final Map<Long, Map<PixExOp.VariableCombination, JFreeChart>> plotMaps = new HashMap<Long, Map<PixExOp.VariableCombination, JFreeChart>>();
     private final RasterNamesFactory rasterNamesFactory;
     private final ProductRegistry productRegistry;
     private final Map<Long, String> productNames = new HashMap<Long, String>();
@@ -115,13 +114,13 @@ public class ScatterPlotDecoratingStrategy implements FormatStrategy {
                 final PixExOp.VariableCombination variableCombination = entry.getKey();
                 try {
                     File targetFile = new File(parent,
-                                               String.format("%s_scatter_plot_%s_%s_%s.png",
-                                                             filePrefix,
-                                                             variableCombination.originalVariableName,
-                                                             variableCombination.productVariableName,
-                                                             productNames.get(productId))
+                            String.format("%s_scatter_plot_%s_%s_%s.png",
+                                    filePrefix,
+                                    variableCombination.originalVariableName,
+                                    variableCombination.productVariableName,
+                                    productNames.get(productId))
                     );
-                    ChartUtilities.saveChartAsPNG(targetFile, entry.getValue(), 600, 400);
+                    ChartUtils.saveChartAsPNG(targetFile, entry.getValue(), 600, 400);
                 } catch (IOException e) {
                     SystemUtils.LOG.warning(e.getMessage());
                 }
@@ -140,7 +139,7 @@ public class ScatterPlotDecoratingStrategy implements FormatStrategy {
         initPlotMaps(productId);
         XYSeries xySeries = getXYSeries(variableCombination, productId);
         Measurement originalMeasurement = MatchupFormatStrategy.findMatchingMeasurement(measurement,
-                                                                                        originalMeasurements);
+                originalMeasurements);
         if (!combinationHasData(variableCombination.productVariableName, measurement.getProductId())) {
             return;
         }
@@ -173,14 +172,14 @@ public class ScatterPlotDecoratingStrategy implements FormatStrategy {
         final XYSeriesCollection data = new XYSeriesCollection();
         data.addSeries(dataset);
         String scatterPlotName = String.format("Scatter plot of '%s' and '%s' for product '%s'",
-                                               variableCombination.originalVariableName,
-                                               variableCombination.productVariableName,
-                                               productNames.get(productId));
+                variableCombination.originalVariableName,
+                variableCombination.productVariableName,
+                productNames.get(productId));
         return ChartFactory.createScatterPlot(scatterPlotName,
-                                              variableCombination.originalVariableName,
-                                              variableCombination.productVariableName,
-                                              data, PlotOrientation.VERTICAL, false, false,
-                                              false);
+                variableCombination.originalVariableName,
+                variableCombination.productVariableName,
+                data, PlotOrientation.VERTICAL, false, false,
+                false);
     }
 
     private void initPlotMaps(long productId) {

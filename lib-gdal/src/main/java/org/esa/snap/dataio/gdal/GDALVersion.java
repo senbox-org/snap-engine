@@ -162,6 +162,21 @@ public enum GDALVersion {
     }
 
     /**
+     * Checks whether the internal GDAL distribution is detected as installed version
+     * @param installedVersionPath the path of the detected installed version
+     * @return {@code true} if the internal GDAL distribution is detected as installed version
+     */
+    private static boolean isInternalVersionDetectedAsInstalledVersion(String installedVersionPath){
+        if (installedVersionPath.equals(INTERNAL_VERSION.getLocation())) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, () -> "Skipping detected internal GDAL " + INTERNAL_VERSION.id + " from distribution.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Retrieves the installed GDAl versions on host OS by invoking 'gdalinfo --version' on every 'gdalinfo' executable path command and parsing the output.
      *
      * @return the installed GDAl versions on host OS or {@code null} if not found
@@ -177,6 +192,9 @@ public enum GDALVersion {
         }
         final Map<String, GDALVersion> gdalVersions = new LinkedHashMap<>();
         for (final String installedVersionsPath : installedVersionsPaths) {
+            if (isInternalVersionDetectedAsInstalledVersion(installedVersionsPath)) {
+                continue;
+            }
             try {
                 final String result = fetchProcessOutput(Runtime.getRuntime().exec(new String[]{installedVersionsPath + File.separator + GDALINFIO_EXECUTABLE_NAME, GDALINFO_EXECUTABLE_ARGS}));
                 final String versionId = result.replaceAll("[\\s\\S]*?(\\d*\\.\\d*\\.\\d*)[\\s\\S]*$", "$1");

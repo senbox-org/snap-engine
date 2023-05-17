@@ -76,17 +76,9 @@ final public class SummaryStxOp extends StxOp {
     }
 
     public double getCoefficientOfVariation(final String unit) {
-        double cv = 0.0;
-        if (unit != null && unit.contains("intensity")) {
-            final double m = valueSum / sampleCount;
-            final double m2 = sqrSum / sampleCount;
-            cv = Math.sqrt(m2 - m*m) / m;
-        } else {
-            final double m4 = power4Sum / sampleCount;
-            final double m2 = sqrSum / sampleCount;
-            cv = Math.sqrt(m4 - m2*m2) / m2;
-        }
-        return cv;
+        final double m = valueSum / sampleCount;
+        final double m2 = sqrSum / sampleCount;
+        return Math.sqrt(m2 - m*m) / m;
     }
 
     public double getEquivalentNumberOfLooks(final String unit) {

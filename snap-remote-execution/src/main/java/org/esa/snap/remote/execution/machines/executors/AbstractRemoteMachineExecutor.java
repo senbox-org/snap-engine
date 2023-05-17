@@ -2,13 +2,13 @@ package org.esa.snap.remote.execution.machines.executors;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import org.apache.commons.lang.StringUtils;
-import org.esa.snap.remote.execution.file.system.IRemoteMachineFileSystem;
-import org.esa.snap.remote.execution.utils.CommandExecutorUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.remote.execution.executors.OutputConsole;
 import org.esa.snap.remote.execution.executors.SSHConnection;
+import org.esa.snap.remote.execution.file.system.IRemoteMachineFileSystem;
 import org.esa.snap.remote.execution.machines.RemoteMachineProperties;
-import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.remote.execution.utils.CommandExecutorUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;

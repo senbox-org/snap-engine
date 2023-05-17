@@ -16,18 +16,15 @@
 package org.esa.snap.core.util;
 
 import org.esa.snap.core.jexp.impl.Tokenizer;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
-import java.awt.Color;
+import java.awt.*;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * The {@code StringUtils} class provides frequently used utility methods dealing with {@code String} values

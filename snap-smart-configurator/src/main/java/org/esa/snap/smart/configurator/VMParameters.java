@@ -16,7 +16,7 @@
 
 package org.esa.snap.smart.configurator;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 
@@ -26,13 +26,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A class to store and manipulate VM Parameters
@@ -225,36 +224,6 @@ public class VMParameters {
         return properties;
     }
 
-    private static ArrayList<String> loadGptParameterList() {
-
-        List<String> list = new ArrayList<>();
-        try (Stream<String> stream = Files.lines(getGptVmOptionsPath())) {
-
-            list = stream
-                    .filter(line -> line.startsWith("#"))
-                    .collect(Collectors.toList());
-
-        } catch (IOException e) {
-            SystemUtils.LOG.severe(String.format("Can't load gpt vmoptions file '%s'", getGptVmOptionsPath().toString()));
-        }
-        return (ArrayList<String>) list;
-    }
-
-    private static ArrayList<String> loadPconvertParameterList() {
-
-        List<String> list = new ArrayList<>();
-        try (Stream<String> stream = Files.lines(getPconvertVmOptionsPath())) {
-
-            list = stream
-                    .filter(line -> line.startsWith("#"))
-                    .collect(Collectors.toList());
-
-        } catch (IOException e) {
-            SystemUtils.LOG.severe(String.format("Can't load pconvert vmoptions file '%s'", getPconvertVmOptionsPath().toString()));
-        }
-        return (ArrayList<String>) list;
-    }
-
     /**
      * Check if the current user can save the VM parameters
      *
@@ -264,85 +233,12 @@ public class VMParameters {
         return Files.isWritable(getSnapConfigPath());
     }
 
-    /**
-     * If allowed, save the VM parameters to disk so they can be used next time
-     *
-     * @throws IOException if the VM parameters could not be saved
-     */
-    void save(boolean saveGPT, boolean savePConvert) throws IOException {
-
-        Properties properties = loadSnapConfProperties();
-
-        String defaultParameters = properties.getProperty(DEFAULT_OPTION_PROPERTY_KEY);
-
-        ArrayList<String> parametersToSave = new ArrayList<>();
-
-        if(defaultParameters != null) {
-            // We search for parameters not starting with "-J" in the actual default parameters list.
-            // These are not VM parameters and so they will not be replaced
-            if(defaultParameters.startsWith("\"")) {
-                // we remove global the double quotes
-                defaultParameters = defaultParameters.substring(1, defaultParameters.length()-1);
-            }
-            List<String> defaultParametersAsList = toParamList(defaultParameters);
-            for (String defaultParameter : defaultParametersAsList) {
-                if (!defaultParameter.startsWith("-J")) {
-                    parametersToSave.add(defaultParameter);
-                }
-            }
-        }
-
-        // We add these VM Parameters, adding "-J" to the list
-        List<String> vmParametersAsList = toParamList(toString());
-        for(String vmParameter : vmParametersAsList) {
-            parametersToSave.add("-J" + vmParameter);
-        }
-
-        String vmParametersAsString = VMParameters.toString(parametersToSave);
-        vmParametersAsString = StringEscapeUtils.escapeJava(vmParametersAsString);
-        vmParametersAsString = "\"" + vmParametersAsString + "\"";
-        String defaultOptionAsString = DEFAULT_OPTION_PROPERTY_KEY + "=" + vmParametersAsString;
-
-        // we replace the default option setting in the config path
-        // we can't use properties.store since this doesn't keep comments and creates some problems with paths
-        List<String> snapConfigLines = Files.readAllLines(getSnapConfigPath());
-
-        if(snapConfigLines != null && snapConfigLines.size() > 0) {
-            Iterator<String> configLinesIterator = snapConfigLines.iterator();
-            String regex = DEFAULT_OPTION_PROPERTY_KEY + "[ =:].*";
-
-            BufferedWriter writer = Files.newBufferedWriter(getSnapConfigPath());
-            do {
-
-                String configLine = configLinesIterator.next();
-
-                snapConfigLines.iterator();
-
-                if (configLine != null) {
-                    if (configLine.matches(regex)) {
-                        while (configLine != null && configLine.trim().endsWith("\\")) {
-                            configLine = configLinesIterator.next();
-                        }
-                        writer.write(defaultOptionAsString);
-                    } else {
-                        writer.write(configLine);
-                    }
-                    writer.newLine();
-                }
-            } while (configLinesIterator.hasNext());
-
-            writer.close();
-        }
-    }
-
     void saveToVMOptions(Path vmOptionsPath) throws IOException {
         ArrayList<String> parametersToSave = new ArrayList<>();
 
         if(getOtherVMOptions() != null && getOtherVMOptions().length() > 0) {
             String[] others = getOtherVMOptions().split(" ");
-            for(String other : others) {
-                parametersToSave.add(other);
-            }
+            Collections.addAll(parametersToSave, others);
         }
 
         // we replace the default option setting in the config path
@@ -351,9 +247,8 @@ public class VMParameters {
 
         boolean xmxReplaced = false;
         boolean xmsReplaced = false;
-        if(vmConfigLines != null && vmConfigLines.size() > 0) {
+        if (vmConfigLines.size() > 0) {
             Iterator<String> configLinesIterator = vmConfigLines.iterator();
-            String regex = DEFAULT_OPTION_PROPERTY_KEY + "[ =:].*";
 
             BufferedWriter writer = Files.newBufferedWriter(vmOptionsPath);
             do {
@@ -371,7 +266,7 @@ public class VMParameters {
                         boolean found = false;
                         for(String parameterToSave : parametersToSave) {
                             String[] split = parameterToSave.split("=");
-                            if(split == null || split.length == 0) {
+                            if (split.length == 0) {
                                 continue;
                             }
                             if (configLine.startsWith(split[0])) {
@@ -416,7 +311,7 @@ public class VMParameters {
 
         if(defaultParameters != null) {
             // We search for parameters not starting with "-J" in the actual default parameters list.
-            // These are not VM parameters and so they will not be replaced
+            // These are not VM parameters, and so they will not be replaced
             if(defaultParameters.startsWith("\"")) {
                 // we remove global the double quotes
                 defaultParameters = defaultParameters.substring(1, defaultParameters.length()-1);
@@ -444,7 +339,7 @@ public class VMParameters {
         // we can't use properties.store since this doesn't keep comments and creates some problems with paths
         List<String> snapConfigLines = Files.readAllLines(getSnapConfigPath());
 
-        if(snapConfigLines != null && snapConfigLines.size() > 0) {
+        if (snapConfigLines.size() > 0) {
             Iterator<String> configLinesIterator = snapConfigLines.iterator();
             String regex = DEFAULT_OPTION_PROPERTY_KEY + "[ =:].*";
 

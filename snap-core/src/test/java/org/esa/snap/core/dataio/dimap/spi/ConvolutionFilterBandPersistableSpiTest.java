@@ -16,33 +16,38 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.ProductData;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-public class ConvolutionFilterBandPersistableSpiTest extends TestCase {
+import static org.junit.Assert.*;
 
-       private ConvolutionFilterBandPersistableSpi _persistableSpi;
+public class ConvolutionFilterBandPersistableSpiTest {
 
-    @Override
+    private ConvolutionFilterBandPersistableSpi _persistableSpi;
+
+    @Before
     public void setUp() {
         _persistableSpi = new ConvolutionFilterBandPersistableSpi();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         _persistableSpi = null;
     }
 
+    @Test
     public void testCanDecode_GoodElement() {
-
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
         final Attribute bandType = new Attribute(DimapProductConstants.ATTRIB_BAND_TYPE, "ConvolutionFilterBand");
@@ -52,21 +57,22 @@ public class ConvolutionFilterBandPersistableSpiTest extends TestCase {
         assertTrue(_persistableSpi.canDecode(bandInfo));
     }
 
+    @Test
     public void testCanDecode_NotSpectralBandInfo() {
-
         final Element element = new Element("SomeWhat");
 
         assertFalse(_persistableSpi.canDecode(element));
     }
 
+    @Test
     public void testCanDecode_NoBandType() {
-
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
         bandInfo.addContent(filterInfo);
         assertFalse(_persistableSpi.canDecode(bandInfo));
     }
 
+    @Test
     public void testCanDecode_NotCorrectBandType() {
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
@@ -77,19 +83,21 @@ public class ConvolutionFilterBandPersistableSpiTest extends TestCase {
         assertFalse(_persistableSpi.canDecode(bandInfo));
     }
 
-
+    @Test
+    @STTM("SNAP-3481")
     public void testCanPersist() {
         final Band source = new Band("b", ProductData.TYPE_INT8, 2, 2);
         final ConvolutionFilterBand cfb = new ConvolutionFilterBand("test", source,
-                                                                    new Kernel(2, 2, new double[]{0, 1, 2, 3}), 1);
+                new Kernel(2, 2, new double[]{0, 1, 2, 3}), 1);
 
         assertTrue(_persistableSpi.canPersist(cfb));
 
-        assertFalse(_persistableSpi.canPersist(new ArrayList()));
+        assertFalse(_persistableSpi.canPersist(new ArrayList<>()));
         assertFalse(_persistableSpi.canPersist(new Object()));
         assertFalse(_persistableSpi.canPersist(new Band("b", ProductData.TYPE_INT8, 2, 2)));
     }
 
+    @Test
     public void testCreatePersistable() {
         assertNotNull(_persistableSpi.createPersistable());
     }

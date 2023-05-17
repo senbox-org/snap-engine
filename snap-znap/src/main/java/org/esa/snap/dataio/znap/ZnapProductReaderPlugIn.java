@@ -54,7 +54,8 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
         } else {
             productRoot = inputPath.getParent();
         }
-        final boolean isValidRootDirName = productRoot != null && productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_CONTAINER_EXTENSION);
+        Path productRootName = productRoot != null ? productRoot.getFileName() : null;
+        final boolean isValidRootDirName = productRootName != null && productRootName.toString().toLowerCase().endsWith(ZNAP_CONTAINER_EXTENSION);
         if (isValidRootDirName) {
             final boolean productRootIsDirectory = Files.isDirectory(productRoot);
             final Path productHeader = productRoot.resolve(FILENAME_DOT_ZGROUP);
@@ -74,7 +75,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
                 }
             }
         }
-        final boolean isValidZnapZipArchiveName = productRoot != null && productRoot.getFileName().toString().toLowerCase().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
+        final boolean isValidZnapZipArchiveName = productRootName != null && productRootName.toString().toLowerCase().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
         if (isValidZnapZipArchiveName) {
             try (ZipStore zipStore = new ZipStore(productRoot)) {
                 final InputStream productHeaderStream = zipStore.getInputStream(FILENAME_DOT_ZGROUP);

@@ -3,7 +3,7 @@ package org.esa.snap.core.dataio.geocoding;
 import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataio.persistence.PersistenceConverter;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Test;
 

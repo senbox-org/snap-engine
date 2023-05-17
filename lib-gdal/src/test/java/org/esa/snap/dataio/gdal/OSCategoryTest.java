@@ -2,7 +2,7 @@ package org.esa.snap.dataio.gdal;
 
 import org.junit.Test;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang3.SystemUtils.*;
 import static org.esa.snap.dataio.gdal.OSCategory.ENV_NAME;
 import static org.junit.Assert.*;
 

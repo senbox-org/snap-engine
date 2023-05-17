@@ -19,11 +19,10 @@ import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang3.SystemUtils.*;
 import static org.esa.snap.dataio.gdal.GDALLoaderConfig.*;
 import static org.esa.snap.dataio.gdal.GDALVersion.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class GDALVersionTest {
 

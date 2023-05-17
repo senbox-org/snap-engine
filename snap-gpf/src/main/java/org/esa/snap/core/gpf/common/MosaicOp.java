@@ -42,7 +42,7 @@ import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.impl.Tokenizer;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.MathUtils;
-import org.geotools.factory.Hints;
+import org.geotools.util.factory.Hints;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;

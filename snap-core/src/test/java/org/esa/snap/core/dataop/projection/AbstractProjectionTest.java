@@ -17,11 +17,11 @@
 package org.esa.snap.core.dataop.projection;
 
 import org.esa.snap.test.LongTestRunner;
-import org.geotools.factory.FactoryRegistry;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.parameter.ParameterGroup;
 import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.referencing.operation.MathTransformProvider;
+import org.geotools.util.factory.FactoryRegistry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +34,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.geotools.gml3.v3_2.GML.identifier;
 import static org.junit.Assert.assertEquals;
@@ -98,15 +98,15 @@ public abstract class AbstractProjectionTest {
     }
 
     List<MathTransformProvider> getMatchingProviders(ReferenceIdentifier identifier) {
-        Iterator<MathTransformProvider> serviceProviders = factoryRegistry.getServiceProviders(MathTransformProvider.class,
-                                                                                               null, null);
-        List<MathTransformProvider> providerList = new ArrayList<>();
-        while (serviceProviders.hasNext()) {
-            MathTransformProvider registeredProvider = serviceProviders.next();
-            if (registeredProvider.nameMatches(identifier.getCode())) {
-                providerList.add(registeredProvider);
+        final Stream<MathTransformProvider> transformProviders = factoryRegistry.getFactories(MathTransformProvider.class, null, null);
+        final MathTransformProvider[] providerArray = (MathTransformProvider[]) transformProviders.toArray();
+        final List<MathTransformProvider> providerList = new ArrayList<>();
+        for (final MathTransformProvider transformProvider : providerArray) {
+            if (transformProvider.nameMatches(identifier.getCode())) {
+                providerList.add(transformProvider);
             }
         }
+
         return providerList;
     }
 
@@ -115,33 +115,33 @@ public abstract class AbstractProjectionTest {
     }
 
     /*
-    * Check if two coordinate points are equals, in the limits of the specified
-    * tolerance vector.
-    *
-    * @param expected  The expected coordinate point.
-    * @param actual    The actual coordinate point.
-    * @param tolerance The tolerance vector. If this vector length is smaller than the number
-    *                  of dimension of <code>actual</code>, then the last tolerance value will
-    *                  be reused for all extra dimensions.
-    */
+     * Check if two coordinate points are equals, in the limits of the specified
+     * tolerance vector.
+     *
+     * @param expected  The expected coordinate point.
+     * @param actual    The actual coordinate point.
+     * @param tolerance The tolerance vector. If this vector length is smaller than the number
+     *                  of dimension of <code>actual</code>, then the last tolerance value will
+     *                  be reused for all extra dimensions.
+     */
     private static void assertPositionEquals(final DirectPosition expected,
                                              final DirectPosition actual,
                                              final double tolerance, int datasetIndex) {
         final int dimension = actual.getDimension();
         assertEquals("The coordinate point doesn't have the expected dimension",
-                                      expected.getDimension(), dimension);
+                expected.getDimension(), dimension);
         for (int i = 0; i < dimension; i++) {
             final String message = String.format("Mismatch for ordinate %d (zero-based) of dataset %d:", i, datasetIndex);
             assertEquals(message,
-                                          expected.getOrdinate(i), actual.getOrdinate(i),
-                                          tolerance);
+                    expected.getOrdinate(i), actual.getOrdinate(i),
+                    tolerance);
         }
     }
 
     /*
-    * Helper method to test transform from a source to a target point.
-    * Coordinate points are (x,y) or (long, lat)
-    */
+     * Helper method to test transform from a source to a target point.
+     * Coordinate points are (x,y) or (long, lat)
+     */
     private static void doTransform(DirectPosition source, DirectPosition target,
                                     MathTransform transform, final int datasetIndex) throws TransformException {
         DirectPosition calculated = transform.transform(source, null);

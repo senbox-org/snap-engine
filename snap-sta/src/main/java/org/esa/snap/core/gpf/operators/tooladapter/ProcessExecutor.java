@@ -126,7 +126,8 @@ public class ProcessExecutor {
     public void stop() {
         this.isStopped = true;
         if (this.process != null) {
-            ProcessHelper.terminate(this.process);
+            //ProcessHelper.terminate(this.process);
+            process.destroyForcibly();
         }
     }
 
