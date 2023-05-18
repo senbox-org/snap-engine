@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014-2015 CS-Romania (office@c-s.ro)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -330,6 +331,16 @@ public class StringUtils {
     }
 
     /**
+     * Tests if the input string is null, or if it contains only white spaces.
+     *
+     * @param value the input string to check
+     * @return {@code true}  if the input string is null or blank; {@code false} otherwise.
+     */
+    public static boolean isNullOrBlank(String value) {
+        return (value == null || value.trim().length() == 0);
+    }
+
+    /**
      * Gives a new StringArray who contains both, all Strings form the given Array and the given String. The given
      * String was added to the end of array
      *
@@ -435,6 +446,37 @@ public class StringUtils {
      */
     public static boolean containsIgnoreCase(String[] a, String s) {
         return indexOfIgnoreCase(a, s) >= 0;
+    }
+
+    /**
+     * Tests if this string starts with the specified prefix, ignoring the case sensitive.
+     *
+     * @param inputValue the input string to test
+     * @param prefix the prefix
+     * @return {@code true} if the input string is a prefix; {@code false} otherwise.
+     */
+    public static boolean startsWithIgnoreCase(String inputValue, String prefix) {
+        return inputValue.regionMatches(true, 0, prefix, 0, prefix.length());
+    }
+
+    /**
+     * Tests if this string ends with any of the given suffixes, ignoring the case sensitive.
+     *
+     * @param input the input string to test
+     * @param suffixes the list of suffixes
+     * @return {@code true} if the input string is a prefix; {@code false} otherwise.
+     */
+    public static boolean endsWithIgnoreCase(String input, String...suffixes) {
+        boolean found = true;
+        String lowerInput = input.toLowerCase();
+        if (suffixes != null && suffixes.length > 0) {
+            for (String suffix : suffixes) {
+                found = lowerInput.endsWith(suffix.toLowerCase());
+                if (found)
+                    break;
+            }
+        }
+        return found;
     }
 
     /**
