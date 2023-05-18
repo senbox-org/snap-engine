@@ -1948,10 +1948,12 @@ public class ImageLegend {
     }
 
     private boolean isStartSuperScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "[sup]") || isStringOnIndex(text, idx, "<sup>");
+        return isStringOnIndex(text, idx, "[sup]") || isStringOnIndex(text, idx, "<sup>") ||
+                isStringOnIndex(text, idx, "[super]") || isStringOnIndex(text, idx, "<super>");
     }
     private boolean isEndSuperScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "[/sup]") || isStringOnIndex(text, idx, "</sup>");
+        return isStringOnIndex(text, idx, "[/sup]") || isStringOnIndex(text, idx, "</sup>") ||
+                isStringOnIndex(text, idx, "[/super]") || isStringOnIndex(text, idx, "</super>");
     }
 
     private boolean isStartItalics(String text, int idx) {

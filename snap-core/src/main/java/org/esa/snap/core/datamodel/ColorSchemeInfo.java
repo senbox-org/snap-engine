@@ -277,20 +277,62 @@ public class ColorSchemeInfo {
                 colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
             }
 
+            while(colorBarTitle.contains("<DESCRIPTION>")) {
+                colorBarTitle = colorBarTitle.replace("<DESCRIPTION>", description);
+            }
+            while(colorBarTitle.contains("[DESC]")) {
+                colorBarTitle = colorBarTitle.replace("[DESC]", description);
+            }
+
+            while(colorBarTitle.contains("<DESC>")) {
+                colorBarTitle = colorBarTitle.replace("<DESC>", description);
+            }
+
             while(colorBarTitle.contains("[BANDNAME]")) {
                 colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
+            }
+
+            while(colorBarTitle.contains("<BANDNAME>")) {
+                colorBarTitle = colorBarTitle.replace("<BANDNAME>", bandname);
+            }
+
+            while(colorBarTitle.contains("[BAND]")) {
+                colorBarTitle = colorBarTitle.replace("[BAND]", bandname);
+            }
+
+            while(colorBarTitle.contains("<BAND>")) {
+                colorBarTitle = colorBarTitle.replace("<BAND>", bandname);
             }
 
             if (units != null) {
                 while (colorBarTitle.contains("[UNITS]")) {
                     colorBarTitle = colorBarTitle.replace("[UNITS]", units);
                 }
+                while (colorBarTitle.contains("<UNITS>")) {
+                    colorBarTitle = colorBarTitle.replace("<UNITS>", units);
+                }
+                while (colorBarTitle.contains("[UNIT]")) {
+                    colorBarTitle = colorBarTitle.replace("[UNIT]", units);
+                }
+                while (colorBarTitle.contains("<UNIT>")) {
+                    colorBarTitle = colorBarTitle.replace("<UNIT>", units);
+                }
             }
 
-            if (colorBarTitle.contains("[WAVELENGTH]")) {
+            if (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("<WAVELENGTH>") ||
+                    colorBarTitle.contains("[WAVE]") || colorBarTitle.contains("<WAVE>")) {
                 if (wavelength > 0.0) {
                     while (colorBarTitle.contains("[WAVELENGTH]")) {
                         colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("<WAVELENGTH>")) {
+                        colorBarTitle = colorBarTitle.replace("<WAVELENGTH>", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("[WAVE]")) {
+                        colorBarTitle = colorBarTitle.replace("[WAVE]", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("<WAVE>")) {
+                        colorBarTitle = colorBarTitle.replace("<WAVE>", wavelengthString);
                     }
                 } else {
                     if (!allowWavelengthZero) {
