@@ -25,7 +25,7 @@ public class GDALConst {
      * @return the JNI GDAL GA_ReadOnly constant
      */
     public static Integer gaReadonly() {
-        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "GA_ReadOnly", Integer.class);
+        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "GA_ReadOnly");
     }
 
     /**
@@ -34,7 +34,7 @@ public class GDALConst {
      * @return the JNI GDAL CE_Failure constant
      */
     public static Integer ceFailure() {
-        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "CE_Failure", Integer.class);
+        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "CE_Failure");
     }
 
     /**
@@ -43,6 +43,6 @@ public class GDALConst {
      * @return the JNI GDAL CE_None constant
      */
     public static Integer ceNone() {
-        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "CE_None", Integer.class);
+        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "CE_None");
     }
 }
