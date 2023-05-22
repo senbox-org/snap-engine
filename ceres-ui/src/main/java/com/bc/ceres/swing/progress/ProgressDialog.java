@@ -16,6 +16,7 @@
 
 package com.bc.ceres.swing.progress;
 
+import com.bc.ceres.swing.BrightBlueImageFilter;
 import com.bc.ceres.swing.SwingHelper;
 import com.jidesoft.swing.JideButton;
 
@@ -47,7 +48,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.FilteredImageSource;
-import java.awt.image.RGBImageFilter;
 
 /**
  * A utility class very similar to {@link javax.swing.ProgressMonitor} but with the following extensions:
@@ -469,26 +469,7 @@ public class ProgressDialog {
 
     private static Image createRolloverImage(Image image) {
         return Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(image.getSource(),
-                new BrightBlueFilter()));
-    }
-
-    private static class BrightBlueFilter extends RGBImageFilter {
-
-        public BrightBlueFilter() {
-            canFilterIndexColorModel = true;
-        }
-
-        @Override
-        public int filterRGB(int x, int y, int rgb) {
-            int a = (rgb & 0xff000000) >> 24;
-            int r = (rgb & 0x00ff0000) >> 16;
-            int g = (rgb & 0x0000ff00) >> 8;
-            int b = rgb & 0x000000ff;
-            int i = (r + g + b) / 3;
-            r = g = i;
-            b = 255;
-            return a << 24 | r << 16 | g << 8 | b;
-        }
+                new BrightBlueImageFilter()));
     }
 
 
