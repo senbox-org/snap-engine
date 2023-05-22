@@ -66,7 +66,7 @@ public final class GDALLoader {
         if (!GDALInstallInfo.INSTANCE.isPresent()) {
             getInstance().initGDAL();
             if (!GDALInstallInfo.INSTANCE.isPresent()) {
-                throw new IllegalStateException("GDAL NOT initialised!");
+                throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
             }
         }
     }
@@ -84,9 +84,7 @@ public final class GDALLoader {
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
                 postGDALInit();
-                if (logger.isLoggable(Level.FINE)) {
-                    Logger.getLogger(GDALLoader.class.getName()).log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
-                }
+                logger.log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "Failed to initialize GDAL native drivers. GDAL readers and writers were disabled." + t.getMessage());
             }
@@ -163,9 +161,7 @@ public final class GDALLoader {
      * Init the drivers if the GDAL library is installed.
      */
     private void initDrivers() {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Init the GDAL drivers on " + this.gdalVersion.getOsCategory().getOperatingSystemName() + ".");
-        }
+        logger.log(Level.FINE, "Init the GDAL drivers on " + this.gdalVersion.getOsCategory().getOperatingSystemName() + ".");
         GDAL.allRegister();// GDAL init drivers
     }
 }
