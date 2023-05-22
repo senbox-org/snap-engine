@@ -26,6 +26,7 @@ Guava;General Library for Java;Google;Apache License;https://github.com/google/g
 hamcrest;Testing framework;Hamcrest;BSD 3 Clause;http://hamcrest.org/;http://opensource.org/licenses/BSD-3-Clause
 hsqldb;database;http://hsqldb.org/;BSD Style;http://hsqldb.org/;http://hsqldb.org/web/hsqlLicense.html
 httpclient;Toolset for http protocol;Apache;Apache License;http://hc.apache.org/;https://www.apache.org/licenses/
+Icons;16x16 Free Application Icons;Aha-Soft;Creative Commons Attribution-Share Alike 3.0;http://www.small-icons.com/packs/16x16-free-application-icons.htm;http://www.small-icons.com/packs/free-license.htm
 ImageIO-EXT;ImageIO extensions;GeoSolutions;Apache License;https://github.com/geosolutions-it/imageio-ext;https://www.apache.org/licenses/
 iText;PDF Library;lowagie;MPL;http://www.lowagie.com/iText/;https://www.mozilla.org/en-US/MPL/
 j2objc-annotations;J2ObjC is an open-source command-line tool from Google that translates Java source code to Objective-C for the iOS (iPhone/iPad) platform;Google;The Apache Software License, Version 2.0;https://github.com/google/j2objc/;http://www.apache.org/licenses/LICENSE-2.0.txt
