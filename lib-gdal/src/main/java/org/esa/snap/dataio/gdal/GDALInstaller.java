@@ -433,8 +433,8 @@ class GDALInstaller {
             fixUpPermissions(this.gdalNativeLibrariesFolderPath);
             if (!gdalVersion.isJni()) {
                 checkDistributionIntegrity(gdalVersion);
-                setSavedDistributionHash(distributionHash);
             }
+            setSavedDistributionHash(distributionHash);
             setSavedModuleSpecificationVersion(moduleVersion);
         }
 
