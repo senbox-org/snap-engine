@@ -37,6 +37,7 @@ public class ColorManipulationDefaults {
     public static final String COLOR_SCHEME_LOOKUP_USER_FILENAME = "color_palette_scheme_lookup_user.xml";
     public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.xml";
     public static final String COLOR_SCHEMES_USER_FILENAME = "color_palette_schemes_user.xml";
+    public static final String COLOR_PALETTE_LIST_FILENAME = "color_palettes.xml";
 
     // Indicates which color palette contained within the color scheme xml to use
     public static final String OPTION_COLOR_STANDARD_SCHEME = "From Scheme STANDARD";
@@ -259,6 +260,35 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Scheme selector will display all schemes categorized into<br>" +
             "primary and additional categories by the PRIMARY field<br> of the color_palette_schemes.xml</html>";
     public static boolean PROPERTY_SCHEME_CATEGORIZE_DISPLAY_DEFAULT = true;
+
+    // Palette Selector Options
+
+    private static final String PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".palette.selector";
+
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_LABEL = "Palette Selector Options";
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_TOOLTIP = "<html>Format options for the color Palettes listed<br>" +
+            " within the Palette Selector</html>";
+
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".inculde.image";
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_LABEL = "Include Palettes Image";
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_TOOLTIP = "Include Palettes Image";
+    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_SORT_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".sort";
+    public static final String PROPERTY_PALETTE_SORT_LABEL = "Sort";
+    public static final String PROPERTY_PALETTE_SORT_TOOLTIP = "<html>Palette selector will display all palettes alphabetically sorted<br>" +
+            " as opposed to the original xml order</html>";
+    public static boolean PROPERTY_PALETTE_SORT_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".split";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Palette selector will display all palettes categorized into<br>" +
+            "primary/additional or universal/standard/additional categories by the PRIMARY/UNIVERSAL/STANDARD field<br> of the color_palette.xml</html>";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION1 = "None";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION2 = "Primary/Additional";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION3 = "Universal/Standard/Addtional";
+    public static String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION3;
 
 
     // Sliders Editor Options
