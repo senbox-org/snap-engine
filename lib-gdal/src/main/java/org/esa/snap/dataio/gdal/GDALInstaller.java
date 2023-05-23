@@ -430,10 +430,12 @@ class GDALInstaller {
             Files.createDirectories(this.gdalNativeLibrariesFolderPath);
             copyEnvironmentVariablesNativeLibrary(gdalVersion);
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
-            checkDistributionIntegrity(gdalVersion);
             fixUpPermissions(this.gdalNativeLibrariesFolderPath);
+            if (!gdalVersion.isJni()) {
+                checkDistributionIntegrity(gdalVersion);
+                setSavedDistributionHash(distributionHash);
+            }
             setSavedModuleSpecificationVersion(moduleVersion);
-            setSavedDistributionHash(distributionHash);
         }
 
         registerEnvironmentVariablesNativeLibrary(gdalVersion);
