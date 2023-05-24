@@ -312,6 +312,7 @@ public class VectorDataNode extends ProductNode {
      * @param features The feature(s) added.
      * @deprecated since 6.0, method is public by accident, should only be used internally
      */
+    @Deprecated
     public void fireFeaturesAdded(SimpleFeature... features) {
         _fireFeaturesAdded(features);
     }
@@ -328,6 +329,7 @@ public class VectorDataNode extends ProductNode {
      * @param features The feature(s) removed.
      * @deprecated since 6.0, method is public by accident, should only be used internally
      */
+    @Deprecated
     public void fireFeaturesRemoved(SimpleFeature... features) {
         _fireFeaturesRemoved(features);
     }

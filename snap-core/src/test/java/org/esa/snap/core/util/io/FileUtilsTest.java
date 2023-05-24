@@ -35,10 +35,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 import static org.esa.snap.core.util.io.FileUtils.getFilenameFromPath;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class FileUtilsTest {
 
@@ -336,5 +333,19 @@ public class FileUtilsTest {
         }
         Assert.assertEquals(new File(fileUri), FileUtils.toFile(jarUriPath));
     }
+
+    @Test
+    public void computeHashForFileTest() throws IOException, URISyntaxException {
+        final URL filePathURL = getClass().getResource("/resource-testdata.jar");
+        Assert.assertNotNull(filePathURL);
+        Assert.assertEquals("15cabe41b0d09a28f93d9a6d81c9b02683bd24ef31c5efb92c534eea1b9e6430", FileUtils.computeHashForFile(Paths.get(filePathURL.toURI())));
+    }
+
+//    @Test
+//    public void computeHashForDirectoryTest() throws IOException, URISyntaxException {
+//        final URL directoryPathURL = getClass().getResource("/resource-testdata");
+//        Assert.assertNotNull(directoryPathURL);
+//        Assert.assertEquals("bbc70dc9fcad7e67aa2d9db19fb9e5476ed170fef566d5242e1514b77cacf5a0", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
+//    }
 }
 

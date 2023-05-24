@@ -20,6 +20,11 @@
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>eu.esa.snap</groupId>
+            <artifactId>sun-image-classes</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jai_core</artifactId>
         </dependency>
@@ -73,7 +78,6 @@
                         <publicPackage>sun.awt.image.codec.*</publicPackage>
                         <publicPackage>com.sun.image.codec.jpeg.*</publicPackage>
                         <publicPackage>com.sun.medialib.codec.*</publicPackage>
-                        <publicPackage>com.sun.medialib.mlib.*</publicPackage>
                         <publicPackage>com.bc.ceres.compiler</publicPackage>
                         <publicPackage>com.bc.ceres.jai.*</publicPackage>
                         <publicPackage>it.geosolutions.imageio.plugins.tiff</publicPackage>
