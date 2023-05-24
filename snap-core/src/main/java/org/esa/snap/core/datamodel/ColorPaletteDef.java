@@ -74,9 +74,6 @@ public class ColorPaletteDef implements Cloneable {
     private boolean isLogScaled;
     private double sourceFileMin;
     private double sourceFileMax;
-    private boolean primary;
-    private boolean universal;
-    private boolean standard;
 
 
     public ColorPaletteDef(double minSample, double maxSample) {
@@ -106,9 +103,6 @@ public class ColorPaletteDef implements Cloneable {
         this.points = new Vector<>(points.length);
         this.points.addAll(Arrays.asList(points));
         this.discrete = false;
-        this.primary = false;
-        this.universal = false;
-        this.standard = false;
     }
 
     public boolean isDiscrete() {
@@ -138,30 +132,6 @@ public class ColorPaletteDef implements Cloneable {
         while (getNumPoints() > numPoints) {
             removePointAt(getNumPoints() - 1);
         }
-    }
-
-    public boolean isPrimary() {
-        return primary;
-    }
-
-    public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
-
-    public boolean isUniversal() {
-        return universal;
-    }
-
-    public void setUniversal(boolean universal) {
-        this.universal = universal;
-    }
-
-    public boolean isStandard() {
-        return standard;
-    }
-
-    public void setStandard(boolean standard) {
-        this.standard = standard;
     }
 
     /**
@@ -291,9 +261,6 @@ public class ColorPaletteDef implements Cloneable {
             def.points = pointVector;
             def.numColors = numColors;
             def.discrete = discrete;
-            def.primary = primary;
-            def.universal = universal;
-            def.standard = standard;
             def.autoDistribute = autoDistribute;
             def.isLogScaled = isLogScaled;
             return def;
@@ -331,7 +298,7 @@ public class ColorPaletteDef implements Cloneable {
         final int numPoints = propertyMap.getPropertyInt(_PROPERTY_KEY_NUM_POINTS);
         if (numPoints < 2) {
             throw new IOException("The selected file contains less than\n" +
-                    "two colour points.");
+                                          "two colour points.");
         }
         final Point[] points = new Point[numPoints];
         double lastSample = 0;
