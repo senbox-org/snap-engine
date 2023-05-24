@@ -50,7 +50,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
     private boolean navControlShown;
     private WakefulComponent navControlWrapper;
     private boolean initiallyZoomingAll;
-    private double zoomInitial;
+    private double zoomInitial = 1.0;
     private boolean zoomedAll;
 
     // AdjustableView properties
