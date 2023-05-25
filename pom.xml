@@ -38,6 +38,7 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <snap.version>${project.version}</snap.version>
+        <snap-help-system.version>1.0.0</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>5.3.3</netcdf.version>
@@ -87,6 +88,8 @@
         <module>snap-getasse30-dem</module>
         <module>snap-geotiff</module>
         <module>snap-jp2-reader</module>
+        <module>snap-gdal-reader</module>
+        <module>snap-gdal-writer</module>
         <module>snap-hdf5-writer</module>
         <module>snap-land-cover</module>
         <module>snap-netcdf</module>
@@ -239,6 +242,12 @@
                 <artifactId>snap-geotiff</artifactId>
                 <version>${snap.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>eu.esa.snap.netbeans</groupId>
+                <artifactId>snap-help-system</artifactId>
+                <version>${snap-help-system.version}</version>
+            </dependency>
             <!-- Miscellaneous 3rd party libraries ############################################# -->
 
             <dependency>
@@ -272,6 +281,17 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>lib-gdal</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gdal-reader</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 

@@ -1,0 +1,17 @@
+org.esa.snap.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.ERMapperDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GS7BGDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GSBGDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GTXDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.HFADriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.ILWISDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.KRODriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.MFFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.NITFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.PCIDSKDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.RMFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.RSTDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
