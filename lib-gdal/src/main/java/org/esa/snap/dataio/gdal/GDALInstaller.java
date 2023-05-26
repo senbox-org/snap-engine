@@ -24,14 +24,9 @@ import org.esa.snap.runtime.Config;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -186,7 +181,7 @@ class GDALInstaller {
 
         logger.log(Level.FINE, "The saved GDAL distribution folder version is '" + savedVersion + "'.");
 
-        return StringUtils.isNullOrEmpty(savedVersion) || compareVersions(savedVersion, moduleVersion) < 0;
+        return StringUtils.isNullOrEmpty(savedVersion) || compareVersions(savedVersion, moduleVersion) != 0;
     }
 
     private static boolean isDistributionInstalled(Path gdalNativeLibrariesFolderPath, GDALVersion gdalVersion){
@@ -415,13 +410,14 @@ class GDALInstaller {
 
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
-        if (isDistributionInstalled(gdalNativeLibrariesFolderPath, gdalVersion)) {
+        final boolean isDistributionInstalled = isDistributionInstalled(gdalNativeLibrariesFolderPath, gdalVersion);
+        if (isDistributionInstalled) {
             canCopyGDALDistribution = isModuleUpdated(moduleVersion);
         }
         if (canCopyGDALDistribution) {
             distributionHash = computeDistributionHash(gdalNativeLibrariesFolderPath, gdalVersion);
             logger.log(Level.FINE, "The distribution hash is '" + distributionHash + "'.");
-            canCopyGDALDistribution = isDistributionUpdated(distributionHash);
+            canCopyGDALDistribution = !isDistributionInstalled || isDistributionUpdated(distributionHash);
         }
 
         if (canCopyGDALDistribution) {
