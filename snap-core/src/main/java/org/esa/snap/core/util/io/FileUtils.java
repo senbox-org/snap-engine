@@ -25,11 +25,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class provides additional functionality in handling with files. All methods in this class dealing with
@@ -571,18 +574,16 @@ public class FileUtils {
     public static String computeHashForDirectory(Path targetDirectory) throws IOException {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
-            Files.walkFileTree(targetDirectory, new SimpleFileVisitor<Path>(){
-                @Override
-                public FileVisitResult visitFile(Path targetFile, BasicFileAttributes attributes) throws IOException {
-                    if (attributes.isRegularFile()) {
-                        md.update(targetFile.getFileName().toString().getBytes());
-                        try (InputStream is = Files.newInputStream(targetFile);  DigestInputStream dis = new DigestInputStream(is, md)){
-                            while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
-                        }
+            final Comparator<Path> pathComparatorOsIndependent = Comparator.comparing(path -> path.toAbsolutePath().toString().toLowerCase());
+            try (Stream<Path> sp = Files.walk(targetDirectory).filter(Files::isRegularFile).sorted(pathComparatorOsIndependent)) {
+                final List<Path> targetFiles = sp.collect(Collectors.toList());
+                for (Path targetFile : targetFiles) {
+                    md.update(targetFile.getFileName().toString().toLowerCase().getBytes());
+                    try (InputStream is = Files.newInputStream(targetFile); DigestInputStream dis = new DigestInputStream(is, md)) {
+                        while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
                     }
-                    return FileVisitResult.CONTINUE;
                 }
-            });
+            }
             return bytesToHex(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
