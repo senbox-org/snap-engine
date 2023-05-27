@@ -35,10 +35,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 import static org.esa.snap.core.util.io.FileUtils.getFilenameFromPath;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class FileUtilsTest {
 
@@ -346,9 +343,9 @@ public class FileUtilsTest {
 
     @Test
     public void computeHashForDirectoryTest() throws IOException, URISyntaxException {
-        final URL directoryPathURL = getClass().getResource("/resource-testdata");
+        final URL directoryPathURL = getClass().getResource("/resource-testdata/auxdata");
         Assert.assertNotNull(directoryPathURL);
-        Assert.assertEquals("bbc70dc9fcad7e67aa2d9db19fb9e5476ed170fef566d5242e1514b77cacf5a0", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
+        Assert.assertEquals("77848723f1da8254229c8cdf46b461857645086610f4c2654afe4c15f248a67e", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
     }
 }
 
