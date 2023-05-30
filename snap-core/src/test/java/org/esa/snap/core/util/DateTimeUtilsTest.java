@@ -1,5 +1,7 @@
 package org.esa.snap.core.util;
 
+import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,5 +52,20 @@ public class DateTimeUtilsTest {
 
         assertEquals("2012-05-30 02:55:00.0", utcToString);
 
+    }
+
+    @Test
+    @STTM("SNAP-3507")
+    public void testAverage() throws ParseException{
+        Date startDate = DateTimeUtils.stringToUTC("2023-05-18 12:40:00.0");
+        Date endDate = DateTimeUtils.stringToUTC("2023-05-18 18:00:00.0");
+        Date averageDate = DateTimeUtils.average(startDate, endDate);
+        assertEquals(DateTimeUtils.stringToUTC("2023-05-18 15:20:00.0"), averageDate);
+
+        ProductData.UTC startUTC = ProductData.UTC.parse("2023-05-18 12:40:00", "yyyy-MM-dd HH:mm:ss");
+        ProductData.UTC endUTC = ProductData.UTC.parse("2023-05-18 18:00:00", "yyyy-MM-dd HH:mm:ss");
+        ProductData.UTC avgUTC = DateTimeUtils.average(startUTC, endUTC);
+        ProductData.UTC expectedAvgUTC = ProductData.UTC.parse("2023-05-18 15:20:00", "yyyy-MM-dd HH:mm:ss");
+        assertEquals(expectedAvgUTC.getAsDate(), avgUTC.getAsDate());
     }
 }

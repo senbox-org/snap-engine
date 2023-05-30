@@ -50,6 +50,7 @@ public class GDALInstallInfoTest {
 
     @After
     public void cleanUp() {
+        TEST_INSTANCE.setLocations(Paths.get(INVALID_BIN_LOCATION));
         if (currentValue != null) {
             writePreferencesValue(currentValue);
         }

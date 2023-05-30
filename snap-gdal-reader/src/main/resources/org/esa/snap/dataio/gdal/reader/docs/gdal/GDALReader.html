@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (C) 2014-2015 CS SI
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~  with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>GDAL Scene Product Reader</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <table class="header">
+        <tr class="header">
+            <td class="header">&nbsp; Import products using the GDAL library</td>
+            <td class="header" align="right">
+                <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+            </td>
+        </tr>
+    </table>
+
+    <h3>Import products using the GDAL library</h3>
+
+    <p>This command allows to open the data of different products in SNAP.
+	   If the files of type is 'All Files' in the open product dialog the GDAL reader tries to open the product if there is no suitable reader to open the selected product. 
+	   If the GDAL reader cannot open the product then a message dialog is displayed.
+       If there is an intented reader to open a certain product, then that reader is used automatically to open the product.
+    </p>
+	<p>	
+	   The available GDAL readers are:
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   Erdas Imagine Images (*.img)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   Golden Software 7 Binary Grid (*.grd)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   Golden Software Binary Grid (*.grd)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   Idrisi Raster A.1 (*.rst)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   ILWIS Raster Map (*.mpr, *.mpl)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   KOLOR Raw (*.kro)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   NOAA Vertical Datum .GTX (*.gtx)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   National Imagery Transmission Format (*.ntf)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   PCIDSK Database File (*.pix)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   Raster Matrix Format (*.rsw)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   SAGA GIS Binary Grid (*.sdat)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   SGI Image File Format 1.0 (*.rgb)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	   VTP .bt (Binary Terrain) 1.3 Format (*.bt)
+	   <br>&nbsp;&nbsp;&nbsp;&nbsp;
+       GeoTIFF - only COG products (*.tif; *.tiff)
+       <br>&nbsp;&nbsp;&nbsp;&nbsp;
+       Vexcel MFF Raster products (*.hdr)
+    </p>
+	<p>
+        The supported GDAL library versions are listed <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/desktop/OptionsDialog.html#GDALLibraryLoaderConfig">here</a>. If this library is already installed, then it is used; otherwise the application will use the internal distribution (3.2.1).
+	   This functionality is available on machines with the Microsoft Windows, Linux and Mac OSX operating system.
+    </p>
+    <p>For more details please see: <a href="http://www.gdal.org/">GDAL - Geospatial Data Abstraction Library</a></p>
+
+</body>
+</html>

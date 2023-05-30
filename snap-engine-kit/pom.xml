@@ -119,6 +119,18 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-writer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Engine Extension Modules -->
         <dependency>
             <groupId>org.esa.snap</groupId>
