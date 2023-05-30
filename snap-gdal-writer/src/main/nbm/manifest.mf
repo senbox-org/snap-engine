@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
+AutoUpdate-Show-In-Client: false
+AutoUpdate-Essential-Module: false
+OpenIDE-Module-Java-Dependencies: Java > 11
+OpenIDE-Module-Display-Category: SNAP Toolboxes
+OpenIDE-Module-Long-Description: <p>This module enables the Sentinel Toolbox to read GDAL products</p>

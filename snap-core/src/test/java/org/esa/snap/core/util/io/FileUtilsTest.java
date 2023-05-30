@@ -341,11 +341,11 @@ public class FileUtilsTest {
         Assert.assertEquals("15cabe41b0d09a28f93d9a6d81c9b02683bd24ef31c5efb92c534eea1b9e6430", FileUtils.computeHashForFile(Paths.get(filePathURL.toURI())));
     }
 
-//    @Test
-//    public void computeHashForDirectoryTest() throws IOException, URISyntaxException {
-//        final URL directoryPathURL = getClass().getResource("/resource-testdata");
-//        Assert.assertNotNull(directoryPathURL);
-//        Assert.assertEquals("bbc70dc9fcad7e67aa2d9db19fb9e5476ed170fef566d5242e1514b77cacf5a0", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
-//    }
+    @Test
+    public void computeHashForDirectoryTest() throws IOException, URISyntaxException {
+        final URL directoryPathURL = getClass().getResource("/resource-testdata/auxdata");
+        Assert.assertNotNull(directoryPathURL);
+        Assert.assertEquals("77848723f1da8254229c8cdf46b461857645086610f4c2654afe4c15f248a67e", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
+    }
 }
 
