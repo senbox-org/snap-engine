@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.util;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,6 +43,15 @@ public class StringUtilsTest {
         assertFalse(StringUtils.isNotNullAndNotEmpty(null));
         assertFalse(StringUtils.isNotNullAndNotEmpty(""));
         assertTrue(StringUtils.isNotNullAndNotEmpty("a"));
+    }
+
+    @Test
+    @STTM("SNAP-3507")
+    public void testNullOrBlank() {
+        assertTrue(StringUtils.isNullOrBlank(null));
+        assertTrue(StringUtils.isNullOrBlank(""));
+        assertTrue(StringUtils.isNullOrBlank("    "));
+        assertFalse(StringUtils.isNullOrBlank("a"));
     }
 
     @Test
@@ -618,6 +628,24 @@ public class StringUtilsTest {
                 "duplicate_3", "twin_2", "CASE_DUPLICATE_2"};
 
         Assert.assertArrayEquals(expectedNames, actualNames);
+    }
+
+    @Test
+    @STTM("SNAP-3507")
+    public void testStartsWithIgnoreCase() {
+        String input = "Starts with ignore case";
+        assertTrue(StringUtils.startsWithIgnoreCase(input,"starts with"));
+        assertTrue(StringUtils.startsWithIgnoreCase(input,"StArTs WiTh"));
+        assertFalse(StringUtils.startsWithIgnoreCase(input," Starts"));
+    }
+
+    @Test
+    @STTM("SNAP-3507")
+    public void testEndsWithIgnoreCase() {
+        String input = "Ends with ignore case";
+        assertTrue(StringUtils.endsWithIgnoreCase(input,"ignore case"));
+        assertTrue(StringUtils.endsWithIgnoreCase(input,"IGNORE CASE"));
+        assertFalse(StringUtils.endsWithIgnoreCase(input,"case "));
     }
 
 }
