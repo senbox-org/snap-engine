@@ -51,6 +51,7 @@
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
+        <esa_snappy.version>10.0.0-SNAPSHOT</esa_snappy.version>
     </properties>
 
     <modules>
@@ -283,7 +284,7 @@
                 <artifactId>lib-gdal</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
+          
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-reader</artifactId>
@@ -293,6 +294,12 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>eu.esa.snap</groupId>
+                <artifactId>esa_snappy</artifactId>
+                <version>${esa_snappy.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
