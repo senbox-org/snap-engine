@@ -64,6 +64,8 @@ public class Band extends AbstractBand {
     public static final String PROPERTY_NAME_SPECTRAL_BAND_INDEX = "spectralBandIndex";
     public static final String PROPERTY_NAME_SPECTRAL_BANDWIDTH = "spectralBandwidth";
     public static final String PROPERTY_NAME_SPECTRAL_WAVELENGTH = "spectralWavelength";
+    public static final String PROPERTY_NAME_DATE_BAND_INDEX = "dateBandIndex";
+    public static final String PROPERTY_NAME_DATE = "date";
 
     /**
      * If this band contains flag data, this is the flag coding.
@@ -73,6 +75,9 @@ public class Band extends AbstractBand {
     private int spectralBandIndex;
     private float spectralWavelength;
     private float spectralBandwidth;
+    private int dateBandIndex;
+    private String date;
+    //    private float spectralBandwidth;
     private float solarFlux;
 
     /**
@@ -89,6 +94,7 @@ public class Band extends AbstractBand {
         // By default a band is not a spectral band,
         // so spectral band index must be -1
         setSpectralBandIndex(-1);
+        setDateBandIndex(-1);
         setModified(false);
     }
 
@@ -198,6 +204,52 @@ public class Band extends AbstractBand {
         if (this.spectralWavelength != spectralWavelength) {
             this.spectralWavelength = spectralWavelength;
             fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_WAVELENGTH);
+            setModified(true);
+        }
+    }
+
+    /**
+     * Gets the (zero-based) date band index.
+     *
+     * @return the (zero-based) date band index or <code>-1</code> if it is unknown
+     */
+    public int getDateBandIndex() {
+        return dateBandIndex;
+    }
+
+    /**
+     * Sets the (zero-based) date band index.
+     *
+     * @param dateBandIndex the (zero-based) spectral band index or <code>-1</code> if it is unknown
+     */
+    public void setDateBandIndex(int dateBandIndex) {
+        if (this.dateBandIndex != dateBandIndex) {
+            this.dateBandIndex = dateBandIndex;
+            fireProductNodeChanged(PROPERTY_NAME_DATE_BAND_INDEX);
+            setModified(true);
+        }
+    }
+
+    /**
+     * Gets the date.
+     *
+     * @return the date for this band, or zero if this is not a date band or the date is
+     *         not known.
+     */
+    public String getDate() {
+        return date;
+    }
+
+    /**
+     * Sets the date.
+     *
+     * @param date YYYY-MM-DD of this band, or 1601-01-01 if this is not a date band or
+     *                           the date is not known.
+     */
+    public void setDate(String date) {
+        if (this.date != date) {
+            this.date = date;
+            fireProductNodeChanged(PROPERTY_NAME_DATE);
             setModified(true);
         }
     }
