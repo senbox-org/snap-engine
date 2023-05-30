@@ -54,6 +54,7 @@ public class TransectProfileData {
      *
      * @deprecated since 4.10, use {@link TransectProfileDataBuilder} instead
      */
+    @Deprecated
     public static TransectProfileData create(RasterDataNode raster, Shape path) throws IOException {
         Config config = new Config();
         config.raster = raster;

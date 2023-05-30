@@ -44,22 +44,22 @@ import java.util.WeakHashMap;
 
 /**
  * A class implementing a caching mechanism for image tiles.
- * <p> <code>TileCache</code> provides a mechanism by which an
- * <code>OpImage</code> may cache its computed tiles.  There may be
- * multiple <code>TileCache</code>s used in an application up to the
- * point of having a different <code>TileCache</code> for each
- * <code>OpImage</code>.
- * <p> The <code>TileCache</code> used for a particular <code>OpImage</code>
- * is derived from the <code>RenderingHints</code> assigned to the
+ * <p> {@code TileCache} provides a mechanism by which an
+ * {@code OpImage} may cache its computed tiles.  There may be
+ * multiple {@code TileCache}s used in an application up to the
+ * point of having a different {@code TileCache} for each
+ * {@code OpImage}.
+ * <p> The {@code TileCache} used for a particular <code>OpImage</code>
+ * is derived from the {@code RenderingHints} assigned to the
  * associated imaging chain node.  If the node is constructed using
- * <code>JAI.create()</code> and no <code>TileCache</code> is specified
- * in the <code>RenderingHints</code> parameter, then one is derived
- * from the <code>RenderingHints</code> associated with the instance of the
- * <code>JAI</code> class being used.
+ * {@code JAI.create()} and no <code>TileCache</code> is specified
+ * in the {@code RenderingHints} parameter, then one is derived
+ * from the {@code RenderingHints} associated with the instance of the
+ * {@code JAI} class being used.
  * <p> In the Sun reference implementation, the cache size is limited by
  * the memory capacity, which is set to a default value at construction
- * or subsequently using the <code>setMemoryCapacity()</code> method.
- * The initial value may be obtained using <code>getMemoryCapacity()</code>.
+ * or subsequently using the {@code setMemoryCapacity()} method.
+ * The initial value may be obtained using {@code getMemoryCapacity()}.
  * The tile capacity is not used as different images may have very different
  * tile sizes so that this metric is not a particularly meaningful control
  * of memory resource consumption in general.
@@ -90,10 +90,10 @@ public class FileTileCache implements TileCache {
     /**
      * Adds a tile to the cache.
      *
-     * @param owner The <code>RenderedImage</code> that the tile belongs to.
+     * @param owner The {@code RenderedImage} that the tile belongs to.
      * @param tileX The X index of the tile in the owner's tile grid.
      * @param tileY The Y index of the tile in the owner's tile grid.
-     * @param tile  A <code>Raster</code> containing the tile data.
+     * @param tile  A {@code Raster} containing the tile data.
      */
     public void add(RenderedImage owner, int tileX, int tileY, Raster tile) {
         add(owner, tileX, tileY, tile, null);
@@ -102,11 +102,11 @@ public class FileTileCache implements TileCache {
     /**
      * Adds a tile to the cache with an associated compute cost
      *
-     * @param owner           The <code>RenderedImage</code> that the tile belongs to.
+     * @param owner           The {@code RenderedImage} that the tile belongs to.
      * @param tileX           The X index of the tile in the owner's tile grid.
      * @param tileY           The Y index of the tile in the owner's tile grid.
-     * @param tile            A <code>Raster</code> containing the tile data.
-     * @param tileCacheMetric An <code>Object</code> as a tile metric.
+     * @param tile            A {@code Raster} containing the tile data.
+     * @param tileCacheMetric An {@code Object} as a tile metric.
      * @since JAI 1.1
      */
     public void add(RenderedImage owner, int tileX, int tileY, Raster tile, Object tileCacheMetric) {
@@ -138,12 +138,12 @@ public class FileTileCache implements TileCache {
     /**
      * Adds an array of tiles to the tile cache.
      *
-     * @param owner           The <code>RenderedImage</code> that the tile belongs to.
-     * @param tileIndices     An array of <code>Point</code>s containing the
-     *                        <code>tileX</code> and <code>tileY</code> indices for each tile.
-     * @param tiles           The array of tile <code>Raster</code>s containing tile data.
+     * @param owner           The {@code RenderedImage} that the tile belongs to.
+     * @param tileIndices     An array of {@code Point}s containing the
+     *                        {@code tileX} and <code>tileY</code> indices for each tile.
+     * @param tiles           The array of tile {@code Raster}s containing tile data.
      * @param tileCacheMetric Object which provides an ordering metric
-     *                        associated with the <code>RenderedImage</code> owner.
+     *                        associated with the {@code RenderedImage} owner.
      * @since JAI 1.1
      */
     public void addTiles(RenderedImage owner, Point[] tileIndices, Raster[] tiles, Object tileCacheMetric) {
@@ -154,10 +154,10 @@ public class FileTileCache implements TileCache {
     }
 
     /**
-     * Retrieves a tile.  Returns <code>null</code> if the tile is not
+     * Retrieves a tile.  Returns {@code null} if the tile is not
      * present in the cache.
      *
-     * @param owner The <code>RenderedImage</code> that the tile belongs to.
+     * @param owner The {@code RenderedImage} that the tile belongs to.
      * @param tileX The X index of the tile in the owner's tile grid.
      * @param tileY The Y index of the tile in the owner's tile grid.
      */
@@ -188,9 +188,9 @@ public class FileTileCache implements TileCache {
      * Retrieves an array of all tiles in the cache which are owned by the
      * specified image.
      *
-     * @param owner The <code>RenderedImage</code> to which the tiles belong.
+     * @param owner The {@code RenderedImage} to which the tiles belong.
      * @return An array of all tiles owned by the specified image or
-     *         <code>null</code> if there are none currently in the cache.
+     * {@code null} if there are none currently in the cache.
      * @since JAI 1.1
      */
     public Raster[] getTiles(RenderedImage owner) {
@@ -198,17 +198,17 @@ public class FileTileCache implements TileCache {
     }
 
     /**
-     * Returns an array of tile <code>Raster</code>s from the cache.
+     * Returns an array of tile {@code Raster}s from the cache.
      * Any or all of the elements of the returned array may be
-     * <code>null</code> if the corresponding tile is not in the cache.
+     * {@code null} if the corresponding tile is not in the cache.
      * The length of the returned array must be the same as that of the
-     * parameter array and the <i>i</i>th <code>Raster</code> in the
+     * parameter array and the <i>i</i>th {@code Raster} in the
      * returned array must correspond to the <i>i</i>th tile index in
      * the parameter array.
      *
-     * @param owner       The <code>RenderedImage</code> that the tile belongs to.
-     * @param tileIndices An array of <code>Point</code>s containing the
-     *                    <code>tileX</code> and <code>tileY</code> indices for each tile.
+     * @param owner       The {@code RenderedImage} that the tile belongs to.
+     * @param tileIndices An array of {@code Point}s containing the
+     *                    {@code tileX} and <code>tileY</code> indices for each tile.
      * @since JAI 1.1
      */
     public Raster[] getTiles(RenderedImage owner, Point[] tileIndices) {
@@ -225,7 +225,7 @@ public class FileTileCache implements TileCache {
      * are no longer needed.  It is legal to implement this method as
      * a no-op.
      *
-     * @param owner The <code>RenderedImage</code> owner of the tiles
+     * @param owner The {@code RenderedImage} owner of the tiles
      *              to be removed.
      */
     public void removeTiles(RenderedImage owner) {
@@ -239,7 +239,7 @@ public class FileTileCache implements TileCache {
      * Advises the cache that a tile is no longer needed.  It is legal
      * to implement this method as a no-op.
      *
-     * @param owner The <code>RenderedImage</code> that the tile belongs to.
+     * @param owner The {@code RenderedImage} that the tile belongs to.
      * @param tileX The X index of the tile in the owner's tile grid.
      * @param tileY The Y index of the tile in the owner's tile grid.
      */
@@ -283,6 +283,19 @@ public class FileTileCache implements TileCache {
     }
 
     /**
+     * Returns the tile capacity in tiles.  It is legal to
+     * implement this method as a no-op which should be
+     * signaled by returning zero.
+     *
+     * @deprecated as of JAI 1.1.
+
+     */
+    @Deprecated
+    public synchronized int getTileCapacity() {
+        return 0;
+    }
+
+    /**
      * Sets the tile capacity to a desired number of tiles.
      * If the capacity is smaller than the current capacity,
      * tiles are flushed from the cache.  It is legal to
@@ -291,26 +304,16 @@ public class FileTileCache implements TileCache {
      * @param tileCapacity The new capacity, in tiles.
      * @deprecated as of JAI 1.1.
      */
+    @Deprecated
     public synchronized void setTileCapacity(int tileCapacity) {
-    }
-
-    /**
-     * Returns the tile capacity in tiles.  It is legal to
-     * implement this method as a no-op which should be
-     * signaled by returning zero.
-     *
-     * @deprecated as of JAI 1.1.
-     */
-    public synchronized int getTileCapacity() {
-        return 0;
     }
 
     /**
      * Sets the memory capacity to a desired number of bytes.
      * If the memory capacity is smaller than the amount of
      * memory currently used by the cache, tiles are flushed
-     * until the <code>TileCache</code>'s memory usage is less than
-     * <code>memoryCapacity</code>.
+     * until the {@code TileCache}'s memory usage is less than
+     * {@code memoryCapacity}.
      *
      * @param memoryCapacity The new capacity, in bytes.
      */
@@ -330,7 +333,7 @@ public class FileTileCache implements TileCache {
     }
 
     /**
-     * Sets the <code>memoryThreshold</code> value to a floating
+     * Sets the {@code memoryThreshold} value to a floating
      * point number that ranges from 0.0 to 1.0.
      * When the cache memory is full, the memory
      * usage will be reduced to this fraction of
@@ -362,43 +365,43 @@ public class FileTileCache implements TileCache {
     }
 
     /**
-     * Sets a <code>Comparator</code> which imposes an order on the
-     * <code>CachedTile</code>s stored in the <code>TileCache</code>.
-     * This ordering is used in <code>memoryControl()</code> to determine
-     * the sequence in which tiles will be removed from the
-     * <code>TileCache</code> so as to reduce the memory to the level given
-     * by the memory threshold.  The <code>Object</code>s passed to the
-     * <code>compare()</code> method of the <code>Comparator</code> will
-     * be instances of <code>CachedTile</code>.  <code>CachedTile</code>s
-     * will be removed from the <code>TileCache</code> in the ascending
-     * order imposed by this <code>Comparator</code>.  If no
-     * <code>Comparator</code> is currently set, the <code>TileCache</code>
-     * should use an implementation-dependent default ordering.  In the
-     * Sun Microsystems, Inc., implementation of <code>TileCache</code>,
-     * this ordering is the <u>l</u>east <u>r</u>ecently <u>u</u>sed
-     * ordering, i.e., the tiles least recently used will be removed first
-     * by <code>memoryControl()</code>.
+     * Returns the {@code Comparator} currently set for use in ordering
+     * the {@code CachedTile}s stored by the <code>TileCache</code>.
      *
-     * @param comparator A <code>Comparator</code> which orders the
-     *                   <code>CachedTile</code>s stored by the <code>TileCache</code>;
-     *                   if <code>null</code> an implementation-dependent algorithm
-     *                   will be used.
-     * @since JAI 1.1
-     */
-    public synchronized void setTileComparator(Comparator comparator) {
-        this.tileComparator = comparator;
-    }
-
-    /**
-     * Returns the <code>Comparator</code> currently set for use in ordering
-     * the <code>CachedTile</code>s stored by the <code>TileCache</code>.
-     *
-     * @return The tile <code>Comparator</code> or <code>null</code> if the
+     * @return The tile {@code Comparator} or <code>null</code> if the
      *         implementation-dependent ordering algorithm is being used.
      * @since JAI 1.1
      */
     public synchronized Comparator getTileComparator() {
         return tileComparator;
+    }
+
+    /**
+     * Sets a {@code Comparator} which imposes an order on the
+     * {@code CachedTile}s stored in the <code>TileCache</code>.
+     * This ordering is used in {@code memoryControl()} to determine
+     * the sequence in which tiles will be removed from the
+     * {@code TileCache} so as to reduce the memory to the level given
+     * by the memory threshold.  The {@code Object}s passed to the
+     * {@code compare()} method of the <code>Comparator</code> will
+     * be instances of {@code CachedTile}.  <code>CachedTile</code>s
+     * will be removed from the {@code TileCache} in the ascending
+     * order imposed by this {@code Comparator}.  If no
+     * {@code Comparator} is currently set, the <code>TileCache</code>
+     * should use an implementation-dependent default ordering.  In the
+     * Sun Microsystems, Inc., implementation of {@code TileCache},
+     * this ordering is the <u>l</u>east <u>r</u>ecently <u>u</u>sed
+     * ordering, i.e., the tiles least recently used will be removed first
+     * by {@code memoryControl()}.
+     *
+     * @param comparator A {@code Comparator} which orders the
+     *                   {@code CachedTile}s stored by the <code>TileCache</code>;
+     *                   if {@code null} an implementation-dependent algorithm
+     *                   will be used.
+     * @since JAI 1.1
+     */
+    public synchronized void setTileComparator(Comparator comparator) {
+        this.tileComparator = comparator;
     }
 
     /////////////////////////////////////////////////////////////////////////

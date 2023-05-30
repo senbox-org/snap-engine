@@ -40,6 +40,7 @@ import java.awt.geom.Point2D;
  * @version $Revision$ $Date$
  * @deprecated since BEAM 4.8, use {@link CrsGeoCoding} instead.
  */
+@Deprecated
 public class MapGeoCoding extends AbstractGeoCoding {
 
     private final MapInfo mapInfo;
