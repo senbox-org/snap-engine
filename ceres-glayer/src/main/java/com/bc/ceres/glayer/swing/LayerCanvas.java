@@ -50,6 +50,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
     private boolean navControlShown;
     private WakefulComponent navControlWrapper;
     private boolean initiallyZoomingAll;
+    private double zoomInitial = 1.0;
     private boolean zoomedAll;
 
     // AdjustableView properties
@@ -224,6 +225,15 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         getViewport().zoom(getMaxVisibleModelBounds());
     }
 
+    public void setZoomInitial(double zoomInitial) {
+        this.zoomInitial = zoomInitial;
+    }
+
+    public double getZoomInitial() {
+        return zoomInitial;
+    }
+
+
     /////////////////////////////////////////////////////////////////////////
     // AdjustableView implementation
 
@@ -351,6 +361,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         }
     }
 
+
     @Override
     protected void paintComponent(Graphics g) {
         long t0 = DEBUG ? System.nanoTime() : 0L;
@@ -358,6 +369,8 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         if (initiallyZoomingAll && !zoomedAll && maxVisibleModelBounds != null && !maxVisibleModelBounds.isEmpty()) {
             zoomedAll = true;
             zoomAll();
+
+            getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial());
         }
 
         final Graphics2D g2d = (Graphics2D) g;
