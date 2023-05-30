@@ -46,23 +46,24 @@ public class CollocateOpTest {
     @Test
     public void testCollocate1Type() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_D");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
+        assertTrue(op.getRenameDependentComponents());
+        assertTrue(op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_D", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -72,10 +73,10 @@ public class CollocateOpTest {
         assertNotNull(secMeta.getElement("test1"));
 
         int numMasterBands = masterProduct.getNumBands();
-        int numSlaveBands = slaveProduct.getNumBands();
+        int numDependentBands = dependentProduct.getNumBands();
         int numMasterTPGs = masterProduct.getNumTiePointGrids();
-        int numSlaveTPGs = slaveProduct.getNumTiePointGrids();
-        assertEquals(numMasterBands + numSlaveBands + numSlaveTPGs + 1, targetProduct.getNumBands());
+        int numDependentTPGs = dependentProduct.getNumTiePointGrids();
+        assertEquals(numMasterBands + numDependentBands + numDependentTPGs + 1, targetProduct.getNumBands());
         assertEquals(numMasterTPGs, targetProduct.getNumTiePointGrids());
 
         assertEquals("radiance_1_M", targetProduct.getBandAt(0).getName());
@@ -83,21 +84,21 @@ public class CollocateOpTest {
         assertEquals("l1_flags_M", targetProduct.getBandAt(15).getName());
         assertEquals("l1_class_M", targetProduct.getBandAt(16).getName());
 
-        assertEquals("radiance_1_S", targetProduct.getBandAt(16 + 1).getName());
-        assertEquals("radiance_2_S", targetProduct.getBandAt(16 + 2).getName());
-        assertEquals("l1_flags_S", targetProduct.getBandAt(16 + 16).getName());
-        assertEquals("l1_class_S", targetProduct.getBandAt(16 + 17).getName());
+        assertEquals("radiance_1_D", targetProduct.getBandAt(16 + 1).getName());
+        assertEquals("radiance_2_D", targetProduct.getBandAt(16 + 2).getName());
+        assertEquals("l1_flags_D", targetProduct.getBandAt(16 + 16).getName());
+        assertEquals("l1_class_D", targetProduct.getBandAt(16 + 17).getName());
 
-        assertEquals("latitude_S", targetProduct.getBandAt(16 + 17 + 1).getName());
-        assertEquals("longitude_S", targetProduct.getBandAt(16 + 17 + 2).getName());
-        assertEquals("dem_altitude_S", targetProduct.getBandAt(16 + 17 + 3).getName());
+        assertEquals("latitude_D", targetProduct.getBandAt(16 + 17 + 1).getName());
+        assertEquals("longitude_D", targetProduct.getBandAt(16 + 17 + 2).getName());
+        assertEquals("dem_altitude_D", targetProduct.getBandAt(16 + 17 + 3).getName());
 
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(0).getValidMaskExpression());
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
-        assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
+        assertEquals("!l1_flags_D.INVALID && radiance_1_D > 10",
                 targetProduct.getBandAt(16 + 1).getValidMaskExpression());
-        assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
+        assertEquals("!l1_flags_D.INVALID && radiance_1_D > 10",
                 targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(4, targetProduct.getMaskGroup().getNodeCount());
@@ -111,12 +112,12 @@ public class CollocateOpTest {
         assertNotNull(mask4);
         assertEquals("bitmask_M", mask1.getName());
         assertEquals("INVALID_M", mask2.getName());
-        assertEquals("bitmask_S", mask3.getName());
-        assertEquals("INVALID_S", mask4.getName());
+        assertEquals("bitmask_D", mask3.getName());
+        assertEquals("INVALID_D", mask4.getName());
         assertEquals("radiance_1_M > 10", Mask.BandMathsType.getExpression(mask1));
         assertEquals("l1_flags_M.INVALID", Mask.BandMathsType.getExpression(mask2));
-        assertEquals("radiance_1_S > 10", Mask.BandMathsType.getExpression(mask3));
-        assertEquals("l1_flags_S.INVALID", Mask.BandMathsType.getExpression(mask4));
+        assertEquals("radiance_1_D > 10", Mask.BandMathsType.getExpression(mask3));
+        assertEquals("l1_flags_D.INVALID", Mask.BandMathsType.getExpression(mask4));
         assertEquals(Color.RED, mask1.getImageColor());
         assertEquals(Color.GREEN, mask2.getImageColor());
         assertEquals(Color.RED, mask3.getImageColor());
@@ -128,39 +129,39 @@ public class CollocateOpTest {
 
         assertEquals(2 + 1, targetProduct.getFlagCodingGroup().getNodeCount());
         assertNotNull(targetProduct.getFlagCodingGroup().get("l1_flags_M"));
-        assertNotNull(targetProduct.getFlagCodingGroup().get("l1_flags_S"));
+        assertNotNull(targetProduct.getFlagCodingGroup().get("l1_flags_D"));
 
         assertEquals(2, targetProduct.getIndexCodingGroup().getNodeCount());
         assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_M"));
-        assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_S"));
+        assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_D"));
 
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(2, autoGrouping.size());
         assertArrayEquals(new String[]{"*radiance*_M"}, autoGrouping.get(0));
-        assertArrayEquals(new String[]{"*radiance*_S"}, autoGrouping.get(1));
+        assertArrayEquals(new String[]{"*radiance*_D"}, autoGrouping.get(1));
     }
 
     @Test
     public void testCollocate2Types() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct2();
+        final Product dependentProduct = createTestProduct2();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_D");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
         assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
+        assertTrue(op.getRenameDependentComponents());
         assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_D", op.getDependentComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -170,10 +171,10 @@ public class CollocateOpTest {
         assertNotNull(secMeta.getElement("test2"));
 
         int numMasterBands = masterProduct.getNumBands();
-        int numSlaveBands = slaveProduct.getNumBands();
+        int numDependentBands = dependentProduct.getNumBands();
         int numMasterTPGs = masterProduct.getNumTiePointGrids();
-        int numSlaveTPGs = slaveProduct.getNumTiePointGrids();
-        assertEquals(numMasterBands + numSlaveBands + numSlaveTPGs + 1, targetProduct.getNumBands());
+        int numDependentTPGs = dependentProduct.getNumTiePointGrids();
+        assertEquals(numMasterBands + numDependentBands + numDependentTPGs + 1, targetProduct.getNumBands());
         assertEquals(numMasterTPGs, targetProduct.getNumTiePointGrids());
 
         assertEquals("radiance_1_M", targetProduct.getBandAt(0).getName());
@@ -181,21 +182,21 @@ public class CollocateOpTest {
         assertEquals("l1_flags_M", targetProduct.getBandAt(15).getName());
         assertEquals("l1_class_M", targetProduct.getBandAt(16).getName());
 
-        assertEquals("reflec_1_S", targetProduct.getBandAt(16 + 1).getName());
-        assertEquals("reflec_2_S", targetProduct.getBandAt(16 + 2).getName());
-        assertEquals("l2_flags_S", targetProduct.getBandAt(16 + 16).getName());
-        assertEquals("l2_class_S", targetProduct.getBandAt(16 + 17).getName());
+        assertEquals("reflec_1_D", targetProduct.getBandAt(16 + 1).getName());
+        assertEquals("reflec_2_D", targetProduct.getBandAt(16 + 2).getName());
+        assertEquals("l2_flags_D", targetProduct.getBandAt(16 + 16).getName());
+        assertEquals("l2_class_D", targetProduct.getBandAt(16 + 17).getName());
 
-        assertEquals("latitude_S", targetProduct.getBandAt(16 + 17 + 1).getName());
-        assertEquals("longitude_S", targetProduct.getBandAt(16 + 17 + 2).getName());
-        assertEquals("dem_altitude_S", targetProduct.getBandAt(16 + 17 + 3).getName());
+        assertEquals("latitude_D", targetProduct.getBandAt(16 + 17 + 1).getName());
+        assertEquals("longitude_D", targetProduct.getBandAt(16 + 17 + 2).getName());
+        assertEquals("dem_altitude_D", targetProduct.getBandAt(16 + 17 + 3).getName());
 
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(0).getValidMaskExpression());
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
-        assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
+        assertEquals("!l2_flags_D.INVALID && reflec_1_D > 0.1",
                 targetProduct.getBandAt(16 + 1).getValidMaskExpression());
-        assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
+        assertEquals("!l2_flags_D.INVALID && reflec_1_D > 0.1",
                 targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(3, targetProduct.getMaskGroup().getNodeCount());
@@ -207,10 +208,10 @@ public class CollocateOpTest {
         assertNotNull(mask3);
         assertEquals("bitmask_M", mask1.getName());
         assertEquals("INVALID_M", mask2.getName());
-        assertEquals("INVALID_S", mask3.getName());
+        assertEquals("INVALID_D", mask3.getName());
         assertEquals("radiance_1_M > 10", Mask.BandMathsType.getExpression(mask1));
         assertEquals("l1_flags_M.INVALID", Mask.BandMathsType.getExpression(mask2));
-        assertEquals("l2_flags_S.INVALID", Mask.BandMathsType.getExpression(mask3));
+        assertEquals("l2_flags_D.INVALID", Mask.BandMathsType.getExpression(mask3));
         assertEquals(Color.RED, mask1.getImageColor());
         assertEquals(Color.GREEN, mask2.getImageColor());
         assertEquals(Color.BLUE, mask3.getImageColor());
@@ -220,30 +221,30 @@ public class CollocateOpTest {
 
         assertEquals(2 + 1, targetProduct.getFlagCodingGroup().getNodeCount());
         assertNotNull(targetProduct.getFlagCodingGroup().get("l1_flags_M"));
-        assertNotNull(targetProduct.getFlagCodingGroup().get("l2_flags_S"));
+        assertNotNull(targetProduct.getFlagCodingGroup().get("l2_flags_D"));
 
         assertEquals(2, targetProduct.getIndexCodingGroup().getNodeCount());
         assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_M"));
-        assertNotNull(targetProduct.getIndexCodingGroup().get("l2_class_S"));
+        assertNotNull(targetProduct.getIndexCodingGroup().get("l2_class_D"));
 
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(2, autoGrouping.size());
         assertArrayEquals(new String[]{"*radiance*_M"}, autoGrouping.get(0));
-        assertArrayEquals(new String[]{"*reflec*_S"}, autoGrouping.get(1));
+        assertArrayEquals(new String[]{"*reflec*_D"}, autoGrouping.get(1));
     }
 
     @Test
     public void testAutogroupingAATSRStyle() {
         final Product masterProduct = createTestProductAATSR();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setDependentComponentPattern("${ORIGINAL_NAME}_D");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
@@ -251,28 +252,28 @@ public class CollocateOpTest {
         assertEquals(3, autoGrouping.size());
         assertArrayEquals(new String[]{"*nadir*_M"}, autoGrouping.get(0));
         assertArrayEquals(new String[]{"*fward*_M"}, autoGrouping.get(1));
-        assertArrayEquals(new String[]{"*radiance*_S"}, autoGrouping.get(2));
+        assertArrayEquals(new String[]{"*radiance*_D"}, autoGrouping.get(2));
     }
 
     @Test
-    public void testCollocate_failsWhenSlaveRenamingPatternIsMissing() {
+    public void testCollocate_failsWhenDependentRenamingPatternIsMissing() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameSlaveComponents(false);
-        op.setSlaveComponentPattern("");
+        op.setRenameDependentComponents(false);
+        op.setDependentComponentPattern("");
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         try {
             op.getTargetProduct();
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("Target product already contains a raster data node with name 'latitude'. " +
-                            "Parameter slaveComponentPattern must be set.",
+                            "Parameter dependentComponentPattern must be set.",
                     oe.getMessage());
         }
     }
@@ -280,59 +281,59 @@ public class CollocateOpTest {
     @Test
     public void testCollocate_SampleCodingSOfMasterWhenNotRenamingMaster() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
         op.setRenameMasterComponents(false);
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
         assertEquals(3, flagCodingGroup.getNodeCount());
         assertTrue(flagCodingGroup.contains("l1_flags"));
-        assertTrue(flagCodingGroup.contains("l1_flags_S"));
+        assertTrue(flagCodingGroup.contains("l1_flags_D"));
         assertTrue(flagCodingGroup.contains("collocationFlags"));
         assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags").getFlagCoding()));
-        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_S").getFlagCoding()));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_D").getFlagCoding()));
 
         ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
         assertEquals(2, indexCodingGroup.getNodeCount());
         assertTrue(indexCodingGroup.contains("l1_class"));
-        assertTrue(indexCodingGroup.contains("l1_class_S"));
+        assertTrue(indexCodingGroup.contains("l1_class_D"));
         assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class").getIndexCoding()));
-        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_S").getIndexCoding()));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_D").getIndexCoding()));
     }
 
     @Test
     public void testCollocate_SampleCodingOfMasterWhenRenamingMaster() {
         final Product masterProduct = createTestProduct1();
-        final Product slaveProduct = createTestProduct1();
+        final Product dependentProduct = createTestProduct1();
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
         op.setRenameMasterComponents(true);
 
         op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setDependentProduct(dependentProduct);
 
         Product targetProduct = op.getTargetProduct();
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
         assertEquals(3, flagCodingGroup.getNodeCount());
         assertTrue(flagCodingGroup.contains("l1_flags_M"));
-        assertTrue(flagCodingGroup.contains("l1_flags_S"));
+        assertTrue(flagCodingGroup.contains("l1_flags_D"));
         assertTrue(flagCodingGroup.contains("collocationFlags"));
         assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_M").getFlagCoding()));
-        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_S").getFlagCoding()));
+        assertTrue(flagCodingGroup.contains(targetProduct.getBand("l1_flags_D").getFlagCoding()));
 
         ProductNodeGroup<IndexCoding> indexCodingGroup = targetProduct.getIndexCodingGroup();
         assertEquals(2, indexCodingGroup.getNodeCount());
         assertTrue(indexCodingGroup.contains("l1_class_M"));
-        assertTrue(indexCodingGroup.contains("l1_class_S"));
+        assertTrue(indexCodingGroup.contains("l1_class_D"));
         assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_M").getIndexCoding()));
-        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_S").getIndexCoding()));
+        assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_D").getIndexCoding()));
     }
 
     private static final float[] wl = new float[]{
