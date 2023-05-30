@@ -71,6 +71,37 @@ public class SystemUtils {
     private static final String MANIFEST_ATTR_MODULE_VERSION = "OpenIDE-Module-Specification-Version";
 
 
+    public static final String VERSION_FILE_NAME = "VERSION.txt";
+
+
+    // Some Property Keys and Defaults relevant to branding
+    // These property values can be branded by setting in the snap.properties file
+
+    public static final String APPLICATION_NAME_PROPERTY_KEY = ".application.name";
+    //    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SNAP";
+    public static final String APPLICATION_NAME_PROPERTY_DEFAULT = "SeaDAS";
+
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_KEY = ".remote.version.url";
+    //        public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads" + "/" + VERSION_FILE_NAME;
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/downloads" + "/" + VERSION_FILE_NAME;
+
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_KEY = ".homepage.url";
+    //    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov";
+
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_KEY = ".report.issue.url";
+    //    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int/main/community/issue-reporting";
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/help/issue-reporting";
+
+    public static final String RELEASE_NOTES_URL_PROPERTY_KEY = ".release.notes.url";
+    //    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://senbox.atlassian.net/issues/?filter=-4&jql=project%20%3D%20SNAP%20AND%20fixVersion%20%3D%20";
+    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/release-notes";
+
+    public static final String MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY = ".mainframe.title.include.version";
+    //    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
+    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = true;
+
+
     /**
      * The SNAP system logger. Default name is "org.esa.snap" which may be overridden by system property "snap.logger.name".
      */
@@ -114,7 +145,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationHomepageUrl() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".homepage.url", "http://step.esa.int");
+        return Config.instance().preferences().get(getApplicationContextId() + APPLICATION_HOMEPAGE_URL_PROPERTY_KEY, APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT);
     }
 
     /**
@@ -203,7 +234,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationName() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", "SNAP");
+        return Config.instance().preferences().get(getApplicationContextId() + APPLICATION_NAME_PROPERTY_KEY, APPLICATION_NAME_PROPERTY_DEFAULT);
     }
 
     /**
@@ -284,7 +315,7 @@ public class SystemUtils {
         if (File.separatorChar != _URL_DIR_SEPARATOR_CHAR
                 && urlPath.indexOf(_URL_DIR_SEPARATOR_CHAR) >= 0) {
             return urlPath.replace(_URL_DIR_SEPARATOR_CHAR,
-                                   File.separatorChar);
+                    File.separatorChar);
         }
         return urlPath;
     }
@@ -443,7 +474,7 @@ public class SystemUtils {
             System.setErr(originalErrStream);
         }
         int parallelism = Config.instance().preferences().getInt(SNAP_PARALLELISM_PROPERTY_NAME,
-                                                                 Runtime.getRuntime().availableProcessors());
+                Runtime.getRuntime().availableProcessors());
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
         tileScheduler.setParallelism(parallelism);
         LOG.fine(MessageFormat.format("JAI tile scheduler parallelism set to {0}", parallelism));
@@ -470,14 +501,27 @@ public class SystemUtils {
 
     }
 
+    // variable key changed from ".remoteVersion.url" to ".remote.version.url"
     public static String getApplicationRemoteVersionUrl() {
-        final String key = getApplicationContextId() + ".remoteVersion.url";
-        String applicationHomepageUrl = getApplicationHomepageUrl();
-        if (!applicationHomepageUrl.endsWith("/")) {
-            applicationHomepageUrl = applicationHomepageUrl + "/";
-        }
-        return System.getProperty(key, applicationHomepageUrl + "software/version.txt");
+        return Config.instance().preferences().get(getApplicationContextId() + REMOTE_VERSION_FILE_URL_PROPERTY_KEY, REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT);
     }
+
+
+    // variable key changed from ".reportIssuePageUrl" to ".report.issue.url"
+    public static String getReportAnIssueUrl() {
+        return Config.instance().preferences().get(getApplicationContextId() + REPORT_ISSUE_PAGE_URL_PROPERTY_KEY, REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT);
+    }
+
+
+    public static String getReleaseNotesUrl() {
+        return Config.instance().preferences().get(getApplicationContextId() + RELEASE_NOTES_URL_PROPERTY_KEY, RELEASE_NOTES_URL_PROPERTY_DEFAULT);
+    }
+
+    public static boolean isMainframeTitleIncludeVersion() {
+        String value = Config.instance().preferences().get(SystemUtils.getApplicationContextId() + MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY, Boolean.toString(MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT));
+        return Boolean.parseBoolean(value);
+    }
+
 
     /**
      * Tries to load the metadata from {@code META-INF/MANIFEST.MF} contained in the module jar
@@ -508,7 +552,7 @@ public class SystemUtils {
      */
     public static String getReleaseVersion() {
         String version = null;
-        Path versionFile = getApplicationHomeDir().toPath().resolve("VERSION.txt");
+        Path versionFile = getApplicationHomeDir().toPath().resolve(VERSION_FILE_NAME);
         if (Files.exists(versionFile)) {
             try {
                 List<String> versionInfo = Files.readAllLines(versionFile);
@@ -522,7 +566,7 @@ public class SystemUtils {
         if (version != null) {
             return version;
         }
-        return "[no version info, missing ${SNAP_HOME}/VERSION.txt]";
+        return "[no version info, missing ${SNAP_HOME}/" + VERSION_FILE_NAME + ".txt]";
     }
 
     /**
