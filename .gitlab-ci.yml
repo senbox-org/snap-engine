@@ -18,7 +18,7 @@ variables:
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
-  MAVEN_DEPLOY_ARGS: "deploy -fn"
+  MAVEN_DEPLOY_ARGS: "${MAVEN_DEPLOY_ARGS} -fn"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
 
@@ -51,7 +51,15 @@ mvn-sonar:
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
-mvn-snapshot:
+mvn-release:
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
+
+mvn-deploy-release:
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
+
+mvn-deploy-snapshot:
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
