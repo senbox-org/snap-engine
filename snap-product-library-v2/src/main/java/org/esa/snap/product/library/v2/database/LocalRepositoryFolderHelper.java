@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -414,7 +415,7 @@ public class LocalRepositoryFolderHelper {
         if (localProductMetadata != null) {
             // the product already exists into the database
             FileTime fileTime = Files.getLastModifiedTime(productPathToCheck);
-            if (fileTime.toMillis() == localProductMetadata.getLastModifiedDate().getTime()) {
+            if (fileTime.toMillis() == localProductMetadata.getLastModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) {
                 // unchanged product
                 saveProductData = new SaveProductData(localProductMetadata.getId(), null, null, null, null);
             }

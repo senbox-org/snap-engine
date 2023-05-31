@@ -38,8 +38,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -138,7 +136,7 @@ public class DataAccess {
             while (resultSet.next()) {
                 repositoryProducts.add(new LocalProductMetadata(resultSet.getInt("id"),
                                                                 resultSet.getString("relative_path"),
-                                                                resultSet.getTimestamp("last_modified_date")));
+                                                                resultSet.getTimestamp("last_modified_date").toLocalDateTime()));
             }
         }
         return repositoryProducts;
@@ -214,8 +212,8 @@ public class DataAccess {
             final Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
             Map<Short, String> remoteRepositories = listRemoteRepositories();
 
-            Date startDate = null;
-            Date endDate = null;
+            LocalDateTime startDate = null;
+            LocalDateTime endDate = null;
             List<AttributeFilter> attributesToFind = null;
             Rectangle2D selectionArea = null;
             SensorType sensorType = null;
@@ -225,12 +223,12 @@ public class DataAccess {
                 if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.FOOT_PRINT_PARAMETER)) {
                     selectionArea = (Rectangle2D)parameterValue;
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.START_DATE_PARAMETER)) {
-                    startDate = (Date)parameterValue;
+                    startDate = (LocalDateTime)parameterValue;
                     if (startDate == null) {
                         throw new NullPointerException("The start date is null.");
                     }
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.END_DATE_PARAMETER)) {
-                    endDate = (Date)parameterValue;
+                    endDate = (LocalDateTime)parameterValue;
                     if (endDate == null) {
                         throw new NullPointerException("The end date is null.");
                     }
@@ -284,18 +282,15 @@ public class DataAccess {
 
             logger.log(Level.FINE, "The sql query is : " + sql.toString());
 
-            Calendar calendar = Calendar.getInstance();
             try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sql.toString())) {
                 int parameterIndex = 1;
                 if (startDate != null) {
-                    LocalDateTime startDt = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    startDt = startDt.withHour(0).withMinute(0).withSecond(0);
-                    prepareStatement.setTimestamp(parameterIndex++, Timestamp.valueOf(startDt));
+                    startDate = startDate.withHour(0).withMinute(0).withSecond(0);
+                    prepareStatement.setTimestamp(parameterIndex++, Timestamp.valueOf(startDate));
                 }
                 if (endDate != null) {
-                    LocalDateTime endDt = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    endDt = endDt.withHour(23).withMinute(59).withSecond(59);
-                    prepareStatement.setTimestamp(parameterIndex, Timestamp.valueOf(endDt));
+                    endDate = endDate.withHour(23).withMinute(59).withSecond(59);
+                    prepareStatement.setTimestamp(parameterIndex, Timestamp.valueOf(endDate));
                 }
                 try (SpatialResultSet resultSet = prepareStatement.executeQuery().unwrap(SpatialResultSet.class)) {
                     productList = new ArrayList<>();
@@ -335,7 +330,7 @@ public class DataAccess {
                             geometry = convertProductGeometry(productGeometry);
                         }
                         String metadataMission = resultSet.getString("metadata_mission");
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, geometry);
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate.toLocalDateTime(), productLocalPath, sizeInBytes, geometry);
                         localProduct.setRemoteMission(remoteMission);
                         localProduct.setMetadataMission(metadataMission);
                         productList.add(localProduct);
@@ -885,11 +880,11 @@ public class DataAccess {
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION);
         if (geometry != null) {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
-                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsLocalDateTime(),
                     fileTime.toMillis(), geometry.toWKT(), null, null, null);
         } else {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
-                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsDate(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsLocalDateTime(),
                     fileTime.toMillis(), null, null, null);
         }
     }
@@ -911,7 +906,7 @@ public class DataAccess {
     }
 
     private static int addLocalProduct(Connection connection, String name, Integer remoteMissionId, String metadataMission, int repositoryId, String relativePath,
-                                       long size, Date acquisitionDate, long lastModified, String footprint,
+                                       long size, LocalDateTime acquisitionDate, long lastModified, String footprint,
                                        Integer dataFormatId, Integer pixelTypeId, Integer sensorTypeId) throws SQLException {
         final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
                                                                                 "(name, remote_mission_id, metadata_mission, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
@@ -933,7 +928,7 @@ public class DataAccess {
         statement.setString(5, relativePath);
         statement.setLong(6, size);
         if (acquisitionDate != null) {
-            statement.setTimestamp(7, new Timestamp(acquisitionDate.getTime()));
+            statement.setTimestamp(7, Timestamp.valueOf(acquisitionDate));
         } else {
             statement.setNull(7, Types.TIMESTAMP);
         }
@@ -969,7 +964,7 @@ public class DataAccess {
     }
 
     private static int addLocalProduct(Connection connection, String name, Integer remoteMissionId, String metadataMission, int repositoryId, String relativePath,
-                                       long size, Date acquisitionDate, long lastModified,
+                                       long size, LocalDateTime acquisitionDate, long lastModified,
                                        Integer dataFormatId, Integer pixelTypeId, Integer sensorTypeId) throws SQLException {
         final PreparedStatement statement = connection.prepareStatement("INSERT INTO products " +
                 "(name, remote_mission_id, metadata_mission, local_repository_id, relative_path, size_in_bytes, acquisition_date," +
@@ -991,7 +986,7 @@ public class DataAccess {
         statement.setString(5, relativePath);
         statement.setLong(6, size);
         if (acquisitionDate != null) {
-            statement.setTimestamp(7, new Timestamp(acquisitionDate.getTime()));
+            statement.setTimestamp(7, Timestamp.valueOf(acquisitionDate));
         } else {
             statement.setNull(7, Types.TIMESTAMP);
         }
@@ -1036,9 +1031,9 @@ public class DataAccess {
         statement.setInt(2, localRepositoryId);
         statement.setString(3, relativePath.toString());
         statement.setLong(4, sizeInBytes);
-        Date acquisitionDate = (productToSave.getStartTime() == null) ? null : productToSave.getStartTime().getAsDate();
+        final LocalDateTime acquisitionDate = (productToSave.getStartTime() == null) ? null : productToSave.getStartTime().getAsLocalDateTime();
         if (acquisitionDate != null) {
-            statement.setTimestamp(5, new Timestamp(acquisitionDate.getTime()));
+            statement.setTimestamp(5, Timestamp.valueOf(acquisitionDate));
         } else {
             statement.setNull(5, Types.TIMESTAMP);
         }
@@ -1061,7 +1056,7 @@ public class DataAccess {
         statement.setInt(3, localRepositoryId);
         statement.setString(4, relativePath.toString());
         statement.setLong(5, sizeInBytes);
-        statement.setTimestamp(6, new Timestamp(productToSave.getAcquisitionDate().getTime()));
+        statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
         statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
         statement.setString(8, productToSave.getPolygon().toWKT());
         statement.setInt(9, productToSave.getDataFormatType().getValue());

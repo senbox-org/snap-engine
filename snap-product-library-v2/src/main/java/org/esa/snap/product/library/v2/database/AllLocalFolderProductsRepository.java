@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -44,8 +45,8 @@ public class AllLocalFolderProductsRepository {
 
         final boolean required = false;
 
-        parameters.add(new RepositoryQueryParameter(START_DATE_PARAMETER, Date.class, "Start date", null, required, null));
-        parameters.add(new RepositoryQueryParameter(END_DATE_PARAMETER, Date.class, "End date", null, required, null));
+        parameters.add(new RepositoryQueryParameter(START_DATE_PARAMETER, LocalDateTime.class, "Start date", null, required, null));
+        parameters.add(new RepositoryQueryParameter(END_DATE_PARAMETER, LocalDateTime.class, "End date", null, required, null));
 
         SensorType[] sensorTypes = SensorType.values();
         String[] sensorValues = new String[sensorTypes.length];
