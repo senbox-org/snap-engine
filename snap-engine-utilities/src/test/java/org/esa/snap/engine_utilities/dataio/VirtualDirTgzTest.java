@@ -23,18 +23,18 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TarVirtualDirTest {
+public class VirtualDirTgzTest {
     @Test
     public void testIsTgz() {
-        assertFalse(TarVirtualDir.isTgz("xxxxx.nc.gz"));
-        assertFalse(TarVirtualDir.isTgz("xxxxx.ppt.gz"));
-        assertFalse(TarVirtualDir.isTgz("xxxxx.gz"));
-        assertFalse(TarVirtualDir.isTgz("xxxxx.tar"));
-        assertFalse(TarVirtualDir.isTgz("xxxxx.geotiff"));
+        assertFalse(VirtualDirTgz.isTgz("xxxxx.nc.gz"));
+        assertFalse(VirtualDirTgz.isTgz("xxxxx.ppt.gz"));
+        assertFalse(VirtualDirTgz.isTgz("xxxxx.gz"));
+        assertFalse(VirtualDirTgz.isTgz("xxxxx.tar"));
+        assertFalse(VirtualDirTgz.isTgz("xxxxx.geotiff"));
 
-        assertTrue(TarVirtualDir.isTgz("xxxxx.tgz"));
-        assertTrue(TarVirtualDir.isTgz("xxxxx.tGz"));
-        assertTrue(TarVirtualDir.isTgz("xxxxx.tar.gz"));
-        assertTrue(TarVirtualDir.isTgz("xxxxx.TAR.gz"));
+        assertTrue(VirtualDirTgz.isTgz("xxxxx.tgz"));
+        assertTrue(VirtualDirTgz.isTgz("xxxxx.tGz"));
+        assertTrue(VirtualDirTgz.isTgz("xxxxx.tar.gz"));
+        assertTrue(VirtualDirTgz.isTgz("xxxxx.TAR.gz"));
     }
 }

@@ -3,10 +3,12 @@ package org.esa.snap.engine_utilities.dataio;
 import com.bc.ceres.core.VirtualDir;
 import org.esa.snap.engine_utilities.commons.FilePath;
 import org.esa.snap.engine_utilities.commons.FilePathInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.esa.snap.core.util.io.FileUtils;
-import org.xeustechnologies.jtar.TarEntry;
-import org.xeustechnologies.jtar.TarHeader;
-import org.xeustechnologies.jtar.TarInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -21,21 +23,25 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
 
 /**
- * Private implementation of a virtual directory representing the contents of a tar or a tar-gz file.
+ * Implementation of a virtual directory representing the contents of a tar or a tar-gz file.
  */
-class TarVirtualDir extends VirtualDirEx {
-
-    private static final byte LF_SPEC_LINK = (byte) 'L';
+public class VirtualDirTgz extends VirtualDirEx {
 
     private static final int TRANSFER_BUFFER_SIZE = 1024 * 1024;
 
     private final Path archiveFile;
     private File extractDir;
 
-    TarVirtualDir(Path tgz) {
+    public VirtualDirTgz(File tgz) {
+        if (tgz == null) {
+            throw new IllegalArgumentException("Input file shall not be null");
+        }
+        this.archiveFile = tgz.toPath();
+    }
+
+    public VirtualDirTgz(Path tgz) {
         if (tgz == null) {
             throw new NullPointerException("Input file shall not be null");
         }
@@ -57,6 +63,12 @@ class TarVirtualDir extends VirtualDirEx {
     public static boolean isTgz(String filename) {
         String lowerCaseFilename = filename.toLowerCase();
         return lowerCaseFilename.endsWith(".tgz") || lowerCaseFilename.endsWith(".tar.gz");
+    }
+
+    public static boolean isTbz(String filename) {
+        String lcName = filename.toLowerCase();
+        return lcName.endsWith(".tar.bz") || lcName.endsWith(".tbz") ||
+                lcName.endsWith(".tar.bz2") || lcName.endsWith(".tbz2");
     }
 
     public static boolean isTar(String filename) {
@@ -115,6 +127,21 @@ class TarVirtualDir extends VirtualDirEx {
         return file.list();
     }
 
+    @Override
+    public String[] listAllFiles() throws IOException {
+        try (TarArchiveInputStream tarStream = buildTarInputStream()) {
+
+            TarArchiveEntry entry;
+            List<String> entryNames = new ArrayList<>();
+            while ((entry = tarStream.getNextTarEntry()) != null) {
+                if (!entry.isDirectory()) {
+                    entryNames.add(entry.getName());
+                }
+            }
+            return entryNames.toArray(new String[0]);
+        }
+    }
+
     public boolean exists(String s) {
         return Files.exists(this.archiveFile);
     }
@@ -129,12 +156,13 @@ class TarVirtualDir extends VirtualDirEx {
 
     @Override
     public boolean isCompressed() {
-        return isTgz(this.archiveFile.getFileName().toString());
+        final String fileName = this.archiveFile.getFileName().toString();
+        return isTgz(fileName) || isTbz(fileName);
     }
 
     @Override
     public boolean isArchive() {
-        return isTgz(this.archiveFile.getFileName().toString());
+        return true;
     }
 
     @Override
@@ -159,16 +187,14 @@ class TarVirtualDir extends VirtualDirEx {
     public void ensureUnpacked(File unpackFolder) throws IOException {
         if (this.extractDir == null) {
             this.extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
-            try (InputStream inputStream = Files.newInputStream(this.archiveFile);
-                 BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                 TarInputStream tis = buildTarInputStream(bufferedInputStream)) {
 
+            try (TarArchiveInputStream tarStream = buildTarInputStream()) {
                 byte[] data = new byte[TRANSFER_BUFFER_SIZE];
-                TarEntry entry;
+                TarArchiveEntry entry;
                 String longLink = null;
-                while ((entry = tis.getNextEntry()) != null) {
+                while ((entry = tarStream.getNextTarEntry()) != null) {
                     String entryName = entry.getName();
-                    boolean entryIsLink = entry.getHeader().linkFlag == TarHeader.LF_LINK || entry.getHeader().linkFlag == LF_SPEC_LINK;
+                    boolean entryIsLink = entry.isLink() || entry.isSymbolicLink();
                     if (longLink != null && longLink.startsWith(entryName)) {
                         entryName = longLink;
                         longLink = null;
@@ -207,7 +233,7 @@ class TarVirtualDir extends VirtualDirEx {
                          BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
 
                         int count;
-                        while ((count = tis.read(data)) != -1) {
+                        while ((count = tarStream.read(data)) != -1) {
                             bufferedOutputStream.write(data, 0, count);
                             //if the entry is a link, must be saved, since the name of the next entry depends on this
                             if (entryIsLink) {
@@ -227,11 +253,20 @@ class TarVirtualDir extends VirtualDirEx {
         }
     }
 
-    private TarInputStream buildTarInputStream(BufferedInputStream bufferedInputStream) throws IOException {
-        if (isTgz(this.archiveFile.getFileName().toString())) {
-            return new TarInputStream(new GZIPInputStream(bufferedInputStream));
-        } else {
-            return new TarInputStream(bufferedInputStream);
+    private TarArchiveInputStream buildTarInputStream() throws IOException {
+        final CompressorStreamFactory compressorStreamFactory = new CompressorStreamFactory();
+        CompressorInputStream compressorInputStream = null;
+        InputStream stream = null;
+        try {
+            stream = new BufferedInputStream(Files.newInputStream(this.archiveFile));
+            compressorInputStream = compressorStreamFactory.createCompressorInputStream(stream);
+            return new TarArchiveInputStream(compressorInputStream);
+        } catch (IOException | CompressorException | IllegalArgumentException ex) {
+            if (stream == null) {
+                throw new IOException("Cannot open file");
+            }
+            // maybe it's just a simple tar
+            return new TarArchiveInputStream(stream);
         }
     }
 
@@ -246,17 +281,15 @@ class TarVirtualDir extends VirtualDirEx {
     @Override
     public String[] listAll(Pattern...patterns) {
         List<String> fileNames;
-        try (InputStream inputStream = Files.newInputStream(this.archiveFile);
-             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-             TarInputStream tis = buildTarInputStream(bufferedInputStream)) {
+        try (TarArchiveInputStream tis = buildTarInputStream()) {
 
             fileNames = new ArrayList<>();
             byte[] data = new byte[TRANSFER_BUFFER_SIZE];
-            TarEntry entry;
+            TarArchiveEntry entry;
             String longLink = null;
-            while ((entry = tis.getNextEntry()) != null) {
+            while ((entry = tis.getNextTarEntry()) != null) {
                 String entryName = entry.getName();
-                boolean entryIsLink = entry.getHeader().linkFlag == TarHeader.LF_LINK || entry.getHeader().linkFlag == LF_SPEC_LINK;
+                boolean entryIsLink = entry.isLink() || entry.isSymbolicLink();
                 if (longLink != null && longLink.startsWith(entryName)) {
                     entryName = longLink;
                     longLink = null;
