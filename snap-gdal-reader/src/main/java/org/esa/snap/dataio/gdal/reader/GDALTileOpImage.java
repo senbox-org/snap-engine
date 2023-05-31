@@ -163,6 +163,7 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                         default:
                             throw new IllegalArgumentException("Unknown data buffer type " + dataBufferType + ".");
                     }
+                    data.clear();
                     final SampleModel sampleModel = new ComponentSampleModel(imageDataBuffer.getDataType(), areaWidth, areaHeight, 1, areaWidth, index);
                     return Raster.createWritableRaster(sampleModel, imageDataBuffer, null);
                 } else {
