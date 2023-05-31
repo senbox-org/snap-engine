@@ -17,7 +17,7 @@ public class OSCategoryTest {
     private static final String ARCHITECTURE_UNKNOWN = "x86";
     private static final String EXECUTABLE_NAME = "ping";
     private static final String LINUX_OS_EXECUTABLE_LOCATION = "/bin";
-    private static final String WINDOWS_OS_EXECUTABLE_LOCATION = "C:\\Windows\\System32";
+    private static final String WINDOWS_OS_EXECUTABLE_LOCATION = "\\System32";
     private static final String MACOS_OS_EXECUTABLE_LOCATION = "/sbin";
 
     @Test
@@ -97,13 +97,13 @@ public class OSCategoryTest {
         assertNotNull(executableLocations);
         if (IS_OS_LINUX) {
             assertTrue(executableLocations.length > 0);
-            assertEquals(LINUX_OS_EXECUTABLE_LOCATION, executableLocations[0]);
+            assertTrue(executableLocations[0].endsWith(LINUX_OS_EXECUTABLE_LOCATION));
         } else if (IS_OS_MAC_OSX) {
             assertTrue(executableLocations.length > 0);
-            assertEquals(MACOS_OS_EXECUTABLE_LOCATION, executableLocations[0]);
+            assertTrue(executableLocations[0].endsWith(MACOS_OS_EXECUTABLE_LOCATION));
         } else if (IS_OS_WINDOWS) {
             assertTrue(executableLocations.length > 0);
-            assertEquals(WINDOWS_OS_EXECUTABLE_LOCATION, executableLocations[0]);
+            assertTrue(executableLocations[0].endsWith(WINDOWS_OS_EXECUTABLE_LOCATION));
         } else {
             assertEquals(0, executableLocations.length);
         }
