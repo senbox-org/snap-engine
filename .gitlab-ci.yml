@@ -14,7 +14,7 @@ include:
 
 # variables
 variables:
-  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11-alpine"
+  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
@@ -46,7 +46,7 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11-alpine"
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   allow_failure: true
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
@@ -95,4 +95,6 @@ failure:
   extends:
     - .report-status
   rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
+      when: never
     - when: on_failure
