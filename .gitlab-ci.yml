@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.3.1"
+    ref: "3.5.0"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -14,7 +14,7 @@ include:
 
 # variables
 variables:
-  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.6.3-jdk-11"
+  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11-alpine"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
@@ -46,7 +46,7 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  image: "registry.hub.docker.com/library/maven:3.6.3-jdk-11"
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11-alpine"
   allow_failure: true
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
