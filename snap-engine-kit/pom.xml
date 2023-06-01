@@ -300,7 +300,7 @@
 
         <dependency>
             <groupId>eu.esa.snap</groupId>
-            <artifactId>esa_snappy</artifactId>
+            <artifactId>esa-snappy</artifactId>
         </dependency>
 
     </dependencies>
