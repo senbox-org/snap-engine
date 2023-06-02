@@ -204,7 +204,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         clone.inverseMap = inverseMap;
         clone.rotator = rotator;
         clone.method = method;
-        clone.datum = datum;
+        clone.datum = datum.clone();
 
         return clone;
     }

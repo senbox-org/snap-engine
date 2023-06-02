@@ -1,5 +1,6 @@
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.Assert;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.junit.Before;
@@ -34,6 +35,7 @@ public class GcpGeoCodingTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
+    @STTM("SNAP-3518")
     public void testTransferGeoCoding() {
         Scene source = SceneFactory.createScene(new Band("source", ProductData.TYPE_INT8, 10, 10));
         Scene target = SceneFactory.createScene(new Band("target", ProductData.TYPE_INT8, 10, 10));
@@ -148,6 +150,7 @@ public class GcpGeoCodingTest {
     }
 
     @Test
+    @STTM("SNAP-3518")
     public void testClone() {
         final PixelPos pixelPos = new PixelPos(6.5, 2.5);
 
