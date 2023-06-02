@@ -77,11 +77,7 @@ public class Datum implements Cloneable {
 
     @Override
     public Datum clone() {
-        try {
-            return (Datum) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new IllegalStateException(e);
-        }
+        return new Datum(name, ellipsoid.clone(), dx, dy, dz);
     }
 
     @Override
