@@ -18,7 +18,6 @@ variables:
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
-  MAVEN_DEPLOY_ARGS: "${MAVEN_DEPLOY_ARGS} -fn"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
 
@@ -51,9 +50,11 @@ mvn-sonar:
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
+# Used to publish release on Github (only manual action & non blocking)
 mvn-release:
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
+    - when: manual
+      allow_failure: true
 
 mvn-deploy-release:
   rules:
