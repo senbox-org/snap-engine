@@ -255,7 +255,7 @@ public class ColorManipulationDefaults {
             " as opposed to the original xml order</html>";
     public static boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
-    public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".split";
+    public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".categorize";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_LABEL = "Categorize";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Scheme selector will display all schemes categorized into<br>" +
             "primary and additional categories by the PRIMARY field<br> of the color_palette_schemes.xml</html>";
@@ -270,7 +270,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_SELECTOR_SECTION_TOOLTIP = "<html>Format options for the color Palettes listed<br>" +
             " within the Palette Selector</html>";
 
-    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".inculde.image";
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".include.colorbar";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_LABEL = "Include Palettes Image";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_TOOLTIP = "Include Palettes Image";
     public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = true;
@@ -281,14 +281,10 @@ public class ColorManipulationDefaults {
             " as opposed to the original xml order</html>";
     public static boolean PROPERTY_PALETTE_SORT_DEFAULT = true;
 
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".split";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".categorize";
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Palette selector will display all palettes categorized into<br>" +
-            "primary/additional or universal/standard/additional categories by the PRIMARY/UNIVERSAL/STANDARD field<br> of the color_palette.xml</html>";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION1 = "None";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION2 = "Primary/Additional";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION3 = "Universal/Standard/Addtional";
-    public static String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = PROPERTY_PALETTE_CATEGORIZE_DISPLAY_OPTION3;
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas8/auxdata/color_palettes/color_palette.xml</html>";
+    public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
 
 
     // Sliders Editor Options
