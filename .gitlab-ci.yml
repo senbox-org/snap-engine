@@ -78,18 +78,21 @@ mvn-deploy-snapshot:
   environment:
     name: reporting-github
   dependencies: []
-  rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
 
 pending:
   stage: .pre
   extends:
     - .report-status
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
 
 success:
   stage: .post
   extends:
     - .report-status
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
+      when: on_success
 
 failure:
   stage: .post
@@ -97,5 +100,4 @@ failure:
     - .report-status
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
-      when: never
-    - when: on_failure
+      when: on_failure
