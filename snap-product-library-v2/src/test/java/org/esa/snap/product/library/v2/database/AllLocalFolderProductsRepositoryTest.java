@@ -1,5 +1,6 @@
 package org.esa.snap.product.library.v2.database;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
 import org.junit.Test;
@@ -22,6 +23,7 @@ public class AllLocalFolderProductsRepositoryTest {
     }
 
     @Test
+    @STTM("SNAP-3517")
     public void testGetParameters() {
         Path databaseParentFolderPath = Paths.get(".");
         H2DatabaseParameters databaseParameters = new H2DatabaseParameters(databaseParentFolderPath);
