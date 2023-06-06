@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -3206,16 +3204,6 @@ public abstract class ProductData implements Cloneable {
          */
         public Date getAsDate() {
             return getAsCalendar().getTime();
-        }
-
-        /**
-         * Returns this UTC date/time value as a LocalDateTime. The method interpretes this UTC value as a MJD 2000 date
-         * (Modified Julian Day where the  first day is the 01.01.2000).
-         *
-         * @see #getAsCalendar()
-         */
-        public LocalDateTime getAsLocalDateTime() {
-            return getAsCalendar().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
 
         /**

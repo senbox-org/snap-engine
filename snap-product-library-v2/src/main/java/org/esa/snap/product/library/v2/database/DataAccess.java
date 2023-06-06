@@ -3,6 +3,7 @@ package org.esa.snap.product.library.v2.database;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.DateTimeUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
@@ -880,11 +881,11 @@ public class DataAccess {
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION);
         if (geometry != null) {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
-                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsLocalDateTime(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar()),
                     fileTime.toMillis(), geometry.toWKT(), null, null, null);
         } else {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
-                    sizeInBytes, productToSave.getStartTime() == null ? null : productToSave.getStartTime().getAsLocalDateTime(),
+                    sizeInBytes, productToSave.getStartTime() == null ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar()),
                     fileTime.toMillis(), null, null, null);
         }
     }
@@ -1031,7 +1032,7 @@ public class DataAccess {
         statement.setInt(2, localRepositoryId);
         statement.setString(3, relativePath.toString());
         statement.setLong(4, sizeInBytes);
-        final LocalDateTime acquisitionDate = (productToSave.getStartTime() == null) ? null : productToSave.getStartTime().getAsLocalDateTime();
+        final LocalDateTime acquisitionDate = (productToSave.getStartTime() == null) ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar());
         if (acquisitionDate != null) {
             statement.setTimestamp(5, Timestamp.valueOf(acquisitionDate));
         } else {

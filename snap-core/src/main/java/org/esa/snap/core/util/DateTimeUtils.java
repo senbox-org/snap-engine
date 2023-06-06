@@ -17,6 +17,7 @@ package org.esa.snap.core.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -149,5 +150,15 @@ public class DateTimeUtils {
      */
     public static Date stringToUTC(String utc) throws ParseException {
         return ISO_8601_UTC_FORMAT.parse(utc);
+    }
+
+    /**
+     * Converts a UTC date/time calendar to a LocalDateTime. The method interpretes this UTC value as a MJD 2000 date
+     * (Modified Julian Day where the  first day is the 01.01.2000).
+     *
+     * @param utc the UTC date/time calendar
+     */
+    public static LocalDateTime calendarToLocalDateTime(Calendar utc) {
+        return LocalDateTime.from(utc.toInstant());
     }
 }
