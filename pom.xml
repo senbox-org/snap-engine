@@ -408,7 +408,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.4.7</version>
+                <version>1.3.3.2-SNAP</version>
             </dependency>
 
             <dependency>
