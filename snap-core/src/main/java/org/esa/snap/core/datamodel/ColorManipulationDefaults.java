@@ -286,6 +286,11 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas8/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
 
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".remove.extension";
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_LABEL = "Remove Filename Extension";
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_TOOLTIP = "Remove extension of the palette filename for display";
+    public static boolean PROPERTY_PALETTE_REMOVE_EXTENSION_DEFAULT = false;
+
 
     // Sliders Editor Options
 
