@@ -1,3 +1,6 @@
 # included templates
 include:
   - 'https://gitlab.com/senbox-org/snap-engine/raw/master/.gitlab-ci.yml'
+
+variables:
+  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-8"
