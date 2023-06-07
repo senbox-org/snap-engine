@@ -110,7 +110,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_SUFFIX_NSWE_LABEL = "Suffix (N,S,W,E)";
     public static final String PROPERTY_LABELS_SUFFIX_NSWE_TOOLTIP = "Format label text with suffix (N,S,W,E) instead of (+/-)";
     private static final String PROPERTY_LABELS_SUFFIX_NSWE_ALIAS = "graticuleLabelsSuffixNswe";
-    public static final boolean PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT = true;
+    public static final boolean PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT = false;
     public static final Class PROPERTY_LABELS_SUFFIX_NSWE_TYPE = Boolean.class;
 
     public static final String PROPERTY_LABELS_DECIMAL_VALUE_NAME = "graticule.labels.decimal.value";
@@ -138,14 +138,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_ROTATION_LON_LABEL = "Rotation (Longitude)";
     public static final String PROPERTY_LABELS_ROTATION_LON_TOOLTIP = "Rotate longitude labels (0 degrees = perpendicular)";
     private static final String PROPERTY_LABELS_ROTATION_LON_ALIAS = "labelsRotationLon";
-    public static final double PROPERTY_LABELS_ROTATION_LON_DEFAULT = 45;
+    public static final double PROPERTY_LABELS_ROTATION_LON_DEFAULT = 90;
     public static final Class PROPERTY_LABELS_ROTATION_LON_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_ROTATION_LAT_NAME = "graticule.labels.rotation.lat";
     public static final String PROPERTY_LABELS_ROTATION_LAT_LABEL = "Rotation (Latitude)";
     public static final String PROPERTY_LABELS_ROTATION_LAT_TOOLTIP = "Rotate latitude labels (0 degrees = perpendicular)";
     private static final String PROPERTY_LABELS_ROTATION_LAT_ALIAS = "labelsRotationLat";
-    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 0;
+    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 90;
     public static final Class PROPERTY_LABELS_ROTATION_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME = "graticule.labels.font.name";
@@ -165,7 +165,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_SIZE_LABEL = "Size";
     public static final String PROPERTY_LABELS_SIZE_TOOLTIP = "Set size of the label text";
     private static final String PROPERTY_LABELS_SIZE_ALIAS = "graticuleLabelsSize";
-    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 12;
+    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 18;
     public static final Class PROPERTY_LABELS_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_LABELS_SIZE_VALUE_MIN = 6;
     public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 70;
@@ -198,14 +198,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRIDLINES_WIDTH_LABEL = "Width";
     public static final String PROPERTY_GRIDLINES_WIDTH_TOOLTIP = "Set width of gridlines";
     private static final String PROPERTY_GRIDLINES_WIDTH_ALIAS = "gridlinesWidth";
-    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 0.8;
+    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1.5;
     public static final Class PROPERTY_GRIDLINES_WIDTH_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_NAME = "graticule.gridlines.dashed.phase";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_LABEL = "Dash Length";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_TOOLTIP = "Set dash length of gridlines or solid gridlines (0=SOLID)";
     private static final String PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS = "graticuleGridlinesDashedPhase";
-    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 3;
+    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 6;
     public static final Class PROPERTY_GRIDLINES_DASHED_PHASE_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_TRANSPARENCY_NAME = "graticule.gridlines.transparency";
@@ -241,7 +241,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_BORDER_WIDTH_LABEL = "Width";
     public static final String PROPERTY_BORDER_WIDTH_TOOLTIP = "Width of border line";
     private static final String PROPERTY_BORDER_WIDTH_ALIAS = "graticuleBorderWidth";
-    public static final double PROPERTY_BORDER_WIDTH_DEFAULT = 1.2;
+    public static final double PROPERTY_BORDER_WIDTH_DEFAULT = 2;
     public static final Class PROPERTY_BORDER_WIDTH_TYPE = Double.class;
 
     public static final String PROPERTY_BORDER_COLOR_NAME = "graticule.border.color";
@@ -277,7 +277,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
     public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
     public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = "graticuleTickmarksLength";
-    public static final double PROPERTY_TICKMARKS_LENGTH_DEFAULT = 3.0;
+    public static final double PROPERTY_TICKMARKS_LENGTH_DEFAULT = 6.0;
     public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Double.class;
 
     public static final String PROPERTY_TICKMARKS_COLOR_NAME = "graticule.tickmarks.color";
