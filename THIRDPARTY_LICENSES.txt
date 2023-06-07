@@ -37,7 +37,7 @@ JAI-tools;Tools for jai;jaitools;BSD 3 Clause;https://code.google.com/archive/p/
 Jama;Linear algebra;Jama;public-domain;https://math.nist.gov/javanumerics/jama/;https://en.wikipedia.org/wiki/Public-domain_software
 James;Mail server;James;Apache License;https://james.apache.org/;https://www.apache.org/licenses/
 JASYPT;Encryption;JASYPT;Apache License;http://www.jasypt.org/;https://www.apache.org/licenses/
-Java SE JRE;Java Runtime;Oracle;Oracle Binary Code License;http://www.oracle.com/technetwork/java/javase/overview/index.html;http://www.oracle.com/technetwork/java/javase/terms/license/index.html
+Java SE JDK;Java Runtime;BellSoft;GPLv2+CE;https://bell-sw.com/libericajdk/;https://bell-sw.com/liberica_eula/
 java-cup-11b;LALR parser generator;cup;BSD Style;http://www2.cs.tum.edu/projects/cup/;http://www2.cs.tum.edu/projects/cup/licence.php
 javahelp;User Help;ORACLE;CDDL;https://javaee.github.io/javahelp/;https://github.com/javaee/javahelp/blob/master/LICENSE
 javaml;Machine learning;Java Machine Learning;GPLv2;http://java-ml.sourceforge.net/;https://sourceforge.net/p/java-ml/java-ml-code/ci/master/tree/legal/license.txt
@@ -55,7 +55,7 @@ jexcelapi;Excel files;jexcelapi;LGPLv3;http://jexcelapi.sourceforge.net/;http://
 jfreechart;Plot library;jfree;LGPLv3;https://www.jfree.org/;https://www.gnu.org/licenses/lgpl-3.0.html
 jgridshift;Transformations;jgridshift;LGPLv2;http://jgridshift.sourceforge.net/;http://www.gnu.de/documents/lgpl-2.1.de.html
 jhdf / jhdf5;HDF(5) support;HDF Group;BSD Style;https://portal.hdfgroup.org/display/support/HDF-Java;https://bitbucket.hdfgroup.org/projects/HDFVIEW/repos/hdfview/browse/COPYING?raw
-JIDE Common;GUI library;Jidesoft;GPL with classpath exception ;http://jidesoft.com/;http://openjdk.java.net/legal/gplv2+ce.html
+JIDE Common;GUI library;Jidesoft;GPL with classpath exception ;http://jidesoft.com;http://openjdk.java.net/legal/gplv2+ce.html
 Jimfs;In-memory file system;Google;Apache License;https://github.com/google/jimfs;https://www.apache.org/licenses/
 jlinda-core;Java Library for Interferometric Data Analysis;jlinda;GNU General Public License (GPL);https://github.com/ppolabs/jlinda;http://www.gnu.org/licenses/gpl.html
 jlinda-nest;Java Library for Interferometric Data Analysis;jlinda;GNU General Public License (GPL);https://github.com/ppolabs/jlinda;http://www.gnu.org/licenses/gpl.html

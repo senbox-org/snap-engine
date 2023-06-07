@@ -24,7 +24,6 @@ import org.esa.snap.engine_utilities.commons.FilePathInputStream;
 import org.esa.snap.engine_utilities.commons.VirtualDirPath;
 import org.esa.snap.engine_utilities.commons.VirtualZipPath;
 import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.engine_utilities.dataio.ListFilesAndFolderVisitor;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 
@@ -87,8 +86,8 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
             if (VirtualDirEx.isPackedFile(path)) {
                 // the path represents an archive
                 String fileName = path.getFileName().toString();
-                if (TarVirtualDir.isTgz(fileName) || TarVirtualDir.isTar(fileName)) {
-                    return new TarVirtualDir(path);
+                if (VirtualDirTgz.isTgz(fileName) || VirtualDirTgz.isTar(fileName)) {
+                    return new VirtualDirTgz(path);
                 } else {
                     // check if the file represents a zip archive
                     boolean zipFile;
@@ -148,7 +147,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
      * @return  <code>true</code> if the file is a tar file, <code>false</code> otherwise
      */
     public static boolean isTar(String filename) {
-        return TarVirtualDir.isTar(filename);
+        return VirtualDirTgz.isTar(filename);
     }
 
     public abstract Path buildPath(String first, String... more);
@@ -215,7 +214,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
      */
     public String[] listAll(Pattern...patterns) {
         File baseFile = getBaseFile();
-        if (TarVirtualDir.isTar(baseFile.getPath()) || TarVirtualDir.isTgz(baseFile.getPath())) {
+        if (VirtualDirTgz.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath())) {
             return listAll();
         } else {
             List<String> filesAndFolders;
@@ -265,7 +264,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                         if (isTar(zipEntryPath)) {
                             File temporaryFile = getFile(zipEntryPath);
                             try {
-                                TarVirtualDir innerTar = new TarVirtualDir(temporaryFile.toPath()) {
+                                VirtualDirTgz innerTar = new VirtualDirTgz(temporaryFile.toPath()) {
                                     @Override
                                     public void close() {
                                         // do nothing

@@ -15,6 +15,10 @@
     <description>The SNAP Engine provides sensor-independent core functionality for remote sensing applications.
     </description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -284,19 +288,21 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-remote-execution</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-remote-products-repository</artifactId>
             <version>${project.version}</version>
         </dependency>
-    </dependencies>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+        <dependency>
+            <groupId>eu.esa.snap</groupId>
+            <artifactId>esa-snappy</artifactId>
+        </dependency>
+
+    </dependencies>
 
 </project>

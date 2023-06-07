@@ -51,6 +51,7 @@
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
+        <esa-snappy.version>10.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
     <modules>
@@ -283,7 +284,7 @@
                 <artifactId>lib-gdal</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
+          
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-reader</artifactId>
@@ -293,6 +294,12 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>eu.esa.snap</groupId>
+                <artifactId>esa-snappy</artifactId>
+                <version>${esa-snappy.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
@@ -401,7 +408,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.4.7</version>
+                <version>1.3.3.2-SNAP</version>
             </dependency>
 
             <dependency>
