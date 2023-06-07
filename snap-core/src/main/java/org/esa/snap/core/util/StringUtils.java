@@ -69,10 +69,6 @@ public class StringUtils {
      * @throws IllegalArgumentException if one of the arguments was null
      * @see java.util.StringTokenizer
      */
-
-
-
-
     public static List<String> split(String text, char[] separators, boolean trimTokens, List<String> tokens) {
 
         Guardian.assertNotNull("text", text);
@@ -944,8 +940,6 @@ public class StringUtils {
         prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
         return prettyFormat;
     }
-
-
 
     public static String[] getStringCaseVariations(String s) {
         // Created by Daniel Knowles
