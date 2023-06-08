@@ -258,7 +258,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
-    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_MANUAL_STR;
     public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
             PROPERTY_LABEL_VALUES_MODE_OPTION1,
             PROPERTY_LABEL_VALUES_MODE_OPTION2,
