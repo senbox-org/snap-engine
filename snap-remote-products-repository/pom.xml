@@ -16,7 +16,8 @@
     <packaging>nbm</packaging>
 
     <name>SNAP Remote Products Repository</name>
-    <description>The Remote Products Repository allows downloading the products from a list of repositories.</description>
+    <description>The Remote Products Repository allows downloading the products from a list of repositories.
+    </description>
 
     <properties>
         <tao.version>1.0.4.7</tao.version>
@@ -61,7 +62,6 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
-            <version>${geotools.version}</version>
         </dependency>
         <!-- Add the 'org.ejml:ejml-ddense' dependency here used by the TAO modules. -->
         <dependency>
@@ -73,6 +73,14 @@
             <artifactId>tao-data-model</artifactId>
             <version>${tao.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.geotools</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.eclipse.persistence</groupId>
                     <artifactId>org.eclipse.persistence.moxy</artifactId>
@@ -123,6 +131,12 @@
             <groupId>ro.cs.tao</groupId>
             <artifactId>tao-datasources-aws</artifactId>
             <version>${tao.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.geotools</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
