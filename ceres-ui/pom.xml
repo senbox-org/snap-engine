@@ -29,7 +29,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jidesoft</groupId>
+            <groupId>com.formdev</groupId>
             <artifactId>jide-oss</artifactId>
         </dependency>
         <dependency>
