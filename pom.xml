@@ -284,7 +284,7 @@
                 <artifactId>lib-gdal</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
+          
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-reader</artifactId>
@@ -345,14 +345,14 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.media.jai</groupId>
-                <artifactId>jai-core-openjdk</artifactId>
-                <version>1.1.4</version>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_core</artifactId>
+                <version>1.1.3</version>
             </dependency>
             <dependency>
-                <groupId>javax.media.jai</groupId>
-                <artifactId>jai-codec-openjdk</artifactId>
-                <version>1.1.4</version>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_codec</artifactId>
+                <version>1.1.3</version>
             </dependency>
             <dependency>
                 <groupId>javax.media</groupId>
@@ -409,16 +409,6 @@
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
                 <version>1.3.3.2-SNAP</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
@@ -433,130 +423,53 @@
                         <groupId>org.ejml</groupId>
                         <artifactId>ejml-ddense</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-opengis</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-xml</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-codec</groupId>
-                        <artifactId>commons-codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
+
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <!-- this would pull in version 1.4.7, which is not compatible with our imageio-ext-tiff:1.3.3.2-SNAP-->
-                        <groupId>it.geosolutions.imageio-ext</groupId>
-                        <artifactId>imageio-ext-cog-reader</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools.xsd</groupId>
                 <artifactId>gt-xsd-gml3</artifactId>
                 <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
 
