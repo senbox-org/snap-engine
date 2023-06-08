@@ -20,12 +20,17 @@
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core-openjdk</artifactId>
+            <groupId>eu.esa.snap</groupId>
+            <artifactId>sun-image-classes</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec-openjdk</artifactId>
+            <groupId>javax.media</groupId>
+            <artifactId>jai_core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jai_codec</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media</groupId>
