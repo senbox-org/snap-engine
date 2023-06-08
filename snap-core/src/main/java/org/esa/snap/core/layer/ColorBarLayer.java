@@ -209,8 +209,7 @@ public class ColorBarLayer extends Layer {
                 }
             }
 
-            if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)
-                    || (isSchemeLabelsRestrict() != schemeLabelsRestrictPrevious)) {
+            if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)) {
                 setLabelValuesActual(labelValuesActualPreferences);
                 setLabelValuesMode(labelValuesModePreferences);
                 setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
