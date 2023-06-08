@@ -45,7 +45,7 @@
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <geotools.version>28.2</geotools.version>
         <org.locationtech.version>1.17.0</org.locationtech.version>
-        <jide.version>3.6.1</jide.version>
+        <jide.version>3.7.12</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
@@ -558,7 +558,9 @@
             <!-- JIDE Swing Libraries ############################################# -->
 
             <dependency>
-                <groupId>com.jidesoft</groupId>
+                <!-- jidesoft is not providing releases anymore. So we take a recent (Jun 2021) version build by someone else -->
+                <!--<groupId>com.jidesoft</groupId>-->
+                <groupId>com.formdev</groupId>
                 <artifactId>jide-oss</artifactId>
                 <version>${jide.version}</version>
             </dependency>
