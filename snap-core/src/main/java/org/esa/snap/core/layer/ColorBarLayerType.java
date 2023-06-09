@@ -61,16 +61,16 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_SCHEME_ALIAS_SUFFIX = PROPERTY_ROOT_ALIAS + "Scheme";
 
     public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".apply";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Apply Scheme (Band Lookup)";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Apply Scheme (Band Lookup)";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Apply Scheme Title/Units (Band Lookup)";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Apply Scheme Title/Units (Band Lookup)";
     private static final String PROPERTY_SCHEME_AUTO_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "Apply";
     public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
     public static final Class PROPERTY_SCHEME_AUTO_APPLY_TYPE = Boolean.class;
 
 
     public static final String PROPERTY_SCHEME_LABELS_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".labels.apply";
-    public static final String PROPERTY_SCHEME_LABELS_APPLY_LABEL = "Apply Scheme Labels (Band Lookup)";
-    public static final String PROPERTY_SCHEME_LABELS_APPLY_TOOLTIP = "Apply Scheme Labels (Band Lookup)";
+    public static final String PROPERTY_SCHEME_LABELS_APPLY_LABEL = "Apply Scheme Tick Values (Band Lookup)";
+    public static final String PROPERTY_SCHEME_LABELS_APPLY_TOOLTIP = "Apply Scheme Tick Values (Band Lookup)";
     private static final String PROPERTY_SCHEME_LABELS_APPLY_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsApply";
     public static boolean PROPERTY_SCHEME_LABELS_APPLY_DEFAULT = true;
     public static final Class PROPERTY_SCHEME_LABELS_APPLY_TYPE = Boolean.class;
@@ -78,7 +78,9 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_SCHEME_LABELS_RESTRICT_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".labels.restrict";
     public static final String PROPERTY_SCHEME_LABELS_RESTRICT_LABEL = "Restrict Scheme Labels";
-    public static final String PROPERTY_SCHEME_LABELS_RESTRICT_TOOLTIP = "Restrict Scheme Labels such that they only are applied if palette min, max, log matches scheme min, max, log";
+    public static final String PROPERTY_SCHEME_LABELS_RESTRICT_TOOLTIP = "<html>Restrict Scheme Labels such that if scheme matches palette when scheme is" +
+            " applied <br>and the user subsequently changes the palette such is no longer matches scheme<br>" +
+            "then the scheme will be turned off so the color bar legend match the altered color palette</html>";
     private static final String PROPERTY_SCHEME_LABELS_RESTRICT_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsRestrict";
     public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = true;
     public static final Class PROPERTY_SCHEME_LABELS_RESTRICT_TYPE = Boolean.class;
