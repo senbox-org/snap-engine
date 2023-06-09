@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Perform decision tree classification of a given product
+ * Perform a masking based on land cover classes of a given product
  */
 
 @OperatorMetadata(alias = "Land-Cover-Mask",
@@ -51,7 +51,7 @@ import java.util.Map;
         authors = "Jun Lu, Luis Veci",
         version = "1.0",
         copyright = "Copyright (C) 2015 by Array Systems Computing Inc.",
-        description = "Perform decision tree classification")
+        description = "Perform a masking based on land cover classes")
 public final class LandCoverMaskOp extends Operator {
 
     @SourceProduct(alias = "source")

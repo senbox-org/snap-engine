@@ -14,10 +14,11 @@ include:
 
 # variables
 variables:
-  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
+  MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-libericaopenjdk-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
+  MAVEN_DEPLOY_ARGS: "${MAVEN_DEPLOY_ARGS} -fn"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
 
