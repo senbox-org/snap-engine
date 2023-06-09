@@ -28,7 +28,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
 
 
 /**
@@ -62,7 +61,8 @@ public class ColorBarLayer extends Layer {
     double paletteMinPrevious;
     double paletteMaxPrevious;
     boolean paletteLogPrevious;
-
+    boolean schemeMatchedPaletteOriginally;
+    boolean isSchemeLabelsApplyPreference;
 
 
     String titlePreferences;
@@ -164,6 +164,7 @@ public class ColorBarLayer extends Layer {
                 colorBarLocationInsidePreference = isColorBarLocationInside();
                 locationOffsetPreference = getLocationOffset();
                 locationShiftPreference = getLocationShift();
+                isSchemeLabelsApplyPreference = isSchemeLabelsApply();
             }
 
 
@@ -178,8 +179,6 @@ public class ColorBarLayer extends Layer {
                 setUnits(unitsPreferences);
                 setUnitsAlt(unitsAltPreferences);
                 setColorBarLength(colorBarLengthPreferences);
-                setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
-
 
                 if (isAutoApplySchemes()) {
                     if (schemeInfo != null) {
@@ -202,59 +201,80 @@ public class ColorBarLayer extends Layer {
                         if (schemeInfo.getColorBarLengthStr() != null && schemeInfo.getColorBarLengthStr().trim().length() > 0) {
                             setColorBarLength(Integer.parseInt(schemeInfo.getColorBarLengthStr()));
                         }
+                    }
+                }
+            }
+
+
+            if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)) {
+                if (isSchemeLabelsApply()
+                        && schemeInfo != null
+                        && schemeInfo.getColorBarLabels() != null
+                        && schemeInfo.getColorBarLabels().trim().length() > 0) {
+                    setLabelValuesActual(schemeInfo.getColorBarLabels());
+                    setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+                    setPopulateLabelsTextfield(true);
+                    schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
+
+                    if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
+                        setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
+                    }
+                } else {
+                    setLabelValuesActual(labelValuesActualPreferences);
+                    setLabelValuesMode(labelValuesModePreferences);
+                    setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+                    setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+                }
+            }
+
+
+
+            if (isPaletteChanged() && isSchemeLabelsRestrict()) {
+
+                if (isSchemeLabelsApply() && schemeLabelsApplyPrevious == true) {
+
+                    // reset to even distribution if the palette gets altered
+
+//            if (isSchemeLabelsApply() && schemeLabelsApplyPrevious != false){  // user just click on schemes  //todo maybe change this to remove autoApplyPrevious != false
+                    if (schemeInfo != null && schemeMatchedPaletteOriginally) {
+                        if (!isSchemeMatchesPalette()) {
+                            System.out.println("raster.getImageInfo().getColorPaletteDef().getMinDisplaySample()=" + raster.getImageInfo().getColorPaletteDef().getMinDisplaySample());
+                            System.out.println("schemeInfo.getMinValue()=" + schemeInfo.getMinValue());
+                            System.out.println("raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample()=" + raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample());
+                            System.out.println("schemeInfo.getMaxValue()=" + schemeInfo.getMaxValue());
+
+                            System.out.println("raster.getImageInfo().getColorPaletteDef().isLogScaled()=" + raster.getImageInfo().getColorPaletteDef().isLogScaled());
+                            System.out.println("schemeInfo.isLogScaled()=" + schemeInfo.isLogScaled());
+
+                            if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
+                                setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
+                                setSchemeLabelsApply(false);
+                                schemeLabelsApplyPrevious = false;
+                            }
+                        }
+                    }
+                }
+
+                if (!isSchemeLabelsApply() && isSchemeLabelsApplyPreference) {
+                    if (isSchemeMatchesPalette()
+                            && schemeInfo != null
+                            && schemeInfo.getColorBarLabels() != null
+                            && schemeInfo.getColorBarLabels().trim().length() > 0) {
+
+                        schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
+
+                        setLabelValuesActual(schemeInfo.getColorBarLabels());
+                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+                        setPopulateLabelsTextfield(true);
+                        schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
+
                         if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
                             setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
                         }
                     }
                 }
+
             }
-
-            if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)) {
-                setLabelValuesActual(labelValuesActualPreferences);
-                setLabelValuesMode(labelValuesModePreferences);
-                setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
-
-                if (isSchemeLabelsApply()) {
-                    if (schemeInfo != null) {
-                        if (schemeInfo.getColorBarLabels() != null && schemeInfo.getColorBarLabels().trim().length() > 0) {
-                            setLabelValuesActual(schemeInfo.getColorBarLabels());
-                            setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
-                            setPopulateLabelsTextfield(true);
-                        }
-                    }
-                }
-            }
-
-
-
-            // reset to even distribution if the palette gets altered
-
-            boolean restrictSchemeLabels = isSchemeLabelsRestrict();
-
-            if (isSchemeLabelsApply()){
-//            if (isSchemeLabelsApply() && schemeLabelsApplyPrevious != false){  // user just click on schemes  //todo maybe change this to remove autoApplyPrevious != false
-                if (schemeInfo != null && restrictSchemeLabels) {
-                    if (raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() != schemeInfo.getMinValue() ||
-                            raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() != schemeInfo.getMaxValue() ||
-                            raster.getImageInfo().getColorPaletteDef().isLogScaled() != schemeInfo.isLogScaled()
-
-                    ) {
-                        System.out.println("raster.getImageInfo().getColorPaletteDef().getMinDisplaySample()=" +raster.getImageInfo().getColorPaletteDef().getMinDisplaySample());
-                        System.out.println("schemeInfo.getMinValue()=" + schemeInfo.getMinValue());
-                        System.out.println("raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample()=" +raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample());
-                        System.out.println("schemeInfo.getMaxValue()=" + schemeInfo.getMaxValue());
-
-                        System.out.println("raster.getImageInfo().getColorPaletteDef().isLogScaled()=" +raster.getImageInfo().getColorPaletteDef().isLogScaled());
-                        System.out.println("schemeInfo.isLogScaled()=" + schemeInfo.isLogScaled());
-
-                        if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
-                            setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
-//                            setSchemeLabelsApply(false);
-                        }
-                    }
-                }
-            }
-
 
 
             if (!imageLegendInitialized ||
@@ -263,7 +283,7 @@ public class ColorBarLayer extends Layer {
                     (getSceneAspectBestFit() != sceneAspectBestFitPrevious) ||
                     (getColorBarLocationHorizontalPlacement() != null & !getColorBarLocationHorizontalPlacement().equals(locationPrevious)) ||
                     (getColorBarLocationVerticalPlacement() != null & !getColorBarLocationVerticalPlacement().equals(locationVerticalPrevious) ||
-            (getLocationGapFactor() != locationGapFactorPrevious)
+                            (getLocationGapFactor() != locationGapFactorPrevious)
 
                     )
             ) {
@@ -335,6 +355,10 @@ public class ColorBarLayer extends Layer {
             imageLegendInitialized = true;
             autoApplyPrevious = isAutoApplySchemes();
             schemeLabelsApplyPrevious = isSchemeLabelsApply();
+
+            paletteMinPrevious = raster.getImageInfo().getColorPaletteDef().getMinDisplaySample();
+            paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
+            paletteLogPrevious = raster.getImageInfo().isLogScaled();
 
             String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
             setTitle(convertedTitle);
@@ -496,6 +520,32 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    private boolean isPaletteChanged() {
+        if (raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() != paletteMinPrevious) {
+            return true;
+        }
+
+        if (raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() != paletteMaxPrevious) {
+            return true;
+        }
+
+        if (raster.getImageInfo().isLogScaled() != paletteLogPrevious) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private boolean isSchemeMatchesPalette() {
+        if (raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() == schemeInfo.getMinValue() &&
+                raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() == schemeInfo.getMaxValue() &&
+                raster.getImageInfo().getColorPaletteDef().isLogScaled() == schemeInfo.isLogScaled()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {
 
@@ -764,7 +814,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private void setSchemeLabelsApply(boolean value) {
         try {
             boolean valueCurrent = isSchemeLabelsApply();
@@ -778,12 +827,10 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private boolean isSchemeLabelsRestrict() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_SCHEME_LABELS_RESTRICT_KEY,
                 ColorBarLayerType.PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT);
     }
-
 
 
     // Title & Units Text
@@ -941,7 +988,9 @@ public class ColorBarLayer extends Layer {
                 return false;
             }
         }
-    };
+    }
+
+    ;
 
 
     private double getSceneAspectBestFit() {
