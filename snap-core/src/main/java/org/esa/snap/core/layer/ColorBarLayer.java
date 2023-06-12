@@ -79,6 +79,8 @@ public class ColorBarLayer extends Layer {
     double locationOffsetPreference;
     double locationShiftPreference;
 
+    boolean schemeOverRidden = false;
+
 
     public ColorBarLayer(RasterDataNode raster) {
         this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
@@ -206,37 +208,80 @@ public class ColorBarLayer extends Layer {
             }
 
 
+
             if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)) {
                 if (isSchemeLabelsApply()
                         && schemeInfo != null
                         && schemeInfo.getColorBarLabels() != null
                         && schemeInfo.getColorBarLabels().trim().length() > 0) {
-                    setLabelValuesActual(schemeInfo.getColorBarLabels());
-                    setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
-                    setPopulateLabelsTextfield(true);
-                    schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
+                    if (!isSchemeLabelsRestrict() || (isSchemeLabelsRestrict() && isSchemeMatchesPalette())) {
+                        setLabelValuesActual(schemeInfo.getColorBarLabels());
+                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+                        setPopulateLabelsTextfield(true);
+                        schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
 
-                    if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
-                        setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
+                        if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
+                            setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
+                        }
+
+                        schemeOverRidden = false;
+                    } else {
+                        setLabelValuesActual(labelValuesActualPreferences);
+                        setLabelValuesMode(labelValuesModePreferences);
+                        setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+                        setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+                        schemeOverRidden = true;
                     }
                 } else {
                     setLabelValuesActual(labelValuesActualPreferences);
                     setLabelValuesMode(labelValuesModePreferences);
                     setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
                     setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+                    schemeOverRidden = false;
                 }
             }
 
 
 
-            if (isPaletteChanged() && isSchemeLabelsRestrict()) {
 
-                if (isSchemeLabelsApply() && schemeLabelsApplyPrevious == true) {
+
+            if (imageLegendInitialized &&  (schemeLabelsRestrictPrevious != isSchemeLabelsRestrict())) {
+                if (isSchemeLabelsApply()
+                        && schemeInfo != null
+                        && schemeInfo.getColorBarLabels() != null
+                        && schemeInfo.getColorBarLabels().trim().length() > 0) {
+                    if (!isSchemeLabelsRestrict() || (isSchemeLabelsRestrict() && isSchemeMatchesPalette())) {
+                        setLabelValuesActual(schemeInfo.getColorBarLabels());
+                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+                        setPopulateLabelsTextfield(true);
+                        schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
+
+                        if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
+                            setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
+                        }
+
+                        schemeOverRidden = false;
+                    } else {
+                        setLabelValuesActual(labelValuesActualPreferences);
+                        setLabelValuesMode(labelValuesModePreferences);
+                        setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+                        setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+                        schemeOverRidden = true;
+                    }
+                }
+            }
+
+
+
+            if (imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
+
+                if (!schemeOverRidden ) {
 
                     // reset to even distribution if the palette gets altered
 
 //            if (isSchemeLabelsApply() && schemeLabelsApplyPrevious != false){  // user just click on schemes  //todo maybe change this to remove autoApplyPrevious != false
-                    if (schemeInfo != null && schemeMatchedPaletteOriginally) {
+//                    if (schemeInfo != null && schemeMatchedPaletteOriginally) {
+                    if (schemeInfo != null) {
                         if (!isSchemeMatchesPalette()) {
                             System.out.println("raster.getImageInfo().getColorPaletteDef().getMinDisplaySample()=" + raster.getImageInfo().getColorPaletteDef().getMinDisplaySample());
                             System.out.println("schemeInfo.getMinValue()=" + schemeInfo.getMinValue());
@@ -247,21 +292,26 @@ public class ColorBarLayer extends Layer {
                             System.out.println("schemeInfo.isLogScaled()=" + schemeInfo.isLogScaled());
 
                             if (ColorBarLayerType.DISTRIB_MANUAL_STR.equals(getLabelValuesMode())) {
-                                setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
-                                setSchemeLabelsApply(false);
-                                schemeLabelsApplyPrevious = false;
+//                                setLabelValuesMode(ColorBarLayerType.DISTRIB_EVEN_STR);
+                                setLabelValuesActual(labelValuesActualPreferences);
+                                setLabelValuesMode(labelValuesModePreferences);
+                                setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+                                setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+                                schemeOverRidden = true;
+//                                setSchemeLabelsApply(false);
+//                                schemeLabelsApplyPrevious = false;
                             }
                         }
                     }
                 }
 
-                if (!isSchemeLabelsApply() && isSchemeLabelsApplyPreference) {
+                if (schemeOverRidden) {
                     if (isSchemeMatchesPalette()
                             && schemeInfo != null
                             && schemeInfo.getColorBarLabels() != null
                             && schemeInfo.getColorBarLabels().trim().length() > 0) {
 
-                        schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
+//                        schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
 
                         setLabelValuesActual(schemeInfo.getColorBarLabels());
                         setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
@@ -271,6 +321,8 @@ public class ColorBarLayer extends Layer {
                         if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
                             setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
                         }
+
+                        schemeOverRidden = false;
                     }
                 }
 
@@ -355,6 +407,7 @@ public class ColorBarLayer extends Layer {
             imageLegendInitialized = true;
             autoApplyPrevious = isAutoApplySchemes();
             schemeLabelsApplyPrevious = isSchemeLabelsApply();
+            schemeLabelsRestrictPrevious = isSchemeLabelsRestrict();
 
             paletteMinPrevious = raster.getImageInfo().getColorPaletteDef().getMinDisplaySample();
             paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
@@ -541,11 +594,16 @@ public class ColorBarLayer extends Layer {
         if (raster.getImageInfo().getColorPaletteDef().getMinDisplaySample() == schemeInfo.getMinValue() &&
                 raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample() == schemeInfo.getMaxValue() &&
                 raster.getImageInfo().getColorPaletteDef().isLogScaled() == schemeInfo.isLogScaled()) {
+
             return true;
         } else {
             return false;
         }
     }
+
+
+
+
 
     private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {
 
