@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -21,11 +21,7 @@ import org.junit.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Storm
@@ -36,7 +32,7 @@ public class WatermaskClassifierTest {
 
     @Before
     public void setUp() throws Exception {
-        gcClassifier = new WatermaskClassifier(50);
+        gcClassifier = new WatermaskClassifier(1000);
     }
 
     @Test
@@ -45,26 +41,26 @@ public class WatermaskClassifierTest {
         assertEquals(WatermaskClassifier.WATER_VALUE, gcClassifier.getWaterMaskSample(70.853971f, 29.210610f));
 
         assertEquals(WatermaskClassifier.LAND_VALUE, gcClassifier.getWaterMaskSample(72.791664f, 105.28333f));
-        assertEquals(WatermaskClassifier.LAND_VALUE,  gcClassifier.getWaterMaskSample(72.794586f, 105.27786f));
+        assertEquals(WatermaskClassifier.LAND_VALUE, gcClassifier.getWaterMaskSample(72.794586f, 105.27786f));
 
         assertEquals(WatermaskClassifier.WATER_VALUE, gcClassifier.getWaterMaskSample(80.19444f, 25.963888f));
-        assertEquals(WatermaskClassifier.LAND_VALUE,  gcClassifier.getWaterMaskSample(80.14856f, 25.95601f));
+        assertEquals(WatermaskClassifier.LAND_VALUE, gcClassifier.getWaterMaskSample(80.14856f, 25.95601f));
 
         assertEquals(WatermaskClassifier.WATER_VALUE, gcClassifier.getWaterMaskSample(80.18703f, 26.04707f));
-        assertEquals(WatermaskClassifier.LAND_VALUE,  gcClassifier.getWaterMaskSample(80.176834f, 26.054949f));
+        assertEquals(WatermaskClassifier.LAND_VALUE, gcClassifier.getWaterMaskSample(80.176834f, 26.054949f));
     }
 
     @Test
     public void testIsWaterCenter() throws Exception {
 
-        assertFalse(gcClassifier.isWater(30.30539f, 111.55285f));
-        assertTrue(gcClassifier.isWater(30.269484f, 111.55418f));
+        assertFalse(gcClassifier.isWater(22.663505f, 113.904132f));
+        assertTrue(gcClassifier.isWater(22.544217f, 113.731145f));
 
         assertFalse(gcClassifier.isWater(49.68f, 0.581f));
         assertTrue(gcClassifier.isWater(49.434505f, 0.156014f));
 
         assertTrue(gcClassifier.isWater(49.33615f, -0.0096f));
-        assertFalse(gcClassifier.isWater(49.32062f, -0.005918f));
+        assertFalse(gcClassifier.isWater(49.310228f, 0.017876f));
 
         assertFalse(gcClassifier.isWater(46.5f, 0.5f));
 
@@ -76,9 +72,9 @@ public class WatermaskClassifierTest {
         assertFalse(gcClassifier.isWater(5.88f, 0.24f));
 
         assertTrue(gcClassifier.isWater(43.322360f, 4.157f));
-        assertTrue(gcClassifier.isWater(43.511243f, 3.869841f));
+        assertTrue(gcClassifier.isWater(  43.468057f,     3.888443f));
 
-        assertFalse(gcClassifier.isWater(45.981416f, -84.462957f));
+        assertFalse(gcClassifier.isWater(46.003362f, -84.481173f));
         assertTrue(gcClassifier.isWater(45.967423f, -84.477179f));
 
         assertTrue(gcClassifier.isWater(53.5f, 5.92f));
