@@ -16,8 +16,7 @@
     <packaging>nbm</packaging>
 
     <name>SNAP Remote Products Repository</name>
-    <description>The Remote Products Repository allows downloading the products from a list of repositories.
-    </description>
+    <description>The Remote Products Repository allows downloading the products from a list of repositories.</description>
 
     <properties>
         <tao.version>1.4.3</tao.version>
@@ -147,6 +146,11 @@
         <dependency>
             <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-fedeo</artifactId>
+            <version>${tao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ro.c-s.tao</groupId>
+            <artifactId>tao-datasources-das</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <!-- JUnit -->
