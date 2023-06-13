@@ -16,7 +16,6 @@ import java.util.Properties;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@STTM("SNAP-3446")
 public class TiledFileOpImageTest {
     private static String mlibStatus;
     @Rule
@@ -33,6 +32,7 @@ public class TiledFileOpImageTest {
         System.setProperty("com.sun.media.jai.disableMediaLib", mlibStatus);
     }
 
+    @STTM("SNAP-3446")
     @Test
     public void testCreate() throws Exception {
         Path outputPath = testDir.newFolder("test-dir").toPath();

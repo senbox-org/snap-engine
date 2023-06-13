@@ -82,9 +82,6 @@ public class MetadataUtils {
             ProductData productData = createProductData(attribute);
             if (productData != null) {
                 String shortName = attribute.getShortName();
-                if (GLOBAL_ATTRIBUTES.equals(elementName)) {
-                    System.out.println(shortName);
-                }
                 MetadataAttribute metadataAttribute = new MetadataAttribute(shortName, productData, true);
                 metadataElement.addAttribute(metadataAttribute);
             }

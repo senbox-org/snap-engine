@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.util;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -321,6 +322,45 @@ public class ProductUtilsTest {
         assertTrue(targetFlagBand.isFlagBand());
         assertTrue(targetFlagBand.isSourceImageSet());
         assertTrue(target.getMaskGroup().contains(maskName));
+    }
+
+    @Test
+    @STTM("SNAP-3507")
+    public void testCopyFlagBandsWithoutMasks() {
+        final int size = 10;
+        final Product source = new Product("source", "test", size, size);
+        final Band flagBand = source.addBand("flag", ProductData.TYPE_INT8);
+        flagBand.setSourceImage(ConstantDescriptor.create((float) size, (float) size, new Byte[]{42}, null));
+        final FlagCoding originalFlagCoding = new FlagCoding("flagCoding");
+        originalFlagCoding.addFlag("erni", 1, "erni flag");
+        originalFlagCoding.addFlag("bert", 2, "bert flag");
+        originalFlagCoding.addFlag("bibo", 4, "bert flag");
+        flagBand.setSampleCoding(originalFlagCoding);
+        source.getFlagCodingGroup().add(originalFlagCoding);
+        final String maskName = "erni_mask";
+        final Mask mask = Mask.BandMathsType.create(maskName, "erni detected", size, size, "flag.erni",
+                Color.WHITE, 0.6f);
+        source.getMaskGroup().add(mask);
+
+        Product target = new Product("target", "T", size, size);
+        ProductUtils.copyFlagBandsWithoutMasks(source, target, false);
+
+        assertEquals(1, target.getFlagCodingGroup().getNodeCount());
+        Band targetFlagBand = target.getBand("flag");
+        assertNotNull(targetFlagBand);
+        assertTrue(targetFlagBand.isFlagBand());
+        assertFalse(targetFlagBand.isSourceImageSet());
+        assertFalse(target.getMaskGroup().contains(maskName));
+
+        target = new Product("target", "T", size, size);
+        ProductUtils.copyFlagBandsWithoutMasks(source, target, true);
+
+        assertEquals(1, target.getFlagCodingGroup().getNodeCount());
+        targetFlagBand = target.getBand("flag");
+        assertNotNull(targetFlagBand);
+        assertTrue(targetFlagBand.isFlagBand());
+        assertTrue(targetFlagBand.isSourceImageSet());
+        assertFalse(target.getMaskGroup().contains(maskName));
     }
 
     @Test

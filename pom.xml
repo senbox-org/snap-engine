@@ -38,18 +38,20 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <snap.version>${project.version}</snap.version>
+        <snap-help-system.version>1.0.0</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>5.3.3</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <geotools.version>28.2</geotools.version>
         <org.locationtech.version>1.17.0</org.locationtech.version>
-        <jide.version>3.6.1</jide.version>
+        <jide.version>3.7.12</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
+        <esa-snappy.version>10.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
     <modules>
@@ -87,6 +89,8 @@
         <module>snap-getasse30-dem</module>
         <module>snap-geotiff</module>
         <module>snap-jp2-reader</module>
+        <module>snap-gdal-reader</module>
+        <module>snap-gdal-writer</module>
         <module>snap-hdf5-writer</module>
         <module>snap-land-cover</module>
         <module>snap-netcdf</module>
@@ -239,6 +243,12 @@
                 <artifactId>snap-geotiff</artifactId>
                 <version>${snap.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>eu.esa.snap.netbeans</groupId>
+                <artifactId>snap-help-system</artifactId>
+                <version>${snap-help-system.version}</version>
+            </dependency>
             <!-- Miscellaneous 3rd party libraries ############################################# -->
 
             <dependency>
@@ -273,6 +283,23 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>lib-gdal</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gdal-reader</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gdal-writer</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>eu.esa.snap</groupId>
+                <artifactId>esa-snappy</artifactId>
+                <version>${esa-snappy.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
@@ -318,14 +345,14 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.media</groupId>
-                <artifactId>jai_core</artifactId>
-                <version>1.1.3</version>
+                <groupId>javax.media.jai</groupId>
+                <artifactId>jai-core-openjdk</artifactId>
+                <version>1.1.4</version>
             </dependency>
             <dependency>
-                <groupId>javax.media</groupId>
-                <artifactId>jai_codec</artifactId>
-                <version>1.1.3</version>
+                <groupId>javax.media.jai</groupId>
+                <artifactId>jai-codec-openjdk</artifactId>
+                <version>1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>javax.media</groupId>
@@ -381,7 +408,17 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.4.7</version>
+                <version>1.3.3.2-SNAP</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -396,53 +433,130 @@
                         <groupId>org.ejml</groupId>
                         <artifactId>ejml-ddense</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-opengis</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-xml</artifactId>
+                <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
-
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <!-- this would pull in version 1.4.7, which is not compatible with our imageio-ext-tiff:1.3.3.2-SNAP-->
+                        <groupId>it.geosolutions.imageio-ext</groupId>
+                        <artifactId>imageio-ext-cog-reader</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools.xsd</groupId>
                 <artifactId>gt-xsd-gml3</artifactId>
                 <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
 
@@ -531,7 +645,9 @@
             <!-- JIDE Swing Libraries ############################################# -->
 
             <dependency>
-                <groupId>com.jidesoft</groupId>
+                <!-- jidesoft is not providing releases anymore. So we take a recent (Jun 2021) version build by someone else -->
+                <!--<groupId>com.jidesoft</groupId>-->
+                <groupId>com.formdev</groupId>
                 <artifactId>jide-oss</artifactId>
                 <version>${jide.version}</version>
             </dependency>
