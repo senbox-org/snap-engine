@@ -244,32 +244,32 @@ public class ColorBarLayer extends Layer {
 
 
 
-
-            if (imageLegendInitialized &&  (schemeLabelsRestrictPrevious != isSchemeLabelsRestrict())) {
-                if (isSchemeLabelsApply()
-                        && schemeInfo != null
-                        && schemeInfo.getColorBarLabels() != null
-                        && schemeInfo.getColorBarLabels().trim().length() > 0) {
-                    if (!isSchemeLabelsRestrict() || (isSchemeLabelsRestrict() && isSchemeMatchesPalette())) {
-                        setLabelValuesActual(schemeInfo.getColorBarLabels());
-                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
-                        setPopulateLabelsTextfield(true);
-                        schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
-
-                        if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
-                            setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
-                        }
-
-                        schemeOverRidden = false;
-                    } else {
-                        setLabelValuesActual(labelValuesActualPreferences);
-                        setLabelValuesMode(labelValuesModePreferences);
-                        setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
-                        setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
-                        schemeOverRidden = true;
-                    }
-                }
-            }
+//
+//            if (imageLegendInitialized &&  (schemeLabelsRestrictPrevious != isSchemeLabelsRestrict())) {
+//                if (isSchemeLabelsApply()
+//                        && schemeInfo != null
+//                        && schemeInfo.getColorBarLabels() != null
+//                        && schemeInfo.getColorBarLabels().trim().length() > 0) {
+//                    if (!isSchemeLabelsRestrict() || (isSchemeLabelsRestrict() && isSchemeMatchesPalette())) {
+//                        setLabelValuesActual(schemeInfo.getColorBarLabels());
+//                        setLabelValuesMode(ColorBarLayerType.DISTRIB_MANUAL_STR);
+//                        setPopulateLabelsTextfield(true);
+//                        schemeMatchedPaletteOriginally = isSchemeMatchesPalette();
+//
+//                        if (schemeInfo.getColorBarLabelScalingStr() != null && schemeInfo.getColorBarLabelScalingStr().trim().length() > 0) {
+//                            setLabelValuesScalingFactor(Double.parseDouble(schemeInfo.getColorBarLabelScalingStr()));
+//                        }
+//
+//                        schemeOverRidden = false;
+//                    } else {
+//                        setLabelValuesActual(labelValuesActualPreferences);
+//                        setLabelValuesMode(labelValuesModePreferences);
+//                        setPopulateLabelsTextfield(populateLabelsTextfieldPreferences);
+//                        setLabelValuesScalingFactor(labelValuesScalingFactorPreferences);
+//                        schemeOverRidden = true;
+//                    }
+//                }
+//            }
 
 
 
