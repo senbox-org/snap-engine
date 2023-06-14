@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (C) 2014-2015 CS SI
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~  with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>GDAL Scene Product Writer</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <table class="header">
+        <tr class="header">
+            <td class="header">&nbsp; Export products using the GDAL library</td>
+            <td class="header" align="right">
+                <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+            </td>
+        </tr>
+    </table>
+
+    <h3>Export products using the GDAL library</h3>
+
+    <p>This command allows to save products into several formats. The format used to save the product corresponds 
+	   to the file type selected in the save dialog window.
+    </p>
+    <p>Images data products are delivered in several image formats, as shown in the table:
+    </p>
+    <table>
+        <tr><th>File extension</th><th>Description</th></tr>
+        <tr>
+            <td>*.kea</td>
+            <td>KEA is an image file format, named after the New Zealand bird, that provides a full implementation of 
+			the GDAL data model and is implemented within a HDF5 file. A software library, likea, is used to access the 
+			file format. The format has comparable performance with existing formats while producing smaller file sizes 
+			and is already within active use for a number of projects within Landcare Research, New Zealand, 
+			and the wider community.</td>
+        </tr>
+
+        <tr>
+            <td>*.nc</td>
+            <td>Network Common Data Format</td>
+        </tr>
+
+        <tr>
+            <td>*.tif</td>
+            <td>GeoTIFF</td>
+        </tr>
+        <tr>
+            <td>*.ntf</td>
+            <td>National Imagery Transmission Format</td>
+        </tr>
+        <tr>
+            <td>*.img</td>
+            <td>Erdas Imagine format for read access and write. The driver supports reading overviews, 
+			palettes, and georeferencing. It supports the Erdas band types u8, s8, u16, s16, u32, s32, f32, f64, c64 and c128.
+			Compressed and missing tiles in Erdas files should be handled properly on read. Files between 2GiB and 4GiB in size 
+			should work on Windows NT, and may work on some Unix platforms. Files with external spill files (needed for datasets 
+			larger than 2GiB) are also support for reading and writing.</td>
+        </tr>
+        <tr>
+            <td>*.bmp</td>
+            <td>Microsoft Windows Device Independent Bitmap</td>
+        </tr>
+        <tr>
+            <td>*.pix</td>
+            <td>PCIDSK Database File</td>
+        </tr>
+        <tr>
+            <td>*.mpr</td>
+            <td>ILWIS Raster Map</td>
+        </tr>
+        <tr>
+            <td>*.rgb</td>
+            <td>SGI Image File Format 1.0</td>
+        </tr>
+        <tr>
+            <td>*.rsw</td>
+            <td>Raster Matrix Format</td>
+        </tr>
+        <tr>
+            <td>*.rst</td>
+            <td>Idrisi Raster A.1</td>
+        </tr>
+        <tr>
+            <td>*.grd</td>
+            <td>Golden Software Binary Grid</td>
+        </tr>
+        <tr>
+            <td>*.pnm</td>
+            <td>Portable Pixmap Format (netpbm)</td>
+        </tr>
+        <tr>
+            <td>*.hdr</td>
+            <td>Vexcel MFF Raster</td>
+        </tr>
+        <tr>
+            <td>*.bt</td>
+            <td>VTP .bt (Binary Terrain) 1.3 Format</td>
+        </tr>
+        <tr>
+            <td>*.gtx</td>
+            <td>NOAA Vertical Datum .GTX</td>
+        </tr>
+        <tr>
+            <td>*.kro</td>
+            <td>KOLOR Raw</td>
+        </tr>
+        <tr>
+            <td>*.sdat</td>
+            <td>SAGA GIS Binary Grid</td>
+        </tr>
+    </table>
+
+    <p>
+        The supported GDAL library versions are listed <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/desktop/OptionsDialog.html#GDALLibraryLoaderConfig">here</a>. If this library is already installed, then it is used; otherwise the application will use the internal distribution (3.2.1).
+        This functionality is available on machines with the Microsoft Windows, Linux and Mac OSX operating system.
+    </p>	
+    <p>For more details please see: <a href="http://www.gdal.org/">GDAL - Geospatial Data Abstraction Library</a></p>
+	
+</body>
+</html>

@@ -20,12 +20,12 @@
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media</groupId>
-            <artifactId>jai_core</artifactId>
+            <groupId>javax.media.jai</groupId>
+            <artifactId>jai-core-openjdk</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media</groupId>
-            <artifactId>jai_codec</artifactId>
+            <groupId>javax.media.jai</groupId>
+            <artifactId>jai-codec-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media</groupId>
@@ -73,7 +73,6 @@
                         <publicPackage>sun.awt.image.codec.*</publicPackage>
                         <publicPackage>com.sun.image.codec.jpeg.*</publicPackage>
                         <publicPackage>com.sun.medialib.codec.*</publicPackage>
-                        <publicPackage>com.sun.medialib.mlib.*</publicPackage>
                         <publicPackage>com.bc.ceres.compiler</publicPackage>
                         <publicPackage>com.bc.ceres.jai.*</publicPackage>
                         <publicPackage>it.geosolutions.imageio.plugins.tiff</publicPackage>
