@@ -27,7 +27,7 @@ public class GDALInstallerTest {
                 });
             }
             try (final Stream<Path> sp = Files.list(target)) {
-                if (!sp.findAny().isPresent()) {
+                if (sp.findAny().isEmpty()) {
                     Files.delete(target);
                 }
             }
@@ -74,7 +74,7 @@ public class GDALInstallerTest {
             final Path nativeLibrariesRootFolderPath = GDALVersionTest.getExpectedNativeLibrariesRootFolderPath();
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
-            new GDALInstaller(nativeLibrariesRootFolderPath).copyDistribution(gdalVersion);
+            GDALInstaller.copyDistribution(gdalVersion);
             assertTrue(Files.exists(nativeLibrariesRootFolderPath));
             assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
             assertTrue(System.getProperty(JAVA_LIB_PATH).contains(nativeLibrariesRootFolderPath.toString()));

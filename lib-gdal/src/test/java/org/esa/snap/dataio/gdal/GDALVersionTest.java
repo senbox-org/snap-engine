@@ -251,14 +251,6 @@ public class GDALVersionTest {
     }
 
     @Test
-    public void testGetOsCategory() {
-        assertEquals(getExpectedOSCategory(), TEST_VERSION.osCategory);
-        assertEquals(getExpectedOSCategory(), TEST_VERSION_JNI.osCategory);
-        assertEquals(TEST_VERSION.osCategory, TEST_VERSION.getOsCategory());
-        assertEquals(TEST_VERSION_JNI.osCategory, TEST_VERSION_JNI.getOsCategory());
-    }
-
-    @Test
     public void testIsJni() {
         assertEquals(TEST_VERSION.jni, TEST_VERSION.isJni());
         assertEquals(TEST_VERSION_JNI.jni, TEST_VERSION_JNI.isJni());
@@ -293,10 +285,8 @@ public class GDALVersionTest {
     @Test
     public void testGetEnvironmentVariablesFilePathFromSources() {
         try {
-            assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), TEST_VERSION.getEnvironmentVariablesFilePathFromSources());
-            assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), TEST_VERSION_JNI.getEnvironmentVariablesFilePathFromSources());
-            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(TEST_VERSION.getEnvironmentVariablesFilePathFromSources()).toURI())));
-            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(TEST_VERSION_JNI.getEnvironmentVariablesFilePathFromSources()).toURI())));
+            assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), GDALVersion.getEnvironmentVariablesFilePathFromSources());
+            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(GDALVersion.getEnvironmentVariablesFilePathFromSources()).toURI())));
         } catch (Exception e) {
             fail("Error on testGetEnvironmentVariablesFilePathFromSources(): " + e.getMessage());
         }
@@ -304,14 +294,12 @@ public class GDALVersionTest {
 
     @Test
     public void testGetEnvironmentVariablesFilePath() {
-        assertEquals(getExpectedEnvironmentVariablesFilePath(), TEST_VERSION.getEnvironmentVariablesFilePath());
-        assertEquals(getExpectedEnvironmentVariablesFilePath(), TEST_VERSION_JNI.getEnvironmentVariablesFilePath());
+        assertEquals(getExpectedEnvironmentVariablesFilePath(), GDALVersion.getEnvironmentVariablesFilePath());
     }
 
     @Test
     public void testGetNativeLibrariesRootFolderPath() {
-        assertEquals(getExpectedNativeLibrariesRootFolderPath(), TEST_VERSION.getNativeLibrariesRootFolderPath());
-        assertEquals(getExpectedNativeLibrariesRootFolderPath(), TEST_VERSION_JNI.getNativeLibrariesRootFolderPath());
+        assertEquals(getExpectedNativeLibrariesRootFolderPath(), GDALVersion.getNativeLibrariesRootFolderPath());
     }
 
     @Test

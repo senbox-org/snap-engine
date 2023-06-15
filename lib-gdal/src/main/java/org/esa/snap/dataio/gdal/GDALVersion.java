@@ -48,9 +48,9 @@ public enum GDALVersion {
 
     private static final Logger logger = Logger.getLogger(GDALVersion.class.getName());
 
-    private static final GDALVersion INTERNAL_VERSION = retrieveInternalVersion();
-    private static final Map<String, GDALVersion> INSTALLED_VERSIONS = retrieveInstalledVersions();
-    private static final GDALVersion INSTALLED_VERSION = getSelectedInstalledVersion();
+    private static GDALVersion INTERNAL_VERSION = null;
+    private static Map<String, GDALVersion> INSTALLED_VERSIONS = null;
+    private static GDALVersion INSTALLED_VERSION = null;
 
     private static final int TIMEOUT_FOR_PROCESS = 30;// allow only 30 seconds of running time for the process
 
@@ -99,12 +99,15 @@ public enum GDALVersion {
      * @return the installed GDAL version when found or internal GDAL version otherwise
      */
     public static GDALVersion getGDALVersion() {
+        if (INSTALLED_VERSION != null) {
+            INSTALLED_VERSION = getSelectedInstalledVersion();
+        }
         if (GDALLoaderConfig.getInstance().useInstalledGDALLibrary() && INSTALLED_VERSION != null) {
             logger.log(Level.FINE, () -> "Installed GDAL " + INSTALLED_VERSION.getId() + " set to be used by SNAP.");
             return INSTALLED_VERSION;
         }
-        logger.log(Level.FINE, () -> "Internal GDAL " + INTERNAL_VERSION.getId() + " set to be used by SNAP.");
-        return INTERNAL_VERSION;
+        logger.log(Level.FINE, () -> "Internal GDAL " + getInternalVersion().getId() + " set to be used by SNAP.");
+        return getInternalVersion();
     }
 
     /**
@@ -113,7 +116,7 @@ public enum GDALVersion {
      * @return the installed GDAL version or {@code null} if not found
      */
     public static GDALVersion getSelectedInstalledVersion() {
-        if (INSTALLED_VERSIONS != null) {
+        if (getInstalledVersions() != null) {
             final GDALVersion selectedInstalledVersion = INSTALLED_VERSIONS.get(GDALLoaderConfig.getInstance().getSelectedInstalledGDALLibrary());
             if (selectedInstalledVersion == null && INSTALLED_VERSIONS.size() > 0) {
                 return INSTALLED_VERSIONS.values().iterator().next();
@@ -129,6 +132,9 @@ public enum GDALVersion {
      * @return the installed GDAL version or {@code null} if not found
      */
     public static Map<String, GDALVersion> getInstalledVersions() {
+        if (INSTALLED_VERSIONS == null) {
+            INSTALLED_VERSIONS = retrieveInstalledVersions();
+        }
         return INSTALLED_VERSIONS;
     }
 
@@ -164,8 +170,8 @@ public enum GDALVersion {
      * @return {@code true} if the internal GDAL distribution is detected as installed version
      */
     private static boolean isInternalVersionDetectedAsInstalledVersion(String installedVersionPath){
-        if (installedVersionPath.equals(INTERNAL_VERSION.getLocation())) {
-            logger.log(Level.FINE, () -> "Skipping detected internal GDAL " + INTERNAL_VERSION.id + " from distribution.");
+        if (installedVersionPath.equals(getInternalVersion().getLocation())) {
+            logger.log(Level.FINE, () -> "Skipping detected internal GDAL " + getInternalVersion().id + " from distribution.");
             return true;
         }
         return false;
@@ -180,7 +186,7 @@ public enum GDALVersion {
         final OSCategory osCategory = OSCategory.getOSCategory();
         final String[] installedVersionsPaths = osCategory.getExecutableLocations(GDALINFIO_EXECUTABLE_NAME);
         if (installedVersionsPaths.length < 1) {
-            logger.log(Level.FINE, () -> "GDAL not found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
+            logger.log(Level.FINE, () -> "GDAL not found on system. Internal GDAL " + getInternalVersion().id + " from distribution will be used.");
             return null;
         }
         final Map<String, GDALVersion> gdalVersions = new LinkedHashMap<>();
@@ -200,7 +206,7 @@ public enum GDALVersion {
                     logger.log(Level.FINE, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
                     gdalVersions.putIfAbsent(version, gdalVersion);
                 } else {
-                    logger.log(Level.FINE, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + INTERNAL_VERSION.id + " from distribution will be used.");
+                    logger.log(Level.FINE, () -> "Incompatible GDAL " + versionId + " found on system. Internal GDAL " + getInternalVersion().id + " from distribution will be used.");
                 }
             } catch (IOException ex) {
                 logger.log(Level.WARNING, () -> "Error occurred while checking installed GDAL version(s): " + ex.getMessage());
@@ -215,6 +221,9 @@ public enum GDALVersion {
      * @return the internal GDAL version
      */
     public static GDALVersion getInternalVersion() {
+        if (INTERNAL_VERSION == null) {
+            INTERNAL_VERSION = retrieveInternalVersion();
+        }
         return INTERNAL_VERSION;
     }
 
@@ -345,8 +354,8 @@ public enum GDALVersion {
      *
      * @return the relative path of the directory based on OS category for this version
      */
-    private String getDirectory() {
-        return this.osCategory.getOperatingSystemName() + "/" + this.osCategory.getArchitecture();
+    private static String getDirectory() {
+        return OSCategory.getOSCategory().getOperatingSystemName() + "/" + OSCategory.getOSCategory().getArchitecture();
     }
 
     /**
@@ -411,10 +420,10 @@ public enum GDALVersion {
      *
      * @return the environment variables native library URL from SNAP distribution packages for this version
      */
-    public URL getEnvironmentVariablesFilePathFromSources() {
-        final String evFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + this.osCategory.getOSSpecificEnvironmentVariablesFileName();
+    public static URL getEnvironmentVariablesFilePathFromSources() {
+        final String evFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName();
         try {
-            return getClass().getClassLoader().getResource(evFileDirectoryFromSources.replace(File.separator, "/"));
+            return GDALVersion.class.getClassLoader().getResource(evFileDirectoryFromSources.replace(File.separator, "/"));
         } catch (Exception ignored) {
             return null;
         }
@@ -425,8 +434,8 @@ public enum GDALVersion {
      *
      * @return the environment variables native library root directory path for install this version
      */
-    public Path getEnvironmentVariablesFilePath() {
-        return getNativeLibrariesRootFolderPath().resolve(this.osCategory.getOSSpecificEnvironmentVariablesFileName());
+    public static Path getEnvironmentVariablesFilePath() {
+        return getNativeLibrariesRootFolderPath().resolve(OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName());
     }
 
     /**
@@ -434,7 +443,7 @@ public enum GDALVersion {
      *
      * @return the root directory path for install this version
      */
-    public Path getNativeLibrariesRootFolderPath() {
+    public static Path getNativeLibrariesRootFolderPath() {
         return SystemUtils.getAuxDataPath().resolve(GDAL_NATIVE_LIBRARIES_ROOT);
     }
 
