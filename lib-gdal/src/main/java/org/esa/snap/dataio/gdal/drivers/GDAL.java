@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.lang.reflect.Array;
+
 /**
  * GDAL gdal JNI driver class
  *
@@ -91,6 +93,27 @@ public class GDAL {
         Object jniDriverInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDriverByName", Object.class, null, new Class[]{String.class}, new Object[]{name});
         if (jniDriverInstance != null) {
             return new Driver(jniDriverInstance);
+        }
+        return null;
+    }
+
+    /**
+     * Calls the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method
+     *
+     * @param dest            the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'dest' argument
+     * @param objectListCount the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'object_list_count' argument
+     * @param options         the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'options' argument
+     * @return the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method result
+     */
+    public static Dataset buildVRT(String dest, Dataset[] objectListCount, BuildVRTOptions options) {
+        Object objectListCountJni = Array.newInstance(objectListCount[0].getJniDatasetInstance().getClass(), objectListCount.length);
+
+        for (int i = 0; i < objectListCount.length; i++) {
+            Array.set(objectListCountJni, i, objectListCount[i].getJniDatasetInstance());
+        }
+        Object jniDatasetInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "BuildVRT", Object.class, null, new Class[]{dest.getClass(), objectListCountJni.getClass(), options.getJniBuildVRTOptionsInstance().getClass()}, new Object[]{dest, objectListCountJni, options.getJniBuildVRTOptionsInstance()});
+        if (jniDatasetInstance != null) {
+            return new Dataset(jniDatasetInstance);
         }
         return null;
     }
