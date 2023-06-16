@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,18 +69,31 @@ public class GDALInstallerTest {
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testCopyDistribution() {
         try {
-            final GDALVersion gdalVersion = GDALVersion.GDAL_321_FULL;
-            final Path nativeLibrariesRootFolderPath = GDALVersionTest.getExpectedNativeLibrariesRootFolderPath();
+            final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
             GDALInstaller.copyDistribution(gdalVersion);
-            assertTrue(Files.exists(nativeLibrariesRootFolderPath));
-            assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
-            assertTrue(System.getProperty(JAVA_LIB_PATH).contains(nativeLibrariesRootFolderPath.toString()));
+            assertTrue(Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath()));
         } catch (IOException e) {
             fail("Error on testCopyDistribution(): " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    @STTM("SNAP-3523")
+    public void testSetupEnvironmentVariablesNativeLibrary() {
+        try {
+            GDALInstaller.setupEnvironmentVariablesNativeLibrary();
+            assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
+            final Path nativeLibrariesRootFolderPath = GDALVersionTest.getExpectedNativeLibrariesRootFolderPath();
+            assertTrue(Files.exists(nativeLibrariesRootFolderPath));
+            assertTrue(System.getProperty(JAVA_LIB_PATH).contains(nativeLibrariesRootFolderPath.toString()));
+        } catch (IOException e) {
+            fail("Error on testInstallBundleDistribution(): " + e.getMessage());
             e.printStackTrace();
         }
     }

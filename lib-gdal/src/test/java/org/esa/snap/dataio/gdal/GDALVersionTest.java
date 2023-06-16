@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.junit.After;
@@ -32,7 +33,7 @@ public class GDALVersionTest {
     private static final String NONE_SELECTED_INSTALLED_GDAL_LIBRARY = "none";
 
     private static final GDALVersion TEST_VERSION_JNI = GDALVersion.GDAL_32X_JNI;
-    private static final GDALVersion TEST_VERSION = GDALVersion.GDAL_321_FULL;
+    private static final GDALVersion TEST_VERSION = GDALVersion.getInternalVersion();
 
     private Boolean currentUseInstalledGDALLibrary;
     private String currentSelectedInstalledGDALLibrary;
@@ -283,6 +284,7 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testGetEnvironmentVariablesFilePathFromSources() {
         try {
             assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), GDALVersion.getEnvironmentVariablesFilePathFromSources());
@@ -293,11 +295,13 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testGetEnvironmentVariablesFilePath() {
         assertEquals(getExpectedEnvironmentVariablesFilePath(), GDALVersion.getEnvironmentVariablesFilePath());
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testGetNativeLibrariesRootFolderPath() {
         assertEquals(getExpectedNativeLibrariesRootFolderPath(), GDALVersion.getNativeLibrariesRootFolderPath());
     }

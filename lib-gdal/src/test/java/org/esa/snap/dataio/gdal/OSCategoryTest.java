@@ -1,8 +1,8 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import static org.apache.commons.lang3.SystemUtils.*;
@@ -93,6 +93,7 @@ public class OSCategoryTest {
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testGetExecutableLocations() {
         final OSCategory osCategory = OSCategory.getOSCategory();
         assertNotNull(osCategory);
