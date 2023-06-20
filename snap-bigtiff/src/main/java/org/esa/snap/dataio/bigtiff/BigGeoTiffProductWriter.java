@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class BigGeoTiffProductWriter extends AbstractProductWriter {
+public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     private static final String PARAM_COMPRESSION_TYPE = "snap.dataio.bigtiff.compression.type";   // value must be "LZW" or "NONE" or empty or null
     private static final String COMPRESSION_TYPE_LZW = "LZW";
