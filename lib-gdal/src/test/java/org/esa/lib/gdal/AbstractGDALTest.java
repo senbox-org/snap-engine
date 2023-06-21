@@ -1,11 +1,15 @@
 package org.esa.lib.gdal;
 
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.dataio.gdal.OSCategory;
 import org.junit.Before;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.apache.commons.lang3.SystemUtils.*;
+import static org.esa.snap.dataio.gdal.GDALVersion.GDAL_NATIVE_LIBRARIES_ROOT;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
@@ -15,6 +19,32 @@ public class AbstractGDALTest {
     private static final String TEST_FOLDER_NAME = "_lib_gdal";
 
     protected Path libGDALTestsFolderPath;
+
+    public static String getExpectedDirectory() {
+        final OSCategory osCategory = getExpectedOSCategory();
+        return osCategory.getOperatingSystemName() + "/" + osCategory.getArchitecture();
+    }
+
+    public static OSCategory getExpectedOSCategory() {
+        if (IS_OS_LINUX) {
+            return OSCategory.LINUX_64;
+        } else if (IS_OS_MAC_OSX) {
+            return OSCategory.MAC_OS_X;
+        } else if (IS_OS_WINDOWS) {
+            final String sysArch = System.getProperty("os.arch").toLowerCase();
+            if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
+                return OSCategory.WIN_64;
+            } else {
+                return OSCategory.WIN_32;
+            }
+        } else {
+            return OSCategory.UNSUPPORTED;
+        }
+    }
+
+    public static Path getExpectedNativeLibrariesRootFolderPath() {
+        return SystemUtils.getAuxDataPath().resolve(GDAL_NATIVE_LIBRARIES_ROOT);
+    }
 
     private static boolean testDataAvailable() {
         final String testDataDir = System.getProperty(PROPERTY_NAME_DATA_DIR);

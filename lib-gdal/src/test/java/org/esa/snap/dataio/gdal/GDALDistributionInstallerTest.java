@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.lib.gdal.AbstractGDALTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,8 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class GDALDistributionInstallerTest {
-
-    private static final String JAVA_LIB_PATH = "java.library.path";
 
     private void deleteFTree(Path target) throws IOException {
         if (Files.isDirectory(target)) {
@@ -40,7 +39,7 @@ public class GDALDistributionInstallerTest {
     }
 
     private void deleteGDALDirs() throws IOException {
-        if (Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath())) {
+        if (Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath())) {
             Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_32X_JNI);
             if (Files.exists(targetPath)) {
                 deleteFTree(targetPath);
@@ -75,11 +74,9 @@ public class GDALDistributionInstallerTest {
             final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             GDALDistributionInstaller.setupDistribution(gdalVersion);
-            final Path jniDistributionPath = GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion);
-            assertTrue(Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath()));
-            assertTrue(Files.exists(jniDistributionPath));
-            assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
-            assertTrue(System.getProperty(JAVA_LIB_PATH).contains(jniDistributionPath.toString()));
+            assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
+            assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
+            assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));
         } catch (IOException e) {
             fail("Error on testSetupDistribution(): " + e.getMessage());
         }
@@ -90,11 +87,9 @@ public class GDALDistributionInstallerTest {
             final GDALVersion gdalVersion = GDALVersion.GDAL_321_FULL;
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             GDALDistributionInstaller.setupDistribution(GDALVersion.GDAL_321_FULL);
-            final Path bundleDistributionPath = GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion);
-            assertTrue(Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath()));
-            assertTrue(Files.exists(bundleDistributionPath));
-            assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
-            assertTrue(System.getProperty(JAVA_LIB_PATH).contains(bundleDistributionPath.toString()));
+            assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
+            assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
+            assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));
         } catch (IOException e) {
             fail("Error on testSetupDistribution(): " + e.getMessage());
         }

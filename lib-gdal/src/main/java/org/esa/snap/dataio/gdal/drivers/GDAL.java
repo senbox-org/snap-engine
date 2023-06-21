@@ -94,4 +94,8 @@ public class GDAL {
         }
         return null;
     }
+
+    public static String getLastErrorMsg(){
+        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetLastErrorMsg", String.class, null, new Class[]{}, new Object[]{});
+    }
 }

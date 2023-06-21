@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static org.apache.commons.lang3.SystemUtils.*;
 import static org.esa.snap.dataio.gdal.GDALLoaderConfig.*;
 import static org.esa.snap.dataio.gdal.GDALVersion.*;
 import static org.junit.Assert.*;
@@ -42,23 +41,6 @@ public class GDALVersionTest {
         return Config.instance(CONFIG_NAME).load().preferences();
     }
 
-    private static OSCategory getExpectedOSCategory() {
-        if (IS_OS_LINUX) {
-            return OSCategory.LINUX_64;
-        } else if (IS_OS_MAC_OSX) {
-            return OSCategory.MAC_OS_X;
-        } else if (IS_OS_WINDOWS) {
-            final String sysArch = System.getProperty("os.arch").toLowerCase();
-            if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
-                return OSCategory.WIN_64;
-            } else {
-                return OSCategory.WIN_32;
-            }
-        } else {
-            return OSCategory.UNSUPPORTED;
-        }
-    }
-
     private static String getExpectedDirName(boolean jni, String name) {
         if (jni) {
             return DIR_NAME.replace(VERSION_NAME, name).replace(JNI_NAME, "-jni");
@@ -75,14 +57,9 @@ public class GDALVersionTest {
         }
     }
 
-    private static String getExpectedDirectory() {
-        final OSCategory osCategory = getExpectedOSCategory();
-        return osCategory.getOperatingSystemName() + "/" + osCategory.getArchitecture();
-    }
-
     private static Map<String, GDALVersion> retrieveExpectedInstalledVersions() {
         final Map<String, GDALVersion> gdalVersions = new LinkedHashMap<>();
-        final OSCategory osCategory = getExpectedOSCategory();
+        final OSCategory osCategory = AbstractGDALTest.getExpectedOSCategory();
         final String[] installedVersionsPaths = osCategory.getExecutableLocations(GDALINFIO_EXECUTABLE_NAME);
         if (installedVersionsPaths.length < 1) {
             return null;
@@ -106,7 +83,7 @@ public class GDALVersionTest {
     }
 
     static Path getExpectedGDALVersionLocation(GDALVersion gdalVersion) {
-        return getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedDirName(gdalVersion.jni, gdalVersion.name));
+        return AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedDirName(gdalVersion.isJni(), gdalVersion.name));
     }
 
     private static String retrieveExpectedInternalVersionLocation() {
@@ -114,7 +91,7 @@ public class GDALVersionTest {
     }
 
     private static String retrieveExpectedInstalledVersionLocation(GDALVersion gdalVersion) {
-        return Arrays.stream(getExpectedOSCategory().getExecutableLocations(GDALINFIO_EXECUTABLE_NAME)).filter(installedVersionLocation -> {
+        return Arrays.stream(AbstractGDALTest.getExpectedOSCategory().getExecutableLocations(GDALINFIO_EXECUTABLE_NAME)).filter(installedVersionLocation -> {
             try {
                 return JNI_VERSIONS.get(fetchProcessOutput(Runtime.getRuntime().exec(new String[]{installedVersionLocation + File.separator + GDALINFIO_EXECUTABLE_NAME, GDALINFO_EXECUTABLE_ARGS})).replaceAll("[\\s\\S]*?(\\d*\\.\\d*\\.\\d*)[\\s\\S]*$", "$1").replaceAll("(\\d*\\.\\d*)[\\s\\S]*$", "$1.x")) == gdalVersion;
             } catch (IOException e) {
@@ -131,32 +108,12 @@ public class GDALVersionTest {
         }
     }
 
-    static String getExpectedEnvironmentVariablesFileName() {
-        return getExpectedOSCategory().getOSSpecificEnvironmentVariablesFileName();
-    }
-
-    private static String getExpectedEnvironmentVariablesDirectory() {
-        return GDAL_NATIVE_LIBRARIES_SRC + "/" + getExpectedDirectory() + "/" + getExpectedEnvironmentVariablesFileName();
-    }
-
     private static URL getExpectedZipFileURLFromSources(GDALVersion gdalVersion) {
-        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + getExpectedDirectory() + "/" + getExpectedZipName(gdalVersion.jni, gdalVersion.name).replace(File.separator, "/"));
+        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + AbstractGDALTest.getExpectedDirectory() + "/" + getExpectedZipName(gdalVersion.isJni(), gdalVersion.name).replace(File.separator, "/"));
     }
 
     private static Path getExpectedZipFilePath(GDALVersion gdalVersion) {
-        return getExpectedGDALVersionLocation(gdalVersion).resolve(getExpectedZipName(gdalVersion.jni, gdalVersion.name));
-    }
-
-    private static URL getExpectedEnvironmentVariablesFilePathFromSources() {
-        return GDALVersion.class.getClassLoader().getResource(getExpectedEnvironmentVariablesDirectory().replace(File.separator, "/"));
-    }
-
-    static Path getExpectedEnvironmentVariablesFilePath() {
-        return getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedEnvironmentVariablesFileName());
-    }
-
-    static Path getExpectedNativeLibrariesRootFolderPath() {
-        return SystemUtils.getAuxDataPath().resolve(GDAL_NATIVE_LIBRARIES_ROOT);
+        return getExpectedGDALVersionLocation(gdalVersion).resolve(getExpectedZipName(gdalVersion.isJni(), gdalVersion.name));
     }
 
     private Path getExpectedJNILibraryFilePath(GDALVersion gdalVersion) {
@@ -196,12 +153,12 @@ public class GDALVersionTest {
         final Map<String, GDALVersion> installedVersions = retrieveExpectedInstalledVersions();
         GDALLoaderConfig.getInstance().setUseInstalledGDALLibrary(USE_INSTALLED_GDAL_LIBRARY);
         if (installedVersions == null || installedVersions.isEmpty()) {
-            assertFalse(GDALVersion.getGDALVersion().jni);
+            assertFalse(GDALVersion.getGDALVersion().isJni());
         } else {
-            assertTrue(GDALVersion.getGDALVersion().jni);
+            assertTrue(GDALVersion.getGDALVersion().isJni());
         }
         GDALLoaderConfig.getInstance().setUseInstalledGDALLibrary(USE_INTERNAL_GDAL_LIBRARY);
-        assertFalse(GDALVersion.getGDALVersion().jni);
+        assertFalse(GDALVersion.getGDALVersion().isJni());
     }
 
     @Test
@@ -253,8 +210,8 @@ public class GDALVersionTest {
 
     @Test
     public void testIsJni() {
-        assertEquals(TEST_VERSION.jni, TEST_VERSION.isJni());
-        assertEquals(TEST_VERSION_JNI.jni, TEST_VERSION_JNI.isJni());
+        assertEquals(TEST_VERSION.nativeLibraryNames == null, TEST_VERSION.isJni());
+        assertEquals(TEST_VERSION_JNI.nativeLibraryNames == null, TEST_VERSION_JNI.isJni());
     }
 
     @Test
@@ -285,25 +242,8 @@ public class GDALVersionTest {
 
     @Test
     @STTM("SNAP-3523")
-    public void testGetEnvironmentVariablesFilePathFromSources() {
-        try {
-            assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), GDALVersion.getEnvironmentVariablesFilePathFromSources());
-            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(GDALVersion.getEnvironmentVariablesFilePathFromSources()).toURI())));
-        } catch (Exception e) {
-            fail("Error on testGetEnvironmentVariablesFilePathFromSources(): " + e.getMessage());
-        }
-    }
-
-    @Test
-    @STTM("SNAP-3523")
-    public void testGetEnvironmentVariablesFilePath() {
-        assertEquals(getExpectedEnvironmentVariablesFilePath(), GDALVersion.getEnvironmentVariablesFilePath());
-    }
-
-    @Test
-    @STTM("SNAP-3523")
     public void testGetNativeLibrariesRootFolderPath() {
-        assertEquals(getExpectedNativeLibrariesRootFolderPath(), GDALVersion.getNativeLibrariesRootFolderPath());
+        assertEquals(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath(), GDALVersion.getNativeLibrariesRootFolderPath());
     }
 
     @Test

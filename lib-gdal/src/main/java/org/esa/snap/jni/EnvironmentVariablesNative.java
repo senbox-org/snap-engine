@@ -7,11 +7,6 @@ package org.esa.snap.jni;
  */
 public class EnvironmentVariablesNative {
 
-    static {
-        //Loads the native library used by this JNI
-        System.loadLibrary("environment-variables");
-    }
-
     public static native int chdir(String dir);
 
     public static native String getcwd();

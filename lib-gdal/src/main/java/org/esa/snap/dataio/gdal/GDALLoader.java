@@ -21,9 +21,13 @@ import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
+import org.esa.snap.engine_utilities.file.FileHelper;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -38,11 +42,14 @@ import java.util.logging.Logger;
 public final class GDALLoader {
 
     private static final GDALLoader INSTANCE = new GDALLoader();
+
+    private static final String GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME = "org.esa.snap.NativeLibraryLoader";
+
     private static final Logger logger = Logger.getLogger(GDALLoader.class.getName());
 
     private boolean gdalInitialisationExecuted = false;
     private GDALVersion gdalVersion;
-    private URLClassLoader gdalVersionLoader;
+    private GDALLoaderClassLoader gdalVersionLoader;
 
     private Map<Integer, Integer> bandToGDALDataTypes;
 
@@ -79,7 +86,8 @@ public final class GDALLoader {
             try {
                 this.gdalVersion = GDALVersion.getGDALVersion();
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
-                this.gdalVersionLoader = new URLClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());
+                this.gdalVersionLoader = new GDALLoaderClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
+                loadGDALNativeLibrary();
                 GDALInstallInfo.INSTANCE.setLocations(this.gdalVersion.getLocationPath());
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
@@ -164,4 +172,46 @@ public final class GDALLoader {
         logger.log(Level.FINE, "Init the GDAL drivers on " + this.gdalVersion.getOsCategory().getOperatingSystemName() + ".");
         GDAL.allRegister();// GDAL init drivers
     }
+
+    /**
+     * Loads the GDAL native library used for access GDAL native methods.
+     */
+    private void loadGDALNativeLibrary() {
+        try {
+            copyLoaderLibrary();
+            final Method loaderMethod = this.gdalVersionLoader.loadClass(GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME).getMethod("loadNativeLibrary", Path.class);
+            for (Path nativeLibraryFilePath : this.gdalVersion.getGDALNativeLibraryFilesPath()) {
+                loaderMethod.invoke(null, nativeLibraryFilePath);
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.fine("Load the GDAL native library '" + nativeLibraryFilePath.getFileName() + "'.");
+                }
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    /**
+     * Copies the loader library used for load GDAL native library.
+     *
+     * @throws IOException When IO error occurs
+     */
+    private static void copyLoaderLibrary() throws IOException {
+        final Path loaderFilePath = GDALVersion.getLoaderLibraryFilePath();
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Copy the loader library file.");
+        }
+
+        final URL libraryFileURLFromSources = GDALVersion.getLoaderFilePathFromSources();
+        if (libraryFileURLFromSources != null) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("The loader library file path on the local disk is '" + loaderFilePath + "' and the library file name from sources is '" + libraryFileURLFromSources + "'.");
+            }
+
+            FileHelper.copyFile(libraryFileURLFromSources, loaderFilePath);
+        } else {
+            throw new IllegalStateException("Unable to get loader libraryFileURLFromSources");
+        }
+    }
+
 }

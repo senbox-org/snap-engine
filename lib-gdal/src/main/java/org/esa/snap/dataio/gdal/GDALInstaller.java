@@ -17,7 +17,6 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.core.runtime.Version;
-import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.file.FileHelper;
@@ -141,7 +140,7 @@ class GDALInstaller {
             } catch (Exception ignored) {
                 //nothing to do
             }
-            return Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(GDALVersion.getEnvironmentVariablesFilePath());
+            return Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(EnvironmentVariablesNativeLoader.getEnvironmentVariablesFilePath());
         }
         return false;
     }
@@ -200,37 +199,6 @@ class GDALInstaller {
             preferences.flush();
         } catch (BackingStoreException exception) {
             // ignore exception
-        }
-    }
-
-    /**
-     * Registers the environment variables native library used for access OS environment variables.
-     *
-     */
-    private static void registerEnvironmentVariablesNativeLibrary() {
-        final Path evFilePath = GDALVersion.getEnvironmentVariablesFilePath();
-        logger.log(Level.FINE, "Register the native paths for folder '" + evFilePath.getParent() + "'.");
-        NativeLibraryUtils.registerNativePaths(evFilePath.getParent());
-    }
-
-    /**
-     * Copies the environment variables native library used for access OS environment variables.
-     *
-     * @throws IOException When IO error occurs
-     */
-    private static void copyEnvironmentVariablesNativeLibrary() throws IOException {
-        final Path evFilePath = GDALVersion.getEnvironmentVariablesFilePath();
-        if (!Files.exists(evFilePath)) {
-            logger.log(Level.FINE, "Copy the environment variables library file.");
-
-            final URL libraryFileURLFromSources = GDALVersion.getEnvironmentVariablesFilePathFromSources();
-            if (libraryFileURLFromSources != null) {
-                logger.log(Level.FINE, "The environment variables library file path on the local disk is '" + evFilePath + "' and the library file name from sources is '" + libraryFileURLFromSources + "'.");
-
-                FileHelper.copyFile(libraryFileURLFromSources, evFilePath);
-            } else {
-                throw new IllegalStateException("Unable to get environment variables libraryFileURLFromSources");
-            }
         }
     }
 
@@ -395,10 +363,4 @@ class GDALInstaller {
             setSavedModuleSpecificationVersion(moduleVersion);
         }
     }
-
-    static void setupEnvironmentVariablesNativeLibrary() throws IOException {
-        copyEnvironmentVariablesNativeLibrary();
-        registerEnvironmentVariablesNativeLibrary();
-    }
-
 }

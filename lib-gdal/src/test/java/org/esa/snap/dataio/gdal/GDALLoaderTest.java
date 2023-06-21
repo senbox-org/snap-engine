@@ -3,7 +3,6 @@ package org.esa.snap.dataio.gdal;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConst;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
@@ -15,7 +14,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.esa.snap.dataio.gdal.GDALVersion.GDAL_NATIVE_LIBRARIES_ROOT;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
@@ -27,11 +25,6 @@ public class GDALLoaderTest extends AbstractGDALTest {
     private static final GDALVersion TEST_GDAL_VERSION = GDALVersion.getGDALVersion();
 
     private Path testFilePath;
-
-
-    private static Path getExpectedNativeLibrariesRootFolderPath() {
-        return SystemUtils.getAuxDataPath().resolve(GDAL_NATIVE_LIBRARIES_ROOT);
-    }
 
     private static URLClassLoader getExpectedGDALVersionLoader() throws Exception {
         return new URLClassLoader(new URL[]{TEST_GDAL_VERSION.getJNILibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());

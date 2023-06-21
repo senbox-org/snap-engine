@@ -23,24 +23,25 @@ import java.util.logging.Logger;
  */
 public enum GDALVersion {
 
-    GDAL_321_FULL("3.2.1", "3-2-1", false, true),
-    GDAL_32X_JNI("3.2.x", "3-2-X", true, true),
-    GDAL_31X_JNI("3.1.x", "3-1-X", true, true),
-    GDAL_30X_JNI("3.0.x", "3-0-X", true, false),
-    GDAL_24X_JNI("2.4.x", "2-4-X", true, false),
-    GDAL_23X_JNI("2.3.x", "2-3-X", true, false),
-    GDAL_22X_JNI("2.2.x", "2-2-X", true, false),
-    GDAL_21X_JNI("2.1.x", "2-1-X", true, false),
-    GDAL_20X_JNI("2.0.x", "2-0-X", true, false);
+    GDAL_321_FULL("3.2.1", "3-2-1", false, new String[]{"gdalalljni"}),
+    GDAL_32X_JNI("3.2.x", "3-2-X", true, null),
+    GDAL_31X_JNI("3.1.x", "3-1-X", true, null),
+    GDAL_30X_JNI("3.0.x", "3-0-X", false, null),
+    GDAL_24X_JNI("2.4.x", "2-4-X", false, null),
+    GDAL_23X_JNI("2.3.x", "2-3-X", false, null),
+    GDAL_22X_JNI("2.2.x", "2-2-X", false, null),
+    GDAL_21X_JNI("2.1.x", "2-1-X", false, null),
+    GDAL_20X_JNI("2.0.x", "2-0-X", false, null);
 
     static final String VERSION_NAME = "{version}";
     static final String JNI_NAME = "{jni}";
     static final String DIR_NAME = "gdal-" + VERSION_NAME + JNI_NAME;
     static final String ZIP_NAME = DIR_NAME + ".zip";
     static final String SHA256_NAME = DIR_NAME + ".sha256";
-    static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
+    public static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
     static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
     static final String GDAL_JNI_LIBRARY_FILE = "java/gdal.jar";
+    private static final String GDAL_LOADER_LIBRARY_FILE = "NativeLibraryLoader.jar";
 
     static final String GDALINFIO_EXECUTABLE_NAME = "gdalinfo";
     static final String GDALINFO_EXECUTABLE_ARGS = "--version";
@@ -57,8 +58,8 @@ public enum GDALVersion {
     String id;
     final String name;
     String location;
-    final boolean jni;
     final boolean cogCapable;
+    final String[] nativeLibraryNames;
     OSCategory osCategory;
 
     /**
@@ -66,13 +67,14 @@ public enum GDALVersion {
      *
      * @param id   the id of version
      * @param name the name of version
-     * @param jni  the type of version: {@code true} if version is JNI driver
+     * @param cogCapable  the COG compatibility of version: {@code true} if version is COG compatible
+     * @param nativeLibraryNames the array with native libraries names to be loaded
      */
-    GDALVersion(String id, String name, boolean jni, boolean cogCapable) {
+    GDALVersion(String id, String name, boolean cogCapable, String[] nativeLibraryNames) {
         this.id = id;
         this.name = name;
-        this.jni = jni;
         this.cogCapable = cogCapable;
+        this.nativeLibraryNames = nativeLibraryNames;
     }
 
     /**
@@ -298,7 +300,7 @@ public enum GDALVersion {
      * @return {@code true} if this version is JNI driver
      */
     public boolean isJni() {
-        return this.jni;
+        return this.nativeLibraryNames == null;
     }
 
     /**
@@ -350,21 +352,12 @@ public enum GDALVersion {
     }
 
     /**
-     * Gets the relative path of the directory based on OS category for this version.
-     *
-     * @return the relative path of the directory based on OS category for this version
-     */
-    private static String getDirectory() {
-        return OSCategory.getOSCategory().getOperatingSystemName() + "/" + OSCategory.getOSCategory().getArchitecture();
-    }
-
-    /**
      * Gets the ZIP archive URL from SNAP distribution packages for this version.
      *
      * @return the ZIP archive URL from SNAP distribution packages for this version
      */
     public URL getZipFileURLFromSources() {
-        final String zipFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + getZipName();
+        final String zipFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + getZipName();
         try {
             logger.log(Level.FINE, "version zip archive URL from sources: '" + zipFileDirectoryFromSources + "'.");
             return getClass().getClassLoader().getResource(zipFileDirectoryFromSources.replace(File.separator, "/"));
@@ -379,7 +372,7 @@ public enum GDALVersion {
      * @return the SHA256 file URL from SNAP distribution packages for this version
      */
     public URL getSHA256FileURLFromSources() {
-        final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + getSHA256Name();
+        final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + getSHA256Name();
         try {
             logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
             return getClass().getClassLoader().getResource(sha256FileDirectoryFromSources.replace(File.separator, "/"));
@@ -416,29 +409,6 @@ public enum GDALVersion {
     }
 
     /**
-     * Gets the environment variables native library URL from SNAP distribution packages for this version.
-     *
-     * @return the environment variables native library URL from SNAP distribution packages for this version
-     */
-    public static URL getEnvironmentVariablesFilePathFromSources() {
-        final String evFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + getDirectory() + "/" + OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName();
-        try {
-            return GDALVersion.class.getClassLoader().getResource(evFileDirectoryFromSources.replace(File.separator, "/"));
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
-
-    /**
-     * Gets the environment variables native library root directory path for install this version.
-     *
-     * @return the environment variables native library root directory path for install this version
-     */
-    public static Path getEnvironmentVariablesFilePath() {
-        return getNativeLibrariesRootFolderPath().resolve(OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName());
-    }
-
-    /**
      * Gets the root directory path for install this version.
      *
      * @return the root directory path for install this version
@@ -454,6 +424,46 @@ public enum GDALVersion {
      */
     public Path getJNILibraryFilePath() {
         return getNativeLibrariesFolderPath().resolve(GDAL_JNI_LIBRARY_FILE);
+    }
+
+    /**
+     * Gets the loader library URL from SNAP distribution packages for this version.
+     *
+     * @return the loader library URL from SNAP distribution packages for this version
+     */
+    public static URL getLoaderFilePathFromSources() {
+        final String loaderFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + GDAL_LOADER_LIBRARY_FILE;
+        try {
+            return GDALVersion.class.getClassLoader().getResource(loaderFileDirectoryFromSources.replace(File.separator, "/"));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the GDAL native library files path for install this version.
+     *
+     * @return the GDAL native library files path for install this version
+     */
+    public Path[] getGDALNativeLibraryFilesPath() {
+        final Path[] gdalNativeLibaryFiles = new Path[this.nativeLibraryNames.length];
+        for (int i = 0; i < this.nativeLibraryNames.length; i++) {
+            gdalNativeLibaryFiles[i] = getLocationPath();
+            if (org.apache.commons.lang3.SystemUtils.IS_OS_LINUX) {
+                gdalNativeLibaryFiles[i] = gdalNativeLibaryFiles[i].resolve("lib").resolve("jni");
+            }
+            gdalNativeLibaryFiles[i] = gdalNativeLibaryFiles[i].resolve(System.mapLibraryName(this.nativeLibraryNames[i]));
+        }
+        return gdalNativeLibaryFiles;
+    }
+
+    /**
+     * Gets the path for Loader of this version.
+     *
+     * @return the path for Loader of this version
+     */
+    public static Path getLoaderLibraryFilePath() {
+        return getNativeLibrariesRootFolderPath().resolve(GDAL_LOADER_LIBRARY_FILE);
     }
 }
 
