@@ -31,7 +31,7 @@ class GDALDistributionInstaller {
      */
     private static void installDistribution(GDALVersion gdalVersion) throws IOException {
         // install the GDAL library from the distribution
-        final OSCategory osCategory = gdalVersion.getOsCategory();
+        final OSCategory osCategory = OSCategory.getOSCategory();
         if (osCategory.getArchitecture() == null) {
             final String msg = "No distribution folder found on " + osCategory.getOperatingSystemName() + ".";
             logger.log(Level.FINE, msg);
@@ -40,7 +40,7 @@ class GDALDistributionInstaller {
 
         logger.log(Level.FINE, "Install the GDAL library from the distribution on " + osCategory.getOperatingSystemName() + ".");
 
-        new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
+        GDALInstaller.copyDistribution(gdalVersion);
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
         logger.log(Level.FINE, "The GDAL library has been copied on the local disk.");
@@ -80,7 +80,7 @@ class GDALDistributionInstaller {
 
         logger.log(Level.FINE, "Install the GDAL JNI drivers from the distribution on " + osCategory.getOperatingSystemName() + ".");
 
-        new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
+        GDALInstaller.copyDistribution(gdalVersion);
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
         logger.log(Level.FINE, "The GDAL JNI drivers has been copied on the local disk.");

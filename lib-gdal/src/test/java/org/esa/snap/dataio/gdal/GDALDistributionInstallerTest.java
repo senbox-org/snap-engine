@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class GDALDistributionInstallerTest {
 
     private void testInstallJNIDistribution() {
         try {
-            final GDALVersion gdalVersion = GDALVersion.GDAL_32X_JNI;
+            final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             GDALDistributionInstaller.setupDistribution(gdalVersion);
             final Path jniDistributionPath = GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion);
@@ -100,6 +101,7 @@ public class GDALDistributionInstallerTest {
     }
 
     @Test
+    @STTM("SNAP-3523")
     public void testSetupDistribution() {
         testInstallJNIDistribution();
         testInstallBundleDistribution();

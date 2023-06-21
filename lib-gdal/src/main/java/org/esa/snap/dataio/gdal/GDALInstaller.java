@@ -54,12 +54,6 @@ class GDALInstaller {
     private static final String PREFERENCE_KEY_DISTRIBUTION_HASH = "gdal.distribution.hash";
     private static final Logger logger = Logger.getLogger(GDALInstaller.class.getName());
 
-    private final Path gdalNativeLibrariesFolderPath;
-
-    GDALInstaller(Path gdalNativeLibrariesFolderPath) {
-        this.gdalNativeLibrariesFolderPath = gdalNativeLibrariesFolderPath;
-    }
-
     /**
      * Fixes the permissions issue with executables on UNIX OS.
      *
@@ -150,7 +144,7 @@ class GDALInstaller {
             } catch (Exception ignored) {
                 //nothing to do
             }
-            return Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(gdalVersion.getEnvironmentVariablesFilePath());
+            return Files.exists(gdalDistributionRootFolderPath) && !isDistributionRootFolderEmpty && Files.exists(GDALVersion.getEnvironmentVariablesFilePath());
         }
         return false;
     }
@@ -215,10 +209,9 @@ class GDALInstaller {
     /**
      * Registers the environment variables native library used for access OS environment variables.
      *
-     * @param gdalVersion the GDAL version to which JNI environment variables native library be installed
      */
-    private static void registerEnvironmentVariablesNativeLibrary(GDALVersion gdalVersion) {
-        final Path evFilePath = gdalVersion.getEnvironmentVariablesFilePath();
+    private static void registerEnvironmentVariablesNativeLibrary() {
+        final Path evFilePath = GDALVersion.getEnvironmentVariablesFilePath();
         logger.log(Level.FINE, "Register the native paths for folder '" + evFilePath.getParent() + "'.");
         NativeLibraryUtils.registerNativePaths(evFilePath.getParent());
     }
@@ -226,15 +219,14 @@ class GDALInstaller {
     /**
      * Copies the environment variables native library used for access OS environment variables.
      *
-     * @param gdalVersion the GDAL version to which JNI environment variables native library be installed
      * @throws IOException When IO error occurs
      */
-    private static void copyEnvironmentVariablesNativeLibrary(GDALVersion gdalVersion) throws IOException {
-        final Path evFilePath = gdalVersion.getEnvironmentVariablesFilePath();
+    private static void copyEnvironmentVariablesNativeLibrary() throws IOException {
+        final Path evFilePath = GDALVersion.getEnvironmentVariablesFilePath();
         if (!Files.exists(evFilePath)) {
             logger.log(Level.FINE, "Copy the environment variables library file.");
 
-            final URL libraryFileURLFromSources = gdalVersion.getEnvironmentVariablesFilePathFromSources();
+            final URL libraryFileURLFromSources = GDALVersion.getEnvironmentVariablesFilePathFromSources();
             if (libraryFileURLFromSources != null) {
                 logger.log(Level.FINE, "The environment variables library file path on the local disk is '" + evFilePath + "' and the library file name from sources is '" + libraryFileURLFromSources + "'.");
 
@@ -337,10 +329,10 @@ class GDALInstaller {
      *
      * @return the current module specification version
      */
-    private String fetchCurrentModuleSpecificationVersion() {
+    private static String fetchCurrentModuleSpecificationVersion() {
         String version = "unknown";
         try {
-            final Class<?> clazz = getClass();
+            final Class<?> clazz = GDALVersion.class;
             final URL classPathURL = clazz.getResource(clazz.getSimpleName() + ".class");
             if (classPathURL != null) {
                 final String classPath = classPathURL.toString();
@@ -367,8 +359,9 @@ class GDALInstaller {
      * @param gdalVersion the GDAL version for which files will be installed
      * @throws IOException When IO error occurs
      */
-    final void copyDistribution(GDALVersion gdalVersion) throws IOException {
-        logger.log(Level.FINE, "Copy the GDAL distribution to folder '" + gdalNativeLibrariesFolderPath.toString() + "'.");
+    static void copyDistribution(GDALVersion gdalVersion) throws IOException {
+        final Path gdalNativeLibrariesFolderPath = GDALVersion.getNativeLibrariesRootFolderPath();
+        logger.log(Level.FINE, "Copy the GDAL distribution to folder '" + gdalNativeLibrariesFolderPath + "'.");
         final String moduleVersion = fetchCurrentModuleSpecificationVersion();
 
         logger.log(Level.FINE, "The module version is '" + moduleVersion + "'.");
@@ -392,20 +385,23 @@ class GDALInstaller {
         }
 
         if (canCopyGDALDistribution) {
-            deleteDistribution(this.gdalNativeLibrariesFolderPath);
-            logger.log(Level.FINE, "create the folder '" + this.gdalNativeLibrariesFolderPath + "' to copy the GDAL distribution.");
-            Files.createDirectories(this.gdalNativeLibrariesFolderPath);
-            copyEnvironmentVariablesNativeLibrary(gdalVersion);
+            deleteDistribution(gdalDistributionRootFolderPath);
+            logger.log(Level.FINE, "create the folder '" + gdalDistributionRootFolderPath + "' to copy the GDAL distribution.");
+            Files.createDirectories(gdalDistributionRootFolderPath);
+
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
-            fixUpPermissions(this.gdalNativeLibrariesFolderPath);
+            fixUpPermissions(gdalNativeLibrariesFolderPath);
             if (!gdalVersion.isJni()) {
                 checkDistributionIntegrity(gdalVersion);
             }
             setSavedDistributionHash(distributionHash);
             setSavedModuleSpecificationVersion(moduleVersion);
         }
+    }
 
-        registerEnvironmentVariablesNativeLibrary(gdalVersion);
+    static void setupEnvironmentVariablesNativeLibrary() throws IOException {
+        copyEnvironmentVariablesNativeLibrary();
+        registerEnvironmentVariablesNativeLibrary();
     }
 
 }
