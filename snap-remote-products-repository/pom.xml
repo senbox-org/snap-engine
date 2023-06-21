@@ -20,7 +20,7 @@
     </description>
 
     <properties>
-        <tao.version>1.0.4.7</tao.version>
+        <tao.version>1.4.3</tao.version>
     </properties>
 
     <dependencies>
@@ -69,7 +69,7 @@
             <artifactId>ejml-ddense</artifactId>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-data-model</artifactId>
             <version>${tao.version}</version>
             <exclusions>
@@ -108,27 +108,27 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-data-sources</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-scihub</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-usgs</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-asf</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-aws</artifactId>
             <version>${tao.version}</version>
             <exclusions>
@@ -140,12 +140,12 @@
         </dependency>
 
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-eocat</artifactId>
             <version>${tao.version}</version>
         </dependency>
         <dependency>
-            <groupId>ro.cs.tao</groupId>
+            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-fedeo</artifactId>
             <version>${tao.version}</version>
         </dependency>

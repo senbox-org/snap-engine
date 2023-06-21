@@ -6,7 +6,7 @@ import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,7 +18,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     private final int id;
     private final String name;
-    private final Date acquisitionDate;
+    private final LocalDateTime acquisitionDate;
     private final AbstractGeometry2D polygon;
 
     private Path path;
@@ -29,7 +29,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private List<Attribute> localAttributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(int id, String name, Date acquisitionDate, Path path, long sizeInBytes, AbstractGeometry2D polygon) {
+    public LocalRepositoryProduct(int id, String name, LocalDateTime acquisitionDate, Path path, long sizeInBytes, AbstractGeometry2D polygon) {
         this.id = id;
         this.name = name;
         this.path = path;
@@ -84,7 +84,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public Date getAcquisitionDate() {
+    public LocalDateTime getAcquisitionDate() {
         return this.acquisitionDate;
     }
 

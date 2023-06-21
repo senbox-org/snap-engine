@@ -3,7 +3,7 @@ package org.esa.snap.remote.products.repository;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public interface RepositoryProduct {
 
     public String getURL();
 
-    public Date getAcquisitionDate();
+    public LocalDateTime getAcquisitionDate();
 
     public void setQuickLookImage(BufferedImage quickLookImage);
 
