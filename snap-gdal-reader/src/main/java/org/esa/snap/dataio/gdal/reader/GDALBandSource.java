@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public interface GDALBandSource {
 
-    public Path getSourceLocalFile();
+    Path[] getSourceLocalFiles();
 
-    public int getBandIndex();
+    int getBandIndex();
 }

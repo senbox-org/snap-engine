@@ -2,6 +2,7 @@ package org.esa.snap.dataio.gdal.drivers;
 
 import org.esa.snap.dataio.gdal.GDALLoader;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
@@ -64,6 +65,16 @@ class GDALReflection {
         GDALLoader.ensureGDALInitialised();
         try {
             return Class.forName(className, false, GDALLoader.getInstance().getGDALVersionLoader());
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    static Object fetchGDALLibraryClassInstance(String className, Class[] argumentsTypes, Object[] arguments) {
+        try {
+            Class<?> gdalClass = fetchGDALLibraryClass(className);
+            Constructor gdalClassConstructor = gdalClass.getConstructor(argumentsTypes);
+            return gdalClassConstructor.newInstance(arguments);
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }

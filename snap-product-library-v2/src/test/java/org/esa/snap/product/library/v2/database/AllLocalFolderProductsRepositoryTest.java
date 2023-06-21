@@ -1,5 +1,6 @@
 package org.esa.snap.product.library.v2.database;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
 import org.junit.Test;
@@ -7,7 +8,7 @@ import org.junit.Test;
 import java.awt.geom.Rectangle2D;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -22,6 +23,7 @@ public class AllLocalFolderProductsRepositoryTest {
     }
 
     @Test
+    @STTM("SNAP-3517")
     public void testGetParameters() {
         Path databaseParentFolderPath = Paths.get(".");
         H2DatabaseParameters databaseParameters = new H2DatabaseParameters(databaseParentFolderPath);
@@ -37,11 +39,11 @@ public class AllLocalFolderProductsRepositoryTest {
 
         parameter = findQueryParameterByName(AllLocalFolderProductsRepository.START_DATE_PARAMETER, queryParameters);
         assertNotNull(parameter);
-        assertEquals(Date.class, parameter.getType());
+        assertEquals(LocalDateTime.class, parameter.getType());
 
         parameter = findQueryParameterByName(AllLocalFolderProductsRepository.END_DATE_PARAMETER, queryParameters);
         assertNotNull(parameter);
-        assertEquals(Date.class, parameter.getType());
+        assertEquals(LocalDateTime.class, parameter.getType());
 
         parameter = findQueryParameterByName(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER, queryParameters);
         assertNotNull(parameter);

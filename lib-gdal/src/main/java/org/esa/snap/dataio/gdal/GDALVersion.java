@@ -4,6 +4,7 @@ import org.esa.snap.core.util.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -367,15 +368,15 @@ public enum GDALVersion {
     }
 
     /**
-     * Gets the SHA256 file URL from SNAP distribution packages for this version.
+     * Gets the SHA256 InputStream from SNAP distribution packages for the current version.
      *
-     * @return the SHA256 file URL from SNAP distribution packages for this version
+     * @return the SHA256 InputStream from SNAP distribution packages
      */
-    public URL getSHA256FileURLFromSources() {
+    public InputStream getSHA256InputStreamFromSources() {
         final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + getSHA256Name();
         try {
             logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
-            return getClass().getClassLoader().getResource(sha256FileDirectoryFromSources.replace(File.separator, "/"));
+            return getClass().getClassLoader().getResourceAsStream(sha256FileDirectoryFromSources.replace(File.separator, "/"));
         } catch (Exception ignored) {
             return null;
         }

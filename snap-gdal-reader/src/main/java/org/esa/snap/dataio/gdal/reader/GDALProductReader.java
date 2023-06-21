@@ -409,8 +409,8 @@ public class GDALProductReader extends AbstractProductReader {
                         productBand.setNoDataValueUsed(true);
                     }
 
-                    GDALMultiLevelSource multiLevelSource = new GDALMultiLevelSource(localFile, dataBufferType.dataBufferType, productBounds, tileSize, bandIndex,
-                                                                                     levelCount, geoCoding, noDataValue, defaultJAIReadTileSize);
+                    GDALMultiLevelSource multiLevelSource = new GDALMultiLevelSource(dataBufferType.dataBufferType, productBounds, tileSize, bandIndex,
+                                                                                     levelCount, geoCoding, noDataValue, defaultJAIReadTileSize, localFile);
                     // compute the tile size of the image layout object based on the tile size from the tileOpImage used to read the data
                     ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
                     productBand.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));

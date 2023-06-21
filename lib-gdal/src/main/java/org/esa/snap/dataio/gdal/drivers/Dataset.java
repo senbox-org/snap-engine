@@ -19,6 +19,10 @@ public class Dataset implements Closeable {
 
     private final Object jniDatasetInstance;
 
+    public Dataset() {
+        this(null);
+    }
+
     /**
      * Creates new instance for this driver
      *

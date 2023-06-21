@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  *
  * Created by jcoravu on 19/8/2019.
  */
-class DownloadProductProgressListener implements ro.cs.tao.ProgressListener {
+class DownloadProductProgressListener implements ro.cs.tao.utils.executors.monitoring.DownloadProgressListener {
 
     private static final Logger logger = Logger.getLogger(DownloadProductProgressListener.class.getName());
 
