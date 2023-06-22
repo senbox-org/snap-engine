@@ -56,6 +56,15 @@ public enum OSCategory {
     }
 
     /**
+     * Gets the relative path of the directory based on OS category for this version.
+     *
+     * @return the relative path of the directory based on OS category for this version
+     */
+    public static String getDirectory() {
+        return getOSCategory().getOperatingSystemName() + "/" + getOSCategory().getArchitecture();
+    }
+
+    /**
      * Retrieves the OS category for host OS by checking java.io.File.SystemUtils constants.
      *
      * @return the OS category for host OS

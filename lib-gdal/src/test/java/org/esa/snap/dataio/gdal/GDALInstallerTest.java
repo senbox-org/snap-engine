@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.lib.gdal.AbstractGDALTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +14,6 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 
 public class GDALInstallerTest {
-
-    private static final String JAVA_LIB_PATH = "java.library.path";
 
     private void deleteFTree(Path target) throws IOException {
         if (Files.isDirectory(target)) {
@@ -38,7 +37,7 @@ public class GDALInstallerTest {
     }
 
     private void deleteGDALDirs() throws IOException {
-        if (Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath())) {
+        if (Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath())) {
             Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_32X_JNI);
             if (Files.exists(targetPath)) {
                 deleteFTree(targetPath);
@@ -76,24 +75,9 @@ public class GDALInstallerTest {
             gdalVersion.setOsCategory(OSCategory.getOSCategory());
             assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
             GDALInstaller.copyDistribution(gdalVersion);
-            assertTrue(Files.exists(GDALVersionTest.getExpectedNativeLibrariesRootFolderPath()));
+            assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
         } catch (IOException e) {
             fail("Error on testCopyDistribution(): " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    @STTM("SNAP-3523")
-    public void testSetupEnvironmentVariablesNativeLibrary() {
-        try {
-            GDALInstaller.setupEnvironmentVariablesNativeLibrary();
-            assertTrue(Files.exists(GDALVersionTest.getExpectedEnvironmentVariablesFilePath()));
-            final Path nativeLibrariesRootFolderPath = GDALVersionTest.getExpectedNativeLibrariesRootFolderPath();
-            assertTrue(Files.exists(nativeLibrariesRootFolderPath));
-            assertTrue(System.getProperty(JAVA_LIB_PATH).contains(nativeLibrariesRootFolderPath.toString()));
-        } catch (IOException e) {
-            fail("Error on testInstallBundleDistribution(): " + e.getMessage());
             e.printStackTrace();
         }
     }
