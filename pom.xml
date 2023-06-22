@@ -333,7 +333,7 @@
                 -->
                 <groupId>org.ejml</groupId>
                 <artifactId>ejml-ddense</artifactId>
-                <version>0.39</version>
+                <version>0.41</version>
             </dependency>
 
             <!-- JDOM Library ############################################# -->
