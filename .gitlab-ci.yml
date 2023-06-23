@@ -14,7 +14,7 @@ include:
 
 # variables
 variables:
-  MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
+  MAVEN_IMAGE: "rghcr.io/carlossg/maven:3.9.2-azulzulu-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
