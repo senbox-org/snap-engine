@@ -35,7 +35,7 @@ public class DownloadableArchive extends DownloadableContentImpl {
     public void getContentFiles() throws Exception {
         final File archiveFile = (File)getContentFile();
 
-        if(archiveFile != null) {
+        if(archiveFile != null && ZipUtils.isValid(archiveFile)) {
             ZipUtils.unzip(archiveFile.toPath(), localFile.getParentFile().toPath(), true);
             archiveFile.delete();
         }
