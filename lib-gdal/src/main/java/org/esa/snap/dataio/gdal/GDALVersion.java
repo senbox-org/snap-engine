@@ -450,7 +450,7 @@ public enum GDALVersion {
         final Path[] gdalNativeLibaryFiles = new Path[this.nativeLibraryNames.length];
         for (int i = 0; i < this.nativeLibraryNames.length; i++) {
             gdalNativeLibaryFiles[i] = getLocationPath();
-            if (org.apache.commons.lang3.SystemUtils.IS_OS_LINUX) {
+            if (org.apache.commons.lang3.SystemUtils.IS_OS_UNIX) {
                 gdalNativeLibaryFiles[i] = gdalNativeLibaryFiles[i].resolve("lib").resolve("jni");
             }
             gdalNativeLibaryFiles[i] = gdalNativeLibaryFiles[i].resolve(System.mapLibraryName(this.nativeLibraryNames[i]));
