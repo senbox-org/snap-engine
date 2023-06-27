@@ -10,7 +10,7 @@ public class GDALConst {
     /**
      * The name of JNI GDAL gdalconst class
      */
-    private static final String CLASS_NAME = "org.gdal.gdalconst.gdalconst";
+    static final String CLASS_NAME = "org.gdal.gdalconst.gdalconst";
 
     /**
      * Creates new instance for this driver

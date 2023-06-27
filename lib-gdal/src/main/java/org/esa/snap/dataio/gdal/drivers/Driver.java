@@ -12,7 +12,7 @@ public class Driver extends GDALBase {
     /**
      * The name of JNI GDAL Driver class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.Driver";
+    static final String CLASS_NAME = "org.gdal.gdal.Driver";
     private static final Class<?> driverClass;
 
     static {
@@ -37,12 +37,12 @@ public class Driver extends GDALBase {
         try {
             getShortNameHandle = createHandle(driverClass, "getShortName", String.class);
             getLongNameHandle = createHandle(driverClass, "getLongName", String.class);
-            create1Handle = createHandle(driverClass, "Create", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"),
+            create1Handle = createHandle(driverClass, "Create", GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME),
                                          String.class, int.class, int.class, int.class, int.class);
-            create2Handle = createHandle(driverClass, "Create", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"),
+            create2Handle = createHandle(driverClass, "Create", GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME),
                                          String.class, int.class, int.class, int.class, int.class, String[].class);
-            createCopyHandle = createHandle(driverClass, "CreateCopy", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"),
-                                            String.class, GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"), String[].class);
+            createCopyHandle = createHandle(driverClass, "CreateCopy", GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME),
+                                            String.class, GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME), String[].class);
             deleteHandle = createHandle(driverClass, "Delete", int.class, String.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);

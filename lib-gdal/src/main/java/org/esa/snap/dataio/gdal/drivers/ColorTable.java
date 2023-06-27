@@ -13,7 +13,7 @@ public class ColorTable extends GDALBase {
     /**
      * The name of JNI GDAL ColorTable class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.ColorTable";
+    static final String CLASS_NAME = "org.gdal.gdal.ColorTable";
     private static final Class<?> colorTableClass;
 
     static {

@@ -12,7 +12,7 @@ public class GCP extends GDALBase {
     /**
      * The name of JNI GDAL GCP class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.GCP";
+    static final String CLASS_NAME = "org.gdal.gdal.GCP";
     private static final Class<?> gcpClass;
 
     static {

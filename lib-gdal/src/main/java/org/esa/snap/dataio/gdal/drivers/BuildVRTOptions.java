@@ -12,7 +12,7 @@ public class BuildVRTOptions {
     /**
      * The name of JNI GDAL BuildVRTOptions class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.BuildVRTOptions";
+    static final String CLASS_NAME = "org.gdal.gdal.BuildVRTOptions";
 
     private final Object jniBuildVRTOptionsInstance;
 

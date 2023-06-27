@@ -12,7 +12,7 @@ public class OSR extends GDALBase {
     /**
      * The name of JNI GDAL osr class
      */
-    private static final String CLASS_NAME = "org.gdal.osr.osr";
+    static final String CLASS_NAME = "org.gdal.osr.osr";
     private static final Class<?> osrClass;
     private static final OSR instance;
     private final MethodHandle setPROJSearchPathHandle;

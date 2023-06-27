@@ -24,6 +24,8 @@ public class GDAL extends GDALBase {
     private final MethodHandle getColorInterpretationHandle;
     private final MethodHandle getDataTypeSizeHandle;
     private final MethodHandle getDriverByNameHandle;
+    private final MethodHandle buildVRTHandle;
+    private final MethodHandle getLastErrorHandle;
 
     static {
         gdalClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
@@ -40,10 +42,19 @@ public class GDAL extends GDALBase {
     private GDAL() throws NoSuchMethodException, IllegalAccessException {
         getDataTypeNameHandle = createStaticHandle(gdalClass, "GetDataTypeName", String.class, int.class);
         getDataTypeByNameHandle = createStaticHandle(gdalClass, "GetDataTypeByName", int.class, String.class);
-        openHandle = createStaticHandle(gdalClass, "Open", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"), String.class, int.class);
+        final Class<?> gdalDatasetClass = GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME);
+        openHandle = createStaticHandle(gdalClass, "Open", gdalDatasetClass, String.class, int.class);
         getColorInterpretationHandle = createStaticHandle(gdalClass, "GetColorInterpretationName", String.class, int.class);
         getDataTypeSizeHandle = createStaticHandle(gdalClass, "GetDataTypeSize", int.class, int.class);
-        getDriverByNameHandle = createStaticHandle(gdalClass, "GetDriverByName", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Driver"), String.class);
+        getDriverByNameHandle = createStaticHandle(gdalClass, "GetDriverByName",
+                                                   GDALReflection.fetchGDALLibraryClass(Driver.CLASS_NAME),
+                                                   String.class);
+        final Object datasetArray = Array.newInstance(gdalDatasetClass, 0);
+        buildVRTHandle = createStaticHandle(gdalClass, "BuildVRT",
+                                            gdalDatasetClass,
+                                            String.class, datasetArray.getClass(), GDALReflection.fetchGDALLibraryClass(BuildVRTOptions.CLASS_NAME));
+        getLastErrorHandle = createStaticHandle(gdalClass, "GetLastErrorMsg", String.class);
+
     }
 
     /**
@@ -131,11 +142,10 @@ public class GDAL extends GDALBase {
      */
     public static Dataset buildVRT(String dest, Dataset[] objectListCount, BuildVRTOptions options) {
         Object objectListCountJni = Array.newInstance(objectListCount[0].getJniDatasetInstance().getClass(), objectListCount.length);
-
         for (int i = 0; i < objectListCount.length; i++) {
             Array.set(objectListCountJni, i, objectListCount[i].getJniDatasetInstance());
         }
-        Object jniDatasetInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "BuildVRT", Object.class, null, new Class[]{dest.getClass(), objectListCountJni.getClass(), options.getJniBuildVRTOptionsInstance().getClass()}, new Object[]{dest, objectListCountJni, options.getJniBuildVRTOptionsInstance()});
+        Object jniDatasetInstance = invokeStatic(instance.buildVRTHandle, dest, objectListCountJni, options.getJniBuildVRTOptionsInstance());
         if (jniDatasetInstance != null) {
             return new Dataset(jniDatasetInstance);
         }
@@ -143,6 +153,6 @@ public class GDAL extends GDALBase {
     }
 
     public static String getLastErrorMsg(){
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetLastErrorMsg", String.class, null, new Class[]{}, new Object[]{});
+        return (String) invokeStatic(instance.getLastErrorHandle);
     }
 }

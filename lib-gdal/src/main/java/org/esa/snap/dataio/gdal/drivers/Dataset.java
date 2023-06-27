@@ -16,7 +16,7 @@ public class Dataset extends GDALBase implements Closeable {
     /**
      * The name of JNI GDAL Dataset class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.Dataset";
+    static final String CLASS_NAME = "org.gdal.gdal.Dataset";
     private static final Class<?> datasetClass;
 
     private final Object jniDatasetInstance;
@@ -57,13 +57,13 @@ public class Dataset extends GDALBase implements Closeable {
             getRasterXSizeHandle = createHandle(datasetClass, "GetRasterXSize", int.class);
             getRasterYSizeHandle = createHandle(datasetClass, "GetRasterYSize", int.class);
             getRasterCountHandle = createHandle(datasetClass, "GetRasterCount", int.class);
-            getRasterBandHandle = createHandle(datasetClass, "GetRasterBand", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Band"), int.class);
+            getRasterBandHandle = createHandle(datasetClass, "GetRasterBand", GDALReflection.fetchGDALLibraryClass(Band.CLASS_NAME), int.class);
             buildOverviewsHandle = createHandle(datasetClass, "BuildOverviews", int.class, String.class, int[].class);
             deleteHandle = createHandle(datasetClass, "delete", void.class);
             getProjectionRefHandle = createHandle(datasetClass, "GetProjectionRef", String.class);
             getGCPProjectionHandle = createHandle(datasetClass, "GetGCPProjection", String.class);
             getGeoTransformHandle = createHandle(datasetClass, "GetGeoTransform", void.class, double[].class);
-            getDriverHandle = createHandle(datasetClass, "GetDriver", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Driver"));
+            getDriverHandle = createHandle(datasetClass, "GetDriver", GDALReflection.fetchGDALLibraryClass(Driver.CLASS_NAME));
             getMetadataDictHandle = createHandle(datasetClass, "GetMetadata_Dict", Hashtable.class, String.class);
             getGCPsHandle = createHandle(datasetClass, "GetGCPs", Vector.class);
             getGCPCountHandle = createHandle(datasetClass, "GetGCPCount", int.class);
