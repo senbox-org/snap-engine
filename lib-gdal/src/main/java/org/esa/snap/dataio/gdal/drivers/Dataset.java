@@ -2,6 +2,7 @@ package org.esa.snap.dataio.gdal.drivers;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -10,14 +11,35 @@ import java.util.Vector;
  *
  * @author Adrian Drăghici
  */
-public class Dataset implements Closeable {
+public class Dataset extends GDALBase implements Closeable {
 
     /**
      * The name of JNI GDAL Dataset class
      */
     private static final String CLASS_NAME = "org.gdal.gdal.Dataset";
+    private static final Class<?> datasetClass;
 
     private final Object jniDatasetInstance;
+    private final MethodHandle getFileListHandle;
+    private final MethodHandle getRasterXSizeHandle;
+    private final MethodHandle getRasterYSizeHandle;
+    private final MethodHandle getRasterCountHandle;
+    private final MethodHandle getRasterBandHandle;
+    private final MethodHandle buildOverviewsHandle;
+    private final MethodHandle deleteHandle;
+    private final MethodHandle getProjectionRefHandle;
+    private final MethodHandle getGCPProjectionHandle;
+    private final MethodHandle getGeoTransformHandle;
+    private final MethodHandle getDriverHandle;
+    private final MethodHandle getMetadataDictHandle;
+    private final MethodHandle getGCPsHandle;
+    private final MethodHandle getGCPCountHandle;
+    private final MethodHandle setProjectionHandle;
+    private final MethodHandle setGeoTransformHandle;
+
+    static {
+        datasetClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
+    }
 
     public Dataset() {
         this(null);
@@ -30,6 +52,26 @@ public class Dataset implements Closeable {
      */
     Dataset(Object jniDatasetInstance) {
         this.jniDatasetInstance = jniDatasetInstance;
+        try {
+            getFileListHandle = createHandle(datasetClass, "GetFileList", Vector.class);
+            getRasterXSizeHandle = createHandle(datasetClass, "GetRasterXSize", int.class);
+            getRasterYSizeHandle = createHandle(datasetClass, "GetRasterYSize", int.class);
+            getRasterCountHandle = createHandle(datasetClass, "GetRasterCount", int.class);
+            getRasterBandHandle = createHandle(datasetClass, "GetRasterBand", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Band"), int.class);
+            buildOverviewsHandle = createHandle(datasetClass, "BuildOverviews", int.class, String.class, int[].class);
+            deleteHandle = createHandle(datasetClass, "delete", void.class);
+            getProjectionRefHandle = createHandle(datasetClass, "GetProjectionRef", String.class);
+            getGCPProjectionHandle = createHandle(datasetClass, "GetGCPProjection", String.class);
+            getGeoTransformHandle = createHandle(datasetClass, "GetGeoTransform", void.class, double[].class);
+            getDriverHandle = createHandle(datasetClass, "GetDriver", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Driver"));
+            getMetadataDictHandle = createHandle(datasetClass, "GetMetadata_Dict", Hashtable.class, String.class);
+            getGCPsHandle = createHandle(datasetClass, "GetGCPs", Vector.class);
+            getGCPCountHandle = createHandle(datasetClass, "GetGCPCount", int.class);
+            setProjectionHandle = createHandle(datasetClass, "SetProjection", int.class, String.class);
+            setGeoTransformHandle = createHandle(datasetClass, "SetGeoTransform", int.class, double[].class);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object getJniDatasetInstance(){
@@ -40,7 +82,7 @@ public class Dataset implements Closeable {
      * Calls the JNI GDAL gdal class GetFileList() method
      */
     public Vector getFileList(){
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetFileList", Vector.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Vector) invoke(getFileListHandle, this.jniDatasetInstance);
     }
     /**
      * Calls the JNI GDAL Dataset class GetRasterXSize() method
@@ -48,7 +90,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetRasterXSize() method result
      */
     public Integer getRasterXSize() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetRasterXSize", Integer.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Integer) invoke(getRasterXSizeHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -57,7 +99,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetRasterYSize() method result
      */
     public Integer getRasterYSize() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetRasterYSize", Integer.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Integer) invoke(getRasterYSizeHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -66,7 +108,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetRasterCount() method result
      */
     public Integer getRasterCount() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetRasterCount", Integer.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Integer) invoke(getRasterCountHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -76,29 +118,26 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetRasterBand(int nBand) method result
      */
     public Band getRasterBand(int nBand) {
-        Object jniBandInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetRasterBand", Object.class, this.jniDatasetInstance, new Class[]{int.class}, new Object[]{nBand});
-        if (jniBandInstance != null) {
-            return new Band(jniBandInstance);
-        }
-        return null;
+        Object jniBandInstance = invoke(getRasterBandHandle, this.jniDatasetInstance, nBand);
+        return jniBandInstance != null ? new Band(jniBandInstance): null;
     }
 
     /**
      * Calls the JNI GDAL Dataset class BuildOverviews(String resampling, int[] overviewlist) method
      *
      * @param resampling   the JNI GDAL Dataset class BuildOverviews(String resampling, int[] overviewlist) method 'resampling' argument
-     * @param overviewlist the JNI GDAL Dataset class BuildOverviews(String resampling, int[] overviewlist) method 'overviewlist' argument
+     * @param overviewList the JNI GDAL Dataset class BuildOverviews(String resampling, int[] overviewlist) method 'overviewlist' argument
      * @return the JNI GDAL Dataset class BuildOverviews(String resampling, int[] overviewlist) method result
      */
-    public Integer buildOverviews(String resampling, int[] overviewlist) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "BuildOverviews", Integer.class, this.jniDatasetInstance, new Class[]{String.class, int[].class}, new Object[]{resampling, overviewlist});
+    public Integer buildOverviews(String resampling, int[] overviewList) {
+        return (Integer) invoke(buildOverviewsHandle, this.jniDatasetInstance ,resampling, overviewList);
     }
 
     /**
      * Calls the JNI GDAL Dataset class delete() method
      */
     public void delete() {
-        GDALReflection.callGDALLibraryMethod(CLASS_NAME, "delete", null, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        invoke(deleteHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -107,7 +146,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetProjectionRef() method result
      */
     public String getProjectionRef() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetProjectionRef", String.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (String) invoke(getProjectionRefHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -116,7 +155,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetGCPProjection() method result
      */
     public String getGCPProjection() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetGCPProjection", String.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (String) invoke(getGCPProjectionHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -125,7 +164,7 @@ public class Dataset implements Closeable {
      * @param argout the JNI GDAL Dataset class GetGeoTransform(double[] argout) method 'argout' argument
      */
     public void getGeoTransform(double[] argout) {
-        GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetGeoTransform", null, this.jniDatasetInstance, new Class[]{double[].class}, new Object[]{argout});
+        invoke(getGeoTransformHandle, this.jniDatasetInstance, argout);
     }
 
     /**
@@ -134,11 +173,8 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetDriver() method result
      */
     public Driver getDriver() {
-        Object jniDriverInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDriver", Object.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
-        if (jniDriverInstance != null) {
-            return new Driver(jniDriverInstance);
-        }
-        return null;
+        Object jniDriverInstance = invoke(getDriverHandle, this.jniDatasetInstance);
+        return jniDriverInstance != null ? new Driver(jniDriverInstance) : null;
     }
 
     /**
@@ -148,7 +184,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetMetadata_Dict(String pszDomain) method result
      */
     public Hashtable getMetadataDict(String pszDomain) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetMetadata_Dict", Hashtable.class, this.jniDatasetInstance, new Class[]{String.class}, new Object[]{pszDomain});
+        return (Hashtable) invoke(getMetadataDictHandle, this.jniDatasetInstance, pszDomain);
     }
 
     /**
@@ -157,7 +193,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetGCPs() method result
      */
     public Vector getGCPs() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetGCPs", Vector.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Vector) invoke(getGCPsHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -166,7 +202,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class GetGCPCount() method result
      */
     public Integer getGCPCount() {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetGCPCount", Integer.class, this.jniDatasetInstance, new Class[]{}, new Object[]{});
+        return (Integer) invoke(getGCPCountHandle, this.jniDatasetInstance);
     }
 
     /**
@@ -176,7 +212,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class SetProjection(String prj) method result
      */
     public Integer setProjection(String prj) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "SetProjection", Integer.class, this.jniDatasetInstance, new Class[]{String.class}, new Object[]{prj});
+        return (Integer) invoke(setProjectionHandle, this.jniDatasetInstance, prj);
     }
 
     /**
@@ -186,7 +222,7 @@ public class Dataset implements Closeable {
      * @return the JNI GDAL Dataset class SetGeoTransform(double[] gdalGeoTransform) method result
      */
     public Integer setGeoTransform(double[] gdalGeoTransform) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "SetGeoTransform", Integer.class, this.jniDatasetInstance, new Class[]{double[].class}, new Object[]{gdalGeoTransform});
+        return (Integer) invoke(setGeoTransformHandle, this.jniDatasetInstance, gdalGeoTransform);
     }
 
     @Override
