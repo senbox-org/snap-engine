@@ -3,6 +3,7 @@ package org.esa.snap.dataio.gdal.drivers;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Array;
 
 /**
  * GDAL gdal JNI driver class
@@ -118,5 +119,30 @@ public class GDAL extends GDALBase {
     public static Driver getDriverByName(String name) {
         Object jniDriverInstance = invokeStatic(instance.getDriverByNameHandle, name);
         return jniDriverInstance != null ? new Driver(jniDriverInstance) : null;
+    }
+
+    /**
+     * Calls the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method
+     *
+     * @param dest            the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'dest' argument
+     * @param objectListCount the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'object_list_count' argument
+     * @param options         the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method 'options' argument
+     * @return the JNI GDAL gdal class BuildVRT(String dest, Dataset[] object_list_count, BuildVRTOptions options) method result
+     */
+    public static Dataset buildVRT(String dest, Dataset[] objectListCount, BuildVRTOptions options) {
+        Object objectListCountJni = Array.newInstance(objectListCount[0].getJniDatasetInstance().getClass(), objectListCount.length);
+
+        for (int i = 0; i < objectListCount.length; i++) {
+            Array.set(objectListCountJni, i, objectListCount[i].getJniDatasetInstance());
+        }
+        Object jniDatasetInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "BuildVRT", Object.class, null, new Class[]{dest.getClass(), objectListCountJni.getClass(), options.getJniBuildVRTOptionsInstance().getClass()}, new Object[]{dest, objectListCountJni, options.getJniBuildVRTOptionsInstance()});
+        if (jniDatasetInstance != null) {
+            return new Dataset(jniDatasetInstance);
+        }
+        return null;
+    }
+
+    public static String getLastErrorMsg(){
+        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetLastErrorMsg", String.class, null, new Class[]{}, new Object[]{});
     }
 }

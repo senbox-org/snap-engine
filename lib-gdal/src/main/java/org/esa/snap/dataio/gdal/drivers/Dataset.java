@@ -41,6 +41,10 @@ public class Dataset extends GDALBase implements Closeable {
         datasetClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
     }
 
+    public Dataset() {
+        this(null);
+    }
+
     /**
      * Creates new instance for this driver
      *

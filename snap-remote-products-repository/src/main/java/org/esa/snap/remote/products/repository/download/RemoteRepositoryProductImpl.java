@@ -4,7 +4,7 @@ import org.esa.snap.remote.products.repository.*;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -19,7 +19,7 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     private final RemoteMission remoteMission;
     private final String downloadURL;
     private final AbstractGeometry2D polygon;
-    private final Date acquisitionDate;
+    private final LocalDateTime acquisitionDate;
 
     private String metadataMission;
     private List<Attribute> remoteAttributes;
@@ -31,7 +31,7 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    RemoteRepositoryProductImpl(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+    RemoteRepositoryProductImpl(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, LocalDateTime acquisitionDate, long approximateSize) {
         this.id = id;
         this.name = name;
         this.remoteMission = remoteMission;
@@ -82,7 +82,7 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     }
 
     @Override
-    public Date getAcquisitionDate() {
+    public LocalDateTime getAcquisitionDate() {
         return this.acquisitionDate;
     }
 

@@ -10,6 +10,10 @@ import java.awt.image.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Vector;
+import java.util.stream.Collectors;
 
 /**
  * A JAI operator for handling the tiles of the products imported with the GDAL library.
@@ -66,15 +70,15 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
         }
     }
 
-    private static abstract class ImageReader {
-        private final String path;
+    private abstract static class ImageReader {
+        private final Path[] paths;
         private final int bandIndex;
         final int[] index = new int[] { 0 };
         private int width;
         private int height;
 
         private ImageReader(GDALBandSource bandSource) {
-            this.path = bandSource.getSourceLocalFile().toString();
+            this.paths = bandSource.getSourceLocalFiles();
             // bands are not 0-base indexed, so we must add 1
             this.bandIndex = bandSource.getBandIndex() + 1;
             this.width = -1;
@@ -172,15 +176,29 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
         }
 
         private Dataset openDataset() {
-            return GDAL.open(this.path, GDALConst.gaReadonly());
+            if (this.paths.length == 1) {
+                return GDAL.open(this.paths[0].toString(), GDALConst.gaReadonly());
+            } else {
+                final Dataset[] datasets = new Dataset[this.paths.length];
+                for (int i = 0; i < this.paths.length; i++) {
+                    datasets[i] = GDAL.open(this.paths[i].toString(), GDALConst.gaReadonly());
+                }
+                final Dataset vrtDataset = GDAL.buildVRT("/vsimem/" + System.currentTimeMillis() + ".vrt",
+                                                         datasets, new BuildVRTOptions(new Vector<>()));
+                return new VRTDataset(vrtDataset, datasets);
+            }
         }
 
         private Band openBand(Dataset dataset) {
             if (dataset == null) {
-                throw new IllegalStateException("Failed to open the GDAL dataset for file '" + this.path + "'.");
+                throw new IllegalStateException(String.format("Failed to open the GDAL dataset for file%s '%s'.",
+                                                              this.paths.length > 1 ? "s" : "",
+                                                              Arrays.stream(this.paths).map(Path::toString).collect(Collectors.joining(","))));
             }
             final Band band;
-            Band gdalRasterBand = dataset.getRasterBand(this.bandIndex);
+            Band gdalRasterBand = (dataset instanceof VRTDataset
+                                   ? ((VRTDataset) dataset).getDataset()
+                                   : dataset).getRasterBand(this.bandIndex);
             int level = getLevel();
             if (level > 0 && gdalRasterBand.getOverviewCount() > 0) {
                 band = gdalRasterBand.getOverview(level - 1);
@@ -189,6 +207,33 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                 band = gdalRasterBand;
             }
             return band;
+        }
+    }
+
+    private static class VRTDataset extends Dataset {
+        private final Dataset vrtDataset;
+        private final Dataset[] sourceDatasets;
+
+        public VRTDataset(Dataset vrtDataset, Dataset[] sourceDatasets) {
+            super();
+            this.vrtDataset = vrtDataset;
+            this.sourceDatasets = sourceDatasets;
+        }
+
+        public Dataset getDataset() {
+            return vrtDataset;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (this.sourceDatasets != null) {
+                for (Dataset source : this.sourceDatasets) {
+                    source.close();
+                }
+            }
+            if (this.vrtDataset != null) {
+                this.vrtDataset.close();
+            }
         }
     }
 }

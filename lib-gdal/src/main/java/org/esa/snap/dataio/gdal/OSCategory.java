@@ -1,8 +1,13 @@
 package org.esa.snap.dataio.gdal;
 
+import org.esa.snap.jni.EnvironmentVariables;
+
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,11 +20,11 @@ import static org.apache.commons.lang3.SystemUtils.*;
  * @author Adrian Drăghici
  */
 public enum OSCategory {
-    WIN_32("Windows", "x86", "where"),
-    WIN_64("Windows", "x64", "where"),
-    LINUX_64("Linux", "x64", "which -a"),
-    MAC_OS_X("MacOSX", "x64", "which -a"),
-    UNSUPPORTED("", "", "");
+    WIN_32("Windows", "x86"),
+    WIN_64("Windows", "x64"),
+    LINUX_64("Linux", "x64"),
+    MAC_OS_X("MacOSX", "x64"),
+    UNSUPPORTED("", "");
 
     private static final Logger logger = Logger.getLogger(OSCategory.class.getName());
 
@@ -29,19 +34,16 @@ public enum OSCategory {
 
     private final String operatingSystemName;
     private final String architecture;
-    private final String findExecutableLocationCmd;
 
     /**
      * Creates new instance for this enum.
      *
      * @param operatingSystemName       the operating system name
      * @param architecture              the operating system architecture
-     * @param findExecutableLocationCmd the operating system specific command for finding executables location present on PATH environment variable
      */
-    OSCategory(String operatingSystemName, String architecture, String findExecutableLocationCmd) {
+    OSCategory(String operatingSystemName, String architecture) {
         this.operatingSystemName = operatingSystemName;
         this.architecture = architecture;
-        this.findExecutableLocationCmd = findExecutableLocationCmd;
     }
 
     /**
@@ -51,6 +53,15 @@ public enum OSCategory {
      */
     public static OSCategory getOSCategory() {
         return osCategory;
+    }
+
+    /**
+     * Gets the relative path of the directory based on OS category for this version.
+     *
+     * @return the relative path of the directory based on OS category for this version
+     */
+    public static String getDirectory() {
+        return getOSCategory().getOperatingSystemName() + "/" + getOSCategory().getArchitecture();
     }
 
     /**
@@ -115,26 +126,24 @@ public enum OSCategory {
     }
 
     /**
-     * Gets the OS specific command for finding executables location present on PATH environment variable by invoking 'where EXECUTABLE_NAME' or 'which EXECUTABLE_NAME' command and parsing the output.
+     * Gets the absolute location of an executable on system by checking all PATH environment variable values.
      *
      * @param executableName the target executable name
      * @return the absolute location of executable
      */
     public String[] getExecutableLocations(String executableName) {
-        try (final java.util.Scanner executableOutput = new java.util.Scanner(Runtime.getRuntime().exec(this.findExecutableLocationCmd + " " + executableName).getInputStream()).useDelimiter("\\A")) {
-            String executableFilePath = executableOutput.hasNext() ? executableOutput.next() : "";
-            executableFilePath = executableFilePath.replaceAll("\\r?\\n", File.pathSeparator);
-            if (!executableFilePath.isEmpty()) {
-                final String[] executableFilePaths = executableFilePath.split(File.pathSeparator);
-                final String[] executableLocations = new String[executableFilePaths.length];
-                for (int i = 0; i < executableFilePaths.length; i++) {
-                    executableLocations[i] = Paths.get(executableFilePaths[i]).getParent().toString();
-                }
-                return executableLocations;
+        List<String> executableLocations = new ArrayList<>();
+        final String pathEVValue = EnvironmentVariables.getEnvironmentVariable("PATH");
+        final String[] pathValues = pathEVValue.split(File.pathSeparator);
+        for (String pathValue : pathValues) {
+            final Path executableFilePath = Paths.get(pathValue).resolve(executableName);
+            if (Files.exists(executableFilePath)) {
+                executableLocations.add(pathValue);
             }
-        } catch (IOException ignored) {
+        }
+        if(executableLocations.isEmpty()){
             logger.log(Level.WARNING, () -> executableName + " not found");
         }
-        return new String[0];
+        return executableLocations.toArray(new String[0]);
     }
 }

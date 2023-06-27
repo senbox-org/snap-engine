@@ -1,7 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 
@@ -31,7 +30,7 @@ class GDALDistributionInstaller {
      */
     private static void installDistribution(GDALVersion gdalVersion) throws IOException {
         // install the GDAL library from the distribution
-        final OSCategory osCategory = gdalVersion.getOsCategory();
+        final OSCategory osCategory = OSCategory.getOSCategory();
         if (osCategory.getArchitecture() == null) {
             final String msg = "No distribution folder found on " + osCategory.getOperatingSystemName() + ".";
             logger.log(Level.FINE, msg);
@@ -40,7 +39,7 @@ class GDALDistributionInstaller {
 
         logger.log(Level.FINE, "Install the GDAL library from the distribution on " + osCategory.getOperatingSystemName() + ".");
 
-        new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
+        GDALInstaller.copyDistribution(gdalVersion);
         final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
 
         logger.log(Level.FINE, "The GDAL library has been copied on the local disk.");
@@ -80,15 +79,9 @@ class GDALDistributionInstaller {
 
         logger.log(Level.FINE, "Install the GDAL JNI drivers from the distribution on " + osCategory.getOperatingSystemName() + ".");
 
-        new GDALInstaller(gdalVersion.getNativeLibrariesRootFolderPath()).copyDistribution(gdalVersion);
-        final Path gdalDistributionRootFolderPath = gdalVersion.getNativeLibrariesFolderPath();
+        GDALInstaller.copyDistribution(gdalVersion);
 
         logger.log(Level.FINE, "The GDAL JNI drivers has been copied on the local disk.");
-
-        logger.log(Level.FINE, "Process the GDAL JNI drivers on " + gdalVersion.getOsCategory().getOperatingSystemName() + ".");
-
-        logger.log(Level.FINE, "Register native lib paths on " + gdalVersion.getOsCategory().getOperatingSystemName() + " for folder '" + gdalDistributionRootFolderPath + "'.");
-        NativeLibraryUtils.registerNativePaths(gdalDistributionRootFolderPath);
 
         logger.log(Level.FINE, "The GDAL library has been successfully installed.");
     }
@@ -103,9 +96,6 @@ class GDALDistributionInstaller {
      */
     private static void processInstalledLinuxDistribution(Path gdalDistributionRootFolderPath) {
         final Path libFolderPath = gdalDistributionRootFolderPath.resolve("lib");
-
-        logger.log(Level.FINE, "Register native lib paths on Linux for folder '" + libFolderPath + "'.");
-        NativeLibraryUtils.registerNativePaths(libFolderPath.resolve("jni"));
 
         final StringBuilder gdalEnv = new StringBuilder();
         gdalEnv.append("GDAL_DATA=").append(gdalDistributionRootFolderPath.resolve("share/gdal"));
@@ -126,9 +116,6 @@ class GDALDistributionInstaller {
      * @param gdalDistributionRootFolderPath the absolute path to the internal GDAL distribution installation location
      */
     private static void processInstalledWindowsDistribution(Path gdalDistributionRootFolderPath) {
-        logger.log(Level.FINE, "Register native lib paths on Windows for folder '" + gdalDistributionRootFolderPath.toString() + "'.");
-        NativeLibraryUtils.registerNativePaths(gdalDistributionRootFolderPath);
-
         StringBuilder gdalEnv = new StringBuilder();
         gdalEnv.append("PATH=").append(gdalDistributionRootFolderPath).append(File.pathSeparator).append(EnvironmentVariables.getEnvironmentVariable("PATH"));
         logger.log(Level.FINE, "Set the PATH environment variable on Windows with '" + gdalEnv + "'.");

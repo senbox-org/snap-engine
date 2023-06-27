@@ -49,11 +49,10 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -481,33 +480,31 @@ public class RemoteRepositoriesManager {
             }
         }
 
-        Calendar calendar = Calendar.getInstance();
-
-        Date startDate = (Date)parametersValues.get(CommonParameterNames.START_DATE);
-        if (startDate != null) {
-            calendar.setTimeInMillis(startDate.getTime());
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-
-            QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
-            begin.setValue(calendar.getTime());
+        final LocalDateTime startDate = ((LocalDateTime)parametersValues.get(CommonParameterNames.START_DATE));
+        if (startDate != null && query.getSupportedParameters().get(CommonParameterNames.START_DATE).getType().equals(LocalDateTime.class)) {
+            final QueryParameter<LocalDateTime> begin = query.createParameter(CommonParameterNames.START_DATE, LocalDateTime.class);
+            begin.setValue(startDate);
             query.addParameter(begin);
         }
-        Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
+        LocalDateTime endDate = ((LocalDateTime)parametersValues.get(CommonParameterNames.END_DATE));
         if (endDate != null) {
-            calendar.setTimeInMillis(endDate.getTime());
-            calendar.set(Calendar.HOUR_OF_DAY, 23);
-            calendar.set(Calendar.MINUTE, 59);
-            calendar.set(Calendar.SECOND, 59);
-            calendar.set(Calendar.MILLISECOND, 0);
-
-            QueryParameter<Date> end = query.createParameter(CommonParameterNames.END_DATE, Date.class);
-            end.setValue(calendar.getTime());
-            query.addParameter(end);
+            endDate = endDate.plusDays(1).minusSeconds(1);
+            if (query.getSupportedParameters().get(CommonParameterNames.END_DATE).getType().equals(LocalDateTime.class)){
+                final QueryParameter<LocalDateTime> end  = query.createParameter(CommonParameterNames.END_DATE, LocalDateTime.class);
+                end.setValue(endDate);
+                query.addParameter(end);
+            } else if (startDate != null){
+                final Class type = LocalDateTime[].class;
+                final QueryParameter<LocalDateTime> begin = query.createParameter(CommonParameterNames.START_DATE, type);
+                begin.setMinValue(startDate);
+                begin.setMaxValue(endDate);
+                query.addParameter(begin);
+                final QueryParameter<LocalDateTime> end = query.createParameter(CommonParameterNames.END_DATE, type);
+                end.setMinValue(startDate);
+                end.setMaxValue(endDate);
+                query.addParameter(end);
+            }
         }
-
         return query;
     }
 

@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 /**
  * GDAL Reflection class which uses Java reflection API to invoke methods from JNI GDAL
  */
@@ -47,4 +50,13 @@ class GDALReflection {
         }
     }
 
+    static Object fetchGDALLibraryClassInstance(String className, Class[] argumentsTypes, Object[] arguments) {
+        try {
+            Class<?> gdalClass = fetchGDALLibraryClass(className);
+            Constructor gdalClassConstructor = gdalClass.getConstructor(argumentsTypes);
+            return gdalClassConstructor.newInstance(arguments);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 }
