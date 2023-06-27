@@ -1,5 +1,8 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Array;
 
 /**
@@ -7,25 +10,52 @@ import java.lang.reflect.Array;
  *
  * @author Adrian Drăghici
  */
-public class GDAL {
+public class GDAL extends GDALBase {
 
     /**
      * The name of JNI GDAL gdal class
      */
     private static final String CLASS_NAME = "org.gdal.gdal.gdal";
+    private static final Class<?> gdalClass;
+    private static final GDAL instance;
+    private final MethodHandle getDataTypeNameHandle;
+    private final MethodHandle getDataTypeByNameHandle;
+    private final MethodHandle openHandle;
+    private final MethodHandle getColorInterpretationHandle;
+    private final MethodHandle getDataTypeSizeHandle;
+    private final MethodHandle getDriverByNameHandle;
+
+    static {
+        gdalClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
+        try {
+            instance = new GDAL();
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Creates new instance for this driver
      */
-    private GDAL() {
-        //nothing to init
+    private GDAL() throws NoSuchMethodException, IllegalAccessException {
+        getDataTypeNameHandle = createStaticHandle(gdalClass, "GetDataTypeName", String.class, int.class);
+        getDataTypeByNameHandle = createStaticHandle(gdalClass, "GetDataTypeByName", int.class, String.class);
+        openHandle = createStaticHandle(gdalClass, "Open", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Dataset"), String.class, int.class);
+        getColorInterpretationHandle = createStaticHandle(gdalClass, "GetColorInterpretationName", String.class, int.class);
+        getDataTypeSizeHandle = createStaticHandle(gdalClass, "GetDataTypeSize", int.class, int.class);
+        getDriverByNameHandle = createStaticHandle(gdalClass, "GetDriverByName", GDALReflection.fetchGDALLibraryClass("org.gdal.gdal.Driver"), String.class);
     }
 
     /**
      * Calls the JNI GDAL gdal class AllRegister() method
      */
     public static void allRegister() {
-        GDALReflection.callGDALLibraryMethod(CLASS_NAME, "AllRegister", null, null, new Class[]{}, new Object[]{});
+        try {
+            Method method = gdalClass.getMethod("AllRegister");
+            method.invoke(null);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -35,7 +65,7 @@ public class GDAL {
      * @return the JNI GDAL gdal class GetDataTypeName(int gdalDataType) method result
      */
     public static String getDataTypeName(int gdalDataType) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDataTypeName", String.class, null, new Class[]{int.class}, new Object[]{gdalDataType});
+        return (String) invokeStatic(instance.getDataTypeNameHandle, gdalDataType);
     }
 
     /**
@@ -45,7 +75,7 @@ public class GDAL {
      * @return the JNI GDAL gdal class GetDataTypeByName(String pszDataTypeName) method result
      */
     public static Integer getDataTypeByName(String pszDataTypeName) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDataTypeByName", Integer.class, null, new Class[]{String.class}, new Object[]{pszDataTypeName});
+        return (Integer) invokeStatic(instance.getDataTypeByNameHandle, pszDataTypeName);
     }
 
     /**
@@ -56,11 +86,8 @@ public class GDAL {
      * @return the JNI GDAL gdal class Open(String utf8Path, int eAccess) method result
      */
     public static Dataset open(String utf8Path, int eAccess) {
-        Object jniDatasetInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "Open", Object.class, null, new Class[]{String.class, int.class}, new Object[]{utf8Path, eAccess});
-        if (jniDatasetInstance != null) {
-            return new Dataset(jniDatasetInstance);
-        }
-        return null;
+        Object jniDatasetInstance = invokeStatic(instance.openHandle, utf8Path, eAccess);
+        return jniDatasetInstance != null ? new Dataset(jniDatasetInstance) : null;
     }
 
     /**
@@ -70,7 +97,7 @@ public class GDAL {
      * @return the JNI GDAL gdal class GetColorInterpretationName(int eColorInterp) method result
      */
     public static String getColorInterpretationName(int eColorInterp) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetColorInterpretationName", String.class, null, new Class[]{int.class}, new Object[]{eColorInterp});
+        return (String) invokeStatic(instance.getColorInterpretationHandle, eColorInterp);
     }
 
     /**
@@ -80,7 +107,7 @@ public class GDAL {
      * @return the JNI GDAL gdal class GetDataTypeSize(int eDataType) method result
      */
     public static Integer getDataTypeSize(int eDataType) {
-        return GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDataTypeSize", Integer.class, null, new Class[]{int.class}, new Object[]{eDataType});
+        return (Integer) invokeStatic(instance.getDataTypeSizeHandle, eDataType);
     }
 
     /**
@@ -90,11 +117,8 @@ public class GDAL {
      * @return the JNI GDAL gdal class GetDriverByName(String name) method result
      */
     public static Driver getDriverByName(String name) {
-        Object jniDriverInstance = GDALReflection.callGDALLibraryMethod(CLASS_NAME, "GetDriverByName", Object.class, null, new Class[]{String.class}, new Object[]{name});
-        if (jniDriverInstance != null) {
-            return new Driver(jniDriverInstance);
-        }
-        return null;
+        Object jniDriverInstance = invokeStatic(instance.getDriverByNameHandle, name);
+        return jniDriverInstance != null ? new Driver(jniDriverInstance) : null;
     }
 
     /**
