@@ -15,7 +15,7 @@ public class Band extends GDALBase implements Closeable {
     /**
      * The name of JNI GDAL Band class
      */
-    private static final String CLASS_NAME = "org.gdal.gdal.Band";
+    static final String CLASS_NAME = "org.gdal.gdal.Band";
     private static final Class<?> bandClass;
 
     static {
