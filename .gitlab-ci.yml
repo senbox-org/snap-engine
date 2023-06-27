@@ -14,7 +14,7 @@ include:
 
 # variables
 variables:
-  MAVEN_IMAGE: "rghcr.io/carlossg/maven:3.9.2-azulzulu-11"
+  MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
