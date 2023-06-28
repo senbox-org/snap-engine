@@ -57,7 +57,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>com.jidesoft.*</publicPackage>
+                        <publicPackage>com.formdev.*</publicPackage>
                         <publicPackage>org.jdesktop.*</publicPackage>
                         <publicPackage>com.bc.ceres.swing</publicPackage>
                         <publicPackage>com.bc.ceres.swing.actions</publicPackage>
