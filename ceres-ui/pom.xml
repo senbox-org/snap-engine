@@ -58,6 +58,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>com.formdev.*</publicPackage>
+                        <publicPackage>com.jidesoft.*</publicPackage>
                         <publicPackage>org.jdesktop.*</publicPackage>
                         <publicPackage>com.bc.ceres.swing</publicPackage>
                         <publicPackage>com.bc.ceres.swing.actions</publicPackage>
