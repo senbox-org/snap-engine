@@ -134,6 +134,11 @@ public class ColorSchemeLookupInfo {
                     }
                 }
             }
+            if (match) {
+                if (!bandName.startsWith(regex.substring(0, 1))) {
+                    match = false;
+                }
+            }
         }
 
         return match;
