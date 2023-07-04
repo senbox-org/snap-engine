@@ -277,8 +277,174 @@ public class TileImplTest {
         samples = tile.getSamplesDouble();
         assertNotNull(samples);
         assertEquals(N, samples.length);
-        assertEquals(10.0, samples[0], 1.0e-10);
-        assertEquals(10.0, samples[N - 1], 1.0e-10);
+        assertEquals(12.5, samples[0], 0.0);
+        assertEquals(12.5, samples[N - 1], 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Double_INT8() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_INT8, factor);
+
+        tile.setSample(0, 0, 1.0);
+        assertEquals(1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, -1.0);
+        assertEquals(-1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        final double upperBound = 127.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, tooBig);
+        assertEquals(upperBound * factor, tile.getSampleDouble(0,0), 0.0);
+
+        final double negativeTooBig = -tooBig;
+        final double lowerBound = -upperBound - 1.0;
+        tile.setSample(0, 0, negativeTooBig);
+        assertEquals(lowerBound * factor, tile.getSampleDouble(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Double_INT16() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_INT16, factor);
+
+        tile.setSample(0, 0, 1.0);
+        assertEquals(1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, -1.0);
+        assertEquals(-1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        final double upperBound = 32767.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, tooBig);
+        assertEquals(upperBound * factor, tile.getSampleDouble(0,0), 0.0);
+
+        final double lowerBound = -upperBound - 1.0;
+        tile.setSample(0, 0, -tooBig);
+        assertEquals(lowerBound * factor, tile.getSampleDouble(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Double_UINT8() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_UINT8, factor);
+
+        tile.setSample(0, 0, 1.0);
+        assertEquals(1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, 0.0);
+        assertEquals(0.0, tile.getSampleDouble(0,0), 0.0);
+
+        final double upperBound = 255.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, tooBig);
+        assertEquals(upperBound * factor, tile.getSampleDouble(0,0), 0.0);
+
+        tile.setSample(0, 0, -1.0);
+        assertEquals(0.0, tile.getSampleDouble(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Double_UINT16() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_UINT16, factor);
+
+        tile.setSample(0, 0, 1.0);
+        assertEquals(1.0, tile.getSampleDouble(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, 0.0);
+        assertEquals(0.0, tile.getSampleDouble(0,0), 0.0);
+
+        final double upperBound = 65535.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, tooBig);
+        assertEquals(upperBound * factor, tile.getSampleDouble(0,0), 0.0);
+
+        tile.setSample(0, 0, -1.0);
+        assertEquals(0.0, tile.getSampleDouble(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Float_INT8() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_INT8, factor);
+
+        tile.setSample(0, 0, 1.0f);
+        assertEquals(1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, -1.0f);
+        assertEquals(-1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        final double upperBound = 127.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, (float) tooBig);
+        assertEquals((float) (upperBound * factor), tile.getSampleFloat(0,0), 0.0);
+
+        final double negativeTooBig = -tooBig;
+        final double lowerBound = -upperBound - 1.0;
+        tile.setSample(0, 0, (float) negativeTooBig);
+        assertEquals((float) (lowerBound * factor), tile.getSampleFloat(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Float_INT16() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_INT16, factor);
+
+        tile.setSample(0, 0, 1.0f);
+        assertEquals(1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, -1.0f);
+        assertEquals(-1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        final double upperBound = 32767.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, (float) tooBig);
+        assertEquals((float) (upperBound * factor), tile.getSampleFloat(0,0), 0.0);
+
+        final double lowerBound = -upperBound - 1.0;
+        tile.setSample(0, 0, (float) -tooBig);
+        assertEquals((float) (lowerBound * factor), tile.getSampleFloat(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Float_UINT8() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_UINT8, factor);
+
+        tile.setSample(0, 0, 1.0f);
+        assertEquals(1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, 0.0f);
+        assertEquals(0.0, tile.getSampleFloat(0,0), 0.0);
+
+        final double upperBound = 255.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, (float) tooBig);
+        assertEquals((float) (upperBound * factor), tile.getSampleFloat(0,0), 0.0);
+
+        tile.setSample(0, 0, -1.0f);
+        assertEquals(0.0, tile.getSampleFloat(0,0), 0.0);
+    }
+
+    @Test
+    public void testSetSamples_Float_UINT16() {
+        final double factor = 0.015;
+        final Tile tile = createScaledTile(ProductData.TYPE_UINT16, factor);
+
+        tile.setSample(0, 0, 1.0f);
+        assertEquals(1.0, tile.getSampleFloat(0,0), 0.015 / 2.0);
+
+        tile.setSample(0, 0, 0.0f);
+        assertEquals(0.0, tile.getSampleFloat(0,0), 0.0);
+
+        final double upperBound = 65535.0;
+        final double tooBig = upperBound * (factor + 0.001);
+        tile.setSample(0, 0, (float) tooBig);
+        assertEquals((float) (upperBound * factor), tile.getSampleFloat(0,0), 0.0);
+
+        tile.setSample(0, 0, -1.0f);
+        assertEquals(0.0, tile.getSampleFloat(0,0), 0.0);
     }
 
     static Tile createRawTile(int type) {
