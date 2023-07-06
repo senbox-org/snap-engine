@@ -11,8 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class GDALDistributionInstallerTest {
 
@@ -71,8 +70,7 @@ public class GDALDistributionInstallerTest {
 
     private void testInstallJNIDistribution() {
         try {
-            final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
-            gdalVersion.setOsCategory(OSCategory.getOSCategory());
+            final GDALVersion gdalVersion = GDALVersion.GDAL_32X_JNI;
             GDALDistributionInstaller.setupDistribution(gdalVersion);
             assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
             assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
@@ -85,8 +83,7 @@ public class GDALDistributionInstallerTest {
     private void testInstallBundleDistribution() {
         try {
             final GDALVersion gdalVersion = GDALVersion.GDAL_321_FULL;
-            gdalVersion.setOsCategory(OSCategory.getOSCategory());
-            GDALDistributionInstaller.setupDistribution(GDALVersion.GDAL_321_FULL);
+            GDALDistributionInstaller.setupDistribution(gdalVersion);
             assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
             assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
             assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));

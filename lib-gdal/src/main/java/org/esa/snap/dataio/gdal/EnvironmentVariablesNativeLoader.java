@@ -66,7 +66,7 @@ public class EnvironmentVariablesNativeLoader {
      *
      * @throws IOException When IO error occurs
      */
-    private static void copyEnvironmentVariablesNativeLibrary() throws IOException {
+    static void copyEnvironmentVariablesNativeLibrary() throws IOException {
         final Path evFilePath = getEnvironmentVariablesFilePath();
         if (!Files.exists(evFilePath)) {
             logger.log(Level.FINE, "Copy the environment variables library file.");
