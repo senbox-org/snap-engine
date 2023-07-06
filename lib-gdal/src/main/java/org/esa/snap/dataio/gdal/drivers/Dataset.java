@@ -164,7 +164,7 @@ public class Dataset extends GDALBase implements Closeable {
      * @param argout the JNI GDAL Dataset class GetGeoTransform(double[] argout) method 'argout' argument
      */
     public void getGeoTransform(double[] argout) {
-        invoke(getGeoTransformHandle, this.jniDatasetInstance, argout);
+        invoke(getGeoTransformHandle, this.jniDatasetInstance, (Object) argout);
     }
 
     /**
@@ -222,7 +222,7 @@ public class Dataset extends GDALBase implements Closeable {
      * @return the JNI GDAL Dataset class SetGeoTransform(double[] gdalGeoTransform) method result
      */
     public Integer setGeoTransform(double[] gdalGeoTransform) {
-        return (Integer) invoke(setGeoTransformHandle, this.jniDatasetInstance, gdalGeoTransform);
+        return (Integer) invoke(setGeoTransformHandle, this.jniDatasetInstance, (Object) gdalGeoTransform);
     }
 
     @Override
