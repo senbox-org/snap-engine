@@ -169,7 +169,7 @@ public final class GDALLoader {
      * Init the drivers if the GDAL library is installed.
      */
     private void initDrivers() {
-        logger.log(Level.FINE, "Init the GDAL drivers on " + this.gdalVersion.getOsCategory().getOperatingSystemName() + ".");
+        logger.log(Level.FINE, "Init the GDAL drivers on " + OSCategory.getOSCategory().getOperatingSystemName() + ".");
         GDAL.allRegister();// GDAL init drivers
     }
 

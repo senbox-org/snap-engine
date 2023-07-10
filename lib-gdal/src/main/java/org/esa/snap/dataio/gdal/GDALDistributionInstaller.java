@@ -70,7 +70,7 @@ class GDALDistributionInstaller {
      */
     private static void installJNI(GDALVersion gdalVersion) throws IOException {
         // install the GDAL JNI drivers from the distribution
-        final OSCategory osCategory = gdalVersion.getOsCategory();
+        final OSCategory osCategory = OSCategory.getOSCategory();
         if (osCategory.getArchitecture() == null) {
             final String msg = "No distribution folder found on " + osCategory.getOperatingSystemName() + ".";
             logger.log(Level.FINE, msg);

@@ -353,11 +353,12 @@ class GDALInstaller {
         }
 
         if (canCopyGDALDistribution) {
-            deleteDistribution(gdalDistributionRootFolderPath);
+            deleteDistribution(gdalDistributionRootFolderPath.getParent());
             logger.log(Level.FINE, "create the folder '" + gdalDistributionRootFolderPath + "' to copy the GDAL distribution.");
             Files.createDirectories(gdalDistributionRootFolderPath);
 
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
+            EnvironmentVariablesNativeLoader.copyEnvironmentVariablesNativeLibrary();
             fixUpPermissions(gdalNativeLibrariesFolderPath);
             if (!gdalVersion.isJni()) {
                 checkDistributionIntegrity(gdalVersion);
