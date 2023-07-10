@@ -3,9 +3,11 @@ package org.esa.snap.engine_utilities.util;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,23 +30,25 @@ public class TestTestUtils {
 
             Path currentPath = Paths.get("");
             System.out.println("Current path is: " + currentPath.toAbsolutePath());
-            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile().getParentFile().getParentFile();
+            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile().getParentFile();
             System.out.println("Trying relative path: " + currentRelativePath.getAbsolutePath());
 
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentRelativePath.toPath())) {
-                for (Path path : stream) {
-                    if (Files.isDirectory(path)) {
-                        System.out.println("  * " + path.getFileName());
-                        try (DirectoryStream<Path> stream2 = Files.newDirectoryStream(path)) {
-                            for (Path p : stream2) {
-                                if (Files.isDirectory(p)) {
-                                    System.out.println("   - " + p.getFileName());
-                                }
-                            }
-                        }
+            printFolders(currentRelativePath.toPath(), 0);
+        }
+    }
+
+    private void printFolders(final Path path, final int level) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            for (Path p : stream) {
+                if (Files.isDirectory(p)) {
+                    System.out.println("  "+ level +" "+ p.getFileName());
+                    if(level < 3) {
+                        printFolders(p, level + 1);
                     }
                 }
             }
+        } catch (IOException e) {
+            SystemUtils.LOG.warning(e.getMessage());
         }
     }
 
