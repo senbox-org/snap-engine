@@ -28,17 +28,17 @@ public class TestTestUtils {
 
             Path currentPath = Paths.get("");
             System.out.println("Current path is: " + currentPath.toAbsolutePath());
-            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile();
-            System.out.println("Trying relative path: " + currentPath.toAbsolutePath());
+            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile().getParentFile().getParentFile();
+            System.out.println("Trying relative path: " + currentRelativePath.getAbsolutePath());
 
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentRelativePath.toPath())) {
                 for (Path path : stream) {
                     if (Files.isDirectory(path)) {
-                        System.out.println("  " + path.getFileName());
+                        System.out.println("  * " + path.getFileName());
                         try (DirectoryStream<Path> stream2 = Files.newDirectoryStream(path)) {
                             for (Path p : stream2) {
                                 if (Files.isDirectory(p)) {
-                                    System.out.println("     " + p.getFileName());
+                                    System.out.println("   - " + p.getFileName());
                                 }
                             }
                         }
