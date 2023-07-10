@@ -5,9 +5,48 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
+import java.io.File;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.junit.Assert.*;
 
 public class TestTestUtils {
+
+    @Test
+    public void testTestDataRoot() throws Exception {
+        assertNotNull(TestUtils.TESTDATA_ROOT);
+
+        Path testDataRootPath = Paths.get(TestUtils.TESTDATA_ROOT);
+        if(Files.exists(testDataRootPath)) {
+            assertTrue(Files.isDirectory(testDataRootPath));
+            assertTrue(Files.isReadable(testDataRootPath));
+        } else {
+            System.out.println("Warning: Test data root does not exist: " + testDataRootPath);
+
+            Path currentPath = Paths.get("");
+            System.out.println("Current path is: " + currentPath.toAbsolutePath());
+            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile();
+            System.out.println("Trying relative path: " + currentPath.toAbsolutePath());
+
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentRelativePath.toPath())) {
+                for (Path path : stream) {
+                    if (Files.isDirectory(path)) {
+                        System.out.println("  " + path.getFileName());
+                        try (DirectoryStream<Path> stream2 = Files.newDirectoryStream(path)) {
+                            for (Path p : stream2) {
+                                if (Files.isDirectory(p)) {
+                                    System.out.println("     " + p.getFileName());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Test
     public void testCreateTestProduct() throws Exception {
