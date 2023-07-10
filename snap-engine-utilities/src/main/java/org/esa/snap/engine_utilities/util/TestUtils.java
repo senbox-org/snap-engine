@@ -47,6 +47,15 @@ import java.util.logging.Logger;
  */
 public class TestUtils {
 
+    private static final String PROPERTY_NAME_TEST_DATA_DIR = "tests.data.dir";
+    public static String TESTDATA_ROOT = System.getProperty(PROPERTY_NAME_TEST_DATA_DIR,"/data/ssd/testData/");
+    static {
+        if(!TESTDATA_ROOT.endsWith("/")) {
+            TESTDATA_ROOT += "/";
+        }
+    }
+    public final static String TEST_ROOT = TESTDATA_ROOT + "SAR/";
+
     private static final boolean FailOnSkip = false;
     private static final boolean FailOnLargeTestProducts = false;
     private static final boolean FailOnAllNoData = false;
