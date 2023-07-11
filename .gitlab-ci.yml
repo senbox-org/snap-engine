@@ -20,6 +20,8 @@ variables:
   MAVEN_DEPLOY_ENABLED: "true"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
+  TEST_DATA_DIR: "${CI_PROJECT_DIR}/testData"
+  S3_ARGS: --endpoint-url $S3_ENDPOINT --region sbg --no-progress
 
 # your pipeline stages
 stages:
@@ -34,13 +36,20 @@ stages:
   - infra-prod
   - production
 
+default:
+  cache:
+    paths:
+      # $CI_PROJECT_DIR is /builds/senbox-org/snap-engine/ on ci
+      - "${CI_PROJECT_DIR}/testData"
+
 mvn-build:
+  before_script:
+    - aws s3 sync s3://%S3_BUCKET%/testData/SAR/unittests %TEST_DATA_DIR%/SAR/unittests %S3_ARGS%
   artifacts:
     paths:
       - "${MAVEN_PROJECT_DIR}/**/target/*.jar"
       - "${MAVEN_PROJECT_DIR}/**/target/classes"
       - "${MAVEN_PROJECT_DIR}/**/target/*.nbm"
-      #- "${MAVEN_PROJECT_DIR}/**/target/site/jacoco/jacoco.csv"
       - "${MAVEN_PROJECT_DIR}/**/target/site"
       - "${MAVEN_PROJECT_DIR}/**/target/surefire-reports"
       - "${MAVEN_PROJECT_DIR}/etc"
