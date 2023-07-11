@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -48,14 +49,16 @@ import java.util.logging.Logger;
 public class TestUtils {
 
     private static final String PROPERTY_NAME_TEST_DATA_DIR = "tests.data.dir";
-    public static String TESTDATA_ROOT = System.getProperty(PROPERTY_NAME_TEST_DATA_DIR,"../../../testData/");
+    public static String TESTDATA_ROOT = System.getProperty(PROPERTY_NAME_TEST_DATA_DIR,"../testData/");
     static {
         if(!TESTDATA_ROOT.endsWith("/")) {
             TESTDATA_ROOT += "/";
         }
         System.out.println("TESTDATA_ROOT: " + TESTDATA_ROOT);
+        System.out.println("TESTDATA_ROOT absolute path is: " + Paths.get(TestUtils.TESTDATA_ROOT).toAbsolutePath());
     }
-    public final static String TEST_ROOT = TESTDATA_ROOT + "SAR/";
+    public final static String TEST_SAR_ROOT = TESTDATA_ROOT + "SAR/";
+    public final static String TEST_SAR_UNITTESTS = TESTDATA_ROOT + "SAR/unittests/";
 
     private static final boolean FailOnSkip = false;
     private static final boolean FailOnLargeTestProducts = false;

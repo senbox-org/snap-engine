@@ -38,7 +38,8 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestCreateElevationOp {
 
-    private final static File inputASAR_WSM = new File(TestUtils.TEST_ROOT + "ASAR/subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
+    private final static File inputASAR_WSM = new File(TestUtils.TEST_SAR_UNITTESTS +
+            "ASAR/subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
     private final static OperatorSpi spi = new AddElevationOp.Spi();
 
