@@ -2,7 +2,6 @@ package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.lib.gdal.AbstractGDALTest;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.jni.EnvironmentVariables;
 import org.junit.Test;
 

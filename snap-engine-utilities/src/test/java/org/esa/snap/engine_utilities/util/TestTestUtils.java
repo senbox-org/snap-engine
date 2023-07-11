@@ -3,11 +3,54 @@ package org.esa.snap.engine_utilities.util;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 
 public class TestTestUtils {
+
+    @Test
+    public void testTestDataRoot() throws Exception {
+        assertNotNull(TestUtils.TESTDATA_ROOT);
+
+        Path testDataRootPath = Paths.get(TestUtils.TESTDATA_ROOT);
+        if(Files.exists(testDataRootPath)) {
+            assertTrue(Files.isDirectory(testDataRootPath));
+            assertTrue(Files.isReadable(testDataRootPath));
+        } else {
+            System.out.println("Warning: Test data root does not exist: " + testDataRootPath);
+
+            Path currentPath = Paths.get("");
+            System.out.println("Current path is: " + currentPath.toAbsolutePath());
+            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile().getParentFile();
+            System.out.println("Trying relative path: " + currentRelativePath.getAbsolutePath());
+
+            printFolders(currentRelativePath.toPath(), 0);
+        }
+    }
+
+    private void printFolders(final Path path, final int level) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            for (Path p : stream) {
+                if (Files.isDirectory(p)) {
+                    System.out.println("  "+ level +" "+ p.getFileName());
+                    if(level < 3) {
+                        printFolders(p, level + 1);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            SystemUtils.LOG.warning(e.getMessage());
+        }
+    }
 
     @Test
     public void testCreateTestProduct() throws Exception {

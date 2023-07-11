@@ -32,6 +32,7 @@ public class GDALVersionTest {
     private static final String NONE_SELECTED_INSTALLED_GDAL_LIBRARY = "none";
 
     private static final GDALVersion TEST_VERSION_JNI = GDALVersion.GDAL_32X_JNI;
+    private static final GDALVersion TEST_OLD_VERSION_JNI = GDAL_30X_JNI;
     private static final GDALVersion TEST_VERSION = GDALVersion.getInternalVersion();
 
     private Boolean currentUseInstalledGDALLibrary;
@@ -72,7 +73,6 @@ public class GDALVersionTest {
                 final GDALVersion InstalledGDALVersion = JNI_VERSIONS.get(version);
                 if (InstalledGDALVersion != null) {
                     InstalledGDALVersion.setId(versionId);
-                    InstalledGDALVersion.setOsCategory(osCategory);
                     gdalVersions.putIfAbsent(version, InstalledGDALVersion);
                 }
             } catch (IOException e) {
@@ -86,26 +86,8 @@ public class GDALVersionTest {
         return AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedDirName(gdalVersion.isJni(), gdalVersion.name));
     }
 
-    private static String retrieveExpectedInternalVersionLocation() {
-        return getExpectedGDALVersionLocation(GDAL_321_FULL).toString();
-    }
-
-    private static String retrieveExpectedInstalledVersionLocation(GDALVersion gdalVersion) {
-        return Arrays.stream(AbstractGDALTest.getExpectedOSCategory().getExecutableLocations(GDALINFIO_EXECUTABLE_NAME)).filter(installedVersionLocation -> {
-            try {
-                return JNI_VERSIONS.get(fetchProcessOutput(Runtime.getRuntime().exec(new String[]{installedVersionLocation + File.separator + GDALINFIO_EXECUTABLE_NAME, GDALINFO_EXECUTABLE_ARGS})).replaceAll("[\\s\\S]*?(\\d*\\.\\d*\\.\\d*)[\\s\\S]*$", "$1").replaceAll("(\\d*\\.\\d*)[\\s\\S]*$", "$1.x")) == gdalVersion;
-            } catch (IOException e) {
-                return false;
-            }
-        }).findFirst().orElse(null);
-    }
-
     private static String getExpectedLocation(GDALVersion gdalVersion) {
-        if (gdalVersion.name.equals(GDAL_321_FULL.name)) {
-            return retrieveExpectedInternalVersionLocation();
-        } else {
-            return retrieveExpectedInstalledVersionLocation(gdalVersion);
-        }
+        return getExpectedGDALVersionLocation(gdalVersion).toString();
     }
 
     private static URL getExpectedZipFileURLFromSources(GDALVersion gdalVersion) {
@@ -125,7 +107,6 @@ public class GDALVersionTest {
         final Preferences preferences = fetchPreferences();
         currentUseInstalledGDALLibrary = preferences.getBoolean(PREFERENCE_KEY_USE_INSTALLED_GDAL, true);
         currentSelectedInstalledGDALLibrary = preferences.get(PREFERENCE_KEY_SELECTED_INSTALLED_GDAL, PREFERENCE_NONE_VALUE_SELECTED_INSTALLED_GDAL);
-        TEST_VERSION_JNI.setOsCategory(OSCategory.getOSCategory());
     }
 
     @After
@@ -210,14 +191,15 @@ public class GDALVersionTest {
 
     @Test
     public void testIsJni() {
-        assertEquals(TEST_VERSION.nativeLibraryNames == null, TEST_VERSION.isJni());
-        assertEquals(TEST_VERSION_JNI.nativeLibraryNames == null, TEST_VERSION_JNI.isJni());
+        assertFalse(TEST_VERSION.isJni());
+        assertTrue(TEST_VERSION_JNI.isJni());
     }
 
     @Test
     public void testIsCOGCapable() {
-        assertEquals(TEST_VERSION.cogCapable, TEST_VERSION.isCOGCapable());
-        assertEquals(TEST_VERSION_JNI.cogCapable, TEST_VERSION_JNI.isCOGCapable());
+        assertTrue(TEST_VERSION.isCOGCapable());
+        assertTrue(TEST_VERSION_JNI.isCOGCapable());
+        assertFalse(TEST_OLD_VERSION_JNI.isCOGCapable());
     }
 
     @Test

@@ -1,16 +1,12 @@
 package com.bc.ceres.core;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Norman Fomferra
@@ -39,7 +35,7 @@ public class ProcessObserverTest {
         assertEquals(1, handler.exitCode.intValue());
     }
 
-    @Ignore("This test fails to often on the server. No Idea why.")
+    @Test
     public void testJavaProcessCancel() throws Exception {
         final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 10 2", getClassPath(), TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
@@ -49,18 +45,20 @@ public class ProcessObserverTest {
                 .setHandler(handler).start();
         Thread.sleep(250);
         observedProcess.cancel();
-        Thread.sleep(250);
+
+        Thread.sleep(500);
 
         assertTrue(handler.started);
+
         assertEquals("Start\n", handler.out);
         assertEquals("", handler.err);
-        assertFalse(handler.ended);
+        assertTrue(handler.ended);
         assertNull(handler.exitCode);
     }
 
     protected String getJavaExecPath() {
         //Add "" to JAVA path if it has blank spaces
-        if(JAVA_EXEC_PATH.contains(" ")) {
+        if (JAVA_EXEC_PATH.contains(" ")) {
             return "\"" + JAVA_EXEC_PATH + "\"";
         }
 
@@ -69,7 +67,7 @@ public class ProcessObserverTest {
 
     protected String getClassPath() {
         //Add "" to claspath if it has blank spaces
-        if(classPath.contains(" ")) {
+        if (classPath.contains(" ")) {
             return "\"" + classPath + "\"";
         }
 
@@ -77,10 +75,10 @@ public class ProcessObserverTest {
     }
 
     static class MyHandler implements ProcessObserver.Handler {
-        boolean started;
+        boolean started = false;
         String out = "";
         String err = "";
-        boolean ended;
+        boolean ended = false;
         Integer exitCode;
 
         @Override

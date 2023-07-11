@@ -7,7 +7,6 @@ import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -46,6 +45,31 @@ public class PixelQuadTreeInverseTest {
         assertEquals(0.5, pixelPos.x, 1e-8);
         assertEquals(25.5, pixelPos.y, 1e-8);
     }
+
+    // @todo 1 tb/tb reactivate and solve geo-location fill value issue 2021-03-17
+    /*
+    @Test
+    public void testGeoPixelPos_SYN_AOD_fillValues() {
+        final GeoRaster geoRaster = TestData.get_SYN_AOD();
+        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(59.2421, -136.13405), null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+
+        pixelPos = inverse.getPixelPos(new GeoPos(59.19238, -135.08754), null);
+        assertEquals(24.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+
+        pixelPos = inverse.getPixelPos(new GeoPos(58.232895, -135.29134), null);
+        assertEquals(24.5, pixelPos.x, 1e-8);
+        assertEquals(26.5, pixelPos.y, 1e-8);
+
+        pixelPos = inverse.getPixelPos(new GeoPos(58.28423, -136.32547), null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(26.5, pixelPos.y, 1e-8);
+    }*/
 
     @Test
     public void testGetPixelPos_SLSTR_OL_outside() {
@@ -91,31 +115,6 @@ public class PixelQuadTreeInverseTest {
         pixelPos = inverse.getPixelPos(new GeoPos(-69.24617, 178.1685), null);
         assertEquals(0.5, pixelPos.x, 1e-8);
         assertEquals(25.5, pixelPos.y, 1e-8);
-    }
-
-    @Test
-    @Ignore
-    // @todo 1 tb/tb reactivate and solve geo-location fill value issue 2021-03-17
-    public void testGeoPixelPos_SYN_AOD_fillValues() {
-        final GeoRaster geoRaster = TestData.get_SYN_AOD();
-        PixelQuadTreeInverse inverse = new PixelQuadTreeInverse();
-        inverse.initialize(geoRaster, false, new PixelPos[0]);
-
-        PixelPos pixelPos = inverse.getPixelPos(new GeoPos(59.2421, -136.13405), null);
-        assertEquals(9.5, pixelPos.x, 1e-8);
-        assertEquals(1.5, pixelPos.y, 1e-8);
-
-        pixelPos = inverse.getPixelPos(new GeoPos(59.19238, -135.08754), null);
-        assertEquals(24.5, pixelPos.x, 1e-8);
-        assertEquals(1.5, pixelPos.y, 1e-8);
-
-        pixelPos = inverse.getPixelPos(new GeoPos(58.232895, -135.29134), null);
-        assertEquals(24.5, pixelPos.x, 1e-8);
-        assertEquals(26.5, pixelPos.y, 1e-8);
-
-        pixelPos = inverse.getPixelPos(new GeoPos(58.28423, -136.32547), null);
-        assertEquals(9.5, pixelPos.x, 1e-8);
-        assertEquals(26.5, pixelPos.y, 1e-8);
     }
 
     @Test
