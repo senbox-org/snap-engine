@@ -82,7 +82,7 @@ public class ColorBarLayerType extends LayerType {
             " applied <br>and the user subsequently changes the palette such is no longer matches scheme<br>" +
             "then the scheme will be turned off so the color bar legend match the altered color palette</html>";
     private static final String PROPERTY_SCHEME_LABELS_RESTRICT_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsRestrict";
-    public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = true;
+    public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = false;
     public static final Class PROPERTY_SCHEME_LABELS_RESTRICT_TYPE = Boolean.class;
 
 
@@ -92,7 +92,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_HEADER_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "HeaderTitle";
 
     public static final String PROPERTY_HEADER_TITLE_SECTION_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".section";
-    public static final String PROPERTY_HEADER_TITLE_SECTION_LABEL = "Title";
+    public static final String PROPERTY_HEADER_TITLE_SECTION_LABEL = "Title/Units";
     public static final String PROPERTY_HEADER_TITLE_SECTION_TOOLTIP = "Header title for the " + COLOR_LOWER_CASE + " bar legend";
     public static final String PROPERTY_HEADER_TITLE_SECTION_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Section";
 
@@ -412,19 +412,19 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-    public static final String PROPERTY_LOCATION_GAP_FACTOR_KEY = PROPERTY_LOCATION_ROOT_KEY + ".gap.factor";
-    public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Gap Factor";
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset.outside";
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Offset (Outside)";
     public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage factor to place " + COLOR_LOWER_CASE + " bar legend away from anchored axis)";
-    private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 0.05;
-    public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = 0.0;
-    public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 1.0;
+    private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset (Outside)";
+    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 10.0;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -100;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 100;
     public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";
     public static final Class PROPERTY_LOCATION_GAP_FACTOR_TYPE = Double.class;
 
 
-    public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
-    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset";
+    public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset.inside";
+    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset (Inside)";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
