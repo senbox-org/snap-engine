@@ -149,6 +149,7 @@ public class Graticule {
      */
     public static Graticule create(RasterDataNode raster,
                                    int desiredNumGridLines,
+                                   int desiredMinorSteps,
                                    double latMajorStep,
                                    double lonMajorStep,
                                    boolean formatCompass,
@@ -163,31 +164,36 @@ public class Graticule {
             desiredNumGridLines = 2;
         }
 
+
         final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
+        final GeoPos geoDeltaScene = getGeoDeltaScene(geoCoding, raster);
 
+        boolean autoBoth = (latMajorStep == 0 && lonMajorStep == 0) ? true : false;
         if (latMajorStep == 0) {
-            int height = raster.getRasterHeight();
-            double ratio = height / (desiredNumGridLines - 1);
-
-            double tmpLatMajorStep = ratio * geoDelta.lat;
+            double tmpLatMajorStep =  geoDeltaScene.lat / (desiredNumGridLines - 0.0);
 
             latMajorStep = getSensibleDegreeIncrement(tmpLatMajorStep);
         }
 
         if (lonMajorStep == 0) {
-            int width = raster.getRasterWidth();
-            double ratio = width / (desiredNumGridLines - 1);
-
-            double tmpLonMajorStep = ratio * geoDelta.lon;
+            double tmpLonMajorStep = geoDeltaScene.lon / (desiredNumGridLines - 0.0);
 
             lonMajorStep = getSensibleDegreeIncrement(tmpLonMajorStep);
         }
 
-        final int desiredMinorSteps = getDesiredMinorSteps(raster);
-        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
-        final double latMinorStep = ratioLatMinor * geoDelta.lat;
-        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
-        final double lonMinorStep = ratioLonMinor * geoDelta.lon;
+        if (autoBoth) {
+            latMajorStep = Math.min(latMajorStep, lonMajorStep);
+            lonMajorStep = latMajorStep;
+        }
+
+//        final int desiredMinorSteps = getDesiredMinorSteps(raster);
+//        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+//        double latMinorStep = ratioLatMinor * geoDelta.lat;
+//        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+//        double lonMinorStep = ratioLonMinor * geoDelta.lon;
+
+        double latMinorStep = latMajorStep / (desiredMinorSteps + 1);
+        double lonMinorStep = lonMajorStep / (desiredMinorSteps + 1);
 
         int geoBoundaryStep = getGeoBoundaryStep(geoCoding, raster);
         GeoPos[] geoBoundary = createGeoBoundary(raster, geoBoundaryStep);
@@ -203,9 +209,9 @@ public class Graticule {
         final Range latRange = ranges[1];
 
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
-                                                                   lonRange.getMin(), lonRange.getMax());
+                lonRange.getMin(), lonRange.getMax());
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
-                                                                   latRange.getMin(), latRange.getMax());
+                latRange.getMin(), latRange.getMax());
 
         if (parallelList.size() > 0 && meridianList.size() > 0) {
             final GeneralPath[] paths = createPaths(parallelList, meridianList);
@@ -224,28 +230,28 @@ public class Graticule {
             final PixelPos[] tickPointsEast = createTickPoints(parallelList, meridianList, TextLocation.EAST);
 
             return new Graticule(paths,
-                                 textGlyphsNorth,
-                                 textGlyphsSouth,
-                                 textGlyphsWest,
-                                 textGlyphsEast,
-                                 textGlyphsLatCorners,
-                                 textGlyphsLonCorners,
-                                 tickPointsNorth,
-                                 tickPointsSouth,
-                                 tickPointsWest,
-                                 tickPointsEast);
+                    textGlyphsNorth,
+                    textGlyphsSouth,
+                    textGlyphsWest,
+                    textGlyphsEast,
+                    textGlyphsLatCorners,
+                    textGlyphsLonCorners,
+                    tickPointsNorth,
+                    tickPointsSouth,
+                    tickPointsWest,
+                    tickPointsEast);
         } else {
             return new Graticule(null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null);
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
         }
     }
 
@@ -825,6 +831,131 @@ public class Graticule {
         return ranges;
     }
 
+
+    static GeoPos getGeoDeltaScene(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+        final PixelPos pixelPos_topCenter = new PixelPos(dataNode.getRasterWidth()*0.5, 0);
+        final PixelPos pixelPos_bottomCenter = new PixelPos(dataNode.getRasterWidth()*0.5, dataNode.getRasterHeight()-1);
+
+        final GeoPos geoPos_topCenter = geoCoding.getGeoPos(pixelPos_topCenter, null);
+        final GeoPos geoPos_bottomCenter = geoCoding.getGeoPos(pixelPos_bottomCenter, null);
+
+        final PixelPos pixelPos_centerRight = new PixelPos(dataNode.getRasterWidth()-1, dataNode.getRasterHeight()*0.5);
+        final PixelPos pixelPos_centerLeft = new PixelPos(0, dataNode.getRasterHeight()-1);
+
+        final GeoPos geoPos_centerRight = geoCoding.getGeoPos(pixelPos_centerRight, null);
+        final GeoPos geoPos_centerLeft = geoCoding.getGeoPos(pixelPos_centerLeft, null);
+
+
+        final PixelPos pixelPos_topRight = new PixelPos(dataNode.getRasterWidth()-1, 0);
+        final PixelPos pixelPos_bottomRight = new PixelPos(dataNode.getRasterWidth()-1, dataNode.getRasterHeight()-1);
+
+        final GeoPos geoPos_topRight = geoCoding.getGeoPos(pixelPos_topRight, null);
+        final GeoPos geoPos_bottomRight = geoCoding.getGeoPos(pixelPos_bottomRight, null);
+
+
+
+        final PixelPos pixelPos_topLeft = new PixelPos(0, 0);
+        final PixelPos pixelPos_bottomLeft = new PixelPos(0, dataNode.getRasterHeight()-1);
+
+        final GeoPos geoPos_topLeft = geoCoding.getGeoPos(pixelPos_topLeft, null);
+        final GeoPos geoPos_bottomLeft = geoCoding.getGeoPos(pixelPos_bottomLeft, null);
+
+
+
+        // Break into top and bottom half just in case scene is large and also crosses pole
+
+        double deltaLatRightTopHalf;
+        if (geoPos_topRight.lat > geoPos_centerRight.lat) {
+            deltaLatRightTopHalf = Math.abs(geoPos_topRight.lat - geoPos_centerRight.lat);
+        } else {
+            // Assume scene crosses pole and account for it
+            deltaLatRightTopHalf = Math.abs((geoPos_topRight.lat + 180) - geoPos_centerRight.lat);
+        }
+
+        double deltaLatRightBottomHalf;
+        if (geoPos_centerRight.lat > geoPos_bottomRight.lat) {
+            deltaLatRightBottomHalf = Math.abs(geoPos_centerRight.lat - geoPos_bottomRight.lat);
+        } else {
+            // Assume scene crosses pole and account for it
+            deltaLatRightBottomHalf = Math.abs((geoPos_centerRight.lat + 180) - geoPos_bottomRight.lat);
+        }
+
+        double deltaLatRight = deltaLatRightTopHalf + deltaLatRightBottomHalf;
+
+
+        double deltaLatLeftTopHalf;
+        if (geoPos_topLeft.lat > geoPos_centerLeft.lat) {
+            deltaLatLeftTopHalf = Math.abs(geoPos_topLeft.lat - geoPos_centerLeft.lat);
+        } else {
+            // Assume scene crosses pole and account for it
+            deltaLatLeftTopHalf = Math.abs((geoPos_topLeft.lat + 180) - geoPos_centerLeft.lat);
+        }
+
+        double deltaLatLeftBottomHalf;
+        if (geoPos_centerLeft.lat > geoPos_bottomLeft.lat) {
+            deltaLatLeftBottomHalf = Math.abs(geoPos_centerLeft.lat - geoPos_bottomLeft.lat);
+        } else {
+            // Assume scene crosses pole and account for it
+            deltaLatLeftBottomHalf = Math.abs((geoPos_centerLeft.lat + 180) - geoPos_bottomLeft.lat);
+        }
+
+        double deltaLatLeft = deltaLatLeftTopHalf + deltaLatLeftBottomHalf;
+
+
+
+
+
+        // Break into left and right half just in case scene is large and also crosses dateline
+
+        double deltaLonTopRightHalf;
+        if (geoPos_topRight.lon > geoPos_topCenter.lon) {
+            deltaLonTopRightHalf = Math.abs(geoPos_topRight.lon - geoPos_topCenter.lon);
+        } else {
+            // Assume scene crosses dateline and account for it
+            deltaLonTopRightHalf = Math.abs((geoPos_topRight.lon + 360) - geoPos_topCenter.lon);
+        }
+
+        double deltaLonTopLeftHalf;
+        if (geoPos_topCenter.lon > geoPos_topLeft.lon) {
+            deltaLonTopLeftHalf = Math.abs(geoPos_topCenter.lon - geoPos_topLeft.lon);
+        } else {
+            // Assume scene crosses dateline and account for it
+            deltaLonTopLeftHalf = Math.abs((geoPos_topCenter.lon + 360) - geoPos_topLeft.lon);
+        }
+
+        double deltaLonTop = deltaLonTopLeftHalf + deltaLonTopRightHalf;
+
+
+
+        double deltaLonBottomRightHalf;
+        if (geoPos_bottomRight.lon > geoPos_bottomCenter.lon) {
+            deltaLonBottomRightHalf = Math.abs(geoPos_bottomRight.lon - geoPos_bottomCenter.lon);
+        } else {
+            // Assume scene crosses dateline and account for it
+            deltaLonBottomRightHalf = Math.abs((geoPos_bottomRight.lon + 360) - geoPos_bottomCenter.lon);
+        }
+
+        double deltaLonBottomLeftHalf;
+        if (geoPos_bottomCenter.lon > geoPos_bottomLeft.lon) {
+            deltaLonBottomLeftHalf = Math.abs(geoPos_bottomCenter.lon - geoPos_bottomLeft.lon);
+        } else {
+            // Assume scene crosses dateline and account for it
+            deltaLonBottomLeftHalf = Math.abs((geoPos_bottomCenter.lon + 360) - geoPos_bottomLeft.lon);
+        }
+
+        double deltaLonBottom = deltaLonBottomLeftHalf + deltaLonBottomRightHalf;
+
+
+
+        double deltaLon = Math.min(deltaLonTop, deltaLonBottom);
+        double deltaLat = Math.min(deltaLatLeft, deltaLatRight);
+
+
+        return new GeoPos(deltaLat, deltaLon);
+    }
+
+
     static GeoPos getGeoDelta(GeoCoding geoCoding, RasterDataNode dataNode) {
         final double posX = 0.5 * dataNode.getRasterWidth();
         final double posy = 0.5 * dataNode.getRasterHeight();
@@ -851,7 +982,7 @@ public class Graticule {
 
     static TextGlyph createTextGlyph(String text, Coord coord1, Coord coord2) {
         final double angle = Math.atan2(coord2.pixelPos.y - coord1.pixelPos.y,
-                                        coord2.pixelPos.x - coord1.pixelPos.x);
+                coord2.pixelPos.x - coord1.pixelPos.x);
         return new TextGlyph(text, coord1.pixelPos.x, coord1.pixelPos.y, angle);
     }
 

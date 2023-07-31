@@ -350,10 +350,19 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_NAME_RASTER = "raster";
 
 
-    public static final String PROPERTY_NUM_GRID_LINES_NAME = "graticule.num.grid.lines"; // todo Danny changed this to number of lines so need to change variable names
+    public static final String PROPERTY_NUM_GRID_LINES_NAME = "graticule.num.grid.lines";
     public static final int PROPERTY_NUM_GRID_LINES_DEFAULT = 4;
-    private static final String PROPERTY_NUM_GRID_LINES_ALIAS = "numGridLines";
+    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "Number of Gridlines (auto-generate)";
+    public static final String PROPERTY_NUM_GRID_LINES_TOOLTIP = "<html>Number of gridlines (approximate due to rounding) <br>to auto-generate if lat or lon spacing = 0</html>";
+    public static final String PROPERTY_NUM_GRID_LINES_ALIAS = "numGridLines";
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
+
+    public static final String PROPERTY_MINOR_STEPS_NAME = "graticule.minor.steps";
+    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 10;
+    public static final String PROPERTY_MINOR_STEPS_LABEL = "Minor Steps Between Gridlines";
+    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of minor steps between gridlines";
+    public static final String PROPERTY_MINOR_STEPS_ALIAS = "minorSteps";
+    public static final Class PROPERTY_MINOR_STEPS_TYPE = Integer.class;
 
 
     // Property Setting: Restore Defaults
@@ -404,6 +413,10 @@ public class GraticuleLayerType extends LayerType {
         final Property resPixelsModel = Property.create(PROPERTY_NUM_GRID_LINES_NAME, Integer.class, PROPERTY_NUM_GRID_LINES_DEFAULT, true);
         resPixelsModel.getDescriptor().setAlias(PROPERTY_NUM_GRID_LINES_ALIAS);
         vc.addProperty(resPixelsModel);
+
+        final Property minorStepsModel = Property.create(PROPERTY_MINOR_STEPS_NAME, Integer.class, PROPERTY_MINOR_STEPS_DEFAULT, true);
+        minorStepsModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_ALIAS);
+        vc.addProperty(minorStepsModel);
 
         final Property gridSpacingLatModel = Property.create(PROPERTY_GRID_SPACING_LAT_NAME, PROPERTY_GRID_SPACING_LAT_TYPE, PROPERTY_GRID_SPACING_LAT_DEFAULT, true);
         gridSpacingLatModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LAT_ALIAS);

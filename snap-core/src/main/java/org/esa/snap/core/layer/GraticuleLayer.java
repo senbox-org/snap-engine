@@ -96,6 +96,7 @@ public class GraticuleLayer extends Layer {
         if (graticule == null) {
             graticule = Graticule.create(raster,
                     getNumGridLines(),
+                    getNumMinorSteps(),
                     getGridSpacingLat(),
                     getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
         }
@@ -894,6 +895,7 @@ public class GraticuleLayer extends Layer {
                 propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -920,6 +922,13 @@ public class GraticuleLayer extends Layer {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME,
                 GraticuleLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT);
     }
+
+    private int getNumMinorSteps() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME,
+                GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT);
+    }
+
+
 
 
     private Color getGridlinesColor() {
