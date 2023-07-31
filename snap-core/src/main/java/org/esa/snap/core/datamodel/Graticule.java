@@ -865,41 +865,13 @@ public class Graticule {
 
         // Break into top and bottom half just in case scene is large and also crosses pole
 
-        double deltaLatRightTopHalf;
-        if (geoPos_topRight.lat > geoPos_centerRight.lat) {
-            deltaLatRightTopHalf = Math.abs(geoPos_topRight.lat - geoPos_centerRight.lat);
-        } else {
-            // Assume scene crosses pole and account for it
-            deltaLatRightTopHalf = Math.abs((geoPos_topRight.lat + 180) - geoPos_centerRight.lat);
-        }
 
-        double deltaLatRightBottomHalf;
-        if (geoPos_centerRight.lat > geoPos_bottomRight.lat) {
-            deltaLatRightBottomHalf = Math.abs(geoPos_centerRight.lat - geoPos_bottomRight.lat);
-        } else {
-            // Assume scene crosses pole and account for it
-            deltaLatRightBottomHalf = Math.abs((geoPos_centerRight.lat + 180) - geoPos_bottomRight.lat);
-        }
-
+        double deltaLatRightTopHalf = Math.abs(geoPos_topRight.lat - geoPos_centerRight.lat);
+        double deltaLatRightBottomHalf = Math.abs(geoPos_centerRight.lat - geoPos_bottomRight.lat);
         double deltaLatRight = deltaLatRightTopHalf + deltaLatRightBottomHalf;
 
-
-        double deltaLatLeftTopHalf;
-        if (geoPos_topLeft.lat > geoPos_centerLeft.lat) {
-            deltaLatLeftTopHalf = Math.abs(geoPos_topLeft.lat - geoPos_centerLeft.lat);
-        } else {
-            // Assume scene crosses pole and account for it
-            deltaLatLeftTopHalf = Math.abs((geoPos_topLeft.lat + 180) - geoPos_centerLeft.lat);
-        }
-
-        double deltaLatLeftBottomHalf;
-        if (geoPos_centerLeft.lat > geoPos_bottomLeft.lat) {
-            deltaLatLeftBottomHalf = Math.abs(geoPos_centerLeft.lat - geoPos_bottomLeft.lat);
-        } else {
-            // Assume scene crosses pole and account for it
-            deltaLatLeftBottomHalf = Math.abs((geoPos_centerLeft.lat + 180) - geoPos_bottomLeft.lat);
-        }
-
+        double deltaLatLeftTopHalf = Math.abs(geoPos_topLeft.lat - geoPos_centerLeft.lat);
+        double deltaLatLeftBottomHalf = Math.abs(geoPos_centerLeft.lat - geoPos_bottomLeft.lat);
         double deltaLatLeft = deltaLatLeftTopHalf + deltaLatLeftBottomHalf;
 
 
@@ -908,40 +880,26 @@ public class Graticule {
 
         // Break into left and right half just in case scene is large and also crosses dateline
 
-        double deltaLonTopRightHalf;
-        if (geoPos_topRight.lon > geoPos_topCenter.lon) {
-            deltaLonTopRightHalf = Math.abs(geoPos_topRight.lon - geoPos_topCenter.lon);
-        } else {
-            // Assume scene crosses dateline and account for it
-            deltaLonTopRightHalf = Math.abs((geoPos_topRight.lon + 360) - geoPos_topCenter.lon);
+        double deltaLonTopRightHalf = Math.abs(geoPos_topRight.lon - geoPos_topCenter.lon);
+        if (deltaLonTopRightHalf > 360) {
+            deltaLonTopRightHalf = deltaLonTopRightHalf - 360;
         }
 
-        double deltaLonTopLeftHalf;
-        if (geoPos_topCenter.lon > geoPos_topLeft.lon) {
-            deltaLonTopLeftHalf = Math.abs(geoPos_topCenter.lon - geoPos_topLeft.lon);
-        } else {
-            // Assume scene crosses dateline and account for it
-            deltaLonTopLeftHalf = Math.abs((geoPos_topCenter.lon + 360) - geoPos_topLeft.lon);
+        double deltaLonTopLeftHalf = Math.abs(geoPos_topCenter.lon - geoPos_topLeft.lon);
+        if (deltaLonTopLeftHalf > 360) {
+            deltaLonTopLeftHalf = deltaLonTopLeftHalf - 360;
         }
-
         double deltaLonTop = deltaLonTopLeftHalf + deltaLonTopRightHalf;
 
 
-
-        double deltaLonBottomRightHalf;
-        if (geoPos_bottomRight.lon > geoPos_bottomCenter.lon) {
-            deltaLonBottomRightHalf = Math.abs(geoPos_bottomRight.lon - geoPos_bottomCenter.lon);
-        } else {
-            // Assume scene crosses dateline and account for it
-            deltaLonBottomRightHalf = Math.abs((geoPos_bottomRight.lon + 360) - geoPos_bottomCenter.lon);
+        double deltaLonBottomRightHalf = Math.abs(geoPos_bottomRight.lon - geoPos_bottomCenter.lon);
+        if (deltaLonBottomRightHalf > 360) {
+            deltaLonBottomRightHalf = deltaLonBottomRightHalf - 360;
         }
 
-        double deltaLonBottomLeftHalf;
-        if (geoPos_bottomCenter.lon > geoPos_bottomLeft.lon) {
-            deltaLonBottomLeftHalf = Math.abs(geoPos_bottomCenter.lon - geoPos_bottomLeft.lon);
-        } else {
-            // Assume scene crosses dateline and account for it
-            deltaLonBottomLeftHalf = Math.abs((geoPos_bottomCenter.lon + 360) - geoPos_bottomLeft.lon);
+        double deltaLonBottomLeftHalf = Math.abs(geoPos_bottomCenter.lon - geoPos_bottomLeft.lon);
+        if (deltaLonBottomLeftHalf > 360) {
+            deltaLonBottomLeftHalf = deltaLonBottomLeftHalf - 360;
         }
 
         double deltaLonBottom = deltaLonBottomLeftHalf + deltaLonBottomRightHalf;
