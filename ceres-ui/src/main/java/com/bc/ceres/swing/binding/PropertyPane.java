@@ -43,15 +43,13 @@ import static com.bc.ceres.swing.TableLayout.cell;
  * @version $Revision$ $Date$
  * @
  */
-// JAN2018 - Daniel Knowles - Added method to return property pane as a JScrollPane
-
-
-// JAN2018 - Daniel Knowles - Moved some of the logic for adding components to a public method which can also be called by
+// JAN2019 - Knowles - Added method to return property pane as a JScrollPane
+// JAN2019 - Knowles - Moved some of the logic for adding components to a public method which can also be called by
 //                            the preferences GUIs.
 //                          - Added tooltips: NOTE: actual tooltips values will be added in the future.
 //                            NOTE: this does not contain section breaks which may be added in the future for a future
 //                                  revision of map gridlines and other tools.
-
+// MAR2021 - Knowles - Added setEnabled so that some properties can be initially disabled
 
 
 public class PropertyPane {
@@ -182,6 +180,8 @@ public class PropertyPane {
         if (components.length == 2) {
             components[0].setToolTipText(descriptor.getDescription());
             components[1].setToolTipText(descriptor.getDescription());
+            components[0].setEnabled(descriptor.getEnabled());
+            components[1].setEnabled(descriptor.getEnabled());
             layout.setCellWeightX(rowIndex, 0, 0.0);
             panel.add(components[1], cell(rowIndex, 0));
             layout.setCellWeightX(rowIndex, 1, 1.0);
