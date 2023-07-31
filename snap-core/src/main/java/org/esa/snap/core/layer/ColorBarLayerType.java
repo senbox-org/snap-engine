@@ -414,7 +414,7 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_LOCATION_GAP_FACTOR_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset.outside";
     public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Offset (Outside)";
-    public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage factor to place " + COLOR_LOWER_CASE + " bar legend away from anchored axis)";
+    public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage of scene size to move " + COLOR_LOWER_CASE + " bar legend outside of anchored axis";
     private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset (Outside)";
     public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 10.0;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -100;
@@ -425,7 +425,7 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset.inside";
     public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Location Offset (Inside)";
-    public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move " + COLOR_LOWER_CASE + " bar legend away from anchored axis (by percentage of " + COLOR_LOWER_CASE + " bar height)";
+    public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Percentage of scene size to move " + COLOR_LOWER_CASE + " bar legend inside of anchored axis";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
