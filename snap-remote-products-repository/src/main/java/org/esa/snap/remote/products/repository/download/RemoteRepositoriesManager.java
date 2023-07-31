@@ -219,6 +219,7 @@ public class RemoteRepositoriesManager {
             product.setProductType(repositoryProduct.getRemoteMission().getName());
             product.setName(repositoryProduct.getName());
             product.setLocation(repositoryProduct.getURL());
+            product.setAcquisitionDate(repositoryProduct.getAcquisitionDate());
 
             List<EOProduct> products = new ArrayList<>(1);
             products.add(product); // add the product to be downloaded
