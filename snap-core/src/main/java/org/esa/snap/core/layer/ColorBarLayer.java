@@ -587,15 +587,15 @@ public class ColorBarLayer extends Layer {
         double offset;
         if (isColorBarLocationInside()) {
             if (isHorizontalColorBar()) {
-                offset = getLocationOffsetInside() * raster.getRasterHeight() / 100;
+                offset = (getLocationOffsetInside() / 100) *  ((raster.getRasterWidth() + raster.getRasterHeight()) / 2.0);
             } else {
-                offset = getLocationOffsetInside() * raster.getRasterWidth() / 100;
+                offset = (getLocationOffsetInside() / 100) *  ((raster.getRasterWidth() + raster.getRasterHeight()) / 2.0);
             }
         } else {
             if (isHorizontalColorBar()) {
-                offset = getLocationOffsetOutside() * raster.getRasterHeight() / 100;
+                offset = (getLocationOffsetOutside() / 100) *  ((raster.getRasterWidth() + raster.getRasterHeight()) / 2.0);
             } else {
-                offset = getLocationOffsetOutside() * raster.getRasterWidth() / 100;
+                offset = (getLocationOffsetOutside() / 100) *  ((raster.getRasterWidth() + raster.getRasterHeight()) / 2.0);
             }
         }
 

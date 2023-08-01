@@ -199,7 +199,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_LABEL = "Scene Aspect Ratio (Best Fit)";
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_TOOLTIP = "For Best Fit: Scene aspect ratio (width/height) which triggers determination of horizontal or vertical color bar";
     private static final String PROPERTY_SCENE_ASPECT_BEST_FIT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "SceneAspectBestFit";
-    public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.25;
+    public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.0;
     public static final Class PROPERTY_SCENE_ASPECT_BEST_FIT_TYPE = Double.class;
 
 
@@ -416,7 +416,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Offset (Outside)";
     public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage of scene size to move " + COLOR_LOWER_CASE + " bar legend outside of anchored axis";
     private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset (Outside)";
-    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 10.0;
+    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 5.0;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -100;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 100;
     public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";
@@ -879,7 +879,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show Backdrop";
     public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the " + COLOR_LOWER_CASE + " bar legend backdrop";
     private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = false;
     public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
 
 
