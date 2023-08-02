@@ -165,18 +165,18 @@ public class Graticule {
         }
 
 
-        final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
+//        final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
         final GeoPos geoDeltaScene = getGeoDeltaScene(geoCoding, raster);
 
         boolean autoBoth = (latMajorStep == 0 && lonMajorStep == 0) ? true : false;
         if (latMajorStep == 0) {
-            double tmpLatMajorStep =  geoDeltaScene.lat / (desiredNumGridLines - 0.0);
+            double tmpLatMajorStep =  geoDeltaScene.lat / desiredNumGridLines;
 
             latMajorStep = getSensibleDegreeIncrement(tmpLatMajorStep);
         }
 
         if (lonMajorStep == 0) {
-            double tmpLonMajorStep = geoDeltaScene.lon / (desiredNumGridLines - 0.0);
+            double tmpLonMajorStep = geoDeltaScene.lon / desiredNumGridLines;
 
             lonMajorStep = getSensibleDegreeIncrement(tmpLonMajorStep);
         }
@@ -192,8 +192,8 @@ public class Graticule {
 //        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
 //        double lonMinorStep = ratioLonMinor * geoDelta.lon;
 
-        double latMinorStep = latMajorStep / (desiredMinorSteps + 1);
-        double lonMinorStep = lonMajorStep / (desiredMinorSteps + 1);
+        double latMinorStep = latMajorStep / desiredMinorSteps;
+        double lonMinorStep = lonMajorStep / desiredMinorSteps;
 
         int geoBoundaryStep = getGeoBoundaryStep(geoCoding, raster);
         GeoPos[] geoBoundary = createGeoBoundary(raster, geoBoundaryStep);
@@ -832,86 +832,79 @@ public class Graticule {
     }
 
 
+    static double getLonSpan(GeoCoding geoCoding, RasterDataNode dataNode, int y) {
+        PixelPos pixelPrev = null;
+        GeoPos geoPosPrev = null;
+        double degreesSpanTotal = 0.0;
+        for (double i=0.0 ; i <= 1 ; i += 0.01 ) {
+            PixelPos pixelCurr;
+            if (i < 1) {
+                pixelCurr = new PixelPos(dataNode.getRasterWidth()*i, 0);
+            } else {
+                pixelCurr = new PixelPos((dataNode.getRasterWidth()-1)*i, 0);
+            }
+            final GeoPos geoPosCurr = geoCoding.getGeoPos(pixelCurr, null);
+
+
+            if (pixelPrev != null && geoPosPrev != null) {
+                double degreesSpanCurr = Math.abs(geoPosCurr.lon - geoPosPrev.lon);
+                if (degreesSpanCurr > 180) {
+                    degreesSpanCurr -=  360;
+                }
+                degreesSpanTotal += degreesSpanCurr;
+            }
+
+            pixelPrev = pixelCurr;
+            geoPosPrev = geoPosCurr;
+        }
+
+        return degreesSpanTotal;
+    }
+
+
+    static double getLatSpan(GeoCoding geoCoding, RasterDataNode dataNode, int x) {
+        PixelPos pixelPrev = null;
+        GeoPos geoPosPrev = null;
+        double degreesSpanTotal = 0.0;
+
+        for (double i=0.0 ; i <= 1 ; i += 0.01 ) {
+            PixelPos pixelCurr;
+            if (i < 1) {
+                pixelCurr = new PixelPos(x, dataNode.getRasterHeight()*i);
+            } else {
+                pixelCurr = new PixelPos(x, (dataNode.getRasterHeight()-1)*i);
+            }
+            final GeoPos geoPosCurr = geoCoding.getGeoPos(pixelCurr, null);
+
+            if (pixelPrev != null && geoPosPrev != null) {
+                double degreesSpanCurr = Math.abs(geoPosCurr.lat - geoPosPrev.lat);
+                degreesSpanTotal += degreesSpanCurr;
+            }
+
+            pixelPrev = pixelCurr;
+            geoPosPrev = geoPosCurr;
+        }
+
+        return degreesSpanTotal;
+    }
+
+
+
+
     static GeoPos getGeoDeltaScene(GeoCoding geoCoding, RasterDataNode dataNode) {
 
-        final PixelPos pixelPos_topCenter = new PixelPos(dataNode.getRasterWidth()*0.5, 0);
-        final PixelPos pixelPos_bottomCenter = new PixelPos(dataNode.getRasterWidth()*0.5, dataNode.getRasterHeight()-1);
-
-        final GeoPos geoPos_topCenter = geoCoding.getGeoPos(pixelPos_topCenter, null);
-        final GeoPos geoPos_bottomCenter = geoCoding.getGeoPos(pixelPos_bottomCenter, null);
-
-        final PixelPos pixelPos_centerRight = new PixelPos(dataNode.getRasterWidth()-1, dataNode.getRasterHeight()*0.5);
-        final PixelPos pixelPos_centerLeft = new PixelPos(0, dataNode.getRasterHeight()-1);
-
-        final GeoPos geoPos_centerRight = geoCoding.getGeoPos(pixelPos_centerRight, null);
-        final GeoPos geoPos_centerLeft = geoCoding.getGeoPos(pixelPos_centerLeft, null);
-
-
-        final PixelPos pixelPos_topRight = new PixelPos(dataNode.getRasterWidth()-1, 0);
-        final PixelPos pixelPos_bottomRight = new PixelPos(dataNode.getRasterWidth()-1, dataNode.getRasterHeight()-1);
-
-        final GeoPos geoPos_topRight = geoCoding.getGeoPos(pixelPos_topRight, null);
-        final GeoPos geoPos_bottomRight = geoCoding.getGeoPos(pixelPos_bottomRight, null);
-
-
-
-        final PixelPos pixelPos_topLeft = new PixelPos(0, 0);
-        final PixelPos pixelPos_bottomLeft = new PixelPos(0, dataNode.getRasterHeight()-1);
-
-        final GeoPos geoPos_topLeft = geoCoding.getGeoPos(pixelPos_topLeft, null);
-        final GeoPos geoPos_bottomLeft = geoCoding.getGeoPos(pixelPos_bottomLeft, null);
-
-
-
-        // Break into top and bottom half just in case scene is large and also crosses pole
-
-
-        double deltaLatRightTopHalf = Math.abs(geoPos_topRight.lat - geoPos_centerRight.lat);
-        double deltaLatRightBottomHalf = Math.abs(geoPos_centerRight.lat - geoPos_bottomRight.lat);
-        double deltaLatRight = deltaLatRightTopHalf + deltaLatRightBottomHalf;
-
-        double deltaLatLeftTopHalf = Math.abs(geoPos_topLeft.lat - geoPos_centerLeft.lat);
-        double deltaLatLeftBottomHalf = Math.abs(geoPos_centerLeft.lat - geoPos_bottomLeft.lat);
-        double deltaLatLeft = deltaLatLeftTopHalf + deltaLatLeftBottomHalf;
-
-
-
-
-
-        // Break into left and right half just in case scene is large and also crosses dateline
-
-        double deltaLonTopRightHalf = Math.abs(geoPos_topRight.lon - geoPos_topCenter.lon);
-        if (deltaLonTopRightHalf > 360) {
-            deltaLonTopRightHalf = deltaLonTopRightHalf - 360;
-        }
-
-        double deltaLonTopLeftHalf = Math.abs(geoPos_topCenter.lon - geoPos_topLeft.lon);
-        if (deltaLonTopLeftHalf > 360) {
-            deltaLonTopLeftHalf = deltaLonTopLeftHalf - 360;
-        }
-        double deltaLonTop = deltaLonTopLeftHalf + deltaLonTopRightHalf;
-
-
-        double deltaLonBottomRightHalf = Math.abs(geoPos_bottomRight.lon - geoPos_bottomCenter.lon);
-        if (deltaLonBottomRightHalf > 360) {
-            deltaLonBottomRightHalf = deltaLonBottomRightHalf - 360;
-        }
-
-        double deltaLonBottomLeftHalf = Math.abs(geoPos_bottomCenter.lon - geoPos_bottomLeft.lon);
-        if (deltaLonBottomLeftHalf > 360) {
-            deltaLonBottomLeftHalf = deltaLonBottomLeftHalf - 360;
-        }
-
-        double deltaLonBottom = deltaLonBottomLeftHalf + deltaLonBottomRightHalf;
-
-
+        double deltaLonTop = getLonSpan( geoCoding,  dataNode,  0);
+        double deltaLonBottom = getLonSpan( geoCoding,  dataNode,  dataNode.getRasterHeight()-1);
+        double deltaLatLeft = getLatSpan(geoCoding, dataNode, 0);
+        double deltaLatRight = getLatSpan(geoCoding, dataNode, dataNode.getRasterWidth()-1);
 
         double deltaLon = Math.min(deltaLonTop, deltaLonBottom);
         double deltaLat = Math.min(deltaLatLeft, deltaLatRight);
 
-
         return new GeoPos(deltaLat, deltaLon);
     }
+
+
 
 
     static GeoPos getGeoDelta(GeoCoding geoCoding, RasterDataNode dataNode) {
