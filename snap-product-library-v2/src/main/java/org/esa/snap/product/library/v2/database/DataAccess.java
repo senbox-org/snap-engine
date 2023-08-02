@@ -1063,7 +1063,11 @@ public class DataAccess {
         statement.setLong(5, sizeInBytes);
         statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
         statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
-        statement.setString(8, productToSave.getPolygon().toWKT());
+        if (productToSave.getPolygon() != null) {
+            statement.setString(8, productToSave.getPolygon().toWKT());
+        } else {
+            statement.setString(8, "");
+        }
         statement.setInt(9, productToSave.getDataFormatType().getValue());
         statement.setInt(10, productToSave.getPixelType().getValue());
         statement.setInt(11, productToSave.getSensorType().getValue());
