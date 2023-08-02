@@ -589,6 +589,7 @@ public class DataAccess {
             } catch (Exception e) {
                 // rollback the statements from the transaction
                 connection.rollback();
+                throw new IllegalStateException("Fail to save the product in database: " + localProductToSave.getName(), e);
             }
         }
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(localProductToSave).getAttributeString(AbstractMetadata.MISSION);
