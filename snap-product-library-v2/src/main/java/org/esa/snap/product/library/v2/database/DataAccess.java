@@ -331,7 +331,11 @@ public class DataAccess {
                             geometry = convertProductGeometry(productGeometry);
                         }
                         String metadataMission = resultSet.getString("metadata_mission");
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate.toLocalDateTime(), productLocalPath, sizeInBytes, geometry);
+                        LocalDateTime acquisitionLocalDate = null;
+                        if (acquisitionDate != null) {
+                            acquisitionLocalDate = acquisitionDate.toLocalDateTime();
+                        }
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionLocalDate, productLocalPath, sizeInBytes, geometry);
                         localProduct.setRemoteMission(remoteMission);
                         localProduct.setMetadataMission(metadataMission);
                         productList.add(localProduct);
