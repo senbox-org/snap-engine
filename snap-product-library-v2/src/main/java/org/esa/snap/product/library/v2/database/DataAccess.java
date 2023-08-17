@@ -68,7 +68,7 @@ public class DataAccess {
     private static H2DatabaseParameters dbParams;
 
     public static void initialize() {
-        dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
+            dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
     }
 
     public static void setDbParams(H2DatabaseParameters dbParams) {
@@ -715,7 +715,12 @@ public class DataAccess {
                         deleteProductRemoteAttributes(productId, connection);
                         deleteProductLocalAttributes(productId, connection);
                     }
-                    updateProduct(productId, remoteProductToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    final AbstractGeometry2D polygon2D = remoteProductToSave.getPolygon();
+                    if (polygon2D != null && !polygon2D.toWKT().isEmpty()) {
+                        updateProduct(productId, remoteProductToSave, polygon2D, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    } else {
+                        updateProduct(productId, remoteProductToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    }
                 }
                 if (remoteProductToSave.getRemoteAttributes().size() > 0) {
                     insertProductRemoteAttributes(productId, remoteProductToSave.getRemoteAttributes(), connection);
@@ -1056,6 +1061,26 @@ public class DataAccess {
                                       throws SQLException {
         final PreparedStatement statement = connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = ?," +
                 "local_repository_id = ?, relative_path = ?, entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, " +
+                "last_modified_date = ?, data_format_type_id = ?, pixel_type_id = ?, sensor_type_id = ? WHERE id = ?");
+        statement.setString(1, productToSave.getName());
+        statement.setInt(2, remoteMissionId);
+        statement.setInt(3, localRepositoryId);
+        statement.setString(4, relativePath.toString());
+        statement.setLong(5, sizeInBytes);
+        statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
+        statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
+        statement.setInt(8, productToSave.getDataFormatType().getValue());
+        statement.setInt(9, productToSave.getPixelType().getValue());
+        statement.setInt(10, productToSave.getSensorType().getValue());
+        statement.setInt(11, productId);
+        statement.executeUpdate();
+    }
+
+    private static void updateProduct(int productId, RepositoryProduct productToSave, AbstractGeometry2D geometry, Path relativePath, int remoteMissionId,
+                               int localRepositoryId, FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
+        final PreparedStatement statement = connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = ?," +
+                "local_repository_id = ?, relative_path = ?, entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, " +
                 "last_modified_date = ?, geometry = ?, data_format_type_id = ?, pixel_type_id = ?, sensor_type_id = ? WHERE id = ?");
         statement.setString(1, productToSave.getName());
         statement.setInt(2, remoteMissionId);
@@ -1064,11 +1089,7 @@ public class DataAccess {
         statement.setLong(5, sizeInBytes);
         statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
         statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
-        if (productToSave.getPolygon() != null) {
-            statement.setString(8, productToSave.getPolygon().toWKT());
-        } else {
-            statement.setString(8, "");
-        }
+        statement.setString(8, geometry.toWKT());
         statement.setInt(9, productToSave.getDataFormatType().getValue());
         statement.setInt(10, productToSave.getPixelType().getValue());
         statement.setInt(11, productToSave.getSensorType().getValue());
