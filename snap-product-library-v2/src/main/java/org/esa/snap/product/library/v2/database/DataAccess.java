@@ -573,7 +573,11 @@ public class DataAccess {
                     deleteQuickLookImage(productId, dbParams.getParentFolderPath());
                     deleteProductRemoteAttributes(productId, connection);
                     deleteProductLocalAttributes(productId, connection);
-                    updateProduct(productId, localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    if (polygon2D != null && !polygon2D.toWKT().isEmpty()) {
+                        updateProduct(productId, localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    } else {
+                        updateProduct(productId, localProductToSave, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    }
                 }
 
                 if (localProductAttributes.size() > 0) {
@@ -889,7 +893,7 @@ public class DataAccess {
                                      FileTime fileTime, long sizeInBytes, Connection connection)
             throws SQLException {
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION);
-        if (geometry != null) {
+        if (geometry != null && !geometry.toWKT().isEmpty()) {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
                     sizeInBytes, productToSave.getStartTime() == null ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar()),
                     fileTime.toMillis(), geometry.toWKT(), null, null, null);
@@ -1053,6 +1057,30 @@ public class DataAccess {
         // in future we may change the attribute from metadata from where we take the mission, therefore preview an update at re-scan & update products
         statement.setString(8, AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION));
         statement.setInt(9, productId);
+        statement.executeUpdate();
+    }
+
+    private static void updateProduct(int productId, Product productToSave, Path relativePath, int localRepositoryId,
+                               FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
+        final PreparedStatement statement =
+                connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = NULL, local_repository_id = ?, relative_path = ?," +
+                        "entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, last_modified_date = ?, " +
+                        "data_format_type_id = NULL, pixel_type_id = NULL, sensor_type_id = NULL, metadata_mission = ? WHERE id = ?");
+        statement.setString(1, productToSave.getName());
+        statement.setInt(2, localRepositoryId);
+        statement.setString(3, relativePath.toString());
+        statement.setLong(4, sizeInBytes);
+        final LocalDateTime acquisitionDate = (productToSave.getStartTime() == null) ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar());
+        if (acquisitionDate != null) {
+            statement.setTimestamp(5, Timestamp.valueOf(acquisitionDate));
+        } else {
+            statement.setNull(5, Types.TIMESTAMP);
+        }
+        statement.setTimestamp(6, new Timestamp(fileTime.toMillis()));
+        // in future we may change the attribute from metadata from where we take the mission, therefore preview an update at re-scan & update products
+        statement.setString(7, AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION));
+        statement.setInt(8, productId);
         statement.executeUpdate();
     }
 
