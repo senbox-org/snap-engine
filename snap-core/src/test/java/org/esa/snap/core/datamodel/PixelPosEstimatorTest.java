@@ -15,9 +15,8 @@ package org.esa.snap.core.datamodel;/*
  */
 
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
