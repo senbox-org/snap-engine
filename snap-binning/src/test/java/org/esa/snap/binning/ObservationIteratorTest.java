@@ -21,7 +21,7 @@ import org.esa.snap.binning.support.SEAGrid;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.junit.runner.RunWith;
