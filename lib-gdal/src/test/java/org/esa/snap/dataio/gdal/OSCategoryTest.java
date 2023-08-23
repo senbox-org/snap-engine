@@ -94,7 +94,7 @@ public class OSCategoryTest {
     }
 
     @Test
-    @STTM("SNAP-3523")
+        @STTM("SNAP-3523")
     public void testGetExecutableLocations() {
         final OSCategory osCategory = OSCategory.getOSCategory();
         assertNotNull(osCategory);
