@@ -1,4 +1,4 @@
-package org.esa.snap.test;
+package com.bc.ceres.test;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
@@ -9,7 +9,7 @@ public class LongTestRunner extends BlockJUnit4ClassRunner {
 
     private static final String PROPERTYNAME_EXECUTE_LONG_TESTS = "enable.long.tests";
     private final Class<?> clazz;
-    private boolean runLongTests;
+    private final boolean runLongTests;
 
     public LongTestRunner(Class<?> klass) throws InitializationError {
         super(klass);

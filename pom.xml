@@ -150,6 +150,13 @@
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
+                <artifactId>ceres-core</artifactId>
+                <version>${snap.version}</version>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
                 <artifactId>ceres-binding</artifactId>
                 <version>${snap.version}</version>
             </dependency>
