@@ -67,12 +67,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-test-utils</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
@@ -103,6 +97,7 @@
                         <publicPackage>com.bc.ceres.core.runtime.support</publicPackage>
                         <publicPackage>com.bc.ceres.launcher</publicPackage>
                         <publicPackage>com.bc.ceres.util</publicPackage>
+                        <publicPackage>com.bc.ceres.test.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -118,6 +113,13 @@
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

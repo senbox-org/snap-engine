@@ -1,7 +1,7 @@
 package org.esa.snap.core.util;
 
 import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

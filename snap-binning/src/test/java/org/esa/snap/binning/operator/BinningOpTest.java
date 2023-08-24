@@ -38,7 +38,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.main.GPT;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
