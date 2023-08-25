@@ -34,9 +34,9 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-test-utils</artifactId>
-            <type>test-jar</type>
+            <artifactId>ceres-core</artifactId>
             <scope>test</scope>
+            <type>test-jar</type>
         </dependency>
 
     </dependencies>
