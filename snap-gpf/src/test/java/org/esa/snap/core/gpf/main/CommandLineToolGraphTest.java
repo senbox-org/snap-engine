@@ -18,39 +18,33 @@ package org.esa.snap.core.gpf.main;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.sun.media.jai.util.SunTileScheduler;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.TestOps;
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphException;
-import org.esa.snap.core.gpf.graph.GraphIO;
-import org.esa.snap.core.gpf.graph.GraphProcessingObserver;
-import org.esa.snap.core.gpf.graph.Node;
+import org.esa.snap.core.gpf.graph.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileScheduler;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class CommandLineToolGraphTest extends TestCase {
+import static org.junit.Assert.*;
 
-    private GraphCommandLineContext context;
-    private CommandLineTool clTool;
-    private TileScheduler jaiTileScheduler;
+public class CommandLineToolGraphTest {
+
     private static final TestOps.Op2.Spi OP2_SPI = new TestOps.Op2.Spi();
     private static final TestOps.Op3.Spi OP3_SPI = new TestOps.Op3.Spi();
     private static final TestOps.OpImplementingOutput.Spi OUTPUT_OP_SPI = new TestOps.OpImplementingOutput.Spi();
+    private GraphCommandLineContext context;
+    private CommandLineTool clTool;
+    private TileScheduler jaiTileScheduler;
 
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         context = new GraphCommandLineContext();
         clTool = new CommandLineTool(context);
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(OP2_SPI);
@@ -64,14 +58,15 @@ public class CommandLineToolGraphTest extends TestCase {
         jai.setTileScheduler(tileScheduler);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         JAI.getDefaultInstance().setTileScheduler(jaiTileScheduler);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(OP2_SPI);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(OP3_SPI);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(OUTPUT_OP_SPI);
     }
 
+    @Test
     public void testGraphUsageMessage() throws Exception {
         final String[] args = new String[]{"-h", "graph.xml"};
 
@@ -88,120 +83,120 @@ public class CommandLineToolGraphTest extends TestCase {
         assertTrue(message.contains("threshold"));
         assertTrue(message.contains("Threshold value"));
         assertTrue(message.contains("expression"));
-
-        //System.out.println(message);
     }
 
+    @Test
     public void testGraphOnly() throws Exception {
         testGraph(new String[]{"graph.xml"},
-                  3,
-                  "g=graph.xml;e=chain1;",
-                  "${sourceProduct}", null,
-                  "${sourceProduct2}", null,
-                  "WriteOp@node2",
-                  "target.dim",
-                  "BEAM-DIMAP",
-                  "${threshold}",
-                  "${expression}"
+                3,
+                "g=graph.xml;e=chain1;",
+                "${sourceProduct}", null,
+                "${sourceProduct2}", null,
+                "WriteOp@node2",
+                "target.dim",
+                "BEAM-DIMAP",
+                "${threshold}",
+                "${expression}"
         );
     }
 
+    @Test
     public void testGraphWithParameters() throws Exception {
         testGraph(new String[]{"graph.xml", "-Pexpression=a+b/c", "-Pthreshold=2.5"},
-                  3,
-                  "g=graph.xml;e=chain1;",
-                  "${sourceProduct}", null,
-                  "${sourceProduct2}", null,
-                  "WriteOp@node2", "target.dim", "BEAM-DIMAP", "2.5",
-                  "a+b/c"
+                3,
+                "g=graph.xml;e=chain1;",
+                "${sourceProduct}", null,
+                "${sourceProduct2}", null,
+                "WriteOp@node2", "target.dim", "BEAM-DIMAP", "2.5",
+                "a+b/c"
         );
     }
 
     public void testGraphWithParametersAndSourceArgs() throws Exception {
         testGraph(new String[]{"graph.xml", "-Pexpression=a+b/c", "-Pthreshold=2.5", "ernie.dim", "idefix.dim"},
-                  5,
-                  "g=graph.xml;e=chain1;",
-                  "ReadOp@sourceProduct", "ernie.dim",
-                  "ReadOp@sourceProduct.2", "idefix.dim",
-                  "WriteOp@node2", "target.dim", "BEAM-DIMAP", "2.5",
-                  "a+b/c"
+                5,
+                "g=graph.xml;e=chain1;",
+                "ReadOp@sourceProduct", "ernie.dim",
+                "ReadOp@sourceProduct.2", "idefix.dim",
+                "WriteOp@node2", "target.dim", "BEAM-DIMAP", "2.5",
+                "a+b/c"
         );
     }
 
     public void testGraphWithParametersAndSourceOptions() throws Exception {
         testGraph(new String[]{
-                "graph.xml",
-                "-Pexpression=a+b/c",
-                "-Pthreshold=2.5",
-                "-SsourceProduct=ernie.dim",
-                "-SsourceProduct2=idefix.dim"
-        },
-                  5,
-                  "g=graph.xml;e=chain1;",
-                  "ReadOp@sourceProduct",
-                  "ernie.dim",
-                  "ReadOp@sourceProduct2",
-                  "idefix.dim",
-                  "WriteOp@node2",
-                  "target.dim",
-                  "BEAM-DIMAP",
-                  "2.5",
-                  "a+b/c"
+                        "graph.xml",
+                        "-Pexpression=a+b/c",
+                        "-Pthreshold=2.5",
+                        "-SsourceProduct=ernie.dim",
+                        "-SsourceProduct2=idefix.dim"
+                },
+                5,
+                "g=graph.xml;e=chain1;",
+                "ReadOp@sourceProduct",
+                "ernie.dim",
+                "ReadOp@sourceProduct2",
+                "idefix.dim",
+                "WriteOp@node2",
+                "target.dim",
+                "BEAM-DIMAP",
+                "2.5",
+                "a+b/c"
         );
     }
 
     public void testGraphWithParametersFileOption() throws Exception {
         testGraph(new String[]{
-                "graph.xml",
-                "-p",
-                "paramFile.properties",
-                "-SsourceProduct=ernie.dim",
-                "-SsourceProduct2=idefix.dim"
-        },
-                  5,
-                  "g=graph.xml;e=chain1;",
-                  "ReadOp@sourceProduct",
-                  "ernie.dim",
-                  "ReadOp@sourceProduct2",
-                  "idefix.dim",
-                  "WriteOp@node2",
-                  "target.dim",
-                  "BEAM-DIMAP",
-                  "-0.5125",
-                  "sqrt(x*x + y*y)"
+                        "graph.xml",
+                        "-p",
+                        "paramFile.properties",
+                        "-SsourceProduct=ernie.dim",
+                        "-SsourceProduct2=idefix.dim"
+                },
+                5,
+                "g=graph.xml;e=chain1;",
+                "ReadOp@sourceProduct",
+                "ernie.dim",
+                "ReadOp@sourceProduct2",
+                "idefix.dim",
+                "WriteOp@node2",
+                "target.dim",
+                "BEAM-DIMAP",
+                "-0.5125",
+                "sqrt(x*x + y*y)"
         );
     }
 
     public void testGraphWithParametersFileOptionIsOverwrittenByOption() throws Exception {
         testGraph(new String[]{
-                "graph.xml",
-                "-p",
-                "paramFile.properties",
-                "-Pexpression=atan(y/x)",
-                "-SsourceProduct=ernie.dim",
-                "-SsourceProduct2=idefix.dim"
-        },
-                  5,
-                  "g=graph.xml;e=chain1;",
-                  "ReadOp@sourceProduct",
-                  "ernie.dim",
-                  "ReadOp@sourceProduct2",
-                  "idefix.dim",
-                  "WriteOp@node2",
-                  "target.dim",
-                  "BEAM-DIMAP",
-                  "-0.5125",
-                  "atan(y/x)"
+                        "graph.xml",
+                        "-p",
+                        "paramFile.properties",
+                        "-Pexpression=atan(y/x)",
+                        "-SsourceProduct=ernie.dim",
+                        "-SsourceProduct2=idefix.dim"
+                },
+                5,
+                "g=graph.xml;e=chain1;",
+                "ReadOp@sourceProduct",
+                "ernie.dim",
+                "ReadOp@sourceProduct2",
+                "idefix.dim",
+                "WriteOp@node2",
+                "target.dim",
+                "BEAM-DIMAP",
+                "-0.5125",
+                "atan(y/x)"
         );
 
     }
 
+    @Test
     public void testGraphWithOpImplementingOutputInterface() throws Exception {
         final String[] args = new String[]{"graphWithOutput.xml"};
 
         clTool.run(args);
         assertEquals(0, context.writeProductCounter);
-
     }
 
     private void testGraph(String[] args,
@@ -259,9 +254,9 @@ public class CommandLineToolGraphTest extends TestCase {
     private static class GraphCommandLineContext implements CommandLineContext {
 
         public String logString;
+        public Graph executedGraph;
         private int readProductCounter;
         private int writeProductCounter;
-        public Graph executedGraph;
         private String m = "";
 
         public GraphCommandLineContext() {
@@ -341,7 +336,7 @@ public class CommandLineToolGraphTest extends TestCase {
         @Override
         public Reader createReader(String fileName) throws FileNotFoundException {
             return new StringReader("expression=sqrt(x*x + y*y)\n" +
-                                            "threshold=-0.5125");
+                    "threshold=-0.5125");
         }
 
         @Override

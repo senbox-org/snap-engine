@@ -1,15 +1,19 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import ucar.nc2.Attribute;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CfHdfGeoInfoExtractorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-    public void testExtractGeoInfo() throws Exception {
-        List<Attribute> attributes = new ArrayList<Attribute>();
+public class CfHdfGeoInfoExtractorTest {
+
+    @Test
+    public void testExtractGeoInfo() {
+        List<Attribute> attributes = new ArrayList<>();
 
         final String attrString = "projeCTIon=GCTP_SNSOID\n\t" +
                 "xdim=1200\n\t\t" +
@@ -27,9 +31,9 @@ public class CfHdfGeoInfoExtractorTest extends TestCase {
         assertEquals("GCTP_SNSOID", cfHdfEosGeoInfoExtractor.getProjection());
         assertEquals(1200, cfHdfEosGeoInfoExtractor.getxDim());
         assertEquals(2400, cfHdfEosGeoInfoExtractor.getyDim());
-        assertEquals(1.23, cfHdfEosGeoInfoExtractor.getUlLon());
-        assertEquals(45.6, cfHdfEosGeoInfoExtractor.getUlLat());
-        assertEquals(78.9, cfHdfEosGeoInfoExtractor.getLrLon());
-        assertEquals(10.34, cfHdfEosGeoInfoExtractor.getLrLat());
+        assertEquals(1.23, cfHdfEosGeoInfoExtractor.getUlLon(), 1e-8);
+        assertEquals(45.6, cfHdfEosGeoInfoExtractor.getUlLat(), 1e-8);
+        assertEquals(78.9, cfHdfEosGeoInfoExtractor.getLrLon(), 1e-8);
+        assertEquals(10.34, cfHdfEosGeoInfoExtractor.getLrLat(), 1e-8);
     }
 }
