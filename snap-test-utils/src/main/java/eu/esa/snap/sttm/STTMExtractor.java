@@ -22,6 +22,7 @@ public class STTMExtractor {
             System.out.println("issue:   " + sttmInfo.jiraIssue);
             System.out.println("package: " + sttmInfo.pckg);
             System.out.println("class:   " + sttmInfo.clazz);
+            System.out.println("method:  " + sttmInfo.method);
             System.out.println("------------------");
         }
     }

@@ -26,6 +26,7 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
         String line;
         String pckg = null;
         String clazz = null;
+        String[] jiraIssues = null;
 
         while ((line = reader.readLine()) != null) {
             line = line.trim(); // just to be sure to have no leading or trailing whitespace tb 2023-08-22
@@ -39,15 +40,25 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
             }
 
             if (line.startsWith("@STTM(")) {
-                // @todo 1 implement code to extract the STTM info here  tb 2023-08-23
-                final String[] jiraIssues = extractJiraIssues(line);
-                for (final String issue: jiraIssues) {
+                jiraIssues = extractJiraIssues(line);
+
+            }
+
+            if (line.startsWith("public ") && jiraIssues != null) {
+                // check for issues to skip not annotated test methods tb 2023-08-25
+                final String methodName = extractMethodName(line);
+
+                // now we have all the bits assembled - generate STTM objects tb 2023-08-25
+                for (final String issue : jiraIssues) {
                     final STTMInfo sttmInfo = new STTMInfo();
                     sttmInfo.jiraIssue = issue;
                     sttmInfo.pckg = pckg;
                     sttmInfo.clazz = clazz;
+                    sttmInfo.method = methodName;
                     resultList.add(sttmInfo);
                 }
+                // need to reset tb 2023-08-25
+                jiraIssues = null;
             }
         }
 
@@ -93,9 +104,31 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
         return issueList.toArray(new String[0]);
     }
 
+    static String extractMethodName(String line) {
+        line = line.replaceAll(" +", " "); // ensure that we only have single blanks as separator tb 2023-08-25
+        final StringTokenizer stringTokenizer = new StringTokenizer(line, " ", false);
+        int idx = 0;
+        while (stringTokenizer.hasMoreTokens()) {
+            final String token = stringTokenizer.nextToken();
+            if (idx == 2) {
+                // remove braces and trailing stuff
+                int braceIdx = token.indexOf("(");
+                if (braceIdx > 0) {
+                    return token.substring(0, braceIdx);
+                }
+                return token;
+            }
+            ++idx;
+        }
+        return null;
+    }
+
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         final String fileName = file.getFileName().toString();
+        if (fileName.contains("DateTime")) {
+            System.out.println("fileName = " + fileName);
+        }
         if (!fileName.matches(REG_EX)) {
             return FileVisitResult.CONTINUE;
         }

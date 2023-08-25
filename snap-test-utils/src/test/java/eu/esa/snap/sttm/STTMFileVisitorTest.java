@@ -33,7 +33,13 @@ public class STTMFileVisitorTest {
     @Test
     @STTM("SNAP-3506")
     public void testExtractSTTMInfo_one_sttm_before_test() throws IOException {
-        final String fileContent = "package eu.esa.opt.dataio.s3.olci;" + sep + "public class OlciLevel1ProductFactoryTest {" + sep + "@STTM(\"SNAP-3519\")" + sep + "@Test" + sep + "    public void testBandGroupingPattern() {" + sep + "    }" + sep + "}";
+        final String fileContent = "package eu.esa.opt.dataio.s3.olci;" + sep +
+                "public class OlciLevel1ProductFactoryTest {" + sep +
+                "@STTM(\"SNAP-3519\")" + sep +
+                "@Test" + sep +
+                "    public void testBandGroupingPattern() {" + sep +
+                "    }" + sep +
+                "}";
 
         final BufferedReader bufferedReader = getReader(fileContent);
 
@@ -43,6 +49,36 @@ public class STTMFileVisitorTest {
         final STTMInfo sttmInfo = sttmInfos.get(0);
         assertEquals("SNAP-3519", sttmInfo.jiraIssue);
         assertEquals("eu.esa.opt.dataio.s3.olci", sttmInfo.pckg);
+        assertEquals("OlciLevel1ProductFactoryTest", sttmInfo.clazz);
+        assertEquals("testBandGroupingPattern", sttmInfo.method);
+    }
+
+    @Test
+    @STTM("SNAP-3506")
+    public void testExtractSTTMInfo_two_sttm_after_test() throws IOException {
+        final String fileContent = "package org.esa.snap.landcover;" + sep +
+                "public class TestAddLandCoverOp {" + sep +
+                "@Test" + sep +
+                "@STTM(\"SNAP-3520, SNAP-3351\")" + sep + "    public void testGLC2000() throws Exception {" + sep +
+                "    }" +
+                sep + "}";
+
+        final BufferedReader bufferedReader = getReader(fileContent);
+
+        final List<STTMInfo> sttmInfos = STTMFileVisitor.extractSTTMInfo(bufferedReader);
+        assertEquals(2, sttmInfos.size());
+
+        STTMInfo sttmInfo = sttmInfos.get(0);
+        assertEquals("SNAP-3520", sttmInfo.jiraIssue);
+        assertEquals("org.esa.snap.landcover", sttmInfo.pckg);
+        assertEquals("TestAddLandCoverOp", sttmInfo.clazz);
+        assertEquals("testGLC2000", sttmInfo.method);
+
+        sttmInfo = sttmInfos.get(1);
+        assertEquals("SNAP-3351", sttmInfo.jiraIssue);
+        assertEquals("org.esa.snap.landcover", sttmInfo.pckg);
+        assertEquals("TestAddLandCoverOp", sttmInfo.clazz);
+        assertEquals("testGLC2000", sttmInfo.method);
     }
 
     @Test
@@ -92,5 +128,14 @@ public class STTMFileVisitorTest {
 
         final String clazz = STTMFileVisitor.extractClass(line);
         assertNull(clazz);
+    }
+
+    @Test
+    @STTM("SNAP-3506")
+    public void testExtractMethodName() {
+        final String line = "public void testGetEnvironmentVariablesFilePathFromSources() {";
+
+        final String methodName = STTMFileVisitor.extractMethodName(line);
+        assertEquals("testGetEnvironmentVariablesFilePathFromSources", methodName);
     }
 }
