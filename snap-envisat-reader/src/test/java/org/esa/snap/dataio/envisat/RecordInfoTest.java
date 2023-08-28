@@ -16,31 +16,15 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.Test;
 
-public class RecordInfoTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public RecordInfoTest(String testName) {
-        super(testName);
-    }
+public class RecordInfoTest {
 
-    public static Test suite() {
-        return new TestSuite(RecordInfoTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-    }
-
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void testRecordInfo() {
-
         try {
             new RecordInfo("TEST");
         } catch (IllegalArgumentException e) {
@@ -60,6 +44,7 @@ public class RecordInfoTest extends TestCase {
         }
     }
 
+    @Test
     public void testAdd() {
         RecordInfo recordInfo = new RecordInfo("test");
         try {
@@ -105,7 +90,7 @@ public class RecordInfoTest extends TestCase {
         }
     }
 
-
+    @Test
     public void testGetFieldInfo() {
         RecordInfo recordInfo = new RecordInfo("test");
         recordInfo.add("ABC", ProductData.TYPE_INT8, 4, null, null);
@@ -121,6 +106,7 @@ public class RecordInfoTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetFieldInfoAt() {
         RecordInfo recordInfo = new RecordInfo("test");
         recordInfo.add("ABC", ProductData.TYPE_INT8, 4, null, null);
@@ -133,6 +119,7 @@ public class RecordInfoTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetFieldInfoIndex() {
         RecordInfo recordInfo = new RecordInfo("test");
         recordInfo.add("ABC", ProductData.TYPE_INT8, 4, null, null);
@@ -147,6 +134,7 @@ public class RecordInfoTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetNumFieldInfos() {
         RecordInfo recordInfo = new RecordInfo("test");
         assertEquals(0, recordInfo.getNumFieldInfos());
@@ -158,15 +146,16 @@ public class RecordInfoTest extends TestCase {
         assertEquals(3, recordInfo.getNumFieldInfos());
     }
 
+    @Test
     public void testGetSizeInBytes() {
         RecordInfo recordInfo = new RecordInfo("test");
         int sib = 0;
         assertEquals(sib, recordInfo.getSizeInBytes());
         recordInfo.add("f1", ProductData.TYPE_INT8, 4, null, null);
-        sib += 1 * 4;
+        sib += 4;
         assertEquals(sib, recordInfo.getSizeInBytes());
         recordInfo.add("f2", ProductData.TYPE_UINT8, 4, null, null);
-        sib += 1 * 4;
+        sib += 4;
         assertEquals(sib, recordInfo.getSizeInBytes());
         recordInfo.add("f3", ProductData.TYPE_INT16, 4, null, null);
         sib += 2 * 4;
@@ -190,10 +179,11 @@ public class RecordInfoTest extends TestCase {
         sib += 12 * 4;
         assertEquals(sib, recordInfo.getSizeInBytes());
         recordInfo.add("f10", ProductData.TYPE_ASCII, 4, null, null);
-        sib += 1 * 4;
+        sib += 4;
         assertEquals(sib, recordInfo.getSizeInBytes());
     }
 
+    @Test
     public void testCreateRecord() {
         RecordInfo recordInfo = new RecordInfo("test");
         recordInfo.add("f1", ProductData.TYPE_INT8, 4, null, null);
@@ -211,5 +201,4 @@ public class RecordInfoTest extends TestCase {
         assertEquals(10, record.getNumFields());
         assertEquals(4 * (1 + 1 + 2 + 2 + 4 + 4 + 4 + 8 + 12 + 1), record.getSizeInBytes());
     }
-
 }

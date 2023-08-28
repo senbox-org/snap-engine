@@ -16,22 +16,15 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class FieldRefTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-    public FieldRefTest(String testName) {
-        super(testName);
-    }
+public class FieldRefTest {
 
-    public static Test suite() {
-        return new TestSuite(FieldRefTest.class);
-    }
-
+    @Test
     public void testParseAndFormat() {
-
         String fieldRefStr = null;
         FieldRef fieldRef = null;
 
@@ -90,7 +83,7 @@ public class FieldRefTest extends TestCase {
             fail(e.getMessage());
         }
 
-        final String malformed[] = {".3.4", "x.3a", "x..", "x.0", "x.0.-1"};
+        final String[] malformed = {".3.4", "x.3a", "x..", "x.0", "x.0.-1"};
         for (int i = 0; i < malformed.length; i++) {
             try {
                 fieldRef = FieldRef.parse(malformed[i]);

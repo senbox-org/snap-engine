@@ -16,33 +16,36 @@
 package org.esa.snap.core.util.math;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RangeTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class RangeTest {
 
     private final IndexValidator _validator = index -> index > 1 && index < 6;
 
+    @Test
     public void testThatRangeIgnoresNaN() {
         double min = 0;
         double max = 1;
         double x;
 
         x = Double.NaN;
-        assertEquals(false, x >= min && x <= max);
-        assertEquals(false, x < min || x > max);
-        assertEquals(false, x == x);
+        assertFalse(x >= min && x <= max);
+        assertFalse(x < min || x > max);
 
         x = Math.log(0.0);
-        assertEquals(true, Double.isInfinite(x));
-        assertEquals(true, x < 0.0);
+        assertTrue(Double.isInfinite(x));
+        assertTrue(x < 0.0);
 
         x = Math.log(-1.0);
-        assertEquals(true, Double.isNaN(x));
+        assertTrue(Double.isNaN(x));
 
         x = Math.sqrt(-1.0);
-        assertEquals(true, Double.isNaN(x));
+        assertTrue(Double.isNaN(x));
     }
 
+    @Test
     public void testComputeRangeByte() {
         byte[] bytes = new byte[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -58,6 +61,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeUByte() {
         final byte[] uBytes = TestHelper.createUBytes(new short[]{2, 253, 4, 5, 250, 7, 8, 9});
         Range range = new Range();
@@ -79,6 +83,7 @@ public class RangeTest extends TestCase {
         assertEquals(250, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeShort() {
         short[] shorts = new short[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -94,6 +99,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeUShort() {
         final short[] uShorts = TestHelper.createUShorts(new int[]{2, 65533, 4, 5, 65530, 7, 8, 9});
         Range range = new Range();
@@ -109,6 +115,7 @@ public class RangeTest extends TestCase {
         assertEquals(65530, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeInt() {
         int[] ints = new int[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -124,6 +131,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeUInt() {
         final int[] uInts = TestHelper.createUInts(new long[]{2, 4294967293L, 4, 5, 4294967290L, 7, 8, 9});
         Range range = new Range();
@@ -139,6 +147,7 @@ public class RangeTest extends TestCase {
         assertEquals(4294967290L, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeFloat() {
         float[] floats = new float[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -154,6 +163,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeDouble() {
         double[] doubles = new double[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -169,6 +179,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeDouble_noValidator() {
         double[] doubles = new double[]{2, -3, 4, 5, -6, 7, 8, 9};
         Range range = new Range();
@@ -185,6 +196,7 @@ public class RangeTest extends TestCase {
         assertEquals(178.4, range.getMax(), 1e-8);
     }
 
+    @Test
     public void testComputeRangeDoubleArray() {
         final DoubleList array = TestHelper.createArray(new int[]{2, -3, 4, 5, -6, 7, 8, 9});
         Range range = new Range();
@@ -200,6 +212,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericByte() {
         final boolean unsigned = false;
         byte[] bytes = new byte[]{2, -3, 4, 5, -6, 7, 8, 9};
@@ -216,6 +229,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericUByte() {
         final boolean unsigned = true;
         final byte[] uBytes = TestHelper.createUBytes(new short[]{2, 253, 4, 5, 250, 7, 8, 9});
@@ -232,6 +246,7 @@ public class RangeTest extends TestCase {
         assertEquals(250, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericShort() {
         final boolean unsigned = false;
         short[] shorts = new short[]{2, -3, 4, 5, -6, 7, 8, 9};
@@ -248,6 +263,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericUShort() {
         final boolean unsigned = true;
         final short[] uShorts = TestHelper.createUShorts(new int[]{2, 65533, 4, 5, 65530, 7, 8, 9});
@@ -264,6 +280,7 @@ public class RangeTest extends TestCase {
         assertEquals(65530, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericInt() {
         final boolean unsigned = false;
         int[] ints = new int[]{2, -3, 4, 5, -6, 7, 8, 9};
@@ -280,6 +297,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericUInt() {
         final boolean unsigned = true;
         final int[] uInts = TestHelper.createUInts(new long[]{2, 4294967293L, 4, 5, 4294967290L, 7, 8, 9});
@@ -296,6 +314,7 @@ public class RangeTest extends TestCase {
         assertEquals(4294967290L, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericFloat() {
         final boolean unsigned = false;
         float[] floats = new float[]{2, -3, 4, 5, -6, 7, 8, 9};
@@ -312,6 +331,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericDouble() {
         final boolean unsigned = false;
         double[] doubles = new double[]{2, -3, 4, 5, -6, 7, 8, 9};
@@ -328,6 +348,7 @@ public class RangeTest extends TestCase {
         assertEquals(7, range.getMax(), 1e-10d);
     }
 
+    @Test
     public void testComputeRangeGenericDoubleArray() {
         final boolean unsigned = false;
         final DoubleList array = TestHelper.createArray(new int[]{2, -3, 4, 5, -6, 7, 8, 9});

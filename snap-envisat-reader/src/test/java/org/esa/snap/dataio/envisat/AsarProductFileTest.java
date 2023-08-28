@@ -15,13 +15,22 @@
  */
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class AsarProductFileTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class AsarProductFileTest {
 
+    private static void testDddbProductTypeReplacement(final String replacement, final String productType,
+                                                       final AsarProductFile.IODD ioddVersion) {
+        String s;
+        s = AsarProductFile.getDddbProductTypeReplacement(productType,
+                ioddVersion);
+        assertEquals(replacement, s);
+    }
+
+    @Test
     public void testDddbProductTypeReplacement() {
-
         //VERSION_UNKNOWN, ASAR_3K, ASAR_4A, ASAR_4B
 
         // IODD 3K
@@ -44,13 +53,5 @@ public class AsarProductFileTest extends TestCase {
         final AsarProductFile.IODD vUnknown = AsarProductFile.IODD.VERSION_UNKNOWN;
         testDddbProductTypeReplacement("ASA_IMG_1P", "ASA_IMG_1P", vUnknown);
         testDddbProductTypeReplacement("ASAR", "ASAR", vUnknown);
-    }
-
-    private static void testDddbProductTypeReplacement(final String replacement, final String productType,
-                                                final AsarProductFile.IODD ioddVersion) {
-        String s;
-        s = AsarProductFile.getDddbProductTypeReplacement(productType,
-                                                           ioddVersion);
-        assertEquals(replacement, s);
     }
 }

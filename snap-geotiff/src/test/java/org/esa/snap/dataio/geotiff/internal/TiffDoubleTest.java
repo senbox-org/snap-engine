@@ -16,7 +16,9 @@
 
 package org.esa.snap.dataio.geotiff.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * TiffDouble Tester.
@@ -26,17 +28,20 @@ import junit.framework.TestCase;
  * @since <pre>02/21/2005</pre>
  */
 
-public class TiffDoubleTest extends TestCase {
+public class TiffDoubleTest {
 
+    @Test
     public void testCreation() {
         new TiffDouble(123497d);
     }
 
-    public void testGetValue() throws Exception {
+    @Test
+    public void testGetValue() {
         final TiffDouble tiffDouble = new TiffDouble(123497d);
         assertEquals(123497d, tiffDouble.getValue(), 1e-10);
     }
 
+    @Test
     public void testGetSizeInBytes() {
         final TiffDouble tiffDouble = new TiffDouble(932846d);
         assertEquals(8, tiffDouble.getSizeInBytes());

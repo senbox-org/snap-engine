@@ -16,10 +16,13 @@
 
 package org.esa.snap.dataio.geotiff.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TiffDirectoryEntrySetTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class TiffDirectoryEntrySetTest {
+
+    @Test
     public void testCreation() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
 
@@ -28,6 +31,7 @@ public class TiffDirectoryEntrySetTest extends TestCase {
         assertEquals(0, entries.length);
     }
 
+    @Test
     public void testSetEntry() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(45), new TiffLong(45678));
@@ -39,6 +43,7 @@ public class TiffDirectoryEntrySetTest extends TestCase {
         assertSame(entry, entries[0]);
     }
 
+    @Test
     public void testSetEntry_ReplaceExistingEntry() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(45), new TiffLong(45678));
@@ -52,6 +57,7 @@ public class TiffDirectoryEntrySetTest extends TestCase {
         assertSame(entry2, entries[0]);
     }
 
+    @Test
     public void testSetEntry_OrderEntries() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(45), new TiffLong(45678));
@@ -66,6 +72,7 @@ public class TiffDirectoryEntrySetTest extends TestCase {
         assertSame(entry, entries[1]);
     }
 
+    @Test
     public void testSetEntry_ReplaceAndOrderEntries() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
         final TiffDirectoryEntry entry1 = new TiffDirectoryEntry(new TiffShort(45), new TiffLong(45678));
@@ -82,6 +89,7 @@ public class TiffDirectoryEntrySetTest extends TestCase {
         assertSame(entry3, entries[1]);
     }
 
+    @Test
     public void testGetEntry() {
         final TiffDirectoryEntrySet entrySet = new TiffDirectoryEntrySet();
         final TiffShort tag1 = new TiffShort(45);
