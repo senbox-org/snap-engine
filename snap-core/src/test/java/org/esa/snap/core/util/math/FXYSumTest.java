@@ -16,26 +16,23 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.util.Debug;
+import org.junit.Test;
 
 import java.util.Arrays;
 
-public class FXYSumTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class FXYSumTest {
 
     public final static double EPS = 1.0e-10;
     public final static int N = 72 * 72;
 
-    public FXYSumTest(String s) {
-        super(s);
+    private static double random(double x1, double x2) {
+        return x1 + Math.random() * (x2 - x1);
     }
 
-    public static Test suite() {
-        return new TestSuite(FXYSumTest.class);
-    }
-
+    @Test
     public void testCreateFXYSum() {
         FXYSum fxySum;
 
@@ -59,46 +56,52 @@ public class FXYSumTest extends TestCase {
 
         // not able to create
         fxySum = FXYSum.createFXYSum(5, createArray(12));
-        assertTrue(fxySum == null);
+        assertNull(fxySum);
     }
 
+    @Test
     public void testLinearOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_LINEAR);
         FXYSum fxyOpt = new FXYSum.Linear();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
+    @Test
     public void testBiLinearOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_BI_LINEAR);
         FXYSum fxyOpt = new FXYSum.BiLinear();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
+    @Test
     public void testQuadricOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_QUADRATIC);
         FXYSum fxyOpt = new FXYSum.Quadric();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
+    @Test
     public void testBiQuadricOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_BI_QUADRATIC);
         FXYSum fxyOpt = new FXYSum.BiQuadric();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
+    @Test
     public void testCubicOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_CUBIC);
         FXYSum fxyOpt = new FXYSum.Cubic();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
+    @Test
     public void testBiCubicOptimization() {
         FXYSum fxyRaw = new FXYSum(FXYSum.FXY_BI_CUBIC);
         FXYSum fxyOpt = new FXYSum.BiCubic();
         testRawAgainstOptimized(fxyRaw, fxyOpt);
     }
 
-    public void testRawAgainstOptimized(FXYSum fxyRaw, FXYSum fxyOpt) {
+    private void testRawAgainstOptimized(FXYSum fxyRaw, FXYSum fxyOpt) {
         final int m = 100;
         double[][] data = new double[m][3];
         double x, y, z;
@@ -130,10 +133,6 @@ public class FXYSumTest extends TestCase {
         } finally {
             Debug.setEnabled(oldState);
         }
-    }
-
-    private static double random(double x1, double x2) {
-        return x1 + Math.random() * (x2 - x1);
     }
 
     private double[] createArray(final int length) {
