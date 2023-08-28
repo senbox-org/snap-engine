@@ -17,29 +17,30 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TiffValueTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class TiffValueTest {
 
     private TiffValue _tiffValue;
     private ImageOutputStream _stream;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _tiffValue = createTiffValueInstance();
         _stream = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-    }
-
+    @Test
     public void testWrite() throws IOException {
         final int[] expected = new int[]{3, 6, 128973, 8};
         _tiffValue.setData(ProductData.createInstance(expected));
@@ -53,6 +54,7 @@ public class TiffValueTest extends TestCase {
         }
     }
 
+    @Test
     public void testWrite_ProductDataThrowsIOException() {
         _tiffValue.setData(new ProductDataDummy());
 
@@ -66,6 +68,7 @@ public class TiffValueTest extends TestCase {
         }
     }
 
+    @Test
     public void testWrite_ThrowsIllegalStateExceptionBecauseDataWasNotSetToValue() {
         _tiffValue.setData(null);
 

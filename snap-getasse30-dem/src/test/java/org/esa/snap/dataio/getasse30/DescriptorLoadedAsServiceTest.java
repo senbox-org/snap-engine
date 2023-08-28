@@ -15,18 +15,19 @@
  */
 package org.esa.snap.dataio.getasse30;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
+import org.junit.Test;
 
-public class DescriptorLoadedAsServiceTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
 
+public class DescriptorLoadedAsServiceTest {
+
+    @Test
     public void testDescriptorIsLoaded() {
         ElevationModelRegistry registry = ElevationModelRegistry.getInstance();
         ElevationModelDescriptor descriptor = registry.getDescriptor("GETASSE30");
 
         assertNotNull(descriptor);
-
     }
-
 }

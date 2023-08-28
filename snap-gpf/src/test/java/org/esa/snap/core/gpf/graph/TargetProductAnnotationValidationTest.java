@@ -17,34 +17,36 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.GPF;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.*;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TargetProductAnnotationValidationTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
+public class TargetProductAnnotationValidationTest {
 
 
     private OperatorSpi notInitTargetProductOpSPI;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         notInitTargetProductOpSPI = new NotInitOutputOperator.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(notInitTargetProductOpSPI);
 
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(notInitTargetProductOpSPI);
     }
 
+    @Test
     public void testTargetProductIsSetByAnnotation() throws GraphException {
         Graph graph = new Graph("graph");
 
@@ -80,6 +82,4 @@ public class TargetProductAnnotationValidationTest extends TestCase {
             }
         }
     }
-
-
 }

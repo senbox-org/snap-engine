@@ -16,36 +16,42 @@
 
 package org.esa.snap.core.gpf.annotations;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 
-public class TestPojoTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class TestPojoTest {
     private Class<? extends TestPojo> testPojoClass;
 
-    @Override
+    @Before
     public void setUp() {
         TestPojo testPojo = new TestPojo();
         testPojoClass = testPojo.getClass();
     }
 
+    @Test
     public void testTargetProductAnnotation() throws NoSuchFieldException {
         Field vapourField = testPojoClass.getDeclaredField("vapour");
         TargetProduct tpa = vapourField.getAnnotation(TargetProduct.class);
         assertNotNull(tpa);
     }
 
+    @Test
     public void testSourceProductAnnotation() throws NoSuchFieldException {
         Field brrField = testPojoClass.getDeclaredField("brr");
         SourceProduct spa = brrField.getAnnotation(SourceProduct.class);
         assertNotNull(spa);
-        assertEquals(true, spa.optional());
+        assertTrue(spa.optional());
         assertEquals("MERIS_BRR", spa.type());
         assertEquals(2, spa.bands().length);
         assertEquals("radiance_2", spa.bands()[0]);
         assertEquals("radiance_5", spa.bands()[1]);
     }
 
+    @Test
     public void testParameterAnnotation() throws NoSuchFieldException {
         Field percentage = testPojoClass.getDeclaredField("percentage");
         Parameter pa = percentage.getAnnotation(Parameter.class);
@@ -53,6 +59,7 @@ public class TestPojoTest extends TestCase {
         assertEquals("(0, 100]", pa.interval());
     }
 
+    @Test
     public void testTargetPropertyAnnotation() throws NoSuchFieldException {
         Field propertyField = testPojoClass.getDeclaredField("property");
         TargetProperty tpa = propertyField.getAnnotation(TargetProperty.class);

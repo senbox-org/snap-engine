@@ -16,14 +16,17 @@
 
 package org.esa.snap.core.gpf.internal;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.gpf.Tile;
+import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.NoSuchElementException;
 
-public class DefaultTileIteratorTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class DefaultTileIteratorTest {
+
+    @Test
     public void testNextWithOnePixel() {
         DefaultTileIterator tileIterator = new DefaultTileIterator(new Rectangle(0, 0, 1, 1));
         assertTrue(tileIterator.hasNext());
@@ -31,16 +34,17 @@ public class DefaultTileIteratorTest extends TestCase {
         assertFalse(tileIterator.hasNext());
     }
 
+    @Test
     public void testNextWith3x3Pixels() {
         DefaultTileIterator tileIterator = new DefaultTileIterator(new Rectangle(2, 5, 3, 3));
         int[][] expected = new int[][]{
-                /*i=0*/ {2 + 0, 5 + 0},
-                /*i=1*/ {2 + 1, 5 + 0},
-                /*i=2*/ {2 + 2, 5 + 0},
-                /*i=3*/ {2 + 0, 5 + 1},
+                /*i=0*/ {2, 5},
+                /*i=1*/ {2 + 1, 5},
+                /*i=2*/ {2 + 2, 5},
+                /*i=3*/ {2, 5 + 1},
                 /*i=4*/ {2 + 1, 5 + 1},
                 /*i=5*/ {2 + 2, 5 + 1},
-                /*i=6*/ {2 + 0, 5 + 2},
+                /*i=6*/ {2, 5 + 2},
                 /*i=7*/ {2 + 1, 5 + 2},
                 /*i=8*/ {2 + 2, 5 + 2}
         };
@@ -61,6 +65,7 @@ public class DefaultTileIteratorTest extends TestCase {
         }
     }
 
+    @Test
     public void testRemove() {
         DefaultTileIterator tileIterator = new DefaultTileIterator(new Rectangle(0, 0, 9, 4));
         try {
