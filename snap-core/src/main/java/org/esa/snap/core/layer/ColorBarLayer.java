@@ -488,8 +488,10 @@ public class ColorBarLayer extends Layer {
             int imageWidth = raster.getRasterWidth();
 
 
-            if (applySizeScaling()) {
-                bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+            if (ColorBarLayerType.SCENE_SCALING_LENGTH.equals(applySizeScaling())) {
+                bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true, true, false);
+            } else if (ColorBarLayerType.SCENE_SCALING_LENGTH.equals(applySizeScaling())) {
+                bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true, false, true);
             } else {
                 bufferedImage = imageLegend.createImage();
             }
@@ -1195,7 +1197,7 @@ public class ColorBarLayer extends Layer {
 
     // Size & Scaling
 
-    private boolean applySizeScaling() {
+    private String applySizeScaling() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
     }

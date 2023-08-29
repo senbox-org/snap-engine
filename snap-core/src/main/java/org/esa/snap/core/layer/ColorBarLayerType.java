@@ -196,7 +196,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".scene.aspect.best.fit";
-    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_LABEL = "Scene Aspect Ratio (Best Fit)";
+    public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_LABEL = "Scene Aspect Ratio";
     public static final String PROPERTY_SCENE_ASPECT_BEST_FIT_TOOLTIP = "For Best Fit: Scene aspect ratio (width/height) which triggers determination of horizontal or vertical color bar";
     private static final String PROPERTY_SCENE_ASPECT_BEST_FIT_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "SceneAspectBestFit";
     public static final double PROPERTY_SCENE_ASPECT_BEST_FIT_DEFAULT = 1.0;
@@ -454,18 +454,30 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SECTION_TOOLTIP = "Set scaling and relative size of " + COLOR_LOWER_CASE + " bar image";
     public static final String PROPERTY_IMAGE_SCALING_SECTION_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Section";
 
+    public static final String SCENE_SCALING_OFF = "No Scaling";
+    public static final String SCENE_SCALING_LENGTH = "Scale by Color Bar Length";
+    public static final String SCENE_SCALING_WIDTH = "Scale by Color Bar Thickness";
+
+
+    public static String[] getScalingOptionsArray() {
+        return  new String[]{
+                SCENE_SCALING_OFF,
+                SCENE_SCALING_LENGTH,
+                SCENE_SCALING_WIDTH
+        };
+    }
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".apply";
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale to Scene Size";
-    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the " + COLOR_LOWER_CASE + " bar legend size to percentage of the scene image size using Legend Scaling Factor";
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the " + COLOR_LOWER_CASE + " bar legend size to percentage of the scene image size using Scene Size Scaling";
     private static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Apply";
-    public static final boolean PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = true;
-    public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = Boolean.class;
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = SCENE_SCALING_WIDTH;
+    public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = String.class;
 
     public static final String PROPERTY_IMAGE_SCALING_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 75.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 20.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;

@@ -784,7 +784,7 @@ public class ImageLegend {
     }
 
 
-    public BufferedImage createImage(Dimension imageLayerDimension, boolean scaleToDimension) {
+    public BufferedImage createImage(Dimension imageLayerDimension, boolean scaleToDimension, boolean scaleByLength, boolean useAvgSideSize) {
 
         double scalingFactor = 1.0;
 
@@ -793,11 +793,36 @@ public class ImageLegend {
             createColorBarInfos();
             initDrawing();
 
+            double avgSideSize = (imageLayerDimension.height + imageLayerDimension.width) / 2.0;
             double oneHundredPercentScalingFactor;
             if (isHorizontalColorBar()) {
+                if (scaleByLength) {
+                    if (useAvgSideSize) {
+                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.width;
+                    } else {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
+                    }
+                } else {
+                    if (useAvgSideSize) {
+                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.height;
             } else {
                 oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
+            }
+                }
+            } else {
+                if (scaleByLength) {
+                    if (useAvgSideSize) {
+                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.height;
+                    } else {
+                        oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
+                    }
+                } else {
+                    if (useAvgSideSize) {
+                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.width;
+                    } else {
+                        oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
+                    }
+                }
             }
 
             scalingFactor = getLayerScaling() / 100.0;

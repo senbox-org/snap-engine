@@ -1,4 +1,5 @@
 org.esa.snap.core.layer.GraticuleLayerType
+org.esa.snap.core.layer.MetaDataLayerType
 org.esa.snap.core.layer.ColorBarLayerType
 org.esa.snap.core.layer.NoDataLayerType
 org.esa.snap.core.layer.RasterImageLayerType
