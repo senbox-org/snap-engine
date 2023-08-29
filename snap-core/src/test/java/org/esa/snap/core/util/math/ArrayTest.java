@@ -15,7 +15,9 @@
  */
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link Array}.
@@ -23,10 +25,11 @@ import junit.framework.TestCase;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class ArrayTest extends TestCase {
+public class ArrayTest {
 
+    @Test
     public void testDoubleCopyTo() {
-        final Array array = new Array.Double(new double[]{1, 2, 3, 4, 5});
+        final Array array = new Array.Double(1, 2, 3, 4, 5);
         final double[] dest = new double[3];
 
         array.copyTo(1, dest, 0, 3);
@@ -36,8 +39,9 @@ public class ArrayTest extends TestCase {
         assertEquals(4.0, dest[2], 0.0);
     }
 
+    @Test
     public void testFloatCopyTo() {
-        final Array array = new Array.Float(new float[]{1, 2, 3, 4, 5});
+        final Array array = new Array.Float(1, 2, 3, 4, 5);
         final double[] dest = new double[3];
 
         array.copyTo(1, dest, 0, 3);
