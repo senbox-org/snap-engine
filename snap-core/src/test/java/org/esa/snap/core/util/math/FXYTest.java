@@ -16,22 +16,15 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class FXYTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class FXYTest {
 
     public final static double EPS = 1.0e-10;
 
-    public FXYTest(String s) {
-        super(s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(FXYTest.class);
-    }
-
+    @Test
     public void testF() {
         assertEquals(2039.28109056, FXY.X4Y4.f(2.1, 3.2), EPS);
         assertEquals(637.2753408, FXY.X4Y3.f(2.1, 3.2), EPS);
@@ -59,5 +52,4 @@ public class FXYTest extends TestCase {
         assertEquals(3.2, FXY.Y.f(2.1, 3.2), EPS);
         assertEquals(1.0, FXY.ONE.f(2.1, 3.2), EPS);
     }
-
 }

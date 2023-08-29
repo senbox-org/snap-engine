@@ -16,17 +16,20 @@
 package org.esa.snap.core.util.converters;
 
 import com.bc.ceres.binding.ConversionException;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
+
+import static org.junit.Assert.*;
 
 /**
  * A layer for vector data nodes.
  *
  * @author Luis Veci
  */
-public class RectangleConverterTest extends TestCase {
+public class RectangleConverterTest {
 
+    @Test
     public void testParseSuccess() throws ConversionException {
         final RectangleConverter rectConverter = new RectangleConverter();
 
@@ -38,12 +41,14 @@ public class RectangleConverterTest extends TestCase {
         assertEquals(4, rect.height);
     }
 
-    public void testFormatSuccess() throws ConversionException {
+    @Test
+    public void testFormatSuccess() {
         final RectangleConverter rectConverter = new RectangleConverter();
 
-        assertEquals("1,2,3,4", rectConverter.format(new Rectangle(1,2,3,4)));
+        assertEquals("1,2,3,4", rectConverter.format(new Rectangle(1, 2, 3, 4)));
     }
 
+    @Test
     public void testFailure() {
         final RectangleConverter rectConverter = new RectangleConverter();
 

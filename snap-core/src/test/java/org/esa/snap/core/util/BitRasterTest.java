@@ -16,10 +16,13 @@
 
 package org.esa.snap.core.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class BitRasterTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class BitRasterTest {
+
+    @Test
     public void testAccessors() {
         final int width = 13;
         final int height = 5;
@@ -31,7 +34,7 @@ public class BitRasterTest extends TestCase {
         assertEquals(height, bitRaster.getHeight());
 
         for (int i = 0; i < size; i++) {
-            assertEquals("i=" + i, false, bitRaster.isSet(i));
+            assertFalse("i=" + i, bitRaster.isSet(i));
         }
 
         for (int y = 0; y < height; y++) {
@@ -41,7 +44,7 @@ public class BitRasterTest extends TestCase {
         }
 
         for (int i = 0; i < size; i++) {
-            assertEquals("i=" + i, true, bitRaster.isSet(i));
+            assertTrue("i=" + i, bitRaster.isSet(i));
         }
 
         for (int i = 0; i < size; i++) {
@@ -50,7 +53,7 @@ public class BitRasterTest extends TestCase {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                assertEquals("x=" + x + ",y=" + y, false, bitRaster.isSet(x, y));
+                assertFalse("x=" + x + ",y=" + y, bitRaster.isSet(x, y));
             }
         }
 
@@ -61,14 +64,13 @@ public class BitRasterTest extends TestCase {
     }
 
     private void testAccessors(BitRaster bitRaster, int x, int y) {
-        assertEquals(false, bitRaster.isSet(x, y));
-        assertEquals(false, bitRaster.isSet(x + y * bitRaster.getWidth()));
+        assertFalse(bitRaster.isSet(x, y));
+        assertFalse(bitRaster.isSet(x + y * bitRaster.getWidth()));
         bitRaster.set(x, y, true);
-        assertEquals(true, bitRaster.isSet(x, y));
-        assertEquals(true, bitRaster.isSet(x + y * bitRaster.getWidth()));
+        assertTrue(bitRaster.isSet(x, y));
+        assertTrue(bitRaster.isSet(x + y * bitRaster.getWidth()));
         bitRaster.set(x, y, false);
-        assertEquals(false, bitRaster.isSet(x, y));
-        assertEquals(false, bitRaster.isSet(x + y * bitRaster.getWidth()));
+        assertFalse(bitRaster.isSet(x, y));
+        assertFalse(bitRaster.isSet(x + y * bitRaster.getWidth()));
     }
-
 }

@@ -15,13 +15,16 @@
  */
 package org.esa.snap.core.util.geotiff;
 
-import junit.framework.TestCase;
 import org.jdom2.Element;
+import org.junit.Test;
 
 import java.util.List;
 
-public class GeoTIFFMetadataTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class GeoTIFFMetadataTest {
+
+    @Test
     public void testConstructors() {
         final GeoTIFFMetadata md1 = new GeoTIFFMetadata();
         assertEquals(1, md1.getGeoTIFFVersion());
@@ -36,6 +39,7 @@ public class GeoTIFFMetadataTest extends TestCase {
         assertEquals(1, md2.getNumGeoKeyEntries());
     }
 
+    @Test
     public void testCreatedRootTree() {
         final GeoTIFFMetadata md = new GeoTIFFMetadata();
 
@@ -83,7 +87,6 @@ public class GeoTIFFMetadataTest extends TestCase {
     }
 
     private List testTiffTag(Element tag, String number, String name, String type) {
-
         assertEquals("TIFFField", tag.getName());
         assertEquals(number, tag.getAttributeValue("number"));
         assertEquals(name, tag.getAttributeValue("name"));
@@ -100,7 +103,7 @@ public class GeoTIFFMetadataTest extends TestCase {
     private void testShorts(List sList, int offset, String value1, String value2, String value3, String value4) {
         assertTrue(offset <= sList.size() - 4);
 
-        Element data1 = (Element) sList.get(offset + 0);
+        Element data1 = (Element) sList.get(offset);
         assertEquals("TIFFShort", data1.getName());
         assertEquals(value1, data1.getAttributeValue("value"));
 
@@ -119,7 +122,7 @@ public class GeoTIFFMetadataTest extends TestCase {
 
     private void testDouble(List dList, int offset, String value) {
         assertTrue(offset < dList.size());
-        Element data1 = (Element) dList.get(offset + 0);
+        Element data1 = (Element) dList.get(offset);
         assertEquals("TIFFDouble", data1.getName());
         assertEquals(value, data1.getAttributeValue("value"));
     }
@@ -131,8 +134,8 @@ public class GeoTIFFMetadataTest extends TestCase {
         assertEquals(value, data1.getAttributeValue("value"));
     }
 
+    @Test
     public void testAddAndGetParams() {
-
         final GeoTIFFMetadata md = new GeoTIFFMetadata();
 
         md.addGeoShortParam(1001, 5784);
@@ -255,7 +258,8 @@ public class GeoTIFFMetadataTest extends TestCase {
         assertEquals("My Datum", md.getGeoAsciiParam(1007));
     }
 
-    public void testAddEntrieysSorted() {
+    @Test
+    public void testAddEntriesSorted() {
         final GeoTIFFMetadata md = new GeoTIFFMetadata();
 
         md.addGeoDoubleParams(1004, new double[]{21.4, -2.1, 76.9, -0.6});
@@ -277,6 +281,7 @@ public class GeoTIFFMetadataTest extends TestCase {
         assertEquals(1007, md.getGeoKeyEntryAt(7).getData()[0]);
     }
 
+    @Test
     public void testGetGeoAscIIParams() {
         final String s1 = "My Projection";
         final String s2 = "My Datum";
@@ -289,6 +294,7 @@ public class GeoTIFFMetadataTest extends TestCase {
         assertEquals(s1 + "|" + s2 + "|", md.getGeoAsciiParams());
     }
 
+    @Test
     public void testGetGeoDoubleParams() {
         final GeoTIFFMetadata md = new GeoTIFFMetadata();
 

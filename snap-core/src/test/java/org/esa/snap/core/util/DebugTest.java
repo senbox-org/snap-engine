@@ -20,6 +20,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+@Deprecated
+// there is no internal usage tb 2023-08-29
 public class DebugTest extends TestCase {
 
     private boolean _oldDebugState;
