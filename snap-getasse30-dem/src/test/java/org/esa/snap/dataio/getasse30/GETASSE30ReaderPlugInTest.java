@@ -16,29 +16,34 @@
 
 package org.esa.snap.dataio.getasse30;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static org.junit.Assert.*;
 
-public class GETASSE30ReaderPlugInTest extends TestCase {
+
+public class GETASSE30ReaderPlugInTest {
 
     private GETASSE30ReaderPlugIn _plugIn;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() {
         _plugIn = new GETASSE30ReaderPlugIn();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         _plugIn = null;
     }
 
+    @Test
     public void testValidInputs() {
         testValidInput("./GETASSE30/00N015W.getasse30");
         testValidInput("./GETASSE30/00N015W.GETASSE30");
@@ -46,10 +51,11 @@ public class GETASSE30ReaderPlugInTest extends TestCase {
     }
 
     private void testValidInput(final String s) {
-        assertTrue(_plugIn.getDecodeQualification(s) == DecodeQualification.INTENDED);
-        assertTrue(_plugIn.getDecodeQualification(new File(s)) == DecodeQualification.INTENDED);
+        assertSame(_plugIn.getDecodeQualification(s), DecodeQualification.INTENDED);
+        assertSame(_plugIn.getDecodeQualification(new File(s)), DecodeQualification.INTENDED);
     }
 
+    @Test
     public void testInvalidInputs() {
         testInvalidInput("10n143w.GETASSE30.zip");
         testInvalidInput("./GETASSE30/00N015W.getasse30.zip");
@@ -72,6 +78,7 @@ public class GETASSE30ReaderPlugInTest extends TestCase {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(new File(s)));
     }
 
+    @Test
     public void testThatOtherTypesCannotBeDecoded() throws MalformedURLException {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(null));
         final URL url = new File("./GETASSE30/readme.txt").toURL();
@@ -80,31 +87,34 @@ public class GETASSE30ReaderPlugInTest extends TestCase {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(object));
     }
 
+    @Test
     public void testCreateReaderInstance() {
         final ProductReader reader = _plugIn.createReaderInstance();
         assertTrue(reader instanceof GETASSE30Reader);
     }
 
+    @Test
     public void testGetInputTypes() {
         final Class[] inputTypes = _plugIn.getInputTypes();
         assertNotNull(inputTypes);
-        assertTrue(inputTypes.length == 2);
+        assertEquals(2, inputTypes.length);
         assertEquals(String.class, inputTypes[0]);
         assertEquals(File.class, inputTypes[1]);
     }
 
+    @Test
     public void testGetFormatNames() {
         final String[] formatNames = _plugIn.getFormatNames();
         assertNotNull(formatNames);
-        assertTrue(formatNames.length == 1);
+        assertEquals(1, formatNames.length);
         assertEquals("GETASSE30", formatNames[0]);
     }
 
+    @Test
     public void testGetDefaultFileExtensions() {
         final String[] defaultFileExtensions = _plugIn.getDefaultFileExtensions();
         assertNotNull(defaultFileExtensions);
-        assertTrue(defaultFileExtensions.length == 1);
+        assertEquals(1, defaultFileExtensions.length);
         assertEquals(".getasse30", defaultFileExtensions[0]);
     }
-
 }

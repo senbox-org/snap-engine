@@ -220,10 +220,10 @@
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-test-utils</artifactId>
+                <artifactId>ceres-core</artifactId>
                 <version>${snap.version}</version>
-                <type>test-jar</type>
                 <scope>test</scope>
+                <type>test-jar</type>
             </dependency>
 
             <!-- SNAP Extension Modules -->

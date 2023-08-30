@@ -16,10 +16,13 @@
 package org.esa.snap.core.util.math;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class HistogramTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class HistogramTest {
+
+    @Test
     public void testComputeHistogramByte() {
         byte[] data = new byte[]{1, 2, -3, -3, 40, 5, -6, 7, 8, 9, -10, 11, -120, 120, 121, 122};
 
@@ -28,7 +31,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramByte(data, IndexValidator.TRUE, 5, null, null,
-                                                         ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(-120, histo.getMin(), 1e-10);
         assertEquals(122, histo.getMax(), 1e-10);
@@ -89,6 +92,7 @@ public class HistogramTest extends TestCase {
         assertEquals(12, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramUByte() {
         byte[] data = new byte[]{
                 1, 2, -3 /*=253*/, -3/*=253*/, 40, 5, -6/*=250*/, 7, 8, 9, -10/*=246*/, 11, -120/*136*/, 120, 121, 122
@@ -99,7 +103,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramUByte(data, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(8, histo.getMaxBinCount());
@@ -143,7 +147,7 @@ public class HistogramTest extends TestCase {
         //        Range:               5 ... 250
 
         histo = Histogram.computeHistogramUByte(data, IndexValidator.TRUE, 5, new Range(5, 250), null,
-                                                ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(6, histo.getMaxBinCount());
@@ -159,6 +163,7 @@ public class HistogramTest extends TestCase {
         assertEquals(12, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramShort() {
         short[] data = new short[]{1, 2, -3, -3, 40, 5, -6, 7, 8, 9, -10, 11, -120, 120, 121, 122};
 
@@ -167,7 +172,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramShort(data, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(11, histo.getMaxBinCount());
@@ -227,6 +232,7 @@ public class HistogramTest extends TestCase {
         assertEquals(12, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramUShort() {
         short[] data = new short[]{
                 1,
@@ -252,7 +258,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramUShort(data, IndexValidator.TRUE, 5, null, null,
-                                                           ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(11, histo.getMaxBinCount());
@@ -297,7 +303,7 @@ public class HistogramTest extends TestCase {
         //        Range:               5 ... 250
 
         histo = Histogram.computeHistogramUShort(data, IndexValidator.TRUE, 5, new Range(5, 250), null,
-                                                 ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(6, histo.getMaxBinCount());
@@ -313,6 +319,7 @@ public class HistogramTest extends TestCase {
         assertEquals(9, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramInt() {
         int[] data = new int[]{1, 2, -3, -3, 40, 5, -6, 7, 8, 9, -10, 11, -120, 120, 121, 122};
 
@@ -380,6 +387,7 @@ public class HistogramTest extends TestCase {
         assertEquals(12, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramUInt() {
         int[] data = new int[]{
                 1,
@@ -405,7 +413,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramUInt(data, IndexValidator.TRUE, 5, null, null,
-                                                         ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(11, histo.getMaxBinCount());
@@ -450,7 +458,7 @@ public class HistogramTest extends TestCase {
         //        Range:               5 ... 250
 
         histo = Histogram.computeHistogramUInt(data, IndexValidator.TRUE, 5, new Range(5, 250), null,
-                                               ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(6, histo.getMaxBinCount());
@@ -466,6 +474,7 @@ public class HistogramTest extends TestCase {
         assertEquals(9, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramFloat() {
         float[] data = new float[]{1, 2, -3, -3, 40, 5, -6, 7, 8, 9, -10, 11, -120, 120, 121, 122};
 
@@ -474,7 +483,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramFloat(data, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(11, histo.getMaxBinCount());
@@ -534,6 +543,7 @@ public class HistogramTest extends TestCase {
         assertEquals(12, histo.getBinCountsSum());
     }
 
+    @Test
     public void testComputeHistogramDouble() {
         double[] data = new double[]{1, 2, -3, -3, 40, 5, -6, 7, 8, 9, -10, 11, -120, 120, 121, 122};
 
@@ -542,7 +552,7 @@ public class HistogramTest extends TestCase {
         //        Range:              null
 
         Histogram histo = Histogram.computeHistogramDouble(data, IndexValidator.TRUE, 5, null, null,
-                                                           ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
 
         assertEquals(5, histo.getNumBins());
         assertEquals(11, histo.getMaxBinCount());
@@ -605,11 +615,12 @@ public class HistogramTest extends TestCase {
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //   Compute Histogram Distribution Tests
 
+    @Test
     public void testComputeHistogramDistribution_Byte() {
         byte[] values = new byte[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramByte(values, IndexValidator.TRUE, 5, null, null,
-                                                         ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -618,11 +629,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_UByte() {
         byte[] values = new byte[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramUByte(values, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -631,11 +643,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_Short() {
         short[] values = new short[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramShort(values, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -644,11 +657,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_UShort() {
         short[] values = new short[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramUShort(values, IndexValidator.TRUE, 5, null, null,
-                                                           ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -657,11 +671,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_Int() {
         int[] values = new int[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramInt(values, IndexValidator.TRUE, 5, null, null,
-                                                        ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -670,11 +685,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_UInt() {
         int[] values = new int[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramUInt(values, IndexValidator.TRUE, 5, null, null,
-                                                         ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -683,11 +699,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_Float() {
         float[] values = new float[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramFloat(values, IndexValidator.TRUE, 5, null, null,
-                                                          ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -696,11 +713,12 @@ public class HistogramTest extends TestCase {
         assertEquals(3, binValues[4]);
     }
 
+    @Test
     public void testComputeHistogramDistribution_Double() {
         double[] values = new double[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramDouble(values, IndexValidator.TRUE, 5, null, null,
-                                                           ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         int[] binValues = histo.getBinCounts();
         assertEquals(3, binValues[0]);
         assertEquals(3, binValues[1]);
@@ -712,11 +730,12 @@ public class HistogramTest extends TestCase {
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //   Compute Histogram Distribution Tests
 
+    @Test
     public void testGetBinIndex() {
         double[] values = new double[]{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
         Histogram histo = Histogram.computeHistogramDouble(values, IndexValidator.TRUE, 5, null, null,
-                                                           ProgressMonitor.NULL);
+                ProgressMonitor.NULL);
         assertEquals(-1, histo.getBinIndex(-1.0));
         assertEquals(-1, histo.getBinIndex(-100.0));
         assertEquals(1, histo.getBinIndex(+2.0));
@@ -724,5 +743,4 @@ public class HistogramTest extends TestCase {
         assertEquals(-1, histo.getBinIndex(+6.0));
         assertEquals(-1, histo.getBinIndex(+100.0));
     }
-
 }

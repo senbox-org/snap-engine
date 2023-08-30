@@ -16,42 +16,16 @@
 
 package org.esa.snap.core.util;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class StopWatchTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public StopWatchTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(StopWatchTest.class);
-    }
-
-    /**
-     * Tests the constructor functionality
-     */
-    public void testStopWatch() {
-        // check whether the timer really starts at construction time
-/*
-        StopWatch   watch = new StopWatch();
-
-        try {
-            Thread.sleep(10);
-        }
-        catch(InterruptedException e) {
-        }
-
-        watch.stop();
-        assertTrue(watch.getStartTime() != watch.getEndTime());
-*/
-    }
+public class StopWatchTest {
 
     /**
      * Tests the functionality for getEndTime
      */
+    @Test
     public void testGetEndTime() {
         StopWatch watch = new StopWatch();
         long endTime;
@@ -71,36 +45,9 @@ public class StopWatchTest extends TestCase {
     }
 
     /**
-     * Tests the functionality for getStartTime()
-     */
-    public void testGetStartTime() {
-/*
-        StopWatch   watch = new StopWatch();
-        long        startTime;
-
-        // start watch, get the start time, let it run, get start time again
-        watch.start();
-        startTime = watch.getStartTime();
-        try {
-            Thread.sleep(10);
-        }
-        catch(InterruptedException e) {
-        }
-        assertEquals(startTime, watch.getStartTime());
-
-        // now stop watch and check again
-        watch.stop();
-        assertEquals(startTime, watch.getStartTime());
-
-        // now start watch again - must be different
-        watch.start();
-        assertTrue(startTime != watch.getStartTime());
-*/
-    }
-
-    /**
      * Tests the functionality of getTimeDiff
      */
+    @Test
     public void testGetTimeDiff() {
         StopWatch watch = new StopWatch();
         long startTime;
@@ -115,67 +62,28 @@ public class StopWatchTest extends TestCase {
     /**
      * Tests the functionality of getTimeDiffString()
      */
+    @Test
     public void testGetTimeDiffString() {
         StopWatch watch = new StopWatch();
 
         watch.stop();
         // just check that we don't get an empty string
-        assertTrue("" != watch.getTimeDiffString());
+        assertNotSame("", watch.getTimeDiffString());
     }
 
     /**
      * Tests the functionality of getTimeString
      */
+    @Test
     public void testGetTimeString() {
         // just test that we don't get an empty string
-        assertTrue("" != StopWatch.getTimeString(12));
-    }
-
-    /**
-     * Tests the functionality of start
-     */
-    public void testStart() {
-/*
-        StopWatch   watch = new StopWatch();
-        long        startTime = watch.getStartTime();
-
-        startTime = watch.getStartTime();
-        try {
-            Thread.sleep(10);
-        }
-        catch(InterruptedException e) {
-        }
-        watch.stop();
-        watch.start();
-        assertTrue(startTime != watch.getStartTime());
-*/
-    }
-
-    /**
-     * tests the functionality of stop
-     */
-    public void testStop() {
-/*
-        StopWatch   watch = new StopWatch();
-        long        endTime;
-
-        watch.stop();
-        endTime = watch.getEndTime();
-
-        watch.start();
-        try {
-            Thread.sleep(10);
-        }
-        catch(InterruptedException e) {
-        }
-        watch.stop();
-        assertTrue(endTime != watch.getEndTime());
-*/
+        assertNotSame("", StopWatch.getTimeString(12));
     }
 
     /**
      * Tests the functionality of toString()
      */
+    @Test
     public void testToString() {
         StopWatch watch = new StopWatch();
 

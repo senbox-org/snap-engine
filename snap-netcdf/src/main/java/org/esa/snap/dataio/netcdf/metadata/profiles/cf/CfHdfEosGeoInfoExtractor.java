@@ -39,11 +39,9 @@ public class CfHdfEosGeoInfoExtractor {
         final String[] strings = structMetadataString.split("\n");
         for (String string : strings) {
             string = string.replaceAll("\t", "");
-            System.out.println(string);
             final StringTokenizer st = new StringTokenizer(string, "\n", false);
             while (st.hasMoreTokens()) {
                 final String s = st.nextToken();
-                System.out.println("s = " + s);
                 final String[] sSplit = s.split("=");
                 if (sSplit != null && sSplit.length == 2) {
                     final String sArgString = sSplit[0];

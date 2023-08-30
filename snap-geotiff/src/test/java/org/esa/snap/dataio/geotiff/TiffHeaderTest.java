@@ -16,14 +16,17 @@
 
 package org.esa.snap.dataio.geotiff;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.geotiff.internal.TiffHeader;
 import org.esa.snap.dataio.geotiff.internal.TiffIFD;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
+
+import static org.junit.Assert.*;
 
 /**
  * TiffHeader Tester.
@@ -33,21 +36,18 @@ import java.io.ByteArrayOutputStream;
  * @since <pre>02/11/2005</pre>
  */
 
-public class TiffHeaderTest extends TestCase {
+public class TiffHeaderTest {
 
     private TiffHeader _tiffHeader;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         final Product product = new Product("name", "type", 10, 15);
         product.addBand("b1", ProductData.TYPE_UINT16);
         _tiffHeader = new TiffHeader(new Product[]{product});
     }
 
-    @Override
-    public void tearDown() throws Exception {
-    }
-
+    @Test
     public void testCreation_WithNull() {
         try {
             new TiffHeader(null);
@@ -59,6 +59,7 @@ public class TiffHeaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreation_WithZeroSizedArray() {
         try {
             new TiffHeader(new Product[0]);
@@ -70,6 +71,7 @@ public class TiffHeaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreation() {
         final Product product = new Product("name", "type", 10, 15);
         product.addBand("b1", ProductData.TYPE_UINT16);
@@ -77,6 +79,7 @@ public class TiffHeaderTest extends TestCase {
         assertNotNull(tiffHeader.getIfdAt(0));
     }
 
+    @Test
     public void testGetIfdAt() {
         assertNotNull(_tiffHeader.getIfdAt(0));
 
@@ -99,6 +102,7 @@ public class TiffHeaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testWrite_withOneProduct() throws Exception {
         final MemoryCacheImageOutputStream ios = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
         _tiffHeader.write(ios);
@@ -113,6 +117,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(expectedNextIFDOffset, ios.readInt());
     }
 
+    @Test
     public void testWrite_withTwoProducts() throws Exception {
         final Product p1 = new Product("p1", "type", 10, 12);
         final Product p2 = new Product("p2", "type", 8, 6);
@@ -137,6 +142,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(expectedStreamLength, ios.length());
     }
 
+    @Test
     public void testSetBigEndianOrder_littleEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(false);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -149,6 +155,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(0x49, bytes[1]);
     }
 
+    @Test
     public void testSetBigEndianOrder_bigEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(true);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -161,6 +168,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(0x4D, bytes[1]);
     }
 
+    @Test
     public void testMagicNumber_littleEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(false);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -173,6 +181,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(0x00, bytes[3]);
     }
 
+    @Test
     public void testMagicNumber_bigEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(true);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -185,6 +194,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(0x2a, bytes[3]);
     }
 
+    @Test
     public void testFirstIfdOffset_littleEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(false);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -199,6 +209,7 @@ public class TiffHeaderTest extends TestCase {
         assertEquals(0x00, bytes[7]);
     }
 
+    @Test
     public void testFirstIfdOffset_bigEndian() throws Exception {
         _tiffHeader.setBigEndianOrder(true);
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();

@@ -16,23 +16,25 @@
 
 package org.esa.snap.core.gpf.internal;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.After;
+import org.junit.Before;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.util.HashMap;
 
-public abstract class AbstractTileImageTileTest extends TestCase {
+import static org.junit.Assert.*;
+
+public abstract class AbstractTileImageTileTest {
 
     private Product product;
     private HashMap<String, TestOpImage> imageMap;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Dimension imageSize = getImageSize();
         Dimension tileSize = getTileSize();
         product = new Product("N", "T", imageSize.width, imageSize.height);
@@ -48,8 +50,8 @@ public abstract class AbstractTileImageTileTest extends TestCase {
         imageMap = new HashMap<String, TestOpImage>();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         for (TestOpImage testOpImage : imageMap.values()) {
             testOpImage.dispose();
         }
@@ -126,31 +128,31 @@ public abstract class AbstractTileImageTileTest extends TestCase {
 
     protected void testFloatSample32IO(TileImpl tile, int x0, int y0) {
         tile.setSample(x0, y0, false); // boolean
-        assertEquals(false, tile.getSampleBoolean(x0, y0));
+        assertFalse(tile.getSampleBoolean(x0, y0));
         assertEquals(0, tile.getSampleInt(x0, y0));
         assertEquals(0.0f, tile.getSampleFloat(x0, y0), 1e-5f);
         assertEquals(0.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, true); // boolean
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(1, tile.getSampleInt(x0, y0));
         assertEquals(1.0f, tile.getSampleFloat(x0, y0), 1e-5f);
         assertEquals(1.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, 1234); // int
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(1234, tile.getSampleInt(x0, y0));
         assertEquals(1234.0f, tile.getSampleFloat(x0, y0), 1e-5f);
         assertEquals(1234.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, 67.89f);  // float
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(67, tile.getSampleInt(x0, y0));
         assertEquals(67.89f, tile.getSampleFloat(x0, y0), 1e-5f);
         assertEquals(67.89, tile.getSampleDouble(x0, y0), 1e-5);
 
         tile.setSample(x0, y0, 12.34567890123);  // double
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(12, tile.getSampleInt(x0, y0));
         assertEquals(12.345679f, tile.getSampleFloat(x0, y0), 1e-5f);
         assertEquals(12.345679, tile.getSampleDouble(x0, y0), 1e-5);
@@ -158,31 +160,31 @@ public abstract class AbstractTileImageTileTest extends TestCase {
 
     protected void testFloat64IO(TileImpl tile, int x0, int y0) {
         tile.setSample(x0, y0, false); // boolean
-        assertEquals(false, tile.getSampleBoolean(x0, y0));
+        assertFalse(tile.getSampleBoolean(x0, y0));
         assertEquals(0, tile.getSampleInt(x0, y0));
         assertEquals(0.0f, tile.getSampleFloat(x0, y0), 1e-10f);
         assertEquals(0.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, true); // boolean
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(1, tile.getSampleInt(x0, y0));
         assertEquals(1.0f, tile.getSampleFloat(x0, y0), 1e-10f);
         assertEquals(1.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, 1234); // int
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(1234, tile.getSampleInt(x0, y0));
         assertEquals(1234.0f, tile.getSampleFloat(x0, y0), 1e-10f);
         assertEquals(1234.0, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, 67.89f);  // float
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(68, tile.getSampleInt(x0, y0));
         assertEquals(67.89f, tile.getSampleFloat(x0, y0), 1e-10f);
         assertEquals(67.89, tile.getSampleDouble(x0, y0), 1e-10);
 
         tile.setSample(x0, y0, 12.34567890123);  // double
-        assertEquals(true, tile.getSampleBoolean(x0, y0));
+        assertTrue(tile.getSampleBoolean(x0, y0));
         assertEquals(12, tile.getSampleInt(x0, y0));
         assertEquals(12.3456f, tile.getSampleFloat(x0, y0), 1e-10f);
         assertEquals(12.34567890123, tile.getSampleDouble(x0, y0), 1e-10);
@@ -221,5 +223,4 @@ public abstract class AbstractTileImageTileTest extends TestCase {
         assertEquals(707.0f, samplesGeneric.getElemFloatAt(index), 1e-5f);
         assertEquals(707.0f, tile.getSampleFloat(x, y), 1e-5f);
     }
-
 }

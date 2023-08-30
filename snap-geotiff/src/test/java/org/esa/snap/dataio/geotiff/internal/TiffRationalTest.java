@@ -17,17 +17,21 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TiffRationalTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class TiffRationalTest {
 
     private static final long _TIFFRATIONAL_MAX = 0xffffffffL;
     private static final long _TIFFRATIONAL_MIN = 1;
 
+    @Test
     public void testCreation() {
         new TiffRational(_TIFFRATIONAL_MAX, _TIFFRATIONAL_MAX);
         new TiffRational(_TIFFRATIONAL_MAX, _TIFFRATIONAL_MIN);
@@ -35,6 +39,7 @@ public class TiffRationalTest extends TestCase {
         new TiffRational(_TIFFRATIONAL_MIN, _TIFFRATIONAL_MAX);
     }
 
+    @Test
     public void testCreation_WithIllegalValueRanges() {
         final int legalValue = 22689356;
         final long[][] values = new long[][]{
@@ -58,6 +63,7 @@ public class TiffRationalTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetNumeratorAndGetDenominator() {
         final int legalValue = 22689356;
         final long[][] values = new long[][]{
@@ -75,6 +81,7 @@ public class TiffRationalTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteToStream() throws IOException {
         final long numerator = _TIFFRATIONAL_MAX;
         final long denominator = _TIFFRATIONAL_MAX - 3;
@@ -89,6 +96,7 @@ public class TiffRationalTest extends TestCase {
         assertEquals((int) denominator, stream.readInt());
     }
 
+    @Test
     public void testGetSizeInBytes() {
         final TiffRational tiffRational = new TiffRational(234, 23478);
         assertEquals(8, tiffRational.getSizeInBytes());

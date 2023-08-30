@@ -17,16 +17,18 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests operators with {@link VirtualBand}s contained in source and target products.
@@ -35,11 +37,14 @@ import java.util.Map;
  * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
-public class OpDealingWithVirtualBandTest extends TestCase {
+public class OpDealingWithVirtualBandTest {
+
+    @Test
     public void testUseVirtualBandInTargetProduct_SingleTile() throws IOException {
         testUseVirtualBandInTargetProduct(new UseVirtualBandInTargetProductOp_SingleTile(2, 3));
     }
 
+    @Test
     public void testUseVirtualBandInTargetProduct_TileStack() throws IOException {
         testUseVirtualBandInTargetProduct(new UseVirtualBandInTargetProductOp_TileStack(2, 3));
     }

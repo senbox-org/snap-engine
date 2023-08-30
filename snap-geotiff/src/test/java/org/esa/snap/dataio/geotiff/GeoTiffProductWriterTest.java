@@ -17,27 +17,29 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.geotiff.internal.TiffHeader;
 import org.esa.snap.dataio.geotiff.internal.TiffIFD;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class GeoTiffProductWriterTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class GeoTiffProductWriterTest {
 
     private static final String FILENAME = "temp.tif";
     private GeoTiffProductWriter _productWriter;
     private Product _product;
 
-    @Override
-    protected void setUp() throws Exception {
-        new File(FILENAME).delete();
-
+    @Before
+    public void setUp() throws Exception {
         _productWriter = new GeoTiffProductWriter(new GeoTiffProductWriterPlugIn());
 
         _product = new Product("temp", "type", 10, 20);
@@ -45,26 +47,35 @@ public class GeoTiffProductWriterTest extends TestCase {
         fillBandWithData(_product.getBand("b1"), 1);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         _productWriter.close();
-        new File(FILENAME).delete();
+        File testFile = new File(FILENAME);
+        if (testFile.isFile()) {
+            if (!testFile.delete()) {
+                fail("unable to delete test file: " + testFile.getName());
+            }
+        }
     }
 
+    @Test
     public void testGeoTIFFProductWriterCreation() {
         final GeoTiffProductWriter productWriter = new GeoTiffProductWriter(new GeoTiffProductWriterPlugIn());
 
         assertNotNull(productWriter.getWriterPlugIn());
     }
 
+    @Test
     public void testThatStringIsAValidOutput() throws IOException {
         _productWriter.writeProductNodes(_product, FILENAME);
     }
 
+    @Test
     public void testThatFileIsAValidOutput() throws IOException {
         _productWriter.writeProductNodes(_product, new File(FILENAME));
     }
 
+    @Test
     public void testWriteProductNodesAreWritten() throws IOException {
         _productWriter.writeProductNodes(_product, FILENAME);
         _productWriter.close();
@@ -72,6 +83,7 @@ public class GeoTiffProductWriterTest extends TestCase {
         assertTrue(new File(FILENAME).length() > 0);
     }
 
+    @Test
     public void testWriteProductNodes_CropFileSize() throws IOException {
         final long expectedSize = computeExpectedSize(_product);
         createBiggerFile(expectedSize);

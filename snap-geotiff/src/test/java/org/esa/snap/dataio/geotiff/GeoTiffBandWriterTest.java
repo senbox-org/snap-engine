@@ -17,21 +17,20 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.dataio.geotiff.internal.TiffDirectoryEntry;
-import org.esa.snap.dataio.geotiff.internal.TiffHeader;
-import org.esa.snap.dataio.geotiff.internal.TiffIFD;
-import org.esa.snap.dataio.geotiff.internal.TiffLong;
-import org.esa.snap.dataio.geotiff.internal.TiffTag;
+import org.esa.snap.dataio.geotiff.internal.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static org.junit.Assert.*;
 
 /**
  * GeoTiffBandWriter Tester.
@@ -41,20 +40,58 @@ import java.io.OutputStream;
  * @since <pre>02/11/2005</pre>
  */
 
-public class GeoTiffBandWriterTest extends TestCase {
+public class GeoTiffBandWriterTest {
 
     private static final int _WIDTH = 20;
     private static final int _HEIGHT = 35;
     private MemoryCacheImageOutputStream _ios;
     private Product _product;
 
-    @Override
-    protected void setUp() throws Exception {
+    private static ProductData createProductDataPartAsUINT32(final Band band, final Rectangle region) {
+        int[] intData = null;
+        intData = band.getPixels((int) region.getX(), (int) region.getY(),
+                (int) region.getWidth(), (int) region.getHeight(),
+                intData, ProgressMonitor.NULL);
+        final ProductData data = ProductData.createInstance(ProductData.TYPE_UINT32, intData.length);
+        data.setElems(intData);
+        return data;
+    }
+
+    private static ProductData createProductDataForBand(final Band band, final int start) {
+        final ProductData data = band.createCompatibleRasterData();
+        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
+            data.setElemIntAt(i, start + i);
+        }
+        band.setData(data);
+        return data;
+    }
+
+    private static ProductData createProductDataForBand(final Band band, final float start) {
+        final ProductData data = band.createCompatibleRasterData();
+        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
+            data.setElemFloatAt(i, start + i);
+        }
+        band.setData(data);
+        return data;
+    }
+
+    private static ProductData createProductDataForBand(final Band band, final double start) {
+        final ProductData data = band.createCompatibleRasterData();
+        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
+            data.setElemDoubleAt(i, start + i);
+        }
+        band.setData(data);
+        return data;
+    }
+
+    @Before
+    public void setUp() throws Exception {
         _ios = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
         _product = new Product("name", "type", _WIDTH, _HEIGHT);
 
     }
 
+    @Test
     public void testCreation() {
         _product.addBand("b1", ProductData.TYPE_UINT32);
         final TiffIFD ifd = new TiffIFD(_product);
@@ -62,8 +99,9 @@ public class GeoTiffBandWriterTest extends TestCase {
         new GeoTiffBandWriter(ifd, _ios, _product);
     }
 
+    @Test
     public void testWriteBandRasterData_3DifferentTypedBands() throws IOException {
-        final int startValues[] = new int[]{0, 30, 100};
+        final int[] startValues = new int[]{0, 30, 100};
         _product.addBand("b1", ProductData.TYPE_UINT32);
         _product.addBand("b2", ProductData.TYPE_UINT16);
         _product.addBand("b3", ProductData.TYPE_UINT32);
@@ -101,6 +139,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithUINT8() throws IOException {
         _product.addBand("b1", ProductData.TYPE_UINT8);
         final int startValue = 1;
@@ -127,6 +166,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithUINT16() throws IOException {
         _product.addBand("b1", ProductData.TYPE_UINT16);
         final int startValue = 1;
@@ -153,6 +193,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithUINT32() throws IOException {
         _product.addBand("b1", ProductData.TYPE_UINT32);
         final int startValue = 1;
@@ -179,6 +220,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithINT8() throws IOException {
         _product.addBand("b1", ProductData.TYPE_INT8);
         final int startValue = 1;
@@ -205,6 +247,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithINT16() throws IOException {
         _product.addBand("b1", ProductData.TYPE_INT16);
         final int startValue = 1;
@@ -231,6 +274,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithINT32() throws IOException {
         _product.addBand("b1", ProductData.TYPE_INT32);
         final int startValue = 1;
@@ -240,7 +284,6 @@ public class GeoTiffBandWriterTest extends TestCase {
         tiffHeader.write(_ios);
 
         bandWriter.writeBandRasterData(_product.getBand("b1"), 0, 0, _WIDTH, _HEIGHT, data, ProgressMonitor.NULL);
-
 
         final TiffIFD ifd = tiffHeader.getIfdAt(0);
         final int firstIFDOffset = 10;
@@ -257,6 +300,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithFLOAT32() throws IOException {
         _product.addBand("b1", ProductData.TYPE_FLOAT32);
         final float startValue = 1.5f;
@@ -283,6 +327,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithFLOAT64() throws IOException {
         _product.addBand("b1", ProductData.TYPE_FLOAT64);
         final double startValue = 1.5f;
@@ -292,7 +337,6 @@ public class GeoTiffBandWriterTest extends TestCase {
         tiffHeader.write(_ios);
 
         bandWriter.writeBandRasterData(_product.getBand("b1"), 0, 0, _WIDTH, _HEIGHT, data, ProgressMonitor.NULL);
-
 
         final TiffIFD ifd = tiffHeader.getIfdAt(0);
         final int firstIFDOffset = 10;
@@ -309,6 +353,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_INT16() throws IOException {
         _product.addBand("b1", ProductData.TYPE_INT16);
         final float scalingFactor = 1.2f;
@@ -320,7 +365,6 @@ public class GeoTiffBandWriterTest extends TestCase {
         tiffHeader.write(_ios);
 
         bandWriter.writeBandRasterData(_product.getBand("b1"), 0, 0, _WIDTH, _HEIGHT, data, ProgressMonitor.NULL);
-
 
         final TiffIFD ifd = tiffHeader.getIfdAt(0);
         final int firstIFDOffset = 10;
@@ -336,6 +380,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_WithOutHeader() throws IOException {
         final ProductData data = ProductData.createInstance(ProductData.TYPE_UINT32, _WIDTH * _HEIGHT);
         final Band band = new Band("b1", ProductData.TYPE_UINT32, _WIDTH, _HEIGHT);
@@ -348,6 +393,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         assertEquals(expSize, _ios.length());
     }
 
+    @Test
     public void testWriteBandRasterData_WithBandNotInProduct() throws IOException {
         _product.addBand("b1", ProductData.TYPE_INT16);
         _product.addBand("b2", ProductData.TYPE_INT16);
@@ -370,7 +416,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
-
+    @Test
     public void testWriteBandRasterData_InParts() throws IOException {
         final int startValue = 12;
         _product.addBand("b1", ProductData.TYPE_UINT32);
@@ -419,6 +465,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_ThrowsIOExceptionWhenWriting() {
         final ProductData data = ProductData.createInstance(ProductData.TYPE_UINT32, _WIDTH * _HEIGHT);
         final Band band = new Band("b1", ProductData.TYPE_UINT32, _WIDTH, _HEIGHT);
@@ -437,6 +484,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteBandRasterData_ThrowsIOExceptionWhenSeeking() {
         final ProductData data = ProductData.createInstance(ProductData.TYPE_UINT32, _WIDTH * _HEIGHT);
         final Band band = new Band("b1", ProductData.TYPE_UINT32, _WIDTH, _HEIGHT);
@@ -455,7 +503,8 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
-    public void testDispose() throws Exception {
+    @Test
+    public void testDispose() {
         _product.addBand("b1", ProductData.TYPE_UINT16);
         final ProductData data = createProductDataForBand(_product.getBand("b1"), 0);
         final GeoTiffBandWriter bandWriter = new GeoTiffBandWriter(new TiffIFD(_product), _ios, _product);
@@ -471,43 +520,6 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
     }
 
-    private static ProductData createProductDataPartAsUINT32(final Band band, final Rectangle region) {
-        int[] intData = null;
-        intData = band.getPixels((int) region.getX(), (int) region.getY(),
-                                 (int) region.getWidth(), (int) region.getHeight(),
-                                 intData, ProgressMonitor.NULL);
-        final ProductData data = ProductData.createInstance(ProductData.TYPE_UINT32, intData.length);
-        data.setElems(intData);
-        return data;
-    }
-
-    private static ProductData createProductDataForBand(final Band band, final int start) {
-        final ProductData data = band.createCompatibleRasterData();
-        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
-            data.setElemIntAt(i, start + i);
-        }
-        band.setData(data);
-        return data;
-    }
-
-    private static ProductData createProductDataForBand(final Band band, final float start) {
-        final ProductData data = band.createCompatibleRasterData();
-        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
-            data.setElemFloatAt(i, start + i);
-        }
-        band.setData(data);
-        return data;
-    }
-
-    private static ProductData createProductDataForBand(final Band band, final double start) {
-        final ProductData data = band.createCompatibleRasterData();
-        for (int i = 0; i < band.getRasterWidth() * band.getRasterHeight(); i++) {
-            data.setElemDoubleAt(i, start + i);
-        }
-        band.setData(data);
-        return data;
-    }
-
     private static class WriteIOExceptionImageOutputStream extends MemoryCacheImageOutputStream {
 
         public WriteIOExceptionImageOutputStream(final OutputStream outStream) {
@@ -520,7 +532,7 @@ public class GeoTiffBandWriterTest extends TestCase {
         }
 
         @Override
-        public void write(final byte b[], final int off, final int len) throws IOException {
+        public void write(final byte[] b, final int off, final int len) throws IOException {
             throw new IOException("IOException write");
         }
     }

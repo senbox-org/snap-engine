@@ -16,12 +16,14 @@
 package org.esa.snap.core.util.math;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import static org.esa.snap.GlobalTestTools.*;
+import static org.esa.snap.GlobalTestTools.equal;
+import static org.junit.Assert.assertEquals;
 
-public class HistogramAggregatingTest extends TestCase {
+public class HistogramAggregatingTest {
 
+    @Test
     public void testByte() {
         final byte[][] values = new byte[][]{
                 new byte[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -32,8 +34,8 @@ public class HistogramAggregatingTest extends TestCase {
 
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (byte[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
 
@@ -41,6 +43,7 @@ public class HistogramAggregatingTest extends TestCase {
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testByte_withValidator() {
         final byte[][] values = new byte[][]{
                 new byte[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -48,16 +51,11 @@ public class HistogramAggregatingTest extends TestCase {
                 new byte[]{0, 1, 2}
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (byte[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
 
 
@@ -65,6 +63,7 @@ public class HistogramAggregatingTest extends TestCase {
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUByte() {
         final byte[][] values = new byte[][]{
                 TestHelper.createUBytes(new short[]{124, 125, 126, 127, 128, 129, 130, 131}),
@@ -74,14 +73,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = true;
 
         final Histogram histogram = new Histogram(new int[6], 125, 130);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (byte[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUByte_withValidator() {
         final byte[][] values = new byte[][]{
                 TestHelper.createUBytes(new short[]{124, 125, 126, 127, 128, 129, 130, 131}),
@@ -89,23 +89,18 @@ public class HistogramAggregatingTest extends TestCase {
                 TestHelper.createUBytes(new short[]{127, 128, 129})
         };
         final boolean unsigned = true;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], 125, 130);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (byte[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testShort() {
         final short[][] values = new short[][]{
                 new short[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -115,14 +110,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = false;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (short[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testShort_withValidator() {
         final short[][] values = new short[][]{
                 new short[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -130,23 +126,18 @@ public class HistogramAggregatingTest extends TestCase {
                 new short[]{0, 1, 2}
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (short[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUShort() {
         final short[][] values = new short[][]{
                 TestHelper.createUShorts(new int[]{32764, 32765, 32766, 32767, 32768, 32769, 32770, 32771}),
@@ -156,14 +147,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = true;
 
         final Histogram histogram = new Histogram(new int[6], 32765, 32770);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (short[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUShort_withValidator() {
         final short[][] values = new short[][]{
                 TestHelper.createUShorts(new int[]{32764, 32765, 32766, 32767, 32768, 32769, 32770, 32771}),
@@ -171,23 +163,18 @@ public class HistogramAggregatingTest extends TestCase {
                 TestHelper.createUShorts(new int[]{32767, 32768, 32769})
         };
         final boolean unsigned = true;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], 32765, 32770);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (short[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testInt() {
         final int[][] values = new int[][]{
                 new int[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -197,14 +184,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = false;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (int[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testInt_withValidator() {
         final int[][] values = new int[][]{
                 new int[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -212,23 +200,18 @@ public class HistogramAggregatingTest extends TestCase {
                 new int[]{0, 1, 2}
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (int[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUInt() {
         final int[][] values = new int[][]{
                 TestHelper.createUInts(new long[]{
@@ -251,14 +234,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = true;
 
         final Histogram histogram = new Histogram(new int[6], 2147483645, 2147483650L);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (int[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testUInt_withValidator() {
         final int[][] values = new int[][]{
                 TestHelper.createUInts(new long[]{
@@ -279,23 +263,18 @@ public class HistogramAggregatingTest extends TestCase {
                 })
         };
         final boolean unsigned = true;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], 2147483645, 2147483650L);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (int[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testFloat() {
         final float[][] values = new float[][]{
                 new float[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -305,14 +284,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = false;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (float[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testFloat_withValidator() {
         final float[][] values = new float[][]{
                 new float[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -320,23 +300,18 @@ public class HistogramAggregatingTest extends TestCase {
                 new float[]{0, 1, 2}
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (float[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testDouble() {
         final double[][] values = new double[][]{
                 new double[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -346,14 +321,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = false;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (double[] value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testDouble_withValidator() {
         final double[][] values = new double[][]{
                 new double[]{-3, -2, -1, 0, 1, 2, 3, 4},
@@ -361,23 +337,18 @@ public class HistogramAggregatingTest extends TestCase {
                 new double[]{0, 1, 2}
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (double[] value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testDoubleArray() {
         final DoubleList[] values = new DoubleList[]{
                 TestHelper.createArray(new int[]{-3, -2, -1, 0, 1, 2, 3, 4}),
@@ -387,14 +358,15 @@ public class HistogramAggregatingTest extends TestCase {
         final boolean unsigned = false;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
+        for (DoubleList value : values) {
+            histogram.aggregate(value, unsigned, IndexValidator.TRUE, ProgressMonitor.NULL);
         }
 
         final int[] exp = new int[]{2, 1, 3, 2, 3, 1};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
 
+    @Test
     public void testDoubleArray_withValidator() {
         final DoubleList[] values = new DoubleList[]{
                 TestHelper.createArray(new int[]{-3, -2, -1, 0, 1, 2, 3, 4}),
@@ -402,21 +374,14 @@ public class HistogramAggregatingTest extends TestCase {
                 TestHelper.createArray(new int[]{0, 1, 2})
         };
         final boolean unsigned = false;
-        final IndexValidator validator = new IndexValidator() {
-            public boolean validateIndex(int index) {
-                return index % 3 != 0;
-            }
-        };
-
+        final IndexValidator validator = index -> index % 3 != 0;
 
         final Histogram histogram = new Histogram(new int[6], -2, 3);
-        for (int i = 0; i < values.length; i++) {
-            histogram.aggregate(values[i], unsigned, validator, ProgressMonitor.NULL);
+        for (DoubleList value : values) {
+            histogram.aggregate(value, unsigned, validator, ProgressMonitor.NULL);
         }
-
 
         final int[] exp = new int[]{1, 1, 1, 2, 3, 0};
         assertEquals("", equal(exp, histogram.getBinCounts()));
     }
-
 }

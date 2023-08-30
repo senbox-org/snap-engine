@@ -15,9 +15,11 @@
  */
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.Arrays;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link ColumnMajorMatrixFactory}.
@@ -25,10 +27,11 @@ import java.util.Arrays;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class ColumnMajorMatrixFactoryTest extends TestCase {
+public class ColumnMajorMatrixFactoryTest {
 
     private MatrixFactory matrixFactory;
 
+    @Test
     public void testCreateMatrix() {
         final double[] values = {1, 4, 2, 5, 3, 6};
 
@@ -37,12 +40,12 @@ public class ColumnMajorMatrixFactoryTest extends TestCase {
         assertEquals(3, matrix[0].length);
         assertEquals(3, matrix[1].length);
 
-        assertTrue(Arrays.equals(new double[]{1, 2, 3}, matrix[0]));
-        assertTrue(Arrays.equals(new double[]{4, 5, 6}, matrix[1]));
+        assertArrayEquals(new double[]{1, 2, 3}, matrix[0], 0.0);
+        assertArrayEquals(new double[]{4, 5, 6}, matrix[1], 0.0);
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         matrixFactory = new ColumnMajorMatrixFactory();
     }
 }

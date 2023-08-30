@@ -16,26 +16,19 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class FieldTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class FieldTest {
 
     Field[] _fields;
 
-    public FieldTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(FieldTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-
+    @Before
+    public void setUp() {
         FieldInfo[] fieldInfos = new FieldInfo[]{
                 new FieldInfo("_fiByte", ProductData.TYPE_INT8, 4, null, null),
                 new FieldInfo("_fiUByte", ProductData.TYPE_UINT8, 4, null, null),
@@ -69,11 +62,12 @@ public class FieldTest extends TestCase {
         }
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         _fields = null;
     }
 
+    @Test
     public void testCreate() {
         try {
             new Field(null);
@@ -82,6 +76,7 @@ public class FieldTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetData() {
         assertTrue(_fields[0].getElems() instanceof byte[]);
         assertTrue(_fields[1].getElems() instanceof byte[]);
@@ -95,6 +90,7 @@ public class FieldTest extends TestCase {
         assertTrue(_fields[9].getElems() instanceof byte[]);
     }
 
+    @Test
     public void testGetDataType() {
         assertEquals(ProductData.TYPE_INT8, _fields[0].getDataType());
         assertEquals(ProductData.TYPE_UINT8, _fields[1].getDataType());
@@ -107,40 +103,4 @@ public class FieldTest extends TestCase {
         assertEquals(ProductData.TYPE_UTC, _fields[8].getDataType());
         assertEquals(ProductData.TYPE_ASCII, _fields[9].getDataType());
     }
-
-    /*
-    public void testGetValueAsText() {
-        assertTrue(false);
-    }
-    public void testGetElemDouble() {
-        assertTrue(false);
-    }
-    public void testGetElemFloat() {
-        assertTrue(false);
-    }
-    public void testGetElemInt() {
-        assertTrue(false);
-    }
-    public void testGetInfo() {
-        assertTrue(false);
-    }
-    public void testGetName() {
-        assertTrue(false);
-    }
-    public void testGetNumElems() {
-        assertTrue(false);
-    }
-    public void testIsIntType() {
-        assertTrue(false);
-    }
-    public void testReadFrom() {
-        assertTrue(false);
-    }
-    public void testSetData() {
-        assertTrue(false);
-    }
-    public void testToString() {
-        assertTrue(false);
-    }
- */
 }

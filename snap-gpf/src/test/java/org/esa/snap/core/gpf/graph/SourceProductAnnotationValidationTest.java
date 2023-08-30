@@ -17,21 +17,21 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.gpf.GPF;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.OperatorSpiRegistry;
-import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.*;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SourceProductAnnotationValidationTest extends TestCase {
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
+public class SourceProductAnnotationValidationTest {
 
     private OperatorSpi wrongTypeOpSpi;
     private OperatorSpi wrongBandsOpSpi;
@@ -40,8 +40,8 @@ public class SourceProductAnnotationValidationTest extends TestCase {
     private OperatorSpi optionalConsumerOpSpi;
     private OperatorSpi aliasConsumerOpSpi;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         wrongTypeOpSpi = new WrongTypeOperator.Spi();
         spiRegistry.addOperatorSpi(wrongTypeOpSpi);
@@ -58,8 +58,8 @@ public class SourceProductAnnotationValidationTest extends TestCase {
 
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         final OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.removeOperatorSpi(wrongTypeOpSpi);
         spiRegistry.removeOperatorSpi(wrongBandsOpSpi);
@@ -69,6 +69,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         spiRegistry.removeOperatorSpi(optionalConsumerOpSpi);
     }
 
+    @Test
     public void testForWrongType() {
         Graph graph = new Graph("graph");
 
@@ -85,6 +86,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testForWrongBands() {
         Graph graph = new Graph("graph");
 
@@ -101,6 +103,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testOptionalAndWrongProductIsGiven() {
         Graph graph = new Graph("graph");
 
@@ -117,6 +120,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testOptionalAndWrongProductIsNotGiven() throws GraphException {
         Graph graph = new Graph("graph");
 
@@ -128,6 +132,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         new GraphContext(graph);
     }
 
+    @Test
     public void testNotInitialzedInputResultsInException() {
         Graph graph = new Graph("graph");
 
@@ -143,6 +148,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testSourceProductWithAlias() throws GraphException {
         Graph graph = new Graph("graph");
 
@@ -155,10 +161,10 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         GraphContext graphContext = new GraphContext(graph);
         NodeContext consumerNodeContext = graphContext.getNodeContext(consumerNode);
         assertSame(((ConsumerWithAliasSourceOperator) consumerNodeContext.getOperator()).input1,
-                   consumerNodeContext.getSourceProduct("alias"));
+                consumerNodeContext.getSourceProduct("alias"));
     }
 
-    @OperatorMetadata(alias="WrongTypeOperator")
+    @OperatorMetadata(alias = "WrongTypeOperator")
     public static class WrongTypeOperator extends Operator {
 
         @TargetProduct
@@ -182,11 +188,11 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
-    @OperatorMetadata(alias="WrongBandsOperator")
+    @OperatorMetadata(alias = "WrongBandsOperator")
     public static class WrongBandsOperator extends Operator {
         @TargetProduct
         private Product targetProduct;
-        
+
         @Override
         public void initialize() throws OperatorException {
             targetProduct = new Product("WrongBands", "GoodType", 1, 1);
@@ -206,11 +212,11 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
-    @OperatorMetadata(alias="GoodOperator")
+    @OperatorMetadata(alias = "GoodOperator")
     public static class GoodOperator extends Operator {
         @TargetProduct
         private Product targetProduct;
-        
+
         @Override
         public void initialize() throws OperatorException {
             targetProduct = new Product("Good", "GoodType", 1, 1);
@@ -230,7 +236,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
-    @OperatorMetadata(alias="ConsumerOperator")
+    @OperatorMetadata(alias = "ConsumerOperator")
     public static class ConsumerOperator extends Operator {
 
         @SourceProduct(type = "GoodType", bands = {"a", "b"})
@@ -256,7 +262,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
-    @OperatorMetadata(alias="OptionalConsumerOperator")
+    @OperatorMetadata(alias = "OptionalConsumerOperator")
     public static class OptionalConsumerOperator extends Operator {
 
         @SourceProduct(optional = true, type = "Optional", bands = {"c", "d"})
@@ -283,7 +289,7 @@ public class SourceProductAnnotationValidationTest extends TestCase {
         }
     }
 
-    @OperatorMetadata(alias="ConsumerWithAliasSourceOperator")
+    @OperatorMetadata(alias = "ConsumerWithAliasSourceOperator")
     public static class ConsumerWithAliasSourceOperator extends Operator {
 
         @SourceProduct(alias = "alias")

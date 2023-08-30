@@ -1,4 +1,6 @@
-package org.esa.snap.smart.configurator;/*
+package org.esa.snap.smart.configurator;
+
+/*
  * Copyright (C) 2015 CS SI
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -15,27 +17,32 @@ package org.esa.snap.smart.configurator;/*
  */
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Nicolas Ducoin
  */
-public class JavaSystemInfosTest extends TestCase {
+public class JavaSystemInfosTest {
 
-    private static SystemInfos systemInfos = JavaSystemInfos.getInstance(1, 2);
+    private static final SystemInfos systemInfos = JavaSystemInfos.getInstance(1, 2);
 
+    @Test
     public void testGetCPUs() {
         int nbCPUs = systemInfos.getNbCPUs();
         assertTrue(nbCPUs > 0);
     }
 
+    @Test
     public void testMemory() {
         long ram = systemInfos.getRAM();
         assertTrue(ram > 0);
     }
 
+    @Test
     public void testDisks() {
         String[] disks = systemInfos.getDisksNames();
         assertTrue(disks != null && disks.length > 0);
@@ -43,23 +50,20 @@ public class JavaSystemInfosTest extends TestCase {
 
     /**
      * Test the disk speed for all devices
-     *
      */
+    @Test
     public void testDiskSpeed() {
         String[] disksNames = systemInfos.getDisksNames();
 
-        for(String diskName : disksNames) {
+        for (String diskName : disksNames) {
             try {
                 double readSpeed = systemInfos.getDiskReadSpeed(diskName);
                 double writeSpeed = systemInfos.getDiskWriteSpeed(diskName);
-                assert(0 != readSpeed && 0 != writeSpeed);
-            } catch(IOException ex) {
+                assert (0 != readSpeed && 0 != writeSpeed);
+            } catch (IOException ex) {
                 // ioException if we can't write or read to the device: ok
                 System.out.println("Can't read or write on " + diskName);
             }
         }
     }
-
-
-
 }

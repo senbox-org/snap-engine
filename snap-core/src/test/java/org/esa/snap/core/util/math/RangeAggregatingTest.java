@@ -16,9 +16,12 @@
 package org.esa.snap.core.util.math;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RangeAggregatingTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class RangeAggregatingTest {
 
     private final IndexValidator _validator = new IndexValidator() {
         public boolean validateIndex(int index) {
@@ -26,6 +29,7 @@ public class RangeAggregatingTest extends TestCase {
         }
     };
 
+    @Test
     public void testAggregatingRangeByte() {
         final boolean unsigned = false;
         final byte[] bytes = new byte[]{2, -5, 7, 20, 40, 100};
@@ -43,6 +47,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeUByte() {
         final boolean unsigned = true;
         final byte[] uBytes = TestHelper.createUBytes(new short[]{40, 20, 50, 60, 200, 230});
@@ -60,6 +65,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(200, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeShort() {
         final boolean unsigned = false;
         final short[] shorts = new short[]{2, -5, 7, 20, 40, 100};
@@ -77,6 +83,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeUShort() {
         final boolean unsigned = true;
         final short[] uShorts = TestHelper.createUShorts(new int[]{40, 20, 50, 30000, 40000, 50000});
@@ -94,6 +101,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40000, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeInt() {
         final boolean unsigned = false;
         final int[] ints = new int[]{2, -5, 7, 20, 40, 100};
@@ -111,6 +119,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeUInt() {
         final boolean unsigned = true;
         final int[] uInts = TestHelper.createUInts(new long[]{40, 20, 50, 2000000000, 3000000000L, 3500000000L});
@@ -128,6 +137,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(3000000000L, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeFloat() {
         final boolean unsigned = false;
         final float[] floats = new float[]{2, -5, 7, 20, 40, 100};
@@ -145,6 +155,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeDouble() {
         final boolean unsigned = false;
         final double[] doubles = new double[]{2, -5, 7, 20, 40, 100};
@@ -162,6 +173,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testAggregatingRangeDoubleArray() {
         final boolean unsigned = false;
         final DoubleList array = TestHelper.createArray(new int[]{2, -5, 7, 20, 40, 100});
@@ -180,6 +192,7 @@ public class RangeAggregatingTest extends TestCase {
         assertEquals(40, range.getMax(), 1e-10);
     }
 
+    @Test
     public void testIllegalArguments() {
         final Range range = new Range();
         try {

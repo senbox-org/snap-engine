@@ -16,19 +16,22 @@
 
 package org.esa.snap.core.gpf;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
-public class InheritedOperatorTest extends TestCase {
 
+public class InheritedOperatorTest {
 
-    public void testBasicOperatorStates() throws OperatorException, IOException {
+    @Test
+    public void testBasicOperatorStates() throws OperatorException {
         Product sourceProduct = new Product("test", "test", 10, 10);
 
         DerivedOp op = new DerivedOp();
@@ -38,7 +41,7 @@ public class InheritedOperatorTest extends TestCase {
         Product targetProduct = op.getTargetProduct();
         assertSame(targetProduct, sourceProduct);
 
-        assertEquals(true, op.canExplode);
+        assertTrue(op.canExplode);
     }
 
     private static class BaseOp extends Operator {

@@ -15,22 +15,14 @@
  */
 package org.esa.snap.core.util;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class GuardianTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public GuardianTest(String testName) {
-        super(testName);
-    }
+public class GuardianTest {
 
-    public static Test suite() {
-        return new TestSuite(GuardianTest.class);
-    }
-
+    @Test
     public void testAssertNotNull() {
-
         try {
             Object test1 = "Bibo!";
             Guardian.assertNotNull("test1", test1);
@@ -62,6 +54,7 @@ public class GuardianTest extends TestCase {
         }
     }
 
+    @Test
     public void testAssertGreaterThan() {
         try {
             Guardian.assertGreaterThan("x", -1, 0);
@@ -82,6 +75,7 @@ public class GuardianTest extends TestCase {
         }
     }
 
+    @Test
     public void testAssertNotNullOrEmpty() {
         try {
             Guardian.assertNotNullOrEmpty("x", "x");
@@ -104,6 +98,7 @@ public class GuardianTest extends TestCase {
         }
     }
 
+    @Test
     public void testAssertEquals_int() {
         int expected;
         int actual;
@@ -134,6 +129,7 @@ public class GuardianTest extends TestCase {
         }
     }
 
+    @Test
     public void testAssertWithinRange() {
         int value;
         int rangeMin;
@@ -196,6 +192,5 @@ public class GuardianTest extends TestCase {
         assertNotNull(e.getMessage());
         assertEquals(expectedMsg, e.getMessage());
     }
-
 }
 

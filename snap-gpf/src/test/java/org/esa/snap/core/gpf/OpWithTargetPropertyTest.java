@@ -16,13 +16,16 @@
 
 package org.esa.snap.core.gpf;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.annotations.TargetProperty;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
-public class OpWithTargetPropertyTest extends TestCase {
+public class OpWithTargetPropertyTest {
 
+    @Test
     public void testTargetPropertyIsComputedDuringOpInitialisation() {
         final Operator op = new PropertyOp();
         final Object targetProperty = op.getTargetProperty("theAnswer");
@@ -31,6 +34,7 @@ public class OpWithTargetPropertyTest extends TestCase {
         assertEquals(42, targetProperty);
     }
 
+    @Test
     public void testWrongPropertyOp() {
         final Operator op = new IllegalPropertyOp();
         try {
@@ -66,5 +70,4 @@ public class OpWithTargetPropertyTest extends TestCase {
             setTargetProduct(new Product("A", "AT", 10, 10));
         }
     }
-
 }

@@ -15,14 +15,16 @@
  */
 package org.esa.snap.core.util.logging;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.util.SystemUtils;
+import org.junit.Test;
 
-public class SystemUtilsLogTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
 
+public class SystemUtilsLogTest {
+
+    @Test
     public void testThatLoggerExists() {
         assertNotNull(SystemUtils.LOG);
     }
-
 }
 

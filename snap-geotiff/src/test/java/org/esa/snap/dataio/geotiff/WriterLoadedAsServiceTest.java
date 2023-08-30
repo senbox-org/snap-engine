@@ -15,15 +15,16 @@
  */
 package org.esa.snap.dataio.geotiff;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
-import org.esa.snap.core.dataio.ProductWriterPlugIn;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class WriterLoadedAsServiceTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class WriterLoadedAsServiceTest {
+
+    @Test
     public void testWriterIsLoaded() {
         int writerCount = 0;
 
@@ -32,13 +33,9 @@ public class WriterLoadedAsServiceTest extends TestCase {
 
         while (writerPlugIns.hasNext()) {
             writerCount++;
-            ProductWriterPlugIn plugIn = (ProductWriterPlugIn) writerPlugIns.next();
-            System.out.println("writerPlugIn.Class = " + plugIn.getClass());
-            System.out.println("writerPlugIn.Descr = " + plugIn.getDescription(null));
+            writerPlugIns.next();
         }
 
-        Assert.assertEquals(1, writerCount);
-
+        assertEquals(1, writerCount);
     }
-
 }

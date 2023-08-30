@@ -19,24 +19,27 @@ package org.esa.snap.core.gpf.internal;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.sun.media.jai.util.SunTileCache;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
+import org.junit.Test;
 
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.util.Map;
 
-public class OperatorImageTileStackTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class OperatorImageTileStackTest {
 
+    @Test
     public void testTileStackImage() {
         final SunTileCache tileCache = (SunTileCache) JAI.getDefaultInstance().getTileCache();
         tileCache.flush();
