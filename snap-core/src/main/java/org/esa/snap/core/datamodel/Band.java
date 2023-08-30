@@ -167,6 +167,30 @@ public class Band extends AbstractBand {
         }
     }
 
+    public float getAngularValue() {
+        return angularValue;
+    }
+
+    public void setAngularValue(float angularValue) {
+        if (this.angularValue != angularValue) {
+            this.angularValue = angularValue;
+            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_VALUE);
+            setModified(true);
+        }
+    }
+
+    public int getAngularBandIndex() {
+        return angularBandIndex;
+    }
+
+    public void setAngularBandIndex(int angularBandIndex) {
+        if (this.angularBandIndex != angularBandIndex) {
+            this.angularBandIndex = angularBandIndex;
+            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_BAND_INDEX);
+            setModified(true);
+        }
+    }
+
     /**
      * Gets the (zero-based) spectral band index.
      *
@@ -511,6 +535,8 @@ public class Band extends AbstractBand {
                 + ProductData.getTypeString(getDataType()) + "," +
                 +getRasterWidth() + "," +
                 +getRasterHeight() + "," +
+                +getAngularBandIndex() + "," +
+                +getAngularValue() + "," +
                 +getSpectralBandIndex() + "," +
                 +getSpectralWavelength() + "," +
                 +getSpectralBandwidth() + "," +
