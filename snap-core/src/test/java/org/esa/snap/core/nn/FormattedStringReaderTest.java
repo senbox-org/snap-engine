@@ -6,41 +6,45 @@
  */
 package org.esa.snap.core.nn;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 
-public class FormattedStringReaderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class FormattedStringReaderTest {
 
     private static final double EPS = 1.0e-8;
 
     private FormattedStringReader r;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         r = new FormattedStringReader(new StringReader("ranges repeated for easier input\n" +
-                                                               "#\n" +
-                                                               "6\n" +
-                                                               "-1.610930\n" +
-                                                               "3.998400\n" +
-                                                               "-5.928960 3.881530\n" +
-                                                               "-4.234020 8.997880\n" +
-                                                               "198134 4493 -72345\n" +
-                                                               "$\n" +
-                                                               "#planes=3 6 50 1\n" +
-                                                               "bias 1 50\n" +
-                                                               "7.890334 8.897559 8.359957\n" +
-                                                               "-23.919953 44.968232 4.968232"));
+                "#\n" +
+                "6\n" +
+                "-1.610930\n" +
+                "3.998400\n" +
+                "-5.928960 3.881530\n" +
+                "-4.234020 8.997880\n" +
+                "198134 4493 -72345\n" +
+                "$\n" +
+                "#planes=3 6 50 1\n" +
+                "bias 1 50\n" +
+                "7.890334 8.897559 8.359957\n" +
+                "-23.919953 44.968232 4.968232"));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         r = null;
     }
 
+    @Test
     public void testX() throws IOException {
-
         assertEquals("ranges repeated for easier input", r.rString());
         assertEquals(6, r.rlong());
         assertEquals(-1.61093, r.rdouble(), EPS);

@@ -16,24 +16,17 @@
 
 package org.esa.snap.core.param.editors;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.param.AbstractParamEditor;
 import org.esa.snap.core.param.ParamEditor;
 import org.esa.snap.core.param.ParamProperties;
 import org.esa.snap.core.param.Parameter;
+import org.junit.Test;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
+
+import static org.junit.Assert.*;
 
 /**
  * EditorComponentNames Tester.
@@ -43,12 +36,13 @@ import java.io.File;
  * @version 1.0
  * @since <pre>02/25/2005</pre>
  */
-public class ParamEditorsTest extends TestCase {
+public class ParamEditorsTest {
 
     private static final String LABEL_NAME = "This is the label";
     private static final String UNIT_NAME = "This is the unit";
     private static final String PARAM_NAME = "theParamName";
 
+    @Test
     public void testBooleanEditor() {
         final ParamProperties properties = new ParamProperties(Boolean.class);
         properties.setLabel(LABEL_NAME);
@@ -66,6 +60,7 @@ public class ParamEditorsTest extends TestCase {
         assertNull(booleanEditor.getPhysUnitLabelComponent());
     }
 
+    @Test
     public void testComboBoxEditor() {
         final ParamProperties properties = new ParamProperties(String[].class);
         properties.setLabel(LABEL_NAME);
@@ -87,6 +82,7 @@ public class ParamEditorsTest extends TestCase {
         assertNull(comboBoxEditor.getPhysUnitLabelComponent());
     }
 
+    @Test
     public void testLabelEditor() {
         final ParamProperties properties = new ParamProperties(String.class);
         properties.setLabel(LABEL_NAME);
@@ -105,6 +101,7 @@ public class ParamEditorsTest extends TestCase {
         assertNull(labelEditor.getPhysUnitLabelComponent());
     }
 
+    @Test
     public void testListEditor() {
         final ParamProperties properties = new ParamProperties(String[].class);
         properties.setLabel(LABEL_NAME);
@@ -127,6 +124,7 @@ public class ParamEditorsTest extends TestCase {
         assertNull(listEditor.getPhysUnitLabelComponent());
     }
 
+    @Test
     public void testTextFieldEditor() {
         final ParamProperties properties = new ParamProperties(String.class);
         properties.setLabel(LABEL_NAME);
@@ -146,6 +144,7 @@ public class ParamEditorsTest extends TestCase {
         assertEquals(" " + UNIT_NAME, textFieldEditor.getPhysUnitLabelComponent().getText());
     }
 
+    @Test
     public void testColorEditor() {
         final ParamProperties properties = new ParamProperties(Color.class);
         properties.setLabel(LABEL_NAME);
@@ -164,7 +163,7 @@ public class ParamEditorsTest extends TestCase {
         assertEquals("theParamName.ColorDisplay", components[0].getName());
         assertEquals("theParamName.ButtonPanel", components[1].getName());
         assertEquals(ColorEditor.ColorDisplay.class.getName(),
-                     components[0].getClass().getName());
+                components[0].getClass().getName());
         assertEquals(JPanel.class.getName(), components[1].getClass().getName());
         final JPanel buttonPanel = ((JPanel) components[1]);
         assertEquals(1, buttonPanel.getComponentCount());
@@ -176,6 +175,7 @@ public class ParamEditorsTest extends TestCase {
         assertEquals(" " + UNIT_NAME, colorEditor.getPhysUnitLabelComponent().getText());
     }
 
+    @Test
     public void testFileEditor() {
         final ParamProperties properties = new ParamProperties(File.class);
         properties.setLabel(LABEL_NAME);
@@ -204,7 +204,8 @@ public class ParamEditorsTest extends TestCase {
         assertEquals(" " + UNIT_NAME, fileEditor.getPhysUnitLabelComponent().getText());
     }
 
-    public void testCorrectFormatingOfLabelComponentText() {
+    @Test
+    public void testCorrectFormattingOfLabelComponentText() {
         AbstractParamEditor testEditor = createTestEditor("label", "unit");
         assertEquals("label: ", testEditor.getLabelComponent().getText());
 
@@ -218,7 +219,8 @@ public class ParamEditorsTest extends TestCase {
         assertEquals("label: ", testEditor.getLabelComponent().getText());
     }
 
-    public void testCorrectFormatingOfPhysUnitLabelText() {
+    @Test
+    public void testCorrectFormattingOfPhysUnitLabelText() {
         AbstractParamEditor testEditor = createTestEditor("label: ", "unit");
         assertEquals(" unit", testEditor.getPhysUnitLabelComponent().getText());
 
@@ -249,5 +251,4 @@ public class ParamEditorsTest extends TestCase {
             }
         };
     }
-
 }
