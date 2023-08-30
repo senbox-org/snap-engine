@@ -64,10 +64,10 @@ public class Band extends AbstractBand {
     public static final String PROPERTY_NAME_SPECTRAL_BAND_INDEX = "spectralBandIndex";
     public static final String PROPERTY_NAME_SPECTRAL_BANDWIDTH = "spectralBandwidth";
     public static final String PROPERTY_NAME_SPECTRAL_WAVELENGTH = "spectralWavelength";
-    public static final String PROPERTY_NAME_ANGULAR_BAND_INDEX = "angularBandIndex";
-    public static final String PROPERTY_NAME_ANGULAR_VALUE = "angularValue";
     public static final String PROPERTY_NAME_DATE_BAND_INDEX = "dateBandIndex";
     public static final String PROPERTY_NAME_DATE = "date";
+    public static final String PROPERTY_NAME_ANGULAR_BAND_INDEX = "angularBandIndex";
+    public static final String PROPERTY_NAME_ANGULAR_VALUE = "angularValue";
 
     /**
      * If this band contains flag data, this is the flag coding.
