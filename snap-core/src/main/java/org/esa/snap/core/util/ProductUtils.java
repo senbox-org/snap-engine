@@ -74,7 +74,6 @@ public class ProductUtils {
 
     public static String METADATA_RESOLUTION_KEY = "spatial_resolution";
     public static String[] METADATA_POSSIBLE_RESOLUTION_KEYS = {METADATA_RESOLUTION_KEY, "resolution"};
-
     private static final int[] RGB_BAND_OFFSETS = new int[]{
             2, 1, 0
     };
@@ -1392,6 +1391,39 @@ public class ProductUtils {
         return metaData;
     }
 
+    public static boolean isMetadataKeyExists(Product product, String key) {
+        // Created by Daniel Knowles
+        boolean keyExists = false;
+
+        MetadataAttribute metadataAttribute;
+
+        if (key != null && key.length() > 0) {
+            try {
+                metadataAttribute = product.getMetadataRoot().getElement("Global_Attributes").getAttribute(key);
+                if (metadataAttribute != null) {
+                    keyExists = true;
+                }
+            } catch (Exception ignore) {
+            }
+        }
+
+        return keyExists;
+    }
+
+    public static String getBandMetaData(Product product, String key, String band) {
+        // Created by Daniel Knowles
+        String metaData = "";
+
+        if (key != null && key.length() > 0 && band != null && band.length() > 0) {
+            try {
+                metaData = product.getMetadataRoot().getElement("Band_Attributes").getElement(band).getAttribute(key).getData().getElemString();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return metaData;
+    }
+
 
 
 
@@ -1451,8 +1483,6 @@ public class ProductUtils {
 
         return metaData;
     }
-
-
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
 
         ProductNodeGroup<VectorDataNode> vectorDataGroup = sourceProduct.getVectorDataGroup();
