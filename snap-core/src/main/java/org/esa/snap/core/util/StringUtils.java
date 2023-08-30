@@ -51,9 +51,6 @@ public class StringUtils {
 
     public static String DELIMITOR_SPACE = " ";
     public static String DELIMITOR_UNDERSCORE = "_";
-
-
-
     /**
      * Splits the given text into a list of tokens by using the supplied separators. Empty tokens are created for
      * successive separators, or if  the supplied text starts with or ends with a separator. If the given text string
@@ -940,7 +937,6 @@ public class StringUtils {
         prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
         return prettyFormat;
     }
-
     public static String[] getStringCaseVariations(String s) {
         // Created by Daniel Knowles
         if (s == null || s.length() == 0) {
@@ -1077,5 +1073,4 @@ public class StringUtils {
 
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
-
 }
