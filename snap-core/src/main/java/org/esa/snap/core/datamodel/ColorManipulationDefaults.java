@@ -34,7 +34,10 @@ public class ColorManipulationDefaults {
 
     // xml files used by the color scheme manager
     public static final String COLOR_SCHEME_LOOKUP_FILENAME = "color_palette_scheme_lookup.xml";
+    public static final String COLOR_SCHEME_LOOKUP_USER_FILENAME = "color_palette_scheme_lookup_user.xml";
     public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.xml";
+    public static final String COLOR_SCHEMES_USER_FILENAME = "color_palette_schemes_user.xml";
+    public static final String COLOR_PALETTE_LIST_FILENAME = "color_palettes.xml";
 
     // Indicates which color palette contained within the color scheme xml to use
     public static final String OPTION_COLOR_STANDARD_SCHEME = "From Scheme STANDARD";
@@ -109,7 +112,7 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_GENERAL_CUSTOM_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".enable";
     public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Enable";
-    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Ude following scheme parameters as default<br>" +
+    public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Use following scheme parameters as default<br>" +
             " when opening a band<br>otherwise use settings from the file reader.</html>";
     public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
 
@@ -252,11 +255,41 @@ public class ColorManipulationDefaults {
             " as opposed to the original xml order</html>";
     public static boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
-    public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".split";
+    public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".categorize";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_LABEL = "Categorize";
     public static final String PROPERTY_SCHEME_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Scheme selector will display all schemes categorized into<br>" +
             "primary and additional categories by the PRIMARY field<br> of the color_palette_schemes.xml</html>";
     public static boolean PROPERTY_SCHEME_CATEGORIZE_DISPLAY_DEFAULT = true;
+
+    // Palette Selector Options
+
+    private static final String PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".palette.selector";
+
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_LABEL = "Palette Selector Options";
+    public static final String PROPERTY_PALETTE_SELECTOR_SECTION_TOOLTIP = "<html>Format options for the color Palettes listed<br>" +
+            " within the Palette Selector</html>";
+
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".include.colorbar";
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_LABEL = "Include Palettes Image";
+    public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_TOOLTIP = "Include Palettes Image";
+    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_SORT_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".sort";
+    public static final String PROPERTY_PALETTE_SORT_LABEL = "Sort";
+    public static final String PROPERTY_PALETTE_SORT_TOOLTIP = "<html>Palette selector will display all palettes alphabetically sorted<br>" +
+            " as opposed to the original xml order</html>";
+    public static boolean PROPERTY_PALETTE_SORT_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".categorize";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas8/auxdata/color_palettes/color_palette.xml</html>";
+    public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".remove.extension";
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_LABEL = "Remove Filename Extension";
+    public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_TOOLTIP = "Remove extension of the palette filename for display";
+    public static boolean PROPERTY_PALETTE_REMOVE_EXTENSION_DEFAULT = false;
 
 
     // Sliders Editor Options
