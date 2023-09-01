@@ -16,13 +16,17 @@
 
 package org.esa.snap.core.dataop.resamp;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class BicubicInterpolationResamplingTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class BicubicInterpolationResamplingTest {
 
     final Resampling resampling = Resampling.BICUBIC_INTERPOLATION;
     final TestRaster raster = new TestRaster();
 
+    @Test
     public void testCreateIndex() {
         final Resampling.Index index = resampling.createIndex();
         assertNotNull(index);
@@ -38,6 +42,7 @@ public class BicubicInterpolationResamplingTest extends TestCase {
         assertEquals(1, index.kj.length);
     }
 
+    @Test
     public void testIndexAndSample() throws Exception {
         final Resampling.Index index = resampling.createIndex();
 
@@ -62,11 +67,11 @@ public class BicubicInterpolationResamplingTest extends TestCase {
 
         resampling.computeIndex(x, y, raster.getWidth(), raster.getHeight(), index);
 
-        assertEquals(i1Exp, index.i[0]);
-        assertEquals(i2Exp, index.i[1]);
+        assertEquals(i1Exp, index.i[0], 1e-8);
+        assertEquals(i2Exp, index.i[1], 1e-8);
 
-        assertEquals(j1Exp, index.j[0]);
-        assertEquals(j2Exp, index.j[1]);
+        assertEquals(j1Exp, index.j[0], 1e-8);
+        assertEquals(j2Exp, index.j[1], 1e-8);
 
         assertEquals(ki1Exp, index.ki[0], 1e-5f);
         assertEquals(kj1Exp, index.kj[0], 1e-5f);
@@ -75,24 +80,24 @@ public class BicubicInterpolationResamplingTest extends TestCase {
         assertEquals(sampleExp, sample, 1e-5f);
     }
 
+    @Test
     public void testCornerBasedIndex() throws Exception {
         testCornerIndex(2.2f, 2.3f);
     }
 
-    private void testCornerIndex(final float x, final float y) throws Exception{
-
+    private void testCornerIndex(final float x, final float y) throws Exception {
         final Resampling.Index index = resampling.createIndex();
         resampling.computeCornerBasedIndex(x, y, raster.getWidth(), raster.getHeight(), index);
 
         final Resampling.Index indexExp = resampling.createIndex();
         computeExpectedIndex(x, y, raster.getWidth(), raster.getHeight(), indexExp);
 
-        assertEquals(indexExp.i[0], index.i[0]);
-        assertEquals(indexExp.i[1], index.i[1]);
-        assertEquals(indexExp.j[0], index.j[0]);
-        assertEquals(indexExp.j[1], index.j[1]);
-        assertEquals(indexExp.ki[0], index.ki[0]);
-        assertEquals(indexExp.kj[0], index.kj[0]);
+        assertEquals(indexExp.i[0], index.i[0], 1e-8);
+        assertEquals(indexExp.i[1], index.i[1], 1e-8);
+        assertEquals(indexExp.j[0], index.j[0], 1e-8);
+        assertEquals(indexExp.j[1], index.j[1], 1e-8);
+        assertEquals(indexExp.ki[0], index.ki[0], 1e-8);
+        assertEquals(indexExp.kj[0], index.kj[0], 1e-8);
     }
 
     private void computeExpectedIndex(
@@ -101,7 +106,6 @@ public class BicubicInterpolationResamplingTest extends TestCase {
         index.y = y;
         index.width = width;
         index.height = height;
-
 
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
