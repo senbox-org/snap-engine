@@ -54,6 +54,18 @@ class DownloadProductProgressListener implements ro.cs.tao.utils.executors.monit
     }
 
     @Override
+    public void notifyProgress(double progressValue, double transferSpeed, int queuedItems) {
+        notifyProgress(progressValue);
+        System.out.printf("1 of %d [%.2f%% %.2f MB/s]\r", queuedItems, progressValue * 100.0, transferSpeed);
+    }
+
+    @Override
+    public void notifyProgress(double progressValue, double transferSpeed){
+        notifyProgress(progressValue);
+        System.out.printf("[%.2f%% %.2f MB/s]\r", progressValue * 100.0, transferSpeed);
+    }
+
+    @Override
     public void notifyProgress(String subTaskName, double subTaskProgress) {
     }
 
