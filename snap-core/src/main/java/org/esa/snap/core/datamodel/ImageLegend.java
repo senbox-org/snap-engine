@@ -625,7 +625,7 @@ public class ImageLegend {
 
     public String getUnitsText() {
         if (unitsText == null || unitsText.length() == 0) {
-            return "";
+            return getUnitsNull();
         } else {
             return unitsText;
         }
@@ -661,14 +661,21 @@ public class ImageLegend {
     }
 
 
+    public boolean isConvertCaret() {
+        return convertCaret;
+    }
 
+    public void setConvertCaret(boolean convertCaret) {
+        this.convertCaret = convertCaret;
+    }
 
+    public boolean isUnitsParenthesis() {
+        return unitsParenthesis;
+    }
 
-    public boolean isConvertCaret() {return convertCaret;}
-    public void setConvertCaret(boolean convertCaret) {this.convertCaret = convertCaret;}
-
-    public boolean isUnitsParenthesis() {return unitsParenthesis;}
-    public void setUnitsParenthesis(boolean unitsParenthesis) {this.unitsParenthesis = unitsParenthesis;}
+    public void setUnitsParenthesis(boolean unitsParenthesis) {
+        this.unitsParenthesis = unitsParenthesis;
+    }
 
 
     public String getOrientation() {
@@ -681,7 +688,7 @@ public class ImageLegend {
 
     public boolean isHorizontalColorBar() {
         if (ColorBarLayerType.OPTION_BEST_FIT.equals(getOrientation())) {
-            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? (double) raster.getRasterWidth() / (double) raster.getRasterHeight(): 1.0;
+            double sceneAspectRatio = (raster.getRasterHeight() != 0) ? (double) raster.getRasterWidth() / (double) raster.getRasterHeight() : 1.0;
             // todo Preference on aspectRatio for best fit
 //            if (raster.getRasterWidth() > raster.getRasterHeight()) {
             if (sceneAspectRatio > getSceneAspectBestFit()) {
@@ -696,7 +703,9 @@ public class ImageLegend {
                 return false;
             }
         }
-    };
+    }
+
+    ;
 
 
     public String getDistributionType() {
@@ -798,27 +807,27 @@ public class ImageLegend {
             if (isHorizontalColorBar()) {
                 if (scaleByLength) {
                     if (useAvgSideSize) {
-                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.width;
+                        oneHundredPercentScalingFactor = (double) avgSideSize / (double) legendSize.width;
                     } else {
-                oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
+                        oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
                     }
                 } else {
                     if (useAvgSideSize) {
-                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.height;
-            } else {
-                oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
-            }
+                        oneHundredPercentScalingFactor = (double) avgSideSize / (double) legendSize.height;
+                    } else {
+                        oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
+                    }
                 }
             } else {
                 if (scaleByLength) {
                     if (useAvgSideSize) {
-                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.height;
+                        oneHundredPercentScalingFactor = (double) avgSideSize / (double) legendSize.height;
                     } else {
                         oneHundredPercentScalingFactor = (double) imageLayerDimension.height / (double) legendSize.height;
                     }
                 } else {
                     if (useAvgSideSize) {
-                        oneHundredPercentScalingFactor = (double) avgSideSize  / (double) legendSize.width;
+                        oneHundredPercentScalingFactor = (double) avgSideSize / (double) legendSize.width;
                     } else {
                         oneHundredPercentScalingFactor = (double) imageLayerDimension.width / (double) legendSize.width;
                     }
@@ -1685,7 +1694,6 @@ public class ImageLegend {
                     }
 
 
-
                 } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
                     translateY = y0;
 
@@ -1697,10 +1705,6 @@ public class ImageLegend {
                     translateY = y0 + Math.max(width1, width2);
 
                     // todo Danny   fixing offset
-
-
-
-
 
 
                     double rotate = -Math.PI / 2.0;
@@ -1732,7 +1736,6 @@ public class ImageLegend {
     }
 
 
-
     private void drawTitle(Graphics2D g2d, boolean draw) {
         Font origFont = g2d.getFont();
         Paint origPaint = g2d.getPaint();
@@ -1750,10 +1753,14 @@ public class ImageLegend {
         String description = raster.getDescription();
         String bandname = raster.getName();
         String units = raster.getUnit();
+        if (units == null) {
+            units = getUnitsNull();
+        }
         float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        float angle = raster.getProduct().getBand(raster.getName()).getAngularValue();
         boolean allowWavelengthZero = true;
 
-        titleString = ColorSchemeInfo.getColorBarTitle(titleString, bandname, description, wavelength, units, allowWavelengthZero);
+        titleString = ColorSchemeInfo.getColorBarTitle(titleString, bandname, description, wavelength, angle, units, allowWavelengthZero);
 
         drawHeaderSubMethod(g2d, titleString, draw, isConvertCaret());
 
@@ -1786,17 +1793,21 @@ public class ImageLegend {
         String description = raster.getDescription();
         String bandname = raster.getName();
         String units = raster.getUnit();
+        if (units == null) {
+            units = getUnitsNull();
+        }
         float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        float angle = raster.getProduct().getBand(raster.getName()).getAngularValue();
         boolean allowWavelengthZero = true;
 
-        unitsString = ColorSchemeInfo.getColorBarTitle(unitsString, bandname, description, wavelength, units, allowWavelengthZero);
+        unitsString = ColorSchemeInfo.getColorBarTitle(unitsString, bandname, description, wavelength, angle, units, allowWavelengthZero);
 
 
         if (isUnitsParenthesis() && unitsString != null) {
             if (unitsString.trim().startsWith("(") && unitsString.trim().endsWith(")")) {
                 // it already has parenthesis so leave it alone
             } else {
-                unitsString = "("+ unitsString + ")";
+                unitsString = "(" + unitsString + ")";
             }
         }
 
@@ -1805,8 +1816,6 @@ public class ImageLegend {
         g2d.setFont(origFont);
         g2d.setPaint(origPaint);
     }
-
-
 
 
     private void drawHeaderSubMethod(Graphics2D g2d, String headerString, boolean draw, boolean convertCaret) {
@@ -1945,9 +1954,9 @@ public class ImageLegend {
 
                 // give a little space in front of subscript or superscript
                 if ((currentIdxIsSuperScript || currentIdxIsSubScript) && prevIdxNormal) {
-                        Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                        double translateUnitsX = singleLetter.getWidth() * (0.1);
-                        g2d.translate(translateUnitsX, 0);
+                    Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
+                    double translateUnitsX = singleLetter.getWidth() * (0.1);
+                    g2d.translate(translateUnitsX, 0);
                 }
 
                 drawHeaderSingleChar(g2d, charStringCurrent, font_script, true);
@@ -1968,6 +1977,7 @@ public class ImageLegend {
     private boolean isStartSubScript(String text, int idx) {
         return isStringOnIndex(text, idx, "[sub]") || isStringOnIndex(text, idx, "<sub>");
     }
+
     private boolean isEndSubScript(String text, int idx) {
         return isStringOnIndex(text, idx, "[/sub]") || isStringOnIndex(text, idx, "</sub>");
     }
@@ -1976,6 +1986,7 @@ public class ImageLegend {
         return isStringOnIndex(text, idx, "[sup]") || isStringOnIndex(text, idx, "<sup>") ||
                 isStringOnIndex(text, idx, "[super]") || isStringOnIndex(text, idx, "<super>");
     }
+
     private boolean isEndSuperScript(String text, int idx) {
         return isStringOnIndex(text, idx, "[/sup]") || isStringOnIndex(text, idx, "</sup>") ||
                 isStringOnIndex(text, idx, "[/super]") || isStringOnIndex(text, idx, "</super>");
@@ -1984,18 +1995,18 @@ public class ImageLegend {
     private boolean isStartItalics(String text, int idx) {
         return isStringOnIndex(text, idx, "[i]") || isStringOnIndex(text, idx, "<i>");
     }
+
     private boolean isEndItalics(String text, int idx) {
-       return isStringOnIndex(text, idx, "[/i]") || isStringOnIndex(text, idx, "</i>");
+        return isStringOnIndex(text, idx, "[/i]") || isStringOnIndex(text, idx, "</i>");
     }
 
     private boolean isStartBold(String text, int idx) {
         return isStringOnIndex(text, idx, "[b]") || isStringOnIndex(text, idx, "<b>");
     }
+
     private boolean isEndBold(String text, int idx) {
         return isStringOnIndex(text, idx, "[/b]") || isStringOnIndex(text, idx, "</b>");
     }
-
-
 
 
     private boolean isStringOnIndex(String text, int idx, String subtext) {
@@ -2006,7 +2017,7 @@ public class ImageLegend {
 
         int offset = 0;
 
-        for (int i=subtext.length(); i > 0; i--) {
+        for (int i = subtext.length(); i > 0; i--) {
             if (text.length() >= idx + i && idx >= offset) {
                 String charStringCurrent = text.substring(idx - offset, idx + i);
                 if (charStringCurrent.equals(subtext)) {
@@ -2019,8 +2030,6 @@ public class ImageLegend {
 
         return false;
     }
-
-
 
 
     private void drawHeaderSingleChar(Graphics2D g2d, String text, FONT_SCRIPT fontScript, boolean draw) {
@@ -2573,9 +2582,8 @@ public class ImageLegend {
     }
 
 
-
     public double getLeftSideBorderGapFactor() {
-            return leftSideBorderGapFactor;
+        return leftSideBorderGapFactor;
     }
 
     public void setLeftSideBorderGapFactor(double leftSideBorderGapFactor) {
@@ -2602,6 +2610,7 @@ public class ImageLegend {
     public double getBottomBorderGapFactor() {
         return bottomBorderGapFactor;
     }
+
     public void setBottomBorderGapFactor(double bottomBorderGapFactor) {
         this.bottomBorderGapFactor = bottomBorderGapFactor;
     }
@@ -2609,6 +2618,7 @@ public class ImageLegend {
     public double getTitleGapFactor() {
         return titleGapFactor;
     }
+
     public void setTitleGapFactor(double titleGapFactor) {
         this.titleGapFactor = titleGapFactor;
     }
@@ -2617,6 +2627,7 @@ public class ImageLegend {
     public double getLabelGapFactor() {
         return labelGapFactor;
     }
+
     public void setLabelGapFactor(double labelGapFactor) {
         this.labelGapFactor = labelGapFactor;
     }
@@ -2626,7 +2637,7 @@ public class ImageLegend {
 //        if (leftSideBorderGap != NULL_INT) {
 //            return leftSideBorderGap;
 //        } else {
-            return (int) Math.round(getLeftSideBorderGapFactor() * getTitleFontSize());
+        return (int) Math.round(getLeftSideBorderGapFactor() * getTitleFontSize());
 //        }
     }
 
@@ -2638,7 +2649,7 @@ public class ImageLegend {
 //        if (rightSideBorderGap != NULL_INT) {
 //            return rightSideBorderGap;
 //        } else {
-            return (int) Math.round(getRightSideBorderGapFactor() * getTitleFontSize());
+        return (int) Math.round(getRightSideBorderGapFactor() * getTitleFontSize());
 //        }
     }
 
@@ -2650,7 +2661,7 @@ public class ImageLegend {
 //        if (topBorderGap != NULL_INT) {
 //            return topBorderGap;
 //        } else {
-            return (int) Math.round(getTopBorderGapFactor() * getTitleFontSize());
+        return (int) Math.round(getTopBorderGapFactor() * getTitleFontSize());
 //        }
     }
 
@@ -2662,7 +2673,7 @@ public class ImageLegend {
 //        if (bottomBorderGap != NULL_INT) {
 //            return bottomBorderGap;
 //        } else {
-            return (int) Math.round(getBottomBorderGapFactor() * getTitleFontSize());
+        return (int) Math.round(getBottomBorderGapFactor() * getTitleFontSize());
 //        }
     }
 
@@ -2671,13 +2682,12 @@ public class ImageLegend {
     }
 
 
-
     public int getLabelGap() {
 //        if (labelGap != NULL_INT) {
 //            return labelGap;
 //        } else {
 //            return (int) Math.round(getLabelGapFactor() * getLabelsFontSize());
-            return (int) Math.round(getLabelGapFactor() * getTitleFontSize());
+        return (int) Math.round(getLabelGapFactor() * getTitleFontSize());
 //        }
     }
 
@@ -2690,7 +2700,7 @@ public class ImageLegend {
 //        if (titleGap != NULL_INT) {
 //            return titleGap;
 //        } else {
-            return (int) Math.round(getTitleGapFactor() * getTitleFontSize());
+        return (int) Math.round(getTitleGapFactor() * getTitleFontSize());
 //        }
     }
 

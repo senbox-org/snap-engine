@@ -22,6 +22,7 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -63,6 +64,8 @@ public class ColorBarLayer extends Layer {
     boolean paletteLogPrevious;
     boolean schemeMatchedPaletteOriginally;
     boolean isSchemeLabelsApplyPreference;
+
+    String currTitle = "";
 
 
     String titlePreferences;
@@ -122,6 +125,7 @@ public class ColorBarLayer extends Layer {
         String bandname = raster.getName();
         String units = raster.getUnit();
         float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+        float angle = raster.getProduct().getBand(raster.getName()).getAngularValue();
         boolean allowWavelengthZero = true;  //todo Consider adding this in preferences
 
 
@@ -130,15 +134,20 @@ public class ColorBarLayer extends Layer {
 
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
+            if (imageLegendInitialized) {
+                String tmpTitle = getTitle();
+                String tmpUnits = getUnits();
+            }
+
             if (!imageLegendInitialized) {
-                String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
-                setTitle(convertedTitle);
-                String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, units, allowWavelengthZero);
-                setTitleAlt(convertedTitleAlt);
-                String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, units, allowWavelengthZero);
-                setUnits(convertedUnits);
-                String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, units, allowWavelengthZero);
-                setUnitsAlt(convertedUnitsAlt);
+//                String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//                setTitle(convertedTitle);
+//                String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//                setTitleAlt(convertedTitleAlt);
+//                String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//                setUnits(convertedUnits);
+//                String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//                setUnitsAlt(convertedUnitsAlt);
 
                 paletteMinPrevious = raster.getImageInfo().getColorPaletteDef().getMinDisplaySample();
                 paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
@@ -171,7 +180,11 @@ public class ColorBarLayer extends Layer {
 
 
             if (!imageLegendInitialized || (isAutoApplySchemes() || isSchemeLabelsApply())) {
-                schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName());
+                String mission = ProductUtils.getMetaData(raster.getProduct(), ProductUtils.METADATA_POSSIBLE_SENSOR_KEYS);
+                if (mission == null || mission.length() == 0) {
+                    mission = getProduct().getProductType();
+                }
+                schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName(), mission);
             }
 
 
@@ -275,7 +288,8 @@ public class ColorBarLayer extends Layer {
 
 
 
-            if (imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
+            // disabling this as it causes too many other bugs
+            if (1 ==2 && imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
 
                 if (!schemeOverRidden ) {
 
@@ -342,40 +356,40 @@ public class ColorBarLayer extends Layer {
             paletteMaxPrevious = raster.getImageInfo().getColorPaletteDef().getMaxDisplaySample();
             paletteLogPrevious = raster.getImageInfo().isLogScaled();
 
-            String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, units, allowWavelengthZero);
-            setTitle(convertedTitle);
-
-            if (convertedTitle == null || convertedTitle.length() == 0) {
-                String convertedTitlePreferences = ColorSchemeInfo.getColorBarTitle(titlePreferences, bandname, description, wavelength, units, allowWavelengthZero);
-
-                setTitle(convertedTitlePreferences);
-
-                if (convertedTitlePreferences == null || convertedTitlePreferences.length() == 0) {
-                    setTitle(raster.getName());
-                }
-            }
-
-
-            String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, units, allowWavelengthZero);
-            setTitleAlt(convertedTitleAlt);
-            String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, units, allowWavelengthZero);
-            setUnits(convertedUnits);
-
-            if (convertedUnits == null || convertedUnits.length() == 0) {
-                String convertedUnitsPreferences = ColorSchemeInfo.getColorBarTitle(unitsPreferences, bandname, description, wavelength, units, allowWavelengthZero);
-
-                setUnits(convertedUnitsPreferences);
-
-                if (convertedUnitsPreferences == null || convertedUnitsPreferences.length() == 0) {
-                    setUnits(raster.getUnit());
-                }
-            }
-
-            if (convertedUnits == null || convertedUnits.length() == 0) {
-                setUnits(raster.getUnit());
-            }
-            String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, units, allowWavelengthZero);
-            setUnitsAlt(convertedUnitsAlt);
+//            String convertedTitle = ColorSchemeInfo.getColorBarTitle(getTitle(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//            setTitle(convertedTitle);
+//
+//            if (convertedTitle == null || convertedTitle.length() == 0) {
+//                String convertedTitlePreferences = ColorSchemeInfo.getColorBarTitle(titlePreferences, bandname, description, wavelength, angle, units, allowWavelengthZero);
+//
+//                setTitle(convertedTitlePreferences);
+//
+//                if (convertedTitlePreferences == null || convertedTitlePreferences.length() == 0) {
+//                    setTitle(raster.getName());
+//                }
+//            }
+//
+//
+//            String convertedTitleAlt = ColorSchemeInfo.getColorBarTitle(getTitleAlt(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//            setTitleAlt(convertedTitleAlt);
+//            String convertedUnits = ColorSchemeInfo.getColorBarTitle(getUnits(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//            setUnits(convertedUnits);
+//
+//            if (convertedUnits == null || convertedUnits.length() == 0) {
+//                String convertedUnitsPreferences = ColorSchemeInfo.getColorBarTitle(unitsPreferences, bandname, description, wavelength, angle, units, allowWavelengthZero);
+//
+//                setUnits(convertedUnitsPreferences);
+//
+//                if (convertedUnitsPreferences == null || convertedUnitsPreferences.length() == 0) {
+//                    setUnits(raster.getUnit());
+//                }
+//            }
+//
+//            if (convertedUnits == null || convertedUnits.length() == 0) {
+//                setUnits(raster.getUnit());
+//            }
+//            String convertedUnitsAlt = ColorSchemeInfo.getColorBarTitle(getUnitsAlt(), bandname, description, wavelength, angle, units, allowWavelengthZero);
+//            setUnitsAlt(convertedUnitsAlt);
 
 
             // Title & Units Text
@@ -490,7 +504,7 @@ public class ColorBarLayer extends Layer {
 
             if (ColorBarLayerType.SCENE_SCALING_LENGTH.equals(applySizeScaling())) {
                 bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true, true, false);
-            } else if (ColorBarLayerType.SCENE_SCALING_LENGTH.equals(applySizeScaling())) {
+            } else if (ColorBarLayerType.SCENE_SCALING_WIDTH.equals(applySizeScaling())) {
                 bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true, false, true);
             } else {
                 bufferedImage = imageLegend.createImage();
@@ -891,10 +905,12 @@ public class ColorBarLayer extends Layer {
 
     private void setTitle(String value) {
         try {
+            this.currTitle = value;
             String valueCurrent = getTitle();
 //            System.out.println("Current title = " + valueCurrent);
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
 //                System.out.println("Inside and setting title to " + value);
+                this.currTitle = value;
                 getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {

@@ -247,7 +247,7 @@ public class ColorSchemeInfo {
     }
 
 
-    public static String getColorBarTitle(String colorBarTitle, String bandname, String description, float wavelength, String units, boolean allowWavelengthZero) {
+    public static String getColorBarTitle(String colorBarTitle, String bandname,  String description, float wavelength, float angle, String units, boolean allowWavelengthZero) {
         
         String wavelengthString = "";
         if (wavelength > 0.0) {
@@ -257,6 +257,9 @@ public class ColorSchemeInfo {
                 wavelengthString = String.valueOf(wavelength);
             }
         }
+        wavelengthString = String.valueOf(wavelength);
+        String angleString = String.valueOf(angle);
+
 
         if (units == null) {
             units = "";
@@ -340,12 +343,21 @@ public class ColorSchemeInfo {
                     }
                 }
             }
+
+            if (colorBarTitle.contains("[ANGLE]") || colorBarTitle.contains("<ANGLE>")) {
+                    while (colorBarTitle.contains("[ANGLE]")) {
+                        colorBarTitle = colorBarTitle.replace("[ANGLE]", angleString);
+                    }
+                    while (colorBarTitle.contains("<ANGLE>")) {
+                        colorBarTitle = colorBarTitle.replace("<ANGLE>", angleString);
+                    }
+            }
         }
 
         return  colorBarTitle;
     }
 
-    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName) {
+    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName, String mission) {
 
         ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
         if (colorSchemeManager != null) {
@@ -356,7 +368,7 @@ public class ColorSchemeInfo {
 
             ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
             for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
-                if (colorSchemeLookupInfo.isMatch(bandName)) {
+                if (colorSchemeLookupInfo.isMatch(bandName, mission)) {
                     return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
                 }
             }
