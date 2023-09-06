@@ -92,6 +92,7 @@ public class OpenJpegExecRetriever {
         WIN_64("openjpeg-2.1.0-win64", Paths.get("bin","opj_compress.exe").toString(), Paths.get("bin","opj_decompress.exe").toString(), Paths.get("bin","opj_dump.exe").toString(), Paths.get("bin","libopenjp2.dll").toString()),
         LINUX_64("openjpeg-2.1.0-linux64", Paths.get("bin","opj_compress").toString(), Paths.get("bin","opj_decompress").toString(), Paths.get("bin","opj_dump").toString(), Paths.get("bin","libopenjp2.so").toString()),
         MAC_OS_X("openjpeg-2.1.0-macosx", Paths.get("bin","opj_compress").toString(), Paths.get("bin","opj_decompress").toString(), Paths.get("bin","opj_dump").toString(), Paths.get("bin","libopenjp2.dylib").toString()),
+        MAC_OS_X_AARCH64("openjpeg-2.1.0-macosx-aarch64", Paths.get("bin", "opj_compress").toString(), Paths.get("bin", "opj_decompress").toString(), Paths.get("bin", "opj_dump").toString(), Paths.get("bin", "libopenjp2.dylib").toString()),
         UNSUPPORTED(null, null, null, null, null);
 
 
@@ -124,19 +125,24 @@ public class OpenJpegExecRetriever {
         String getCodec() { return Paths.get(directory,codec).toString(); }
 
         static OSCategory getOSCategory() {
-            OSCategory category;
+            String sysArch = System.getProperty("os.arch").toLowerCase();
+            OSCategory category = null;
             if (IS_OS_LINUX) {
                 category = OSCategory.LINUX_64;
             } else if (IS_OS_MAC_OSX) {
-                category = OSCategory.MAC_OS_X;
+                if (sysArch.contains("amd64")) {
+                    category = OSCategory.MAC_OS_X;
+                } else if (sysArch.contains("aarch64")) {
+                    category = OSCategory.MAC_OS_X_AARCH64;
+                }
             } else if (IS_OS_WINDOWS) {
-                String sysArch = System.getProperty("os.arch").toLowerCase();
                 if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
                     category = OSCategory.WIN_64;
                 } else {
                     category = OSCategory.WIN_32;
                 }
-            } else {
+            }
+            if (category == null) {
                 // we should never be here since we do not release installers for other systems.
                 category = OSCategory.UNSUPPORTED;
             }
