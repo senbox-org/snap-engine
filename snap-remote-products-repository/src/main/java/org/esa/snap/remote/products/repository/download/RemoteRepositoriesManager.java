@@ -6,6 +6,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.CustomEOProduct;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.HTTPServerException;
 import org.esa.snap.remote.products.repository.PixelType;
@@ -211,21 +212,14 @@ public class RemoteRepositoriesManager {
             dataSourceComponent.setProgressListener(taoProgressListener);
             dataSourceComponent.setProductStatusListener(taoProductStatusListener);
 
-            EOProduct product = new EOProduct() {
-                @Override
-                public void setApproximateSize(long approximateSize) {
-                    super.setApproximateSize(approximateSize);
-
-                    if (approximateSize > 0) {
-                        progressListener.notifyApproximateSize(approximateSize);
-                    }
-                }
-            };
+            final CustomEOProduct product = new CustomEOProduct();
+            product.setProgressListener(progressListener);
             product.setApproximateSize(repositoryProduct.getApproximateSize());
             product.setId(repositoryProduct.getId());
             product.setProductType(repositoryProduct.getRemoteMission().getName());
             product.setName(repositoryProduct.getName());
             product.setLocation(repositoryProduct.getURL());
+            product.setAcquisitionDate(repositoryProduct.getAcquisitionDate());
 
             List<EOProduct> products = new ArrayList<>(1);
             products.add(product); // add the product to be downloaded
