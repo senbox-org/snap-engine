@@ -288,8 +288,7 @@ public class ColorBarLayer extends Layer {
 
 
 
-            // disabling this as it causes too many other bugs
-            if (1 ==2 && imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
+            if (imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
 
                 if (!schemeOverRidden ) {
 
