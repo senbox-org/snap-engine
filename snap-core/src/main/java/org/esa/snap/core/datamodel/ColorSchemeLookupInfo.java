@@ -20,14 +20,16 @@ public class ColorSchemeLookupInfo {
     private String scheme_id;
     private ColorSchemeInfo colorSchemeInfo;
     private String description;
+    private String mission;
 
 
-    public ColorSchemeLookupInfo(String regex, String scheme_id, String description, ColorSchemeInfo colorSchemeInfo) {
+    public ColorSchemeLookupInfo(String regex, String scheme_id, String description, String mission, ColorSchemeInfo colorSchemeInfo) {
 
         if (regex != null && scheme_id != null) {
             setRegex(regex);
             setScheme_id(scheme_id);
             setDescription(description);
+            setMission(mission);
             setColorSchemeInfo(colorSchemeInfo);
             setRegexArray(regex);
         }
@@ -87,9 +89,16 @@ public class ColorSchemeLookupInfo {
     }
 
 
+    public String getMission() {
+        return mission;
+    }
+
+    public void setMission(String mission) {
+        this.mission = mission;
+    }
 
 
-    public boolean isMatch(String bandName, String regex) {
+    public boolean isMatch(String bandName, String mission, String regex) {
 
         boolean match = false;
 
@@ -148,13 +157,19 @@ public class ColorSchemeLookupInfo {
 
 
 
-    public boolean isMatch(String bandName) {
+    public boolean isMatch(String bandName, String mission) {
         boolean match = false;
+
+        if (mission != null && getMission() != null) {
+            if (!mission.contains(getMission())) {
+                return false;
+            }
+        }
 
         if (bandName == null || bandName.length() == 0) { return false; }
 
         for (String regex: getRegexArray()) {
-            match = isMatch(bandName, regex);
+            match = isMatch(bandName, mission, regex);
             if (match) {
                 break;
             }

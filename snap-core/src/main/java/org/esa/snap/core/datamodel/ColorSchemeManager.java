@@ -513,13 +513,15 @@ public class ColorSchemeManager {
 
         if (colorSchemeLookupUserFile.exists()) {
             Document domCustom = getFileDocument(colorSchemeLookupUserFile);
-            Element rootElementCustom = domCustom.getDocumentElement();
-            NodeList keyNodeListCustom = rootElementCustom.getElementsByTagName("KEY");
+            if (domCustom != null) {
+                Element rootElementCustom = domCustom.getDocumentElement();
+                NodeList keyNodeListCustom = rootElementCustom.getElementsByTagName("KEY");
 
-            if (keyNodeListCustom != null && keyNodeListCustom.getLength() > 0) {
-                for (int i = 0; i < keyNodeListCustom.getLength(); i++) {
-                    Element schemeElement = (Element) keyNodeListCustom.item(i);
-                    addColorSchemeLookup(schemeElement);
+                if (keyNodeListCustom != null && keyNodeListCustom.getLength() > 0) {
+                    for (int i = 0; i < keyNodeListCustom.getLength(); i++) {
+                        Element schemeElement = (Element) keyNodeListCustom.item(i);
+                        addColorSchemeLookup(schemeElement);
+                    }
                 }
             }
         }
@@ -546,6 +548,7 @@ public class ColorSchemeManager {
             String regex = schemeElement.getAttribute("REGEX");
             String schemeId = getTextValue(schemeElement, "SCHEME_ID");
             String description = getTextValue(schemeElement, "DESCRIPTION");
+            String mission = getTextValue(schemeElement, "MISSION");
 
 
             if (regex == null || regex.length() == 0) {
@@ -566,7 +569,7 @@ public class ColorSchemeManager {
             }
 
             if (checksOut) {
-                ColorSchemeLookupInfo colorSchemeLookupInfo = new ColorSchemeLookupInfo(regex, schemeId, description, colorSchemeInfo);
+                ColorSchemeLookupInfo colorSchemeLookupInfo = new ColorSchemeLookupInfo(regex, schemeId, description, mission, colorSchemeInfo);
 
                 if (colorSchemeLookupInfo != null) {
                     colorSchemeLookupInfos.add(colorSchemeLookupInfo);

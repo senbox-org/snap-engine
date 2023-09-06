@@ -56,7 +56,7 @@ public class MetaDataLayer extends Layer {
 
 
     private final String INFO_PARAM_WAVE = "WAVE";
-//    private final String INFO_PARAM_ANGLE = "ANGLE";
+    private final String INFO_PARAM_ANGLE = "ANGLE";
     private final String INFO_PARAM_FLAG_CODING = "FLAG_CODING";
     private final String INFO_PARAM_VALID_PIXEL_EXPRESSION = "VALID_PIXEL_EXPRESSION";
     private final String INFO_PARAM_NO_DATA_VALUE = "NO_DATA_VALUE";
@@ -97,7 +97,7 @@ public class MetaDataLayer extends Layer {
             INFO_PARAM_SCENE_SIZE,
 
             INFO_PARAM_WAVE,
-//            INFO_PARAM_ANGLE,
+            INFO_PARAM_ANGLE,
             INFO_PARAM_FLAG_CODING,
             INFO_PARAM_VALID_PIXEL_EXPRESSION,
             INFO_PARAM_NO_DATA_VALUE,
@@ -627,15 +627,15 @@ public class MetaDataLayer extends Layer {
                             break;
 
                         case "<FILE_INFO=":
-                            value = getDerivedMeta(metaId);
+                            value = getDerivedMeta(metaId.toUpperCase());
                             break;
 
                         case "<BAND_INFO=":
-                            value = getDerivedMeta(metaId);
+                            value = getDerivedMeta(metaId.toUpperCase());
                             break;
 
                         case "<INFO=":
-                            value = getDerivedMeta(metaId);
+                            value = getDerivedMeta(metaId.toUpperCase());
                             break;
                     }
 
@@ -667,23 +667,38 @@ public class MetaDataLayer extends Layer {
 
 
                 case INFO_PARAM_FILE:
-                    value = raster.getProduct().getName();
+                    try {
+                        value = raster.getProduct().getName();
+                    } catch (Exception e) {
+                    }
                     break;
 
                 case INFO_PARAM_FILE_LOCATION:
-                    value = raster.getProduct().getFileLocation().toString();
+                    try {
+                        value = raster.getProduct().getFileLocation().toString();
+                    } catch (Exception e) {
+                    }
                     break;
 
                 case INFO_PARAM_PRODUCT_TYPE:
-                    value = raster.getProduct().getProductType();
+                    try {
+                        value = raster.getProduct().getProductType();
+                    } catch (Exception e) {
+                    }
                     break;
 
                 case INFO_PARAM_SCENE_START_TIME:
-                    value = raster.getProduct().getStartTime().toString();
+                    try {
+                        value = raster.getProduct().getStartTime().toString();
+                    } catch (Exception e) {
+                    }
                     break;
 
                 case INFO_PARAM_SCENE_END_TIME:
-                    value = raster.getProduct().getEndTime().toString();
+                    try {
+                        value = raster.getProduct().getEndTime().toString();
+                    } catch (Exception e) {
+                    }
                     break;
 
 //                case INFO_PARAM_PROCESSING_VERSION:
@@ -751,12 +766,15 @@ public class MetaDataLayer extends Layer {
                     value = String.valueOf(raster.getProduct().getBand(raster.getName()).getSpectralWavelength());
                     break;
 
-//                case INFO_PARAM_ANGLE:
-//                    value = String.valueOf(raster.getProduct().getBand(raster.getName()).getAngularValue());
-//                    break;
+                case INFO_PARAM_ANGLE:
+                    value = String.valueOf(raster.getProduct().getBand(raster.getName()).getAngularValue());
+                    break;
 
                 case INFO_PARAM_FLAG_CODING:
-                    value = String.valueOf(raster.getProduct().getBand(raster.getName()).getFlagCoding());
+                    try {
+                        value = String.valueOf(raster.getProduct().getBand(raster.getName()).getFlagCoding());
+                    } catch (Exception e) {
+                    }
                     break;
 
                 case INFO_PARAM_VALID_PIXEL_EXPRESSION:
@@ -792,30 +810,40 @@ public class MetaDataLayer extends Layer {
                     break;
 
                 case INFO_PARAM_IS_PALETTE_LOG_SCALED:
-                    value = String.valueOf(raster.getImageInfo().getColorPaletteDef().isLogScaled());
-                    break;
-
-                case INFO_PARAM_NODE_DISPLAY_NAMES:
-                    value = "";
-                    String[] nodeDisplayNames = raster.getOverlayMaskGroup().getNodeDisplayNames();
-                    for (String nodeDisplayName : nodeDisplayNames) {
-                        if (value.length() == 0) {
-                            value = nodeDisplayName;
-                        } else {
-                            value = value + ", " + nodeDisplayName;
-                        }
+                    try {
+                        value = String.valueOf(raster.getImageInfo().getColorPaletteDef().isLogScaled());
+                    } catch (Exception e) {
                     }
                     break;
 
-                case INFO_PARAM_NODE_NAMES:
-                    value = "";
-                    String[] getNodeNames = raster.getOverlayMaskGroup().getNodeNames();
-                    for (String getNodeName : getNodeNames) {
-                        if (value.length() == 0) {
-                            value = getNodeName;
-                        } else {
-                            value = value + ", " + getNodeName;
+                case INFO_PARAM_NODE_DISPLAY_NAMES:
+                    try {
+                        value = "";
+                        String[] nodeDisplayNames = raster.getOverlayMaskGroup().getNodeDisplayNames();
+                        for (String nodeDisplayName : nodeDisplayNames) {
+                            if (value.length() == 0) {
+                                value = nodeDisplayName;
+                            } else {
+                                value = value + ", " + nodeDisplayName;
+                            }
                         }
+                    } catch (Exception e) {
+                    }
+
+                    break;
+
+                case INFO_PARAM_NODE_NAMES:
+                    try {
+                        value = "";
+                        String[] getNodeNames = raster.getOverlayMaskGroup().getNodeNames();
+                        for (String getNodeName : getNodeNames) {
+                            if (value.length() == 0) {
+                                value = getNodeName;
+                            } else {
+                                value = value + ", " + getNodeName;
+                            }
+                        }
+                    } catch (Exception e) {
                     }
                     break;
 

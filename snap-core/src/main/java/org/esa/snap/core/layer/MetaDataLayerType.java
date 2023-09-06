@@ -74,7 +74,7 @@ public class MetaDataLayerType extends LayerType {
     }
 
 
-    public static final String PROPERTY_FONT_STYLE_1 = "SanSerif";
+    public static final String PROPERTY_FONT_STYLE_1 = "SansSerif";
     public static final String PROPERTY_FONT_STYLE_2 = "Serif";
     public static final String PROPERTY_FONT_STYLE_3 = "Courier";
     public static final String PROPERTY_FONT_STYLE_4 = "Monospaced";
@@ -255,7 +255,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_FONT_STYLE_LABEL = "Font Style";
     public static final String PROPERTY_MARGIN_FONT_STYLE_TOOLTIP = "Set the font style of the footer";
     public static final String PROPERTY_MARGIN_FONT_STYLE_ALIAS = PROPERTY_MARGIN_FORMAT_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_MARGIN_FONT_STYLE_DEFAULT = "SanSerif";
+    public static final String PROPERTY_MARGIN_FONT_STYLE_DEFAULT = "SansSerif";
     public static final Class PROPERTY_MARGIN_FONT_STYLE_TYPE = String.class;
     public static final Object PROPERTY_MARGIN_FONT_STYLE_VALUE_SET[] = {PROPERTY_FONT_STYLE_1, PROPERTY_FONT_STYLE_2, PROPERTY_FONT_STYLE_3, PROPERTY_FONT_STYLE_4};
 
@@ -313,7 +313,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD3_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD3_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD3_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield3";
-    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "ID: <META=id>";
+    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "";
     public static final Class PROPERTY_HEADER_TEXTFIELD3_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD4_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield4";
@@ -484,7 +484,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_GAP_LABEL = "Location Gap";
     public static final String PROPERTY_FOOTER2_GAP_TOOLTIP = "Percentage of scene size to place footer away from the edge of the scene image";
     private static final String PROPERTY_FOOTER2_GAP_ALIAS = PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 6.0;
+    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 35.0;
     public static final double PROPERTY_FOOTER2_GAP_MIN = -100;
     public static final double PROPERTY_FOOTER2_GAP_MAX = 100;
     public static final String PROPERTY_FOOTER2_GAP_INTERVAL = "[" + MetaDataLayerType.PROPERTY_MARGIN_GAP_MIN + "," + MetaDataLayerType.PROPERTY_MARGIN_GAP_MAX + "]";
@@ -512,7 +512,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_FONT_STYLE_LABEL = "Font Style";
     public static final String PROPERTY_FOOTER2_FONT_STYLE_TOOLTIP = "Set the font style of the footer";
     public static final String PROPERTY_FOOTER2_FONT_STYLE_ALIAS = PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_FOOTER2_FONT_STYLE_DEFAULT = "SanSerif";
+    public static final String PROPERTY_FOOTER2_FONT_STYLE_DEFAULT = "SansSerif";
     public static final Class PROPERTY_FOOTER2_FONT_STYLE_TYPE = String.class;
     public static final Object PROPERTY_FOOTER2_FONT_STYLE_VALUE_SET[] = {PROPERTY_FONT_STYLE_1, PROPERTY_FONT_STYLE_2, PROPERTY_FONT_STYLE_3, PROPERTY_FONT_STYLE_4};
 
