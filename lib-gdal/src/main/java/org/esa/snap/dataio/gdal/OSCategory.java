@@ -24,6 +24,7 @@ public enum OSCategory {
     WIN_64("Windows", "x64"),
     LINUX_64("Linux", "x64"),
     MAC_OS_X("MacOSX", "x64"),
+    MAC_OS_X_AARCH64("MacOSX", "aarch64"),
     UNSUPPORTED("", "");
 
     private static final Logger logger = Logger.getLogger(OSCategory.class.getName());
@@ -52,6 +53,9 @@ public enum OSCategory {
      * @return the actual OS category for host OS
      */
     public static OSCategory getOSCategory() {
+        if (osCategory == OSCategory.UNSUPPORTED) {
+            throw new IllegalStateException("Unsupported operating system / platform detected. Native libraries cannot be loaded.");
+        }
         return osCategory;
     }
 
@@ -70,19 +74,26 @@ public enum OSCategory {
      * @return the OS category for host OS
      */
     private static OSCategory retrieveOSCategory() {
-        OSCategory category;
+        OSCategory category = null;
+        final String sysArch = System.getProperty("os.arch").toLowerCase();
         if (IS_OS_LINUX) {
-            category = OSCategory.LINUX_64;
+            if (sysArch.contains("amd64")) {
+                category = OSCategory.LINUX_64;
+            }
         } else if (IS_OS_MAC_OSX) {
-            category = OSCategory.MAC_OS_X;
+            if (sysArch.contains("amd64")) {
+                category = OSCategory.MAC_OS_X;
+            } else if (sysArch.contains("aarch64")) {
+                category = OSCategory.MAC_OS_X_AARCH64;
+            }
         } else if (IS_OS_WINDOWS) {
-            String sysArch = System.getProperty("os.arch").toLowerCase();
             if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
                 category = OSCategory.WIN_64;
             } else {
                 category = OSCategory.WIN_32;
             }
-        } else {
+        }
+        if (category == null) {
             // we should never be here since we do not release installers for other systems.
             category = OSCategory.UNSUPPORTED;
         }
