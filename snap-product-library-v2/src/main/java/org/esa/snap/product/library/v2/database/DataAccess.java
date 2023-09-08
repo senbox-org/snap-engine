@@ -68,7 +68,7 @@ public class DataAccess {
     private static H2DatabaseParameters dbParams;
 
     public static void initialize() {
-        dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
+            dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
     }
 
     public static void setDbParams(H2DatabaseParameters dbParams) {
@@ -331,7 +331,11 @@ public class DataAccess {
                             geometry = convertProductGeometry(productGeometry);
                         }
                         String metadataMission = resultSet.getString("metadata_mission");
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate.toLocalDateTime(), productLocalPath, sizeInBytes, geometry);
+                        LocalDateTime acquisitionLocalDate = null;
+                        if (acquisitionDate != null) {
+                            acquisitionLocalDate = acquisitionDate.toLocalDateTime();
+                        }
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionLocalDate, productLocalPath, sizeInBytes, geometry);
                         localProduct.setRemoteMission(remoteMission);
                         localProduct.setMetadataMission(metadataMission);
                         productList.add(localProduct);
@@ -569,7 +573,11 @@ public class DataAccess {
                     deleteQuickLookImage(productId, dbParams.getParentFolderPath());
                     deleteProductRemoteAttributes(productId, connection);
                     deleteProductLocalAttributes(productId, connection);
-                    updateProduct(productId, localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    if (polygon2D != null && !polygon2D.toWKT().isEmpty()) {
+                        updateProduct(productId, localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    } else {
+                        updateProduct(productId, localProductToSave, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    }
                 }
 
                 if (localProductAttributes.size() > 0) {
@@ -585,6 +593,7 @@ public class DataAccess {
             } catch (Exception e) {
                 // rollback the statements from the transaction
                 connection.rollback();
+                throw new IllegalStateException("Fail to save the product in database: " + localProductToSave.getName(), e);
             }
         }
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(localProductToSave).getAttributeString(AbstractMetadata.MISSION);
@@ -710,7 +719,12 @@ public class DataAccess {
                         deleteProductRemoteAttributes(productId, connection);
                         deleteProductLocalAttributes(productId, connection);
                     }
-                    updateProduct(productId, remoteProductToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    final AbstractGeometry2D polygon2D = remoteProductToSave.getPolygon();
+                    if (polygon2D != null && !polygon2D.toWKT().isEmpty()) {
+                        updateProduct(productId, remoteProductToSave, polygon2D, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    } else {
+                        updateProduct(productId, remoteProductToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
+                    }
                 }
                 if (remoteProductToSave.getRemoteAttributes().size() > 0) {
                     insertProductRemoteAttributes(productId, remoteProductToSave.getRemoteAttributes(), connection);
@@ -879,7 +893,7 @@ public class DataAccess {
                                      FileTime fileTime, long sizeInBytes, Connection connection)
             throws SQLException {
         final String metadataMission = AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION);
-        if (geometry != null) {
+        if (geometry != null && !geometry.toWKT().isEmpty()) {
             return addLocalProduct(connection, productToSave.getName(), null, metadataMission, localRepositoryId, relativePath.toString(),
                     sizeInBytes, productToSave.getStartTime() == null ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar()),
                     fileTime.toMillis(), geometry.toWKT(), null, null, null);
@@ -1046,9 +1060,53 @@ public class DataAccess {
         statement.executeUpdate();
     }
 
+    private static void updateProduct(int productId, Product productToSave, Path relativePath, int localRepositoryId,
+                               FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
+        final PreparedStatement statement =
+                connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = NULL, local_repository_id = ?, relative_path = ?," +
+                        "entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, last_modified_date = ?, " +
+                        "data_format_type_id = NULL, pixel_type_id = NULL, sensor_type_id = NULL, metadata_mission = ? WHERE id = ?");
+        statement.setString(1, productToSave.getName());
+        statement.setInt(2, localRepositoryId);
+        statement.setString(3, relativePath.toString());
+        statement.setLong(4, sizeInBytes);
+        final LocalDateTime acquisitionDate = (productToSave.getStartTime() == null) ? null : DateTimeUtils.calendarToLocalDateTime(productToSave.getStartTime().getAsCalendar());
+        if (acquisitionDate != null) {
+            statement.setTimestamp(5, Timestamp.valueOf(acquisitionDate));
+        } else {
+            statement.setNull(5, Types.TIMESTAMP);
+        }
+        statement.setTimestamp(6, new Timestamp(fileTime.toMillis()));
+        // in future we may change the attribute from metadata from where we take the mission, therefore preview an update at re-scan & update products
+        statement.setString(7, AbstractMetadata.getAbstractedMetadata(productToSave).getAttributeString(AbstractMetadata.MISSION));
+        statement.setInt(8, productId);
+        statement.executeUpdate();
+    }
+
     private static void updateProduct(int productId, RepositoryProduct productToSave, Path relativePath, int remoteMissionId,
                                       int localRepositoryId, FileTime fileTime, long sizeInBytes, Connection connection)
                                       throws SQLException {
+        final PreparedStatement statement = connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = ?," +
+                "local_repository_id = ?, relative_path = ?, entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, " +
+                "last_modified_date = ?, data_format_type_id = ?, pixel_type_id = ?, sensor_type_id = ? WHERE id = ?");
+        statement.setString(1, productToSave.getName());
+        statement.setInt(2, remoteMissionId);
+        statement.setInt(3, localRepositoryId);
+        statement.setString(4, relativePath.toString());
+        statement.setLong(5, sizeInBytes);
+        statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
+        statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
+        statement.setInt(8, productToSave.getDataFormatType().getValue());
+        statement.setInt(9, productToSave.getPixelType().getValue());
+        statement.setInt(10, productToSave.getSensorType().getValue());
+        statement.setInt(11, productId);
+        statement.executeUpdate();
+    }
+
+    private static void updateProduct(int productId, RepositoryProduct productToSave, AbstractGeometry2D geometry, Path relativePath, int remoteMissionId,
+                               int localRepositoryId, FileTime fileTime, long sizeInBytes, Connection connection)
+            throws SQLException {
         final PreparedStatement statement = connection.prepareStatement("UPDATE products SET name = ?, remote_mission_id = ?," +
                 "local_repository_id = ?, relative_path = ?, entry_point = NULL, size_in_bytes = ?, acquisition_date = ?, " +
                 "last_modified_date = ?, geometry = ?, data_format_type_id = ?, pixel_type_id = ?, sensor_type_id = ? WHERE id = ?");
@@ -1059,7 +1117,7 @@ public class DataAccess {
         statement.setLong(5, sizeInBytes);
         statement.setTimestamp(6, Timestamp.valueOf(productToSave.getAcquisitionDate()));
         statement.setTimestamp(7, new Timestamp(fileTime.toMillis()));
-        statement.setString(8, productToSave.getPolygon().toWKT());
+        statement.setString(8, geometry.toWKT());
         statement.setInt(9, productToSave.getDataFormatType().getValue());
         statement.setInt(10, productToSave.getPixelType().getValue());
         statement.setInt(11, productToSave.getSensorType().getValue());
