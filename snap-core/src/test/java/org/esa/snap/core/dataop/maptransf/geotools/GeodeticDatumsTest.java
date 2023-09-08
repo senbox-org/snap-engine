@@ -16,14 +16,17 @@
 
 package org.esa.snap.core.dataop.maptransf.geotools;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.datum.DatumAuthorityFactory;
 
-public class GeodeticDatumsTest extends TestCase {
+import static org.junit.Assert.assertSame;
 
+public class GeodeticDatumsTest {
+
+    @Test
     public void testGeodeticDatums() throws FactoryException {
         final DatumAuthorityFactory factory = ReferencingFactoryFinder.getDatumAuthorityFactory("EPSG", null);
 
@@ -35,5 +38,4 @@ public class GeodeticDatumsTest extends TestCase {
         assertSame(GeodeticDatums.WGS72, GeodeticDatums.getGeodeticDatum(Datum.WGS_72));
         assertSame(GeodeticDatums.WGS84, GeodeticDatums.getGeodeticDatum(Datum.WGS_84));
     }
-
 }

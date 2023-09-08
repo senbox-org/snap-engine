@@ -16,14 +16,17 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ProductNodeGroupTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ProductNodeGroupTest {
+
+    @Test
     public void testAddRemoveAreObservable() {
         Product p = new Product("p", "t", 10, 10);
 
-        assertEquals(false, p.isModified());
+        assertFalse(p.isModified());
 
         ProductNodeGroup<Placemark> pinGroup = p.getPinGroup();
         PNL pl = new PNL(Placemark.class);
@@ -43,13 +46,13 @@ public class ProductNodeGroupTest extends TestCase {
         pinGroup.add(placemark1);
         pinGroup.add(placemark2);
         pinGroup.add(placemark3);
-        assertEquals(true, p.isModified());
+        assertTrue(p.isModified());
         assertEquals(3, pinGroup.getNodeCount());
         assertEquals("+p1;+p2;+p3;", pl.trace);
         pl.trace = "";
 
         p.setModified(false);
-        assertEquals(false, p.isModified());
+        assertFalse(p.isModified());
         assertEquals("", pl.trace);
 
         assertSame(placemark1, pinGroup.get(0));
@@ -72,7 +75,7 @@ public class ProductNodeGroupTest extends TestCase {
         bl.trace = "";
 
         p.setModified(false);
-        assertEquals(false, p.isModified());
+        assertFalse(p.isModified());
         assertEquals("", pl.trace);
         assertEquals("", bl.trace);
 
@@ -80,7 +83,7 @@ public class ProductNodeGroupTest extends TestCase {
         assertEquals("c:b2.unit;", bl.trace);
         bl.trace = "";
 
-        assertEquals(true, p.isModified());
+        assertTrue(p.isModified());
 
         p.removeBand(p.getBand("b1"));
         p.removeBand(p.getBand("b2"));
@@ -90,6 +93,7 @@ public class ProductNodeGroupTest extends TestCase {
         bl.trace = "";
     }
 
+    @Test
     public void testNodeChangeIsObservable() {
         final Product p = new Product("p", "t", 10, 10);
         final ProductNodeGroup<Placemark> pinGroup = p.getPinGroup();
@@ -101,40 +105,39 @@ public class ProductNodeGroupTest extends TestCase {
         p.addProductNodeListener(listener);
 
         placemark.setLabel("new label");
-        assertEquals(true, p.isModified());
+        assertTrue(p.isModified());
         assertEquals("c:p1.label;", listener.trace);
     }
 
+    @Test
     public void testOwnership() {
         MetadataElement root = new MetadataElement("root");
         MetadataElement child = new MetadataElement("child");
 
-        ProductNodeGroup<MetadataElement> referencingGroup = new ProductNodeGroup<MetadataElement>(null, "metadataElements", false);
+        ProductNodeGroup<MetadataElement> referencingGroup = new ProductNodeGroup<>(null, "metadataElements", false);
         child.setOwner(root);
         assertSame(root, child.getOwner());
         referencingGroup.add(child);
-        assertEquals(true, referencingGroup.contains(child));
+        assertTrue(referencingGroup.contains(child));
         assertSame(root, child.getOwner());
         referencingGroup.remove(child);
-        assertEquals(false, referencingGroup.contains(child));
+        assertFalse(referencingGroup.contains(child));
         assertSame(root, child.getOwner());
 
-        ProductNodeGroup<MetadataElement> owningGroup = new ProductNodeGroup<MetadataElement>(null, "metadataElements", true);
+        ProductNodeGroup<MetadataElement> owningGroup = new ProductNodeGroup<>(null, "metadataElements", true);
         child.setOwner(root);
         assertSame(root, child.getOwner());
         owningGroup.add(child);
-        assertEquals(true, owningGroup.contains(child));
+        assertTrue(owningGroup.contains(child));
         assertSame(owningGroup, child.getOwner());
         owningGroup.remove(child);
-        assertEquals(false, owningGroup.contains(child));
+        assertFalse(owningGroup.contains(child));
         assertSame(null, child.getOwner());
     }
 
     private static class PNL implements ProductNodeListener {
-
-
-        String trace = "";
         private final Class<? extends ProductNode> nodeClass;
+        String trace = "";
 
         public PNL(Class<? extends ProductNode> nodeClass) {
             this.nodeClass = nodeClass;
