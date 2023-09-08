@@ -72,7 +72,6 @@ public class GDALInstallerTest {
     public void testCopyDistribution() {
         try {
             final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
-            gdalVersion.setOsCategory(OSCategory.getOSCategory());
             assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
             GDALInstaller.copyDistribution(gdalVersion);
             assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));

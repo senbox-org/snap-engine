@@ -17,12 +17,12 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -32,18 +32,20 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class TiffIFDTest extends TestCase {
+import static org.junit.Assert.*;
 
-    private Product _product;
+public class TiffIFDTest {
+
     private static final int WIDTH = 10;
     private static final int HEIGHT = 20;
+    private Product _product;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         _product = new Product("name", "type", WIDTH, HEIGHT);
     }
 
+    @Test
     public void testTiffIFDCreation_WithEmptyProduct() {
         try {
             new TiffIFD(_product);
@@ -55,6 +57,7 @@ public class TiffIFDTest extends TestCase {
         }
     }
 
+    @Test
     public void testTiffIFDCreationMixedTypes() throws Exception {
         _product.addBand("b1", ProductData.TYPE_UINT8);
         _product.addBand("b2", ProductData.TYPE_UINT16);
@@ -93,8 +96,8 @@ public class TiffIFDTest extends TestCase {
                 TiffCode.SAMPLE_FORMAT_FLOAT.getValue(),
                 TiffCode.SAMPLE_FORMAT_FLOAT.getValue(),
         };
-        final double[] expXResolution = new double[]{1 / 1};
-        final double[] expYResolution = new double[]{1 / 1};
+        final double[] expXResolution = new double[]{1};
+        final double[] expYResolution = new double[]{1};
         final double[] expResolutionUnit = new double[]{1};
 
         final TiffAscii beamMetadata = TiffIFD.getBeamMetadata(_product);
@@ -130,6 +133,7 @@ public class TiffIFDTest extends TestCase {
         assertEquals(expEntireSize, ifd.getRequiredEntireSize());
     }
 
+    @Test
     public void testTiffIFDCreationUByte() throws Exception {
         _product.addBand("b1", ProductData.TYPE_UINT8);
         _product.addBand("b2", ProductData.TYPE_UINT16);
@@ -138,7 +142,6 @@ public class TiffIFDTest extends TestCase {
         _product.setPreferredTileSize(tileSize);
 
         final TiffIFD ifd = new TiffIFD(_product);
-
 
         final double[] expWidth = new double[]{WIDTH};
         final double[] expHeight = new double[]{HEIGHT};
@@ -162,8 +165,8 @@ public class TiffIFDTest extends TestCase {
                 TiffCode.SAMPLE_FORMAT_UINT.getValue(),
                 TiffCode.SAMPLE_FORMAT_UINT.getValue()
         };
-        final double[] expXResolution = new double[]{1 / 1};
-        final double[] expYResolution = new double[]{1 / 1};
+        final double[] expXResolution = new double[]{1};
+        final double[] expYResolution = new double[]{1};
         final double[] expResolutionUnit = new double[]{1};
         final TiffAscii beamMetadata = TiffIFD.getBeamMetadata(_product);
 
@@ -199,6 +202,7 @@ public class TiffIFDTest extends TestCase {
         assertEquals(expEntireSize, ifd.getRequiredEntireSize());
     }
 
+    @Test
     public void testWriteToStream() throws Exception {
         _product.addBand("b1", ProductData.TYPE_UINT16);
         _product.addBand("b2", ProductData.TYPE_FLOAT32);
@@ -223,7 +227,7 @@ public class TiffIFDTest extends TestCase {
         final double[] expPhotoInter = new double[]{TiffCode.PHOTOMETRIC_BLACK_IS_ZERO.getValue()};
         final TiffAscii expImageDescription = new TiffAscii(_product.getName());
         final double[] expStripOffsets = new double[]{
-                0 + expectedStreamLength, 800 + expectedStreamLength
+                expectedStreamLength, 800 + expectedStreamLength
         };
         final double[] expSamplesPerPixel = new double[]{_product.getNumBands()};
         final double[] expRowsPerStrip = new double[]{HEIGHT};
@@ -235,8 +239,8 @@ public class TiffIFDTest extends TestCase {
                 TiffCode.SAMPLE_FORMAT_FLOAT.getValue(),
                 TiffCode.SAMPLE_FORMAT_FLOAT.getValue(),
         };
-        final double[] expXResolution = new double[]{1 / 1};
-        final double[] expYResolution = new double[]{1 / 1};
+        final double[] expXResolution = new double[]{1};
+        final double[] expYResolution = new double[]{1};
         final double[] expResolutionUnit = new double[]{1};
 
         long offset = ifd.getRequiredIfdSize() + startOffset;
@@ -292,6 +296,7 @@ public class TiffIFDTest extends TestCase {
         Assert.assertArrayEquals(expIfdBytes, actBytes);
     }
 
+    @Test
     public void testWriteToStream_WithIllegalOffset() {
         _product.addBand("b1", ProductData.TYPE_UINT16);
         fillBandWithData(_product.getBandAt(0), 20);
@@ -309,6 +314,7 @@ public class TiffIFDTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetStripOffsets_AfterWrite() throws IOException {
         final long firstIFDOffset = 10;
         _product.addBand("b1", ProductData.TYPE_UINT16);
@@ -325,11 +331,6 @@ public class TiffIFDTest extends TestCase {
                 stripOffsets[0].getValue());
     }
 
-    @Test
-    public void testDimapHeader_ComponentGeoCoding() {
-
-    }
-
     private long computeRequiredValuesSize(final double[] expBitsPerSample,
                                            final double[] expStripOffsets,
                                            final double[] expStripByteCounts,
@@ -338,12 +339,12 @@ public class TiffIFDTest extends TestCase {
                                            final double[] expYResolution,
                                            TiffAscii imageDescription, TiffAscii metadata) {
 
-        long size = TiffType.getBytesForType(TiffType.SHORT) * expBitsPerSample.length;
-        size += TiffType.getBytesForType(TiffType.LONG) * expStripOffsets.length;
-        size += TiffType.getBytesForType(TiffType.LONG) * expStripByteCounts.length;
-        size += TiffType.getBytesForType(TiffType.SHORT) * expSampleFormat.length;
-        size += TiffType.getBytesForType(TiffType.RATIONAL) * expXResolution.length;
-        size += TiffType.getBytesForType(TiffType.RATIONAL) * expYResolution.length;
+        long size = (long) TiffType.getBytesForType(TiffType.SHORT) * expBitsPerSample.length;
+        size += (long) TiffType.getBytesForType(TiffType.LONG) * expStripOffsets.length;
+        size += (long) TiffType.getBytesForType(TiffType.LONG) * expStripByteCounts.length;
+        size += (long) TiffType.getBytesForType(TiffType.SHORT) * expSampleFormat.length;
+        size += (long) TiffType.getBytesForType(TiffType.RATIONAL) * expXResolution.length;
+        size += (long) TiffType.getBytesForType(TiffType.RATIONAL) * expYResolution.length;
         size += imageDescription.getSizeInBytes();
         size += metadata.getSizeInBytes();
 
@@ -450,5 +451,4 @@ public class TiffIFDTest extends TestCase {
         }
         band.setData(data);
     }
-
 }

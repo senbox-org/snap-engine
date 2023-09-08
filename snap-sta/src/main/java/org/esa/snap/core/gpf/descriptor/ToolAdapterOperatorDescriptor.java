@@ -19,6 +19,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.StreamException;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.descriptor.dependency.Bundle;
@@ -817,6 +818,7 @@ public class ToolAdapterOperatorDescriptor implements OperatorDescriptor {
     private static XStream createXStream(ClassLoader classLoader) {
         XStream xStream = new XStream();
         xStream.setClassLoader(classLoader);
+        xStream.addPermission(AnyTypePermission.ANY);
         xStream.registerConverter(new TemplateConverter(
                 xStream.getConverterLookup().lookupConverterForType(Template.class),
                 xStream.getReflectionProvider()));

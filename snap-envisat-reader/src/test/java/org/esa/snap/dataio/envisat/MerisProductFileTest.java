@@ -15,10 +15,13 @@
  */
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class MerisProductFileTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class MerisProductFileTest {
+
+    @Test
     public void testDddbProductTypeReplacement() {
         // IODD 5
         final int v5 = MerisProductFile.IODD_VERSION_5;
@@ -26,10 +29,10 @@ public class MerisProductFileTest extends TestCase {
         testDddbProductTypeReplacement("MER_FR__1P_IODD5", "MER_FR__1P", v5);
         testDddbProductTypeReplacement("MER_RR__2P_IODD6", "MER_RR__2P", v5); // L2 is compliant with L2 IODD 6
         testDddbProductTypeReplacement("MER_RR__1C_IODD5", "MER_RR__1C",
-                                       v5); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v5); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement("MER_FR__2P_IODD6", "MER_FR__2P", v5); // L2 is compliant with L2 IODD 6
         testDddbProductTypeReplacement("MER_RR__2C_IODD6", "MER_RR__2C",
-                                       v5); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v5); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement(null, "MERIS", v5); // unknown product type
 
         // IODD 6
@@ -39,7 +42,7 @@ public class MerisProductFileTest extends TestCase {
         testDddbProductTypeReplacement("MER_RR__2P_IODD6", "MER_RR__2P", v6); // L2 affected
         testDddbProductTypeReplacement("MER_FR__2P_IODD6", "MER_FR__2P", v6); // L2 affected
         testDddbProductTypeReplacement("MER_RR__2C_IODD6", "MER_RR__2C",
-                                       v6); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v6); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement(null, "MERIS", v6);  // unknown product type
 
         // IODD 7
@@ -52,10 +55,10 @@ public class MerisProductFileTest extends TestCase {
         testDddbProductTypeReplacement("MER_RR__2C_IODD7", "MER_RR__2C", v7); // only full swath affected
         testDddbProductTypeReplacement("MER_FR__1P", "MER_FRS_1P", v7); // full swath affected
         testDddbProductTypeReplacement("MER_FR__1C", "MER_FRS_1C",
-                                       v7); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v7); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement("MER_FR__2P_IODD7", "MER_FRS_2P", v7); // full swath affected
         testDddbProductTypeReplacement("MER_FR__2C_IODD7", "MER_FRS_2C",
-                                       v7); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v7); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement(null, "MERIS", v7);  // unknown product type
 
         // IODD 8
@@ -68,10 +71,10 @@ public class MerisProductFileTest extends TestCase {
         testDddbProductTypeReplacement(null, "MER_RR__2C", v8); // only full swath affected
         testDddbProductTypeReplacement("MER_FR__1P", "MER_FRS_1P", v8); // full swath affected
         testDddbProductTypeReplacement("MER_FR__1C", "MER_FRS_1C",
-                                       v8); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v8); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement("MER_FR__2P", "MER_FRS_2P", v8); // full swath affected
         testDddbProductTypeReplacement("MER_FR__2C", "MER_FRS_2C",
-                                       v8); // similar child product, todo: (nf) there is no '2C' descriptor!
+                v8); // similar child product, todo: (nf) there is no '2C' descriptor!
         testDddbProductTypeReplacement(null, "MERIS", v8);  // unknown product type
 
         // invalid IODD version

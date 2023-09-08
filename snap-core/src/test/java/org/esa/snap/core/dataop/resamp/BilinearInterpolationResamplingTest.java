@@ -15,13 +15,17 @@
  */
 package org.esa.snap.core.dataop.resamp;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class BilinearInterpolationResamplingTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class BilinearInterpolationResamplingTest {
 
     final Resampling resampling = Resampling.BILINEAR_INTERPOLATION;
     final TestRaster raster = new TestRaster();
 
+    @Test
     public void testCreateIndex() {
         final Resampling.Index index = resampling.createIndex();
         assertNotNull(index);
@@ -37,6 +41,7 @@ public class BilinearInterpolationResamplingTest extends TestCase {
         assertEquals(1, index.kj.length);
     }
 
+    @Test
     public void testIndexAndSample() throws Exception {
         final Resampling.Index index = resampling.createIndex();
 
@@ -67,16 +72,17 @@ public class BilinearInterpolationResamplingTest extends TestCase {
                                     float kjExp,
                                     float sampleExp) throws Exception {
         resampling.computeIndex(x, y, raster.getWidth(), raster.getHeight(), index);
-        assertEquals(i1Exp, index.i[0]);
-        assertEquals(i2Exp, index.i[1]);
-        assertEquals(j1Exp, index.j[0]);
-        assertEquals(j2Exp, index.j[1]);
+        assertEquals(i1Exp, index.i[0], 1e-8);
+        assertEquals(i2Exp, index.i[1], 1e-8);
+        assertEquals(j1Exp, index.j[0], 1e-8);
+        assertEquals(j2Exp, index.j[1], 1e-8);
         assertEquals(kiExp, index.ki[0], 1e-5f);
         assertEquals(kjExp, index.kj[0], 1e-5f);
         double sample = resampling.resample(raster, index);
         assertEquals(sampleExp, sample, 1e-5f);
     }
 
+    @Test
     public void testCornerBasedIndex() throws Exception {
         testCornerIndex(-.5f, 0.0f);
         testCornerIndex(0.0f, 0.0f);
@@ -93,7 +99,7 @@ public class BilinearInterpolationResamplingTest extends TestCase {
         testCornerIndex(2.2f, 2.3f);
     }
 
-    private void testCornerIndex(final float x, final float y) throws Exception{
+    private void testCornerIndex(final float x, final float y) throws Exception {
 
         final Resampling.Index index = resampling.createIndex();
         resampling.computeCornerBasedIndex(x, y, raster.getWidth(), raster.getHeight(), index);
@@ -101,12 +107,12 @@ public class BilinearInterpolationResamplingTest extends TestCase {
         final Resampling.Index indexExp = resampling.createIndex();
         computeExpectedIndex(x, y, raster.getWidth(), raster.getHeight(), indexExp);
 
-        assertEquals(indexExp.i[0], index.i[0]);
-        assertEquals(indexExp.i[1], index.i[1]);
-        assertEquals(indexExp.j[0], index.j[0]);
-        assertEquals(indexExp.j[1], index.j[1]);
-        assertEquals(indexExp.ki[0], index.ki[0]);
-        assertEquals(indexExp.kj[0], index.kj[0]);
+        assertEquals(indexExp.i[0], index.i[0], 1e-8);
+        assertEquals(indexExp.i[1], index.i[1], 1e-8);
+        assertEquals(indexExp.j[0], index.j[0], 1e-8);
+        assertEquals(indexExp.j[1], index.j[1], 1e-8);
+        assertEquals(indexExp.ki[0], index.ki[0], 1e-8);
+        assertEquals(indexExp.kj[0], index.kj[0], 1e-8);
     }
 
     private void computeExpectedIndex(

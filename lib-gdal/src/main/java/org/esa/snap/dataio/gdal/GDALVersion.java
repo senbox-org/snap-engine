@@ -24,15 +24,15 @@ import java.util.logging.Logger;
  */
 public enum GDALVersion {
 
-    GDAL_321_FULL("3.2.1", "3-2-1", false, new String[]{"gdalalljni"}),
-    GDAL_32X_JNI("3.2.x", "3-2-X", true, null),
-    GDAL_31X_JNI("3.1.x", "3-1-X", true, null),
-    GDAL_30X_JNI("3.0.x", "3-0-X", false, null),
-    GDAL_24X_JNI("2.4.x", "2-4-X", false, null),
-    GDAL_23X_JNI("2.3.x", "2-3-X", false, null),
-    GDAL_22X_JNI("2.2.x", "2-2-X", false, null),
-    GDAL_21X_JNI("2.1.x", "2-1-X", false, null),
-    GDAL_20X_JNI("2.0.x", "2-0-X", false, null);
+    GDAL_321_FULL("3.2.1", "3-2-1", true, new String[]{"gdalalljni"}, false),
+    GDAL_32X_JNI("3.2.x", "3-2-X", true, new String[]{"gdalalljni"}, true),
+    GDAL_31X_JNI("3.1.x", "3-1-X", true, new String[]{"gdalalljni"}, true),
+    GDAL_30X_JNI("3.0.x", "3-0-X", false, new String[]{"gdalalljni"}, true),
+    GDAL_24X_JNI("2.4.x", "2-4-X", false, new String[]{"gdalalljni"}, true),
+    GDAL_23X_JNI("2.3.x", "2-3-X", false, new String[]{"gdalalljni"}, true),
+    GDAL_22X_JNI("2.2.x", "2-2-X", false, new String[]{"libgdalconstjni.dylib", "libgdaljni.dylib", "libgnmjni.dylib", "libogrjni.dylib", "libosrjni.dylib"}, true),
+    GDAL_21X_JNI("2.1.x", "2-1-X", false, new String[]{"libgdalconstjni.dylib", "libgdaljni.dylib", "libgnmjni.dylib", "libogrjni.dylib", "libosrjni.dylib"}, true),
+    GDAL_20X_JNI("2.0.x", "2-0-X", false, new String[]{"libgdalconstjni.dylib", "libgdaljni.dylib", "libgnmjni.dylib", "libogrjni.dylib", "libosrjni.dylib"}, true);
 
     static final String VERSION_NAME = "{version}";
     static final String JNI_NAME = "{jni}";
@@ -58,10 +58,10 @@ public enum GDALVersion {
 
     String id;
     final String name;
-    String location;
+    final String location;
     final boolean cogCapable;
     final String[] nativeLibraryNames;
-    OSCategory osCategory;
+    final boolean isJNI;
 
     /**
      * Creates new instance for this enum.
@@ -71,11 +71,13 @@ public enum GDALVersion {
      * @param cogCapable  the COG compatibility of version: {@code true} if version is COG compatible
      * @param nativeLibraryNames the array with native libraries names to be loaded
      */
-    GDALVersion(String id, String name, boolean cogCapable, String[] nativeLibraryNames) {
+    GDALVersion(String id, String name, boolean cogCapable, String[] nativeLibraryNames, boolean isJNI) {
         this.id = id;
         this.name = name;
         this.cogCapable = cogCapable;
         this.nativeLibraryNames = nativeLibraryNames;
+        this.isJNI = isJNI;
+        this.location = getNativeLibrariesFolderPath().toString();
     }
 
     /**
@@ -102,7 +104,7 @@ public enum GDALVersion {
      * @return the installed GDAL version when found or internal GDAL version otherwise
      */
     public static GDALVersion getGDALVersion() {
-        if (INSTALLED_VERSION != null) {
+        if (INSTALLED_VERSION == null) {
             INSTALLED_VERSION = getSelectedInstalledVersion();
         }
         if (GDALLoaderConfig.getInstance().useInstalledGDALLibrary() && INSTALLED_VERSION != null) {
@@ -204,8 +206,6 @@ public enum GDALVersion {
                 final GDALVersion gdalVersion = JNI_VERSIONS.get(version);
                 if (gdalVersion != null) {
                     gdalVersion.setId(versionId);
-                    gdalVersion.setOsCategory(osCategory);
-                    gdalVersion.setLocation(installedVersionsPath);
                     logger.log(Level.FINE, () -> "GDAL " + versionId + " found on system. JNI driver will be used.");
                     gdalVersions.putIfAbsent(version, gdalVersion);
                 } else {
@@ -225,20 +225,9 @@ public enum GDALVersion {
      */
     public static GDALVersion getInternalVersion() {
         if (INTERNAL_VERSION == null) {
-            INTERNAL_VERSION = retrieveInternalVersion();
+            INTERNAL_VERSION = GDAL_321_FULL;
         }
         return INTERNAL_VERSION;
-    }
-
-    /**
-     * Retrieves internal GDAL version from SNAP distribution packages.
-     *
-     * @return the internal GDAL version
-     */
-    private static GDALVersion retrieveInternalVersion() {
-        GDAL_321_FULL.setOsCategory(OSCategory.getOSCategory());
-        GDAL_321_FULL.setLocation(GDAL_321_FULL.getNativeLibrariesFolderPath().toString());
-        return GDAL_321_FULL;
     }
 
     /**
@@ -269,39 +258,12 @@ public enum GDALVersion {
     }
 
     /**
-     * Sets the location of this version.
-     *
-     * @param location the new location
-     */
-    private void setLocation(String location) {
-        this.location = location;
-    }
-
-    /**
-     * Gets the OS category of this version.
-     *
-     * @return the OS category of this version
-     */
-    public OSCategory getOsCategory() {
-        return this.osCategory;
-    }
-
-    /**
-     * Sets the OS category of this version
-     *
-     * @param osCategory the new OS category
-     */
-    void setOsCategory(OSCategory osCategory) {
-        this.osCategory = osCategory;
-    }
-
-    /**
      * Gets whether this version is JNI driver.
      *
      * @return {@code true} if this version is JNI driver
      */
     public boolean isJni() {
-        return this.nativeLibraryNames == null;
+        return this.isJNI;
     }
 
     /**
@@ -447,8 +409,8 @@ public enum GDALVersion {
      * @return the GDAL native library files path for install this version
      */
     public Path[] getGDALNativeLibraryFilesPath() {
-        final Path[] gdalNativeLibaryFiles = new Path[this.nativeLibraryNames.length];
-        for (int i = 0; i < this.nativeLibraryNames.length; i++) {
+        final Path[] gdalNativeLibaryFiles = new Path[this.nativeLibraryNames!=null?this.nativeLibraryNames.length:0];
+        for (int i = 0; i < gdalNativeLibaryFiles.length; i++) {
             gdalNativeLibaryFiles[i] = getLocationPath();
             if (org.apache.commons.lang3.SystemUtils.IS_OS_UNIX) {
                 gdalNativeLibaryFiles[i] = gdalNativeLibaryFiles[i].resolve("lib").resolve("jni");

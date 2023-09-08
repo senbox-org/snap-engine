@@ -16,24 +16,18 @@
 
 package org.esa.snap.dataio.getasse30;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.text.ParseException;
 
-
-public class GETASSE30FileInfoTest extends TestCase {
-
-    @Override
-    protected void setUp() throws Exception {
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-    }
+import static org.junit.Assert.*;
 
 
+public class GETASSE30FileInfoTest {
+
+    @Test
     public void testValidFileSize() {
-        assertTrue(GETASSE30FileInfo.isValidFileSize(2 * (1L * 1L)));
+        assertTrue(GETASSE30FileInfo.isValidFileSize((long) 2));
         assertTrue(GETASSE30FileInfo.isValidFileSize(2 * (2L * 2L)));
         assertTrue(GETASSE30FileInfo.isValidFileSize(2 * (3L * 3L)));
         assertTrue(GETASSE30FileInfo.isValidFileSize(2 * (4L * 4L)));
@@ -55,12 +49,13 @@ public class GETASSE30FileInfoTest extends TestCase {
         assertFalse(GETASSE30FileInfo.isValidFileSize(-76));
     }
 
+    @Test
     public void testExtractEastingNorthingWithValidStrings() throws ParseException {
         int[] values = GETASSE30FileInfo.parseEastingNorthing("00N015W.GETASSE30");
         assertNotNull(values);
         assertEquals(2, values.length);
         assertEquals(-15, values[0]);
-        assertEquals(00, values[1]);
+        assertEquals(0, values[1]);
 
         values = GETASSE30FileInfo.parseEastingNorthing("75S135E.GETASSE30");
         assertNotNull(values);
@@ -69,6 +64,7 @@ public class GETASSE30FileInfoTest extends TestCase {
         assertEquals(-75, values[1]);
     }
 
+    @Test
     public void testExtractEastingNorthingWithInvalidStrings() {
         try {
             GETASSE30FileInfo.parseEastingNorthing("020n10w");  // string length  = 7
@@ -106,7 +102,7 @@ public class GETASSE30FileInfoTest extends TestCase {
         try {
             GETASSE30FileInfo.parseEastingNorthing("");
         } catch (IllegalArgumentException expected) {
-            assertTrue(expected.getMessage().indexOf("empty") > -1);
+            assertTrue(expected.getMessage().contains("empty"));
         } catch (ParseException e) {
             fail("IllegalArgumentException expected");
         }

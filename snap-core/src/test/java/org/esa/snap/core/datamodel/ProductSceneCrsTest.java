@@ -10,26 +10,21 @@ import org.geotools.referencing.crs.DefaultDerivedCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
 import org.geotools.referencing.operation.transform.AbstractMathTransform;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.geotools.referencing.operation.transform.ConcatenatedTransform;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.parameter.GeneralParameterDescriptor;
 import org.opengis.parameter.ParameterDescriptorGroup;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.Matrix;
 
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import static org.geotools.referencing.crs.DefaultGeographicCRS.WGS84;
 import static org.geotools.referencing.cs.DefaultCartesianCS.DISPLAY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Norman
@@ -96,28 +91,11 @@ public class ProductSceneCrsTest {
         assertEquals(at3, CRS.findMathTransform(crs1, crs3));
     }
 
-    @Test
-    @Ignore("GeoTools issue: org.opengis.parameter.InvalidParameterValueException: Argument \"info\" should not be null")
-    public void testNotSoObviousCase() throws Exception {
-        MathTransform2D geoCodingTransform = new NonLinearGarbageTransform();
-        DefaultDerivedCRS crs1 = new DefaultDerivedCRS("IMG1", WGS84, geoCodingTransform, DISPLAY);
-
-        AffineTransform2D at = new AffineTransform2D(AffineTransform.getScaleInstance(0.5, 0.5));
-        MathTransform concatenatedTransform = ConcatenatedTransform.create(geoCodingTransform, at);
-        DefaultDerivedCRS crs2 = new DefaultDerivedCRS("IMG2", WGS84, concatenatedTransform, DISPLAY);
-        // I get "org.opengis.parameter.InvalidParameterValueException: Argument "info" should not be null."  :(
-
-        MathTransform mathTransform = CRS.findMathTransform(crs1, crs2);
-        assertEquals(at, mathTransform);
-    }
-
     private static class NonLinearGarbageTransform extends AbstractMathTransform implements MathTransform2D {
 
         @Override
         public ParameterDescriptorGroup getParameterDescriptors() {
-            return new DefaultParameterDescriptorGroup(getClass().getSimpleName(), new GeneralParameterDescriptor[]{
-                    new DefaultParameterDescriptor<>("info", String.class, null, "")
-            });
+            return new DefaultParameterDescriptorGroup(getClass().getSimpleName(), new DefaultParameterDescriptor<>("info", String.class, null, ""));
         }
 
         @Override

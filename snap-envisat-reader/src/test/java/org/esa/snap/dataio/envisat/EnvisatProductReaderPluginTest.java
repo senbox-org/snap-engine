@@ -16,10 +16,13 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class EnvisatProductReaderPluginTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class EnvisatProductReaderPluginTest {
+
+    @Test
     public void testGetDefaultFileExtension() {
         final EnvisatProductReaderPlugIn plugIn = new EnvisatProductReaderPlugIn();
 

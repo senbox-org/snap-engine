@@ -16,10 +16,13 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class MathUtilsTest_SphereDistance extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class MathUtilsTest_SphereDistance {
+
+    @Test
     public void testSphereDistance_AtEquator() {
         final double meanEarthRadius_km = 6371.0;
         final double meanEarthDiameter_km = meanEarthRadius_km * 2;
@@ -34,27 +37,28 @@ public class MathUtilsTest_SphereDistance extends TestCase {
 
         // method under Test
         double distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                                   lam1_rad, phi1_rad,
-                                                   lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
 
         assertEquals(expected, distance, 1.0e-11);
 
         lam1_rad = MathUtils.DTOR * 80.0;
         lam2_rad = MathUtils.DTOR * 90.0;
         distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                            lam1_rad, phi1_rad,
-                                            lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
         assertEquals(expected, distance, 1.0e-11);
 
         lam1_rad = MathUtils.DTOR * -175.0;
         lam2_rad = MathUtils.DTOR * 175.0;
         distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                            lam1_rad, phi1_rad,
-                                            lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
 
         assertEquals(expected, distance, 1.0e-11);
     }
 
+    @Test
     public void testSphereDistance_VertivalAcrossTheEquator() {
         final double meanEarthRadius_km = 6371.0;
         final double meanEarthDiameter_km = meanEarthRadius_km * 2;
@@ -69,20 +73,21 @@ public class MathUtilsTest_SphereDistance extends TestCase {
 
         // method under Test
         double distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                                   lam1_rad, phi1_rad,
-                                                   lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
 
         assertEquals(expected, distance, 1.0e-11);
 
         phi1_rad = MathUtils.DTOR * 5.0;
         phi2_rad = MathUtils.DTOR * -5.0;
         distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                            lam1_rad, phi1_rad,
-                                            lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
 
         assertEquals(expected, distance, 1.0e-11);
     }
 
+    @Test
     public void testSphereDistance_45degreeAcrossTheEquator() {
         final double meanEarthRadius_km = 6371.0;
         final double meanEarthDiameter_km = meanEarthRadius_km * 2;
@@ -104,11 +109,12 @@ public class MathUtilsTest_SphereDistance extends TestCase {
 
         // method under test
         final double distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                                         lam1_rad, phi1_rad,
-                                                         lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
         assertEquals(expected, distance, 1.0e-11);
     }
 
+    @Test
     public void testSphereDistance_beliebig() {
         final double meanEarthRadius_km = 6371.0;
         final double meanEarthDiameter_km = meanEarthRadius_km * 2;
@@ -130,8 +136,8 @@ public class MathUtilsTest_SphereDistance extends TestCase {
 
         // method under test
         final double distance = MathUtils.sphereDistance(meanEarthRadius_km,
-                                                         lam1_rad, phi1_rad,
-                                                         lam2_rad, phi2_rad);
+                lam1_rad, phi1_rad,
+                lam2_rad, phi2_rad);
         assertEquals(expected, distance, 1.0e-11);
     }
 }

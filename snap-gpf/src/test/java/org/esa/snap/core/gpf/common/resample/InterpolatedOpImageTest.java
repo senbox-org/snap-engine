@@ -18,8 +18,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Tonio Fincke
@@ -113,10 +113,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -131,7 +131,7 @@ public class InterpolatedOpImageTest {
         assertEquals(6.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(6.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(6.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -142,10 +142,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -160,7 +160,7 @@ public class InterpolatedOpImageTest {
         assertEquals(4.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(5.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(5.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(123.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(123.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -171,10 +171,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -189,7 +189,7 @@ public class InterpolatedOpImageTest {
         assertEquals(5.66666666, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(5.16666666, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(5.83333333, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -200,10 +200,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -218,7 +218,7 @@ public class InterpolatedOpImageTest {
         assertEquals(6.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(5.16666666, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(5.83333333, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -229,10 +229,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -247,7 +247,7 @@ public class InterpolatedOpImageTest {
         assertEquals(5.666666507720947, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(6.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(6.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -258,10 +258,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -276,7 +276,7 @@ public class InterpolatedOpImageTest {
         assertEquals(4.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
         assertEquals(5.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
         assertEquals(5.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
-        assertEquals(123.0, targetData.getSampleDouble(2, 2, 0));
+        assertEquals(123.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
     }
 
     @Test
@@ -291,39 +291,15 @@ public class InterpolatedOpImageTest {
         testCubicConvolution(ProductData.TYPE_FLOAT32);
     }
 
-    @Test
-    @Ignore("Needs to be fixed. SNAP-1241")
-    public void testInterpolate_Byte_CubicConvolution() throws NoninvertibleTransformException {
-        testCubicConvolution(ProductData.TYPE_INT8);
-    }
-
-    @Test
-    @Ignore("Needs to be fixed. SNAP-1241")
-    public void testInterpolate_Short_CubicConvolution() throws NoninvertibleTransformException {
-        testCubicConvolution(ProductData.TYPE_INT16);
-    }
-
-    @Test
-    @Ignore("Needs to be fixed. SNAP-1241")
-    public void testInterpolate_UShort_CubicConvolution() throws NoninvertibleTransformException {
-        testCubicConvolution(ProductData.TYPE_UINT16);
-    }
-
-    @Test
-    @Ignore("Needs to be fixed. SNAP-1241")
-    public void testInterpolate_Int_CubicConvolution() throws NoninvertibleTransformException {
-        testCubicConvolution(ProductData.TYPE_INT32);
-    }
-
     private void testCubicConvolution(int dataType) throws NoninvertibleTransformException {
         final Band sourceBand = createSourceBand(dataType);
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Cubic_Convolution),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Cubic_Convolution),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -346,10 +322,10 @@ public class InterpolatedOpImageTest {
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Bilinear),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());
@@ -375,7 +351,7 @@ public class InterpolatedOpImageTest {
             assertEquals(5.66666666, targetData.getSampleDouble(2, 1, 0), 1e-6);
             assertEquals(5.16666666, targetData.getSampleDouble(0, 2, 0), 1e-6);
             assertEquals(5.83333333, targetData.getSampleDouble(1, 2, 0), 1e-6);
-            assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+            assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
         }
     }
 
@@ -385,10 +361,10 @@ public class InterpolatedOpImageTest {
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
 
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
-                                                                  sourceBand.getNoDataValue(), dataBufferType,
-                                                                  ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Nearest),
-                                                                  sourceBand.getImageToModelTransform(),
-                                                                  referenceBand.getImageToModelTransform());
+                sourceBand.getNoDataValue(), dataBufferType,
+                ResampleUtils.getUpsamplingFromInterpolationType(InterpolationType.Nearest),
+                sourceBand.getImageToModelTransform(),
+                referenceBand.getImageToModelTransform());
 
         assertNotNull(image);
         assertEquals(referenceBand.getRasterWidth(), image.getWidth());

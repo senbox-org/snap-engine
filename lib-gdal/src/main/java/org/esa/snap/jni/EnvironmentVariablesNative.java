@@ -30,4 +30,6 @@ public class EnvironmentVariablesNative {
 
  3b) ---- for Linux ----
     gcc -fPIC -I{$JAVA_HOME}/include -I{$JAVA_HOME}/include/linux -shared -o environment-variables.so org_esa_snap_jni_EnvironmentVariablesNative.c
+ 3c) ---- for Mac ----
+    gcc -I$JAVA_HOME/include -I$JAVA_HOME/include/darwin -shared -o environment-variables.dylib org_esa_snap_jni_EnvironmentVariablesNative.c
 */

@@ -29,7 +29,7 @@ import org.esa.snap.pixex.output.PixExMeasurementFactory;
 import org.esa.snap.pixex.output.PixExProductRegistry;
 import org.esa.snap.pixex.output.PixExRasterNamesFactory;
 import org.esa.snap.pixex.output.TargetWriterFactoryAndMap;
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Before;

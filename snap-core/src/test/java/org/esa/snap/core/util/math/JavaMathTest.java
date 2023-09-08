@@ -16,14 +16,17 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * A set of tests which are used to demonstrate
  * behaviour of Java mathematics.
  */
-public class JavaMathTest extends TestCase {
+public class JavaMathTest {
 
+    @Test
     public void testUnsignedIntegerArithmetic() {
 
         assertEquals(0xff, 0xff);
@@ -36,9 +39,9 @@ public class JavaMathTest extends TestCase {
 
         byte b;
         b = -128;
-        assertFalse(b << 8 == (b & 0xff) << 8);
+        assertNotEquals(b << 8, (b & 0xff) << 8);
         b = 127;
-        assertTrue(b << 8 == (b & 0xff) << 8);
+        assertEquals(b << 8, (b & 0xff) << 8);
 
         int i;
         i = 240;
@@ -52,31 +55,31 @@ public class JavaMathTest extends TestCase {
      * BEAM does not really rely on the success of this test,
      * it's just for demonstration purpose.
      */
-    public void testStrangeFloatinPointValues() {
+    @Test
+    public void testStrangeFloatingPointValues() {
         float f;
 
         // Float.NaN is really not a number:
         f = (float) Math.sqrt(-1);
         assertTrue(Float.isNaN(f));
-        assertFalse(f == f);
+        assertFalse((f == f));
         assertTrue(f != f);
-        assertFalse(f == Float.NaN);
         assertTrue(f != Float.NaN);
 
         // Float.POSITIVE_INFINITY is a real number:
         f = +1f / 0f;
         assertTrue(Float.isInfinite(f));
-        assertTrue(f == Float.POSITIVE_INFINITY);
+        assertEquals(Float.POSITIVE_INFINITY, f, 0.0);
         assertTrue(f > 0f);
-        assertTrue(f == f);
+        assertEquals(f, f, 0.0);
         assertFalse(f != f);
 
         // Float.NEGATIVE_INFINITY is a real number:
         f = -1f / 0f;
         assertTrue(Float.isInfinite(f));
-        assertTrue(f == Float.NEGATIVE_INFINITY);
+        assertEquals(Float.NEGATIVE_INFINITY, f, 0.0);
         assertTrue(f < 0f);
-        assertTrue(f == f);
+        assertEquals(f, f, 0.0);
         assertFalse(f != f);
 
         // test that greater- and less-than comparisions with NaN always fail
@@ -86,15 +89,16 @@ public class JavaMathTest extends TestCase {
         assertFalse(Float.NaN > Float.NEGATIVE_INFINITY);
     }
 
+    @Test
     public void testNaN() {
         double x = Double.NaN;
-        assertFalse(x == Double.NaN);
+        assertFalse((x == Double.NaN));
         assertTrue(x != Double.NaN);
         x = 6;
         assertTrue(x != Double.NaN);
-        assertFalse(x == Double.NaN);
+        assertNotEquals(Double.NaN, x, 0.0);
         assertTrue(Float.isNaN((float) Double.NaN));
-        assertTrue(Double.isNaN((double) Float.NaN));
+        assertTrue(Double.isNaN(Float.NaN));
         assertTrue(Double.isNaN(Math.floor(Double.NaN)));
         assertEquals(0, (int) Float.NaN);
         assertEquals(0, (int) Math.floor(Float.NaN));
@@ -106,10 +110,10 @@ public class JavaMathTest extends TestCase {
         assertEquals(0, (int) Math.floor(Double.NaN + 0.5f));
         assertEquals(Integer.MIN_VALUE, (int) Double.NEGATIVE_INFINITY);
         assertEquals(Integer.MAX_VALUE, (int) Double.POSITIVE_INFINITY);
-        assertEquals(Double.NaN, Math.max(Double.NaN, 5.4));
+        assertEquals(Double.NaN, Math.max(Double.NaN, 5.4), 1e-8);
         assertFalse(Double.NaN < 5.4);
         assertFalse(Double.NaN > 5.4);
-        assertFalse(Double.NaN == 5.4);
+        assertNotEquals(Double.NaN, 5.4, 0.0);
         assertFalse(Double.NaN < Double.NEGATIVE_INFINITY);
         assertFalse(Double.NaN > Double.NEGATIVE_INFINITY);
 
@@ -122,14 +126,15 @@ public class JavaMathTest extends TestCase {
      * BEAM does not really rely on the success of this test,
      * it's just for demonstration purpose.
      */
+    @Test
     public void testDoubleUnequalToFloat() {
         assertTrue(0.1f != 0.1d);
-        assertTrue(1f == 1d);
-        assertTrue((0.1f * 10f) == (0.1d * 10d));
+        assertEquals(1f, 1d, 0.0);
+        assertEquals((0.1f * 10f), (0.1d * 10d), 0.0);
 
         final double d1 = 7.1;
         final float f1 = (float) d1;
-        assertFalse(d1 == f1);
+        assertNotEquals(d1, f1, 0.0);
     }
 
     /**
@@ -137,11 +142,12 @@ public class JavaMathTest extends TestCase {
      * BEAM does not really rely on the success of this test,
      * it's just for demonstration purpose.
      */
+    @Test
     public void testFloatEqualToDouble() {
         final float f1 = 7.1f;
         final double d1 = f1;
 
-        assertTrue(f1 == d1);
+        assertEquals(f1, d1, 0.0);
     }
 
     /**
@@ -149,35 +155,36 @@ public class JavaMathTest extends TestCase {
      * BEAM does not really rely on the success of this test,
      * it's just for demonstration purpose.
      */
+    @Test
     public void testComputingWithInfinity() {
 
-        assertTrue(Double.NEGATIVE_INFINITY == Math.log(0.0));
+        assertEquals(Double.NEGATIVE_INFINITY, Math.log(0.0), 0.0);
         assertTrue(Double.isNaN(Math.log(Double.NEGATIVE_INFINITY)));
-        assertTrue(Double.POSITIVE_INFINITY == Math.log(Double.POSITIVE_INFINITY));
+        assertEquals(Double.POSITIVE_INFINITY, Math.log(Double.POSITIVE_INFINITY), 0.0);
 
-        assertTrue(1.0 == Math.exp(0.0));
-        assertTrue(0.0 == Math.exp(Double.NEGATIVE_INFINITY));
-        assertTrue(Double.POSITIVE_INFINITY == Math.exp(Double.POSITIVE_INFINITY));
+        assertEquals(1.0, Math.exp(0.0), 0.0);
+        assertEquals(0.0, Math.exp(Double.NEGATIVE_INFINITY), 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, Math.exp(Double.POSITIVE_INFINITY), 0.0);
 
 
-        assertTrue(Double.NEGATIVE_INFINITY == -Double.POSITIVE_INFINITY);
-        assertTrue(Double.POSITIVE_INFINITY == -Double.NEGATIVE_INFINITY);
+        assertEquals(Double.NEGATIVE_INFINITY, -Double.POSITIVE_INFINITY, 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, -Double.NEGATIVE_INFINITY, 0.0);
 
-        assertTrue(Double.POSITIVE_INFINITY == Double.POSITIVE_INFINITY + 1.0);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY + 1.0);
-        assertTrue(Double.POSITIVE_INFINITY == Double.POSITIVE_INFINITY - 1.0);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY - 1.0);
-        assertTrue(Double.POSITIVE_INFINITY == Double.POSITIVE_INFINITY * 2.0);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY * 2.0);
-        assertTrue(Double.POSITIVE_INFINITY == Double.POSITIVE_INFINITY / 2.0);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY / 2.0);
+        assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY + 1.0, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY + 1.0, 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY - 1.0, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY - 1.0, 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY * 2.0, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY * 2.0, 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY / 2.0, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY / 2.0, 0.0);
 
         assertTrue(Double.isNaN(Double.NEGATIVE_INFINITY + Double.POSITIVE_INFINITY));
         assertTrue(Double.isNaN(Double.POSITIVE_INFINITY + Double.NEGATIVE_INFINITY));
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY - Double.POSITIVE_INFINITY);
-        assertTrue(Double.POSITIVE_INFINITY == Double.POSITIVE_INFINITY - Double.NEGATIVE_INFINITY);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.NEGATIVE_INFINITY * Double.POSITIVE_INFINITY);
-        assertTrue(Double.NEGATIVE_INFINITY == Double.POSITIVE_INFINITY * Double.NEGATIVE_INFINITY);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY - Double.POSITIVE_INFINITY, 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY - Double.NEGATIVE_INFINITY, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY * Double.POSITIVE_INFINITY, 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY * Double.NEGATIVE_INFINITY, 0.0);
         assertTrue(Double.isNaN(Double.NEGATIVE_INFINITY / Double.POSITIVE_INFINITY));
         assertTrue(Double.isNaN(Double.POSITIVE_INFINITY / Double.NEGATIVE_INFINITY));
     }

@@ -15,10 +15,14 @@
  */
 package org.esa.snap.core.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class BitSetterTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+public class BitSetterTest {
+
+    @Test
     public void test32BitFlagMethods() {
         int[] indexes = new int[]{
                 0, 1, 4, 5,
@@ -38,7 +42,7 @@ public class BitSetterTest extends TestCase {
             final int result = results[i];
             int flags = BitSetter.setFlag(0, index);
             assertEquals("i = " + i, result, flags);
-            assertEquals("i = " + i, true, BitSetter.isFlagSet(flags, index));
+            assertTrue("i = " + i, BitSetter.isFlagSet(flags, index));
         }
 
         int flags = 0;
@@ -58,6 +62,7 @@ public class BitSetterTest extends TestCase {
         }
     }
 
+    @Test
     public void test64BitFlagMethods() {
         int[] indexes = new int[]{
                 0, 1, 7, 8,
@@ -77,7 +82,7 @@ public class BitSetterTest extends TestCase {
             final long result = results[i];
             long flags = BitSetter.setFlag(0L, index, true);
             assertEquals("i = " + i, result, flags);
-            assertEquals("i = " + i, true, BitSetter.isFlagSet(flags, index));
+            assertTrue("i = " + i, BitSetter.isFlagSet(flags, index));
         }
 
         long flags = 0;
@@ -97,6 +102,7 @@ public class BitSetterTest extends TestCase {
         }
     }
 
+    @Test
     public void testSetAndReset64BitFlag() throws Exception {
         // test that long flags can be reset properly
         long sampleL = BitSetter.setFlag(0, 2, true);
@@ -119,6 +125,7 @@ public class BitSetterTest extends TestCase {
         assertEquals(2, sampleL);
     }
 
+    @Test
     public void testSetAndReset32BitFlag() throws Exception {
         // test that int flags can be reset properly
         int sampleI = BitSetter.setFlag(0, 2, true);
@@ -140,5 +147,4 @@ public class BitSetterTest extends TestCase {
         sampleI = BitSetter.setFlag(sampleI, 3, false);
         assertEquals(2, sampleI);
     }
-
 }

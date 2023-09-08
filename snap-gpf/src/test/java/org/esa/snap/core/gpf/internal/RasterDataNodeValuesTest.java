@@ -15,34 +15,38 @@
  */
 package org.esa.snap.core.gpf.internal;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.Test;
 
-public class RasterDataNodeValuesTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class RasterDataNodeValuesTest {
+
+    @Test
     public void testgetNames() {
         Product testProduct = new Product("name", "desc", 1, 1);
         testProduct.addBand("a", ProductData.TYPE_INT8);
         testProduct.addBand("b", ProductData.TYPE_INT8);
-        
+
         String[] bandNames = RasterDataNodeValues.getNames(testProduct, Band.class);
-        
+
         assertNotNull(bandNames);
         assertEquals(2, bandNames.length);
         assertEquals("a", bandNames[0]);
         assertEquals("b", bandNames[1]);
-        
+
         bandNames = RasterDataNodeValues.getNames(testProduct, Band.class, true);
-        
+
         assertNotNull(bandNames);
         assertEquals(3, bandNames.length);
         assertEquals("", bandNames[0]);
         assertEquals("a", bandNames[1]);
         assertEquals("b", bandNames[2]);
-        
+
         String[] maskNames = RasterDataNodeValues.getNames(testProduct, Mask.class);
         assertNotNull(maskNames);
         assertEquals(0, maskNames.length);

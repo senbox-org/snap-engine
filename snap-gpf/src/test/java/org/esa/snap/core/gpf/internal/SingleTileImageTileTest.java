@@ -16,17 +16,21 @@
 
 package org.esa.snap.core.gpf.internal;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.awt.*;
 import java.awt.image.Raster;
+
+import static org.junit.Assert.*;
 
 public class SingleTileImageTileTest extends AbstractTileImageTileTest {
     final static int IMAGE_W = 4;
     final static int IMAGE_H = 5;
     private TestOpImage imageFLOAT32;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         imageFLOAT32 = getImage("B_FLOAT32");
     }
@@ -46,14 +50,15 @@ public class SingleTileImageTileTest extends AbstractTileImageTileTest {
         return new Dimension(IMAGE_W, IMAGE_H);
     }
 
+    @Test
     public void testThatImageIsNotTiled() {
         assertEquals(1, imageFLOAT32.getTileCount());
         assertEquals(IMAGE_W, imageFLOAT32.getSampleModel().getWidth());
         assertEquals(IMAGE_H, imageFLOAT32.getSampleModel().getHeight());
     }
 
+    @Test
     public void testFullTile() {
-
         Rectangle expectedRect = new Rectangle(IMAGE_W, IMAGE_H);
         TileImpl tile = imageFLOAT32.getTile(expectedRect);
         assertNotNull(tile);
@@ -81,6 +86,7 @@ public class SingleTileImageTileTest extends AbstractTileImageTileTest {
         testFloat32RawSampleIO(tile, IMAGE_W / 2, IMAGE_H / 2);
     }
 
+    @Test
     public void testChildTile() {
         final int CHILD_X = 1;
         final int CHILD_Y = 2;
@@ -96,18 +102,18 @@ public class SingleTileImageTileTest extends AbstractTileImageTileTest {
         testOnlySamplesFloatAccessible(tile);
 
         // test for initial sample values
-        assertEquals(12.5, tile.getSampleDouble(CHILD_X + 0, CHILD_Y + 0), 1e-5);
-        assertEquals(22.5, tile.getSampleDouble(CHILD_X + 1, CHILD_Y + 0), 1e-5);
-        assertEquals(13.5, tile.getSampleDouble(CHILD_X + 0, CHILD_Y + 1), 1e-5);
+        assertEquals(12.5, tile.getSampleDouble(CHILD_X, CHILD_Y), 1e-5);
+        assertEquals(22.5, tile.getSampleDouble(CHILD_X + 1, CHILD_Y), 1e-5);
+        assertEquals(13.5, tile.getSampleDouble(CHILD_X, CHILD_Y + 1), 1e-5);
         assertEquals(23.5, tile.getSampleDouble(CHILD_X + 1, CHILD_Y + 1), 1e-5);
-        assertEquals(14.5, tile.getSampleDouble(CHILD_X + 0, CHILD_Y + 2), 1e-5);
+        assertEquals(14.5, tile.getSampleDouble(CHILD_X, CHILD_Y + 2), 1e-5);
         assertEquals(24.5, tile.getSampleDouble(CHILD_X + 1, CHILD_Y + 2), 1e-5);
 
-        testFloat32RawSampleIO(tile, CHILD_X + 0, CHILD_Y + 0);
-        testFloat32RawSampleIO(tile, CHILD_X + 1, CHILD_Y + 0);
-        testFloat32RawSampleIO(tile, CHILD_X + 0, CHILD_Y + 1);
+        testFloat32RawSampleIO(tile, CHILD_X, CHILD_Y);
+        testFloat32RawSampleIO(tile, CHILD_X + 1, CHILD_Y);
+        testFloat32RawSampleIO(tile, CHILD_X, CHILD_Y + 1);
         testFloat32RawSampleIO(tile, CHILD_X + 1, CHILD_Y + 1);
-        testFloat32RawSampleIO(tile, CHILD_X + 0, CHILD_Y + 2);
+        testFloat32RawSampleIO(tile, CHILD_X, CHILD_Y + 2);
         testFloat32RawSampleIO(tile, CHILD_X + 1, CHILD_Y + 2);
     }
 }

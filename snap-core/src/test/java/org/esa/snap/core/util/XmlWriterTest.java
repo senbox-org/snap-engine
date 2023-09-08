@@ -15,17 +15,16 @@
  */
 package org.esa.snap.core.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class XmlWriterTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public XmlWriterTest(String s) {
-        super(s);
-    }
+public class XmlWriterTest {
 
+    @Test
     public void testPrintLineWidthText() {
         StringWriter stringWriter = new StringWriter();
         XmlWriter xmlWriter = new XmlWriter(stringWriter, false);
@@ -35,11 +34,12 @@ public class XmlWriterTest extends TestCase {
         String expected = "    <tag>name</tag>";
         stringWriter = new StringWriter();
         new PrintWriter(stringWriter).println();
-        expected = expected + stringWriter.toString();
+        expected = expected + stringWriter;
 
         assertEquals(expected, current);
     }
 
+    @Test
     public void testPrintLineEmptyText() {
         StringWriter stringWriter = new StringWriter();
         XmlWriter xmlWriter = new XmlWriter(stringWriter, false);
@@ -49,11 +49,12 @@ public class XmlWriterTest extends TestCase {
         String expected = "    <tag />";
         stringWriter = new StringWriter();
         new PrintWriter(stringWriter).println();
-        expected = expected + stringWriter.toString();
+        expected = expected + stringWriter;
 
         assertEquals(expected, current);
     }
 
+    @Test
     public void testPrintLineNullText() {
         StringWriter stringWriter = new StringWriter();
         XmlWriter xmlWriter = new XmlWriter(stringWriter, false);
@@ -63,11 +64,12 @@ public class XmlWriterTest extends TestCase {
         String expected = "    <tag />";
         stringWriter = new StringWriter();
         new PrintWriter(stringWriter).println();
-        expected = expected + stringWriter.toString();
+        expected = expected + stringWriter;
 
         assertEquals(expected, current);
     }
 
+    @Test
     public void testPrintLineText_ampersand() {
         StringWriter stringWriter = new StringWriter();
         XmlWriter xmlWriter = new XmlWriter(stringWriter, false);
@@ -77,11 +79,12 @@ public class XmlWriterTest extends TestCase {
         String expected = "    <tag>ampersand &amp; ampersand</tag>";
         stringWriter = new StringWriter();
         new PrintWriter(stringWriter).println();
-        expected = expected + stringWriter.toString();
+        expected = expected + stringWriter;
 
         assertEquals(expected, current);
     }
 
+    @Test
     public void testPrintLineText_parentheses() {
         StringWriter stringWriter = new StringWriter();
         XmlWriter xmlWriter = new XmlWriter(stringWriter, false);
@@ -91,11 +94,12 @@ public class XmlWriterTest extends TestCase {
         String expected = "    <tag>test &lt; test &gt; test</tag>";
         stringWriter = new StringWriter();
         new PrintWriter(stringWriter).println();
-        expected = expected + stringWriter.toString();
+        expected = expected + stringWriter;
 
         assertEquals(expected, current);
     }
 
+    @Test
     public void testCreateTags() {
         String[] tags = XmlWriter.createTags(0, "name");
 
@@ -104,6 +108,7 @@ public class XmlWriterTest extends TestCase {
         assertEquals("</name>", tags[1]);
     }
 
+    @Test
     public void testCreateTagsWithAtribs() {
         String[] tags = XmlWriter.createTags(2, "name", new String[][]{{"a", "b"}, {"c", "d"}});
 
@@ -112,6 +117,7 @@ public class XmlWriterTest extends TestCase {
         assertEquals("        </name>", tags[1]);
     }
 
+    @Test
     public void testCreateTagsWithAtribs_ampersand_and_parentheses() {
         String[] tags = XmlWriter.createTags(2, "name", new String[][]{{"a", "a & b"}, {"c", "d < e > f"}});
 

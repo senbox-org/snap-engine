@@ -16,29 +16,26 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class ApproximatorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class ApproximatorTest {
 
     public final static double EPS = 1e-10;
     public final static int N = 72 * 72;
 
-    public ApproximatorTest(String s) {
-        super(s);
+    private static double random(double x1, double x2) {
+        return x1 + Math.random() * (x2 - x1);
     }
 
-    public static Test suite() {
-        return new TestSuite(ApproximatorTest.class);
-    }
-
+    @Test
     public void testFX() {
         final double axx = -3.0;
         final double ax = 2.0;
         final double a1 = -1.0;
 
-        double data[][] = new double[N][2];
+        double[][] data = new double[N][2];
         for (int i = 0; i < data.length; i++) {
             double x = random(-8, 8);
             double y = axx * x * x + ax * x + a1;
@@ -56,6 +53,7 @@ public class ApproximatorTest extends TestCase {
         assertEquals(0.0, rmse, EPS);
     }
 
+    @Test
     public void testFXY() {
         final double axx = -6.0;
         final double ayy = +5.0;
@@ -64,7 +62,7 @@ public class ApproximatorTest extends TestCase {
         final double ay = -2.0;
         final double a1 = +1.0;
 
-        double data[][] = new double[N][3];
+        double[][] data = new double[N][3];
         for (int i = 0; i < data.length; i++) {
             double x = random(-8, 8);
             double y = random(-8, 8);
@@ -74,8 +72,8 @@ public class ApproximatorTest extends TestCase {
             data[i][2] = z;
         }
         final FXY[] funcs = new FXY[]{FXY.X2, FXY.Y2, FXY.XY,
-                                      FXY.X, FXY.Y,
-                                      FXY.ONE};
+                FXY.X, FXY.Y,
+                FXY.ONE};
         double[] coeffs = new double[6];
         Approximator.approximateFXY(data, null, funcs, coeffs);
         double rmse = Approximator.computeRMSE(data, null, funcs, coeffs);
@@ -87,9 +85,5 @@ public class ApproximatorTest extends TestCase {
         assertEquals(ay, coeffs[4], EPS);
         assertEquals(a1, coeffs[5], EPS);
         assertEquals(0.0, rmse, EPS);
-    }
-
-    private static double random(double x1, double x2) {
-        return x1 + Math.random() * (x2 - x1);
     }
 }

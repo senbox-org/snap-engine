@@ -16,47 +16,41 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.util.BeamConstants;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
-public class RsMathUtilTest extends TestCase {
+public class RsMathUtilTest {
 
     public static final double EPS = 1e-5F;
-
-    public RsMathUtilTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(RsMathUtilTest.class);
-    }
 
     /**
      * Tests the functionality of radianceToReflectance():
      */
+    @Test
     public void testRadianceToReflectance() {
         float rad = 80.f;
         float sza = 30.f;
 
         // check for correct values
         assertEquals(0.1692265f, RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[0]),
-                     EPS);
+                EPS);
         assertEquals(0.1757149f, RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[5]),
-                     EPS);
+                EPS);
         assertEquals(0.23116349f, RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[10]),
-                     EPS);
+                EPS);
         assertEquals(0.3287255f, RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[14]),
-                     EPS);
+                EPS);
         testVectorVersion();
     }
 
     /**
      * Tests the functionality of reflectanceToRadiance():
      */
+    @Test
     public void testReflectanceToRadiance() {
         float rad = 80.f;
         float sza = 30.f;
@@ -64,12 +58,13 @@ public class RsMathUtilTest extends TestCase {
 
         float refl = RsMathUtils.radianceToReflectance(rad, sza, solarFlux);   // this is tested above
         float backToRad = RsMathUtils.reflectanceToRadiance(refl, sza, solarFlux);
-        assertEquals(rad, backToRad);
+        assertEquals(rad, backToRad, 1e-8);
     }
 
     /**
      * Tests the functionality of radianceToReflectance() vector version
      */
+    @Test
     public void testVectorVersion() {
 
         float[] rad = {80.f, 80.f, 80.f, 80.f};
@@ -77,28 +72,29 @@ public class RsMathUtilTest extends TestCase {
 
         // check for correct results
         assertEquals(0.1692265f,
-                     RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[0], null)[0],
-                     EPS);
+                RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[0], null)[0],
+                EPS);
         assertEquals(0.1757149f,
-                     RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[5], null)[0],
-                     EPS);
+                RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[5], null)[0],
+                EPS);
         assertEquals(0.23116349f,
-                     RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[10], null)[0],
-                     EPS);
+                RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[10], null)[0],
+                EPS);
         assertEquals(0.3287255f,
-                     RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[14], null)[0],
-                     EPS);
+                RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[14], null)[0],
+                EPS);
 
         // check that if we set a recycle array that it is actually used
         float[] recycle = new float[4];
 
         assertEquals(recycle,
-                     RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[0], recycle));
+                RsMathUtils.radianceToReflectance(rad, sza, BeamConstants.MERIS_SOLAR_FLUXES[0], recycle));
     }
 
     /**
      * Tests the functionality of zenithToElevation
      */
+    @Test
     public void testZenithToElevation() {
         // function must scale correctly
         assertEquals(45.f, RsMathUtils.zenithToElevation(45.f), 1e-7);
@@ -122,6 +118,7 @@ public class RsMathUtilTest extends TestCase {
     /**
      * Tests the functionality of elevationToZenith
      */
+    @Test
     public void testElevationToElevation() {
         // function must scale correctly
         assertEquals(45.f, RsMathUtils.elevationToZenith(45.f), 1e-7);
@@ -145,6 +142,7 @@ public class RsMathUtilTest extends TestCase {
     /**
      * Tests the functionality of simpleBarometric()
      */
+    @Test
     public void testSimpleBarometric() {
         float fRet;
 
@@ -197,14 +195,16 @@ public class RsMathUtilTest extends TestCase {
         // check that the recycle argument is not used when it has the wrong size
         float[] recycleShort = {0.f, 0.f, 0.f, 0.f};
         fRetArray = RsMathUtils.simpleBarometric(pressure, eHeight, recycleShort);
-        assertTrue(fRetArray != recycle);
+        assertNotSame(fRetArray, recycle);
     }
 
+    @Test
     public void testKoschmider() {
         assertEquals(3.92f, RsMathUtils.koschmieder(2.f), EPS);
         assertEquals(0.46117648482f, RsMathUtils.koschmieder(17.f), EPS);
     }
 
+    @Test
     public void testKoschmider_exception() {
         try {
             RsMathUtils.koschmieder(0.f);
@@ -213,11 +213,13 @@ public class RsMathUtilTest extends TestCase {
         }
     }
 
+    @Test
     public void testKoschmiderInv() {
         assertEquals(3.92f, RsMathUtils.koschmiederInv(2.f), EPS);
         assertEquals(39.2f, RsMathUtils.koschmiederInv(0.2f), EPS);
     }
 
+    @Test
     public void testKoschmiderInv_exception() {
         try {
             RsMathUtils.koschmiederInv(0.f);
@@ -226,7 +228,7 @@ public class RsMathUtilTest extends TestCase {
         }
     }
 
-
+    @Test
     public void testApplyGeodeticCorrection() {
         final GeoPos gp = new GeoPos();
         final float re = (float) RsMathUtils.MEAN_EARTH_RADIUS;
@@ -281,22 +283,5 @@ public class RsMathUtilTest extends TestCase {
         RsMathUtils.applyGeodeticCorrection(gp, h, 45, -90);
         assertEquals(expLon, gp.lon, EPS);
         assertEquals(expLat, gp.lat, EPS);
-
-//        gp.lon = 0;
-//        gp.lat = 45;
-//        expLon = 0;
-//        expLat = 45 + dpr * h / re;
-//        RsMathUtils.applyGeodeticCorrection(gp, h, 45, 0);
-//        assertEquals(expLon, gp.lon, EPS);
-//        assertEquals(expLat, gp.lat, EPS);
-//
-//        gp.lon = 0;
-//        gp.lat = 45;
-//        expLon = 0;
-//        expLat = 45 - dpr * h / re;
-//        RsMathUtils.applyGeodeticCorrection(gp, h, 45, 180);
-//        assertEquals(expLon, gp.lon, EPS);
-//        assertEquals(expLat, gp.lat, EPS);
     }
-
 }

@@ -15,20 +15,13 @@
  */
 package org.esa.snap.core.util;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class UtilConstantsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public UtilConstantsTest(String testName) {
-        super(testName);
-    }
+public class UtilConstantsTest {
 
-    public static Test suite() {
-        return new TestSuite(UtilConstantsTest.class);
-    }
-
+    @Test
     public void testTheMessages() {
         assertEquals("Object is not an array.", UtilConstants.MSG_OBJ_NO_ARRAY);
         assertEquals("Object is null.", UtilConstants.MSG_OBJECT_NULL);
@@ -57,6 +50,7 @@ public class UtilConstantsTest extends TestCase {
         assertEquals("Tokens must not be null.", UtilConstants.MSG_NULL_TOKEN);
     }
 
+    @Test
     public void testTheBufferNames() {
         assertEquals("DataBuffer.TYPE_BYTE", UtilConstants.BUFFER_BYTE_NAME);
         assertEquals("DataBuffer.TYPE_SHORT", UtilConstants.BUFFER_SHORT_NAME);
@@ -68,6 +62,7 @@ public class UtilConstantsTest extends TestCase {
         assertEquals("DataBuffer.TYPE_<?>", UtilConstants.BUFFER_UNKNOWN_NAME);
     }
 
+    @Test
     public void testColourSpaceConstants() {
         assertEquals("ColorSpace.TYPE_XYZ", UtilConstants.CS_TYPE_XYZ);
         assertEquals("ColorSpace.TYPE_Lab", UtilConstants.CS_TYPE_LAB);

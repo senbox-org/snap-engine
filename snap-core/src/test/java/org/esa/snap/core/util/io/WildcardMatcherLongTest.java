@@ -16,7 +16,7 @@
 
 package org.esa.snap.core.util.io;
 
-import org.esa.snap.test.LongTestRunner;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

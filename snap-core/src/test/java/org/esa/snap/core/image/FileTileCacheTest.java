@@ -16,18 +16,28 @@
 
 package org.esa.snap.core.image;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TiledImage;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.io.File;
 
-public class FileTileCacheTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class FileTileCacheTest {
+
+    private static TiledImage createImage() {
+        PixelInterleavedSampleModel sm = new PixelInterleavedSampleModel(DataBuffer.TYPE_USHORT, 120, 80, 1, 120, new int[]{0});
+        ColorModel cm = PlanarImage.createColorModel(sm);
+        TiledImage image = new TiledImage(0, 0, 256, 256, 0, 0, sm, cm);
+        return image;
+    }
+
+    @Test
     public void testGetImageId() {
         FileTileCache cache = new FileTileCache(new File("."));
         TiledImage image1 = createImage();
@@ -42,15 +52,16 @@ public class FileTileCacheTest extends TestCase {
         assertNotNull(id2);
         assertNotNull(id3);
 
-        assertTrue(!id1.equals(id2));
-        assertTrue(!id1.equals(id3));
-        assertTrue(!id2.equals(id3));
+        assertNotEquals(id1, id2);
+        assertNotEquals(id1, id3);
+        assertNotEquals(id2, id3);
 
         assertSame(id1, cache.getImageId(image1));
         assertSame(id2, cache.getImageId(image2));
         assertSame(id3, cache.getImageId(image3));
     }
 
+    @Test
     public void testGetTileIndices() {
         TiledImage image = createImage();
 
@@ -70,12 +81,5 @@ public class FileTileCacheTest extends TestCase {
         for (int i = 0; i < expectedIndices.length; i++) {
             assertEquals("i=" + i, expectedIndices[i], indices[i]);
         }
-    }
-
-    private static TiledImage createImage() {
-        PixelInterleavedSampleModel sm = new PixelInterleavedSampleModel(DataBuffer.TYPE_USHORT, 120, 80, 1, 120, new int[]{0});
-        ColorModel cm = PlanarImage.createColorModel(sm);
-        TiledImage image = new TiledImage(0, 0, 256, 256, 0, 0, sm, cm);
-        return image;
     }
 }

@@ -17,18 +17,23 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.TestOps;
 import org.esa.snap.core.util.jai.VerboseTileCache;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
 
-public class GraphProcessorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class GraphProcessorTest {
     private OperatorSpi spi1;
     private OperatorSpi spi2;
     private OperatorSpi spi3;
@@ -36,8 +41,8 @@ public class GraphProcessorTest extends TestCase {
     private TileCache testTileCache;
     private boolean defVerbosity;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         jaiTileCache = JAI.getDefaultInstance().getTileCache();
         defVerbosity = VerboseTileCache.isVerbose();
         VerboseTileCache.setVerbose(false);
@@ -55,8 +60,8 @@ public class GraphProcessorTest extends TestCase {
         registry.addOperatorSpi(spi3);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         testTileCache.flush();
         VerboseTileCache.setVerbose(defVerbosity);
         JAI.getDefaultInstance().setTileCache(jaiTileCache);
@@ -68,6 +73,7 @@ public class GraphProcessorTest extends TestCase {
 
 
     @SuppressWarnings("null")
+    @Test
     public void testTwoOpsExecutionOrder() throws Exception {
         GraphProcessor processor = new GraphProcessor();
 
@@ -98,9 +104,8 @@ public class GraphProcessorTest extends TestCase {
     //            \   /
     //            node3    <-- Target!
     //
+    @Test
     public void testThreeOpsExecutionOrder() throws Exception {
-
-
         Graph graph = new Graph("graph");
 
         Node node1 = new Node("node1", "Op1");
@@ -127,7 +132,5 @@ public class GraphProcessorTest extends TestCase {
         // --> Op2 should only be called once
         assertEquals("Op1;Op2;Op3;", TestOps.getCalls());
         TestOps.clearCalls();
-
     }
-
 }

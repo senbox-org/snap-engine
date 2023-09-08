@@ -1,14 +1,18 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Olaf Danne
  */
-public class CfGeocodingPartTest extends TestCase {
+public class CfGeocodingPartTest {
 
+    @Test
     public void testIsGlobalShifted180() {
         Array longitudeData = Array.makeArray(DataType.DOUBLE, 480, 0.0, 0.75);
         assertTrue(CfGeocodingPart.isGlobalShifted180(longitudeData));

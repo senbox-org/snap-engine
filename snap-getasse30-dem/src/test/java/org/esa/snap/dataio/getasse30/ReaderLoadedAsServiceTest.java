@@ -15,15 +15,17 @@
  */
 package org.esa.snap.dataio.getasse30;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class ReaderLoadedAsServiceTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class ReaderLoadedAsServiceTest {
+
+    @Test
     public void testReaderIsLoaded() {
         int readerCount = 0;
 
@@ -33,12 +35,8 @@ public class ReaderLoadedAsServiceTest extends TestCase {
         while (readerPlugIns.hasNext()) {
             readerCount++;
             ProductReaderPlugIn plugIn = (ProductReaderPlugIn) readerPlugIns.next();
-            System.out.println("readerPlugIn.Class = " + plugIn.getClass());
-            System.out.println("readerPlugIn.Descr = " + plugIn.getDescription(null));
         }
 
-        Assert.assertEquals(1, readerCount);
-
+        assertEquals(1, readerCount);
     }
-
 }

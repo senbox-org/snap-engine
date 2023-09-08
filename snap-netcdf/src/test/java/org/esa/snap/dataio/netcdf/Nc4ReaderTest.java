@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -58,7 +59,7 @@ public class Nc4ReaderTest {
         assertNotNull(url);
         assertEquals("file", url.getProtocol());
 
-        final String path = URLDecoder.decode(url.getPath(), "UTF-8");
+        final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
         assertTrue(path.endsWith("test.nc"));
 
         final File file = new File(path);
@@ -77,7 +78,7 @@ public class Nc4ReaderTest {
     @Test
     public void testVariableAttributes() throws Exception {
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
-        final String path = URLDecoder.decode(url.getPath(), "UTF-8");
+        final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
         final File file = new File(path);
         final ProductReader reader = new CfNetCdfReaderPlugIn().createReaderInstance();
 
@@ -106,7 +107,6 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    //@Ignore("fails already while creating test product independent of NetCDF version, test is not in master")
     public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
         DummyProductBuilder pb = new DummyProductBuilder();
         pb.size(DummyProductBuilder.Size.SMALL);

@@ -17,10 +17,13 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TiffTypeTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class TiffTypeTest {
+
+    @Test
     public void testGetBytesForType() {
         assertEquals(1, TiffType.getBytesForType(TiffType.BYTE));
         assertEquals(1, TiffType.getBytesForType(TiffType.ASCII));
@@ -39,6 +42,7 @@ public class TiffTypeTest extends TestCase {
         assertEquals(8, TiffType.getBytesForType(TiffType.SRATIONAL));
     }
 
+    @Test
     public void testGetBytesForType_WithIllegalArgument() {
         try {
             TiffType.getBytesForType(new TiffShort(3849));
@@ -50,8 +54,9 @@ public class TiffTypeTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetType() {
-        TiffValue values[];
+        TiffValue[] values;
 
         values = new TiffValue[]{new TiffRational(1, 2), new TiffRational(12, 1)};
         assertEquals(TiffType.RATIONAL.getValue(), TiffType.getType(values).getValue());
@@ -69,9 +74,9 @@ public class TiffTypeTest extends TestCase {
         assertEquals(TiffType.DOUBLE.getValue(), TiffType.getType(values).getValue());
     }
 
+    @Test
     public void testGetType_WithValueNotSupported() {
-        final TiffValue values[];
-        values = new TiffValue[]{new TiffValueNotSupported()};
+        final TiffValue[] values = new TiffValue[]{new TiffValueNotSupported()};
 
         try {
             TiffType.getType(values).getValue();
@@ -83,8 +88,9 @@ public class TiffTypeTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetType_WithDifferingValueTypes() {
-        final TiffValue values[] = new TiffValue[]{
+        final TiffValue[] values = new TiffValue[]{
                 new TiffRational(1, 1),
                 new TiffLong(12345)
         };

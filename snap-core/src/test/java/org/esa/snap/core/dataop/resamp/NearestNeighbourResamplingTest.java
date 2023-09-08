@@ -15,13 +15,17 @@
  */
 package org.esa.snap.core.dataop.resamp;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class NearestNeighbourResamplingTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class NearestNeighbourResamplingTest {
 
     final Resampling resampling = Resampling.NEAREST_NEIGHBOUR;
     final TestRaster raster = new TestRaster();
 
+    @Test
     public void testCreateIndex() {
         final Resampling.Index index = resampling.createIndex();
         assertNotNull(index);
@@ -35,6 +39,7 @@ public class NearestNeighbourResamplingTest extends TestCase {
         assertEquals(0, index.kj.length);
     }
 
+    @Test
     public void testComputeIndexAndGetSample() throws Exception {
         final Resampling.Index index = resampling.createIndex();
         test(index, 0.5f, 0.0f, 0.0, 0.0, 10f);
@@ -48,12 +53,13 @@ public class NearestNeighbourResamplingTest extends TestCase {
 
     private void test(final Resampling.Index index, float x, float y, double iExp, double jExp, float sampleExp) throws Exception {
         resampling.computeIndex(x, y, raster.getWidth(), raster.getHeight(), index);
-        assertEquals(iExp, index.i0);
-        assertEquals(jExp, index.j0);
+        assertEquals(iExp, index.i0, 1e-8);
+        assertEquals(jExp, index.j0, 1e-8);
         double sample = resampling.resample(raster, index);
         assertEquals(sampleExp, sample, 1e-5f);
     }
 
+    @Test
     public void testCornerBasedIndex() throws Exception {
         testCornerIndex(0.5f, 0.0f);
         testCornerIndex(0.5f, 2.0f);
@@ -64,16 +70,15 @@ public class NearestNeighbourResamplingTest extends TestCase {
         testCornerIndex(2.9f, 2.9f);
     }
 
-    private void testCornerIndex(final float x, final float y) throws Exception{
-
+    private void testCornerIndex(final float x, final float y) throws Exception {
         final Resampling.Index index = resampling.createIndex();
         resampling.computeCornerBasedIndex(x, y, raster.getWidth(), raster.getHeight(), index);
 
         final Resampling.Index indexExp = resampling.createIndex();
         computeExpectedIndex(x, y, raster.getWidth(), raster.getHeight(), indexExp);
 
-        assertEquals(indexExp.i0, index.i0);
-        assertEquals(indexExp.j0, index.j0);
+        assertEquals(indexExp.i0, index.i0, 1e-8);
+        assertEquals(indexExp.j0, index.j0, 1e-8);
     }
 
     private void computeExpectedIndex(
@@ -86,5 +91,4 @@ public class NearestNeighbourResamplingTest extends TestCase {
         index.i0 = Resampling.Index.crop((int) Math.round(x), width - 1);
         index.j0 = Resampling.Index.crop((int) Math.round(y), height - 1);
     }
-
 }

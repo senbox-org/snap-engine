@@ -20,7 +20,6 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.awt.image.Raster;
@@ -189,58 +188,6 @@ public class CsvProductReaderTest {
         assertFalse(CsvProductReader.isSquareNumber(5));
         assertFalse(CsvProductReader.isSquareNumber(10));
         assertFalse(CsvProductReader.isSquareNumber(11));
-    }
-
-    @Test
-    @Ignore("Metadata support not yet implemented, therefore test is ignored")
-    public void testReadMetaData() throws Exception {
-        final Product product = readTestProduct("simple_format_example.txt");
-        final MetadataElement[] metadataElements = product.getMetadataRoot().getElements();
-        final MetadataElement propertyElement = metadataElements[0];
-        final MetadataElement recordElement = metadataElements[1];
-        final MetadataAttribute[] properties = propertyElement.getAttributes();
-        final MetadataElement[] records = recordElement.getElements();
-
-        assertEquals(2, metadataElements.length);
-
-        assertEquals("Properties", propertyElement.getName());
-        assertEquals("Records", recordElement.getName());
-
-        assertEquals(4, properties.length);
-        assertEquals(3, records.length);
-
-        assertEquals("geometry1", properties[0].getName());
-        assertEquals("POLYGON(1.0, 1.0, 1.1)", properties[0].getData().getElemString());
-        assertEquals("geometry2", properties[1].getName());
-        assertEquals("POLYGON(2.0, 1.0, 1.1)", properties[1].getData().getElemString());
-        assertEquals("separator", properties[2].getName());
-        assertEquals(",", properties[2].getData().getElemString());
-        assertEquals("crs", properties[3].getName());
-        assertTrue(properties[3].getData().getElemString().startsWith("GEOGCS[\"WGS 84\""));
-
-        final MetadataElement firstRecord = records[0];
-        assertEquals("0", firstRecord.getName());
-        assertEquals(3, firstRecord.getAttributes().length);
-        assertEquals("station", firstRecord.getAttributes()[0].getName());
-        assertEquals("AMRU1", firstRecord.getAttributes()[0].getData().getElemString());
-        assertEquals(ProductData.UTC.parse("2010-06-01T12:45:00", Constants.TIME_PATTERN).getAsDate().getTime(), firstRecord.getAttributeUTC("date_time").getAsDate().getTime());
-        assertEquals(ProductData.UTC.parse("2011-06-01T10:45:00", Constants.TIME_PATTERN).getAsDate().getTime(), firstRecord.getAttributeUTC("testTime").getAsDate().getTime());
-
-        final MetadataElement secondRecord = records[1];
-        assertEquals("1", secondRecord.getName());
-        assertEquals(2, secondRecord.getAttributes().length);
-        assertEquals("station", secondRecord.getAttributes()[0].getName());
-        assertEquals("AMRU1", secondRecord.getAttributes()[0].getData().getElemString());
-        assertEquals(ProductData.UTC.parse("2010-06-01T12:48:00", Constants.TIME_PATTERN).getAsDate().getTime(), secondRecord.getAttributeUTC("date_time").getAsDate().getTime());
-        assertNull(secondRecord.getAttribute("testTime"));
-
-        final MetadataElement thirdRecord = records[2];
-        assertEquals("2", thirdRecord.getName());
-        assertEquals(2, thirdRecord.getAttributes().length);
-        assertEquals("station", thirdRecord.getAttributes()[0].getName());
-        assertEquals("AMRU2", thirdRecord.getAttributes()[0].getData().getElemString());
-        assertNull(thirdRecord.getAttribute("date_time"));
-        assertEquals(ProductData.UTC.parse("2011-06-01T12:45:00", Constants.TIME_PATTERN).getAsDate().getTime(), thirdRecord.getAttributeUTC("testTime").getAsDate().getTime());
     }
 
     @Test

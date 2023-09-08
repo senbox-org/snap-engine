@@ -150,6 +150,13 @@
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
+                <artifactId>ceres-core</artifactId>
+                <version>${snap.version}</version>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
                 <artifactId>ceres-binding</artifactId>
                 <version>${snap.version}</version>
             </dependency>
@@ -213,10 +220,10 @@
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-test-utils</artifactId>
+                <artifactId>ceres-core</artifactId>
                 <version>${snap.version}</version>
-                <type>test-jar</type>
                 <scope>test</scope>
+                <type>test-jar</type>
             </dependency>
 
             <!-- SNAP Extension Modules -->
@@ -400,7 +407,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>31.1-jre</version>
+                <version>32.1.1-jre</version>
             </dependency>
 
             <!-- ImageioIO-Ext ############################################# -->

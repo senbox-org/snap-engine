@@ -18,44 +18,44 @@ package com.bc.ceres.swing.binding;
 
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValueSet;
-import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JTextField;
-import java.awt.GraphicsEnvironment;
+import javax.swing.*;
+import java.awt.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-@Ignore("Disabled, propagation of changes often not fast enough.")
 public class BindingContextObjectBackedTest {
 
     private PropertyContainer propertyContainerOB;
     private BindingContext bindingContextOB;
     private TestPojo pojo;
 
+    private static JComponent getPrimaryComponent(Binding binding) {
+        return binding.getComponents()[0];
+    }
 
     @Before
     public void setUp() throws Exception {
-        Assume.assumeFalse("Fails often on server, therefore disabled in headless mode.", GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            // we cannot execute this in a headless environment tb 2023-07-10
+            return;
+        }
 
         pojo = new TestPojo();
         propertyContainerOB = PropertyContainer.createObjectBacked(pojo);
         propertyContainerOB.getDescriptor("valueSetBoundIntValue").setValueSet(new ValueSet(TestPojo.intValueSet));
         bindingContextOB = new BindingContext(propertyContainerOB, null);
-
     }
 
     @Test
     public void testBindTextField() throws Exception {
+        if (GraphicsEnvironment.isHeadless()) {
+            // we cannot execute this in a headless environment tb 2023-07-10
+            return;
+        }
+
         JTextField textField = new JTextField();
         Binding binding = bindingContextOB.bind("stringValue", textField);
         assertNotNull(binding);
@@ -80,9 +80,13 @@ public class BindingContextObjectBackedTest {
         assertNotSame("Oscar", textField.getText()); // value change not detected by binding
     }
 
-
     @Test
     public void testAdjustComponents() throws Exception {
+        if (GraphicsEnvironment.isHeadless()) {
+            // we cannot execute this in a headless environment tb 2023-07-10
+            return;
+        }
+
         JTextField textField1 = new JTextField();
         JTextField textField2 = new JTextField();
         JCheckBox checkBox = new JCheckBox();
@@ -116,12 +120,8 @@ public class BindingContextObjectBackedTest {
         assertEquals("XYZ", textField2.getText());
     }
 
-
-    private static JComponent getPrimaryComponent(Binding binding) {
-        return binding.getComponents()[0];
-    }
-
     private static class TestPojo {
+        static Integer[] intValueSet = new Integer[]{101, 102, 103};
         boolean booleanValue;
         @SuppressWarnings("UnusedDeclaration")
         int intValue;
@@ -129,10 +129,7 @@ public class BindingContextObjectBackedTest {
         String stringValue;
         @SuppressWarnings("UnusedDeclaration")
         int[] listValue;
-
         @SuppressWarnings("UnusedDeclaration")
         int valueSetBoundIntValue;
-        static Integer[] intValueSet = new Integer[]{101, 102, 103};
     }
-
 }

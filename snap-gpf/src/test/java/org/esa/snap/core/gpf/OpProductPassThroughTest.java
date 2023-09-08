@@ -17,28 +17,33 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.util.Arrays;
+
+import static org.junit.Assert.*;
 
 /**
  * <i>Warning: Tests for experimental code added by nf (25.02.2010)</i><br/>
  *
  * @since BEAM 4.8
  */
-public class OpProductPassThroughTest extends TestCase {
-    public void testUpdateOnGpfBandOp() throws Exception {
+public class OpProductPassThroughTest {
+
+    @Test
+    public void testUpdateOnGpfBandOp() {
         testOp(new GpfBandOp());
     }
 
-    public void testUpdateOnJaiBandOp() throws Exception {
+    @Test
+    public void testUpdateOnJaiBandOp() {
         testOp(new JaiBandOp());
     }
 
@@ -53,7 +58,7 @@ public class OpProductPassThroughTest extends TestCase {
         assertSame(targetProduct, sourceProduct);
         assertNotNull(targetProduct.getBand("A"));
 
-        assertEquals(0.5f, targetProduct.getBand("A").getSourceImage().getData().getSampleFloat(0, 0, 0));
+        assertEquals(0.5f, targetProduct.getBand("A").getSourceImage().getData().getSampleFloat(0, 0, 0), 1e-8);
 
         op.sampleValue = -0.6f;
         op.update();
@@ -62,7 +67,7 @@ public class OpProductPassThroughTest extends TestCase {
         assertSame(targetProduct2, targetProduct);
         assertNotNull(targetProduct2.getBand("A"));
 
-        assertEquals(-0.6f, targetProduct2.getBand("A").getSourceImage().getData().getSampleFloat(0, 0, 0));
+        assertEquals(-0.6f, targetProduct2.getBand("A").getSourceImage().getData().getSampleFloat(0, 0, 0), 1e-8);
     }
 
     public static class Op extends Operator {
@@ -92,8 +97,8 @@ public class OpProductPassThroughTest extends TestCase {
         public void initialize() throws OperatorException {
             super.initialize();
             band.setSourceImage(ConstantDescriptor.create((float) targetProduct.getSceneRasterWidth(),
-                                                          (float) targetProduct.getSceneRasterHeight(),
-                                                          new Float[]{sampleValue}, null));
+                    (float) targetProduct.getSceneRasterHeight(),
+                    new Float[]{sampleValue}, null));
         }
 
     }

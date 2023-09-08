@@ -27,11 +27,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Arrays;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -39,15 +38,12 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestCreateElevationOp {
 
-    private static final String PROPERTY_NAME_S1_DATA_DIR = "s1tbx.tests.data.dir";
-    private final static String sep = File.separator;
-    private final static String input = System.getProperty(PROPERTY_NAME_S1_DATA_DIR,"/data/ssd/testData/s1tbx/");
-    private final static String inputSAR = input + sep + "SAR" + sep;
-    private final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
+    private final static File inputASAR_WSM = new File(TestUtils.TEST_SAR_UNITTESTS +
+            "ASAR/subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
     private final static OperatorSpi spi = new AddElevationOp.Spi();
 
-    private static double[] expectedValues = {
+    private final static double[] expectedValues = {
             1526.6146240234375,
             1521.0814208984375,
             1532.55810546875,
@@ -58,12 +54,14 @@ public class TestCreateElevationOp {
             1555.7523193359375
     };
 
-    private File inputFile;
-
     @Before
-    public void setup() {
-        inputFile =  inputASAR_WSM;
-        assumeTrue(inputFile.exists());
+    public void setup() throws Exception {
+        try {
+            assumeTrue(inputASAR_WSM + " not found.", inputASAR_WSM.exists());
+        } catch (Exception e) {
+            TestUtils.skipTest(this, e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -73,7 +71,7 @@ public class TestCreateElevationOp {
      */
     @Test
     public void testProcessing() throws Exception {
-        final Product sourceProduct = TestUtils.readSourceProduct(inputFile);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputASAR_WSM);
 
         final AddElevationOp op = (AddElevationOp) spi.createOperator();
         assertNotNull(op);
@@ -91,7 +89,7 @@ public class TestCreateElevationOp {
         final double[] demValues = new double[8];
         elevBand.readPixels(0, 0, 4, 2, demValues, ProgressMonitor.NULL);
 
-        assertTrue(Arrays.equals(expectedValues, demValues));
+        assertArrayEquals(expectedValues, demValues, 0.0);
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
         //TestUtils.attributeEquals(abs, AbstractMetadata.DEM, "SRTM");

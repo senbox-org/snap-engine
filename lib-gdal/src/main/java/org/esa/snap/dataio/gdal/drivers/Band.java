@@ -197,7 +197,7 @@ public class Band extends GDALBase implements Closeable {
      * @param val the JNI GDAL Band class GetOffset(Double[] val) method 'val' argument
      */
     public void getOffset(Double[] val) {
-        invoke(getOffsetHandle, this.jniBandInstance, val);
+        invoke(getOffsetHandle, this.jniBandInstance, (Object) val);
     }
 
     /**
@@ -206,7 +206,7 @@ public class Band extends GDALBase implements Closeable {
      * @param val the JNI GDAL Band class GetScale(Double[] val) method 'val' argument
      */
     public void getScale(Double[] val) {
-        invoke(getScaleHandle, this.jniBandInstance, val);
+        invoke(getScaleHandle, this.jniBandInstance, (Object) val);
     }
 
     /**
@@ -224,7 +224,7 @@ public class Band extends GDALBase implements Closeable {
      * @param val the JNI GDAL Band class GetNoDataValue(Double[] val) method 'val' argument
      */
     public void getNoDataValue(Double[] val) {
-        invoke(getNoDataValueHandle, this.jniBandInstance, val);
+        invoke(getNoDataValueHandle, this.jniBandInstance, (Object) val);
     }
 
     /**

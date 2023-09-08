@@ -32,23 +32,22 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestInputProductValidator {
 
-    private static final String PROPERTY_NAME_S1_DATA_DIR = "s1tbx.tests.data.dir";
-    private final static String sep = File.separator;
-    private final static String input = System.getProperty(PROPERTY_NAME_S1_DATA_DIR,"/data/ssd/testData/s1tbx/");
-    private final static String inputSAR = input + sep + "SAR" + sep;
-    private final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
+    private final static File inputASAR_WSM = new File(TestUtils.TEST_SAR_UNITTESTS + "ASAR/subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
-    File inputFile;
     @Before
-    public void setup() {
-        inputFile =  inputASAR_WSM;
-        assumeTrue(inputFile.exists());
+    public void setup() throws Exception {
+        try {
+            assumeTrue(inputASAR_WSM + " not found.", inputASAR_WSM.exists());
+        } catch (Exception e) {
+            TestUtils.skipTest(this, e.getMessage());
+            throw e;
+        }
     }
 
     @Test
     public void TestNotSentinel1Product() throws Exception {
 
-        final Product sourceProduct = TestUtils.readSourceProduct(inputFile);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputASAR_WSM);
         final InputProductValidator validator = new InputProductValidator(sourceProduct);
 
         try {
