@@ -1,6 +1,8 @@
 package org.esa.snap.core.datamodel;
 
 
+import org.esa.snap.core.util.ProductUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -357,7 +359,7 @@ public class ColorSchemeInfo {
         return  colorBarTitle;
     }
 
-    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName, String mission) {
+    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName, Product product) {
 
         ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
         if (colorSchemeManager != null) {
@@ -368,7 +370,7 @@ public class ColorSchemeInfo {
 
             ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
             for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
-                if (colorSchemeLookupInfo.isMatch(bandName, mission)) {
+                if (colorSchemeLookupInfo.isMatch(bandName, product)) {
                     return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
                 }
             }

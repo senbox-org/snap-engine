@@ -549,6 +549,8 @@ public class ColorSchemeManager {
             String schemeId = getTextValue(schemeElement, "SCHEME_ID");
             String description = getTextValue(schemeElement, "DESCRIPTION");
             String mission = getTextValue(schemeElement, "MISSION");
+            String productType = getTextValue(schemeElement, "PRODUCT_TYPE");
+            String filename = getTextValue(schemeElement, "FILE_NAME");
 
 
             if (regex == null || regex.length() == 0) {
@@ -569,14 +571,13 @@ public class ColorSchemeManager {
             }
 
             if (checksOut) {
-                ColorSchemeLookupInfo colorSchemeLookupInfo = new ColorSchemeLookupInfo(regex, schemeId, description, mission, colorSchemeInfo);
+                ColorSchemeLookupInfo colorSchemeLookupInfo = new ColorSchemeLookupInfo(regex, schemeId, description, mission, productType, filename, colorSchemeInfo);
 
                 if (colorSchemeLookupInfo != null) {
                     colorSchemeLookupInfos.add(colorSchemeLookupInfo);
                 }
             }
         }
-
     }
 
 

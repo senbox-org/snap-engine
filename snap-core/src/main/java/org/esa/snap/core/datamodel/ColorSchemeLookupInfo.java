@@ -1,6 +1,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.datamodel.ColorSchemeInfo;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,15 +22,19 @@ public class ColorSchemeLookupInfo {
     private ColorSchemeInfo colorSchemeInfo;
     private String description;
     private String mission;
+    private String productType;
+    private String filename;
 
 
-    public ColorSchemeLookupInfo(String regex, String scheme_id, String description, String mission, ColorSchemeInfo colorSchemeInfo) {
+    public ColorSchemeLookupInfo(String regex, String scheme_id, String description, String mission, String productType, String filename, ColorSchemeInfo colorSchemeInfo) {
 
         if (regex != null && scheme_id != null) {
             setRegex(regex);
             setScheme_id(scheme_id);
             setDescription(description);
             setMission(mission);
+            setProductType(productType);
+            setFilename(filename);
             setColorSchemeInfo(colorSchemeInfo);
             setRegexArray(regex);
         }
@@ -97,6 +102,22 @@ public class ColorSchemeLookupInfo {
         this.mission = mission;
     }
 
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
 
     public boolean isMatch(String bandName, String mission, String regex) {
 
@@ -157,14 +178,38 @@ public class ColorSchemeLookupInfo {
 
 
 
-    public boolean isMatch(String bandName, String mission) {
+    public boolean isMatch(String bandName, Product product) {
         boolean match = false;
 
-        if (mission != null && getMission() != null) {
-            if (!mission.contains(getMission())) {
+        String mission = ProductUtils.getMetaData(product, ProductUtils.METADATA_POSSIBLE_SENSOR_KEYS);
+        if (mission == null || mission.length() == 0) {
+            mission = product.getProductType();
+        }
+
+        if (getMission() != null) {
+            if (mission == null || !mission.contains(getMission()) ) {
                 return false;
             }
         }
+
+        if (getProductType() != null) {
+            if (product.getProductType() == null || !product.getProductType().contains(getProductType()) ) {
+                return false;
+            }
+        }
+
+        if (getFilename() != null) {
+            if (product.getName() == null || !product.getName().contains(getFilename()) ) {
+                return false;
+            }
+        }
+
+
+//        if (mission != null && getMission() != null) {
+//            if (!mission.contains(getMission())) {
+//                return false;
+//            }
+//        }
 
         if (bandName == null || bandName.length() == 0) { return false; }
 

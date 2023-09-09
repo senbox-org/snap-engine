@@ -477,7 +477,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 20.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 25.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;
