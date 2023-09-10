@@ -180,11 +180,7 @@ public class ColorBarLayer extends Layer {
 
 
             if (!imageLegendInitialized || (isAutoApplySchemes() || isSchemeLabelsApply())) {
-                String mission = ProductUtils.getMetaData(raster.getProduct(), ProductUtils.METADATA_POSSIBLE_SENSOR_KEYS);
-                if (mission == null || mission.length() == 0) {
-                    mission = getProduct().getProductType();
-                }
-                schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName(), mission);
+                schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName(), getProduct());
             }
 
 
@@ -288,8 +284,7 @@ public class ColorBarLayer extends Layer {
 
 
 
-            // disabling this as it causes too many other bugs
-            if (1 ==2 && imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
+            if (imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
 
                 if (!schemeOverRidden ) {
 

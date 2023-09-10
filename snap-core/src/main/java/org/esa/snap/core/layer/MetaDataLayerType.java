@@ -367,7 +367,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_FONT_SIZE_LABEL = "Font Size";
     public static final String PROPERTY_HEADER_FONT_SIZE_TOOLTIP = "Set size of the header font";
     private static final String PROPERTY_HEADER_FONT_SIZE_ALIAS =  PROPERTY_HEADER_FORMAT_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_HEADER_FONT_SIZE_DEFAULT = 30;
+    public static final int PROPERTY_HEADER_FONT_SIZE_DEFAULT = 40;
     public static final Class PROPERTY_HEADER_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_HEADER_FONT_SIZE_VALUE_MIN = 6;
     public static final int PROPERTY_HEADER_FONT_SIZE_VALUE_MAX = 70;
@@ -484,7 +484,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_GAP_LABEL = "Location Gap";
     public static final String PROPERTY_FOOTER2_GAP_TOOLTIP = "Percentage of scene size to place footer away from the edge of the scene image";
     private static final String PROPERTY_FOOTER2_GAP_ALIAS = PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 35.0;
+    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 40.0;
     public static final double PROPERTY_FOOTER2_GAP_MIN = -100;
     public static final double PROPERTY_FOOTER2_GAP_MAX = 100;
     public static final String PROPERTY_FOOTER2_GAP_INTERVAL = "[" + MetaDataLayerType.PROPERTY_MARGIN_GAP_MIN + "," + MetaDataLayerType.PROPERTY_MARGIN_GAP_MAX + "]";
