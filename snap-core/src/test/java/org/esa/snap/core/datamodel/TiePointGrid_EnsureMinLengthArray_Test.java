@@ -15,10 +15,13 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TiePointGrid_EnsureMinLengthArray_Test extends TestCase {
+import static org.junit.Assert.*;
 
+public class TiePointGrid_EnsureMinLengthArray_Test {
+
+    @Test
     public void testEnsureMinLengthArray_ArrayIsNull() {
         final int[] ints = TiePointGrid.ensureMinLengthArray((int[]) null, 4);
         assertNotNull(ints);
@@ -33,6 +36,7 @@ public class TiePointGrid_EnsureMinLengthArray_Test extends TestCase {
         assertEquals(4, doubles.length);
     }
 
+    @Test
     public void testEnsureMinLengthArray_LengthIsEqual() {
         final int[] intsGiven = new int[4];
         final int[] intsReturned = TiePointGrid.ensureMinLengthArray(intsGiven, 4);
@@ -47,6 +51,7 @@ public class TiePointGrid_EnsureMinLengthArray_Test extends TestCase {
         assertSame(doublesGiven, doublesReturned);
     }
 
+    @Test
     public void testEnsureMinLengthArray_LengthIsBigger() {
         final int[] intsGiven = new int[6];
         final int[] intsReturned = TiePointGrid.ensureMinLengthArray(intsGiven, 4);
@@ -61,6 +66,7 @@ public class TiePointGrid_EnsureMinLengthArray_Test extends TestCase {
         assertSame(doublesGiven, doublesReturned);
     }
 
+    @Test
     public void testEnsureMinLengthArray_IllegalSize() {
         try {
             TiePointGrid.ensureMinLengthArray(new int[3], 4);

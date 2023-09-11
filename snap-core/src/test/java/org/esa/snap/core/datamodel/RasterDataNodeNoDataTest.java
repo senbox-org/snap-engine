@@ -16,28 +16,31 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.*;
 
-public class RasterDataNodeNoDataTest extends TestCase {
+
+public class RasterDataNodeNoDataTest {
 
     private Product p;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         p = new Product("p", "t", 10, 10);
     }
 
+    @Test
     public void testValidPixelExpression() {
         double z = 0;
 
         Band floatBand = p.addBand("b", ProductData.TYPE_FLOAT32);
 
-        assertEquals(null, floatBand.getValidMaskExpression());
+        assertNull(floatBand.getValidMaskExpression());
 
         floatBand.setNoDataValueUsed(true);
         floatBand.setGeophysicalNoDataValue(-999.0);
@@ -67,7 +70,7 @@ public class RasterDataNodeNoDataTest extends TestCase {
 
 
         Band intBand = p.addBand("i", ProductData.TYPE_INT32);
-        assertEquals(null, intBand.getValidMaskExpression());
+        assertNull(intBand.getValidMaskExpression());
 
         intBand.setNoDataValueUsed(true);
         intBand.setNoDataValue(42);
@@ -91,6 +94,7 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertEquals("u.raw != 255.0", uintBand.getValidMaskExpression());
     }
 
+    @Test
     public void testIsPixelValid() throws Exception {
         Band b = p.addBand("b", ProductData.TYPE_FLOAT32);
 
@@ -101,13 +105,14 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertFalse(b.isPixelValid(-10, -3));
     }
 
+    @Test
     public void testNodeDataChangedEventFired() {
         Band b = p.addBand("b", ProductData.TYPE_FLOAT32);
 
-        assertEquals(false, b.isNoDataValueUsed());
+        assertFalse(b.isNoDataValueUsed());
         assertEquals(0.0, b.getNoDataValue(), 1e-15);
-        assertEquals(null, b.getValidPixelExpression());
-        assertEquals(null, b.getValidMaskExpression());
+        assertNull(b.getValidPixelExpression());
+        assertNull(b.getValidMaskExpression());
 
         ChangeDetector detector = new ChangeDetector();
         p.addProductNodeListener(detector);
@@ -135,7 +140,7 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertEquals(4, detector.nodeDataChanges);
     }
 
-
+    @Test
     public void testSetNoDataValue() {
         final Band b = createBand(p, ProductData.TYPE_UINT16, 0.005, 4, false);
 
@@ -154,6 +159,7 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertEquals(RasterDataNode.PROPERTY_NAME_NO_DATA_VALUE, detector.propertyNames.get(0));
     }
 
+    @Test
     public void testSetGeophysicalNoDataValue() {
         final Band b = createBand(p, ProductData.TYPE_UINT16, 0.005, 4, false);
         ChangeDetector detector = new ChangeDetector();
@@ -171,6 +177,7 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertEquals(RasterDataNode.PROPERTY_NAME_NO_DATA_VALUE, detector.propertyNames.get(0));
     }
 
+    @Test
     public void testSetGeophysicalNoDataValueWithLogScaling() {
         final Band b = createBand(p, ProductData.TYPE_UINT16, 2.3, -1.8, true);
 
@@ -186,13 +193,14 @@ public class RasterDataNodeNoDataTest extends TestCase {
         assertEquals(geoValue, b.getGeophysicalNoDataValue(), 1e-10);
     }
 
+    @Test
     public void testUsageOfRawSymbolForAllDataTypes() {
-        testDataType(ProductData.TYPE_INT8, 4 ,127, "b.raw != 127.0");
-        testDataType(ProductData.TYPE_INT8, 1 ,-1, "b.raw != -1.0");
+        testDataType(ProductData.TYPE_INT8, 4, 127, "b.raw != 127.0");
+        testDataType(ProductData.TYPE_INT8, 1, -1, "b.raw != -1.0");
 
-        testDataType(ProductData.TYPE_UINT8, 4 ,-1, "b.raw != 255.0");
-        testDataType(ProductData.TYPE_UINT8, 4 ,255, "b.raw != 255.0");
-        testDataType(ProductData.TYPE_UINT8, 4 ,256, "b.raw != 0.0");
+        testDataType(ProductData.TYPE_UINT8, 4, -1, "b.raw != 255.0");
+        testDataType(ProductData.TYPE_UINT8, 4, 255, "b.raw != 255.0");
+        testDataType(ProductData.TYPE_UINT8, 4, 256, "b.raw != 0.0");
 
         testDataType(ProductData.TYPE_INT16, 4, 5, "b.raw != 5.0");
 
@@ -200,12 +208,12 @@ public class RasterDataNodeNoDataTest extends TestCase {
 
         testDataType(ProductData.TYPE_INT32, 4, 5, "b.raw != 5.0");
 
-        testDataType(ProductData.TYPE_UINT32, 4 , Integer.MAX_VALUE, "b.raw != 2.147483647E9");
-        testDataType(ProductData.TYPE_UINT32, 4 ,Integer.MAX_VALUE + 1, "b.raw != 2.147483648E9");
-        testDataType(ProductData.TYPE_UINT32, 4 ,-1, "b.raw != 4.294967295E9");
+        testDataType(ProductData.TYPE_UINT32, 4, Integer.MAX_VALUE, "b.raw != 2.147483647E9");
+        testDataType(ProductData.TYPE_UINT32, 4, Integer.MAX_VALUE + 1, "b.raw != 2.147483648E9");
+        testDataType(ProductData.TYPE_UINT32, 4, -1, "b.raw != 4.294967295E9");
 
-        testDataType(ProductData.TYPE_FLOAT32, 4 ,5, "fneq(b,5.0)");
-        testDataType(ProductData.TYPE_FLOAT64, 4 ,5, "fneq(b,5.0)");
+        testDataType(ProductData.TYPE_FLOAT32, 4, 5, "fneq(b,5.0)");
+        testDataType(ProductData.TYPE_FLOAT64, 4, 5, "fneq(b,5.0)");
     }
 
     private void testDataType(int productDataType, double v1, double v2, String validMask) {
@@ -253,6 +261,4 @@ public class RasterDataNodeNoDataTest extends TestCase {
             nodeDataChanges++;
         }
     }
-
-
 }

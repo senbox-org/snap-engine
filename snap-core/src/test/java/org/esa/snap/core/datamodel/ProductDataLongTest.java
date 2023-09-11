@@ -15,23 +15,27 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.util.io.FileUtils;
+import org.junit.After;
 import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-public class ProductDataLongTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ProductDataLongTest {
 
     private FileImageInputStream _inputStream;
     private FileImageOutputStream _outputStream;
 
-    @Override
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         File outputDir = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
         Assume.assumeTrue(outputDir.mkdirs() || outputDir.exists());
         File streamFile = new File(outputDir, "long.img");
@@ -42,8 +46,8 @@ public class ProductDataLongTest extends TestCase {
         assertNotNull(_outputStream);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         try {
             _inputStream.close();
             _outputStream.close();
@@ -52,6 +56,7 @@ public class ProductDataLongTest extends TestCase {
         FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
     }
 
+    @Test
     public void testSingleValueConstructor() {
         long testValue = 2147483652L;
         ProductData instance = ProductData.createInstance(ProductData.TYPE_INT64);
@@ -63,22 +68,22 @@ public class ProductDataLongTest extends TestCase {
         assertEquals(2147483652.0F, instance.getElemFloat(), 0.0e-12F);
         assertEquals(2147483652.0D, instance.getElemDouble(), 0.0e-12D);
         assertEquals("2147483652", instance.getElemString());
-        assertEquals(true, instance.getElemBoolean());
+        assertTrue(instance.getElemBoolean());
         assertEquals(1, instance.getNumElems());
         Object data = instance.getElems();
-        assertEquals(true, data instanceof long[]);
+        assertTrue(data instanceof long[]);
         assertEquals(1, ((long[]) data).length);
-        assertEquals(true, instance.isScalar());
-        assertEquals(true, instance.isInt());
+        assertTrue(instance.isScalar());
+        assertTrue(instance.isInt());
         assertEquals("2147483652", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_INT64);
         expectedEqual.setElems(new long[]{testValue});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_INT64);
         expectedUnequal.setElems(new long[]{testValue - 1});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -89,9 +94,10 @@ public class ProductDataLongTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 
+    @Test
     public void testConstructor() {
         long testValue = 2147483652L;
         ProductData instance = ProductData.createInstance(ProductData.TYPE_INT64, 3);
@@ -114,24 +120,24 @@ public class ProductDataLongTest extends TestCase {
         assertEquals("-1", instance.getElemStringAt(0));
         assertEquals("2147483652", instance.getElemStringAt(1));
         assertEquals("-2147483652", instance.getElemStringAt(2));
-        assertEquals(true, instance.getElemBooleanAt(0));
-        assertEquals(true, instance.getElemBooleanAt(1));
-        assertEquals(true, instance.getElemBooleanAt(2));
+        assertTrue(instance.getElemBooleanAt(0));
+        assertTrue(instance.getElemBooleanAt(1));
+        assertTrue(instance.getElemBooleanAt(2));
         assertEquals(3, instance.getNumElems());
         Object data2 = instance.getElems();
-        assertEquals(true, data2 instanceof long[]);
+        assertTrue(data2 instanceof long[]);
         assertEquals(3, ((long[]) data2).length);
-        assertEquals(false, instance.isScalar());
-        assertEquals(true, instance.isInt());
+        assertFalse(instance.isScalar());
+        assertTrue(instance.isInt());
         assertEquals("-1,2147483652,-2147483652", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_INT64, 3);
         expectedEqual.setElems(new long[]{-1, 2147483652L, -1 * 2147483652L});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_INT64, 3);
         expectedUnequal.setElems(new long[]{-1, 2147483652L, -1 * 2147483647 + 5});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -142,9 +148,10 @@ public class ProductDataLongTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 
+    @Test
     public void testSetElemsAsString() {
         final ProductData pd = ProductData.createInstance(ProductData.TYPE_INT64, 3);
         pd.setElems(new String[]{
@@ -158,21 +165,22 @@ public class ProductDataLongTest extends TestCase {
         assertEquals(0, pd.getElemLongAt(2));
     }
 
+    @Test
     public void testSetElemsAsString_OutOfRange() {
         final ProductData pd1 = ProductData.createInstance(ProductData.TYPE_INT64, 1);
         try {
-            pd1.setElems(new String[]{String.valueOf("9223372036854775808")});
+            pd1.setElems(new String[]{"9223372036854775808"});
         } catch (Exception e) {
             assertEquals(NumberFormatException.class, e.getClass());
-            assertEquals(true, e.getMessage().contains("9223372036854775808"));
+            assertTrue(e.getMessage().contains("9223372036854775808"));
         }
 
         final ProductData pd2 = ProductData.createInstance(ProductData.TYPE_INT64, 1);
         try {
-            pd2.setElems(new String[]{String.valueOf("-9223372036854775809")});
+            pd2.setElems(new String[]{"-9223372036854775809"});
         } catch (Exception e) {
             assertEquals(NumberFormatException.class, e.getClass());
-            assertEquals(true, e.getMessage().contains("-9223372036854775809"));
+            assertTrue(e.getMessage().contains("-9223372036854775809"));
         }
     }
 }

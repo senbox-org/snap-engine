@@ -17,18 +17,21 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Locale;
 
-public class RasterDataNodeIOTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class RasterDataNodeIOTest {
 
     public final static TestProductReaderPlugIn TPRPI = new TestProductReaderPlugIn();
 
@@ -53,13 +56,22 @@ public class RasterDataNodeIOTest extends TestCase {
     private TestProductReader pr;
     private Rectangle rectangle;
 
-    @Override
-    protected void setUp() {
+    private static int getRawPixelValue(int x, int y) {
+        return 1 + x + y;
+    }
+
+    private static float getTiePointValue(int i, int j) {
+        return 1.0f + 0.5f * (i + j);
+    }
+
+    @Before
+    public void setUp() {
         p = createTestProduct();
         pr = (TestProductReader) p.getProductReader();
         rectangle = new Rectangle(0, 0, SW, SH);
     }
 
+    @Test
     public void testThatSourceImagesGeneratedForBandsAreCached() throws IOException {
         final ProductData bpd = ProductData.createInstance(ProductData.TYPE_FLOAT32, SW * SH);
         final ProductData gpd = ProductData.createInstance(ProductData.TYPE_FLOAT32, GW * GH);
@@ -92,6 +104,7 @@ public class RasterDataNodeIOTest extends TestCase {
         assertEquals(3, pr.getNumReads());
     }
 
+    @Test
     public void testReadPixelsFromFloatBand() throws IOException {
         Band b = p.getBand(FLOAT_BAND_NAME);
         float[] floatElems = new float[SW * SH];
@@ -112,6 +125,7 @@ public class RasterDataNodeIOTest extends TestCase {
         return y * SW + x;
     }
 
+    @Test
     public void testReadPixelsFromScaledIntBand() throws IOException {
         Band b = p.getBand(SCALED_USHORT_BAND_NAME);
         short[] intElems = new short[SW * SH];
@@ -128,6 +142,7 @@ public class RasterDataNodeIOTest extends TestCase {
         assertEquals(getRawPixelValue(x, y), intElems[i(y, x)], DELTA);
     }
 
+    @Test
     public void testReadPixelsFromTiePointGrid() throws IOException {
         TiePointGrid g = p.getTiePointGrid(TIE_POINT_GRID_NAME);
         float[] floatElems = new float[SW * SH];
@@ -135,7 +150,7 @@ public class RasterDataNodeIOTest extends TestCase {
         if (rasterData.getType() == ProductData.TYPE_FLOAT32) {
             g.readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[]) rasterData.getElems(), ProgressMonitor.NULL);
         } else {
-            float[] pixels = g.readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[])null, ProgressMonitor.NULL);
+            float[] pixels = g.readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[]) null, ProgressMonitor.NULL);
             for (int i = 0; i < pixels.length; i++) {
                 rasterData.setElemFloatAt(i, pixels[i]);
             }
@@ -163,14 +178,6 @@ public class RasterDataNodeIOTest extends TestCase {
         assertEquals(0.5f + getTiePointValue(x / 2, y / 2), floatElems[i(y, x)], DELTA);
     }
 
-    private static int getRawPixelValue(int x, int y) {
-        return 1 + x + y;
-    }
-
-    private static float getTiePointValue(int i, int j) {
-        return 1.0f + 0.5f * (i + j);
-    }
-
     private Product createTestProduct() {
         Product p = new Product("p", "t", SW, SH, TPRPI.createReaderInstance());
 
@@ -181,9 +188,9 @@ public class RasterDataNodeIOTest extends TestCase {
             }
         }
         TiePointGrid tpg = new TiePointGrid(TIE_POINT_GRID_NAME,
-                                            GW, GH, 0.5f, 0.5f,
-                                            (SW - 1) / (float) (GW - 1), (SH - 1) / (float) (GH - 1),
-                                            tiePoints);
+                GW, GH, 0.5f, 0.5f,
+                (SW - 1) / (float) (GW - 1), (SH - 1) / (float) (GH - 1),
+                tiePoints);
         p.addTiePointGrid(tpg);
 
         Band floatBand = new Band(FLOAT_BAND_NAME, ProductData.TYPE_FLOAT32, SW, SH);
@@ -248,7 +255,7 @@ public class RasterDataNodeIOTest extends TestCase {
         }
 
         @Override
-        protected Product readProductNodesImpl() throws IOException{
+        protected Product readProductNodesImpl() throws IOException {
             return null;
         }
 
@@ -273,6 +280,5 @@ public class RasterDataNodeIOTest extends TestCase {
                 pm.done();
             }
         }
-
     }
 }

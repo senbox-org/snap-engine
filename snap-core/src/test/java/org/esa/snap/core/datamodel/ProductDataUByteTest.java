@@ -15,24 +15,27 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.util.io.FileUtils;
+import org.junit.After;
 import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-public class ProductDataUByteTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ProductDataUByteTest {
 
     private FileImageInputStream _inputStream;
     private FileImageOutputStream _outputStream;
 
-
-    @Override
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         File outputDir = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
         Assume.assumeTrue(outputDir.mkdirs() || outputDir.exists());
         File streamFile = new File(outputDir, "ubyte.img");
@@ -43,8 +46,8 @@ public class ProductDataUByteTest extends TestCase {
         assertNotNull(_outputStream);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         try {
             _inputStream.close();
             _outputStream.close();
@@ -53,6 +56,7 @@ public class ProductDataUByteTest extends TestCase {
         FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
     }
 
+    @Test
     public void testSingleValueConstructor() {
         ProductData instance = ProductData.createInstance(ProductData.TYPE_UINT8);
         instance.setElems(new byte[]{-1});
@@ -65,19 +69,19 @@ public class ProductDataUByteTest extends TestCase {
         assertEquals("255", instance.getElemString());
         assertEquals(1, instance.getNumElems());
         Object data = instance.getElems();
-        assertEquals(true, data instanceof byte[]);
+        assertTrue(data instanceof byte[]);
         assertEquals(1, ((byte[]) data).length);
-        assertEquals(true, instance.isScalar());
-        assertEquals(true, instance.isInt());
+        assertTrue(instance.isScalar());
+        assertTrue(instance.isInt());
         assertEquals("255", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_UINT8);
         expectedEqual.setElems(new byte[]{-1});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_UINT8);
         expectedUnequal.setElems(new byte[]{-2});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -88,9 +92,10 @@ public class ProductDataUByteTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 
+    @Test
     public void testConstructor() {
         ProductData instance = ProductData.createInstance(ProductData.TYPE_UINT8, 3);
         instance.setElems(new byte[]{-1, 127, -128});
@@ -113,19 +118,19 @@ public class ProductDataUByteTest extends TestCase {
         assertEquals("128", instance.getElemStringAt(2));
         assertEquals(3, instance.getNumElems());
         Object data2 = instance.getElems();
-        assertEquals(true, data2 instanceof byte[]);
+        assertTrue(data2 instanceof byte[]);
         assertEquals(3, ((byte[]) data2).length);
-        assertEquals(false, instance.isScalar());
-        assertEquals(true, instance.isInt());
+        assertFalse(instance.isScalar());
+        assertTrue(instance.isInt());
         assertEquals("255,127,128", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_UINT8, 3);
         expectedEqual.setElems(new byte[]{-1, 127, -128});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_UINT8, 3);
         expectedUnequal.setElems(new byte[]{-1, 127, -127});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -136,9 +141,10 @@ public class ProductDataUByteTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 
+    @Test
     public void testSetElemsAsString() {
         final ProductData pd = ProductData.createInstance(ProductData.TYPE_UINT8, 3);
         pd.setElems(new String[]{
@@ -152,6 +158,7 @@ public class ProductDataUByteTest extends TestCase {
         assertEquals(0, pd.getElemIntAt(2));
     }
 
+    @Test
     public void testSetElemsAsString_OutOfRange() {
         final ProductData pd1 = ProductData.createInstance(ProductData.TYPE_UINT8, 1);
         try {
