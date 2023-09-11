@@ -15,10 +15,13 @@
  */
 package org.esa.snap.core.dataop.barithm;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RasterDataEvalEnvTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class RasterDataEvalEnvTest {
+
+    @Test
     public void testDefaultConstructor() {
         final RasterDataEvalEnv env = new RasterDataEvalEnv(0, 0, 1, 1);
         assertEquals(0, env.getPixelX());
@@ -30,6 +33,7 @@ public class RasterDataEvalEnvTest extends TestCase {
         assertEquals(1, env.getRegionHeight());
     }
 
+    @Test
     public void testConstructor() {
         final RasterDataEvalEnv env = new RasterDataEvalEnv(20, 14, 238, 548);
         assertEquals(20, env.getPixelX());
@@ -41,6 +45,7 @@ public class RasterDataEvalEnvTest extends TestCase {
         assertEquals(548, env.getRegionHeight());
     }
 
+    @Test
     public void testXY() {
         final RasterDataEvalEnv env = new RasterDataEvalEnv(50, 20, 200, 100);
 

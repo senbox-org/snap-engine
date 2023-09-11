@@ -16,13 +16,16 @@
 
 package org.esa.snap.core.dataop.maptransf.geotools;
 
-import junit.framework.TestCase;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.datum.DatumAuthorityFactory;
 
-public class EllipsoidsTest extends TestCase {
+import static org.junit.Assert.assertSame;
 
+public class EllipsoidsTest {
+
+    @Test
     public void testEllipsoids() throws FactoryException {
         final DatumAuthorityFactory factory = ReferencingFactoryFinder.getDatumAuthorityFactory("EPSG", null);
 
@@ -31,5 +34,4 @@ public class EllipsoidsTest extends TestCase {
         assertSame(factory.createEllipsoid("EPSG:7043"), Ellipsoids.WGS72);
         assertSame(factory.createEllipsoid("EPSG:7030"), Ellipsoids.WGS84);
     }
-
 }
