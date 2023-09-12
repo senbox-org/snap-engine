@@ -16,10 +16,14 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class PixelPosTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+public class PixelPosTest {
+
+    @Test
     public void testInvalidState() {
         PixelPos pixelPos = new PixelPos();
         assertTrue(pixelPos.isValid());

@@ -15,18 +15,21 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.placemark.PlacemarkIO;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
 import org.jdom2.Element;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlacemarkTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class PlacemarkTest {
 
     private static final String _NODE_ADDED = "nodeAdded";
     private static final String _NODE_CHANGED = "nodeChanged";
@@ -38,11 +41,11 @@ public class PlacemarkTest extends TestCase {
     private List<String> eventTypes;
     private List<ProductNodeEvent> events;
 
-    @Override
+    @Before
     public void setUp() {
         product = new Product("product", "t", 10, 10);
-        eventTypes = new ArrayList<String>();
-        events = new ArrayList<ProductNodeEvent>();
+        eventTypes = new ArrayList<>();
+        events = new ArrayList<>();
         product.addProductNodeListener(new ProductNodeListener() {
             @Override
             public void nodeChanged(ProductNodeEvent event) {
@@ -78,7 +81,7 @@ public class PlacemarkTest extends TestCase {
         });
     }
 
-
+    @Test
     public void testPinEvents() {
         final Placemark placemark1 = Placemark.createPointPlacemark(PinDescriptor.getInstance(), "pinName", "pinLabel", "", null, new GeoPos(),
                 product.getSceneGeoCoding());
@@ -141,6 +144,7 @@ public class PlacemarkTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteXML_XmlWriterIsNull() {
         Placemark placemark = Placemark.createPointPlacemark(PinDescriptor.getInstance(), "pinName", "pinLabel", "", null, new GeoPos(),
                 product.getSceneGeoCoding());
@@ -155,6 +159,7 @@ public class PlacemarkTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteXML_IndentIsSmallerThanZero() {
         Placemark placemark = Placemark.createPointPlacemark(PinDescriptor.getInstance(), "pinName", "pinLabel", "", null, new GeoPos(), product.getSceneGeoCoding());
 
@@ -169,6 +174,7 @@ public class PlacemarkTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteXML_DifferentValidIndent() {
         Placemark placemark = Placemark.createPointPlacemark(PinDescriptor.getInstance(), "pinName", "pinLabel", "", null, new GeoPos(4f, 87f),
                 product.getSceneGeoCoding());
@@ -197,6 +203,7 @@ public class PlacemarkTest extends TestCase {
         assertEquals(expected, stringWriter.toString());
     }
 
+    @Test
     public void testCreatePin_FromJDOMElement() {
         final String pinName = "pin14";
         final String pinDesc = "descr";
@@ -288,6 +295,7 @@ public class PlacemarkTest extends TestCase {
         assertEquals("fill:255,0,0;stroke:0,0,255", placemark.getStyleCss());
     }
 
+    @Test
     public void testLabelSettings() {
         Placemark p = Placemark.createPointPlacemark(PinDescriptor.getInstance(), "rallamann", "rallamann", "", null, new GeoPos(), product.getSceneGeoCoding());
         assertEquals("rallamann", p.getName());
@@ -302,6 +310,5 @@ public class PlacemarkTest extends TestCase {
 
         p.setLabel("");
         assertEquals("", p.getLabel());
-
     }
 }

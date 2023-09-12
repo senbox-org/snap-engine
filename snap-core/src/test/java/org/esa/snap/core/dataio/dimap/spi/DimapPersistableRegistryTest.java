@@ -16,45 +16,34 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class DimapPersistableRegistryTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-    private final static Class[] EXPECTED_SPIS = new Class[] {
+public class DimapPersistableRegistryTest {
+
+    private final static Class[] EXPECTED_SPIS = new Class[]{
             GeneralFilterBandPersistableSpi.class,
             ConvolutionFilterBandPersistableSpi.class
     };
 
-    public void testDimapPersistableRegistryCreation() {
-        assertNotNull(DimapPersistableSpiRegistry.getInstance());
-    }
-
-    public void testGetStandardSpis() {
-        final DimapPersistableSpiRegistry registry = DimapPersistableSpiRegistry.getInstance();
-
-        final Iterator<DimapPersistableSpi> persistableSpis = registry.getPersistableSpis();
-        assertNotNull(persistableSpis);
-        assertIteratorContainsInstances(persistableSpis, EXPECTED_SPIS);
-
-    }
     private static void assertIteratorContainsInstances(Iterator<DimapPersistableSpi> iterator, Class[] expectedClasses) {
-
         final List<DimapPersistableSpi> list = copyToList(iterator);
 
-        for (int i = 0; i < expectedClasses.length; i++) {
-            final Class expectedClass = expectedClasses[i];
+        for (final Class expectedClass : expectedClasses) {
             boolean found = false;
-            for (int j = 0; j < list.size(); j++) {
-                final Object instance =  list.get(j);
-                if(expectedClass.isInstance(instance)) {
+            for (final Object instance : list) {
+                if (expectedClass.isInstance(instance)) {
                     found = true;
+                    break;
                 }
             }
-            if(!found) {
+            if (!found) {
                 fail("No instance found of '" + expectedClass.toString() + "' in given iterator");
             }
         }
@@ -62,11 +51,23 @@ public class DimapPersistableRegistryTest extends TestCase {
 
     private static List<DimapPersistableSpi> copyToList(Iterator<DimapPersistableSpi> iterator) {
         final ArrayList<DimapPersistableSpi> list = new ArrayList<DimapPersistableSpi>();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             list.add(iterator.next());
         }
         return list;
     }
 
+    @Test
+    public void testDimapPersistableRegistryCreation() {
+        assertNotNull(DimapPersistableSpiRegistry.getInstance());
+    }
 
+    @Test
+    public void testGetStandardSpis() {
+        final DimapPersistableSpiRegistry registry = DimapPersistableSpiRegistry.getInstance();
+
+        final Iterator<DimapPersistableSpi> persistableSpis = registry.getPersistableSpis();
+        assertNotNull(persistableSpis);
+        assertIteratorContainsInstances(persistableSpis, EXPECTED_SPIS);
+    }
 }

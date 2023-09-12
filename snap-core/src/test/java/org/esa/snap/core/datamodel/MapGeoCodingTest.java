@@ -15,20 +15,31 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.junit.Test;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-public class MapGeoCodingTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class MapGeoCodingTest {
+
+    private static void testPixelToMapTransform(MapGeoCoding mapGeoCoding, float x, float y, float lat, float lon) {
+        GeoPos expectedGP = new GeoPos(lat, lon);
+        PixelPos expectedPP = new PixelPos(x, y);
+
+        GeoPos someGP = mapGeoCoding.getGeoPos(expectedPP, null);
+        assertEquals(expectedGP.lon, someGP.lon, 1e-4f);
+        assertEquals(expectedGP.lat, someGP.lat, 1e-4f);
+        PixelPos somePP = mapGeoCoding.getPixelPos(expectedGP, null);
+        assertEquals(expectedPP.x, somePP.x, 1e-4f);
+        assertEquals(expectedPP.y, somePP.y, 1e-4f);
+    }
+
+    @Test
     public void testFail() {
         MapGeoCoding mapGeoCoding = createIdentityMapGeoCoding();
 
@@ -67,6 +78,7 @@ public class MapGeoCodingTest extends TestCase {
         assertEquals(-179.9999, geoPos.getLon(), 1e-4);
     }
 
+    @Test
     public void testTransferGeoCodingWithoutSubset() {
         MapGeoCoding mapGeoCoding = createIdentityMapGeoCoding();
 
@@ -97,6 +109,7 @@ public class MapGeoCodingTest extends TestCase {
 
     }
 
+    @Test
     public void testTransferGeoCodingWithSubset() {
         MapGeoCoding mapGeoCoding = createIdentityMapGeoCoding();
 
@@ -117,25 +130,26 @@ public class MapGeoCodingTest extends TestCase {
 
         assertNotSame(origMapInfo, copyMapInfo);
         assertEquals(origMapInfo.getEasting() + subsetDef.getRegion().getX(),
-                     copyMapInfo.getEasting(), 1e-6);
+                copyMapInfo.getEasting(), 1e-6);
         assertEquals(origMapInfo.getNorthing() - subsetDef.getRegion().getY(),
-                     copyMapInfo.getNorthing(), 1e-6);
+                copyMapInfo.getNorthing(), 1e-6);
         assertSame(origMapInfo.getDatum(), copyMapInfo.getDatum());
         assertEquals(origMapInfo.getElevationModelName(), copyMapInfo.getElevationModelName());
         assertEquals(origMapInfo.getMapProjection().getName(), copyMapInfo.getMapProjection().getName());
         assertEquals(origMapInfo.getOrientation(), copyMapInfo.getOrientation(), 1e-6);
         assertEquals(origMapInfo.getPixelSizeX() * subsetDef.getSubSamplingX(),
-                     copyMapInfo.getPixelSizeX(), 1e-6);
+                copyMapInfo.getPixelSizeX(), 1e-6);
         assertEquals(origMapInfo.getPixelSizeY() * subsetDef.getSubSamplingY(),
-                     copyMapInfo.getPixelSizeY(), 1e-6);
+                copyMapInfo.getPixelSizeY(), 1e-6);
         assertEquals(origMapInfo.getPixelX(),
-                     copyMapInfo.getPixelX(), 1e-6);
+                copyMapInfo.getPixelX(), 1e-6);
         assertEquals(origMapInfo.getPixelY(),
-                     copyMapInfo.getPixelY(), 1e-6);
+                copyMapInfo.getPixelY(), 1e-6);
         assertEquals(destScene.getRasterHeight(), copyMapInfo.getSceneHeight(), 1e-6);
         assertEquals(destScene.getRasterWidth(), copyMapInfo.getSceneWidth(), 1e-6);
     }
 
+    @Test
     public void testAT() {
         AffineTransform transform = new AffineTransform();
 
@@ -145,6 +159,7 @@ public class MapGeoCodingTest extends TestCase {
         assertEquals(new Point(1 + 3 * 10, 2 + 4 * 11), transform.transform(new Point(10, 11), null));
     }
 
+    @Test
     public void testThatAffineTransformCanBeUsedInstead() {
         MapGeoCoding mapGeoCoding = createNonRotatedMapGeoCoding();
 
@@ -179,18 +194,6 @@ public class MapGeoCodingTest extends TestCase {
         testPixelToMapTransform(mapGeoCoding, x, y, lat, lon);
     }
 
-    private static void testPixelToMapTransform(MapGeoCoding mapGeoCoding, float x, float y, float lat, float lon) {
-        GeoPos expectedGP = new GeoPos(lat, lon);
-        PixelPos expectedPP = new PixelPos(x, y);
-
-        GeoPos someGP = mapGeoCoding.getGeoPos(expectedPP, null);
-        assertEquals(expectedGP.lon, someGP.lon, 1e-4f);
-        assertEquals(expectedGP.lat, someGP.lat, 1e-4f);
-        PixelPos somePP = mapGeoCoding.getPixelPos(expectedGP, null);
-        assertEquals(expectedPP.x, somePP.x, 1e-4f);
-        assertEquals(expectedPP.y, somePP.y, 1e-4f);
-    }
-
     private MapGeoCoding createIdentityMapGeoCoding() {
         final IdentityTransformDescriptor td = new IdentityTransformDescriptor();
         final MapTransform transform = td.createTransform(null);
@@ -218,5 +221,4 @@ public class MapGeoCodingTest extends TestCase {
     private MapInfo createMapInfo(Datum datum, MapProjection projection) {
         return new MapInfo(projection, -1.2f, 3.4f, 5.6f, -7.8f, 0.9f, -1.0f, datum);
     }
-
 }

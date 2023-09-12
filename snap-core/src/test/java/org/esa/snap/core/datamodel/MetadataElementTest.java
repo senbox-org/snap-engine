@@ -16,17 +16,17 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.esa.snap.core.util.Debug;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.junit.Assert.*;
 
-public class MetadataElementTest extends TestCase {
+
+public class MetadataElementTest {
 
     private MetadataElement _testGroup;
     private Object _addedNode;
@@ -34,27 +34,19 @@ public class MetadataElementTest extends TestCase {
     private ArrayList _propertyNameList;
     private ArrayList _propertySourceList;
 
-    public MetadataElementTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(MetadataElementTest.class);
-    }
-
     /**
      * Initialize the tests
      */
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _testGroup = new MetadataElement("test");
     }
 
     /**
      * Tests construction failures
      */
+    @Test
     public void testRsAnnotation() {
-
         try {
             new MetadataElement(null);
             fail("construction with null argument not allowed");
@@ -65,6 +57,7 @@ public class MetadataElementTest extends TestCase {
     /**
      * GuiTest_DialogAndModalDialog the acceptVisitor functionality
      */
+    @Test
     public void testAcceptVisitor() {
         LinkedListProductVisitor visitor = new LinkedListProductVisitor();
         List expectedList = new LinkedList();
@@ -84,6 +77,7 @@ public class MetadataElementTest extends TestCase {
     /**
      * Tests the functionality for addAttribute
      */
+    @Test
     public void testAddAttribute() {
         MetadataElement annot = new MetadataElement("test_me");
         MetadataAttribute att;
@@ -105,45 +99,40 @@ public class MetadataElementTest extends TestCase {
     /**
      * Tests the functionality for containsAttribute()
      */
+    @Test
     public void testContainsAttribute() {
         MetadataElement annot = new MetadataElement("test_me");
         MetadataAttribute att = new MetadataAttribute("Test1", ProductData.createInstance(ProductData.TYPE_INT32),
-                                                      false);
+                false);
 
         // should not contain anything now
-        assertEquals(false, annot.containsAttribute("Test1"));
+        assertFalse(annot.containsAttribute("Test1"));
 
         // add attribute an check again
         annot.addAttribute(att);
-        assertEquals(true, annot.containsAttribute("Test1"));
+        assertTrue(annot.containsAttribute("Test1"));
 
         // tis one should not be there
-        assertEquals(false, annot.containsAttribute("NotMe"));
-    }
-
-    /**
-     * GuiTest_DialogAndModalDialog the functionality for createCopy()
-     */
-    public void testCreateDeepClone() {
-        Debug.traceMethodNotImplemented(_testGroup.getClass(), "createCopy");
+        assertFalse(annot.containsAttribute("NotMe"));
     }
 
     /**
      * Tests the functionality for getPropertyValue()
      */
+    @Test
     public void testGetAttribute() {
         MetadataElement annot = new MetadataElement("yepp");
         MetadataAttribute att;
 
         // a new object should not return anything on this request
         try {
-            att = annot.getAttributeAt(0);
+            annot.getAttributeAt(0);
             fail("there are no elements in the list");
         } catch (IndexOutOfBoundsException e) {
         }
 
         att = new MetadataAttribute("GuiTest_DialogAndModalDialog", ProductData.createInstance(ProductData.TYPE_INT32),
-                                    false);
+                false);
         annot.addAttribute(att);
         assertEquals(att, annot.getAttributeAt(0));
     }
@@ -151,10 +140,11 @@ public class MetadataElementTest extends TestCase {
     /**
      * Tests the functionality for getAttributeNames
      */
+    @Test
     public void testGetAttributeNames() {
         MetadataElement annot = new MetadataElement("yepp");
         MetadataAttribute att = new MetadataAttribute("GuiTest_DialogAndModalDialog",
-                                                      ProductData.createInstance(ProductData.TYPE_INT32), false);
+                ProductData.createInstance(ProductData.TYPE_INT32), false);
 
         // initially no strings should be returned
         assertEquals(0, annot.getAttributeNames().length);
@@ -168,10 +158,11 @@ public class MetadataElementTest extends TestCase {
     /**
      * GuiTest_DialogAndModalDialog the functionality for getNumAttributes()
      */
+    @Test
     public void testGetNumAttributes() {
         MetadataElement annot = new MetadataElement("yepp");
         MetadataAttribute att = new MetadataAttribute("GuiTest_DialogAndModalDialog",
-                                                      ProductData.createInstance(ProductData.TYPE_INT32), false);
+                ProductData.createInstance(ProductData.TYPE_INT32), false);
 
         // a new object should not have any attributes
         assertEquals(0, annot.getNumAttributes());
@@ -184,12 +175,13 @@ public class MetadataElementTest extends TestCase {
     /**
      * Tests the functionality for removeAttribute()
      */
+    @Test
     public void testRemoveAttribute() {
         MetadataElement annot = new MetadataElement("yepp");
         MetadataAttribute att = new MetadataAttribute("GuiTest_DialogAndModalDialog",
-                                                      ProductData.createInstance(ProductData.TYPE_INT32), false);
+                ProductData.createInstance(ProductData.TYPE_INT32), false);
         MetadataAttribute att2 = new MetadataAttribute("GuiTest_DialogAndModalDialog",
-                                                       ProductData.createInstance(ProductData.TYPE_INT32), false);
+                ProductData.createInstance(ProductData.TYPE_INT32), false);
 
         // add one, check, remove again, check again
         annot.addAttribute(att);
@@ -209,13 +201,14 @@ public class MetadataElementTest extends TestCase {
         assertEquals(2, annot.getNumAttributes());
     }
 
-    public void testSetAtributeInt() {
+    @Test
+    public void testSetAttributeInt() {
         final Product product = new Product("n", "t", 5, 5);
         final MetadataElement elem = new MetadataElement("test");
         product.getMetadataRoot().addElement(elem);
         _propertyNameList = new ArrayList();
         _propertySourceList = new ArrayList();
-        product.addProductNodeListener(new ProductNodeListenerAdapter(){
+        product.addProductNodeListener(new ProductNodeListenerAdapter() {
             @Override
             public void nodeAdded(ProductNodeEvent event) {
                 _addedNode = event.getSource();
@@ -228,7 +221,7 @@ public class MetadataElementTest extends TestCase {
 
             @Override
             public void nodeChanged(ProductNodeEvent event) {
-                _propertyNameList.add( event.getPropertyName());
+                _propertyNameList.add(event.getPropertyName());
                 _propertySourceList.add(event.getSource());
             }
         });
