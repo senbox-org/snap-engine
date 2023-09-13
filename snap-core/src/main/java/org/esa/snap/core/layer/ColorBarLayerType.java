@@ -417,8 +417,8 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage of scene size to move " + COLOR_LOWER_CASE + " bar legend outside of anchored axis";
     private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset (Outside)";
     public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 5.0;
-    public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -100;
-    public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 100;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -1000;
+    public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 1000;
     public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";
     public static final Class PROPERTY_LOCATION_GAP_FACTOR_TYPE = Double.class;
 

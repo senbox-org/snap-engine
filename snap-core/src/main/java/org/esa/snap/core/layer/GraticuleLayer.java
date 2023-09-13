@@ -1016,10 +1016,10 @@ public class GraticuleLayer extends Layer {
 //                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
 //            }
 
-//            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2;
-            double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
+            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2;
+//            double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
 
-            ptsToPixelsMultiplier = maxSideSize * 0.001;
+            ptsToPixelsMultiplier = averageSideSize * 0.001;
         }
 
 
