@@ -539,6 +539,19 @@ public class MetaDataLayer extends Layer {
 
 
             switch (META_START) {
+                case "<M=":
+                    inputString = inputString.replace("<m=", META_START);
+                    break;
+
+                case "<G=":
+                    inputString = inputString.replace("<g=", META_START);
+                    break;
+
+                case "<MG=":
+                    inputString = inputString.replace("<mg=", META_START);
+                    inputString = inputString.replace("<Mg=", META_START);
+                    break;
+
                 case "<META=":
                     inputString = inputString.replace("<Meta=", META_START);
                     inputString = inputString.replace("<meta=", META_START);
@@ -549,14 +562,27 @@ public class MetaDataLayer extends Layer {
                     inputString = inputString.replace("<file_meta=", META_START);
                     break;
 
+                case "<B=":
+                    inputString = inputString.replace("<b=", META_START);
+                    break;
+
+                case "<MB=":
+                    inputString = inputString.replace("<Mb=", META_START);
+                    inputString = inputString.replace("<mb=", META_START);
+                    break;
+
                 case "<BAND_META=":
                     inputString = inputString.replace("<Band_Meta=", META_START);
                     inputString = inputString.replace("<band_meta=", META_START);
                     break;
 
-                case "<FILE_INFO=":
-                    inputString = inputString.replace("<File_Info=", META_START);
-                    inputString = inputString.replace("<file_info=", META_START);
+                case "<I=":
+                    inputString = inputString.replace("<i=", META_START);
+                    break;
+
+                case "<INFO=":
+                    inputString = inputString.replace("<Info=", META_START);
+                    inputString = inputString.replace("<info=", META_START);
                     break;
 
                 case "<BAND_INFO=":
@@ -564,9 +590,9 @@ public class MetaDataLayer extends Layer {
                     inputString = inputString.replace("<band_info=", META_START);
                     break;
 
-                case "<INFO=":
-                    inputString = inputString.replace("<Info=", META_START);
-                    inputString = inputString.replace("<info=", META_START);
+                case "<FILE_INFO=":
+                    inputString = inputString.replace("<File_Info=", META_START);
+                    inputString = inputString.replace("<file_info=", META_START);
                     break;
             }
 
@@ -606,24 +632,44 @@ public class MetaDataLayer extends Layer {
 
                     switch (META_START) {
                         case "<META=":
-                            value = ProductUtils.getMetaData(raster.getProduct(), metaId);
-                            if (value == null || value.length() == 0) {
-                                for (String keyInSet : getAllPossibleRelatedKeys(metaId)) {
-                                    value = ProductUtils.getMetaData(raster.getProduct(), keyInSet);
-                                    if (value != null && value.length() > 0) {
-                                        metaId = keyInSet;
-                                        break;
-                                    }
-                                }
-                            }
+                            value = getFileMetaWithPossibleVariantKeys(metaId);
+                            break;
+
+                        case "<M=":
+                            value = getFileMetaWithPossibleVariantKeys(metaId);
+                            break;
+
+                        case "<G=":
+                            value = getFileMetaWithPossibleVariantKeys(metaId);
+                            break;
+
+                        case "<MG=":
+                            value = getFileMetaWithPossibleVariantKeys(metaId);
                             break;
 
                         case "<FILE_META=":
-                            value = ProductUtils.getMetaData(raster.getProduct(), metaId);
+                            value = getFileMetaWithPossibleVariantKeys(metaId);
+                            break;
+
+
+                        case "<B=":
+                            value = ProductUtils.getBandMetaData(raster.getProduct(), metaId, raster.getName());
+                            break;
+
+                        case "<MB=":
+                            value = ProductUtils.getBandMetaData(raster.getProduct(), metaId, raster.getName());
                             break;
 
                         case "<BAND_META=":
                             value = ProductUtils.getBandMetaData(raster.getProduct(), metaId, raster.getName());
+                            break;
+
+                        case "<I=":
+                            value = getDerivedMeta(metaId.toUpperCase());
+                            break;
+
+                        case "<INFO=":
+                            value = getDerivedMeta(metaId.toUpperCase());
                             break;
 
                         case "<FILE_INFO=":
@@ -634,9 +680,7 @@ public class MetaDataLayer extends Layer {
                             value = getDerivedMeta(metaId.toUpperCase());
                             break;
 
-                        case "<INFO=":
-                            value = getDerivedMeta(metaId.toUpperCase());
-                            break;
+
                     }
 
                     if (showKeys) {
@@ -654,6 +698,22 @@ public class MetaDataLayer extends Layer {
         }
 
         return inputString;
+    }
+
+
+    private String getFileMetaWithPossibleVariantKeys(String metaId) {
+        String value = ProductUtils.getMetaData(raster.getProduct(), metaId);
+        if (value == null || value.length() == 0) {
+            for (String keyInSet : getAllPossibleRelatedKeys(metaId)) {
+                value = ProductUtils.getMetaData(raster.getProduct(), keyInSet);
+                if (value != null && value.length() > 0) {
+                    metaId = keyInSet;
+                    break;
+                }
+            }
+        }
+
+        return value;
     }
 
     private String getDerivedMeta(String inputString) {
@@ -926,15 +986,17 @@ public class MetaDataLayer extends Layer {
         double yTopTranslateFirstLine;
         double yBottomTranslateFirstLine;
 
+        double avgSideLength = (raster.getRasterWidth() + raster.getRasterHeight())/ 2.0;
+
         if (isHeader) {
-            yTopTranslateFirstLine = -heightInformationBlock - raster.getRasterHeight() * (getHeaderGapFactor() / 100);
-            yBottomTranslateFirstLine = raster.getRasterHeight() * (getHeaderGapFactor() / 100);
+            yTopTranslateFirstLine = -heightInformationBlock - avgSideLength * (getHeaderGapFactor() / 100);
+            yBottomTranslateFirstLine = avgSideLength * (getHeaderGapFactor() / 100);
         } else if (isFooter2) {
-            yTopTranslateFirstLine = -heightInformationBlock - raster.getRasterHeight() * (getFooter2GapFactor() / 100);
-            yBottomTranslateFirstLine = raster.getRasterHeight() * (getFooter2GapFactor() / 100);
+            yTopTranslateFirstLine = -heightInformationBlock - avgSideLength * (getFooter2GapFactor() / 100);
+            yBottomTranslateFirstLine = avgSideLength * (getFooter2GapFactor() / 100);
         } else {
-            yTopTranslateFirstLine = -heightInformationBlock - raster.getRasterHeight() * (getMarginGapFactor() / 100);
-            yBottomTranslateFirstLine = raster.getRasterHeight() * (getMarginGapFactor() / 100);
+            yTopTranslateFirstLine = -heightInformationBlock - avgSideLength * (getMarginGapFactor() / 100);
+            yBottomTranslateFirstLine = avgSideLength * (getMarginGapFactor() / 100);
         }
 
 
@@ -1004,37 +1066,37 @@ public class MetaDataLayer extends Layer {
                     break;
 
                 case MetaDataLayerType.LOCATION_RIGHT:
-                    xOffset = (float) (raster.getRasterWidth() + raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (raster.getRasterWidth() + avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = 0;
                     break;
 
                 case MetaDataLayerType.LOCATION_RIGHT_CENTER:
-                    xOffset = (float) (raster.getRasterWidth() + raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (raster.getRasterWidth() + avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = (float) (raster.getRasterHeight() / 2.0 + labelBounds.getHeight() - heightInformationBlock);
                     break;
 
                 case MetaDataLayerType.LOCATION_RIGHT_BOTTOM:
-                    xOffset = (float) (raster.getRasterWidth() + raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (raster.getRasterWidth() + avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = (float) (raster.getRasterHeight() + labelBounds.getHeight() - heightInformationBlock);
                     break;
 
                 case MetaDataLayerType.LOCATION_LEFT:
-                    xOffset = (float) (-maxWidthInformationBlock - raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (-maxWidthInformationBlock - avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = 0;
                     break;
 
                 case MetaDataLayerType.LOCATION_LEFT_CENTER:
-                    xOffset = (float) (-maxWidthInformationBlock - raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (-maxWidthInformationBlock - avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = (float) (raster.getRasterHeight() / 2.0 + labelBounds.getHeight() - heightInformationBlock);
                     break;
 
                 case MetaDataLayerType.LOCATION_LEFT_BOTTOM:
-                    xOffset = (float) (-maxWidthInformationBlock - raster.getRasterWidth() * (getMarginGapFactor() / 100));
+                    xOffset = (float) (-maxWidthInformationBlock - avgSideLength * (getMarginGapFactor() / 100));
                     ;
                     yOffset = (float) (raster.getRasterHeight() + labelBounds.getHeight() - heightInformationBlock);
                     break;
@@ -1316,11 +1378,17 @@ public class MetaDataLayer extends Layer {
             String[] linesArray = text.split("(\\n|<br>)");
             for (String currentLine : linesArray) {
                 if (currentLine != null && currentLine.length() > 0) {
+                    currentLine = replaceStringVariables(currentLine, false, "<I=");
                     currentLine = replaceStringVariables(currentLine, false, "<INFO=");
-                    currentLine = replaceStringVariables(currentLine, false, "<META=");
                     currentLine = replaceStringVariables(currentLine, false, "<FILE_INFO=");
                     currentLine = replaceStringVariables(currentLine, false, "<BAND_INFO=");
+                    currentLine = replaceStringVariables(currentLine, false, "<M=");
+                    currentLine = replaceStringVariables(currentLine, false, "<MG=");
+                    currentLine = replaceStringVariables(currentLine, false, "<G=");
+                    currentLine = replaceStringVariables(currentLine, false, "<META=");
                     currentLine = replaceStringVariables(currentLine, false, "<FILE_META=");
+                    currentLine = replaceStringVariables(currentLine, false, "<MB=");
+                    currentLine = replaceStringVariables(currentLine, false, "<B=");
                     currentLine = replaceStringVariables(currentLine, false, "<BAND_META=");
                     lineArrayList.add(currentLine);
                 }
@@ -1431,8 +1499,9 @@ public class MetaDataLayer extends Layer {
 
         if (ptsToPixelsMultiplier == NULL_DOUBLE) {
             double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
+            double avgSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2.0;
 
-            ptsToPixelsMultiplier = maxSideSize * 0.001;
+            ptsToPixelsMultiplier = avgSideSize * 0.001;
         }
 
 
