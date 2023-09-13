@@ -43,6 +43,7 @@ public class Node {
     private String operatorName;
     private SourceList sourceList;
     private DomElement configuration;
+    private GraphNodeUpdater graphNodeUpdater;
 
     /**
      * Constructs a new <code>Node</code> instance.
@@ -54,6 +55,16 @@ public class Node {
         this.id = id;
         this.operatorName = operatorName;
         init();
+    }
+
+    public void attachGraphNodeUpdater(GraphNodeUpdater graphNodeUpdater){
+        this.graphNodeUpdater = graphNodeUpdater;
+    }
+
+    public void updateGraphNode(NodeContext nodeContext) throws GraphException {
+        if (this.graphNodeUpdater != null) {
+            this.graphNodeUpdater.doUpdate(nodeContext);
+        }
     }
 
     /**
