@@ -17,52 +17,47 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Locale;
 
-public class ProductIOPlugInManagerTest extends TestCase {
+import static org.junit.Assert.assertSame;
+
+public class ProductIOPlugInManagerTest {
 
     private static final String _prodType = "TestProduct";
+    private static final int _sceneWidth = 400;
+    private static final int _sceneHeight = 300;
     private final ProductIOPlugInManager _m = ProductIOPlugInManager.getInstance();
     ProductReaderPlugIn _xr = new XProductReaderPi();
     ProductReaderPlugIn _yr = new YProductReaderPi();
     ProductWriterPlugIn _xw = new XProductWriterPi();
     ProductWriterPlugIn _yw = new YProductWriterPi();
-    private static final int _sceneWidth = 400;
-    private static final int _sceneHeight = 300;
 
-    public ProductIOPlugInManagerTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductIOPlugInManagerTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _m.addReaderPlugIn(_xr);
         _m.addReaderPlugIn(_yr);
         _m.addWriterPlugIn(_xw);
         _m.addWriterPlugIn(_yw);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         _m.removeReaderPlugIn(_xr);
         _m.removeReaderPlugIn(_yr);
         _m.removeWriterPlugIn(_xw);
         _m.removeWriterPlugIn(_yw);
     }
 
+    @Test
     public void testThatGetInstanceAlwaysReturnsTheSameObject() {
         assertSame(_m, ProductIOPlugInManager.getInstance());
     }
@@ -95,7 +90,7 @@ public class ProductIOPlugInManagerTest extends TestCase {
         }
 
         public DecodeQualification getDecodeQualification(Object input) {
-            if(input instanceof String) {
+            if (input instanceof String) {
                 return DecodeQualification.INTENDED;
             }
             return DecodeQualification.UNABLE;
@@ -129,7 +124,7 @@ public class ProductIOPlugInManagerTest extends TestCase {
         }
 
         public DecodeQualification getDecodeQualification(Object input) {
-             if(input instanceof String) {
+            if (input instanceof String) {
                 return DecodeQualification.INTENDED;
             }
             return DecodeQualification.UNABLE;

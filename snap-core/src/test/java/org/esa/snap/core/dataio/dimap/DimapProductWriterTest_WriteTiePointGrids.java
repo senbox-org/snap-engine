@@ -15,9 +15,6 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Product;
@@ -25,37 +22,34 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class DimapProductWriterTest_WriteTiePointGrids extends TestCase {
+import static org.junit.Assert.*;
+
+public class DimapProductWriterTest_WriteTiePointGrids {
 
     private final DimapProductWriterPlugIn _writerPlugIn = new DimapProductWriterPlugIn();
     private DimapProductWriter _productWriter;
     private File _outputDir;
     private File _outputFile;
 
-    public DimapProductWriterTest_WriteTiePointGrids(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(DimapProductWriterTest_WriteTiePointGrids.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         GlobalTestTools.deleteTestDataOutputDirectory();
         _productWriter = new DimapProductWriter(_writerPlugIn);
         _outputDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
         _outputFile = new File(_outputDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         if (_productWriter != null) {
             try {
                 _productWriter.close();
@@ -65,9 +59,10 @@ public class DimapProductWriterTest_WriteTiePointGrids extends TestCase {
         GlobalTestTools.deleteTestDataOutputDirectory();
     }
 
+    @Test
     public void testWriteProductNodes_TiePointGrid() {
         Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
-                                      50, 25);
+                50, 25);
         float[] expectedArray = getTiePointData(10, 5);
         TiePointGrid tiePointGrid = new TiePointGrid("name", 10, 5, 0, 0, 5, 5, expectedArray);
         product.addTiePointGrid(tiePointGrid);
@@ -101,7 +96,7 @@ public class DimapProductWriterTest_WriteTiePointGrids extends TestCase {
 
     private float[] getCurrentByteArray(TiePointGrid grid) {
         FileImageInputStream inputStream = createInputStream(grid);
-        int fileLength = new Long(inputStream.length()).intValue();
+        int fileLength = Long.valueOf(inputStream.length()).intValue();
         int arrayLength = fileLength / ProductData.getElemSize(ProductData.TYPE_FLOAT32);
         float[] currentFloats = new float[arrayLength];
         try {
@@ -118,7 +113,7 @@ public class DimapProductWriterTest_WriteTiePointGrids extends TestCase {
     private FileImageInputStream createInputStream(TiePointGrid grid) {
         File tiePointGridDir = new File(createDataDir(), DimapProductConstants.TIE_POINT_GRID_DIR_NAME);
         File file = new File(tiePointGridDir, grid.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
-        assertEquals(true, file.exists());
+        assertTrue(file.exists());
         FileImageInputStream inputStream = null;
         try {
             inputStream = new FileImageInputStream(file);

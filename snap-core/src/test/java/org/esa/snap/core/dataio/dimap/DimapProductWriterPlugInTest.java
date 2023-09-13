@@ -15,41 +15,37 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.GlobalTestConfig;
+import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Product;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-public class DimapProductWriterPlugInTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DimapProductWriterPlugInTest {
 
     private final static DimapProductWriterPlugIn _plugIn = new DimapProductWriterPlugIn();
     private ProductWriter _productWriter;
 
-    public DimapProductWriterPlugInTest(String s) {
-        super(s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(DimapProductWriterPlugInTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _productWriter = _plugIn.createWriterInstance();
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         _productWriter = null;
+        GlobalTestTools.deleteTestDataOutputDirectory();
     }
 
+    @Test
     public void testPlugInInfoQuery() {
-
         assertNotNull(_plugIn.getFormatNames());
         assertEquals(1, _plugIn.getFormatNames().length);
         assertEquals(DimapProductConstants.DIMAP_FORMAT_NAME, _plugIn.getFormatNames()[0]);
@@ -60,11 +56,13 @@ public class DimapProductWriterPlugInTest extends TestCase {
         assertNotNull(_plugIn.getDescription(null));
     }
 
+    @Test
     public void testCreatedProductWriterInstance() {
         assertNotNull(_productWriter);
-        assertEquals(true, _productWriter instanceof DimapProductWriter);
+        assertTrue(_productWriter instanceof DimapProductWriter);
     }
 
+    @Test
     public void testWriteProductNodes() {
         Product product = new Product("test", "TEST", 10, 10);
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test.dim");
@@ -74,5 +72,4 @@ public class DimapProductWriterPlugInTest extends TestCase {
             fail("unexpected IOException: " + e.getMessage());
         }
     }
-
 }

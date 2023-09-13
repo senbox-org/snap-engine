@@ -19,10 +19,13 @@ package com.bc.ceres.swing.update;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.runtime.Version;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ModuleManagerTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class ModuleManagerTest {
+
+    @Test
     public void testInstallMultiVersionsOnRepo() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.1.xml",
@@ -33,18 +36,18 @@ public class ModuleManagerTest extends TestCase {
                 "xml/consistency/module-b-2.4.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          repositoryModuleFileNames);
+                repositoryModuleFileNames);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(1, moduleManager.getInstalledModuleItems().length);
         assertEquals(0, moduleManager.getUpdatableModuleItems().length);
         assertEquals(1, moduleManager.getAvailableModuleItems().length);
 
-        assertEquals("module-b",moduleManager.getAvailableModuleItems()[0].getModule().getSymbolicName());
-        assertEquals(Version.parseVersion("2.4"),moduleManager.getAvailableModuleItems()[0].getModule().getVersion());
-
+        assertEquals("module-b", moduleManager.getAvailableModuleItems()[0].getModule().getSymbolicName());
+        assertEquals(Version.parseVersion("2.4"), moduleManager.getAvailableModuleItems()[0].getModule().getVersion());
     }
 
+    @Test
     public void testUpdateMultiVersionsOnRepo() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.0.xml",
@@ -54,15 +57,15 @@ public class ModuleManagerTest extends TestCase {
                 "xml/consistency/module-a-1.1.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          repositoryModuleFileNames);
+                repositoryModuleFileNames);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(1, moduleManager.getInstalledModuleItems().length);
         assertEquals(1, moduleManager.getUpdatableModuleItems().length);
         assertEquals(0, moduleManager.getAvailableModuleItems().length);
 
-        assertEquals("module-a",moduleManager.getUpdatableModuleItems()[0].getModule().getSymbolicName());
-        assertEquals(Version.parseVersion("1.0"),moduleManager.getUpdatableModuleItems()[0].getModule().getVersion());
-        assertEquals(Version.parseVersion("1.1"),moduleManager.getUpdatableModuleItems()[0].getRepositoryModule().getVersion());
+        assertEquals("module-a", moduleManager.getUpdatableModuleItems()[0].getModule().getSymbolicName());
+        assertEquals(Version.parseVersion("1.0"), moduleManager.getUpdatableModuleItems()[0].getModule().getVersion());
+        assertEquals(Version.parseVersion("1.1"), moduleManager.getUpdatableModuleItems()[0].getRepositoryModule().getVersion());
     }
 }

@@ -17,33 +17,38 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DummyImageInputStream;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.TreeNode;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-public class AbstractProductReaderTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class AbstractProductReaderTest {
 
     private AbstractProductReader reader;
 
+    @Test
     public void testParseTileSize() {
-        assertEquals(null, AbstractProductReader.parseTileSize(null, 1024));
-        assertEquals(new Integer(1024), AbstractProductReader.parseTileSize("*", 1024));
-        assertEquals(new Integer(256), AbstractProductReader.parseTileSize("256", 1024));
-        assertEquals(null, AbstractProductReader.parseTileSize("ten", 1024));
+        assertNull(AbstractProductReader.parseTileSize(null, 1024));
+        assertEquals(Integer.valueOf(1024), AbstractProductReader.parseTileSize("*", 1024));
+        assertEquals(Integer.valueOf(256), AbstractProductReader.parseTileSize("256", 1024));
+        assertNull(AbstractProductReader.parseTileSize("ten", 1024));
     }
 
+    @Test
     public void testGetConfiguredTileSize_PrefSizeSet() {
         Product product = new Product("a", "b", 1121, 9281);
         product.setPreferredTileSize(256, 512);
-        assertEquals(null, AbstractProductReader.getConfiguredTileSize(product, null, null));
+        assertNull(AbstractProductReader.getConfiguredTileSize(product, null, null));
         assertEquals(new Dimension(1121, 512), AbstractProductReader.getConfiguredTileSize(product, "*", null));
         assertEquals(new Dimension(32, 512), AbstractProductReader.getConfiguredTileSize(product, "32", null));
         assertEquals(new Dimension(256, 9281), AbstractProductReader.getConfiguredTileSize(product, null, "*"));
@@ -54,9 +59,10 @@ public class AbstractProductReaderTest extends TestCase {
         assertEquals(new Dimension(32, 64), AbstractProductReader.getConfiguredTileSize(product, "32", "64"));
     }
 
+    @Test
     public void testGetConfiguredTileSize_PrefSizeNotSet() {
         Product product = new Product("a", "b", 1121, 9281);
-        assertEquals(null, AbstractProductReader.getConfiguredTileSize(product, null, null));
+        assertNull(AbstractProductReader.getConfiguredTileSize(product, null, null));
         assertEquals(new Dimension(1121, 1121), AbstractProductReader.getConfiguredTileSize(product, "*", null));
         assertEquals(new Dimension(32, 32), AbstractProductReader.getConfiguredTileSize(product, "32", null));
         assertEquals(new Dimension(1121, 9281), AbstractProductReader.getConfiguredTileSize(product, null, "*"));
@@ -67,6 +73,7 @@ public class AbstractProductReaderTest extends TestCase {
         assertEquals(new Dimension(32, 64), AbstractProductReader.getConfiguredTileSize(product, "32", "64"));
     }
 
+    @Test
     public void testGetProductComponents_inputFile() throws IOException {
         URL location = AbstractProductReaderTest.class.getProtectionDomain().getCodeSource().getLocation();
         File file = new File(location.getFile());
@@ -86,6 +93,7 @@ public class AbstractProductReaderTest extends TestCase {
         assertEquals(file, treeNodes[0].getContent());
     }
 
+    @Test
     public void testGetProductComponents_inputString() throws IOException {
         URL location = AbstractProductReaderTest.class.getProtectionDomain().getCodeSource().getLocation();
 
@@ -105,6 +113,7 @@ public class AbstractProductReaderTest extends TestCase {
         assertEquals(file, treeNodes[0].getContent());
     }
 
+    @Test
     public void testGetProductComponents_unsupportedInputObject() throws IOException {
         reader.readProductNodes(new DummyImageInputStream(), null);
 
@@ -112,8 +121,8 @@ public class AbstractProductReaderTest extends TestCase {
         assertNull(productComponents);
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         reader = new TestProductReader();
     }
 

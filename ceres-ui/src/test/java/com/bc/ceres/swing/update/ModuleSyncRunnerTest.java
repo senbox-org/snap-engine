@@ -16,14 +16,24 @@
 
 package com.bc.ceres.swing.update;
 
-import com.bc.ceres.core.runtime.ModuleState;
-import com.bc.ceres.core.runtime.Module;
-import com.bc.ceres.core.runtime.Version;
 import com.bc.ceres.core.CoreException;
-import junit.framework.TestCase;
+import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.core.runtime.ModuleState;
+import com.bc.ceres.core.runtime.Version;
+import org.junit.Test;
 
-public class ModuleSyncRunnerTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ModuleSyncRunnerTest {
+
+    private static ModuleItem[] sync(ModuleItem[] installedModuleItems, Module[] repositoryModules) {
+        return ModuleSyncRunner.sync(
+                installedModuleItems,
+                repositoryModules
+        );
+    }
+
+    @Test
     public void testNullArgs() {
         try {
             ModuleSyncRunner.sync(null, new Module[0]);
@@ -33,18 +43,20 @@ public class ModuleSyncRunnerTest extends TestCase {
         }
 
         try {
-            ModuleSyncRunner.sync(new ModuleItem[0], null);
+            ModuleSyncRunner.sync(ModuleItem.EMPTY_ARRAY, null);
             fail("NullPointerException expected");
         } catch (NullPointerException e) {
             // ok
         }
     }
 
+    @Test
     public void testEmptyModules() {
-        ModuleItem[] moduleItems = sync(new ModuleItem[0], new Module[0]);
+        ModuleItem[] moduleItems = sync(ModuleItem.EMPTY_ARRAY, new Module[0]);
         testLength(moduleItems, 0);
     }
 
+    @Test
     public void testOneInstalledModule() throws CoreException {
         ModuleItem[] moduleItems = sync(new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED)
@@ -53,17 +65,19 @@ public class ModuleSyncRunnerTest extends TestCase {
         testLength(moduleItems, 0);
     }
 
+    @Test
     public void testOneInstalledAndOneAvailableModule_DifferentIdsSameVersions() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED)
         };
         Module[] repositoryModules = new Module[]{TestHelpers.newRepositoryModuleMock("module-b", "1.0",
-                                                                                                          ModuleState.NULL)};
+                ModuleState.NULL)};
         ModuleItem[] moduleItems = sync(installedModuleItems, repositoryModules);
         testLength(moduleItems, 1);
         testModule(moduleItems[0], "module-b", "1.0", ModuleState.NULL, repositoryModules[0]);
     }
 
+    @Test
     public void testOneInstalledAndOneAvailableModule_SameIdsSameVersions() throws CoreException {
         ModuleItem[] moduleItems = sync(new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED)
@@ -73,6 +87,7 @@ public class ModuleSyncRunnerTest extends TestCase {
         testLength(moduleItems, 0);
     }
 
+    @Test
     public void testOneInstalledAndOneAvailableModule_SameIdsDiffVersions() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED)
@@ -86,13 +101,7 @@ public class ModuleSyncRunnerTest extends TestCase {
         testModule(installedModuleItems[0], "module-a", "1.0", ModuleState.INSTALLED, availableModuleItems[0]);
     }
 
-    private static ModuleItem[] sync(ModuleItem[] installedModuleItems, Module[] repositoryModules) {
-        return ModuleSyncRunner.sync(
-                installedModuleItems,
-                repositoryModules
-        );
-    }
-
+    @Test
     public void testTwoInstalledAndTwoAvailableModules_OneCanBeUpdated() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED),
@@ -108,9 +117,9 @@ public class ModuleSyncRunnerTest extends TestCase {
 
         testModule(installedModuleItems[0], "module-a", "1.0", ModuleState.INSTALLED, availableModuleItems[1]);
         testModule(installedModuleItems[1], "module-c", "1.0", ModuleState.INSTALLED, null);
-
     }
 
+    @Test
     public void testTwoInstalledAndTwoAvailableModules_OneHasHigherOtherHasLowerVersion() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED),
@@ -126,6 +135,7 @@ public class ModuleSyncRunnerTest extends TestCase {
         testModule(installedModuleItems[1], "module-b", "1.0", ModuleState.INSTALLED, null);
     }
 
+    @Test
     public void testThatUninstalledModulesAreShownAsAvailable() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED),
@@ -146,6 +156,7 @@ public class ModuleSyncRunnerTest extends TestCase {
 
     }
 
+    @Test
     public void testThatLatestUpdateIsSet() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED),
@@ -164,6 +175,7 @@ public class ModuleSyncRunnerTest extends TestCase {
         testModule(installedModuleItems[1], "module-b", "1.0", ModuleState.INSTALLED, availableModuleItems[2]);
     }
 
+    @Test
     public void testTwoUninstalledAndTwoAvailables_SameIdsSameVersions() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.UNINSTALLED),
@@ -186,6 +198,7 @@ public class ModuleSyncRunnerTest extends TestCase {
 //        testModule(installedModuleItems[1], "module-b", "1.0", ModuleState.UNINSTALLED, null);
     }
 
+    @Test
     public void testTwoUninstalledAndTwoAvailables_SameIdsDiffVersions() throws CoreException {
         ModuleItem[] installedModuleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.UNINSTALLED),

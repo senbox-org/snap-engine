@@ -16,13 +16,14 @@
 
 package com.bc.ceres.swing.update;
 
-import junit.framework.TestCase;
-import com.bc.ceres.core.runtime.ProxyConfig;
+import org.junit.Test;
 
-public class ConnectionConfigDataTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
 
+public class ConnectionConfigDataTest {
+
+    @Test
     public void testConnectionConfig() {
-
         ConnectionConfigData connectionConfigData = new ConnectionConfigData();
         assertNotNull(connectionConfigData.getProxyConfig());
     }

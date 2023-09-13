@@ -16,12 +16,15 @@
 
 package com.bc.ceres.swing.update;
 
-import com.bc.ceres.core.runtime.ModuleState;
 import com.bc.ceres.core.CoreException;
-import junit.framework.TestCase;
+import com.bc.ceres.core.runtime.ModuleState;
+import org.junit.Test;
 
-public class ModuleFilterTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ModuleFilterTest {
+
+    @Test
     public void testFilter() throws CoreException {
         ModuleItem[] moduleItems = new ModuleItem[]{
                 TestHelpers.newModuleItemMock("module-a", "1.0", ModuleState.INSTALLED),
