@@ -19,55 +19,55 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
-import com.bc.ceres.swing.binding.internal.MultiSelectionEditor;
+import org.junit.Test;
 
-import javax.swing.JComponent;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class MultiSelectionEditorTest extends TestCase {
+public class MultiSelectionEditorTest {
 
-    public void testIsApplicable() throws Exception {
+    @Test
+    public void testIsApplicable() {
         MultiSelectionEditor multiSelEditor = new MultiSelectionEditor();
-        
-        ValueSet valueSet = new ValueSet(new Double[] {Double.valueOf(42), Double.valueOf(84)});
+
+        ValueSet valueSet = new ValueSet(new Double[]{42.0, 84.0});
         PropertyDescriptor doubleArrayDescriptor = new PropertyDescriptor("test", Double[].class);
         doubleArrayDescriptor.setValueSet(valueSet);
         assertTrue(multiSelEditor.isValidFor(doubleArrayDescriptor));
-        
+
         doubleArrayDescriptor = new PropertyDescriptor("test", Double.class);
         doubleArrayDescriptor.setValueSet(valueSet);
         assertFalse(multiSelEditor.isValidFor(doubleArrayDescriptor));
-        
+
         doubleArrayDescriptor = new PropertyDescriptor("test", Double[].class);
         assertFalse(multiSelEditor.isValidFor(doubleArrayDescriptor));
-        
+
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         assertFalse(multiSelEditor.isValidFor(doubleDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         MultiSelectionEditor multiSelEditor = new MultiSelectionEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("value");
-        ValueSet valueSet = new ValueSet(new Double[] {Double.valueOf(42), Double.valueOf(84)});
+        ValueSet valueSet = new ValueSet(new Double[]{42.0, 84.0});
         propertyDescriptor.setValueSet(valueSet);
         assertSame(Double[].class, propertyDescriptor.getType());
-        
+
         assertTrue(multiSelEditor.isValidFor(propertyDescriptor));
         JComponent editorComponent = multiSelEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
         assertSame(JScrollPane.class, editorComponent.getClass());
-        
+
         JComponent[] components = bindingContext.getBinding("value").getComponents();
         assertEquals(1, components.length);
         assertSame(JList.class, components[0].getClass());
     }
-    
+
     private static class V {
         Double[] value;
     }

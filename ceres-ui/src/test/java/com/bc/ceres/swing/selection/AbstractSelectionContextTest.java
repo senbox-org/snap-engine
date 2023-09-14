@@ -17,15 +17,19 @@
 package com.bc.ceres.swing.selection;
 
 import com.bc.ceres.swing.selection.support.DefaultSelection;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.awt.datatransfer.StringSelection;
 
-public class AbstractSelectionContextTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class AbstractSelectionContextTest {
+
+    @Test
     public void testDefaultOperations() {
         MySelectionContext context = new MySelectionContext();
 
-        assertEquals(false, context.canInsert(null));
+        assertFalse(context.canInsert(null));
         try {
             context.insert(new StringSelection("X"));
             fail("Exception expected");
@@ -33,7 +37,7 @@ public class AbstractSelectionContextTest extends TestCase {
             // ok
         }
 
-        assertEquals(false, context.canDeleteSelection());
+        assertFalse(context.canDeleteSelection());
         try {
             context.deleteSelection();
             fail("Exception expected");
@@ -41,7 +45,7 @@ public class AbstractSelectionContextTest extends TestCase {
             // ok
         }
 
-        assertEquals(false, context.canSelectAll());
+        assertFalse(context.canSelectAll());
         try {
             context.selectAll();
             fail("Exception expected");
@@ -50,6 +54,7 @@ public class AbstractSelectionContextTest extends TestCase {
         }
     }
 
+    @Test
     public void testSelectionChangeSupport() {
         MySelectionContext context = new MySelectionContext();
 
@@ -86,12 +91,12 @@ public class AbstractSelectionContextTest extends TestCase {
 
     private static class MySelectionContext extends AbstractSelectionContext {
         @Override
-        public void setSelection(Selection selection) {
+        public Selection getSelection() {
+            return null;
         }
 
         @Override
-        public Selection getSelection() {
-            return null;
+        public void setSelection(Selection selection) {
         }
 
         @Override
@@ -99,5 +104,4 @@ public class AbstractSelectionContextTest extends TestCase {
             super.fireSelectionChange(selection);
         }
     }
-
 }

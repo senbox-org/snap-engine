@@ -19,51 +19,52 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
-import com.bc.ceres.swing.binding.internal.SingleSelectionEditor;
+import org.junit.Test;
 
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
+import javax.swing.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class SingleSelectionEditorTest extends TestCase {
+public class SingleSelectionEditorTest {
 
-    public void testIsApplicable() throws Exception {
+    @Test
+    public void testIsApplicable() {
         SingleSelectionEditor singleSelEditor = new SingleSelectionEditor();
-        
-        ValueSet valueSet = new ValueSet(new Double[] {Double.valueOf(42), Double.valueOf(84)});
+
+        ValueSet valueSet = new ValueSet(new Double[]{42.0, 84.0});
         PropertyDescriptor doubleArrayDescriptor = new PropertyDescriptor("test", Double.class);
         doubleArrayDescriptor.setValueSet(valueSet);
         assertTrue(singleSelEditor.isValidFor(doubleArrayDescriptor));
-        
+
         doubleArrayDescriptor = new PropertyDescriptor("test", Double[].class);
         doubleArrayDescriptor.setValueSet(valueSet);
         assertFalse(singleSelEditor.isValidFor(doubleArrayDescriptor));
-        
+
         doubleArrayDescriptor = new PropertyDescriptor("test", Double.class);
         assertFalse(singleSelEditor.isValidFor(doubleArrayDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         SingleSelectionEditor singleSelEditor = new SingleSelectionEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("value");
-        ValueSet valueSet = new ValueSet(new Double[] {Double.valueOf(42), Double.valueOf(84)});
+        ValueSet valueSet = new ValueSet(new Double[]{42.0, 84.0});
         propertyDescriptor.setValueSet(valueSet);
         assertSame(Double.class, propertyDescriptor.getType());
-        
+
         assertTrue(singleSelEditor.isValidFor(propertyDescriptor));
         JComponent editorComponent = singleSelEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
         assertSame(JComboBox.class, editorComponent.getClass());
-        
+
         JComponent[] components = bindingContext.getBinding("value").getComponents();
         assertEquals(1, components.length);
         assertSame(JComboBox.class, components[0].getClass());
     }
-    
+
     private static class V {
         Double value;
     }

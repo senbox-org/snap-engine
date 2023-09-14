@@ -19,59 +19,60 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.swing.binding.BindingContext;
-import com.bc.ceres.swing.binding.internal.RangeEditor;
+import org.junit.Test;
 
-import javax.swing.JComponent;
-import javax.swing.JSlider;
+import javax.swing.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class RangeEditorTest extends TestCase {
+public class RangeEditorTest {
 
-    public void testIsApplicable() throws Exception {
+    @Test
+    public void testIsApplicable() {
         RangeEditor rangeEditor = new RangeEditor();
-        
+
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         ValueRange valueRange = ValueRange.parseValueRange("[2.0,4.6]");
         doubleDescriptor.setValueRange(valueRange);
         assertFalse(rangeEditor.isValidFor(doubleDescriptor));
-        
+
         doubleDescriptor = new PropertyDescriptor("test", Double.class);
         assertFalse(rangeEditor.isValidFor(doubleDescriptor));
-        
+
         doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         valueRange = ValueRange.parseValueRange("[2.0,*)");
         doubleDescriptor.setValueRange(valueRange);
         assertFalse(rangeEditor.isValidFor(doubleDescriptor));
-        
+
         doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         valueRange = ValueRange.parseValueRange("[*,4.6)");
         doubleDescriptor.setValueRange(valueRange);
         assertFalse(rangeEditor.isValidFor(doubleDescriptor));
-        
+
         PropertyDescriptor booleanDescriptor = new PropertyDescriptor("test", Boolean.TYPE);
         assertFalse(rangeEditor.isValidFor(booleanDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         RangeEditor rangeEditor = new RangeEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("value");
         ValueRange valueRange = ValueRange.parseValueRange("[2.0,4.6]");
         propertyDescriptor.setValueRange(valueRange);
         assertSame(Double.TYPE, propertyDescriptor.getType());
-        
+
         JComponent editorComponent = rangeEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
         assertSame(JSlider.class, editorComponent.getClass());
-        
+
         JComponent[] components = bindingContext.getBinding("value").getComponents();
         assertEquals(1, components.length);
         assertSame(JSlider.class, components[0].getClass());
     }
-    
+
     private static class V {
         double value;
     }

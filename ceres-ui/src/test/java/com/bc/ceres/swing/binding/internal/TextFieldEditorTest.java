@@ -18,43 +18,44 @@ package com.bc.ceres.swing.binding.internal;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.BindingContext;
-import com.bc.ceres.swing.binding.internal.TextFieldEditor;
+import org.junit.Test;
 
-import javax.swing.JComponent;
-import javax.swing.JTextField;
+import javax.swing.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class TextFieldEditorTest extends TestCase {
+public class TextFieldEditorTest {
 
-    public void testIsApplicable() throws Exception {
+    @Test
+    public void testIsApplicable() {
         TextFieldEditor textEditor = new TextFieldEditor();
-        
+
         PropertyDescriptor textDescriptor = new PropertyDescriptor("test", String.class);
         assertFalse(textEditor.isValidFor(textDescriptor));
         // TextFieldEditor returns always false, because it is the default !!!
-        
+
         PropertyDescriptor booleanDescriptor = new PropertyDescriptor("test", Boolean.TYPE);
         assertFalse(textEditor.isValidFor(booleanDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         TextFieldEditor textEditor = new TextFieldEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("value");
         assertSame(String.class, propertyDescriptor.getType());
-        
+
         JComponent editorComponent = textEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
         assertSame(JTextField.class, editorComponent.getClass());
-        
+
         JComponent[] components = bindingContext.getBinding("value").getComponents();
         assertEquals(1, components.length);
         assertSame(JTextField.class, components[0].getClass());
     }
-    
+
     private static class V {
         String value;
     }

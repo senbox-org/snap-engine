@@ -16,11 +16,13 @@
 
 package com.bc.ceres.swing.selection;
 
-import junit.framework.TestCase;
-import com.bc.ceres.swing.selection.AbstractSelection;
+import org.junit.Test;
 
-public class AbstractSelectionTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class AbstractSelectionTest {
+
+    @Test
     public void testDefaultBehaviour() {
         AbstractSelection selection = new MySelection();
 
