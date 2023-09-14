@@ -16,46 +16,18 @@
 
 package com.bc.ceres.swing;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
+
+import static org.junit.Assert.*;
 
 /**
  * A {@link javax.swing.JLabel} which fires action events when clicked.
  */
-public class ActionLabelTest extends TestCase {
-
-    public void testConstructors() {
-        ActionLabel label = new ActionLabel();
-        assertEquals(null, label.getText());
-        assertNotNull(label.getActionListeners());
-        assertEquals(0, label.getActionListeners().length);
-
-        label = new ActionLabel("X");
-        assertEquals("X", label.getText());
-        assertNotNull(label.getActionListeners());
-        assertEquals(0, label.getActionListeners().length);
-
-        final ActionListener testAction = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        };
-        label = new ActionLabel("Y", testAction);
-        assertEquals("Y", label.getText());
-        assertNotNull(label.getActionListeners());
-        assertEquals(1, label.getActionListeners().length);
-        assertSame(testAction, label.getActionListeners()[0]);
-    }
+public class ActionLabelTest {
 
     public static void main(String[] args) {
         final JComponent panel = new JComponent() {
@@ -66,21 +38,13 @@ public class ActionLabelTest extends TestCase {
                 g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             }
         };
-        assertEquals(false, panel.isOpaque());
+        assertFalse(panel.isOpaque());
         panel.setBackground(new Color(0, 255, 0, 127));
         panel.add(new JButton("Button 1"));
         panel.add(new JLabel("Normal label 1"));
-        panel.add(new ActionLabel("Action label 1", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("e = " + e);
-            }
-        }));
+        panel.add(new ActionLabel("Action label 1", e -> System.out.println("e = " + e)));
         panel.add(new JLabel("Normal label 2"));
-        panel.add(new ActionLabel("Action label 2", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("e = " + e);
-            }
-        }));
+        panel.add(new ActionLabel("Action label 2", e -> System.out.println("e = " + e)));
         panel.add(new JButton("Button 2"));
 
         final JPanel containerPanel = new JPanel(new BorderLayout()) {
@@ -105,5 +69,26 @@ public class ActionLabelTest extends TestCase {
         frame.getContentPane().add(containerPanel, BorderLayout.CENTER);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    @Test
+    public void testConstructors() {
+        ActionLabel label = new ActionLabel();
+        assertNull(label.getText());
+        assertNotNull(label.getActionListeners());
+        assertEquals(0, label.getActionListeners().length);
+
+        label = new ActionLabel("X");
+        assertEquals("X", label.getText());
+        assertNotNull(label.getActionListeners());
+        assertEquals(0, label.getActionListeners().length);
+
+        final ActionListener testAction = e -> {
+        };
+        label = new ActionLabel("Y", testAction);
+        assertEquals("Y", label.getText());
+        assertNotNull(label.getActionListeners());
+        assertEquals(1, label.getActionListeners().length);
+        assertSame(testAction, label.getActionListeners()[0]);
     }
 }

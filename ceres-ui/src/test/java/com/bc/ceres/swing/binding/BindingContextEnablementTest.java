@@ -17,45 +17,48 @@
 package com.bc.ceres.swing.binding;
 
 import com.bc.ceres.binding.PropertyContainer;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.swing.*;
 
-public class BindingContextEnablementTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-    public void testEnablement() throws Exception {
+public class BindingContextEnablementTest {
+
+    @Test
+    public void testEnablement() {
         final BindingContext bindingContext = new BindingContext(PropertyContainer.createObjectBacked(new X()));
         final JTextField aField = new JTextField();
         final JTextField bField = new JTextField();
         bindingContext.bind("a", aField);
         bindingContext.bind("b", bField);
 
-        assertEquals(true, aField.isEnabled());
-        assertEquals(true, bField.isEnabled());
+        assertTrue(aField.isEnabled());
+        assertTrue(bField.isEnabled());
 
         bindingContext.bindEnabledState("b", true, "a", "Hanni");
         bindingContext.adjustComponents();
 
-        assertEquals(true, aField.isEnabled());
-        assertEquals(false, bField.isEnabled());
+        assertTrue(aField.isEnabled());
+        assertFalse(bField.isEnabled());
 
         bindingContext.getPropertySet().setValue("a", "Nanni");
 
-        assertEquals(true, aField.isEnabled());
-        assertEquals(false, bField.isEnabled());
-
+        assertTrue(aField.isEnabled());
+        assertFalse(bField.isEnabled());
 
         bindingContext.getPropertySet().setValue("a", "Hanni");
 
-        assertEquals(true, aField.isEnabled());
-        assertEquals(true, bField.isEnabled());
+        assertTrue(aField.isEnabled());
+        assertTrue(bField.isEnabled());
 
         bindingContext.unbind(bindingContext.getBinding("b"));
 
         bindingContext.getPropertySet().setValue("a", "Pfanni");
 
-        assertEquals(true, aField.isEnabled());
-        assertEquals(true, bField.isEnabled());
+        assertTrue(aField.isEnabled());
+        assertTrue(bField.isEnabled());
     }
 
     public static class X {
