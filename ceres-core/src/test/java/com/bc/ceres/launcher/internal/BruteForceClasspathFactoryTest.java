@@ -17,12 +17,15 @@
 package com.bc.ceres.launcher.internal;
 
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
-public class BruteForceClasspathFactoryTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class BruteForceClasspathFactoryTest {
+
+    @Test
     public void testGetFiles() throws Exception {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BruteForceClasspathFactory bfcf = new BruteForceClasspathFactory(config);

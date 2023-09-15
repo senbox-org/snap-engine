@@ -17,18 +17,30 @@
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelSource;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class DefaultMultiLevelImageTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class DefaultMultiLevelImageTest {
+
+    static PlanarImage createSingleBandedByteImage(int w, int h) {
+        final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+        bi.getRaster().setSample(0, 0, 0, 11);
+        bi.getRaster().setSample(1, 0, 0, 22);
+        bi.getRaster().setSample(0, 1, 0, 33);
+        bi.getRaster().setSample(1, 1, 0, 44);
+        return PlanarImage.wrapRenderedImage(bi);
+    }
+
+    @Test
     public void testSamplesAreProvidedFromSource() {
         PlanarImage sourceImage = createSingleBandedByteImage(2, 2);
         DefaultMultiLevelSource mls = new DefaultMultiLevelSource(sourceImage, 1);
@@ -44,6 +56,7 @@ public class DefaultMultiLevelImageTest extends TestCase {
         assertEquals(44, mli.getData().getSample(1, 1, 0));
     }
 
+    @Test
     public void testLevelInstances() {
         DefaultMultiLevelImage mli = createSomeDefaultMultiLevelImage();
 
@@ -67,6 +80,7 @@ public class DefaultMultiLevelImageTest extends TestCase {
         assertNotSame(a1, b1);
     }
 
+    @Test
     public void testProperties() {
         DefaultMultiLevelImage mli = createSomeDefaultMultiLevelImage();
         PCL pcl = new PCL();
@@ -96,15 +110,6 @@ public class DefaultMultiLevelImageTest extends TestCase {
         DefaultMultiLevelModel model = new DefaultMultiLevelModel(2, new AffineTransform(), 256, 256);
         MultiLevelSource mls = new TestMultiLevelSource(model);
         return new DefaultMultiLevelImage(mls);
-    }
-
-    static PlanarImage createSingleBandedByteImage(int w, int h) {
-        final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
-        bi.getRaster().setSample(0, 0, 0, 11);
-        bi.getRaster().setSample(1, 0, 0, 22);
-        bi.getRaster().setSample(0, 1, 0, 33);
-        bi.getRaster().setSample(1, 1, 0, 44);
-        return PlanarImage.wrapRenderedImage(bi);
     }
 
     private static class TestMultiLevelSource extends AbstractMultiLevelSource {

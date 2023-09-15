@@ -16,13 +16,15 @@
 
 package com.bc.ceres.glevel.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-public class DefaultMultiLevelModelTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class DefaultMultiLevelModelTest {
 
     final double TX0 = -50;
     final double TY0 = 150;
@@ -32,6 +34,7 @@ public class DefaultMultiLevelModelTest extends TestCase {
 
     final double[] ES = {1, 2, 4, 8};
 
+    @Test
     public void testAllProperties() {
         AffineTransform i2m0 = new AffineTransform();
         i2m0.translate(TX0, TY0);
@@ -55,8 +58,8 @@ public class DefaultMultiLevelModelTest extends TestCase {
         assertEquals(msg, ES[level], scale, 1e-10);
         assertEquals(msg, level, model.getLevel(scale));
         assertEquals(msg, new Point2D.Double(TX0, TY0),
-                     i2m.transform(new Point2D.Double(0, 0), null));
+                i2m.transform(new Point2D.Double(0, 0), null));
         assertEquals(msg, new Point2D.Double(S0 * scale + TX0, S0 * scale + TY0),
-                     i2m.transform(new Point2D.Double(1, 1), null));
+                i2m.transform(new Point2D.Double(1, 1), null));
     }
 }

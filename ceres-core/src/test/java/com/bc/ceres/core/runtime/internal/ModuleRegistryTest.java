@@ -20,12 +20,15 @@ import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.Extension;
 import com.bc.ceres.core.runtime.ExtensionPoint;
 import com.bc.ceres.core.runtime.Module;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 
-public class ModuleRegistryTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ModuleRegistryTest {
+
+    @Test
     public void testNullArgConvention() throws CoreException {
         ModuleRegistry moduleRegistry = new ModuleRegistry();
         try {
@@ -36,12 +39,14 @@ public class ModuleRegistryTest extends TestCase {
         }
     }
 
+    @Test
     public void testNewModuleRegistryIsEmpty() {
         ModuleRegistry moduleRegistry = new ModuleRegistry();
         assertNotNull(moduleRegistry.getModules());
         assertEquals(0, moduleRegistry.getModules().length);
     }
 
+    @Test
     public void testRegisteringDuplicates() throws CoreException, IOException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/module-a.xml",
@@ -63,13 +68,12 @@ public class ModuleRegistryTest extends TestCase {
         assertNotNull(moduleA);
         assertSame(moduleA, moduleRegistry.getModule(moduleA.getModuleId()));
         assertSame(moduleA, moduleRegistry.getModule(moduleA.getLocation()));
-        assertEquals(new ModuleImpl[]{moduleA}, moduleRegistry.getModules(moduleA.getSymbolicName()));
-
+        assertModulesEqual(new ModuleImpl[]{moduleA}, moduleRegistry.getModules(moduleA.getSymbolicName()));
 
         assertNotNull(moduleB);
         assertSame(moduleB, moduleRegistry.getModule(moduleB.getModuleId()));
         assertSame(moduleB, moduleRegistry.getModule(moduleB.getLocation()));
-        assertEquals(new ModuleImpl[]{moduleB}, moduleRegistry.getModules(moduleB.getSymbolicName()));
+        assertModulesEqual(new ModuleImpl[]{moduleB}, moduleRegistry.getModules(moduleB.getSymbolicName()));
 
         assertSame(moduleC, moduleRegistry.getModule(moduleC.getModuleId()));
         assertSame(moduleC, moduleRegistry.getModule(moduleC.getLocation()));
@@ -77,12 +81,12 @@ public class ModuleRegistryTest extends TestCase {
         assertSame(moduleCv2, moduleRegistry.getModule(moduleCv2.getLocation()));
         assertSame(moduleCv3, moduleRegistry.getModule(moduleCv3.getModuleId()));
         assertSame(moduleCv3, moduleRegistry.getModule(moduleCv3.getLocation()));
-        assertEquals(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
-                     moduleRegistry.getModules(moduleC.getSymbolicName()));
-        assertEquals(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
-                     moduleRegistry.getModules(moduleCv2.getSymbolicName()));
-        assertEquals(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
-                     moduleRegistry.getModules(moduleCv3.getSymbolicName()));
+        assertModulesEqual(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
+                moduleRegistry.getModules(moduleC.getSymbolicName()));
+        assertModulesEqual(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
+                moduleRegistry.getModules(moduleCv2.getSymbolicName()));
+        assertModulesEqual(new ModuleImpl[]{moduleC, moduleCv2, moduleCv3},
+                moduleRegistry.getModules(moduleCv3.getSymbolicName()));
 
         try {
             moduleRegistry.registerModule(moduleAClone);
@@ -106,7 +110,7 @@ public class ModuleRegistryTest extends TestCase {
         }
     }
 
-    private void assertEquals(ModuleImpl[] expected, ModuleImpl[] actual) {
+    private void assertModulesEqual(ModuleImpl[] expected, ModuleImpl[] actual) {
         assertNotNull(actual);
         assertEquals(expected.length, actual.length);
         for (int i = 0; i < expected.length; i++) {
@@ -114,6 +118,7 @@ public class ModuleRegistryTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetModulesReturnsArrayCopies() throws CoreException, IOException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/module-a.xml",
@@ -140,6 +145,7 @@ public class ModuleRegistryTest extends TestCase {
         assertNotNull(modulesFromCall1[1]);
     }
 
+    @Test
     public void testRegisterAndGetModule() throws CoreException, IOException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 /*id=1*/ "xml/module-a.xml",
@@ -209,7 +215,6 @@ public class ModuleRegistryTest extends TestCase {
         assertEquals("e-bb21", extensions[0].getId());
         assertEquals("e-bb22", extensions[1].getId());
 
-
         assertSame(e_31, module_3.getExtension("e-cb11"));
         assertSame(e_32, module_3.getExtension("e-cb12"));
         assertSame(e_33, module_3.getExtension("e-cb21"));
@@ -217,5 +222,4 @@ public class ModuleRegistryTest extends TestCase {
         assertSame(e_35, module_3.getExtension("e-cb32"));
         assertSame(e_36, module_3.getExtension("e-cb33"));
     }
-
 }

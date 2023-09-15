@@ -16,7 +16,7 @@
 
 package com.bc.ceres.jai.operator;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.RenderedOp;
 import java.awt.image.DataBuffer;
@@ -26,7 +26,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 
-public class XmlDescriptorTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class XmlDescriptorTest {
+
+    @Test
     public void testInvalidArgs() throws URISyntaxException {
         try {
             XmlDescriptor.create(new URI(""), null, null);
@@ -34,26 +38,27 @@ public class XmlDescriptorTest extends TestCase {
             fail("Unexpected: " + e);
         }
         try {
-            XmlDescriptor.create(null, new HashMap<String, Object>(), null);
+            XmlDescriptor.create(null, new HashMap<>(), null);
             fail();
-          } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // ok
         }
         try {
             XmlDescriptor.create(null, null, null);
             fail();
-          } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // ok
         }
     }
 
+    @Test
     public void testSimple() throws URISyntaxException {
         testSimple(getResource("nested.jai.xml"));
         testSimple(getResource("flat.jai.xml"));
     }
 
     private void testSimple(URI uri) {
-        HashMap<String, Object> configuration = new HashMap<String, Object>();
+        HashMap<String, Object> configuration = new HashMap<>();
         configuration.put("source0", SourceImageFactory.createOneBandedUShortImage(2, 2, new short[]{1, 2, 3, 4}));
         RenderedOp op = XmlDescriptor.create(uri, configuration, null);
         assertNotNull(op);
