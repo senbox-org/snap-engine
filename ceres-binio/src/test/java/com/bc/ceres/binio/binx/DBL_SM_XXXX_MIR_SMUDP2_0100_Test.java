@@ -19,16 +19,19 @@ package com.bc.ceres.binio.binx;
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataFormat;
 import com.bc.ceres.binio.SequenceType;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import static org.junit.Assert.*;
 
-public class DBL_SM_XXXX_MIR_SMUDP2_0100_Test extends TestCase {
 
+public class DBL_SM_XXXX_MIR_SMUDP2_0100_Test {
+
+    @Test
     public void testBinXIO() throws URISyntaxException, IOException, BinXException {
         URL resource = getClass().getResource("DBL_SM_XXXX_MIR_SMUDP2_0100.binXschema.xml");
         assertNotNull(resource);

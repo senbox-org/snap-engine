@@ -18,6 +18,9 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class EnumConverterTest extends AbstractConverterTest {
 
@@ -45,7 +48,7 @@ public class EnumConverterTest extends AbstractConverterTest {
     }
 
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(Tests.class);
 
@@ -66,6 +69,7 @@ public class EnumConverterTest extends AbstractConverterTest {
         assertNullCorrectlyHandled();
     }
 
+    @Test
     public void testConverterForwardAndBackward() throws ConversionException {
         final Converter converter = getConverter();
         assertEquals(Tests.TEST1, converter.parse(converter.format(Tests.TEST1)));

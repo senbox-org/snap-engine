@@ -16,13 +16,15 @@
 
 package com.bc.ceres.core;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.*;
 
-public class PrintWriterProgressMonitorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class PrintWriterProgressMonitorTest {
 
+    @Test
     public void testSimpleProgress() throws IOException {
         StringWriter sw = new StringWriter();
         PrintWriterProgressMonitor spm = new PrintWriterProgressMonitor(new PrintWriter(sw));
@@ -38,11 +40,10 @@ public class PrintWriterProgressMonitorTest extends TestCase {
         BufferedReader br = new BufferedReader(new StringReader(sw.toString()));
         assertEquals("Making a Cluxi, started", br.readLine());
         for (int i = 1; i <= 10; i++) {
-            assertEquals("Making a Cluxi, "+ (i * 10) +"% worked", br.readLine());
+            assertEquals("Making a Cluxi, " + (i * 10) + "% worked", br.readLine());
         }
         assertEquals("Making a Cluxi, done", br.readLine());
         assertEquals(-1, br.read());
         br.close();
     }
-
 }

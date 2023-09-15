@@ -18,15 +18,12 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
-import junit.framework.TestCase;
 
 import java.lang.reflect.Array;
 
-public abstract class AbstractConverterTest extends TestCase {
+import static org.junit.Assert.*;
 
-
-    protected AbstractConverterTest() {
-    }
+public abstract class AbstractConverterTest {
 
     public abstract Converter getConverter();
 

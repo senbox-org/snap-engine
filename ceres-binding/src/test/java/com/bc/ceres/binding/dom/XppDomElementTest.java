@@ -18,6 +18,8 @@ package com.bc.ceres.binding.dom;
 
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 
+import static org.junit.Assert.fail;
+
 public class XppDomElementTest extends AbstractDomElementTest {
     @Override
     protected DomElement createDomElement(String name) {

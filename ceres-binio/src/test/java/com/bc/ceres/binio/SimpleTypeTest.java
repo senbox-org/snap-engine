@@ -16,9 +16,22 @@
 
 package com.bc.ceres.binio;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class SimpleTypeTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SimpleTypeTest {
+
+    private static void testSimpleType(SimpleType type, String expectedName, int expectedSize) {
+        assertEquals(expectedName, type.getName());
+        assertEquals(expectedSize, type.getSize());
+        assertTrue(type.isSimpleType());
+        assertFalse(type.isCollectionType());
+        assertFalse(type.isSequenceType());
+        assertFalse(type.isCompoundType());
+    }
+
+    @Test
     public void testSimpleTypes() {
         testSimpleType(SimpleType.BYTE, "byte", 1);
         testSimpleType(SimpleType.UBYTE, "ubyte", 1);
@@ -31,15 +44,4 @@ public class SimpleTypeTest extends TestCase {
         testSimpleType(SimpleType.FLOAT, "float", 4);
         testSimpleType(SimpleType.DOUBLE, "double", 8);
     }
-
-    private static void testSimpleType(SimpleType type, String expectedName, int expectedSize) {
-        assertEquals(expectedName, type.getName());
-        assertEquals(expectedSize, type.getSize());
-        assertEquals(true, type.isSimpleType());
-        assertEquals(false, type.isCollectionType());
-        assertEquals(false, type.isSequenceType());
-        assertEquals(false, type.isCompoundType());
-    }
-
-
 }

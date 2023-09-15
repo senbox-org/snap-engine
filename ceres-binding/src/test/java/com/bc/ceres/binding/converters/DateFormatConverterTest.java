@@ -18,11 +18,16 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
+import static org.junit.Assert.fail;
 
 public class DateFormatConverterTest extends AbstractConverterTest {
 
@@ -37,18 +42,18 @@ public class DateFormatConverterTest extends AbstractConverterTest {
         return converter;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         oldTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         TimeZone.setDefault(oldTimeZone);
     }
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(Date.class);
 
