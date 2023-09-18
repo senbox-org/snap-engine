@@ -100,14 +100,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_LABEL = "Title";
     public static final String PROPERTY_TITLE_TOOLTIP = "Title text for the header of the " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_TITLE_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS;
-    public static final String PROPERTY_TITLE_DEFAULT = "[DESCRIPTION]";
+    public static final String PROPERTY_TITLE_DEFAULT = "<INFO=band_description>";
     public static final Class PROPERTY_TITLE_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_ALT_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt";
     public static final String PROPERTY_TITLE_ALT_LABEL = "Title (Alternate)";
     public static final String PROPERTY_TITLE_ALT_TOOLTIP = "Alternate title for the " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_TITLE_ALT_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Alt";
-    public static final String PROPERTY_TITLE_ALT_DEFAULT = "[BANDNAME]";
+    public static final String PROPERTY_TITLE_ALT_DEFAULT = "<INFO=band>";
     public static final Class PROPERTY_TITLE_ALT_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_ALT_USE_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt.use";
@@ -133,14 +133,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_UNITS_LABEL = "Units";
     public static final String PROPERTY_UNITS_TOOLTIP = "Units text for the header of the " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_UNITS_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS;
-    public static final String PROPERTY_UNITS_DEFAULT = "[UNITS]";
+    public static final String PROPERTY_UNITS_DEFAULT = "<INFO=units>";
     public static final Class PROPERTY_UNITS_TYPE = String.class;
 
     public static final String PROPERTY_UNITS_ALT_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt";
     public static final String PROPERTY_UNITS_ALT_LABEL = "Units (Alternate)";
     public static final String PROPERTY_UNITS_ALT_TOOLTIP = "Alternate units for the " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_UNITS_ALT_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Alt";
-    public static final String PROPERTY_UNITS_ALT_DEFAULT = "[BANDNAME]; [UNITS]";
+    public static final String PROPERTY_UNITS_ALT_DEFAULT = "<INFO=band>; <INFO=units>";
     public static final Class PROPERTY_UNITS_ALT_TYPE = String.class;
 
     public static final String PROPERTY_UNITS_ALT_USE_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt.use";
@@ -518,7 +518,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
 
     public static final String PROPERTY_TITLE_SECTION_KEY = PROPERTY_TITLE_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_SECTION_LABEL = "Title (More Options)";
+    public static final String PROPERTY_TITLE_SECTION_LABEL = "Title Formatting";
     public static final String PROPERTY_TITLE_SECTION_TOOLTIP = "Set parameter options in title of " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_TITLE_SECTION_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Section";
 
@@ -583,7 +583,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Units";
 
     public static final String PROPERTY_UNITS_SECTION_KEY = PROPERTY_UNITS_ROOT_KEY + ".section";
-    public static final String PROPERTY_UNITS_SECTION_LABEL = "Units (More Options)";
+    public static final String PROPERTY_UNITS_SECTION_LABEL = "Units Formatting";
     public static final String PROPERTY_UNITS_SECTION_TOOLTIP = "Set units of " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_UNITS_SECTION_ALIAS = PROPERTY_UNITS_ROOT_ALIAS + "Section";
 
@@ -648,7 +648,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABELS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Labels";
 
     public static final String PROPERTY_LABELS_SECTION_KEY = PROPERTY_LABELS_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels (More Options)";
+    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels Formatting";
     public static final String PROPERTY_LABELS_SECTION_TOOLTIP = "Configuration options for the labels";
     public static final String PROPERTY_LABELS_SECTION_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "Section";
 
