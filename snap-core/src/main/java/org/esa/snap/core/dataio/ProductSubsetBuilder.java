@@ -668,6 +668,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 destBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
                 destBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
                 destBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+                destBand.setAngularValue(sourceBand.getAngularValue());
+                destBand.setAngularBandIndex(sourceBand.getAngularBandIndex());
                 destBand.setSolarFlux(sourceBand.getSolarFlux());
                 if (sourceBand.isNoDataValueSet()) {
                     destBand.setNoDataValue(sourceBand.getNoDataValue());

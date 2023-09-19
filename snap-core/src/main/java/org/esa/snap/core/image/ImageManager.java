@@ -117,7 +117,7 @@ public class ImageManager {
 
     public static ImageLayout createSingleBandedImageLayout(RasterDataNode rasterDataNode) {
         return createSingleBandedImageLayout(rasterDataNode,
-                                             getDataBufferType(rasterDataNode.getDataType()));
+                getDataBufferType(rasterDataNode.getDataType()));
     }
 
     public static ImageLayout createSingleBandedImageLayout(RasterDataNode rasterDataNode, int dataBufferType) {
@@ -135,13 +135,13 @@ public class ImageManager {
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, tileWidth, tileHeight);
         ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
         return new ImageLayout(0, 0,
-                               width,
-                               height,
-                               0, 0,
-                               tileWidth,
-                               tileHeight,
-                               sampleModel,
-                               colorModel);
+                width,
+                height,
+                0, 0,
+                tileWidth,
+                tileHeight,
+                sampleModel,
+                colorModel);
     }
 
     public static ImageLayout createSingleBandedImageLayout(int dataBufferType,
@@ -150,11 +150,11 @@ public class ImageManager {
                                                             Dimension tileSize,
                                                             ResolutionLevel level) {
         return createSingleBandedImageLayout(dataBufferType,
-                                             null,
-                                             sourceWidth,
-                                             sourceHeight,
-                                             tileSize,
-                                             level);
+                null,
+                sourceWidth,
+                sourceHeight,
+                tileSize,
+                level);
     }
 
     public static ImageLayout createSingleBandedImageLayout(int dataBufferType,
@@ -179,16 +179,16 @@ public class ImageManager {
                                                                                    */
 
         Rectangle sourceBounds = new Rectangle(sourcePos != null ? sourcePos.x : 0,
-                                               sourcePos != null ? sourcePos.y : 0,
-                                               sourceWidth,
-                                               sourceHeight);
+                sourcePos != null ? sourcePos.y : 0,
+                sourceWidth,
+                sourceHeight);
         final Rectangle destBounds = DefaultMultiLevelSource.getLevelImageBounds(sourceBounds, level.getScale());
 
         final int destWidth = destBounds.width;
         final int destHeight = destBounds.height;
         tileSize = tileSize != null ? tileSize : JAIUtils.computePreferredTileSize(destWidth, destHeight, 1);
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType,
-                                                                           tileSize.width, tileSize.height);
+                tileSize.width, tileSize.height);
         ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
 
         if (colorModel == null) {
@@ -196,19 +196,19 @@ public class ImageManager {
             ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
             int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
             colorModel = new ComponentColorModel(cs, nBits, false, true,
-                                                 Transparency.OPAQUE,
-                                                 dataType);
+                    Transparency.OPAQUE,
+                    dataType);
         }
 
         return new ImageLayout(destBounds.x,
-                               destBounds.y,
-                               destWidth,
-                               destHeight,
-                               0, 0,
-                               tileSize.width,
-                               tileSize.height,
-                               sampleModel,
-                               colorModel);
+                destBounds.y,
+                destWidth,
+                destHeight,
+                0, 0,
+                tileSize.width,
+                tileSize.height,
+                sampleModel,
+                colorModel);
     }
 
     public static int getDataBufferType(int productDataType) {
@@ -258,7 +258,7 @@ public class ImageManager {
             tileSize = preferredTileSize;
         } else {
             tileSize = JAIUtils.computePreferredTileSize(product.getSceneRasterWidth(),
-                                                         product.getSceneRasterHeight(), 1);
+                    product.getSceneRasterHeight(), 1);
         }
         return tileSize;
     }
@@ -268,9 +268,9 @@ public class ImageManager {
                                                 int level) {
         Assert.notNull(rasterDataNodes, "rasterDataNodes");
         Assert.state(rasterDataNodes.length == 1
-                             || rasterDataNodes.length == 3
-                             || rasterDataNodes.length == 4,
-                     "invalid number of bands"
+                        || rasterDataNodes.length == 3
+                        || rasterDataNodes.length == 4,
+                "invalid number of bands"
         );
 
         prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
@@ -302,15 +302,15 @@ public class ImageManager {
                 if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Transparency_Blending) {
                     PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
                     valueImage = paint(valueImage,
-                                       confidenceImage, new Color(0, 0, 0, 0),
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                            confidenceImage, new Color(0, 0, 0, 0),
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
                 } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Monochromatic_Blending) {
                     PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
                     valueImage = paint(valueImage,
-                                       confidenceImage, uncertaintyImageInfo.getColorPaletteDef().getLastPoint().getColor(),
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                            confidenceImage, uncertaintyImageInfo.getColorPaletteDef().getLastPoint().getColor(),
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
                 } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Blending) {
                     PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
                     //PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
@@ -318,15 +318,15 @@ public class ImageManager {
                     PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
                     valueImage = paint(valueImage, confidenceImage, uncertaintyImage);
                     valueImage = paint(valueImage,
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
                 } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Overlay) {
                     PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
                     PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
                     valueImage = paint(valueImage, 0.5, uncertaintyImage);
                     valueImage = paint(valueImage,
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
                 } else {
                     Assert.state(false, "unknown uncertainty visualisation mode " + visualisationMode);
                 }
@@ -399,9 +399,9 @@ public class ImageManager {
     private static PlanarImage paint(PlanarImage sourceImage, double transparency, PlanarImage maskColorImage) {
         RenderingHints renderingHints = createDefaultRenderingHints(sourceImage, null);
         RenderedImage maskImage = ConstantDescriptor.create((float) sourceImage.getWidth(),
-                                                            (float) sourceImage.getHeight(),
-                                                            new Byte[]{(byte) (255 * (1.0 - transparency))},
-                                                            renderingHints);
+                (float) sourceImage.getHeight(),
+                new Byte[]{(byte) (255 * (1.0 - transparency))},
+                renderingHints);
         return paintImpl(sourceImage, maskColorImage, maskImage, renderingHints);
     }
 
@@ -427,9 +427,9 @@ public class ImageManager {
         }
 
         return CompositeDescriptor.create(sourceImage, maskColorImage,
-                                          maskImage, null, false,
-                                          targetHasAlpha ? CompositeDescriptor.DESTINATION_ALPHA_LAST : CompositeDescriptor.NO_DESTINATION_ALPHA,
-                                          renderingHints);
+                maskImage, null, false,
+                targetHasAlpha ? CompositeDescriptor.DESTINATION_ALPHA_LAST : CompositeDescriptor.NO_DESTINATION_ALPHA,
+                renderingHints);
     }
 
     private PlanarImage createColored3BandImage(RasterDataNode[] rasters, ImageInfo rgbImageInfo, int level) {
@@ -443,10 +443,10 @@ public class ImageManager {
             stxs[i] = raster.getStx();
             RenderedImage sourceImage = getSourceImage(raster, level);
             images[i] = createByteIndexedImage(raster,
-                                               sourceImage,
-                                               rgbImageInfo.getRgbChannelDef().getMinDisplaySample(i),
-                                               rgbImageInfo.getRgbChannelDef().getMaxDisplaySample(i),
-                                               rgbImageInfo.getRgbChannelDef().getGamma(i));
+                    sourceImage,
+                    rgbImageInfo.getRgbChannelDef().getMinDisplaySample(i),
+                    rgbImageInfo.getRgbChannelDef().getMaxDisplaySample(i),
+                    rgbImageInfo.getRgbChannelDef().getGamma(i));
             validMaskImages[i] = getValidMaskImage(raster, level);
         }
         return createMergeRgbaOp(images, validMaskImages, rgbImageInfo.getHistogramMatching(), stxs);
@@ -495,7 +495,7 @@ public class ImageManager {
 
         if (mustReinterpretSourceImage(raster, sourceImage)) {
             sourceImage = ReinterpretDescriptor.create(sourceImage, 1.0, 0.0, ReinterpretDescriptor.LINEAR,
-                                                       ReinterpretDescriptor.INTERPRET_BYTE_SIGNED, null);
+                    ReinterpretDescriptor.INTERPRET_BYTE_SIGNED, null);
         }
 
         final boolean logarithmicDisplay = raster.getImageInfo().isLogScaled();
@@ -504,14 +504,14 @@ public class ImageManager {
             if (!rasterIsLog10Scaled) {
                 final double offset = raster.scaleInverse(0.0);
                 sourceImage = ReinterpretDescriptor.create(sourceImage, 1.0, -offset, ReinterpretDescriptor.LOGARITHMIC,
-                                                           ReinterpretDescriptor.AWT, null);
+                        ReinterpretDescriptor.AWT, null);
                 newMin = Math.log10(newMin - offset);
                 newMax = Math.log10(newMax - offset);
             }
         } else {
             if (rasterIsLog10Scaled) {
                 sourceImage = ReinterpretDescriptor.create(sourceImage, raster.getScalingFactor(), raster.getScalingOffset(), ReinterpretDescriptor.EXPONENTIAL,
-                                                           ReinterpretDescriptor.AWT, null);
+                        ReinterpretDescriptor.AWT, null);
                 newMin = minSample;
                 newMax = maxSample;
             }
@@ -605,9 +605,9 @@ public class ImageManager {
         }
         RenderingHints hints = createDefaultRenderingHints(sourceImage, null);
         sourceImage = ClampDescriptor.create(sourceImage,
-                                             new double[]{keyMin - 1},
-                                             new double[]{keyMax + 1},
-                                             hints);
+                new double[]{keyMin - 1},
+                new double[]{keyMax + 1},
+                hints);
         return LookupDescriptor.create(sourceImage, lookup, hints);
     }
 
@@ -865,7 +865,7 @@ public class ImageManager {
     public static PlanarImage createColoredMaskImage(Color color, RenderedImage alphaImage, boolean invertAlpha) {
         RenderingHints hints = createDefaultRenderingHints(alphaImage, null);
         return createColoredMaskImage(color, invertAlpha ? InvertDescriptor.create(alphaImage, hints) : alphaImage,
-                                      hints);
+                hints);
     }
 
     public static PlanarImage createColoredMaskImage(RenderedImage maskImage, Color color, double opacity) {
@@ -934,8 +934,8 @@ public class ImageManager {
             return PlanarImage.wrapRenderedImage(image);
         }
         return FormatDescriptor.create(image,
-                                       dataType,
-                                       createDefaultRenderingHints(image, targetLayout));
+                dataType,
+                createDefaultRenderingHints(image, targetLayout));
     }
 
     /**
@@ -952,9 +952,9 @@ public class ImageManager {
             return PlanarImage.wrapRenderedImage(src);
         }
         return RescaleDescriptor.create(src,
-                                        new double[]{factor},
-                                        new double[]{offset},
-                                        createDefaultRenderingHints(src, null));
+                new double[]{factor},
+                new double[]{offset},
+                createDefaultRenderingHints(src, null));
     }
 
     private static PlanarImage createLookupOp(RenderedImage src, byte[][] lookupTable) {
@@ -1036,9 +1036,9 @@ public class ImageManager {
                     alpha = (256 * i) / colorPalette.length;
                 }
                 colorPalette[i] = new Color(color.getRed(),
-                                            color.getGreen(),
-                                            color.getBlue(),
-                                            alpha);
+                        color.getGreen(),
+                        color.getBlue(),
+                        alpha);
             }
         }
         return colorPalette;
@@ -1070,6 +1070,28 @@ public class ImageManager {
         boSaCo.color1 = p1.getColor();
         boSaCo.color2 = p2.getColor();
         return boSaCo;
+    }
+
+    public static Color computeColor(ImageInfo imageInfo, Double rasterValue) {
+        final ColorPaletteDef cpd = imageInfo.getColorPaletteDef();
+        if (rasterValue <= cpd.getMinDisplaySample()) {
+            return cpd.getFirstPoint().getColor();
+        } else if (rasterValue >= cpd.getMaxDisplaySample()) {
+            return cpd.getLastPoint().getColor();
+        } else {
+            BorderSamplesAndColors boSaCo = new BorderSamplesAndColors();
+            final boolean logScaled = imageInfo.isLogScaled();
+            if (logScaled) {
+                rasterValue = Stx.LOG10_SCALING.scale(rasterValue);
+            }
+            for (int i = 0; i < cpd.getNumPoints() - 1; i++) {
+                boSaCo = getBorderSamplesAndColors(imageInfo, i, boSaCo);
+                if (rasterValue >= boSaCo.sample1 && rasterValue <= boSaCo.sample2) {
+                    return computeColor(rasterValue, boSaCo);
+                }
+            }
+        }
+        return Color.black;
     }
 
     private static class BorderSamplesAndColors {

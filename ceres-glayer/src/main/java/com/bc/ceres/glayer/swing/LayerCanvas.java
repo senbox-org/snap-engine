@@ -50,6 +50,11 @@ public class LayerCanvas extends JPanel implements AdjustableView {
     private boolean navControlShown;
     private WakefulComponent navControlWrapper;
     private boolean initiallyZoomingAll;
+    private double zoomInitial = 1.0;
+    private double zoomInitialWide = 1.0;
+    private double zoomInitialTall = 1.0;
+    private double setZoomInitialAspectWide = 1.2;
+    private double setZoomInitialAspectTall = 0.8;
     private boolean zoomedAll;
 
     // AdjustableView properties
@@ -224,6 +229,50 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         getViewport().zoom(getMaxVisibleModelBounds());
     }
 
+    public void setZoomInitial(double zoomInitial) {
+        this.zoomInitial = zoomInitial;
+    }
+
+    public double getZoomInitial() {
+        return zoomInitial;
+    }
+
+    public void setZoomInitialWide(double zoomInitialWide) {
+        this.zoomInitialWide = zoomInitialWide;
+    }
+
+    public double getZoomInitialWide() {
+        return zoomInitialWide;
+    }
+
+    public void setZoomInitialTall(double zoomInitialTall) {
+        this.zoomInitialTall = zoomInitialTall;
+    }
+
+    public double getZoomInitialTall() {
+        return zoomInitialTall;
+    }
+
+    public void setZoomInitialAspectTall(double zoomInitialAspectTall) {
+        this.setZoomInitialAspectTall = zoomInitialAspectTall;
+    }
+
+    public double getZoomInitialAspectTall() {
+        return setZoomInitialAspectTall;
+    }
+
+    public void setZoomInitialAspectWide(double zoomInitialAspectWide) {
+        this.setZoomInitialAspectWide = zoomInitialAspectWide;
+    }
+
+    public double getZoomInitialAspectWide() {
+        return setZoomInitialAspectWide;
+    }
+
+
+
+
+
     /////////////////////////////////////////////////////////////////////////
     // AdjustableView implementation
 
@@ -351,6 +400,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         }
     }
 
+
     @Override
     protected void paintComponent(Graphics g) {
         long t0 = DEBUG ? System.nanoTime() : 0L;
@@ -358,6 +408,23 @@ public class LayerCanvas extends JPanel implements AdjustableView {
         if (initiallyZoomingAll && !zoomedAll && maxVisibleModelBounds != null && !maxVisibleModelBounds.isEmpty()) {
             zoomedAll = true;
             zoomAll();
+
+            double aspectTall = getZoomInitialAspectTall();
+            double aspectWide = getZoomInitialAspectWide();
+
+            double aspectRatio = maxVisibleModelBounds.getWidth() / maxVisibleModelBounds.getHeight();
+
+            if (aspectRatio <= aspectTall) {
+                // it is a tall scene
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialTall());
+
+            } else if (aspectRatio >= aspectWide) {
+                // it is a wide scene
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialWide());
+
+            } else {
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial());
+            }
         }
 
         final Graphics2D g2d = (Graphics2D) g;
