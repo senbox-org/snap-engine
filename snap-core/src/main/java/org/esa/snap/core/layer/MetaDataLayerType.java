@@ -152,14 +152,14 @@ public class MetaDataLayerType extends LayerType {
     public static final Class PROPERTY_MARGIN_METADATA2_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA3_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata3";
-    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOB_ATTR Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOBAL_ATTR Key(s)";
     public static final String PROPERTY_MARGIN_METADATA3_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA3_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata3";
     public static final String PROPERTY_MARGIN_METADATA3_DEFAULT = "id";
     public static final Class PROPERTY_MARGIN_METADATA3_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA4_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata4";
-    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "GLOB_ATTR Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "GLOBAL_ATTR Key(s)";
     public static final String PROPERTY_MARGIN_METADATA4_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA4_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata4";
     public static final String PROPERTY_MARGIN_METADATA4_DEFAULT = "processing_control_software_name";
@@ -304,7 +304,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD_TOOLTIP = "Adds a title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield";
-    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Title: <GLOB_ATTR=title>";
+    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Title: <GLOBAL_ATTR=title>";
     public static final Class PROPERTY_HEADER_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD2_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield2";

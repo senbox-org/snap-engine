@@ -455,9 +455,9 @@ public class MetadataUtils {
 //                    inputString = inputString.replace(replaceKeyStart+"meta=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart+"Global_Attribute=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart+"global_attribute=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"GLOB_ATTR=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Glob_Attr=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"glob_attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart+"GLOBAL_ATTR=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart+"Global_Attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart+"global_attr=", replaceGoal);
                     break;
 
                 case "BAND_ATTRIBUTE=":
