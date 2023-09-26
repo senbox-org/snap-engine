@@ -41,6 +41,12 @@ public class MetaDataLayer extends Layer {
         MARGIN
     }
 
+    static enum META_TYPE {
+        PROPERTY,
+        GLOBAL_ATTRIBUTE,
+        BAND_ATTRIBUTE
+    }
+
 
 
 
@@ -221,26 +227,54 @@ public class MetaDataLayer extends Layer {
 
             }
 
-            if (marginList.size() > 0) {
-                marginList.add("");
-            }
+//            if (marginList != null) {
+//                marginList.add("");
+//            }
+
             if (marginInfoCombinedArrayList.size() > 0) {
-                marginList.add("File-Band Info:");
-                addFromMetadataList(marginInfoCombinedArrayList, marginList, false, false);
-                marginList.add("");
+                if (getMarginPropertyHeading() != null && getMarginPropertyHeading().length() > 0) {
+                    if (marginList.size() > 0) {
+                        marginList.add("");
+                    }
+                    marginList.add(getMarginPropertyHeading());
+                }
+                addFromMetadataList(marginInfoCombinedArrayList, marginList, META_TYPE.PROPERTY);
             }
 
             if (marginMetadataCombinedArrayList.size() > 0) {
-                marginList.add("File Metadata: (Global_Attributes)");
-                addFromMetadataList(marginMetadataCombinedArrayList, marginList, true, true);
-                marginList.add("");
+                if (getMarginGlobalHeading() != null && getMarginGlobalHeading().length() > 0) {
+                    if (marginList.size() > 0) {
+                        marginList.add("");
+                    }
+                    marginList.add(getMarginGlobalHeading());
+                }
+                addFromMetadataList(marginMetadataCombinedArrayList, marginList, META_TYPE.GLOBAL_ATTRIBUTE);
             }
 
             if (marginBandMetadataCombinedArrayList.size() > 0) {
-                marginList.add("Band Metadata '" + raster.getName() + "' (Band_Attributes):");
-                addFromMetadataList(marginBandMetadataCombinedArrayList, marginList, true, false);
-                marginList.add("");
+                if (getMarginBandHeading() != null && getMarginBandHeading().length() > 0) {
+                    if (marginList.size() > 0) {
+                        marginList.add("");
+                    }
+//                    marginList.add(getMarginBandHeading()+ " " + raster.getName());
+                    marginList.add(getMarginBandHeading());
+                }
+                addFromMetadataList(marginBandMetadataCombinedArrayList, marginList, META_TYPE.BAND_ATTRIBUTE);
             }
+
+
+//
+//            if (marginMetadataCombinedArrayList.size() > 0) {
+//                marginList.add("File Metadata: (Global_Attributes)");
+//                addFromMetadataList(marginMetadataCombinedArrayList, marginList, true, true);
+//                marginList.add("");
+//            }
+//
+//            if (marginBandMetadataCombinedArrayList.size() > 0) {
+//                marginList.add("Band Metadata '" + raster.getName() + "' (Band_Attributes):");
+//                addFromMetadataList(marginBandMetadataCombinedArrayList, marginList, true, false);
+//                marginList.add("");
+//            }
 
 
             for (String curr : getHeaderFooterLinesArray(getFooter2Textfield())) {
@@ -317,11 +351,11 @@ public class MetaDataLayer extends Layer {
 
 
 
-    private void addFromMetadataList(ArrayList<String> footerMetadataCombinedArrayList, List<String> footerList, boolean isMeta, boolean globalAttributes) {
+    private void addFromMetadataList(ArrayList<String> footerMetadataCombinedArrayList, List<String> footerList, META_TYPE meta_type) {
         for (String currKey : footerMetadataCombinedArrayList) {
             if (currKey != null && currKey.length() > 0) {
                 String currParam = null;
-                if (!isMeta) {
+                if (META_TYPE.PROPERTY == meta_type) {
                     int length = currKey.length();
                     if (length > 2) {
                         currParam = MetadataUtils.getDerivedMeta(currKey.toUpperCase(), raster, MetadataUtils.INFO_PARAM_WAVE);
@@ -333,7 +367,7 @@ public class MetaDataLayer extends Layer {
                 } else {
                     String key = currKey;
 
-                    if (globalAttributes) {
+                    if (META_TYPE.GLOBAL_ATTRIBUTE == meta_type) {
                         currParam = ProductUtils.getMetaData(raster.getProduct(), currKey);
                     } else {
                         currParam = ProductUtils.getBandMetaData(raster.getProduct(), currKey, raster.getName());
@@ -632,6 +666,9 @@ public class MetaDataLayer extends Layer {
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA_KEY) ||
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA2_KEY) ||
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA3_KEY) ||
+                        propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_PROPERTY_HEADING_KEY) ||
+                        propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_GLOBAL_HEADING_KEY) ||
+                        propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_BAND_HEADING_KEY) ||
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA4_KEY) ||
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA5_KEY) ||
                         propertyName.equals(MetaDataLayerType.PROPERTY_MARGIN_METADATA_KEYS_SHOW_KEY) ||
@@ -746,6 +783,28 @@ public class MetaDataLayer extends Layer {
                 MetaDataLayerType.PROPERTY_MARGIN_SHOW_DEFAULT);
         return footer;
     }
+
+    private String getMarginPropertyHeading() {
+        String marginPropertyHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_PROPERTY_HEADING_KEY,
+                MetaDataLayerType.PROPERTY_MARGIN_PROPERTY_HEADING_DEFAULT);
+
+        return MetadataUtils.getReplacedStringAllVariables(marginPropertyHeading, raster, "", "");
+    }
+
+    private String getMarginGlobalHeading() {
+        String marginGlobalHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_GLOBAL_HEADING_KEY,
+                MetaDataLayerType.PROPERTY_MARGIN_GLOBAL_HEADING_DEFAULT);
+
+        return MetadataUtils.getReplacedStringAllVariables(marginGlobalHeading, raster, "", "");
+    }
+
+    private String getMarginBandHeading() {
+        String marginBandHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_BAND_HEADING_KEY,
+                MetaDataLayerType.PROPERTY_MARGIN_BAND_HEADING_DEFAULT);
+
+        return MetadataUtils.getReplacedStringAllVariables(marginBandHeading, raster, "", "");
+    }
+
 
     private String getMarginMetadata1() {
         String footerMetadata = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_METADATA_KEY,

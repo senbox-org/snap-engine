@@ -98,7 +98,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_SECTION_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_MARGIN_SHOW_KEY = PROPERTY_MARGIN_ROOT_KEY + ".show";
-    public static final String PROPERTY_MARGIN_SHOW_LABEL = "Show";
+    public static final String PROPERTY_MARGIN_SHOW_LABEL = "Show Margin Annotation";
     public static final String PROPERTY_MARGIN_SHOW_TOOLTIP = "Show metadata annotation section";
     public static final String PROPERTY_MARGIN_SHOW_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_MARGIN_SHOW_DEFAULT = true;
@@ -123,14 +123,14 @@ public class MetaDataLayerType extends LayerType {
 
 
     public static final String PROPERTY_MARGIN_TEXTFIELD_KEY = PROPERTY_MARGIN_ROOT_KEY + ".textfield";
-    public static final String PROPERTY_MARGIN_TEXTFIELD_LABEL = "Annotation Text";
+    public static final String PROPERTY_MARGIN_TEXTFIELD_LABEL = "Margin Text";
     public static final String PROPERTY_MARGIN_TEXTFIELD_TOOLTIP = "Adds a line to the Metadata & Notes section";
     public static final String PROPERTY_MARGIN_TEXTFIELD_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Textfield";
     public static final String PROPERTY_MARGIN_TEXTFIELD_DEFAULT = "";
     public static final Class PROPERTY_MARGIN_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_TEXTFIELD2_KEY = PROPERTY_MARGIN_ROOT_KEY + ".textfield2";
-    public static final String PROPERTY_MARGIN_TEXTFIELD2_LABEL = "Annotation Text";
+    public static final String PROPERTY_MARGIN_TEXTFIELD2_LABEL = "Margin Text";
     public static final String PROPERTY_MARGIN_TEXTFIELD2_TOOLTIP = "Adds a line to the Metadata & Notes section";
     public static final String PROPERTY_MARGIN_TEXTFIELD2_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Textfield2";
     public static final String PROPERTY_MARGIN_TEXTFIELD2_DEFAULT = "";
@@ -138,38 +138,60 @@ public class MetaDataLayerType extends LayerType {
 
 
     public static final String PROPERTY_MARGIN_METADATA_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata";
-    public static final String PROPERTY_MARGIN_METADATA_LABEL = "INFO Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA_LABEL = "PROPERTY List";
     public static final String PROPERTY_MARGIN_METADATA_TOOLTIP = "Adds information properties";
     public static final String PROPERTY_MARGIN_METADATA_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata";
-    public static final String PROPERTY_MARGIN_METADATA_DEFAULT = "File,Product_Type";
+    public static final String PROPERTY_MARGIN_METADATA_DEFAULT = "file,product_type";
     public static final Class PROPERTY_MARGIN_METADATA_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA2_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata2";
-    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "INFO Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "PROPERTIES List";
     public static final String PROPERTY_MARGIN_METADATA2_TOOLTIP = "Adds information properties";
     public static final String PROPERTY_MARGIN_METADATA2_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata2";
-    public static final String PROPERTY_MARGIN_METADATA2_DEFAULT = "File_Location,Band,Band_Description";
+    public static final String PROPERTY_MARGIN_METADATA2_DEFAULT = "file_location,band,band_description";
     public static final Class PROPERTY_MARGIN_METADATA2_TYPE = String.class;
 
+    public static final String PROPERTY_MARGIN_PROPERTY_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".property.heading";
+    public static final String PROPERTY_MARGIN_PROPERTY_HEADING_LABEL = "PROPERTIES Section Heading";
+    public static final String PROPERTY_MARGIN_PROPERTY_HEADING_TOOLTIP = "Heading of the PROPERTY section";
+    public static final String PROPERTY_MARGIN_PROPERTY_HEADING_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "PropertyHeading";
+    public static final String PROPERTY_MARGIN_PROPERTY_HEADING_DEFAULT = "File/Band (Properties):";
+    public static final Class PROPERTY_MARGIN_PROPERTY_HEADING_TYPE = String.class;
+
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".global.attrib.heading";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_LABEL = "GLOBAL_ATTRIBUTES Section Heading";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_TOOLTIP = "Heading of the GLOBAL_ATTRIBUTE section";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "GlobalAttribHeading";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_DEFAULT = "File Metadata (Global_Attributes):";
+    public static final Class PROPERTY_MARGIN_GLOBAL_HEADING_TYPE = String.class;
+
+    public static final String PROPERTY_MARGIN_BAND_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".band.attrib.heading";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_LABEL = "BAND_ATTRIBUTES Section Heading";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_TOOLTIP = "Heading of the BAND_ATTRIBUTE section";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "BandAttribHeading";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_DEFAULT = "Band Metadata (Band_Attributes): <PROPERTY=band>";
+    public static final Class PROPERTY_MARGIN_BAND_HEADING_TYPE = String.class;
+
+
     public static final String PROPERTY_MARGIN_METADATA3_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata3";
-    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOBAL_ATTR Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOBAL_ATTRIBUTES List";
     public static final String PROPERTY_MARGIN_METADATA3_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA3_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata3";
-    public static final String PROPERTY_MARGIN_METADATA3_DEFAULT = "id";
+    public static final String PROPERTY_MARGIN_METADATA3_DEFAULT = "title, instrument, platform";
     public static final Class PROPERTY_MARGIN_METADATA3_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA4_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata4";
-    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "GLOBAL_ATTR Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "GLOBAL_ATTRIBUTES List";
     public static final String PROPERTY_MARGIN_METADATA4_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA4_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata4";
-    public static final String PROPERTY_MARGIN_METADATA4_DEFAULT = "processing_control_software_name";
+    public static final String PROPERTY_MARGIN_METADATA4_DEFAULT = "processing_version, processing_control_software_name";
     public static final Class PROPERTY_MARGIN_METADATA4_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA5_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata5";
-    public static final String PROPERTY_MARGIN_METADATA5_LABEL = "BAND_ATTR Key(s)";
+    public static final String PROPERTY_MARGIN_METADATA5_LABEL = "BAND_ATTRIBUTES List";
     public static final String PROPERTY_MARGIN_METADATA5_TOOLTIP = "Adds band-metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA5_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata5";
-    public static final String PROPERTY_MARGIN_METADATA5_DEFAULT = "long_name,reference";
+    public static final String PROPERTY_MARGIN_METADATA5_DEFAULT = "long_name, units, valid_min, valid_max";
     public static final Class PROPERTY_MARGIN_METADATA5_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA_KEYS_SHOW_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.keys.show";
@@ -188,7 +210,7 @@ public class MetaDataLayerType extends LayerType {
 
 
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".show.all.info";
-    public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_LABEL = "Show All Info";
+    public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_LABEL = "PROPERTIES Show All";
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_TOOLTIP = "Display all info keys";
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "ShowAllInfo";
     public static final boolean PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_DEFAULT = false;
@@ -196,21 +218,21 @@ public class MetaDataLayerType extends LayerType {
 
 
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.show.all";
-    public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_LABEL = "Show All Metadata*";
+    public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_LABEL = "GLOBAL_ATTRIBUTES Show All *";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_TOOLTIP = "Display all metadata keys (does NOT include all processing control params)";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "MetadataShowAll";
-    public static final boolean PROPERTY_MARGIN_METADATA_SHOW_ALL_DEFAULT = true;
+    public static final boolean PROPERTY_MARGIN_METADATA_SHOW_ALL_DEFAULT = false;
     public static final Class PROPERTY_MARGIN_METADATA_SHOW_ALL_TYPE = Boolean.class;
 
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.process.control.show.all";
-    public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_LABEL = "Show All Metadata (Processing Control Params)";
+    public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_LABEL = "GLOBAL_ATTRIBUTES Show All (Processing Control Params)";
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_TOOLTIP = "Display all metadata processing control params keys";
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "MetadataProcessControlShowAll";
     public static final boolean PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_DEFAULT = false;
     public static final Class PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_TYPE = Boolean.class;
 
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".band.metadata.show.all";
-    public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_LABEL = "Show All Band Metadata";
+    public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_LABEL = "BAND_ATTRIBUTES Show All";
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_TOOLTIP = "Display all band metadata keys";
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "BandMetadataShow";
     public static final boolean PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_DEFAULT = false;
@@ -293,7 +315,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_SECTION_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_HEADER_SHOW_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".show";
-    public static final String PROPERTY_HEADER_SHOW_LABEL = "Show";
+    public static final String PROPERTY_HEADER_SHOW_LABEL = "Show Header Annotation";
     public static final String PROPERTY_HEADER_SHOW_TOOLTIP = "Show header";
     public static final String PROPERTY_HEADER_SHOW_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_HEADER_SHOW_DEFAULT = true;
@@ -311,7 +333,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD2_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD2_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD2_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield2";
-    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "Band: <INFO=band> (<INFO=band_description>)";
+    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)";
     public static final Class PROPERTY_HEADER_TEXTFIELD2_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD3_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield3";
@@ -435,7 +457,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_SECTION_ALIAS = PROPERTY_FOOTER2_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_FOOTER2_SHOW_KEY = PROPERTY_FOOTER2_ROOT_KEY + ".show";
-    public static final String PROPERTY_FOOTER2_SHOW_LABEL = "Show";
+    public static final String PROPERTY_FOOTER2_SHOW_LABEL = "Show Footer Annotation";
     public static final String PROPERTY_FOOTER2_SHOW_TOOLTIP = "Show footer";
     public static final String PROPERTY_FOOTER2_SHOW_ALIAS = PROPERTY_FOOTER2_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_FOOTER2_SHOW_DEFAULT = true;
@@ -445,7 +467,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_TEXTFIELD_LABEL = "Footer Text";
     public static final String PROPERTY_FOOTER2_TEXTFIELD_TOOLTIP = "Adds a footer to the Header-Footer Layer";
     public static final String PROPERTY_FOOTER2_TEXTFIELD_ALIAS = PROPERTY_FOOTER2_ROOT_ALIAS + "Textfield";
-    public static final String PROPERTY_FOOTER2_TEXTFIELD_DEFAULT = "File: <INFO=file>";
+    public static final String PROPERTY_FOOTER2_TEXTFIELD_DEFAULT = "File: <PROPERTY=file>";
     public static final Class PROPERTY_FOOTER2_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_FOOTER2_TEXTFIELD2_KEY = PROPERTY_FOOTER2_ROOT_KEY + ".textfield2";
@@ -718,6 +740,22 @@ public class MetaDataLayerType extends LayerType {
         final Property footerMetadata3Model = Property.create(PROPERTY_MARGIN_METADATA3_KEY, PROPERTY_MARGIN_METADATA3_TYPE, true, true);
         footerMetadata3Model.getDescriptor().setAlias(PROPERTY_MARGIN_METADATA3_ALIAS);
         vc.addProperty(footerMetadata3Model);
+
+
+
+        final Property marginPropertyHeadingModel = Property.create(PROPERTY_MARGIN_PROPERTY_HEADING_KEY, PROPERTY_MARGIN_PROPERTY_HEADING_TYPE, true, true);
+        marginPropertyHeadingModel.getDescriptor().setAlias(PROPERTY_MARGIN_PROPERTY_HEADING_ALIAS);
+        vc.addProperty(marginPropertyHeadingModel);
+
+        final Property marginGlobalHeadingModel = Property.create(PROPERTY_MARGIN_GLOBAL_HEADING_KEY, PROPERTY_MARGIN_GLOBAL_HEADING_TYPE, true, true);
+        marginGlobalHeadingModel.getDescriptor().setAlias(PROPERTY_MARGIN_GLOBAL_HEADING_ALIAS);
+        vc.addProperty(marginGlobalHeadingModel);
+
+        final Property marginBandHeadingModel = Property.create(PROPERTY_MARGIN_BAND_HEADING_KEY, PROPERTY_MARGIN_BAND_HEADING_TYPE, true, true);
+        marginBandHeadingModel.getDescriptor().setAlias(PROPERTY_MARGIN_BAND_HEADING_ALIAS);
+        vc.addProperty(marginBandHeadingModel);
+
+
 
         final Property footerMetadata4Model = Property.create(PROPERTY_MARGIN_METADATA4_KEY, PROPERTY_MARGIN_METADATA4_TYPE, true, true);
         footerMetadata4Model.getDescriptor().setAlias(PROPERTY_MARGIN_METADATA4_ALIAS);
