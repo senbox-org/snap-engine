@@ -23,14 +23,14 @@ public class DrawingUtils {
         boolean caratAwaitingEntry = false;
 
         if ((headerString.contains("^") && convertCaret) ||
-                headerString.contains("<super>") ||
-                headerString.contains("</super>") ||
-                headerString.contains("<superscript>") ||
-                headerString.contains("</superscript>") ||
+                headerString.contains("<sup>") ||
+                headerString.contains("</sup>") ||
+                headerString.contains("<SUP>") ||
+                headerString.contains("</SUP>") ||
                 headerString.contains("<sub>") ||
                 headerString.contains("</sub>") ||
-                headerString.contains("<subscript>") ||
-                headerString.contains("</subscript>")) {
+                headerString.contains("<SUB>") ||
+                headerString.contains("</SUB>")) {
             containsSuperSubScript = true;
         }
 
@@ -169,35 +169,35 @@ public class DrawingUtils {
 
 
     private static boolean isStartSubScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "<sub>") || isStringOnIndex(text, idx, "<subscript>");
+        return isStringOnIndex(text, idx, "<sub>") || isStringOnIndex(text, idx, "<SUB>");
     }
 
     private static boolean isEndSubScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "</sub>") || isStringOnIndex(text, idx, "</subscript>");
+        return isStringOnIndex(text, idx, "</sub>") || isStringOnIndex(text, idx, "</SUB>");
     }
 
     private static boolean isStartSuperScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "<super>") || isStringOnIndex(text, idx, "<superscript>");
+        return isStringOnIndex(text, idx, "<sup>") || isStringOnIndex(text, idx, "<SUP>");
     }
 
     private static boolean isEndSuperScript(String text, int idx) {
-        return isStringOnIndex(text, idx, "</super>") || isStringOnIndex(text, idx, "</superscript>");
+        return isStringOnIndex(text, idx, "</sup>") || isStringOnIndex(text, idx, "</SUP>");
     }
 
     private static boolean isStartItalics(String text, int idx) {
-        return  isStringOnIndex(text, idx, "<i>");
+        return  isStringOnIndex(text, idx, "<i>") || isStringOnIndex(text, idx, "<I>");
     }
 
     private static boolean isEndItalics(String text, int idx) {
-        return isStringOnIndex(text, idx, "</i>");
+        return isStringOnIndex(text, idx, "</i>") || isStringOnIndex(text, idx, "</I>");
     }
 
     private static boolean isStartBold(String text, int idx) {
-        return isStringOnIndex(text, idx, "<b>");
+        return isStringOnIndex(text, idx, "<b>") || isStringOnIndex(text, idx, "<B>");
     }
 
     private static boolean isEndBold(String text, int idx) {
-        return  isStringOnIndex(text, idx, "</b>");
+        return  isStringOnIndex(text, idx, "</b>") || isStringOnIndex(text, idx, "</B>");
     }
 
 

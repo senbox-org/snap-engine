@@ -324,7 +324,7 @@ public class MetadataUtils {
         String currentLine = inputText;
 
         try {
-            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "INFO=", raster, delimiter, "");
+            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "PROPERTY=", raster, delimiter, "");
             currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "GLOBAL_ATTRIBUTE=", raster, delimiter, "");
             currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "BAND_ATTRIBUTE=", raster, delimiter, "");
 
@@ -443,7 +443,9 @@ public class MetadataUtils {
             String replaceGoal = replaceKeyStart+replaceKey;
 
             switch (replaceKey) {
-                case "INFO=":
+                case "PROPERTY=":
+                    inputString = inputString.replace(replaceKeyStart+"Property=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart+"property=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart+"INFO=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart+"Info=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart+"info=", replaceGoal);
@@ -525,7 +527,7 @@ public class MetadataUtils {
 
 
                     switch (replaceKey) {
-                        case "INFO=":
+                        case "PROPERTY=":
                             value = getDerivedMeta(metaId.toUpperCase(), raster, percentD_ReplacementKey);
                             break;
 
