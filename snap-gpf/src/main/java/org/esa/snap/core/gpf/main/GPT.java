@@ -45,6 +45,7 @@ public class GPT {
                 message = e.getClass().getName();
             }
             System.err.println("\nError: " + message);
+            e.printStackTrace();
             System.exit(1);
         }
     }
