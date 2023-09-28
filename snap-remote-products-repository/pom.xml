@@ -101,6 +101,10 @@
                     <artifactId>ejml-ddense</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.apache.velocity</groupId>
+                    <artifactId>velocity</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>commons-lang</groupId>
                     <artifactId>commons-lang</artifactId>
                 </exclusion>
