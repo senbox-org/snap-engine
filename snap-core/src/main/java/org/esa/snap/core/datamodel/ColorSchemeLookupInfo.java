@@ -3,6 +3,7 @@ package org.esa.snap.core.datamodel;
 import org.esa.snap.core.datamodel.ColorSchemeInfo;
 import org.esa.snap.core.util.ProductUtils;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,14 +122,18 @@ public class ColorSchemeLookupInfo {
 
     public boolean isMatch(String bandName, String mission, String regex) {
 
-        boolean match = false;
-
         if (bandName == null || bandName.length() == 0) { return false; }
         if (regex == null || regex.length() == 0) { return false; }
-
+        bandName = bandName.trim();
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(bandName);
-        match = matcher.find();
+        boolean match = matcher.find();
+
+//        if (!match) {
+//            bandName = "^" + bandName;
+//            matcher = pattern.matcher(bandName);
+//            match = matcher.find();
+//        }
 
         if (!match) {
             final String WILDCARD = new String("*");
