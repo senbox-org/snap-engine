@@ -11,7 +11,7 @@ import static org.junit.Assert.fail;
 public class HdfActivatorTest {
 
     @Test
-    @STTM("SNAP-3546")
+    @STTM("SNAP-3553")
     public void testActivate() {
         HdfActivator.activate();
 
