@@ -17,11 +17,6 @@
 package org.esa.snap.core.util;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import junit.framework.TestCase;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.Query;
 import org.geotools.data.memory.MemoryDataStore;
@@ -36,6 +31,11 @@ import org.geotools.feature.type.GeometryTypeImpl;
 import org.geotools.filter.identity.FeatureIdImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.junit.Test;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -46,25 +46,27 @@ import org.opengis.feature.type.GeometryType;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.Assert.*;
 
-public class FeatureUtilsTest extends TestCase {
 
+public class FeatureUtilsTest {
+
+    @Test
     public void testCollectionClipping() throws IOException {
-
-        GeometryType gt1 = new GeometryTypeImpl(new NameImpl("geometry"), Polygon.class,DefaultGeographicCRS.WGS84,
-                                                false, false, null, null, null);
+        GeometryType gt1 = new GeometryTypeImpl(new NameImpl("geometry"), Polygon.class, DefaultGeographicCRS.WGS84,
+                false, false, null, null, null);
 
         AttributeType at2 = new AttributeTypeImpl(new NameImpl("label"), String.class,
-                                                  false, false, null, null, null);
+                false, false, null, null, null);
 
         GeometryDescriptor gd1 = new GeometryDescriptorImpl(gt1, new NameImpl("geometry"),
-                                                            0, 1,false, null);
+                0, 1, false, null);
 
-        AttributeDescriptor ad2 = new AttributeDescriptorImpl(at2,new NameImpl("LABEL"),
-                                                              0, 1,false,null);
+        AttributeDescriptor ad2 = new AttributeDescriptorImpl(at2, new NameImpl("LABEL"),
+                0, 1, false, null);
 
         SimpleFeatureType marcoType = new SimpleFeatureTypeImpl(new NameImpl("MarcoType"), Arrays.asList(gd1, ad2), gd1,
-                                                                false, null, null, null);
+                false, null, null, null);
 
 
         GeometryFactory gf = new GeometryFactory();
@@ -75,7 +77,7 @@ public class FeatureUtilsTest extends TestCase {
         SimpleFeatureImpl f2 = new SimpleFeatureImpl(data2, marcoType, new FeatureIdImpl("MarcoF2"), true);
         SimpleFeatureImpl f3 = new SimpleFeatureImpl(data3, marcoType, new FeatureIdImpl("MarcoF3"), true);
 
-        MemoryDataStore dataStore = new MemoryDataStore(new SimpleFeature[]{f1, f2, f3});
+        MemoryDataStore dataStore = new MemoryDataStore(f1, f2, f3);
 
         // F1 - no intersection
         // F2 - vertically clipped in the half
@@ -90,17 +92,17 @@ public class FeatureUtilsTest extends TestCase {
         assertEquals(3, marcoSource.getCount(Query.ALL));
         assertEquals("MarcoType", marcoSource.getName().toString());
         final ReferencedEnvelope expectedEnvelope = new ReferencedEnvelope(0, 50, 0, 10,
-                                                                           DefaultGeographicCRS.WGS84);
+                DefaultGeographicCRS.WGS84);
         assertTrue(expectedEnvelope.boundsEquals2D(marcoSource.getBounds(), 1.0e-6));
         assertTrue(expectedEnvelope.boundsEquals2D(marcoSource.getBounds(Query.ALL), 1.0e-6));
 
         FeatureCollection<SimpleFeatureType, SimpleFeature> normanSource = FeatureUtils.clipCollection(marcoSource.getFeatures(),
-                                                                                                       null,
-                                                                                                       clipGeometry,
-                                                                                                       DefaultGeographicCRS.WGS84,
-                                                                                                       "normansClippedCollection",
-                                                                                                       DefaultGeographicCRS.WGS84,
-                                                                                                       ProgressMonitor.NULL);
+                null,
+                clipGeometry,
+                DefaultGeographicCRS.WGS84,
+                "normansClippedCollection",
+                DefaultGeographicCRS.WGS84,
+                ProgressMonitor.NULL);
 
         assertNotNull(normanSource);
         assertEquals("normansClippedCollection", normanSource.getID());
@@ -111,5 +113,4 @@ public class FeatureUtilsTest extends TestCase {
         assertEquals(0, normanSource.getBounds().getMinY(), 1.0e-10);
         assertEquals(10, normanSource.getBounds().getMaxY(), 1.0e-10);
     }
-
 }

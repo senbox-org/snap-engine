@@ -26,20 +26,23 @@ public class AbstractGDALTest {
     }
 
     public static OSCategory getExpectedOSCategory() {
-        if (IS_OS_LINUX) {
+        final String sysArch = System.getProperty("os.arch").toLowerCase();
+        if (IS_OS_LINUX && sysArch.contains("amd64")) {
             return OSCategory.LINUX_64;
         } else if (IS_OS_MAC_OSX) {
-            return OSCategory.MAC_OS_X;
+            if (sysArch.contains("amd64")) {
+                return OSCategory.MAC_OS_X;
+            } else if (sysArch.contains("aarch64")) {
+                return OSCategory.MAC_OS_X_AARCH64;
+            }
         } else if (IS_OS_WINDOWS) {
-            final String sysArch = System.getProperty("os.arch").toLowerCase();
             if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
                 return OSCategory.WIN_64;
             } else {
                 return OSCategory.WIN_32;
             }
-        } else {
-            return OSCategory.UNSUPPORTED;
         }
+        return OSCategory.UNSUPPORTED;
     }
 
     public static Path getExpectedNativeLibrariesRootFolderPath() {

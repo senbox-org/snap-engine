@@ -16,7 +16,6 @@
 
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -25,21 +24,26 @@ import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Marco Peters
  */
-public class CfFlagCodingPartTest extends TestCase {
+public class CfFlagCodingPartTest {
 
+    @Test
     public void testReplaceNonWordCharacters() {
-       assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a/b"));
-       assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a / b"));
-       assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a.b"));
+        assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a/b"));
+        assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a / b"));
+        assertEquals("a_b", CfFlagCodingPart.replaceNonWordCharacters("a.b"));
     }
 
+    @Test
     public void testWriteFlagCoding() throws Exception {
         Band flagBand = new Band("flag_band", ProductData.TYPE_UINT8, 10, 10);
         FlagCoding flagCoding = new FlagCoding("some_flags");
@@ -52,7 +56,7 @@ public class CfFlagCodingPartTest extends TestCase {
         n3writable.addDimension("y", flagBand.getRasterHeight());
         n3writable.addDimension("x", flagBand.getRasterWidth());
         final DataType ncDataType = DataTypeUtils.getNetcdfDataType(flagBand.getDataType());
-        NVariable variable = n3writable.addVariable(flagBand.getName(), ncDataType, null,"y x");
+        NVariable variable = n3writable.addVariable(flagBand.getName(), ncDataType, null, "y x");
         CfBandPart.writeCfBandAttributes(flagBand, variable);
         CfFlagCodingPart.writeFlagCoding(flagBand, n3writable);
 
@@ -85,6 +89,7 @@ public class CfFlagCodingPartTest extends TestCase {
         flagCoding.addAttribute(attribute);
     }
 
+    @Test
     public void testEnforceUsingedDataType_byte() {
         byte[] bytes = {1, 2, 127, -128};
         Array factory = Array.factory(DataType.BYTE, new int[]{bytes.length}, bytes);
@@ -95,6 +100,7 @@ public class CfFlagCodingPartTest extends TestCase {
         assertEquals(128, unsingedBytes.getInt(3));
     }
 
+    @Test
     public void testEnforceUsingedDataType_short() {
         short[] shorts = {1, 2, 32767, -32768};
         Array factory = Array.factory(DataType.SHORT, new int[]{shorts.length}, shorts);
@@ -105,6 +111,7 @@ public class CfFlagCodingPartTest extends TestCase {
         assertEquals(32768, unsingedShorts.getInt(3));
     }
 
+    @Test
     public void testEnforceUsingedDataType_int() {
         int[] ints = {1, 2, 2147483647, -2147483648};
         Array factory = Array.factory(DataType.INT, new int[]{ints.length}, ints);

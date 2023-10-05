@@ -16,20 +16,24 @@
 
 package org.esa.snap.core.util;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TreeNodeTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class TreeNodeTest {
+
+    @Test
     public void testProxy() {
         TreeNode<String> n = new TreeNode<String>("x");
-        Assert.assertEquals("x", n.getId());
-        Assert.assertEquals(null, n.getParent());
-        Assert.assertEquals(null, n.getContent());
+
+        assertEquals("x", n.getId());
+        assertNull(n.getParent());
+        assertNull(n.getContent());
         assertNotNull(n.getChildren());
-        Assert.assertEquals(0, n.getChildren().length);
+        assertEquals(0, n.getChildren().length);
     }
 
+    @Test
     public void testGetChildren() {
         TreeNode<String> root = new TreeNode<String>("");
 
@@ -49,27 +53,28 @@ public class TreeNodeTest extends TestCase {
         assertEquals(3, children.length);
     }
 
+    @Test
     public void testGetAndCreateChild() {
         TreeNode<String> root = new TreeNode<String>("");
         TreeNode<String> subChild = root.createChild("foo/bar/grunt");
 
         TreeNode<String> foo = root.getChild("foo");
         assertNotNull(foo);
-        Assert.assertEquals("foo", foo.getId());
+        assertEquals("foo", foo.getId());
 
         TreeNode<String> bar = foo.getChild("bar");
         assertNotNull(bar);
-        Assert.assertEquals("bar", bar.getId());
+        assertEquals("bar", bar.getId());
 
         TreeNode<String> grunt = bar.getChild("grunt");
         assertNotNull(grunt);
-        Assert.assertEquals("grunt", grunt.getId());
+        assertEquals("grunt", grunt.getId());
         assertSame(grunt, subChild);
 
         TreeNode<String> subChild2 = root.createChild("foo/bar/baz");
         TreeNode<String> baz = bar.getChild("baz");
         assertNotNull(baz);
-        Assert.assertEquals("baz", baz.getId());
+        assertEquals("baz", baz.getId());
         assertSame(baz, subChild2);
 
         assertSame(baz, root.getChild("foo/bar/baz"));
@@ -101,13 +106,14 @@ public class TreeNodeTest extends TestCase {
         assertSame(null, root.getChild("pippo"));
     }
 
-
+    @Test
     public void testRoot() {
         TreeNode<String> root = new TreeNode<String>("");
         TreeNode<String> grunt = root.createChild("foo/bar/grunt");
         assertSame(root, grunt.getRoot());
     }
 
+    @Test
     public void testAbsolutePaths() {
         TreeNode<String> root = new TreeNode<String>("");
         TreeNode<String> foo = root.createChild("foo");

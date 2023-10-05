@@ -16,7 +16,9 @@
 
 package com.bc.ceres.jai.opimage;
 
-import junit.framework.TestCase;
+import com.bc.ceres.compiler.Code;
+import com.bc.ceres.jai.operator.ExpressionDescriptorTest;
+import org.junit.Test;
 
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
@@ -25,32 +27,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-import com.bc.ceres.jai.operator.ExpressionDescriptorTest;
-import com.bc.ceres.jai.opimage.ExpressionCode;
-import com.bc.ceres.jai.opimage.ExpressionCodeGenerator;
-import com.bc.ceres.compiler.Code;
+import static org.junit.Assert.*;
 
-public class ExpressionCodeGeneratorTest extends TestCase {
-
-    public void testGeneratedCode() {
-        final HashMap<String, RenderedImage> sourceMap = ExpressionDescriptorTest.createSourceMap();
-
-        ExpressionCode code = ExpressionCodeGenerator.generate("com.bc.ceres.jai.opimage",
-                                                               "ExpressionOpImage_1",
-                                                               sourceMap,
-                                                               DataBuffer.TYPE_DOUBLE,
-                                                               "S1 * S2 / S3 % S4 + S5 - S6");
-        assertNotNull(code);
-        assertEquals("com.bc.ceres.jai.opimage.ExpressionOpImage_1", code.getClassName());
-        assertNotNull(code.getSources());
-        assertEquals(6, code.getSources().size());
-        assertNotNull(code.getCharContent(true));
-        assertTrue(code.getCharContent(true).length() > 0);
-
-        // Write java code so that we can test the generated class.
-        // Note that actual compilation is done from source code in RAM (Code).
-        write(code);
-    }
+public class ExpressionCodeGeneratorTest {
 
     static void write(Code code) {
         try {
@@ -65,5 +44,26 @@ public class ExpressionCodeGeneratorTest extends TestCase {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    public void testGeneratedCode() {
+        final HashMap<String, RenderedImage> sourceMap = ExpressionDescriptorTest.createSourceMap();
+
+        ExpressionCode code = ExpressionCodeGenerator.generate("com.bc.ceres.jai.opimage",
+                "ExpressionOpImage_1",
+                sourceMap,
+                DataBuffer.TYPE_DOUBLE,
+                "S1 * S2 / S3 % S4 + S5 - S6");
+        assertNotNull(code);
+        assertEquals("com.bc.ceres.jai.opimage.ExpressionOpImage_1", code.getClassName());
+        assertNotNull(code.getSources());
+        assertEquals(6, code.getSources().size());
+        assertNotNull(code.getCharContent(true));
+        assertTrue(code.getCharContent(true).length() > 0);
+
+        // Write java code so that we can test the generated class.
+        // Note that actual compilation is done from source code in RAM (Code).
+        write(code);
     }
 }

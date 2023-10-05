@@ -16,17 +16,20 @@
 
 package com.bc.ceres.swing.selection.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.awt.datatransfer.DataFlavor;
 
-public class DefaultSelectionTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class DefaultSelectionTest {
+
+    @Test
     public void testEmpty() {
         DefaultSelection selection = new DefaultSelection();
 
-        assertEquals(true, selection.isEmpty());
-        assertEquals(null, selection.getSelectedValue());
+        assertTrue(selection.isEmpty());
+        assertNull(selection.getSelectedValue());
         assertNotNull(selection.getSelectedValues());
         assertEquals(0, selection.getSelectedValues().length);
         assertEquals("", selection.getPresentationName());
@@ -36,16 +39,17 @@ public class DefaultSelectionTest extends TestCase {
 
         assertEquals("DefaultSelection[selectedValues={}]", selection.toString());
 
-        assertEquals(false, selection.equals(null));
-        assertEquals(true, selection.equals(selection));
-        assertEquals(true, selection.equals(new DefaultSelection()));
-        assertEquals(false, selection.equals(new DefaultSelection("B")));
+        assertNotEquals(null, selection);
+        assertEquals(selection, selection);
+        assertEquals(selection, new DefaultSelection());
+        assertNotEquals(selection, new DefaultSelection("B"));
     }
 
+    @Test
     public void testOneElement() {
         DefaultSelection selection = new DefaultSelection("X");
 
-        assertEquals(false, selection.isEmpty());
+        assertFalse(selection.isEmpty());
         assertEquals("X", selection.getSelectedValue());
         assertNotNull(selection.getSelectedValues());
         assertEquals(1, selection.getSelectedValues().length);
@@ -54,20 +58,21 @@ public class DefaultSelectionTest extends TestCase {
 
         assertNotNull(selection.createTransferable(false));
         assertNotNull(selection.createTransferable(true));
-        assertEquals(true, selection.createTransferable(true).isDataFlavorSupported(DataFlavor.stringFlavor));
+        assertTrue(selection.createTransferable(true).isDataFlavorSupported(DataFlavor.stringFlavor));
 
         assertEquals("DefaultSelection[selectedValues={X}]", selection.toString());
 
-        assertEquals(false, selection.equals(null));
-        assertEquals(true, selection.equals(selection));
-        assertEquals(true, selection.equals(new DefaultSelection("X")));
-        assertEquals(false, selection.equals(new DefaultSelection("B")));
+        assertNotEquals(null, selection);
+        assertEquals(selection, selection);
+        assertEquals(selection, new DefaultSelection("X"));
+        assertNotEquals(selection, new DefaultSelection("B"));
     }
 
+    @Test
     public void testMoreElements() {
         DefaultSelection selection = new DefaultSelection("A", "B", "C");
 
-        assertEquals(false, selection.isEmpty());
+        assertFalse(selection.isEmpty());
         assertEquals("A", selection.getSelectedValue());
         assertNotNull(selection.getSelectedValues());
         assertEquals(3, selection.getSelectedValues().length);
@@ -78,14 +83,14 @@ public class DefaultSelectionTest extends TestCase {
 
         assertNotNull(selection.createTransferable(false));
         assertNotNull(selection.createTransferable(true));
-        assertEquals(true, selection.createTransferable(true).isDataFlavorSupported(DataFlavor.stringFlavor));
+        assertTrue(selection.createTransferable(true).isDataFlavorSupported(DataFlavor.stringFlavor));
 
         assertEquals("DefaultSelection[selectedValues={A,B,C}]", selection.toString());
 
-        assertEquals(false, selection.equals(null));
-        assertEquals(true, selection.equals(selection));
-        assertEquals(true, selection.equals(new DefaultSelection("A", "B", "C")));
-        assertEquals(false, selection.equals(new DefaultSelection("B", "A", "C")));
-        assertEquals(false, selection.equals(new DefaultSelection("B")));
+        assertNotEquals(null, selection);
+        assertEquals(selection, selection);
+        assertEquals(selection, new DefaultSelection("A", "B", "C"));
+        assertNotEquals(selection, new DefaultSelection("B", "A", "C"));
+        assertNotEquals(selection, new DefaultSelection("B"));
     }
 }

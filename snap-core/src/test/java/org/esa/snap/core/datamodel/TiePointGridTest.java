@@ -18,8 +18,11 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.BeamConstants;
+import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.junit.Assert.*;
 
 
 public class TiePointGridTest extends AbstractRasterDataNodeTest {
@@ -40,6 +43,7 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         return new TiePointGrid("default", 2, 2, 0, 0, 1, 1, new float[]{1f, 2f, 3f, 4f});
     }
 
+    @Test
     public void testConstructors() {
         try {
             new TiePointGrid("x", gridWidth, gridHeight, 0, 0, 4, 2);
@@ -83,6 +87,7 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testProperties() {
         TiePointGrid grid = new TiePointGrid("x", gridWidth, gridHeight, 0, 0, 4, 2, tiePoints);
 
@@ -114,6 +119,7 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testPropertiesNoSubSampling() {
         TiePointGrid grid = new TiePointGrid("x", gridWidth, gridHeight, 0, 0, 1, 1, tiePoints);
 
@@ -137,8 +143,8 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         assertSame(grid.getRasterData(), grid.getRasterData());
     }
 
+    @Test
     public void testInterpolation() {
-
         TiePointGrid grid = new TiePointGrid("x", gridWidth, gridHeight, 0.5f, 0.5f, 4, 2, tiePoints);
 
         float[][] interpolated = new float[][]{
@@ -172,8 +178,8 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testExtrapolation() {
-
         TiePointGrid grid = new TiePointGrid("x", gridWidth, gridHeight, 0.5f, 0.5f, 4, 2, tiePoints);
 
         assertEquals(-0.75F, grid.getPixelFloat(-1, -1), eps);
@@ -187,16 +193,17 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         assertEquals(+6.75F, grid.getPixelFloat(9, 9), eps);
     }
 
+    @Test
     public void testAccess_TiePointGrid() {
         TiePointGrid tiePointGrid = new TiePointGrid("x",
-                                                     3, 3,
-                                                     0.5f, 1.5f,
-                                                     3, 5,
-                                                     new float[]{
-                                                             2, 4, 6,
-                                                             12, 10, 8,
-                                                             14, 16, 18
-                                                     });
+                3, 3,
+                0.5f, 1.5f,
+                3, 5,
+                new float[]{
+                        2, 4, 6,
+                        12, 10, 8,
+                        14, 16, 18
+                });
 
         // Test for the current tie pont positions.
         // The positions marked with ">xx<" at the raster below
@@ -273,6 +280,7 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
 //        E----+--V-+----+----+----+----+----+----+----E--   14
     }
 
+    @Test
     public void testAccess_MERIS_TiePointGrid() {
         String tpgName = "x";
         int gridWidth = 4;
@@ -287,10 +295,10 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
                 -0.05F, -0.10F, -0.15F, -0.20F
         };
         TiePointGrid grid = new TiePointGrid(tpgName,
-                                             gridWidth, gridHeight,
-                                             offsetX, offsetY,
-                                             subSamplingX, subSamplingY,
-                                             tiepoints);
+                gridWidth, gridHeight,
+                offsetX, offsetY,
+                subSamplingX, subSamplingY,
+                tiepoints);
 
         float[][] valuesForIntAccess = new float[][]{
 //            Line 1
@@ -350,6 +358,7 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testAccess_AATSR_LOC_TiePointGrid() {
         String tpgName = "x";
         int gridWidth = BeamConstants.AATSR_LOC_TIE_POINT_GRID_WIDTH;
@@ -368,10 +377,10 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
                 12f, 13f, 14f, 15f, 16f, 17f, 18f, 19f, 20f, 21f, 22f
         };
         TiePointGrid grid = new TiePointGrid(tpgName,
-                                             gridWidth, gridHeight,
-                                             offsetX, offsetY,
-                                             subSamplingX, subSamplingY,
-                                             tiepoints);
+                gridWidth, gridHeight,
+                offsetX, offsetY,
+                subSamplingX, subSamplingY,
+                tiepoints);
 
         float[][] valuesForIntAccess = new float[][]{
 //            Line 0
@@ -521,18 +530,18 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testReadAndGetPixelSimilarity() throws IOException {
-
         TiePointGrid grid;
 
         grid = new TiePointGrid("offset05",
-                                3, 2,
-                                0.5f, 0.5f, // Offsets set!
-                                1f, 1f,
-                                new float[]{
-                                        1f, 2f, 3f,
-                                        2f, 3f, 4f,
-                                });
+                3, 2,
+                0.5f, 0.5f, // Offsets set!
+                1f, 1f,
+                new float[]{
+                        1f, 2f, 3f,
+                        2f, 3f, 4f,
+                });
 
         float[] rline1 = grid.readPixels(0, 0, 3, 1, (float[]) null, ProgressMonitor.NULL);
         assertEquals(1f, rline1[0], 1e-6f);
@@ -553,13 +562,13 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
 
         grid = new TiePointGrid("offset00",
-                                3, 2,
-                                0.0f, 0.0f, // Zero now!
-                                1f, 1f,
-                                new float[]{
-                                        1f, 2f, 3f,
-                                        2f, 3f, 4f,
-                                });
+                3, 2,
+                0.0f, 0.0f, // Zero now!
+                1f, 1f,
+                new float[]{
+                        1f, 2f, 3f,
+                        2f, 3f, 4f,
+                });
 
         rline1 = grid.readPixels(0, 0, 3, 1, (float[]) null, ProgressMonitor.NULL);
         assertEquals(2f, rline1[0], 1e-6f);
@@ -580,8 +589,8 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         }
     }
 
-
-    public static void testDiscontinuity() {
+    @Test
+    public void testDiscontinuity() {
         final TiePointGrid tp0 = new TiePointGrid("tp0", 2, 2, 0, 0, 1, 1);
         assertEquals(TiePointGrid.DISCONT_NONE, tp0.getDiscontinuity());
 
@@ -605,11 +614,12 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         assertEquals(TiePointGrid.DISCONT_AT_360, tp4.getDiscontinuity());
     }
 
+    @Test
     public void testClone() {
         TiePointGrid grid = new TiePointGrid("abc", 2, 2,
-                                             0.1, 0.2,
-                                             0.3, 0.4,
-                                             new float[]{1.2f, 2.3f, 3.4f, 4.5f});
+                0.1, 0.2,
+                0.3, 0.4,
+                new float[]{1.2f, 2.3f, 3.4f, 4.5f});
         grid.setDescription("Aha!");
         grid.setDiscontinuity(TiePointGrid.DISCONT_AT_180);
 
@@ -619,18 +629,18 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         assertEquals(TiePointGrid.DISCONT_AT_180, gridClone.getDiscontinuity());
         assertEquals(2, gridClone.getGridWidth());
         assertEquals(2, gridClone.getGridHeight());
-        assertEquals(0.1, gridClone.getOffsetX());
-        assertEquals(0.2, gridClone.getOffsetY());
-        assertEquals(0.3, gridClone.getSubSamplingX());
-        assertEquals(0.4, gridClone.getSubSamplingY());
+        assertEquals(0.1, gridClone.getOffsetX(), 1e-8);
+        assertEquals(0.2, gridClone.getOffsetY(), 1e-8);
+        assertEquals(0.3, gridClone.getSubSamplingX(), 1e-8);
+        assertEquals(0.4, gridClone.getSubSamplingY(), 1e-8);
         assertNotNull(gridClone.getData());
-        assertEquals(true, gridClone.getData().getElems() instanceof float[]);
+        assertTrue(gridClone.getData().getElems() instanceof float[]);
         float[] dataClone = (float[]) gridClone.getData().getElems();
         assertEquals(4, dataClone.length);
-        assertEquals(1.2f, dataClone[0]);
-        assertEquals(2.3f, dataClone[1]);
-        assertEquals(3.4f, dataClone[2]);
-        assertEquals(4.5f, dataClone[3]);
+        assertEquals(1.2f, dataClone[0], 1e-8);
+        assertEquals(2.3f, dataClone[1], 1e-8);
+        assertEquals(3.4f, dataClone[2], 1e-8);
+        assertEquals(4.5f, dataClone[3], 1e-8);
         assertNotSame(grid.getData().getElems(), dataClone);
     }
 }

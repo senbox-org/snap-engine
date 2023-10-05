@@ -16,10 +16,14 @@
 
 package org.esa.snap.core.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class IntMapTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+public class IntMapTest {
+
+    @Test
     public void testIntMap() {
         IntMap intMap = new IntMap(-10, 110);
 
@@ -51,7 +55,7 @@ public class IntMapTest extends TestCase {
         assertEquals(IntMap.NULL, intMap.getValue(-1000 + 1));
         assertEquals(IntMap.NULL, intMap.getValue(-100 + 1));
         assertEquals(IntMap.NULL, intMap.getValue(-10 + 1));
-        assertEquals(IntMap.NULL, intMap.getValue(1 - 1));
+        assertEquals(IntMap.NULL, intMap.getValue(0));
         assertEquals(IntMap.NULL, intMap.getValue(10 - 1));
         assertEquals(IntMap.NULL, intMap.getValue(100 - 1));
         assertEquals(IntMap.NULL, intMap.getValue(1000 - 1));
@@ -76,6 +80,7 @@ public class IntMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testSequentialAccess() {
         IntMap intMap = new IntMap();
         assertEquals(0, intMap.getSize());
@@ -92,6 +97,7 @@ public class IntMapTest extends TestCase {
         assertEquals(0, intMap.getSize());
     }
 
+    @Test
     public void testKeys() {
         IntMap intMap = new IntMap(10, 100);
         intMap.putValue(234, 5);
@@ -108,6 +114,7 @@ public class IntMapTest extends TestCase {
         assertEquals(534, keys[4]);
     }
 
+    @Test
     public void testPairs() {
         IntMap intMap = new IntMap(10, 100);
         intMap.putValue(234, 5);
@@ -129,6 +136,7 @@ public class IntMapTest extends TestCase {
         assertEquals(1, pairs[4][1]);
     }
 
+    @Test
     public void testRanges() {
         IntMap intMap = new IntMap(10, 100);
         intMap.putValue(234, 5);
@@ -144,7 +152,7 @@ public class IntMapTest extends TestCase {
         assertEquals(8232, ranges[1][1]);
     }
 
-
+    @Test
     public void testClone() {
         IntMap intMap = new IntMap(10, 100);
         intMap.putValue(234, 5);
@@ -152,7 +160,7 @@ public class IntMapTest extends TestCase {
         intMap.putValue(534, 1);
         intMap.putValue(22, 43);
         intMap.putValue(-8, 8232);
-        final int[][] pairs = ((IntMap)intMap.clone()).getPairs();
+        final int[][] pairs = ((IntMap) intMap.clone()).getPairs();
         assertEquals(5, pairs.length);
         assertEquals(-8, pairs[0][0]);
         assertEquals(2, pairs[1][0]);

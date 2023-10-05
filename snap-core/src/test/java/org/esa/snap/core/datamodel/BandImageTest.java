@@ -19,22 +19,26 @@ package org.esa.snap.core.datamodel;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.glevel.MultiLevelModel;
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReader;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class BandImageTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class BandImageTest {
+
     private static final int SIZE = 1000;
     private static final AffineTransform I2M = new AffineTransform(0.1, 0.2, 0.3, 0.4, 0.5, 0.6);
 
+    @Test
     public void testThatMultiLevelImagesAreConsistent() throws IOException {
         testThat(new ProductFactory(false));
         testThat(new ProductFactory(true));
@@ -91,12 +95,10 @@ public class BandImageTest extends TestCase {
         private void setMapGeoCoding(Product product) {
             try {
                 GeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                                       new Rectangle(0, 0, SIZE, SIZE),
-                                                       new AffineTransform(I2M));
+                        new Rectangle(0, 0, SIZE, SIZE),
+                        new AffineTransform(I2M));
                 product.setSceneGeoCoding(geoCoding);
-            } catch (FactoryException e) {
-                fail(e.getMessage());
-            } catch (TransformException e) {
+            } catch (FactoryException | TransformException e) {
                 fail(e.getMessage());
             }
         }

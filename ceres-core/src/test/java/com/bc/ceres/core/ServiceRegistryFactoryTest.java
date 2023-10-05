@@ -16,14 +16,16 @@
 
 package com.bc.ceres.core;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
-public class ServiceRegistryFactoryTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ServiceRegistryFactoryTest {
 
+    @Test
     public void testGetServiceRegistry() {
         ServiceRegistryManager instance = ServiceRegistryManager.getInstance();
         assertNotNull(instance);
@@ -36,10 +38,14 @@ public class ServiceRegistryFactoryTest extends TestCase {
         ListenerB listenerB = new ListenerB();
         serviceRegistryB.addListener(listenerB);
 
-        A a1 = new A("foo") {};
-        A a2 = new A("grunt") {};
-        B b1 = new B("bar") {};
-        B b2 = new B("baz") {};
+        A a1 = new A("foo") {
+        };
+        A a2 = new A("grunt") {
+        };
+        B b1 = new B("bar") {
+        };
+        B b2 = new B("baz") {
+        };
 
         serviceRegistryA.addService(a1);
         serviceRegistryA.addService(a2);
@@ -58,12 +64,12 @@ public class ServiceRegistryFactoryTest extends TestCase {
 
         Set<A> servicesA = serviceRegistryA.getServices();
         for (A serviceA : servicesA) {
-           serviceRegistryA.removeService(serviceA);
+            serviceRegistryA.removeService(serviceA);
         }
 
         Set<B> servicesB = serviceRegistryB.getServices();
         for (B serviceB : servicesB) {
-           serviceRegistryB.removeService(serviceB);
+            serviceRegistryB.removeService(serviceB);
         }
 
         assertFalse(listenerA.services.contains(a1));
@@ -96,7 +102,6 @@ public class ServiceRegistryFactoryTest extends TestCase {
             super(id);
         }
     }
-
 
     private class ListenerBase {
         public Set<Object> services = new HashSet<Object>(4);

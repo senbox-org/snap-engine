@@ -17,31 +17,32 @@
 package org.esa.snap.core.datamodel;
 
 
-public class AbstractDataNodeTest extends AbstractNamedNodeTest {
+import static org.junit.Assert.*;
 
+public class AbstractDataNodeTest extends AbstractNamedNodeTest {
 
     @Override
     public void testSetUnit(DataNode dataNode) {
 
         // old value --> null ?
         dataNode.setUnit(null);
-        assertEquals(null, dataNode.getUnit());
-        assertEquals(false, dataNode.isModified());
+        assertNull(dataNode.getUnit());
+        assertFalse(dataNode.isModified());
 
         // null --> new value: is modified ?
         dataNode.setUnit("mg/m^3");
         assertEquals("mg/m^3", dataNode.getUnit());
-        assertEquals(true, dataNode.isModified());
+        assertTrue(dataNode.isModified());
 
         // old value == new value?
         dataNode.setModified(false);
         dataNode.setUnit("mg/m^3");
         assertEquals("mg/m^3", dataNode.getUnit());
-        assertEquals(false, dataNode.isModified());
+        assertFalse(dataNode.isModified());
 
         // old value != new value?
         dataNode.setUnit("g/cm^3");
         assertEquals("g/cm^3", dataNode.getUnit());
-        assertEquals(true, dataNode.isModified());
+        assertTrue(dataNode.isModified());
     }
 }

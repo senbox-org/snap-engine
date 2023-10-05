@@ -16,48 +16,30 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.TestNotExecutableException;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.After;
+import org.junit.Before;
 
-public class DDDBTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DDDBTest {
 
     private DDDB _dddb;
 
-    public DDDBTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        if (DDDB.isInstalled()) {
-            return new TestSuite(DDDBTest.class);
-        } else {
-            return new TestCase(DDDBTest.class.getName()) {
-
-                @Override
-                public void runTest() {
-                    System.out.println();
-                    System.out.println(DDDBTest.class + ": warning: test will not be performed: DDDB not installed: ");
-                    System.out.println(DDDB.DB_DIR_PATH);
-                }
-            };
-        }
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _dddb = DDDB.getInstance();
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         _dddb = null;
     }
 
+    @org.junit.Test
     public void testGetDatasetNames() {
         try {
             assertEquals("Radiance_9", _dddb.getDatasetNames("MER_RR__1P")[11]);
@@ -84,6 +66,7 @@ public class DDDBTest extends TestCase {
         }
     }
 
+    @org.junit.Test
     public void testReadRecordInfo() {
         try {
             java.util.Hashtable params = new java.util.Hashtable();
@@ -93,7 +76,7 @@ public class DDDBTest extends TestCase {
             assertNotNull(_dddb.readRecordInfo("MER_RR__1P", "Scaling_Factor_GADS", null));
             assertNotNull(_dddb.readRecordInfo("MER_RR__1P", "SCALING_FACTOR_GADS", null));
 
-            params.put("tiePointGridWidth", new Integer(71));
+            params.put("tiePointGridWidth", Integer.valueOf(71));
             assertNotNull(_dddb.readRecordInfo("MER_RR__1P", "Tie_points_ADS", params));
             assertNotNull(_dddb.readRecordInfo("MER_RR__1P", "TIE_POINTS_ADS", params));
 
@@ -125,12 +108,13 @@ public class DDDBTest extends TestCase {
         }
     }
 
+    @org.junit.Test
     public void testDataIntegrity() {
         try {
             java.util.Hashtable params = new java.util.Hashtable();
 
-            params.put("tiePointGridWidth", new Integer(71));
-            params.put("sceneRasterWidth", new Integer(1121));
+            params.put("tiePointGridWidth", Integer.valueOf(71));
+            params.put("sceneRasterWidth", Integer.valueOf(1121));
 
             testDataBaseIntegrity("MER_RR__1P", "Quality_ADS", params, 4, 33);
             testDataBaseIntegrity("MER_RR__1P", "Scaling_Factor_GADS", params, 12, 292);
@@ -138,8 +122,8 @@ public class DDDBTest extends TestCase {
             testDataBaseIntegrity("MER_RR__1P", "Radiance_9", params, 3, 2255);
             testDataBaseIntegrity("MER_RR__1P", "Flags", params, 4, 3376);
 
-            params.put("tiePointGridWidth", new Integer(36));
-            params.put("sceneRasterWidth", new Integer(2241));
+            params.put("tiePointGridWidth", Integer.valueOf(36));
+            params.put("sceneRasterWidth", Integer.valueOf(2241));
 
             testDataBaseIntegrity("MER_FR__1P", "Quality_ADS", params, 4, 33);
             testDataBaseIntegrity("MER_FR__1P", "Scaling_Factor_GADS", params, 12, 292);
@@ -164,7 +148,7 @@ public class DDDBTest extends TestCase {
         assertEquals(msg, sizeInBytesExpected, info.getSizeInBytes());
     }
 
-
+    @org.junit.Test
     public void testThatAllFieldTypesAreRecognized() {
         assertEquals(ProductData.TYPE_INT8, DDDB.getFieldType("SChar"));
         assertEquals(ProductData.TYPE_UINT8, DDDB.getFieldType("UChar"));
@@ -205,11 +189,13 @@ public class DDDBTest extends TestCase {
         }
     }
 
+    @org.junit.Test
     public void testGetInstance() {
         assertNotNull(DDDB.getInstance());
         assertSame(_dddb, DDDB.getInstance());
     }
 
+    @org.junit.Test
     public void testMERIS_L2_Flags_IODD7() {
         FlagCoding flagCoding = _dddb.readFlagsCoding("l2_flags", "flags/MER_RR__2P_flags_IODD7.dd");
 
@@ -296,6 +282,7 @@ public class DDDBTest extends TestCase {
         }
     }
 
+    @org.junit.Test
     public void testMERIS_L2_Flags() {
         FlagCoding flagCoding = _dddb.readFlagsCoding("l2_flags", "flags/MER_RR__2P_flags.dd");
 

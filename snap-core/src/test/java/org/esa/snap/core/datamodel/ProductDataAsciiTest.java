@@ -16,25 +16,31 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.util.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.*;
 
-public class ProductDataAsciiTest extends TestCase {
+
+public class ProductDataAsciiTest {
 
     private FileImageOutputStream _outputStream;
     private FileImageInputStream _inputStream;
 
-    @Override
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
-        outputFile.mkdirs();
+        if (!outputFile.mkdirs()) {
+            fail("Unable to create test directory: " + outputFile);
+        };
         File streamFile = new File(outputFile, "ascii.img");
         streamFile.createNewFile();
         _inputStream = new FileImageInputStream(streamFile);
@@ -43,8 +49,8 @@ public class ProductDataAsciiTest extends TestCase {
         assertNotNull(_outputStream);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         try {
             _inputStream.close();
             _outputStream.close();
@@ -53,11 +59,13 @@ public class ProductDataAsciiTest extends TestCase {
         FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
     }
 
+    @Test
     public void testDataTypeInconsistency() {
         ProductData instance = ProductData.createInstance(ProductData.TYPE_ASCII);
         assertEquals(ProductData.TYPE_ASCII, instance.getType());
     }
 
+    @Test
     public void testSingleValueConstructor() {
         ProductData instance = ProductData.createInstance(ProductData.TYPE_ASCII);
         instance.setElems(new byte[]{'#'});
@@ -67,22 +75,22 @@ public class ProductDataAsciiTest extends TestCase {
         assertEquals(35.0F, instance.getElemFloat(), 0.0e-12F);
         assertEquals(35.0D, instance.getElemDouble(), 0.0e-12D);
         assertEquals("#", instance.getElemString());
-        assertEquals(true, instance.getElemBoolean());
+        assertTrue(instance.getElemBoolean());
         assertEquals(1, instance.getNumElems());
         Object data = instance.getElems();
-        assertEquals(true, data instanceof byte[]);
+        assertTrue(data instanceof byte[]);
         assertEquals(1, ((byte[]) data).length);
-        assertEquals(true, instance.isScalar());
-        assertEquals(false, instance.isInt());
+        assertTrue(instance.isScalar());
+        assertFalse(instance.isInt());
         assertEquals("#", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_ASCII);
         expectedEqual.setElems(new byte[]{35});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_ASCII);
         expectedUnequal.setElems(new byte[]{126});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -93,9 +101,10 @@ public class ProductDataAsciiTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 
+    @Test
     public void testConstructor() {
         ProductData instance = ProductData.createInstance(ProductData.TYPE_ASCII, 10);
         instance.setElems(new byte[]{'a', 'A', 'e', 'i', 'n', ' ', 'T', 'e', 's', 't'});
@@ -117,19 +126,19 @@ public class ProductDataAsciiTest extends TestCase {
         assertEquals("e", instance.getElemStringAt(2));
         assertEquals(10, instance.getNumElems());
         Object data2 = instance.getElems();
-        assertEquals(true, data2 instanceof byte[]);
+        assertTrue(data2 instanceof byte[]);
         assertEquals(10, ((byte[]) data2).length);
-        assertEquals(false, instance.isScalar());
-        assertEquals(false, instance.isInt());
+        assertFalse(instance.isScalar());
+        assertFalse(instance.isInt());
         assertEquals("aAein Test", instance.toString());
 
         ProductData expectedEqual = ProductData.createInstance(ProductData.TYPE_ASCII, 10);
         expectedEqual.setElems(new byte[]{'a', 'A', 'e', 'i', 'n', ' ', 'T', 'e', 's', 't'});
-        assertEquals(true, instance.equalElems(expectedEqual));
+        assertTrue(instance.equalElems(expectedEqual));
 
         ProductData expectedUnequal = ProductData.createInstance(ProductData.TYPE_ASCII, 10);
         expectedUnequal.setElems(new byte[]{'A', 'a', 'e', 'i', 'n', ' ', 'T', 'e', 's', 't'});
-        assertEquals(false, instance.equalElems(expectedUnequal));
+        assertFalse(instance.equalElems(expectedUnequal));
 
 //        StreamTest
         ProductData dataFromStream = null;
@@ -140,6 +149,6 @@ public class ProductDataAsciiTest extends TestCase {
         } catch (IOException e) {
             fail("IOException not expected");
         }
-        assertEquals(true, instance.equalElems(dataFromStream));
+        assertTrue(instance.equalElems(dataFromStream));
     }
 }

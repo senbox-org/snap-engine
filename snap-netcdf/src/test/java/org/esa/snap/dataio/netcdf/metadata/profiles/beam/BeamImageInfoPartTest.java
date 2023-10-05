@@ -15,28 +15,31 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import ucar.nc2.Attribute;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class BeamImageInfoPartTest extends TestCase {
+public class BeamImageInfoPartTest {
 
     private Attribute a1;
     private Attribute a2;
     private Attribute a3;
     private Attribute a4;
 
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         a1 = mock(Attribute.class);
         a2 = mock(Attribute.class);
         a3 = mock(Attribute.class);
         a4 = mock(Attribute.class);
     }
 
-    protected void tearDown() throws Exception {
-    }
-
+    @Test
     public void testReturnTrue_AllAttributesHaveTheSameSize() {
         when(a1.getLength()).thenReturn(4);
         when(a2.getLength()).thenReturn(4);
@@ -44,18 +47,20 @@ public class BeamImageInfoPartTest extends TestCase {
         when(a4.getLength()).thenReturn(4);
         final Attribute[] attributes = {a1, a2, a3, a4};
 
-        assertEquals(true, BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
+        assertTrue(BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
     }
 
+    @Test
     public void testReturnFalse_FirstAttributeIsNull() {
         when(a2.getLength()).thenReturn(4);
         when(a3.getLength()).thenReturn(4);
         when(a4.getLength()).thenReturn(4);
         final Attribute[] attributes = {null, a2, a3, a4};
 
-        assertEquals(false, BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
+        assertFalse(BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
     }
 
+    @Test
     public void testReturnFalse_OneOfTheAttributesIsNull() {
         when(a1.getLength()).thenReturn(4);
         when(a2.getLength()).thenReturn(4);
@@ -63,9 +68,10 @@ public class BeamImageInfoPartTest extends TestCase {
         when(a4.getLength()).thenReturn(4);
         final Attribute[] attributes = {a1, a2, null, a4};
 
-        assertEquals(false, BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
+        assertFalse(BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
     }
 
+    @Test
     public void testReturnFalse_TheAttributesHaveDiffenentSizes() {
         when(a1.getLength()).thenReturn(4);
         when(a2.getLength()).thenReturn(4);
@@ -73,6 +79,6 @@ public class BeamImageInfoPartTest extends TestCase {
         when(a4.getLength()).thenReturn(4);
         final Attribute[] attributes = {a1, a2, a3, a4};
 
-        assertEquals(false, BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
+        assertFalse(BeamImageInfoPart.allAttributesAreNotNullAndHaveTheSameSize(attributes));
     }
 }

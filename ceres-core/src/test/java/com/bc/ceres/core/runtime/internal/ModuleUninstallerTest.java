@@ -16,19 +16,18 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.io.IOException;
+import static org.junit.Assert.fail;
 
-import com.bc.ceres.core.CoreException;
+public class ModuleUninstallerTest {
 
-public class ModuleUninstallerTest extends TestCase {
-    public void testNullArgConvention() throws IOException, CoreException {
+    @Test
+    public void testNullArgConvention() {
         try {
             new ModuleUninstaller(null);
             fail();
         } catch (NullPointerException e) {
         }
     }
-
 }

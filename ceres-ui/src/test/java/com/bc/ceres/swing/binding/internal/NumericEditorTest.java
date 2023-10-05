@@ -20,14 +20,16 @@ import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JComponent;
-import javax.swing.JTextField;
+import javax.swing.*;
 
-public class NumericEditorTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public void testIsApplicable() throws Exception {
+public class NumericEditorTest {
+
+    @Test
+    public void testIsApplicable() {
         NumericEditor numericEditor = new NumericEditor();
 
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.class);
@@ -59,7 +61,8 @@ public class NumericEditorTest extends TestCase {
         assertFalse(numericEditor.isValidFor(booleanDescriptor));
     }
 
-    public void testCreateEditorComponent() throws Exception {
+    @Test
+    public void testCreateEditorComponent() {
         NumericEditor numericEditor = new NumericEditor();
 
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);

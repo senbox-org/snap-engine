@@ -16,8 +16,9 @@ public class OSCategoryTest {
     private static final String MACOS_OS_NAME = "MacOSX";
     private static final String UNKNOWN_OS_NAME = "";
     private static final String ARCHITECTURE_X64 = "x64";
+    private static final String ARCHITECTURE_AARCH64 = "aarch64";
     private static final String ARCHITECTURE_X86 = "x86";
-    private static final String ARCHITECTURE_UNKNOWN = "x86";
+    private static final String ARCHITECTURE_UNKNOWN = "";
     private static final String EXECUTABLE_NAME = "ping";
     private static final String UNIX_EXECUTABLE_NAME = "sh";
     private static final String LINUX_OS_EXECUTABLE_LOCATION = "/bin";
@@ -25,15 +26,20 @@ public class OSCategoryTest {
     private static final String MACOS_OS_EXECUTABLE_LOCATION = "/sbin";
 
     @Test
+    @STTM("SNAP-3440")
     public void testGetOSCategory() {
         final OSCategory osCategory = OSCategory.getOSCategory();
         assertNotNull(osCategory);
-        if (IS_OS_LINUX) {
+        final String sysArch = System.getProperty("os.arch").toLowerCase();
+        if (IS_OS_LINUX && sysArch.contains("amd64")) {
             assertEquals(OSCategory.LINUX_64, osCategory);
         } else if (IS_OS_MAC_OSX) {
-            assertEquals(OSCategory.MAC_OS_X, osCategory);
+            if (sysArch.contains("amd64")) {
+                assertEquals(OSCategory.MAC_OS_X, osCategory);
+            } else if (sysArch.contains("aarch64")) {
+                assertEquals(OSCategory.MAC_OS_X_AARCH64, osCategory);
+            }
         } else if (IS_OS_WINDOWS) {
-            final String sysArch = System.getProperty("os.arch").toLowerCase();
             if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
                 assertEquals(OSCategory.WIN_64, osCategory);
             } else {
@@ -74,15 +80,20 @@ public class OSCategoryTest {
     }
 
     @Test
+    @STTM("SNAP-3440")
     public void testGetArchitecture() {
         final OSCategory osCategory = OSCategory.getOSCategory();
         assertNotNull(osCategory);
-        if (IS_OS_LINUX) {
+        final String sysArch = System.getProperty("os.arch").toLowerCase();
+        if (IS_OS_LINUX && sysArch.contains("amd64")) {
             assertEquals(ARCHITECTURE_X64, osCategory.getArchitecture());
         } else if (IS_OS_MAC_OSX) {
-            assertEquals(ARCHITECTURE_X64, osCategory.getArchitecture());
+            if (sysArch.contains("amd64")) {
+                assertEquals(ARCHITECTURE_X64, osCategory.getArchitecture());
+            } else if (sysArch.contains("aarch64")) {
+                assertEquals(ARCHITECTURE_AARCH64, osCategory.getArchitecture());
+            }
         } else if (IS_OS_WINDOWS) {
-            final String sysArch = System.getProperty("os.arch").toLowerCase();
             if (sysArch.contains("amd64") || sysArch.contains("x86_x64")) {
                 assertEquals(ARCHITECTURE_X64, osCategory.getArchitecture());
             } else {

@@ -17,14 +17,17 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TiffDirectoryEntryTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class TiffDirectoryEntryTest {
+
+    @Test
     public void testCreation_WithOneValue() {
         final TiffShort tag = new TiffShort(3);
         final int expValue = 7643;
@@ -38,6 +41,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(expValue, ((TiffLong) entry.getValues()[0]).getValue());
     }
 
+    @Test
     public void testCreation_WithValueArray() {
         final TiffShort tag = new TiffShort(3);
         final int[] values = new int[]{7643, 974646};
@@ -55,6 +59,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreation_ValueTypesAreMixed() {
         final TiffShort tag = new TiffShort(3);
         final TiffValue[] mixedValueTypes = new TiffValue[]{
@@ -71,6 +76,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteToStream() throws IOException {
         //preparation
         final TiffValue[] values = new TiffValue[]{
@@ -111,6 +117,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
     }
 
+    @Test
     public void testWriteToStream_OneTiffShortValue() throws IOException {
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(232), new TiffShort(28));
 
@@ -126,6 +133,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(0, ios.readShort());
     }
 
+    @Test
     public void testWriteToStream_TwoTiffShortValue() throws IOException {
         final TiffShort[] values = new TiffShort[]{new TiffShort(28), new TiffShort(235)};
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(232), values);
@@ -143,6 +151,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
     }
 
+    @Test
     public void testWrite_ValuesSizeInBytesIsBiggerThanFour_ValueOffsetIsNull() {
         final TiffDirectoryEntry entry = new TiffDirectoryEntry(new TiffShort(3), new TiffRational(12, 6));
         final MemoryCacheImageOutputStream stream = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
@@ -157,6 +166,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetSize_TiffShort_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(30),
@@ -166,6 +176,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(TiffDirectoryEntry.BYTES_PER_ENTRY, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffShort_TwoValues() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(30),
@@ -176,6 +187,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(TiffDirectoryEntry.BYTES_PER_ENTRY, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffShort_MoreThanTwoValues() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(1),
@@ -188,6 +200,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(expectedSize, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffLong_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffLong(30)
@@ -197,6 +210,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(TiffDirectoryEntry.BYTES_PER_ENTRY, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffLong_ValueArray() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffLong(1),
@@ -209,6 +223,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(expectedSize, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffRational_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffRational(20, 30)
@@ -219,6 +234,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(expectedSize, entry.getSize());
     }
 
+    @Test
     public void testGetSize_TiffRational_ValueArray() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffRational(4, 1),
@@ -230,6 +246,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(expectedSize, entry.getSize());
     }
 
+    @Test
     public void testGetValueSizeInBytes_TiffShort() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(30),
@@ -242,6 +259,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(8, entry.getValuesSizeInBytes());
     }
 
+    @Test
     public void testGetValueSizeInBytes_TiffLong() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffLong(30),
@@ -254,6 +272,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(16, entry.getValuesSizeInBytes());
     }
 
+    @Test
     public void testGetValueSizeInBytes_TiffRational() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffRational(30, 10),
@@ -266,6 +285,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(32, entry.getValuesSizeInBytes());
     }
 
+    @Test
     public void testGetValueSizeInBytes_TiffAscii() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffAscii("ab"),   // 3 bytes
@@ -278,6 +298,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertEquals(13, entry.getValuesSizeInBytes());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffShort_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(12)
@@ -287,6 +308,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertFalse(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffShort_TwoValues() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(12),
@@ -297,6 +319,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertFalse(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffShort_MoreThanTwoValues() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffShort(12),
@@ -308,6 +331,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertTrue(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffLong_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffLong(12)
@@ -317,6 +341,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertFalse(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffLong_MoreThanOneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffLong(12),
@@ -327,6 +352,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertTrue(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffRational_OneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffRational(12, 14)
@@ -336,6 +362,7 @@ public class TiffDirectoryEntryTest extends TestCase {
         assertTrue(entry.mustValuesBeReferenced());
     }
 
+    @Test
     public void testMustValuesBeReferenced_TiffRational_MoreThanOneValue() {
         final TiffValue[] values = new TiffValue[]{
                 new TiffRational(12, 6),
@@ -349,7 +376,7 @@ public class TiffDirectoryEntryTest extends TestCase {
     private long getExpectedStreamLength(final TiffValue[] values, final long valuesOffset) {
         final TiffShort type = TiffType.getType(values);
         final short bytesForType = TiffType.getBytesForType(type);
-        return values.length * bytesForType + valuesOffset;
+        return (long) values.length * bytesForType + valuesOffset;
     }
 
     private TiffValue[] createTiffLongValues(final int[] ints) {
@@ -359,14 +386,4 @@ public class TiffDirectoryEntryTest extends TestCase {
         }
         return values;
     }
-
-// TOCO - Check: Never used?    
-//    private TiffValue[] createTiffShortValues(final int[] ints) {
-//        final TiffValue[] values = new TiffValue[ints.length];
-//        for (int i = 0; i < values.length; i++) {
-//            values[i] = new TiffShort(ints[i]);
-//        }
-//        return values;
-//    }
-
 }

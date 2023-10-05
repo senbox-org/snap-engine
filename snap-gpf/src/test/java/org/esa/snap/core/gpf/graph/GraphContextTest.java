@@ -1,17 +1,21 @@
 package org.esa.snap.core.gpf.graph;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.TestOps;
 import org.esa.snap.core.util.jai.VerboseTileCache;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
 
-public class GraphContextTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class GraphContextTest {
     private OperatorSpi spi1;
     private OperatorSpi spi2;
     private OperatorSpi spi3;
@@ -19,8 +23,8 @@ public class GraphContextTest extends TestCase {
     private TileCache testTileCache;
     private boolean defVerbosity;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         jaiTileCache = JAI.getDefaultInstance().getTileCache();
         defVerbosity = VerboseTileCache.isVerbose();
         VerboseTileCache.setVerbose(false);
@@ -38,8 +42,8 @@ public class GraphContextTest extends TestCase {
         registry.addOperatorSpi(spi3);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         testTileCache.flush();
         VerboseTileCache.setVerbose(defVerbosity);
         JAI.getDefaultInstance().setTileCache(jaiTileCache);
@@ -49,6 +53,7 @@ public class GraphContextTest extends TestCase {
         spiRegistry.removeOperatorSpi(spi3);
     }
 
+    @Test
     public void testEmptyChain() {
         Graph graph = new Graph("test-graph");
         try {
@@ -59,8 +64,8 @@ public class GraphContextTest extends TestCase {
         }
     }
 
+    @Test
     public void testSourceToNodeResolving() throws GraphException {
-
         Graph graph = new Graph("chain1");
 
         Node node1 = new Node("node1", "org.esa.snap.core.gpf.TestOps$Op1$Spi");
@@ -85,6 +90,7 @@ public class GraphContextTest extends TestCase {
         assertTrue(graphContext.getNodeContext(node3).isOutput());
     }
 
+    @Test
     public void testSpiCreation() throws GraphException {
         Graph graph = new Graph("chain1");
 
@@ -97,8 +103,8 @@ public class GraphContextTest extends TestCase {
         assertEquals("org.esa.snap.core.gpf.TestOps$Op1", nodeContext.getOperator().getClass().getName());
     }
 
+    @Test
     public void testTargetProductCreation() throws GraphException {
-
         Graph graph = new Graph("chain1");
 
         Node node1 = new Node("node1", "Op1");
@@ -112,8 +118,8 @@ public class GraphContextTest extends TestCase {
         assertNotNull(outputProducts[0]);
     }
 
+    @Test
     public void testAnnotationsProcessed() throws Exception {
-
         Graph graph = new Graph("graph");
 
         Node node1 = new Node("node1", "Op1");
@@ -146,12 +152,11 @@ public class GraphContextTest extends TestCase {
 
         assertFalse(op3.ignoreSign);        // has NO default value
         assertEquals("NN", op3.interpolMethod);     // has default value
-        assertEquals(1.5, op3.factor);              // has default value
-
+        assertEquals(1.5, op3.factor, 1e-8);              // has default value
     }
 
+    @Test
     public void testMissingNode() {
-
         Graph graph = new Graph("graph");
 
         Node node1 = new Node("node1", "Op1");
@@ -170,11 +175,10 @@ public class GraphContextTest extends TestCase {
         } catch (GraphException e) {
             // expected
         }
-
     }
 
+    @Test
     public void testMissingSpi() {
-
         Graph graph = new Graph("graph");
 
         Node node1 = new Node("node1", "Opa");
@@ -194,6 +198,4 @@ public class GraphContextTest extends TestCase {
             // expected
         }
     }
-
-
 }

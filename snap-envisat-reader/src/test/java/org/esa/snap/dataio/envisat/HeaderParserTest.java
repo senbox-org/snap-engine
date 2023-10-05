@@ -16,37 +16,31 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Date;
 
-public class HeaderParserTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class HeaderParserTest {
 
     private boolean _oldDebugState;
 
-    public HeaderParserTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(HeaderParserTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-        //_oldDebugState = Debug.setEnabled(true);
+    @Before
+    public void setUp() {
         _oldDebugState = Debug.setEnabled(false);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         Debug.setEnabled(_oldDebugState);
     }
 
+    @Test
     public void testThatSingleEntriesAreParsedCorrectly() {
         try {
             String source = "TOT_SIZE=+00000000000186478394<bytes>\n";
@@ -93,7 +87,6 @@ public class HeaderParserTest extends TestCase {
             fail("unexpected HeaderParseException: " + e.getMessage());
         }
 
-
         try {
             String source = "COLUMN_SPACING=+2.60000000e+02<m>\n";
             Header header = HeaderParser.getInstance().parseHeader("TEST", source.getBytes());
@@ -127,7 +120,7 @@ public class HeaderParserTest extends TestCase {
             assertEquals("DS_NAME", param.getInfo().getName());
             assertEquals(ProductData.TYPE_ASCII, param.getInfo().getDataType());
             assertEquals(28, param.getInfo().getNumDataElems());
-            assertEquals(null, param.getInfo().getPhysicalUnit());
+            assertNull(param.getInfo().getPhysicalUnit());
             assertEquals(28, param.getNumElems());
             assertEquals("Cloud measurement parameters", param.getAsString());
             Debug.trace("header: " + header);
@@ -180,7 +173,7 @@ public class HeaderParserTest extends TestCase {
             assertNotNull(param1.getInfo());
             assertEquals("DS_TYPE", param1.getInfo().getName());
             assertEquals(ProductData.TYPE_ASCII, param1.getInfo().getDataType());
-            assertEquals(null, param1.getInfo().getPhysicalUnit());
+            assertNull(param1.getInfo().getPhysicalUnit());
             assertEquals(1, param1.getInfo().getNumDataElems());
             assertEquals("A", param1.getAsString());
 
@@ -190,7 +183,7 @@ public class HeaderParserTest extends TestCase {
             assertEquals("NUM_DSR", param2.getInfo().getName());
             assertEquals(ProductData.TYPE_INT32, param2.getInfo().getDataType());
             assertEquals(1, param2.getInfo().getNumDataElems());
-            assertEquals(null, param2.getInfo().getPhysicalUnit());
+            assertNull(param2.getInfo().getPhysicalUnit());
             assertEquals(1, param2.getNumElems());
             assertEquals(36, param2.getElemInt(0));
 
@@ -199,10 +192,9 @@ public class HeaderParserTest extends TestCase {
             Debug.trace(e);
             fail("unexpected HeaderParseException: " + e.getMessage());
         }
-
-
     }
 
+    @Test
     public void testThatInvalidEntriesAreRejected() {
         try {
             String source = "=\"Holla Senor\"";
@@ -227,8 +219,9 @@ public class HeaderParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testThatInvalidNumbersAreHandledAsStringValues() throws HeaderParseException,
-                                                                        HeaderEntryNotFoundException {
+            HeaderEntryNotFoundException {
         Header header;
         header = HeaderParser.getInstance().parseHeader("TEST", "X=+000+".getBytes());
         assertEquals(ProductData.TYPE_ASCII, header.getParamDataType("X"));
@@ -239,18 +232,18 @@ public class HeaderParserTest extends TestCase {
         header = HeaderParser.getInstance().parseHeader("TEST", "X=+ 001".getBytes());
     }
 
+    @Test
     public void testThatNumericDataTypesAreHandledCorrectly() {
-
         try {
             String source =
                     "AN_UINT32=+4294967295<bytes>\n" +
-                    "AN_INT32=-2147483648<bytes>\n" +
-                    "AN_UINT16=+65535<bytes>\n" +
-                    "AN_INT16=-32768<bytes>\n" +
-                    "AN_UINT8=+255<bytes>\n" +
-                    "AN_INT8=-128<bytes>\n" +
-                    "TRUE=1\n" +
-                    "FALSE=0\n";
+                            "AN_INT32=-2147483648<bytes>\n" +
+                            "AN_UINT16=+65535<bytes>\n" +
+                            "AN_INT16=-32768<bytes>\n" +
+                            "AN_UINT8=+255<bytes>\n" +
+                            "AN_INT8=-128<bytes>\n" +
+                            "TRUE=1\n" +
+                            "FALSE=0\n";
 
             Header header = HeaderParser.getInstance().parseHeader("TEST", source.getBytes());
             assertNotNull(header);
@@ -310,125 +303,120 @@ public class HeaderParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testARealLifeMPHExample() throws HeaderParseException {
-        StringBuffer sb = new StringBuffer();
-        sb.append("PRODUCT=\"MER_FR__2PTACR20000620_104323_00000099X000_00000_00000_0000.N1\"\n");
-        sb.append("PROC_STAGE=T\n");
-        sb.append("REF_DOC=\"PO-RS-MDA-GS-2009_3/B  \"\n");
-        sb.append("\n");
-        sb.append("ACQUISITION_STATION=\"ENVISAT SampleData#3\"\n");
-        sb.append("PROC_CENTER=\"F-ACRI\"\n");
-        sb.append("PROC_TIME=\"22-FEB-2000 19:41:46.000000\"\n");
-        sb.append("SOFTWARE_VER=\"MEGS/4.3      \"\n");
-        sb.append("\n");
-        sb.append("SENSING_START=\"20-JUN-2000 10:43:23.851360\"\n");
-        sb.append("SENSING_STOP=\"20-JUN-2000 10:45:02.411360\"\n");
-        sb.append("\n");
-        sb.append("PHASE=X\n");
-        sb.append("CYCLE=+000\n");
-        sb.append("REL_ORBIT=+00000\n");
-        sb.append("ABS_ORBIT=+00000\n");
-        sb.append("STATE_VECTOR_TIME=\"20-JUN-2000 10:06:52.269120\"\n");
-        sb.append("DELTA_UT1=+.000000<s>\n");
-        sb.append("X_POSITION=-7162215.231<m>\n");
-        sb.append("Y_POSITION=+0208912.061<m>\n");
-        sb.append("Z_POSITION=-0000004.200<m>\n");
-        sb.append("X_VELOCITY=+0056.067000<m/s>\n");
-        sb.append("Y_VELOCITY=+1629.960000<m/s>\n");
-        sb.append("Z_VELOCITY=+7377.421000<m/s>\n");
-        sb.append("VECTOR_SOURCE=\"00\"\n");
-        sb.append("\n");
-        sb.append("UTC_SBT_TIME=\"20-JUN-2000 06:29:50.343648\"\n");
-        sb.append("SAT_BINARY_TIME=+0000000000\n");
-        sb.append("CLOCK_STEP=+3906250000<ps>\n");
-        sb.append("\n");
-        sb.append("LEAP_UTC=\"                           \"\n");
-        sb.append("LEAP_SIGN=+000\n");
-        sb.append("LEAP_ERR=0\n");
-        sb.append("\n");
-        sb.append("PRODUCT_ERR=0\n");
-        sb.append("TOT_SIZE=+00000000000186478394<bytes>\n");
-        sb.append("SPH_SIZE=+0000011622<bytes>\n");
-        sb.append("NUM_DSD=+0000000036\n");
-        sb.append("DSD_SIZE=+0000000280<bytes>\n");
-        sb.append("NUM_DATA_SETS=+0000000023\n");
-        sb.append("\n");
+        String sb = "PRODUCT=\"MER_FR__2PTACR20000620_104323_00000099X000_00000_00000_0000.N1\"\n" +
+                "PROC_STAGE=T\n" +
+                "REF_DOC=\"PO-RS-MDA-GS-2009_3/B  \"\n" +
+                "\n" +
+                "ACQUISITION_STATION=\"ENVISAT SampleData#3\"\n" +
+                "PROC_CENTER=\"F-ACRI\"\n" +
+                "PROC_TIME=\"22-FEB-2000 19:41:46.000000\"\n" +
+                "SOFTWARE_VER=\"MEGS/4.3      \"\n" +
+                "\n" +
+                "SENSING_START=\"20-JUN-2000 10:43:23.851360\"\n" +
+                "SENSING_STOP=\"20-JUN-2000 10:45:02.411360\"\n" +
+                "\n" +
+                "PHASE=X\n" +
+                "CYCLE=+000\n" +
+                "REL_ORBIT=+00000\n" +
+                "ABS_ORBIT=+00000\n" +
+                "STATE_VECTOR_TIME=\"20-JUN-2000 10:06:52.269120\"\n" +
+                "DELTA_UT1=+.000000<s>\n" +
+                "X_POSITION=-7162215.231<m>\n" +
+                "Y_POSITION=+0208912.061<m>\n" +
+                "Z_POSITION=-0000004.200<m>\n" +
+                "X_VELOCITY=+0056.067000<m/s>\n" +
+                "Y_VELOCITY=+1629.960000<m/s>\n" +
+                "Z_VELOCITY=+7377.421000<m/s>\n" +
+                "VECTOR_SOURCE=\"00\"\n" +
+                "\n" +
+                "UTC_SBT_TIME=\"20-JUN-2000 06:29:50.343648\"\n" +
+                "SAT_BINARY_TIME=+0000000000\n" +
+                "CLOCK_STEP=+3906250000<ps>\n" +
+                "\n" +
+                "LEAP_UTC=\"                           \"\n" +
+                "LEAP_SIGN=+000\n" +
+                "LEAP_ERR=0\n" +
+                "\n" +
+                "PRODUCT_ERR=0\n" +
+                "TOT_SIZE=+00000000000186478394<bytes>\n" +
+                "SPH_SIZE=+0000011622<bytes>\n" +
+                "NUM_DSD=+0000000036\n" +
+                "DSD_SIZE=+0000000280<bytes>\n" +
+                "NUM_DATA_SETS=+0000000023\n" +
+                "\n";
 
-        HeaderParser.getInstance().parseHeader("MPH", sb.toString().getBytes());
+        HeaderParser.getInstance().parseHeader("MPH", sb.getBytes());
     }
 
+    @Test
     public void testARealLifeSPHExample() throws HeaderParseException {
-        StringBuffer sb = new StringBuffer();
-        sb.append("SPH_DESCRIPTOR=\"Level 2 Full Resolution     \"\n");
-        sb.append("STRIPLINE_CONTINUITY_INDICATOR=+000\n");
-        sb.append("SLICE_POSITION=+001\n");
-        sb.append("NUM_SLICES=+001\n");
-        sb.append("FIRST_LINE_TIME=\"20-JUN-2000 10:43:23.827346\"\n");
-        sb.append("LAST_LINE_TIME=\"20-JUN-2000 10:45:02.387346\"\n");
-        sb.append("FIRST_FIRST_LAT=+0048477538<10-6degN>\n");
-        sb.append("FIRST_FIRST_LONG=-0000848029<10-6degE>\n");
-        sb.append("FIRST_MID_LAT=+0049120852<10-6degN>\n");
-        sb.append("FIRST_MID_LONG=-0004690841<10-6degE>\n");
-        sb.append("FIRST_LAST_LAT=+0049633188<10-6degN>\n");
-        sb.append("FIRST_LAST_LONG=-0008623846<10-6degE>\n");
-        sb.append("LAST_FIRST_LAT=+0042727139<10-6degN>\n");
-        sb.append("AST_FIRST_LONG=-0003066400<10-6degE>\n");
-        sb.append("LAST_MID_LAT=+0043337479<10-6degN>\n");
-        sb.append("LAST_MID_LONG=-0006541594<10-6degE>\n");
-        sb.append("LAST_LAST_LAT=+0043840261<10-6degN>\n");
-        sb.append("LAST_LAST_LONG=-0010080759<10-6degE>\n");
-        sb.append("\n");
-        sb.append("TRANS_ERR_FLAG=0\n");
-        sb.append("FORMAT_ERR_FLAG=0\n");
-        sb.append("DATABASE_FLAG=0\n");
-        sb.append("COARSE_ERR_FLAG=0\n");
-        sb.append("ECMWF_TYPE=1\n");
-        sb.append("NUM_TRANS_ERR=+0000000000\n");
-        sb.append("NUM_FORMAT_ERR=+0000000000\n");
-        sb.append("TRANS_ERR_THRESH=+0.00000000e+00<%>\n");
-        sb.append("FORMAT_ERR_THRESH=+0.00000000e+00<%>\n");
-        sb.append("\n");
-        sb.append("NUM_BANDS=+015\n");
-        sb.append(
-                "BAND_WAVELEN=+0000412500+0000442500+0000490000+0000510000+0000560000+0000620000+0000665000+0000681250+0000705000+0000753750+0000760625+0000775000+0000865000+0000885000+0000900000<10-3nm>\n");
-        sb.append(
-                "BANDWIDTH=+10000+10000+10000+10000+10000+10000+10000+07500+10000+07500+03750+15000+20000+10000+10000<10-3nm>\n");
-        sb.append("INST_FOV=+0000019151<10-6deg>\n");
-        sb.append("PROC_MODE=0\n");
-        sb.append("OFFSET_COMP=1\n");
-        sb.append("LINE_TIME_INTERVAL=+0000044000<10-6s>\n");
-        sb.append("LINE_LENGTH=+02241<samples>\n");
-        sb.append("LINES_PER_TIE_PT=+064\n");
-        sb.append("SAMPLES_PER_TIE_PT=+064\n");
-        sb.append("COLUMN_SPACING=+2.60000000e+02<m>\n");
-        sb.append("\n");
+        String sb = "SPH_DESCRIPTOR=\"Level 2 Full Resolution     \"\n" +
+                "STRIPLINE_CONTINUITY_INDICATOR=+000\n" +
+                "SLICE_POSITION=+001\n" +
+                "NUM_SLICES=+001\n" +
+                "FIRST_LINE_TIME=\"20-JUN-2000 10:43:23.827346\"\n" +
+                "LAST_LINE_TIME=\"20-JUN-2000 10:45:02.387346\"\n" +
+                "FIRST_FIRST_LAT=+0048477538<10-6degN>\n" +
+                "FIRST_FIRST_LONG=-0000848029<10-6degE>\n" +
+                "FIRST_MID_LAT=+0049120852<10-6degN>\n" +
+                "FIRST_MID_LONG=-0004690841<10-6degE>\n" +
+                "FIRST_LAST_LAT=+0049633188<10-6degN>\n" +
+                "FIRST_LAST_LONG=-0008623846<10-6degE>\n" +
+                "LAST_FIRST_LAT=+0042727139<10-6degN>\n" +
+                "AST_FIRST_LONG=-0003066400<10-6degE>\n" +
+                "LAST_MID_LAT=+0043337479<10-6degN>\n" +
+                "LAST_MID_LONG=-0006541594<10-6degE>\n" +
+                "LAST_LAST_LAT=+0043840261<10-6degN>\n" +
+                "LAST_LAST_LONG=-0010080759<10-6degE>\n" +
+                "\n" +
+                "TRANS_ERR_FLAG=0\n" +
+                "FORMAT_ERR_FLAG=0\n" +
+                "DATABASE_FLAG=0\n" +
+                "COARSE_ERR_FLAG=0\n" +
+                "ECMWF_TYPE=1\n" +
+                "NUM_TRANS_ERR=+0000000000\n" +
+                "NUM_FORMAT_ERR=+0000000000\n" +
+                "TRANS_ERR_THRESH=+0.00000000e+00<%>\n" +
+                "FORMAT_ERR_THRESH=+0.00000000e+00<%>\n" +
+                "\n" +
+                "NUM_BANDS=+015\n" +
+                "BAND_WAVELEN=+0000412500+0000442500+0000490000+0000510000+0000560000+0000620000+0000665000+0000681250+0000705000+0000753750+0000760625+0000775000+0000865000+0000885000+0000900000<10-3nm>\n" +
+                "BANDWIDTH=+10000+10000+10000+10000+10000+10000+10000+07500+10000+07500+03750+15000+20000+10000+10000<10-3nm>\n" +
+                "INST_FOV=+0000019151<10-6deg>\n" +
+                "PROC_MODE=0\n" +
+                "OFFSET_COMP=1\n" +
+                "LINE_TIME_INTERVAL=+0000044000<10-6s>\n" +
+                "LINE_LENGTH=+02241<samples>\n" +
+                "LINES_PER_TIE_PT=+064\n" +
+                "SAMPLES_PER_TIE_PT=+064\n" +
+                "COLUMN_SPACING=+2.60000000e+02<m>\n" +
+                "\n";
 
-        HeaderParser.getInstance().parseHeader("SPH", sb.toString().getBytes());
+        HeaderParser.getInstance().parseHeader("SPH", sb.getBytes());
     }
 
+    @Test
     public void testARealLifeDSDExample() throws HeaderParseException {
-        StringBuffer sb = new StringBuffer();
-        sb.append("DS_NAME=\"Quality ADS                 \"\n");
-        sb.append("DS_TYPE=A\n");
-        sb.append("FILENAME=\"                                                              \"\n");
-        sb.append("DS_OFFSET=+00000000000000012869<bytes>\n");
-        sb.append("DS_SIZE=+00000000000000000160<bytes>\n");
-        sb.append("NUM_DSR=+0000000005\n");
-        sb.append("DSR_SIZE=+0000000032<bytes>\n");
-        sb.append("\n");
+        String sb = "DS_NAME=\"Quality ADS                 \"\n" +
+                "DS_TYPE=A\n" +
+                "FILENAME=\"                                                              \"\n" +
+                "DS_OFFSET=+00000000000000012869<bytes>\n" +
+                "DS_SIZE=+00000000000000000160<bytes>\n" +
+                "NUM_DSR=+0000000005\n" +
+                "DSR_SIZE=+0000000032<bytes>\n" +
+                "\n";
 
-        HeaderParser.getInstance().parseHeader("DSD(1)", sb.toString().getBytes());
+        HeaderParser.getInstance().parseHeader("DSD(1)", sb.getBytes());
     }
 
-
+    @Test
     public final void testGetAsDate() throws HeaderParseException,
-                                             HeaderEntryNotFoundException {
-        StringBuffer sb = new StringBuffer();
-        sb.append("SENSING_START=\"20-JAN-2000 10:43:23.851360\"\n");
-        Header header = HeaderParser.getInstance().parseHeader("MPH", sb.toString().getBytes());
+            HeaderEntryNotFoundException {
+        Header header = HeaderParser.getInstance().parseHeader("MPH", "SENSING_START=\"20-JAN-2000 10:43:23.851360\"\n".getBytes());
         final Date paramDate = header.getParamDate("SENSING_START");
         final long mjd2kOffset = 946684800000L;
         assertEquals(mjd2kOffset + ((((20 - 1) * 24 + 10) * 60 + 43) * 60 + 23) * 1000 + 851, paramDate.getTime());
     }
-
 }

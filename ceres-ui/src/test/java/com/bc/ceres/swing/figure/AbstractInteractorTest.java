@@ -19,19 +19,22 @@ package com.bc.ceres.swing.figure;
 import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
 import com.bc.ceres.swing.figure.support.DefaultFigureFactory;
 import com.bc.ceres.swing.figure.support.FigureEditorPanel;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JMenu;
+import javax.swing.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-public class AbstractInteractorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class AbstractInteractorTest {
+
+    @Test
     public void testListeners() {
         FigureEditorPanel figureEditorPanel = new FigureEditorPanel(null,
-                                                                    new DefaultFigureCollection(),
-                                                                    new DefaultFigureFactory());
+                new DefaultFigureCollection(),
+                new DefaultFigureFactory());
         AbstractInteractor interactor = new AbstractInteractor() {
         };
 
@@ -65,6 +68,7 @@ public class AbstractInteractorTest extends TestCase {
         assertEquals("a?;a;d;a?;a;c;s?;s;e;d;", listener.trace);
     }
 
+    @Test
     public void testEscKeyPressedInvokesCancel() {
         AbstractInteractor interaction = new AbstractInteractor() {
         };

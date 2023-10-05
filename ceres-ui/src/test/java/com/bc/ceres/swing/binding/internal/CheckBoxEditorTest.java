@@ -18,33 +18,34 @@ package com.bc.ceres.swing.binding.internal;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.BindingContext;
-import com.bc.ceres.swing.binding.internal.CheckBoxEditor;
+import org.junit.Test;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
+import javax.swing.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class CheckBoxEditorTest extends TestCase {
+public class CheckBoxEditorTest {
 
-    public void testIsApplicable() throws Exception {
+    @Test
+    public void testIsApplicable() {
         CheckBoxEditor checkBoxEditor = new CheckBoxEditor();
-        
+
         PropertyDescriptor booleanDescriptor = new PropertyDescriptor("test", Boolean.TYPE);
         assertTrue(checkBoxEditor.isValidFor(booleanDescriptor));
-        
+
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         assertFalse(checkBoxEditor.isValidFor(doubleDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         CheckBoxEditor checkBoxEditor = new CheckBoxEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("b");
         assertSame(Boolean.TYPE, propertyDescriptor.getType());
-        
+
         assertTrue(checkBoxEditor.isValidFor(propertyDescriptor));
         JComponent editorComponent = checkBoxEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
@@ -53,7 +54,7 @@ public class CheckBoxEditorTest extends TestCase {
         assertEquals(1, components.length);
         assertSame(JCheckBox.class, components[0].getClass());
     }
-    
+
     private static class V {
         boolean b;
     }

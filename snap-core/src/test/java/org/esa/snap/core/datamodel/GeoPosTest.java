@@ -16,28 +16,13 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class GeoPosTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public GeoPosTest(String testName) {
-        super(testName);
-    }
+public class GeoPosTest {
 
-    public static Test suite() {
-        return new TestSuite(GeoPosTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-    }
-
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void testConstructor() {
         GeoPos geoPos1 = new GeoPos();
         assertEquals(0.0F, geoPos1.lat, 1.e-10F);
@@ -54,6 +39,7 @@ public class GeoPosTest extends TestCase {
         assertEquals(geoPos3.lon, geoPos3.lon, 1.e-10F);
     }
 
+    @Test
     public void testIsInvalid() {
         assertTrue(new GeoPos(+90, +180).isValid());
         assertTrue(new GeoPos(+90, 0).isValid());
@@ -75,6 +61,7 @@ public class GeoPosTest extends TestCase {
         assertFalse(new GeoPos(0, Float.NaN).isValid());
     }
 
+    @Test
     public void testSetInvalid() {
         GeoPos geoPos = new GeoPos();
         assertTrue(geoPos.isValid());
@@ -84,6 +71,7 @@ public class GeoPosTest extends TestCase {
         assertEquals("Inv E (NaN)", geoPos.getLonString());
     }
 
+    @Test
     public void testStringConversion() {
         GeoPos geoPos;
 
@@ -124,7 +112,7 @@ public class GeoPosTest extends TestCase {
         assertEquals("21\260 E", geoPos.getLonString());
     }
 
-
+    @Test
     public void testNormalizeLon() {
         assertEquals(0, GeoPos.normalizeLon(0), 0);
         assertEquals(-180, GeoPos.normalizeLon(-180), 0);
@@ -179,7 +167,6 @@ public class GeoPosTest extends TestCase {
         assertEquals(-90, GeoPos.normalizeLon(-4 * 360 + 270), 0);
         assertEquals(-45, GeoPos.normalizeLon(-4 * 360 + 315), 0);
         assertEquals(0, GeoPos.normalizeLon(-4 * 360 + 360), 0);
-
     }
 }
 

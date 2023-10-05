@@ -16,49 +16,41 @@
 
 package org.esa.snap.core.util;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class ObjectUtilsTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public ObjectUtilsTest(String testName) {
-        super(testName);
-    }
+public class ObjectUtilsTest {
 
-    public static Test suite() {
-        return new TestSuite(ObjectUtilsTest.class);
-    }
-
+    @Test
     public void testEqualObjects() {
         Object a = "A";
         Object b = "A";
         Object c = "1";
         Object d = "AB";
         Object e = a;
-        assertEquals(true, ObjectUtils.equalObjects(a, b));
-        assertEquals(false, ObjectUtils.equalObjects(a, c));
-        assertEquals(false, ObjectUtils.equalObjects(a, d));
-        assertEquals(true, ObjectUtils.equalObjects(a, e));
-        assertEquals(true, ObjectUtils.equalObjects(null, null));
-        assertEquals(false, ObjectUtils.equalObjects(a, null));
-        assertEquals(false, ObjectUtils.equalObjects(null, a));
+        assertTrue(ObjectUtils.equalObjects(a, b));
+        assertFalse(ObjectUtils.equalObjects(a, c));
+        assertFalse(ObjectUtils.equalObjects(a, d));
+        assertTrue(ObjectUtils.equalObjects(a, e));
+        assertTrue(ObjectUtils.equalObjects(null, null));
+        assertFalse(ObjectUtils.equalObjects(a, null));
+        assertFalse(ObjectUtils.equalObjects(null, a));
 
         double[] ad1 = new double[]{1.3, 2.3, 4.5};
         double[] ad2 = new double[]{1.3, 2.3, 4.5};
         double[] ad3 = new double[]{1.3, -.3, 4.5};
-        assertEquals(true, ObjectUtils.equalObjects(ad1, ad1));
-        assertEquals(true, ObjectUtils.equalObjects(ad1, ad2));
-        assertEquals(false, ObjectUtils.equalObjects(ad1, ad3));
-        assertEquals(false, ObjectUtils.equalObjects(ad1, b));
+        assertTrue(ObjectUtils.equalObjects(ad1, ad1));
+        assertTrue(ObjectUtils.equalObjects(ad1, ad2));
+        assertFalse(ObjectUtils.equalObjects(ad1, ad3));
+        assertFalse(ObjectUtils.equalObjects(ad1, b));
 
         Object[] aad1 = new Object[]{new double[]{1.3, 2.3, 4.5}, new double[]{9.1, 4.3, 4.7}};
         Object[] aad2 = new Object[]{new double[]{1.3, 2.3, 4.5}, new double[]{9.1, 4.3, 4.7}};
         Object[] aad3 = new Object[]{new double[]{1.3, -.3, 4.5}, new double[]{9.1, 4.3, 4.7}};
-        assertEquals(true, ObjectUtils.equalObjects(aad1, aad1));
-        assertEquals(true, ObjectUtils.equalObjects(aad1, aad2));
-        assertEquals(false, ObjectUtils.equalObjects(aad1, aad3));
-        assertEquals(false, ObjectUtils.equalObjects(aad1, b));
+        assertTrue(ObjectUtils.equalObjects(aad1, aad1));
+        assertTrue(ObjectUtils.equalObjects(aad1, aad2));
+        assertFalse(ObjectUtils.equalObjects(aad1, aad3));
+        assertFalse(ObjectUtils.equalObjects(aad1, b));
     }
-
 }

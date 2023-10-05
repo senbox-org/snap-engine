@@ -24,15 +24,18 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class BandTest extends AbstractRasterDataNodeTest {
 
@@ -45,8 +48,8 @@ public class BandTest extends AbstractRasterDataNodeTest {
     private Band _rsBandZippFloat1005;
     private Band _rsBandBlepDouble100100;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _rsBand = new Band("band1", ProductData.TYPE_INT8, 20, 20);
         _rsBandBlaByte5050 = new Band("Bla", ProductData.TYPE_UINT8, 50, 50);
         _rsBandBlubbUShort1010 = new Band("Blubb", ProductData.TYPE_UINT16, 10, 10);
@@ -58,10 +61,6 @@ public class BandTest extends AbstractRasterDataNodeTest {
     }
 
     @Override
-    protected void tearDown() {
-    }
-
-    @Override
     protected RasterDataNode createRasterDataNode() {
         return new Band("Undef", ProductData.TYPE_INT8, 10, 10);
     }
@@ -69,6 +68,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * Tests the various expected constructor failures
      */
+    @Test
     public void testBandConstructor() {
         try {
             new Band("Undef", ProductData.TYPE_UNDEFINED, 24, 54);
@@ -102,6 +102,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * Tests the correct datatypes to be returned
      */
+    @Test
     public void testGetDataType() {
         assertEquals(ProductData.TYPE_UINT8, _rsBandBlaByte5050.getDataType());
         assertEquals(ProductData.TYPE_UINT16, _rsBandBlubbUShort1010.getDataType());
@@ -115,6 +116,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * GuiTest_DialogAndModalDialog correct functionality for getBandOutputRasterWidth()
      */
+    @Test
     public void testGetWidth() {
         assertEquals(50, _rsBandBlaByte5050.getRasterWidth());
         assertEquals(10, _rsBandBlubbUShort1010.getRasterWidth());
@@ -128,6 +130,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * Tests the functionality for getBandOutputRasterHeight()
      */
+    @Test
     public void testGetHeight() {
         assertEquals(50, _rsBandBlaByte5050.getRasterHeight());
         assertEquals(10, _rsBandBlubbUShort1010.getRasterHeight());
@@ -138,30 +141,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertEquals(100, _rsBandBlepDouble100100.getRasterHeight());
     }
 
-    /**
-     * Tests the getRaster functionality.
-     */
-    public void testGetRaster() {
-        // nothing to test here because either a raster or a null
-        // are valid returns
-    }
-
-    /**
-     * Tests the functionality for getWriteableRaster()
-     */
-    public void testGetWriteableRaster() {
-        // nothing to test here because either a raster or a null
-        // are valid returns
-    }
-
-    /**
-     * GuiTest_DialogAndModalDialog the functionality for createColorIndexedImage
-     */
-    public void testCreateBufferedImage() {
-        // nothing to test here because either a raster or a null
-        // are valid returns
-    }
-
+    @Test
     public void testAcceptVisitor() {
         LinkedListProductVisitor visitor = new LinkedListProductVisitor();
         List expectedList = new LinkedList();
@@ -182,6 +162,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * Tests base class functionality setDescription()
      */
+    @Test
     public void testSetDescription() {
         testSetDescription(_rsBandBlaByte5050);
         testSetDescription(_rsBandBlubbUShort1010);
@@ -194,6 +175,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
     /**
      * Tests base class functionality setUnit()
      */
+    @Test
     public void testSetUnit() {
         testSetUnit(_rsBandBlaByte5050);
         testSetUnit(_rsBandBlubbUShort1010);
@@ -203,6 +185,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         testSetUnit(_rsBandBlepDouble100100);
     }
 
+    @Test
     public void testDataFromLevelZeroImage() {
         int[] testData = new int[1024 * 1024];
         for (int i = 0; i < testData.length; i++) {
@@ -231,8 +214,8 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertEquals(1047550, dataL2.getSample(255, 255, 0));
     }
 
+    @Test
     public void testGetPixel() {
-
         final float feps = 1e-6F;
         final double deps = 1e-12;
 
@@ -251,7 +234,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
             int y = i / 10;
             assertEquals((int) testDataFloat[i], _rsBandZippFloat1005.getPixelInt(x, y));
             assertEquals(testDataFloat[i], _rsBandZippFloat1005.getPixelFloat(x, y), feps);
-            assertEquals((double) testDataFloat[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
+            assertEquals(testDataFloat[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
         }
 
         int[] testDataInt = new int[]{
@@ -267,35 +250,40 @@ public class BandTest extends AbstractRasterDataNodeTest {
             int y = i / 10;
             assertEquals(testDataInt[i], _rsBandZippFloat1005.getPixelInt(x, y));
             assertEquals((float) testDataInt[i], _rsBandZippFloat1005.getPixelFloat(x, y), feps);
-            assertEquals((double) testDataInt[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
+            assertEquals(testDataInt[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
         }
     }
 
+    @Test
     public void testSolarFlux() {
         assertEquals(0.0F, _rsBand.getSolarFlux(), 1e-6F);
         _rsBand.setSolarFlux(1.1F);
         assertEquals(1.1F, _rsBand.getSolarFlux(), 1e-6F);
     }
 
+    @Test
     public void testWaveLength() {
         assertEquals(0.0F, _rsBand.getSpectralWavelength(), 1e-6F);
         _rsBand.setSpectralWavelength(1.2F);
         assertEquals(1.2F, _rsBand.getSpectralWavelength(), 1e-6F);
     }
 
+    @Test
     public void testBandwidth() {
         assertEquals(0.0F, _rsBand.getSpectralBandwidth(), 1e-6F);
         _rsBand.setSpectralBandwidth(1.3F);
         assertEquals(1.3F, _rsBand.getSpectralBandwidth(), 1e-6F);
     }
 
+    @Test
     public void testScalingInitialValues() {
         Band bandFloat = new Band("radiance_13", ProductData.TYPE_FLOAT32, 10, 10);
         assertEquals(1.0f, bandFloat.getScalingFactor(), 1e-10f);
         assertEquals(0.0f, bandFloat.getScalingOffset(), 1e-10f);
-        assertEquals(false, bandFloat.isLog10Scaled());
+        assertFalse(bandFloat.isLog10Scaled());
     }
 
+    @Test
     public void testThatScalingFactorsApplyToPixelAccessors_Int16() {
         Band bandShort = new Band("radiance_13", ProductData.TYPE_INT16, 10, 10);
 
@@ -359,6 +347,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertEquals(1584.8932, bandShort.getPixelDouble(0, 0), 1e-5d);
     }
 
+    @Test
     public void testThatScalingFactorsApplyToPixelAccessors_Float32() {
         Band bandFloat = new Band("radiance_13", ProductData.TYPE_FLOAT32, 10, 10);
 
@@ -423,7 +412,8 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertEquals(79d, bandFloat.getPixelDouble(0, 0), 1e-5d);
     }
 
-    public void testSetAndGetPixels_UShort_Int() throws Exception {
+    @Test
+    public void testSetAndGetPixels_UShort_Int() {
         final Band band = new Band("radiance_4", ProductData.TYPE_UINT16, 3, 2);
         band.ensureRasterData();
         short[] testShortsRaw, trueShortsRaw;
@@ -434,11 +424,10 @@ public class BandTest extends AbstractRasterDataNodeTest {
         testInts = new int[]{1, 2, 3, 4, 5, 6};
         band.setPixels(0, 0, 3, 2, testInts);
         trueInts = band.getPixels(0, 0, 3, 2, (int[]) null, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testInts, trueInts));
+        assertArrayEquals(testInts, trueInts);
         testShortsRaw = new short[]{1, 2, 3, 4, 5, 6};
         trueShortsRaw = (short[]) data.getElems();
-        assertTrue(Arrays.equals(testShortsRaw, trueShortsRaw));
-
+        assertArrayEquals(testShortsRaw, trueShortsRaw);
 
         band.setScalingFactor(0.5);
         band.setScalingOffset(-13);
@@ -446,13 +435,14 @@ public class BandTest extends AbstractRasterDataNodeTest {
         testInts = new int[]{3, -5, 7, -9, 11, -13};
         band.setPixels(0, 0, 3, 2, testInts);
         trueInts = band.getPixels(0, 0, 3, 2, (int[]) null, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testInts, trueInts));
+        assertArrayEquals(testInts, trueInts);
         testShortsRaw = new short[]{32, 16, 40, 8, 48, 0};
         trueShortsRaw = (short[]) data.getElems();
-        assertTrue(Arrays.equals(testShortsRaw, trueShortsRaw));
+        assertArrayEquals(testShortsRaw, trueShortsRaw);
     }
 
-    public void testSetAndGetPixels_UShort_Float() throws Exception {
+    @Test
+    public void testSetAndGetPixels_UShort_Float() {
         final Band band = new Band("radiance_4", ProductData.TYPE_UINT16, 3, 2);
         band.ensureRasterData();
         short[] testShortsRaw, trueShortsRaw;
@@ -471,10 +461,11 @@ public class BandTest extends AbstractRasterDataNodeTest {
         }
         testShortsRaw = new short[]{1110, 780, 1330, 560, 1550, 340};
         trueShortsRaw = (short[]) data.getElems();
-        assertTrue(Arrays.equals(testShortsRaw, trueShortsRaw));
+        assertArrayEquals(testShortsRaw, trueShortsRaw);
     }
 
-    public void testSetAndGetPixels_UShort_Double() throws Exception {
+    @Test
+    public void testSetAndGetPixels_UShort_Double() {
         final Band band = new Band("radiance_4", ProductData.TYPE_UINT16, 3, 2);
         band.ensureRasterData();
         short[] testShortsRaw, trueShortsRaw;
@@ -493,9 +484,10 @@ public class BandTest extends AbstractRasterDataNodeTest {
         }
         testShortsRaw = new short[]{1110, 780, 1330, 560, 1550, 340};
         trueShortsRaw = (short[]) data.getElems();
-        assertTrue(Arrays.equals(testShortsRaw, trueShortsRaw));
+        assertArrayEquals(testShortsRaw, trueShortsRaw);
     }
 
+    @Test
     public final void testReadAndWritePixels() throws IOException {
         final int[] testInt8s = new int[]{3, -6, 9, -12, 15, -18};
         final int[] testInt16s = new int[]{11, -22, 33, -44, 55, -66};
@@ -560,10 +552,10 @@ public class BandTest extends AbstractRasterDataNodeTest {
         final File outputDirectory = GlobalTestConfig.getSnapTestDataOutputDirectory();
         final File file = new File(outputDirectory, name + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
         ProductIO.writeProduct(product,
-                               file,
-                               DimapProductConstants.DIMAP_FORMAT_NAME,
-                               false,
-                               ProgressMonitor.NULL);
+                file,
+                DimapProductConstants.DIMAP_FORMAT_NAME,
+                false,
+                ProgressMonitor.NULL);
 
         product = ProductIO.readProduct(file);
 
@@ -575,7 +567,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
 
         bandInt8 = product.getBand("bandInt8");
         bandInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testInt8s, trueInts));
+        assertArrayEquals(testInt8s, trueInts);
         bandInt8.setScalingFactor(0.1);
         bandInt8.setScalingOffset(1.25);
         testScaledFloats = new float[]{1.55f, 0.65f, 2.15f, 0.05f, 2.75f, -0.55f};
@@ -590,15 +582,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandInt8.setScalingFactor(1);
         bandInt8.setScalingOffset(0);
         bandInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertEquals(true, Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandInt8.setScalingFactor(2);
         bandInt8.setScalingOffset(2);
         bandInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandInt16 = product.getBand("bandInt16");
         bandInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertEquals(true, Arrays.equals(testInt16s, trueInts));
+        assertArrayEquals(testInt16s, trueInts);
         bandInt16.setScalingFactor(0.1);
         bandInt16.setScalingOffset(1.25);
         testScaledFloats = new float[]{2.35f, -0.95f, 4.55f, -3.15f, 6.75f, -5.35f};
@@ -613,15 +605,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandInt16.setScalingFactor(1);
         bandInt16.setScalingOffset(0);
         bandInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandInt16.setScalingFactor(2);
         bandInt16.setScalingOffset(2);
         bandInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandInt32 = product.getBand("bandInt32");
         bandInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testInt32s, trueInts));
+        assertArrayEquals(testInt32s, trueInts);
         bandInt32.setScalingFactor(0.1);
         bandInt32.setScalingOffset(1.25);
         testScaledFloats = new float[]{12.35f, -20.95f, 34.55f, -43.15f, 56.75f, -65.35f};
@@ -636,15 +628,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandInt32.setScalingFactor(1);
         bandInt32.setScalingOffset(0);
         bandInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandInt32.setScalingFactor(2);
         bandInt32.setScalingOffset(2);
         bandInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandUInt8 = product.getBand("bandUInt8");
         bandUInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testUInt8s, trueInts));
+        assertArrayEquals(testUInt8s, trueInts);
         bandUInt8.setScalingFactor(0.1);
         bandUInt8.setScalingOffset(1.25);
         testScaledFloats = new float[]{1.35f, 1.45f, 1.55f, 1.65f, 1.75f, 1.85f};
@@ -659,15 +651,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandUInt8.setScalingFactor(1);
         bandUInt8.setScalingOffset(0);
         bandUInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandUInt8.setScalingFactor(2);
         bandUInt8.setScalingOffset(2);
         bandUInt8.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandUInt16 = product.getBand("bandUInt16");
         bandUInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testUInt16s, trueInts));
+        assertArrayEquals(testUInt16s, trueInts);
         bandUInt16.setScalingFactor(0.1);
         bandUInt16.setScalingOffset(1.25);
         testScaledFloats = new float[]{101.35f, 201.45f, 301.55f, 401.65f, 501.75f, 601.85f};
@@ -682,15 +674,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandUInt16.setScalingFactor(1);
         bandUInt16.setScalingOffset(0);
         bandUInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandUInt16.setScalingFactor(2);
         bandUInt16.setScalingOffset(2);
         bandUInt16.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandUInt32 = product.getBand("bandUInt32");
         bandUInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testUInt32s, trueInts));
+        assertArrayEquals(testUInt32s, trueInts);
         bandUInt32.setScalingFactor(0.1);
         bandUInt32.setScalingOffset(1.25);
         testScaledFloats = new float[]{112.35f, 223.45f, 334.55f, 445.65f, 556.75f, 667.85f};
@@ -705,15 +697,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandUInt32.setScalingFactor(1);
         bandUInt32.setScalingOffset(0);
         bandUInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{4, 3, 3, 2, 2, 1}, trueInts));
+        assertArrayEquals(new int[]{4, 3, 3, 2, 2, 1}, trueInts);
         bandUInt32.setScalingFactor(2);
         bandUInt32.setScalingOffset(2);
         bandUInt32.readPixels(0, 0, 3, 2, trueInts, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new int[]{10, 8, 8, 6, 6, 4}, trueInts));
+        assertArrayEquals(new int[]{10, 8, 8, 6, 6, 4}, trueInts);
 
         bandFloat32 = product.getBand("bandFloat32");
         bandFloat32.readPixels(0, 0, 3, 2, trueFloats, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testFloat32s, trueFloats));
+        assertArrayEquals(testFloat32s, trueFloats, 0.0F);
         bandFloat32.setScalingFactor(0.1);
         bandFloat32.setScalingOffset(1.25);
         testScaledFloats = new float[]{1.3501f, 1.4502f, 1.5503f, 1.6504f, 1.7505f, 1.8506f};
@@ -729,15 +721,15 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandFloat32.setScalingFactor(1);
         bandFloat32.setScalingOffset(0);
         bandFloat32.readPixels(0, 0, 3, 2, trueFloats, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new float[]{2.5f, 7.5f, 12.5f, 17.5f, 22.5f, 27.5f}, trueFloats));
+        assertArrayEquals(new float[]{2.5f, 7.5f, 12.5f, 17.5f, 22.5f, 27.5f}, trueFloats, 0.0F);
         bandFloat32.setScalingFactor(0.2);
         bandFloat32.setScalingOffset(3);
         bandFloat32.readPixels(0, 0, 3, 2, trueFloats, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testFloats, trueFloats));
+        assertArrayEquals(testFloats, trueFloats, 0.0f);
 
         bandFloat64 = product.getBand("bandFloat64");
         bandFloat64.readPixels(0, 0, 3, 2, trueDoubles, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testFloat64s, trueDoubles));
+        assertArrayEquals(testFloat64s, trueDoubles, 0.0);
         bandFloat64.setScalingFactor(0.1);
         bandFloat64.setScalingOffset(1.25);
         testScaledDoubles = new double[]{-0.25d, 21.25d, -2998.75d, 445.25d, -553.75d, -59998.75d};
@@ -753,17 +745,18 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandFloat64.setScalingFactor(1);
         bandFloat64.setScalingOffset(0);
         bandFloat64.readPixels(0, 0, 3, 2, trueDoubles, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(new double[]{2.5, 7.5, 12.5, 17.5, 22.5, 27.5}, trueDoubles));
+        assertArrayEquals(new double[]{2.5, 7.5, 12.5, 17.5, 22.5, 27.5}, trueDoubles, 0.0);
         bandFloat64.setScalingFactor(0.2);
         bandFloat64.setScalingOffset(3);
         bandFloat64.readPixels(0, 0, 3, 2, trueDoubles, ProgressMonitor.NULL);
-        assertTrue(Arrays.equals(testDoubles, trueDoubles));
+        assertArrayEquals(testDoubles, trueDoubles, 0.0);
 
         product.closeProductReader();
         product.dispose();
         GlobalTestTools.deleteTestDataInputDirectory();
     }
 
+    @Test
     public final void testThatSetPixelsMethodsThrowISE() {
         Product product = new Product("X", "NO_TYPE", 3, 2);
         Band band = new Band("band", ProductData.TYPE_INT8, 3, 2);
@@ -806,6 +799,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testThatNullSourceImageCanBeSet() {
         Product p = new Product("p", "pt", 10, 10);
 
@@ -829,7 +823,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertNotNull(b.getSourceImage());// Don't wonder at that, the image created uses the (pretended) product reader
     }
 
-
+    @Test
     public void testBandImageChangeNotifications() {
         PNL pnl = new PNL();
         Product p = new Product("p", "pt", 10, 10);

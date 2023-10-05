@@ -15,7 +15,7 @@
  */
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,8 +33,42 @@ import static org.junit.Assert.*;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class VectorLookupTableTest extends TestCase {
+public class VectorLookupTableTest {
 
+    // method taken from https://github.com/junit-team/junit4/wiki/Multithreaded-code-and-concurrency
+    private static void assertConcurrent(final String message, final List<? extends Runnable> runnables, final int maxTimeoutSeconds) throws InterruptedException {
+        final int numThreads = runnables.size();
+        final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+        final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
+        try {
+            final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
+            final CountDownLatch afterInitBlocker = new CountDownLatch(1);
+            final CountDownLatch allDone = new CountDownLatch(numThreads);
+            for (final Runnable submittedTestRunnable : runnables) {
+                threadPool.submit(() -> {
+                    allExecutorThreadsReady.countDown();
+                    try {
+                        afterInitBlocker.await();
+                        submittedTestRunnable.run();
+                    } catch (final Throwable e) {
+                        exceptions.add(e);
+                    } finally {
+                        allDone.countDown();
+                    }
+                });
+            }
+            // wait until all threads are ready
+            assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent", allExecutorThreadsReady.await(runnables.size() * 10L, TimeUnit.MILLISECONDS));
+            // start all test runners
+            afterInitBlocker.countDown();
+            assertTrue(message + " timeout! More than" + maxTimeoutSeconds + "seconds", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
+        } finally {
+            threadPool.shutdownNow();
+        }
+        assertTrue(message + "failed with exception(s)" + exceptions, exceptions.isEmpty());
+    }
+
+    @Test
     public void testArrayInterpolation1D() {
         final double[] dimension = new double[]{0, 1};
         final double[] values = new double[]{0, 2, 1, 3};
@@ -50,6 +84,7 @@ public class VectorLookupTableTest extends TestCase {
         assertArrayEquals(new double[]{0.5, 2.5}, lut.getValues(0.5), 1.0e-6);
     }
 
+    @Test
     public void testArrayInterpolation2D() {
         final double[][] dimensions = new double[][]{{0, 1}, {0, 1}};
         final double[] values = new double[]{0, 4, 1, 5, 2, 6, 3, 7};
@@ -72,6 +107,7 @@ public class VectorLookupTableTest extends TestCase {
         assertArrayEquals(new double[]{2.5, 6.5}, lut.getValues(1.0, 0.5), 1.0e-6);
     }
 
+    @Test
     public void testArrayInterpolationWithFloatValues() {
         final float[][] dimensions = new float[][]{{0, 1}, {0, 1}};
         final float[] values = new float[]{0, 4, 1, 5, 2, 6, 3, 7};
@@ -87,6 +123,7 @@ public class VectorLookupTableTest extends TestCase {
         assertArrayEquals(new double[]{2.5, 6.5}, lut.getValues(1.0, 0.5), 1.0e-6);
     }
 
+    @Test
     public void testThreadSafety() throws InterruptedException {
         final float[][] dimensions = new float[][]{{0, 1}, {0, 1}};
         final float[] values = new float[]{0, 4, 1, 5, 2, 6, 3, 7};
@@ -98,39 +135,6 @@ public class VectorLookupTableTest extends TestCase {
         }
 
         assertConcurrent("VectorLookupTableTest", runnables, 3);
-    }
-
-    // method taken from https://github.com/junit-team/junit4/wiki/Multithreaded-code-and-concurrency
-    private static void assertConcurrent(final String message, final List<? extends Runnable> runnables, final int maxTimeoutSeconds) throws InterruptedException {
-        final int numThreads = runnables.size();
-        final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
-        final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
-        try {
-            final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
-            final CountDownLatch afterInitBlocker = new CountDownLatch(1);
-            final CountDownLatch allDone = new CountDownLatch(numThreads);
-            for (final Runnable submittedTestRunnable : runnables) {
-                threadPool.submit(() -> {
-                    allExecutorThreadsReady.countDown();
-                    try {
-                        afterInitBlocker.await();
-                        submittedTestRunnable.run();
-                    } catch (final Throwable e) {
-                        exceptions.add(e);
-                    } finally {
-                        allDone.countDown();
-                    }
-                });
-            }
-            // wait until all threads are ready
-            assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent", allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS));
-            // start all test runners
-            afterInitBlocker.countDown();
-            assertTrue(message + " timeout! More than" + maxTimeoutSeconds + "seconds", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
-        } finally {
-            threadPool.shutdownNow();
-        }
-        assertTrue(message + "failed with exception(s)" + exceptions, exceptions.isEmpty());
     }
 
     private static class TestTask implements Runnable {
@@ -153,5 +157,4 @@ public class VectorLookupTableTest extends TestCase {
             assertArrayEquals(new double[]{2.5, 6.5}, lut.getValues(1.0, 0.5), 1.0e-6);
         }
     }
-
 }

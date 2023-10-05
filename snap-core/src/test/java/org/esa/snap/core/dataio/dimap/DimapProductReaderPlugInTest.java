@@ -15,44 +15,38 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class DimapProductReaderPlugInTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DimapProductReaderPlugInTest {
 
     private final static DimapProductReaderPlugIn _plugIn = new DimapProductReaderPlugIn();
     private ProductReader _productReader;
 
-    public DimapProductReaderPlugInTest(String s) {
-        super(s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(DimapProductReaderPlugInTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _productReader = _plugIn.createReaderInstance();
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         _productReader = null;
     }
 
+    @Test
     public void testPlugInInfoQuery() {
-
         assertNotNull(_plugIn.getFormatNames());
         assertEquals(1, _plugIn.getFormatNames().length);
         assertEquals(DimapProductConstants.DIMAP_FORMAT_NAME, _plugIn.getFormatNames()[0]);
@@ -63,6 +57,7 @@ public class DimapProductReaderPlugInTest extends TestCase {
         assertNotNull(_plugIn.getDescription(null));
     }
 
+    @Test
     public void testCanDecodeInput() {
         File file = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
         try {
@@ -80,17 +75,18 @@ public class DimapProductReaderPlugInTest extends TestCase {
                 file.getParentFile().deleteOnExit();
             }
         } catch (IOException e) {
-            System.out.println("DimapProductReaderPlugInTest: failed to create test file " + file.getPath());
+            fail("DimapProductReaderPlugInTest: failed to create test file " + file.getPath());
         }
     }
 
+    @Test
     public void testCreatedProductReaderInstance() {
         assertNotNull(_productReader);
-        assertEquals(true, _productReader instanceof DimapProductReader);
+        assertTrue(_productReader instanceof DimapProductReader);
     }
 
+    @Test
     public void testReadProductNodes() {
-
         File inputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
         Product product = null;
         try {

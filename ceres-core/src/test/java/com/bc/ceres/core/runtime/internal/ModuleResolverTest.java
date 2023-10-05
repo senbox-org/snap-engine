@@ -17,24 +17,56 @@
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.CoreException;
-import com.bc.ceres.core.runtime.Extension;
-import com.bc.ceres.core.runtime.ExtensionPoint;
 import com.bc.ceres.core.runtime.Module;
-import com.bc.ceres.core.runtime.ModuleState;
-import com.bc.ceres.core.runtime.Version;
-import junit.framework.TestCase;
+import com.bc.ceres.core.runtime.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class ModuleResolverTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ModuleResolverTest {
 
     private ModuleRegistry moduleRegistry;
 
-    @Override
-    protected void setUp() throws Exception {
+    private static File getCanonicalFile(URL url) throws IOException, URISyntaxException {
+        return new File(url.toURI()).getCanonicalFile();
+    }
+
+    private static void testSingleModuleDependency(ModuleRegistry moduleRegistry, String declaringModuleName,
+                                                   String declaredModuleName, String declaredVersion,
+                                                   String actualVersion, int moduleDependyCount) throws
+            CoreException {
+        ModuleImpl moduleA = moduleRegistry.getModules(declaringModuleName)[0];
+        final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(), false);
+        moduleResolver.resolve(moduleA);
+        assertEquals(declaredModuleName, moduleA.getDeclaredDependencies()[0].getModuleSymbolicName());
+        assertEquals(declaredVersion, moduleA.getDeclaredDependencies()[0].getVersion());
+        ModuleImpl[] dependencies = moduleA.getModuleDependencies();
+        assertEquals(moduleDependyCount, dependencies.length);
+        if (moduleDependyCount == 1) {
+            assertEquals(declaredModuleName, dependencies[0].getSymbolicName());
+            assertEquals(Version.parseVersion(actualVersion), dependencies[0].getVersion());
+        }
+    }
+
+    private static void testForExpectedCyclicDependencies(ModuleImpl module) {
+        try {
+            final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
+                    false);
+            moduleResolver.resolve(module);
+            fail("ResolveException expected because of cyclic dependencies");
+        } catch (ResolveException e) {
+        }
+    }
+
+    @Before
+    public void setUp() throws Exception {
         moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/module-a.xml",
                 "xml/module-b.xml",
@@ -44,12 +76,13 @@ public class ModuleResolverTest extends TestCase {
         });
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         moduleRegistry = null;
     }
 
-    public void testNullArgConvention() throws IOException, CoreException {
+    @Test
+    public void testNullArgConvention() throws CoreException {
         try {
             final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(), false);
             moduleResolver.resolve(null);
@@ -73,15 +106,15 @@ public class ModuleResolverTest extends TestCase {
         } catch (NullPointerException e) {
             fail();
         }
-
     }
 
+    @Test
     public void testResolvingAResolvesOnlyA() throws CoreException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-a"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, ModuleImpl.EMPTY_ARRAY);
 
         TestHelpers.assertModuleIsInstalled(getModule("module-b"));
         TestHelpers.assertModuleIsInstalled(getModule("module-c"));
@@ -91,12 +124,13 @@ public class ModuleResolverTest extends TestCase {
         assertTrue(getModule("module-a").getClassLoader() instanceof ModuleClassLoader);
     }
 
+    @Test
     public void testResolvingBResolvesBAndA() throws CoreException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-b"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, ModuleImpl.EMPTY_ARRAY);
         TestHelpers.assertModuleIsResolved(getModule("module-b"), 1, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsInstalled(getModule("module-c"));
         TestHelpers.assertModuleIsInstalled(getModule("module-d"));
@@ -106,12 +140,13 @@ public class ModuleResolverTest extends TestCase {
         assertTrue(getModule("module-b").getClassLoader() instanceof ModuleClassLoader);
     }
 
+    @Test
     public void testResolvingCResolvesCAndBAndA() throws CoreException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-c"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, ModuleImpl.EMPTY_ARRAY);
         TestHelpers.assertModuleIsResolved(getModule("module-b"), 1, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[]{getModule("module-b")});
         TestHelpers.assertModuleIsInstalled(getModule("module-d"));
@@ -122,12 +157,13 @@ public class ModuleResolverTest extends TestCase {
         assertTrue(getModule("module-c").getClassLoader() instanceof ModuleClassLoader);
     }
 
+    @Test
     public void testResolvingDResolvesDAndA() throws CoreException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-d"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 1, ModuleImpl.EMPTY_ARRAY);
         TestHelpers.assertModuleIsInstalled(getModule("module-b"));
         TestHelpers.assertModuleIsInstalled(getModule("module-c"));
         TestHelpers.assertModuleIsResolved(getModule("module-d"), 1, new ModuleImpl[]{getModule("module-a")});
@@ -135,20 +171,20 @@ public class ModuleResolverTest extends TestCase {
 
         assertTrue(getModule("module-a").getClassLoader() instanceof ModuleClassLoader);
         assertTrue(getModule("module-d").getClassLoader() instanceof ModuleClassLoader);
-
     }
 
+    @Test
     public void testResolvingEResolvesAllExceptC() throws CoreException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-e"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 2, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 2, ModuleImpl.EMPTY_ARRAY);
         TestHelpers.assertModuleIsResolved(getModule("module-b"), 1, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsInstalled(getModule("module-c"));
         TestHelpers.assertModuleIsResolved(getModule("module-d"), 1, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsResolved(getModule("module-e"), 1,
-                                           new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
+                new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
 
         assertTrue(getModule("module-a").getClassLoader() instanceof ModuleClassLoader);
         assertTrue(getModule("module-b").getClassLoader() instanceof ModuleClassLoader);
@@ -156,20 +192,21 @@ public class ModuleResolverTest extends TestCase {
         assertTrue(getModule("module-e").getClassLoader() instanceof ModuleClassLoader);
     }
 
+    @Test
     public void testResolvingCAndEResolvesAll() throws CoreException {
         final ModuleResolver moduleResolver1 = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                  false);
+                false);
         moduleResolver1.resolve(getModule("module-c"));
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-e"));
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 3, new ModuleImpl[]{});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 3, ModuleImpl.EMPTY_ARRAY);
         TestHelpers.assertModuleIsResolved(getModule("module-b"), 2, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[]{getModule("module-b")});
         TestHelpers.assertModuleIsResolved(getModule("module-d"), 1, new ModuleImpl[]{getModule("module-a")});
         TestHelpers.assertModuleIsResolved(getModule("module-e"), 1,
-                                           new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
+                new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
 
         assertTrue(getModule("module-a").getClassLoader() instanceof ModuleClassLoader);
         assertTrue(getModule("module-b").getClassLoader() instanceof ModuleClassLoader);
@@ -178,9 +215,10 @@ public class ModuleResolverTest extends TestCase {
         assertTrue(getModule("module-e").getClassLoader() instanceof ModuleClassLoader);
     }
 
+    @Test
     public void testModuleClassLoaderE() throws CoreException, URISyntaxException, IOException {
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve(getModule("module-e"));
 
         ClassLoader clE = getModule("module-e").getClassLoader();
@@ -217,12 +255,8 @@ public class ModuleResolverTest extends TestCase {
         assertEquals(expectedFile, actualFile);
     }
 
-    private static File getCanonicalFile(URL url) throws IOException, URISyntaxException {
-        return new File(url.toURI()).getCanonicalFile();
-    }
-
-    public void testExtensionsAndExtensionPoints() throws CoreException, IOException {
-
+    @Test
+    public void testExtensionsAndExtensionPoints() throws CoreException {
         Module module_a = moduleRegistry.getModule(1);
         Module module_b = moduleRegistry.getModule(2);
         Module module_c = moduleRegistry.getModule(3);
@@ -230,13 +264,12 @@ public class ModuleResolverTest extends TestCase {
         Module module_e = moduleRegistry.getModule(5);
 
         final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                 false);
+                false);
         moduleResolver.resolve((ModuleImpl) module_a);
         moduleResolver.resolve((ModuleImpl) module_b);
         moduleResolver.resolve((ModuleImpl) module_c);
         moduleResolver.resolve((ModuleImpl) module_d);
         moduleResolver.resolve((ModuleImpl) module_e);
-
 
         assertNotNull(module_a);
         assertNotNull(module_b);
@@ -322,8 +355,7 @@ public class ModuleResolverTest extends TestCase {
         assertSame(module_e.getExtension("e-ed33"), module_2_extensions[5]);
     }
 
-
-
+    @Test
     public void testCyclicModuleDependencies() throws CoreException, IOException {
         ModuleRegistry cyclicModuleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/cyclic/module-a.xml",
@@ -335,9 +367,9 @@ public class ModuleResolverTest extends TestCase {
 
         testForExpectedCyclicDependencies(cyclicModuleRegistry.getModules("module-a")[0]);
         testForExpectedCyclicDependencies(cyclicModuleRegistry.getModules("module-e")[0]);
-
     }
 
+    @Test
     public void testResolverIgnoresErrorInOptionalDependency() throws IOException, CoreException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/dependencies/module-i-optionally-wants-f.xml",
@@ -359,6 +391,7 @@ public class ModuleResolverTest extends TestCase {
         assertEquals(ModuleState.INSTALLED, moduleF.getState());
     }
 
+    @Test
     public void testResolverFindsBestMatchingDependencyVersion() throws IOException, CoreException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/dependencies/module-a-wants-b-ge-1.0.0.xml",
@@ -381,36 +414,7 @@ public class ModuleResolverTest extends TestCase {
         testSingleModuleDependency(moduleRegistry, "module-h", "module-b", "1.0.2", "1.0.2", 1);
     }
 
-    private static void testSingleModuleDependency(ModuleRegistry moduleRegistry, String declaringModuleName,
-                                                   String declaredModuleName, String declaredVersion,
-                                                   String actualVersion, int moduleDependyCount) throws
-                                                                                                 CoreException {
-        ModuleImpl moduleA = moduleRegistry.getModules(declaringModuleName)[0];
-        final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(), false);
-        moduleResolver.resolve(moduleA);
-        assertEquals(declaredModuleName, moduleA.getDeclaredDependencies()[0].getModuleSymbolicName());
-        assertEquals(declaredVersion, moduleA.getDeclaredDependencies()[0].getVersion());
-        ModuleImpl[] dependencies = moduleA.getModuleDependencies();
-        assertEquals(moduleDependyCount, dependencies.length);
-        if (moduleDependyCount == 1) {
-            assertEquals(declaredModuleName, dependencies[0].getSymbolicName());
-            assertEquals(Version.parseVersion(actualVersion), dependencies[0].getVersion());
-        }
-    }
-
-    private static void testForExpectedCyclicDependencies(ModuleImpl module) {
-        try {
-            final ModuleResolver moduleResolver = new ModuleResolver(ModuleResolver.class.getClassLoader(),
-                                                                     false);
-            moduleResolver.resolve(module);
-            fail("ResolveException expected because of cyclic dependencies");
-        } catch (ResolveException e) {
-        }
-    }
-
-
     private ModuleImpl getModule(String symbolicName) {
         return moduleRegistry.getModules(symbolicName)[0];
     }
-
 }

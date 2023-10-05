@@ -16,6 +16,10 @@
 
 package com.bc.ceres.binding.dom;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 public class DefaultDomElementTest extends AbstractDomElementTest {
 
     @Override
@@ -49,6 +53,7 @@ public class DefaultDomElementTest extends AbstractDomElementTest {
         }
     }
 
+    @Test
     public void testMixChildren() {
         testMixChildren(new DefaultDomElement("a"), new DefaultDomElement("b"), new DefaultDomElement("c"));
         testMixChildren(new DefaultDomElement("a"), new DefaultDomElement("b"), new XppDomElement("c"));

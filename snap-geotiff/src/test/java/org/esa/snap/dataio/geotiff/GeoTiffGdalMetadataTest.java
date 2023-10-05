@@ -16,11 +16,14 @@
 
 package org.esa.snap.dataio.geotiff;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
+import org.junit.Test;
 
-public class GeoTiffGdalMetadataTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class GeoTiffGdalMetadataTest {
+
+    @Test
     public void testGetBandsFromGdalMetadata_probav_toa() throws Exception {
         // TOA product
         // e.g. PROBAV_S1_TOA_X20Y10_20180308_333M_V101_RADIOMETRY.tif
@@ -44,7 +47,7 @@ public class GeoTiffGdalMetadataTest extends TestCase {
                         "<Item name=\"DESCRIPTION\" sample=\"3\">Top Of Atmosphere Reflectance SWIR - channel</Item>\n" +
                         "<Item name=\"UNITS\" sample=\"3\">-</Item>\n" +
                         "<Item name=\"NODATA\" sample=\"3\">-1.00000</Item>\n" +
-                "</GDALMetadata>";
+                        "</GDALMetadata>";
 
         Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
@@ -53,24 +56,25 @@ public class GeoTiffGdalMetadataTest extends TestCase {
         assertEquals("RED", bands[0].getName());
         assertEquals("Top Of Atmosphere Reflectance RED - channel", bands[0].getDescription());
         assertEquals("-", bands[0].getUnit());
-        assertEquals(-1.0, bands[0].getNoDataValue());
+        assertEquals(-1.0, bands[0].getNoDataValue(), 1e-8);
 
         assertEquals("NIR", bands[1].getName());
         assertEquals("Top Of Atmosphere Reflectance NIR - channel", bands[1].getDescription());
         assertEquals("-", bands[1].getUnit());
-        assertEquals(-1.0, bands[1].getNoDataValue());
+        assertEquals(-1.0, bands[1].getNoDataValue(), 1e-8);
 
         assertEquals("BLUE", bands[2].getName());
         assertEquals("Top Of Atmosphere Reflectance BLUE - channel", bands[2].getDescription());
         assertEquals("-", bands[2].getUnit());
-        assertEquals(-1.0, bands[2].getNoDataValue());
+        assertEquals(-1.0, bands[2].getNoDataValue(), 1e-8);
 
         assertEquals("SWIR", bands[3].getName());
         assertEquals("Top Of Atmosphere Reflectance SWIR - channel", bands[3].getDescription());
         assertEquals("-", bands[3].getUnit());
-        assertEquals(-1.0, bands[3].getNoDataValue());
+        assertEquals(-1.0, bands[3].getNoDataValue(), 1e-8);
     }
 
+    @Test
     public void testGetBandsFromGdalMetadata_probav_toc() throws Exception {
         // TOC product
         // e.g. PROBAV_S1_TOC_X20Y10_20180308_333M_V101_RADIOMETRY.tif
@@ -94,7 +98,7 @@ public class GeoTiffGdalMetadataTest extends TestCase {
                         "<Item name=\"DESCRIPTION\" sample=\"3\">Top Of Canopy Reflectance SWIR - channel</Item>\n" +
                         "<Item name=\"UNITS\" sample=\"3\">-</Item>\n" +
                         "<Item name=\"NODATA\" sample=\"3\">-1.00000</Item>\n" +
-                "</GDALMetadata>";
+                        "</GDALMetadata>";
 
         Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
@@ -103,24 +107,25 @@ public class GeoTiffGdalMetadataTest extends TestCase {
         assertEquals("RED", bands[0].getName());
         assertEquals("Top Of Canopy Reflectance RED - channel", bands[0].getDescription());
         assertEquals("-", bands[0].getUnit());
-        assertEquals(-1.0, bands[0].getNoDataValue());
+        assertEquals(-1.0, bands[0].getNoDataValue(), 1e-8);
 
         assertEquals("NIR", bands[1].getName());
         assertEquals("Top Of Canopy Reflectance NIR - channel", bands[1].getDescription());
         assertEquals("-", bands[1].getUnit());
-        assertEquals(-1.0, bands[1].getNoDataValue());
+        assertEquals(-1.0, bands[1].getNoDataValue(), 1e-8);
 
         assertEquals("BLUE", bands[2].getName());
         assertEquals("Top Of Canopy Reflectance BLUE - channel", bands[2].getDescription());
         assertEquals("-", bands[2].getUnit());
-        assertEquals(-1.0, bands[2].getNoDataValue());
+        assertEquals(-1.0, bands[2].getNoDataValue(), 1e-8);
 
         assertEquals("SWIR", bands[3].getName());
         assertEquals("Top Of Canopy Reflectance SWIR - channel", bands[3].getDescription());
         assertEquals("-", bands[3].getUnit());
-        assertEquals(-1.0, bands[3].getNoDataValue());
+        assertEquals(-1.0, bands[3].getNoDataValue(), 1e-8);
     }
 
+    @Test
     public void testGetBandsFromGdalMetadata_probav_ndvi() throws Exception {
         // NDVI product
         // e.g. PROBAV_S10_TOC_X20Y10_20180311_333M_NDVI_V101_NDVI.tif
@@ -134,7 +139,7 @@ public class GeoTiffGdalMetadataTest extends TestCase {
                         "<Item name=\"OFFSET\" sample=\"0\" role=\"offset\">-0.0800000000000000017</Item>\n" +
                         "<Item name=\"SCALE\" sample=\"0\" role=\"scale\">0.00400000000000000008</Item>\n" +
                         "<Item name=\"UNITTYPE\" sample=\"0\">255.00000</Item>\n" +
-                "</GDALMetadata>";
+                        "</GDALMetadata>";
 
         Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
@@ -143,11 +148,12 @@ public class GeoTiffGdalMetadataTest extends TestCase {
         assertEquals("NDVI", bands[0].getName());
         assertEquals("Normalized Difference Vegetation Index", bands[0].getDescription());
         assertEquals("-", bands[0].getUnit());
-        assertEquals(255.0, bands[0].getNoDataValue());
-        assertEquals(0.00400000000000000008, bands[0].getScalingFactor());
-        assertEquals(-0.0800000000000000017, bands[0].getScalingOffset());
+        assertEquals(255.0, bands[0].getNoDataValue(), 1e-8);
+        assertEquals(0.00400000000000000008, bands[0].getScalingFactor(), 1e-8);
+        assertEquals(-0.0800000000000000017, bands[0].getScalingOffset(), 1e-8);
     }
 
+    @Test
     public void testGetBandsFromGdalMetadata_bandname_only() throws Exception {
         // we have a band name in metadata, but no other attributes like description, unit,...
         // e.g. CCI-LC-MERIS-SR-L3-300m-v4.0--FR-2009-01-01-364d.STATUS.tif
@@ -158,7 +164,7 @@ public class GeoTiffGdalMetadataTest extends TestCase {
                         "<Item name=\"Copyright\">UCL Geomatics, BELGIUM 1999-2012</Item>\n" +
                         "<Item name=\"Authors\">Pierre Defourny et al.</Item>\n" +
                         "<Item name=\"BAND\" sample=\"0\">STATUS</Item>\n" +
-                "</GDALMetadata>";
+                        "</GDALMetadata>";
 
         Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
@@ -169,5 +175,4 @@ public class GeoTiffGdalMetadataTest extends TestCase {
         assertNull(bands[0].getUnit());
         assertFalse(bands[0].isNoDataValueUsed());
     }
-
 }

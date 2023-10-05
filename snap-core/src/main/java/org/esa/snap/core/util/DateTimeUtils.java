@@ -165,7 +165,7 @@ public class DateTimeUtils {
      * @param utc the UTC date/time calendar
      */
     public static LocalDateTime calendarToLocalDateTime(Calendar utc) {
-        return LocalDateTime.from(utc.toInstant());
+        return LocalDateTime.ofInstant(utc.toInstant(), utc.getTimeZone().toZoneId());
     }
 
     /**

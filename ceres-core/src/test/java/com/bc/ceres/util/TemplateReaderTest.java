@@ -16,15 +16,26 @@
 
 package com.bc.ceres.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.Properties;
 
-public class TemplateReaderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+public class TemplateReaderTest {
+
+    private static void test(Properties properties, String input, String expectedOutput) throws IOException {
+        StringReader stringReader = new StringReader(input);
+        TemplateReader templateReader = new TemplateReader(stringReader, properties);
+        String actualOutput = templateReader.readAll();
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    @Test
     public void testNullArgConvention() {
         try {
             new TemplateReader(null, new Properties());
@@ -48,110 +59,112 @@ public class TemplateReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testWithoutProperties() throws IOException {
         Properties properties = new Properties();
 
         test(properties,
-             "<module><symbolicName>my-module</symbolicName></module>",
-             "<module><symbolicName>my-module</symbolicName></module>");
+                "<module><symbolicName>my-module</symbolicName></module>",
+                "<module><symbolicName>my-module</symbolicName></module>");
 
         test(properties,
-             "<module><symbolicName>${id}</symbolicName></module>",
-             "<module><symbolicName>${id}</symbolicName></module>");
+                "<module><symbolicName>${id}</symbolicName></module>",
+                "<module><symbolicName>${id}</symbolicName></module>");
     }
 
+    @Test
     public void testWithProperties() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("id", "com.bc.x");
 
         test(properties,
-             "<module><symbolicName>my-module</symbolicName></module>",
-             "<module><symbolicName>my-module</symbolicName></module>");
+                "<module><symbolicName>my-module</symbolicName></module>",
+                "<module><symbolicName>my-module</symbolicName></module>");
 
         test(properties,
-             "<module><symbolicName>$id</symbolicName></module>",
-             "<module><symbolicName>com.bc.x</symbolicName></module>");
+                "<module><symbolicName>$id</symbolicName></module>",
+                "<module><symbolicName>com.bc.x</symbolicName></module>");
 
         test(properties,
-             "<module><symbolicName>${id}</symbolicName></module>",
-             "<module><symbolicName>com.bc.x</symbolicName></module>");
+                "<module><symbolicName>${id}</symbolicName></module>",
+                "<module><symbolicName>com.bc.x</symbolicName></module>");
 
         test(properties,
-             "<module><symbolicName>${id}</symbolicName><version>${version}</version></module>",
-             "<module><symbolicName>com.bc.x</symbolicName><version>${version}</version></module>");
+                "<module><symbolicName>${id}</symbolicName><version>${version}</version></module>",
+                "<module><symbolicName>com.bc.x</symbolicName><version>${version}</version></module>");
 
         properties.setProperty("version", "1.0");
 
         test(properties,
-             "<module><symbolicName>${id}</symbolicName><version>${version}</version></module>",
-             "<module><symbolicName>com.bc.x</symbolicName><version>1.0</version></module>");
+                "<module><symbolicName>${id}</symbolicName><version>${version}</version></module>",
+                "<module><symbolicName>com.bc.x</symbolicName><version>1.0</version></module>");
     }
 
+    @Test
     public void testReplacementAtEOF() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("bar", "foo");
 
         test(properties,
-             "blah, blah, $bar",
-             "blah, blah, foo");
+                "blah, blah, $bar",
+                "blah, blah, foo");
 
         test(properties,
-             "blah, blah, ${bar}",
-             "blah, blah, foo");
+                "blah, blah, ${bar}",
+                "blah, blah, foo");
     }
 
+    @Test
     public void testReplacementAtBOF() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("bar", "foo");
 
         test(properties,
-             "$bar, blah, blah",
-             "foo, blah, blah");
+                "$bar, blah, blah",
+                "foo, blah, blah");
 
         test(properties,
-             "${bar}, blah, blah",
-             "foo, blah, blah");
+                "${bar}, blah, blah",
+                "foo, blah, blah");
     }
 
+    @Test
     public void testSubsequentReplacements() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("bar", "foo");
 
         test(properties,
-             "$bar$bar, blah, blah",
-             "$bar$bar, blah, blah");
+                "$bar$bar, blah, blah",
+                "$bar$bar, blah, blah");
 
         test(properties,
-             "${bar} ${bar}, blah, blah",
-             "foo foo, blah, blah");
+                "${bar} ${bar}, blah, blah",
+                "foo foo, blah, blah");
 
         test(properties,
-             "${bar}-${bar}, blah, blah",
-             "foo-foo, blah, blah");
-
-        // todo - this test fails (rq - 02.11.2007)
-//        test(properties,
-//             "${bar}${bar}, blah, blah",
-//             "foofoo, blah, blah");
+                "${bar}-${bar}, blah, blah",
+                "foo-foo, blah, blah");
     }
 
+    @Test
     public void testNotReplaceable() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("bar", "foo");
 
         test(properties,
-             "${bar, blah, blah",
-             "${bar, blah, blah");
+                "${bar, blah, blah",
+                "${bar, blah, blah");
 
         test(properties,
-             "blah, blah ${bar",
-             "blah, blah ${bar");
+                "blah, blah ${bar",
+                "blah, blah ${bar");
 
         test(properties,
-             "blah, blah $-bar",
-             "blah, blah $-bar");
+                "blah, blah $-bar",
+                "blah, blah $-bar");
     }
 
+    @Test
     public void testEmptyValues() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("emptyValue", "");
@@ -174,12 +187,4 @@ public class TemplateReaderTest extends TestCase {
         test(properties, "${spaceValue}_more text", " _more text");
         test(properties, "${nlValue}_more text", "\n_more text");
     }
-
-    private static void test(Properties properties, String input, String expectedOutput) throws IOException {
-        StringReader stringReader = new StringReader(input);
-        TemplateReader templateReader = new TemplateReader(stringReader, properties);
-        String actualOutput = templateReader.readAll();
-        assertEquals(expectedOutput, actualOutput);
-    }
-
 }

@@ -17,10 +17,13 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class GraphTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class GraphTest {
+
+    @Test
     public void testEmptyChain() {
         Graph graph = new Graph("chain1");
 
@@ -28,6 +31,7 @@ public class GraphTest extends TestCase {
         assertNotNull(graph.getNodes());
     }
 
+    @Test
     public void testOneNodeChain() {
         Graph graph = new Graph("chain1");
         Node node = new Node("node1", "org.esa.snap.core.gpf.TestOps$Op1Spi");
@@ -43,6 +47,7 @@ public class GraphTest extends TestCase {
 
     }
 
+    @Test
     public void testRemoveNode() {
         Graph graph = new Graph("chain1");
         Node node = new Node("node1", "org.esa.snap.core.gpf.TestOps$Op1Spi");
@@ -59,6 +64,7 @@ public class GraphTest extends TestCase {
         assertNull(graph.getNode("node1"));
     }
 
+    @Test
     public void testAddExistingNode() {
         Graph graph = new Graph("chain1");
         Node node1 = new Node("node1", "org.esa.snap.core.gpf.TestOps$Op1Spi");
@@ -72,7 +78,8 @@ public class GraphTest extends TestCase {
         }
     }
 
-    public void testApplicationData() throws Exception {
+    @Test
+    public void testApplicationData() {
         Graph graph = new Graph("chain1");
         assertNull(graph.getApplicationData("foo"));
 
@@ -92,5 +99,4 @@ public class GraphTest extends TestCase {
 
         assertSame(xpp3Dom2, graph.getApplicationData("foo"));
     }
-
 }

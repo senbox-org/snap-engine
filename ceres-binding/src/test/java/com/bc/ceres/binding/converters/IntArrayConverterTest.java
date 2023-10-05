@@ -18,6 +18,7 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
 
 public class IntArrayConverterTest extends AbstractConverterTest {
 
@@ -31,7 +32,7 @@ public class IntArrayConverterTest extends AbstractConverterTest {
         return converter;
     }
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(int[].class);
         testParseSuccess(new int[]{-2, -1, 0, 1, 2, 3, 4}, "-2,  -1,0  ,1,\t2,3,4");

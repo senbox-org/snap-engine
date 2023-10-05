@@ -15,20 +15,13 @@
  */
 package org.esa.snap.core.dataop.maptransf;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class MapInfoTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public MapInfoTest(String name) {
-        super(name);
-    }
+public class MapInfoTest {
 
-    public static Test suite() {
-        return new TestSuite(MapInfoTest.class);
-    }
-
+    @Test
     public void testCreateDeepClone() {
         MapInfo original = createMapInfo();
         original.setNoDataValue(-1.23456);
@@ -55,11 +48,12 @@ public class MapInfoTest extends TestCase {
         assertEquals(deepClone.isSceneSizeFitted(), original.isSceneSizeFitted());
     }
 
+    @Test
     public void testToString() {
         // Note: we need this test because BEAM-DIMAP writer uses toString in order to serialize a mapInfo
         // todo - remove this dependency from toString!
         assertEquals("pro_name, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, datumName, units=degree, 123, 234",
-                     createMapInfo().toString());
+                createMapInfo().toString());
     }
 
     private MapInfo createMapInfo() {

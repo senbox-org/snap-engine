@@ -16,26 +16,17 @@
 
 package org.esa.snap.core.param;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 // @todo 1 se/se - write more tests
 
-public class ParameterTest extends TestCase {
+public class ParameterTest {
 
     private final static String _PARAMETER_NAME = "Parametername";
 
-    public ParameterTest(String testName) {
-        super(testName);
-    }
-
-    @Override
-    protected void setUp() {
-    }
-
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void test_Constructors() {
         Parameter param;
 
@@ -47,7 +38,7 @@ public class ParameterTest extends TestCase {
         assertNotNull(param.getProperties());
         assertNull(param.getProperties().getValueType());
 
-        Object value = new Integer(32);
+        Object value = Integer.valueOf(32);
 
         param = new Parameter(_PARAMETER_NAME, value);
         assertNotNull(param);

@@ -16,9 +16,13 @@
 
 package org.esa.snap.core.gpf.internal;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.awt.*;
 import java.awt.image.Raster;
+
+import static org.junit.Assert.*;
 
 public class MultiTileImageTileTest extends AbstractTileImageTileTest {
 
@@ -27,8 +31,8 @@ public class MultiTileImageTileTest extends AbstractTileImageTileTest {
     final static int TILE_SIZE = 6;
     private TestOpImage imageFLOAT32;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         imageFLOAT32 = getImage("B_FLOAT32");
     }
@@ -48,38 +52,43 @@ public class MultiTileImageTileTest extends AbstractTileImageTileTest {
         return new Dimension(TILE_SIZE, TILE_SIZE);
     }
 
+    @Test
     public void testThatImageIsTiled() {
         assertEquals(TILE_SIZE, imageFLOAT32.getSampleModel().getWidth());
         assertEquals(TILE_SIZE, imageFLOAT32.getSampleModel().getHeight());
         assertEquals(4, imageFLOAT32.getTileCount());
     }
 
+    @Test
     public void testTargetTile00() {
         testTargetTile(new Rectangle(0,
-                                     0,
-                                     TILE_SIZE,
-                                     TILE_SIZE));
+                0,
+                TILE_SIZE,
+                TILE_SIZE));
     }
 
+    @Test
     public void testTargetTile10() {
         testTargetTile(new Rectangle(TILE_SIZE,
-                                     0,
-                                     IMAGE_W - TILE_SIZE,
-                                     TILE_SIZE));
+                0,
+                IMAGE_W - TILE_SIZE,
+                TILE_SIZE));
     }
 
+    @Test
     public void testTargetTile01() {
         testTargetTile(new Rectangle(0,
-                                     TILE_SIZE,
-                                     TILE_SIZE,
-                                     IMAGE_H - TILE_SIZE));
+                TILE_SIZE,
+                TILE_SIZE,
+                IMAGE_H - TILE_SIZE));
     }
 
+    @Test
     public void testTargetTile11() {
         testTargetTile(new Rectangle(TILE_SIZE,
-                                     TILE_SIZE,
-                                     IMAGE_W - TILE_SIZE,
-                                     IMAGE_H - TILE_SIZE));
+                TILE_SIZE,
+                IMAGE_W - TILE_SIZE,
+                IMAGE_H - TILE_SIZE));
     }
 
     private void testTargetTile(Rectangle expectedRect) {
@@ -109,6 +118,7 @@ public class MultiTileImageTileTest extends AbstractTileImageTileTest {
         testFloat32RawSampleIO(tile, x0 + TILE_SIZE / 2, y0 + TILE_SIZE / 2);
     }
 
+    @Test
     public void testSourceTileIsContainedInImageTile00() {
         final int CHILD_X = 2;
         final int CHILD_Y = 3;
@@ -124,6 +134,7 @@ public class MultiTileImageTileTest extends AbstractTileImageTileTest {
         testTileStructure(tile, expectedRect, CHILD_Y * TILE_SIZE + CHILD_X, TILE_SIZE, false);
     }
 
+    @Test
     public void testSourceTileIsNotContainedInAnyImageTile() {
         final int CHILD_X = 5;
         final int CHILD_Y = 3;
@@ -153,5 +164,4 @@ public class MultiTileImageTileTest extends AbstractTileImageTileTest {
             // ok
         }
     }
-
 }

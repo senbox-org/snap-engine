@@ -15,27 +15,31 @@
  */
 package org.esa.snap.core.dataio;
 
-import junit.framework.TestCase;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 
-public class ImageInputAndOutputStreamTest extends TestCase {
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
-    private File _testFile;
+public class ImageInputAndOutputStreamTest {
+
     private final int _lineLength = 4;
     private final int _numLines = 5;
     private final int elemsize = 4;
+    private File _testFile;
 
-    @Override
-    protected void setUp() throws Exception {
-        deleteOutput();
+    @Before
+    public void setUp() throws Exception {
+        GlobalTestTools.deleteTestDataOutputDirectory();
         final File outputDirectory = GlobalTestConfig.getSnapTestDataOutputDirectory();
         outputDirectory.mkdirs();
 
@@ -52,11 +56,12 @@ public class ImageInputAndOutputStreamTest extends TestCase {
         imageOutputStream.close();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        deleteOutput();
+    @After
+    public void tearDown() throws Exception {
+        GlobalTestTools.deleteTestDataOutputDirectory();
     }
 
+    @Test
     public void testFileImageIOStreams() {
         final float[] outputLineBuffer = new float[_lineLength];
         for (int i = 0; i < outputLineBuffer.length; i++) {
@@ -80,15 +85,11 @@ public class ImageInputAndOutputStreamTest extends TestCase {
             for (int offset = 0; offset < byteLineSize * _numLines; offset += byteLineSize) {
                 verifyInputStream.seek(offset);
                 verifyInputStream.readFully(inputLineBuffer, 0, _lineLength);
-                assertEquals(true, Arrays.equals(inputLineBuffer, outputLineBuffer));
+                assertArrayEquals(inputLineBuffer, outputLineBuffer, 0.0f);
             }
             verifyInputStream.close();
         } catch (IOException e) {
             fail("IOException not expected");
         }
-    }
-
-    private void deleteOutput() {
-        GlobalTestTools.deleteTestDataOutputDirectory();
     }
 }

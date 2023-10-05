@@ -21,12 +21,15 @@ import com.bc.ceres.core.runtime.ConfigurationElement;
 import com.bc.ceres.core.runtime.Extension;
 import com.bc.ceres.core.runtime.ModuleState;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 
-public class ConfigurationElementImplTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ConfigurationElementImplTest {
+
+    @Test
     public void testThatX() throws CoreException, IOException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/module-thing-declarer.xml",
@@ -67,8 +70,8 @@ public class ConfigurationElementImplTest extends TestCase {
         assertSame(thingsExtension, simplestThingElement.getDeclaringExtension());
         Thing simplestThing = simplestThingElement.createExecutableExtension(Thing.class);
         assertTrue(simplestThing instanceof DefaultThing);
-        assertEquals(null, ((DefaultThing) simplestThing).value1);
-        assertEquals(null, ((DefaultThing) simplestThing).value2);
+        assertNull(((DefaultThing) simplestThing).value1);
+        assertNull(((DefaultThing) simplestThing).value2);
 
         ConfigurationElement simpleThingElement = children[1];
         assertSame(thingsExtension, simpleThingElement.getDeclaringExtension());

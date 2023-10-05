@@ -16,28 +16,16 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-import java.awt.Color;
+import java.awt.*;
 
-public class ProductNodeTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public ProductNodeTest(String testName) {
-        super(testName);
-    }
+public class ProductNodeTest {
 
-    public static Test suite() {
-        return new TestSuite(ProductNodeTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-    }
-
+    @Test
     public void testSetOwnerToNullAfterNodeRemoval() {
-        final ProductNode[] owners = new ProductNode[1];
         final Product product = new Product("product", "t", 10, 10);
         product.addBand("band1", ProductData.TYPE_INT16);
         final Band addedBand = product.getBandAt(0);
@@ -60,8 +48,8 @@ public class ProductNodeTest extends TestCase {
         assertNull(addedBand.getOwner());
     }
 
+    @Test
     public void testSetProductToNullAfterNodeRemoval() {
-
         Band band = new Band("b", ProductData.TYPE_INT16, 10, 10);
 
         assertNull(band.getOwner());
@@ -90,33 +78,33 @@ public class ProductNodeTest extends TestCase {
         assertNull(band.getProduct());
     }
 
+    @Test
     public void testSetName() {
         int numberOfExceptionsTrown;
         int expectedNumberOfExceptions;
         final ProductNode productNode = new Band("valid", ProductData.TYPE_INT8, 1, 1);
 
-
         final String[] invalidNames = new String[]{
-            ".Band", "",  " ",  "       ", "or", "not", "and"
+                ".Band", "", " ", "       ", "or", "not", "and"
         };
         numberOfExceptionsTrown = tryToSetInvalidNames(productNode, invalidNames);
         expectedNumberOfExceptions = invalidNames.length;
         assertEquals(expectedNumberOfExceptions, numberOfExceptionsTrown);
 
-
         final String[] validNames = new String[]{
-            "Band", "band1", "ba_nd", "band_", "_band", "Band.sdf",
-            "1band", "ba#nd", "band~", "band 2", "band ", " band"
+                "Band", "band1", "ba_nd", "band_", "_band", "Band.sdf",
+                "1band", "ba#nd", "band~", "band 2", "band ", " band"
         };
         numberOfExceptionsTrown = tryToSetValidNames(productNode, validNames);
         expectedNumberOfExceptions = 0;
         assertEquals(expectedNumberOfExceptions, numberOfExceptionsTrown);
     }
 
+    @Test
     public void testSetName_NodeInProduct() {
         Product product = new Product("P", "T", 10, 10);
         product.addBand("band", ProductData.TYPE_INT16);
-        product.addTiePointGrid(new TiePointGrid("tpg", 5,5, 0,0,2,2));
+        product.addTiePointGrid(new TiePointGrid("tpg", 5, 5, 0, 0, 2, 2));
         product.addMask("mask", "True", "test", Color.CYAN, 0.6);
 
         Band productNode = new Band("valid", ProductData.TYPE_INT8, 10, 10);
@@ -125,22 +113,26 @@ public class ProductNodeTest extends TestCase {
         try {
             productNode.setName("band");
             fail("Band with name 'band' already exists!");
-        } catch (IllegalArgumentException ignore) {}
+        } catch (IllegalArgumentException ignore) {
+        }
 
         try {
             productNode.setName("tpg");
             fail("Tie-point grid with name 'tpg' already exists!");
-        } catch (IllegalArgumentException ignore) {}
+        } catch (IllegalArgumentException ignore) {
+        }
 
         try {
             productNode.setName("mask");
             fail("mask with name 'mask' already exists!");
-        } catch (IllegalArgumentException ignore) {}
+        } catch (IllegalArgumentException ignore) {
+        }
 
         productNode.setName("valid");
     }
 
-    public void testIsValidNodeName(){
+    @Test
+    public void testIsValidNodeName() {
         assertFalse(ProductNode.isValidNodeName(""));
         assertFalse(ProductNode.isValidNodeName(" "));
         assertFalse(ProductNode.isValidNodeName("\\"));
@@ -170,10 +162,10 @@ public class ProductNodeTest extends TestCase {
 
     private int tryToSetInvalidNames(final ProductNode productNode, final String[] names) {
         int countedExceptions = 0;
-        for (int i = 0; i < names.length; i++) {
+        for (String name : names) {
             try {
-                productNode.setName(names[i]);
-                fail("IllegalArgumentException expected for name '" + names[i] + "'");
+                productNode.setName(name);
+                fail("IllegalArgumentException expected for name '" + name + "'");
             } catch (IllegalArgumentException e) {
                 countedExceptions++;
             }
@@ -183,12 +175,12 @@ public class ProductNodeTest extends TestCase {
 
     private int tryToSetValidNames(final ProductNode productNode, final String[] names) {
         int countedExceptions = 0;
-        for (int i = 0; i < names.length; i++) {
+        for (String name : names) {
             try {
-                productNode.setName(names[i]);
+                productNode.setName(name);
             } catch (IllegalArgumentException e) {
                 countedExceptions++;
-                fail("IllegalArgumentException was NOT expected for name '" + names[i] + "'");
+                fail("IllegalArgumentException was NOT expected for name '" + name + "'");
             }
         }
         return countedExceptions;

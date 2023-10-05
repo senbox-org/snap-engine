@@ -17,26 +17,32 @@
 package org.esa.snap.dataio.geotiff.internal;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TiffShortTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class TiffShortTest {
 
 
     private static final int _TIFFSHORT_MAX = 0xffff;
     private static final int _TIFFSHORT_MIN = 0;
 
+    @Test
     public void testCreation_WithMaxValue() {
         new TiffShort(_TIFFSHORT_MAX);
     }
 
+    @Test
     public void testCreation_WithMinValue() {
         new TiffShort(_TIFFSHORT_MIN);
     }
 
+    @Test
     public void testCreation_ValueSmallerThanMinValue() {
         try {
             new TiffShort(_TIFFSHORT_MIN - 1);
@@ -48,6 +54,7 @@ public class TiffShortTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreation_ValueBiggerThanMaxValue() {
         try {
             new TiffShort(_TIFFSHORT_MAX + 1);
@@ -59,6 +66,7 @@ public class TiffShortTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetValue() {
         TiffShort tiffShort;
 
@@ -73,6 +81,7 @@ public class TiffShortTest extends TestCase {
         assertEquals(value, tiffShort.getValue());
     }
 
+    @Test
     public void testWriteToStream() throws IOException {
         final TiffShort tiffShort = new TiffShort(_TIFFSHORT_MAX);
         final MemoryCacheImageOutputStream stream = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
@@ -84,6 +93,7 @@ public class TiffShortTest extends TestCase {
         assertEquals((short) 0xffff, stream.readShort());
     }
 
+    @Test
     public void testGetSizeInBytes() {
         final TiffShort tiffShort = new TiffShort(234);
         assertEquals(2, tiffShort.getSizeInBytes());

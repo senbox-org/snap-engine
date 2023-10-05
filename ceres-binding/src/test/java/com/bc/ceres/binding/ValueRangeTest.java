@@ -16,10 +16,14 @@
 
 package com.bc.ceres.binding;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ValueRangeTest extends TestCase {
-    public void testParseFailures()  {
+import static org.junit.Assert.*;
+
+public class ValueRangeTest {
+
+    @Test
+    public void testParseFailures() {
         try {
             ValueRange.parseValueRange(null);
             fail();
@@ -39,81 +43,81 @@ public class ValueRangeTest extends TestCase {
         }
     }
 
-    public void testParse() throws ConversionException {
+    @Test
+    public void testParse() {
         ValueRange valueRange = ValueRange.parseValueRange("[10,20)");
         assertEquals(10.0, valueRange.getMin(), 1e-10);
-        assertEquals(true, valueRange.hasMin());
-        assertEquals(true, valueRange.isMinIncluded());
+        assertTrue(valueRange.hasMin());
+        assertTrue(valueRange.isMinIncluded());
         assertEquals(20.0, valueRange.getMax(), 1e-10);
-        assertEquals(true, valueRange.hasMax());
-        assertEquals(false, valueRange.isMaxIncluded());
+        assertTrue(valueRange.hasMax());
+        assertFalse(valueRange.isMaxIncluded());
 
         valueRange = ValueRange.parseValueRange("(-10,20]");
         assertEquals(-10.0, valueRange.getMin(), 1e-10);
-        assertEquals(false, valueRange.isMinIncluded());
+        assertFalse(valueRange.isMinIncluded());
         assertEquals(20.0, valueRange.getMax(), 1e-10);
-        assertEquals(true, valueRange.isMaxIncluded());
-        assertEquals(true, valueRange.hasMin());
-        assertEquals(true, valueRange.hasMax());
+        assertTrue(valueRange.isMaxIncluded());
+        assertTrue(valueRange.hasMin());
+        assertTrue(valueRange.hasMax());
 
         valueRange = ValueRange.parseValueRange("(*, 20]");
         assertEquals(Double.NEGATIVE_INFINITY, valueRange.getMin(), 1e-10);
-        assertEquals(false, valueRange.hasMin());
-        assertEquals(false, valueRange.isMinIncluded());
+        assertFalse(valueRange.hasMin());
+        assertFalse(valueRange.isMinIncluded());
         assertEquals(20.0, valueRange.getMax(), 1e-10);
-        assertEquals(true, valueRange.hasMax());
-        assertEquals(true, valueRange.isMaxIncluded());
+        assertTrue(valueRange.hasMax());
+        assertTrue(valueRange.isMaxIncluded());
 
         valueRange = ValueRange.parseValueRange("[-10,*]");
         assertEquals(-10.0, valueRange.getMin(), 1e-10);
-        assertEquals(true, valueRange.isMinIncluded());
+        assertTrue(valueRange.isMinIncluded());
         assertEquals(Double.POSITIVE_INFINITY, valueRange.getMax(), 1e-10);
-        assertEquals(false, valueRange.hasMax());
-        assertEquals(true, valueRange.isMaxIncluded());
-        assertEquals(true, valueRange.hasMin());
+        assertFalse(valueRange.hasMax());
+        assertTrue(valueRange.isMaxIncluded());
+        assertTrue(valueRange.hasMin());
     }
 
+    @Test
     public void testContains() {
-
         ValueRange valueRange = new ValueRange(-1.5, 3.2, true, false);
 
-        assertEquals(false, valueRange.contains(-1.6));
-        assertEquals(true, valueRange.contains(-1.5));
-        assertEquals(true, valueRange.contains(-1.4));
+        assertFalse(valueRange.contains(-1.6));
+        assertTrue(valueRange.contains(-1.5));
+        assertTrue(valueRange.contains(-1.4));
 
-        assertEquals(true, valueRange.contains(3.1));
-        assertEquals(false, valueRange.contains(3.2));
-        assertEquals(false, valueRange.contains(3.3));
+        assertTrue(valueRange.contains(3.1));
+        assertFalse(valueRange.contains(3.2));
+        assertFalse(valueRange.contains(3.3));
 
         valueRange = new ValueRange(-1.5, 3.2, false, true);
 
-        assertEquals(false, valueRange.contains(-1.6));
-        assertEquals(false, valueRange.contains(-1.5));
-        assertEquals(true, valueRange.contains(-1.4));
+        assertFalse(valueRange.contains(-1.6));
+        assertFalse(valueRange.contains(-1.5));
+        assertTrue(valueRange.contains(-1.4));
 
-        assertEquals(true, valueRange.contains(3.1));
-        assertEquals(true, valueRange.contains(3.2));
-        assertEquals(false, valueRange.contains(3.3));
+        assertTrue(valueRange.contains(3.1));
+        assertTrue(valueRange.contains(3.2));
+        assertFalse(valueRange.contains(3.3));
 
         valueRange = new ValueRange(Double.NEGATIVE_INFINITY, 3.2, false, true);
 
-        assertEquals(true, valueRange.contains(-1.6));
-        assertEquals(true, valueRange.contains(-1.5));
-        assertEquals(true, valueRange.contains(-1.4));
+        assertTrue(valueRange.contains(-1.6));
+        assertTrue(valueRange.contains(-1.5));
+        assertTrue(valueRange.contains(-1.4));
 
-        assertEquals(true, valueRange.contains(3.1));
-        assertEquals(true, valueRange.contains(3.2));
-        assertEquals(false, valueRange.contains(3.3));
+        assertTrue(valueRange.contains(3.1));
+        assertTrue(valueRange.contains(3.2));
+        assertFalse(valueRange.contains(3.3));
 
         valueRange = new ValueRange(-1.5, Double.POSITIVE_INFINITY, false, true);
 
-        assertEquals(false, valueRange.contains(-1.6));
-        assertEquals(false, valueRange.contains(-1.5));
-        assertEquals(true, valueRange.contains(-1.4));
+        assertFalse(valueRange.contains(-1.6));
+        assertFalse(valueRange.contains(-1.5));
+        assertTrue(valueRange.contains(-1.4));
 
-        assertEquals(true, valueRange.contains(3.1));
-        assertEquals(true, valueRange.contains(3.2));
-        assertEquals(true, valueRange.contains(3.3));
+        assertTrue(valueRange.contains(3.1));
+        assertTrue(valueRange.contains(3.2));
+        assertTrue(valueRange.contains(3.3));
     }
-
 }

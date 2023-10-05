@@ -16,8 +16,8 @@
 
 package org.esa.snap.core.image;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.util.ImageUtils;
+import org.junit.Test;
 
 import javax.media.jai.ImageLayout;
 import java.awt.image.ColorModel;
@@ -28,8 +28,11 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-public class ImageHeaderTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ImageHeaderTest {
+
+    @Test
     public void testLoadFloatImage() throws IOException {
         final ImageHeader imageHeader = ImageHeader.load(
                 new InputStreamReader(ImageHeaderTest.class.getResourceAsStream("float-image.properties")),
@@ -54,6 +57,7 @@ public class ImageHeaderTest extends TestCase {
         assertEquals(32, imageLayout.getSampleModel(null).getSampleSize()[0]);
     }
 
+    @Test
     public void testLoadBitImage() throws IOException {
         final ImageHeader imageHeader = ImageHeader.load(
                 new InputStreamReader(ImageHeaderTest.class.getResourceAsStream("bit-image.properties")),
@@ -78,6 +82,7 @@ public class ImageHeaderTest extends TestCase {
         assertEquals(1, imageLayout.getSampleModel(null).getSampleSize()[0]);
     }
 
+    @Test
     public void testStoreAndLoad() throws IOException {
         int minX = 1;
         int minY = -1;
@@ -91,11 +96,11 @@ public class ImageHeaderTest extends TestCase {
         ColorModel colorModel = null;
 
         ImageLayout imageLayout = new ImageLayout(minX, minY,
-                                                  width, height,
-                                                  tileGridXOffset,
-                                                  tileGridYOffset,
-                                                  tileWidth, tileHeight,
-                                                  sampleModel, colorModel);
+                width, height,
+                tileGridXOffset,
+                tileGridYOffset,
+                tileWidth, tileHeight,
+                sampleModel, colorModel);
 
 
         StringWriter writer = new StringWriter();

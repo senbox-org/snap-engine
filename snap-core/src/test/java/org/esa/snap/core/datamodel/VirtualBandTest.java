@@ -17,20 +17,16 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 
+import static org.junit.Assert.*;
+
 public class VirtualBandTest extends AbstractRasterDataNodeTest {
 
-    @Override
-    protected void setUp() {
-    }
-
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void testExprAndTerm() {
         final Product product = new Product("p", "t", 10, 10);
         final VirtualBand virtualBand = new VirtualBand("vb", ProductData.TYPE_FLOAT32, 10, 10, "1.0");
@@ -48,6 +44,7 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testReplaceExpressionIdentifier() {
         final String oldIdentifier = "oldIdentifier";
         final String newIdentifier = "newIdentifier";
@@ -58,7 +55,7 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         final boolean[] isActive = new boolean[]{false};
         final Product product = new Product("prod", "NO_TYPE", 10, 10) {
 
-            protected void fireNodeChanged(ProductNode sourceNode, String propertyName, Object oldValue) {
+            private void fireNodeChanged(ProductNode sourceNode, String propertyName, Object oldValue) {
                 if (isActive[0]) {
                     fail("Event '" + propertyName + "' not expected");
                 }
@@ -96,7 +93,8 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         assertTrue(virtualBand.isModified());
     }
 
-    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentIsNull() {
+    @Test
+    public void testThrowIllegalArgumentExceptionIfTheExpressionArgumentIsNull() {
         final String expression = null;
         try {
             new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
@@ -107,7 +105,8 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         }
     }
 
-    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentIsAnEmptyString() {
+    @Test
+    public void testThrowIllegalArgumentExceptionIfTheExpressionArgumentIsAnEmptyString() {
         final String expression = "";
         try {
             new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
@@ -118,7 +117,8 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         }
     }
 
-    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentContainsOnlyWhitespaces() {
+    @Test
+    public void testThrowIllegalArgumentExceptionIfTheExpressionArgumentContainsOnlyWhitespaces() {
         final String expression = " \n\r\t";
         try {
             new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
@@ -129,6 +129,7 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         }
     }
 
+    @Test
     public void testReplaceExpression_Ignore_null_empty_and_equal_Expression() {
         final Product product = new Product("prod", "type", 10, 11);
         final VirtualBand vb = new VirtualBand("name", ProductData.TYPE_INT16, 10, 11, "2");

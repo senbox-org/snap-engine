@@ -17,19 +17,22 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 
-public class OpDirectInstantiationTest extends TestCase {
 
+public class OpDirectInstantiationTest {
+
+    @Test
     public void testDirectInstantiation() throws IOException, OperatorException {
         Product a = new Product("a", "T", 2, 2);
         a.addBand(new VirtualBand("x", ProductData.TYPE_FLOAT64, 2, 2, "5.2"));
@@ -57,7 +60,7 @@ public class OpDirectInstantiationTest extends TestCase {
     }
 
     private static class MulConstOp extends Operator {
-        private Product sourceProduct;
+        private final Product sourceProduct;
         @TargetProduct
         private Product targetProduct;
         @Parameter(defaultValue = "100")
@@ -85,7 +88,6 @@ public class OpDirectInstantiationTest extends TestCase {
             }
         }
 
-
         @Override
         public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
             Band sourceBand = sourceProduct.getBand(band.getName());
@@ -99,11 +101,10 @@ public class OpDirectInstantiationTest extends TestCase {
     }
 
     private static class AddOp extends Operator {
-        private Product sourceProduct1;
-        private Product sourceProduct2;
+        private final Product sourceProduct1;
+        private final Product sourceProduct2;
         @TargetProduct
         private Product targetProduct;
-
 
         public AddOp(Product sourceProduct1, Product sourceProduct2) {
             this.sourceProduct1 = sourceProduct1;
@@ -118,7 +119,6 @@ public class OpDirectInstantiationTest extends TestCase {
                 targetProduct.addBand(sourceBand.getName(), sourceBand.getDataType());
             }
         }
-
 
         @Override
         public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {

@@ -16,10 +16,12 @@
 
 package org.esa.snap.dataio.geotiff.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * TiffAscii Tester.
@@ -29,17 +31,20 @@ import java.io.ByteArrayOutputStream;
  * @since <pre>02/21/2005</pre>
  */
 
-public class GeoTiffAsciiTest extends TestCase {
+public class GeoTiffAsciiTest {
 
+    @Test
     public void testCreation() {
         new GeoTiffAscii("Alois und Sepp");
     }
 
-    public void testGetValue() throws Exception {
+    @Test
+    public void testGetValue() {
         final GeoTiffAscii tiffAscii = new GeoTiffAscii("Alois und Sepp");
         assertEquals("Alois und Sepp|\u0000", tiffAscii.getValue());
     }
 
+    @Test
     public void testWrite() throws Exception {
         final GeoTiffAscii tiffAscii = new GeoTiffAscii("Alois und Sepp");
 
@@ -50,6 +55,7 @@ public class GeoTiffAsciiTest extends TestCase {
         assertEquals("Alois und Sepp|\u0000", os.toString());
     }
 
+    @Test
     public void testGetSizeInBytes() {
         final String value = "Hedi und Fredi";
         final GeoTiffAscii geoTiffAscii = new GeoTiffAscii(value);

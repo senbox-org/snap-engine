@@ -17,29 +17,28 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.gpf.GPF;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.OperatorSpiRegistry;
-import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.*;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SourceProductsAnnotationValidationTest extends TestCase {
+import static org.junit.Assert.fail;
+
+public class SourceProductsAnnotationValidationTest {
 
     private OperatorSpi someOpSpi;
     private OperatorSpi twoSourcesOpSpi;
     private OperatorSpi anySourcesOpSpi;
     private OptSourcesOp.Spi optSourcesOpSpi;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         someOpSpi = new InputOp.Spi();
         twoSourcesOpSpi = new TwoSourcesOp.Spi();
         anySourcesOpSpi = new AnySourcesOp.Spi();
@@ -52,8 +51,8 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
         registry.addOperatorSpi(optSourcesOpSpi);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         registry.removeOperatorSpi(someOpSpi);
         registry.removeOperatorSpi(twoSourcesOpSpi);
@@ -61,6 +60,7 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
         registry.removeOperatorSpi(optSourcesOpSpi);
     }
 
+    @Test
     public void testTwoSourcesOp() {
         final String opName = "TwoSourcesOp";
         Graph graph;
@@ -104,6 +104,7 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testAnySourcesOp() {
         final String opName = "AnySourcesOp";
         Graph graph;
@@ -128,6 +129,7 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
         }
     }
 
+    @Test
     public void testOptSourcesOp() {
         final String opName = "OptSourcesOp";
         Graph graph;
@@ -151,7 +153,6 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
             fail("GraphException not expected, sources not checked. Error: " + ge.getMessage());
         }
     }
-
 
     private Graph createTestGraph(String opName) {
         Graph graph = new Graph("graph");
@@ -248,7 +249,7 @@ public class SourceProductsAnnotationValidationTest extends TestCase {
 
         @SourceProducts
         // count=0
-                Product[] inputs;
+        Product[] inputs;
 
         @TargetProduct
         Product output;

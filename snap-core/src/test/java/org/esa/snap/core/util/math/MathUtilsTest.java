@@ -16,41 +16,70 @@
 
 package org.esa.snap.core.util.math;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
+
+import static org.junit.Assert.*;
 
 
-public class MathUtilsTest extends TestCase {
+public class MathUtilsTest {
 
+    @Test
+    public  void testSudivideRectangle() {
+        Rectangle[] rectangles;
+
+        rectangles = MathUtils.subdivideRectangle(100, 40, 4, 2, 0);
+        assertEquals(4 * 2, rectangles.length);
+        assertEquals(new Rectangle(0, 0, 25, 20), rectangles[0]);
+        assertEquals(new Rectangle(25, 0, 25, 20), rectangles[1]);
+        assertEquals(new Rectangle(50, 0, 25, 20), rectangles[2]);
+        assertEquals(new Rectangle(75, 0, 25, 20), rectangles[3]);
+        assertEquals(new Rectangle(0, 20, 25, 20), rectangles[4]);
+        assertEquals(new Rectangle(25, 20, 25, 20), rectangles[5]);
+        assertEquals(new Rectangle(50, 20, 25, 20), rectangles[6]);
+        assertEquals(new Rectangle(75, 20, 25, 20), rectangles[7]);
+
+        rectangles = MathUtils.subdivideRectangle(100, 40, 4, 2, 1);
+        assertEquals(4 * 2, rectangles.length);
+        assertEquals(new Rectangle(0, 0, 26, 21), rectangles[0]);
+        assertEquals(new Rectangle(24, 0, 27, 21), rectangles[1]);
+        assertEquals(new Rectangle(49, 0, 27, 21), rectangles[2]);
+        assertEquals(new Rectangle(74, 0, 26, 21), rectangles[3]);
+        assertEquals(new Rectangle(0, 19, 26, 21), rectangles[4]);
+        assertEquals(new Rectangle(24, 19, 27, 21), rectangles[5]);
+        assertEquals(new Rectangle(49, 19, 27, 21), rectangles[6]);
+        assertEquals(new Rectangle(74, 19, 26, 21), rectangles[7]);
+    }
+
+    @Test
     public void testEqualValues() {
-
         assertTrue(MathUtils.equalValues(1.0F, 1.0F));
         assertTrue(MathUtils.equalValues(1.0F, 1.0F + 0.9F * MathUtils.EPS_F));
         assertTrue(MathUtils.equalValues(1.0F, 1.0F - 0.9F * MathUtils.EPS_F));
-        assertTrue(!MathUtils.equalValues(1.0F, 2.0F));
-        assertTrue(!MathUtils.equalValues(1.0F, 1.0F + 1.1F * MathUtils.EPS_F));
-        assertTrue(!MathUtils.equalValues(1.0F, 1.0F - 1.1F * MathUtils.EPS_F));
+        assertFalse(MathUtils.equalValues(1.0F, 2.0F));
+        assertFalse(MathUtils.equalValues(1.0F, 1.0F + 1.1F * MathUtils.EPS_F));
+        assertFalse(MathUtils.equalValues(1.0F, 1.0F - 1.1F * MathUtils.EPS_F));
         assertTrue(MathUtils.equalValues(1.0F, 1.0F, 1e-4F));
         assertTrue(MathUtils.equalValues(1.0F, 1.0F + 0.9e-4F, 1e-4F));
         assertTrue(MathUtils.equalValues(1.0F, 1.0F - 0.9e-4F, 1e-4F));
-        assertTrue(!MathUtils.equalValues(1.0F, 1.0F + 1.1e-4F, 1e-5F));
-        assertTrue(!MathUtils.equalValues(1.0F, 1.0F - 1.1e-4F, 1e-5F));
+        assertFalse(MathUtils.equalValues(1.0F, 1.0F + 1.1e-4F, 1e-5F));
+        assertFalse(MathUtils.equalValues(1.0F, 1.0F - 1.1e-4F, 1e-5F));
 
         assertTrue(MathUtils.equalValues(1.0, 1.0));
         assertTrue(MathUtils.equalValues(1.0, 1.0 + 0.9 * MathUtils.EPS));
         assertTrue(MathUtils.equalValues(1.0, 1.0 - 0.9 * MathUtils.EPS));
-        assertTrue(!MathUtils.equalValues(1.0, 2.0));
-        assertTrue(!MathUtils.equalValues(1.0, 1.0 + 1.1 * MathUtils.EPS));
-        assertTrue(!MathUtils.equalValues(1.0, 1.0 - 1.1 * MathUtils.EPS));
+        assertFalse(MathUtils.equalValues(1.0, 2.0));
+        assertFalse(MathUtils.equalValues(1.0, 1.0 + 1.1 * MathUtils.EPS));
+        assertFalse(MathUtils.equalValues(1.0, 1.0 - 1.1 * MathUtils.EPS));
         assertTrue(MathUtils.equalValues(1.0, 1.0, 1e-4));
         assertTrue(MathUtils.equalValues(1.0, 1.0 + 0.9e-4, 1e-4));
         assertTrue(MathUtils.equalValues(1.0, 1.0 - 0.9e-4, 1e-4));
-        assertTrue(!MathUtils.equalValues(1.0, 1.0 + 1.1e-4, 1e-5));
-        assertTrue(!MathUtils.equalValues(1.0, 1.0 - 1.1e-4, 1e-5));
+        assertFalse(MathUtils.equalValues(1.0, 1.0 + 1.1e-4, 1e-5));
+        assertFalse(MathUtils.equalValues(1.0, 1.0 - 1.1e-4, 1e-5));
     }
 
+    @Test
     public void testInterpolate2D() {
         assertEquals(0.0F, MathUtils.interpolate2D(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 2.0F), MathUtils.EPS_F);
         assertEquals(0.5F, MathUtils.interpolate2D(0.5F, 0.0F, 0.0F, 1.0F, 1.0F, 2.0F), MathUtils.EPS_F);
@@ -73,46 +102,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(2.0, MathUtils.interpolate2D(1.0, 1.0, 0.0, 1.0, 1.0, 2.0), MathUtils.EPS);
     }
 
-    /*public void testExp() {
-        boolean oldDebugState = Debug.setEnabled(true);
-
-        final int maxIter = 1000000;
-        StopWatch sw = new StopWatch();
-
-        sw.start();
-        testMathExp(maxIter);
-        sw.stop();
-        Debug.trace(maxIter + " x 4 x Math.exp(): " + sw.getTimeDiffString());
-
-        sw.start();
-        testStrictMathExp(maxIter);
-        sw.stop();
-        Debug.trace(maxIter + " x 4 x StrictMath.exp(): " + sw.getTimeDiffString());
-
-        Debug.setEnabled(oldDebugState);
-    }
-
-
-    void testMathExp(int maxIter) {
-        double x = 1.0F, y;
-        for (int i = 0; i < maxIter; i++) {
-            y = Math.exp(x);
-            y = Math.exp(y);
-            y = Math.exp(y);
-            y = Math.exp(y);
-        }
-    }
-
-    void testStrictMathExp(int maxIter) {
-        double x = 1.0F, y;
-        for (int i = 0; i < maxIter; i++) {
-            y = StrictMath.exp(x);
-            y = StrictMath.exp(y);
-            y = StrictMath.exp(y);
-            y = StrictMath.exp(y);
-        }
-    }  */
-
+    @Test
     public void testRounding() {
         assertEquals(1.0, MathUtils.computeRoundFactor(0.0, 100.0, 0), MathUtils.EPS);
         assertEquals(10.0, MathUtils.computeRoundFactor(0.0, 100.0, 1), MathUtils.EPS);
@@ -143,18 +133,19 @@ public class MathUtilsTest extends TestCase {
     /**
      * Tests the correct functionality of the degreesToRadians method
      */
+    @Test
     public void testDegToRad() {
         float[] degrees = {0.f, 10.f, 23.f, 45.f, 89.f, 90.f, 134.f, 265.f, 312.f};
         float[] radians = {
-                    0.f,
-                    0.17453293f,
-                    0.40142573f,
-                    0.78539816f,
-                    1.55334303f,
-                    1.57079633f,
-                    2.33874119f,
-                    4.62512252f,
-                    5.44542727f
+                0.f,
+                0.17453293f,
+                0.40142573f,
+                0.78539816f,
+                1.55334303f,
+                1.57079633f,
+                2.33874119f,
+                4.62512252f,
+                5.44542727f
         };
 
         for (int n = 0; n < degrees.length; n++) {
@@ -165,17 +156,18 @@ public class MathUtilsTest extends TestCase {
     /**
      * Tests the correct functionality of the radians to degree conversion
      */
+    @Test
     public void testRadToDeg() {
         float[] radians = {0.1f, 0.3f, 0.6f, 0.9f, 1.12f, 1.6f, 2.7f, 3.8f};
         float[] degrees = {
-                    5.72957795f,
-                    17.18873385f,
-                    34.37746771f,
-                    51.56620156f,
-                    64.17127305f,
-                    91.67324722f,
-                    154.69860469f,
-                    217.72396215f
+                5.72957795f,
+                17.18873385f,
+                34.37746771f,
+                51.56620156f,
+                64.17127305f,
+                91.67324722f,
+                154.69860469f,
+                217.72396215f
         };
 
         for (int n = 0; n < radians.length; n++) {
@@ -183,6 +175,7 @@ public class MathUtilsTest extends TestCase {
         }
     }
 
+    @Test
     public void testFloorInt() {
         assertEquals(1, MathUtils.floorInt(1.0d));
         assertEquals(0, MathUtils.floorInt(0.99999999999d));
@@ -197,6 +190,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(-2, MathUtils.floorInt(-1.00000000001d));
     }
 
+    @Test
     public void testFloorlong() {
         assertEquals(1, MathUtils.floorLong(1.0d));
         assertEquals(0, MathUtils.floorLong(0.99999999999d));
@@ -211,18 +205,21 @@ public class MathUtilsTest extends TestCase {
         assertEquals(-2, MathUtils.floorLong(-1.00000000001d));
     }
 
+    @Test
     public void testRoundAndCropInt() {
         assertEquals(4L, MathUtils.roundAndCrop(4.3f, 1, 7));
         assertEquals(5L, MathUtils.roundAndCrop(4.3f, 5, 7));
         assertEquals(3L, MathUtils.roundAndCrop(4.3f, 1, 3));
     }
 
+    @Test
     public void testRoundAndCropLong() {
         assertEquals(4L, MathUtils.roundAndCrop(4.3d, 1L, 7L));
         assertEquals(5L, MathUtils.roundAndCrop(4.3d, 5L, 7L));
         assertEquals(3L, MathUtils.roundAndCrop(4.3d, 1L, 3L));
     }
 
+    @Test
     public void testCropByte() {
         byte min = 12;
         byte max = 28;
@@ -236,6 +233,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max));
     }
 
+    @Test
     public void testCropShort() {
         short min = 12;
         short max = 28;
@@ -249,6 +247,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max));
     }
 
+    @Test
     public void testCropInt() {
         int min = 12;
         int max = 28;
@@ -262,6 +261,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max));
     }
 
+    @Test
     public void testCropLong() {
         long min = 12;
         long max = 28;
@@ -275,6 +275,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max));
     }
 
+    @Test
     public void testCropFloat() {
         float min = 12.5f;
         float max = 28.7f;
@@ -288,6 +289,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max), 1e-5f);
     }
 
+    @Test
     public void testCropDouble() {
         double min = 120.3;
         double max = 286.4;
@@ -301,6 +303,7 @@ public class MathUtilsTest extends TestCase {
         assertEquals(max, MathUtils.crop(val, min, max), 1e-10);
     }
 
+    @Test
     public void testFitDimension() {
         assertEquals(new Dimension(0, 0), MathUtils.fitDimension(0, 1.0, 0.5));
         assertEquals(new Dimension(2, 1), MathUtils.fitDimension(2, 1.0, 0.5));
@@ -328,32 +331,6 @@ public class MathUtilsTest extends TestCase {
         assertEquals(new Dimension(6, 3), MathUtils.fitDimension(21, 1.0, 0.5));
         assertEquals(new Dimension(6, 3), MathUtils.fitDimension(23, 1.0, 0.5));
         assertEquals(new Dimension(8, 4), MathUtils.fitDimension(25, 1.0, 0.5));
-    }
-
-    public static void testSudivideRectangle() {
-        Rectangle[] rectangles;
-
-        rectangles = MathUtils.subdivideRectangle(100, 40, 4, 2, 0);
-        assertEquals(4 * 2, rectangles.length);
-        assertEquals(new Rectangle(0, 0, 25, 20), rectangles[0]);
-        assertEquals(new Rectangle(25, 0, 25, 20), rectangles[1]);
-        assertEquals(new Rectangle(50, 0, 25, 20), rectangles[2]);
-        assertEquals(new Rectangle(75, 0, 25, 20), rectangles[3]);
-        assertEquals(new Rectangle(0, 20, 25, 20), rectangles[4]);
-        assertEquals(new Rectangle(25, 20, 25, 20), rectangles[5]);
-        assertEquals(new Rectangle(50, 20, 25, 20), rectangles[6]);
-        assertEquals(new Rectangle(75, 20, 25, 20), rectangles[7]);
-
-        rectangles = MathUtils.subdivideRectangle(100, 40, 4, 2, 1);
-        assertEquals(4 * 2, rectangles.length);
-        assertEquals(new Rectangle(0, 0, 26, 21), rectangles[0]);
-        assertEquals(new Rectangle(24, 0, 27, 21), rectangles[1]);
-        assertEquals(new Rectangle(49, 0, 27, 21), rectangles[2]);
-        assertEquals(new Rectangle(74, 0, 26, 21), rectangles[3]);
-        assertEquals(new Rectangle(0, 19, 26, 21), rectangles[4]);
-        assertEquals(new Rectangle(24, 19, 27, 21), rectangles[5]);
-        assertEquals(new Rectangle(49, 19, 27, 21), rectangles[6]);
-        assertEquals(new Rectangle(74, 19, 26, 21), rectangles[7]);
     }
 }
 
