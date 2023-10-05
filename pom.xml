@@ -267,7 +267,7 @@
             <dependency>
                 <groupId>ncsa.hdf</groupId>
                 <artifactId>lib-hdf</artifactId>
-                <version>${hdf.version}</version>
+                <version>${hdf.native.version}</version>
             </dependency>
 
             <dependency>
