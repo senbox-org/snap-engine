@@ -3,8 +3,20 @@ package org.esa.snap.core.util;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MetadataUtils {
+
+    private enum DATE_FORMAT {
+        CAMEL_LONG,
+        CAMEL_SHORT
+    }
+
+    private enum TIME_FORMAT {
+        HHMM,
+        HHMMSS,
+        HHMMSSms
+    }
 
     private static final String INFO_PARAM_FILE = "FILE";
     private static final String INFO_PARAM_PROCESSING_VERSION = "PROCESSING_VERSION";
@@ -21,6 +33,8 @@ public class MetadataUtils {
     private static final String INFO_PARAM_BAND_DESCRIPTION = "BAND_DESCRIPTION";
     private static final String INFO_PARAM_FILE_LOCATION = "FILE_LOCATION";
     private static final String INFO_PARAM_PRODUCT_TYPE = "PRODUCT_TYPE";
+    private static final String INFO_PARAM_SCENE_DATE = "SCENE_DATE";
+    private static final String INFO_PARAM_SCENE_DATETIME = "SCENE_DATETIME";
     private static final String INFO_PARAM_SCENE_START_TIME = "SCENE_START_TIME";
     private static final String INFO_PARAM_SCENE_END_TIME = "SCENE_END_TIME";
     private static final String INFO_PARAM_SCENE_HEIGHT = "SCENE_HEIGHT";
@@ -60,6 +74,8 @@ public class MetadataUtils {
             INFO_PARAM_BAND_DESCRIPTION,
             INFO_PARAM_FILE_LOCATION,
             INFO_PARAM_PRODUCT_TYPE,
+            INFO_PARAM_SCENE_DATE,
+            INFO_PARAM_SCENE_DATETIME,
             INFO_PARAM_SCENE_START_TIME,
             INFO_PARAM_SCENE_END_TIME,
             INFO_PARAM_SCENE_HEIGHT,
@@ -83,11 +99,8 @@ public class MetadataUtils {
     };
 
 
-
     public static String getDerivedMeta(String infoKey, RasterDataNode raster, String percentD_ReplacementKey) {
         String value = "";
-
-
 
 
         if (infoKey != null && infoKey.length() > 0) {
@@ -116,6 +129,61 @@ public class MetadataUtils {
                     } catch (Exception e) {
                     }
                     break;
+
+                case INFO_PARAM_SCENE_DATE:
+                    try {
+                        String start_date = getSceneStartDate(raster, DATE_FORMAT.CAMEL_LONG);
+                        String end_date = getSceneEndDate(raster, DATE_FORMAT.CAMEL_LONG);
+
+                        if (start_date != null && start_date.length() > 0 && end_date != null && end_date.length() > 0) {
+                            if (start_date.trim().equals(end_date.trim())) {
+                                value = start_date;
+                            } else {
+                                value = "(" + start_date + " - " + end_date + ")";
+                            }
+                        } else {
+                            value = start_date;
+                        }
+
+                    } catch (Exception e) {
+                    }
+                    break;
+
+
+                case INFO_PARAM_SCENE_DATETIME:
+                    try {
+                        String start_date = getSceneStartDate(raster, DATE_FORMAT.CAMEL_LONG);
+                        String start_time_only = getSceneStartTimeOnly(raster, TIME_FORMAT.HHMMSS);
+
+                        String start_datetime = start_date;
+                        if (start_time_only != null && start_time_only.length() > 0) {
+                            start_datetime = start_date + " " + start_time_only;
+                        }
+
+
+                        String end_date = getSceneEndDate(raster, DATE_FORMAT.CAMEL_LONG);
+                        String end_time_only = getSceneEndTimeOnly(raster, TIME_FORMAT.HHMMSS);
+
+                        String end_datetime = start_date;
+                        if (end_time_only != null && end_time_only.length() > 0) {
+                            end_datetime = end_date + " " + end_time_only;
+                        }
+
+
+                        if (start_datetime != null && start_datetime.length() > 0 && end_datetime != null && end_datetime.length() > 0) {
+                            if (start_datetime.trim().equals(end_datetime.trim())) {
+                                value = start_datetime;
+                            } else {
+                                value = "(" + start_datetime + " - " + end_datetime + ")";
+                            }
+                        } else {
+                            value = start_datetime;
+                        }
+
+                    } catch (Exception e) {
+                    }
+                    break;
+
 
                 case INFO_PARAM_SCENE_START_TIME:
                     try {
@@ -319,6 +387,148 @@ public class MetadataUtils {
     }
 
 
+    public static String getSceneStartDate(RasterDataNode raster, DATE_FORMAT dateFormat) {
+        String start_datetime = raster.getProduct().getStartTime().toString();
+        return getSceneDateInnerMethod(start_datetime, dateFormat);
+    }
+
+    public static String getSceneEndDate(RasterDataNode raster, DATE_FORMAT dateFormat) {
+        String start_datetime = raster.getProduct().getEndTime().toString();
+        return getSceneDateInnerMethod(start_datetime, dateFormat);
+    }
+
+
+    public static String getSceneDateInnerMethod(String datetime, DATE_FORMAT dateFormat) {
+        String[] datetime_arr = datetime.split("\\s+", 2);
+
+        if (datetime_arr.length > 0) {
+            if (dateFormat != null && (dateFormat == DATE_FORMAT.CAMEL_LONG || dateFormat == DATE_FORMAT.CAMEL_SHORT)) {
+                String[] datetime2_arr = datetime_arr[0].split("-", 3);
+
+                if (datetime2_arr.length == 3) {
+                    String day = datetime2_arr[0];
+                    String month = datetime2_arr[1];
+                    String year = datetime2_arr[2];
+
+                    if (dateFormat == DATE_FORMAT.CAMEL_LONG) {
+                        month = formatMonthCamelLong(month);
+                    } else if (dateFormat == DATE_FORMAT.CAMEL_SHORT) {
+                        month = formatMonthCamelShort(month);
+                    }
+
+                    return month + " " + day + ", " + year;
+                }
+            }
+
+            return datetime_arr[0];
+        } else {
+            return "";
+        }
+    }
+
+
+    public static String formatMonthCamelLong(String month) {
+
+        month = month.toUpperCase();
+
+        switch (month) {
+            case "JAN":
+                return "January";
+            case "FEB":
+                return "February";
+            case "MAR":
+                return "March";
+            case "APR":
+                return "April";
+            case "MAY":
+                return "May";
+            case "JUN":
+                return "June";
+            case "JUL":
+                return "July";
+            case "AUG":
+                return "August";
+            case "SEP":
+                return "September";
+            case "OCT":
+                return "October";
+            case "NOV":
+                return "November";
+            case "DEC":
+                return "December";
+        }
+
+        return month;
+    }
+
+    public static String formatMonthCamelShort(String month) {
+
+        month = month.toUpperCase();
+
+        switch (month) {
+            case "JAN":
+                return "Jan";
+            case "FEB":
+                return "Feb";
+            case "MAR":
+                return "Mar";
+            case "APR":
+                return "Apr";
+            case "MAY":
+                return "May";
+            case "JUN":
+                return "Jun";
+            case "JUL":
+                return "Jul";
+            case "AUG":
+                return "Aug";
+            case "SEP":
+                return "Sep";
+            case "OCT":
+                return "Oct";
+            case "NOV":
+                return "Nov";
+            case "DEC":
+                return "Dec";
+        }
+
+        return month;
+    }
+
+
+    public static String getSceneStartTimeOnly(RasterDataNode raster, TIME_FORMAT timeFormat) {
+        String start_datetime = raster.getProduct().getStartTime().toString();
+        return getSceneTimeOnly(start_datetime, timeFormat);
+    }
+
+    public static String getSceneEndTimeOnly(RasterDataNode raster, TIME_FORMAT timeFormat) {
+        String end_datetime = raster.getProduct().getEndTime().toString();
+        return getSceneTimeOnly(end_datetime, timeFormat);
+    }
+
+
+    public static String getSceneTimeOnly(String datetime, TIME_FORMAT timeFormat) {
+        String[] end_datetime_arr = datetime.split("\\s+", 2);
+
+        if (end_datetime_arr.length > 1) {
+            String time_only = end_datetime_arr[1];
+            if (timeFormat == TIME_FORMAT.HHMMSS) {
+                String[] time_milli_split = time_only.split("\\.");
+
+                if (time_milli_split.length > 0) {
+                    return time_milli_split[0];
+                } else {
+                    return "";
+                }
+            } else {
+                return time_only;
+            }
+        } else {
+            return "";
+        }
+    }
+
+
     public static String getReplacedStringAllVariables(String inputText, RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
 
         String currentLine = inputText;
@@ -354,7 +564,7 @@ public class MetadataUtils {
         return currentLine;
     }
 
-    private static String getReplacedStringSingleVariableWrapper(String inputString, boolean showKeys, String replaceKey,  RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
+    private static String getReplacedStringSingleVariableWrapper(String inputString, boolean showKeys, String replaceKey, RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
         String replacedText = inputString;
 
         try {
@@ -440,37 +650,37 @@ public class MetadataUtils {
             String metaStart = "";
 
 
-            String replaceGoal = replaceKeyStart+replaceKey;
+            String replaceGoal = replaceKeyStart + replaceKey;
 
             switch (replaceKey) {
                 case "PROPERTY=":
-                    inputString = inputString.replace(replaceKeyStart+"Property=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"property=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"INFO=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Info=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"info=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Property=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "property=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "INFO=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Info=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "info=", replaceGoal);
                     break;
 
                 case "GLOBAL_ATTRIBUTE=":
 //                    inputString = inputString.replace(replaceKeyStart+"META=", replaceGoal);
 //                    inputString = inputString.replace(replaceKeyStart+"Meta=", replaceGoal);
 //                    inputString = inputString.replace(replaceKeyStart+"meta=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Global_Attribute=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"global_attribute=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"GLOBAL_ATTR=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Global_Attr=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"global_attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Global_Attribute=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "global_attribute=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "GLOBAL_ATTR=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Global_Attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "global_attr=", replaceGoal);
                     break;
 
                 case "BAND_ATTRIBUTE=":
 //                    inputString = inputString.replace(replaceKeyStart+"BAND_META=", replaceGoal);
 //                    inputString = inputString.replace(replaceKeyStart+"Band_Meta=", replaceGoal);
 //                    inputString = inputString.replace(replaceKeyStart+"band_meta=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Band_Attribute=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"band_attribute=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"BAND_ATTR=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"Band_Attr=", replaceGoal);
-                    inputString = inputString.replace(replaceKeyStart+"band_attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Band_Attribute=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "band_attribute=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "BAND_ATTR=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Band_Attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "band_attr=", replaceGoal);
                     break;
             }
 
@@ -599,9 +809,6 @@ public class MetadataUtils {
 
         return new String[]{key};
     }
-
-
-
 
 
 }

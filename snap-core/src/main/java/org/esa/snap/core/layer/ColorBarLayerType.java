@@ -416,7 +416,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_GAP_FACTOR_LABEL = "Location Offset (Outside)";
     public static final String PROPERTY_LOCATION_GAP_FACTOR_TOOLTIP = "Percentage of scene size to move " + COLOR_LOWER_CASE + " bar legend outside of anchored axis";
     private static final String PROPERTY_LOCATION_GAP_FACTOR_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset (Outside)";
-    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 5.0;
+    public static final Double PROPERTY_LOCATION_GAP_FACTOR_DEFAULT = 6.0;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MIN = -1000;
     public static final double PROPERTY_LOCATION_GAP_FACTOR_MAX = 1000;
     public static final String PROPERTY_LOCATION_GAP_FACTOR_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MIN + "," + ColorBarLayerType.PROPERTY_LOCATION_GAP_FACTOR_MAX + "]";
@@ -470,14 +470,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale to Scene Size";
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the " + COLOR_LOWER_CASE + " bar legend size to percentage of the scene image size using Scene Size Scaling";
     private static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Apply";
-    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = SCENE_SCALING_WIDTH;
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = SCENE_SCALING_LENGTH;
     public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = String.class;
 
     public static final String PROPERTY_IMAGE_SCALING_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 25.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 100.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;

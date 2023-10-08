@@ -165,7 +165,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_SIZE_LABEL = "Labels Font Size";
     public static final String PROPERTY_LABELS_SIZE_TOOLTIP = "Set size of the label text";
     private static final String PROPERTY_LABELS_SIZE_ALIAS = "graticuleLabelsSize";
-    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 18;
+    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 25;
     public static final Class PROPERTY_LABELS_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_LABELS_SIZE_VALUE_MIN = 6;
     public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 70;
@@ -173,7 +173,7 @@ public class GraticuleLayerType extends LayerType {
 
 
     public static final String PROPERTY_LABELS_COLOR_NAME = "graticule.labels.color";
-    public static final String PROPERTY_LABELS_COLOR_LABEL = "Lables Font Color";
+    public static final String PROPERTY_LABELS_COLOR_LABEL = "Labels Font Color";
     public static final String PROPERTY_LABELS_COLOR_TOOLTIP = "Set color of the label text";
     private static final String PROPERTY_LABELS_COLOR_ALIAS = "graticuleLabelsColor";
     public static final Color PROPERTY_LABELS_COLOR_DEFAULT = Color.BLACK;

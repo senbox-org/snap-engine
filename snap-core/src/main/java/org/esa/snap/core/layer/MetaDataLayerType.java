@@ -115,7 +115,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_GAP_LABEL = "Margin Gap";
     public static final String PROPERTY_MARGIN_GAP_TOOLTIP = "Percentage of scene size to place metadata away from the edge of the scene image";
     private static final String PROPERTY_MARGIN_GAP_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_MARGIN_GAP_DEFAULT = 35.0;
+    public static final Double PROPERTY_MARGIN_GAP_DEFAULT = 50.0;
     public static final double PROPERTY_MARGIN_GAP_MIN = -100;
     public static final double PROPERTY_MARGIN_GAP_MAX = 100;
     public static final String PROPERTY_MARGIN_GAP_INTERVAL = "[" + MetaDataLayerType.PROPERTY_MARGIN_GAP_MIN + "," + MetaDataLayerType.PROPERTY_MARGIN_GAP_MAX + "]";
@@ -265,7 +265,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_FONT_SIZE_LABEL = "Margin Font Size";
     public static final String PROPERTY_MARGIN_FONT_SIZE_TOOLTIP = "Set size of the footer text";
     private static final String PROPERTY_MARGIN_FONT_SIZE_ALIAS =  PROPERTY_MARGIN_FORMAT_ROOT_ALIAS + "Size";
-    public static final int PROPERTY_MARGIN_FONT_SIZE_DEFAULT = 15;
+    public static final int PROPERTY_MARGIN_FONT_SIZE_DEFAULT = 20;
     public static final Class PROPERTY_MARGIN_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_MARGIN_FONT_SIZE_MIN = 6;
     public static final int PROPERTY_MARGIN_FONT_SIZE_MAX = 70;
@@ -326,7 +326,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD_TOOLTIP = "Adds a title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield";
-    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Title: <GLOBAL_ATTR=title>";
+    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<GLOBAL_ATTR=title>";
     public static final Class PROPERTY_HEADER_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD2_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield2";
@@ -340,7 +340,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD3_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD3_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD3_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield3";
-    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "";
+    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "File: <PROPERTY=file><br><PROPERTY=scene_date>";
     public static final Class PROPERTY_HEADER_TEXTFIELD3_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD4_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield4";
@@ -460,7 +460,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_SHOW_LABEL = "Show Footer Annotation";
     public static final String PROPERTY_FOOTER2_SHOW_TOOLTIP = "Show footer";
     public static final String PROPERTY_FOOTER2_SHOW_ALIAS = PROPERTY_FOOTER2_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_FOOTER2_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_FOOTER2_SHOW_DEFAULT = false;
     public static final Class PROPERTY_FOOTER2_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_FOOTER2_TEXTFIELD_KEY = PROPERTY_FOOTER2_ROOT_KEY + ".textfield";
@@ -525,14 +525,14 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_LOCATION_LABEL = "Footer Location";
     public static final String PROPERTY_FOOTER2_LOCATION_TOOLTIP = "Where to place the footer on the image";
     private static final String PROPERTY_FOOTER2_LOCATION_ALIAS = PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "Location";
-    public static final String PROPERTY_FOOTER2_LOCATION_DEFAULT = LOCATION_BOTTOM_LEFT;
+    public static final String PROPERTY_FOOTER2_LOCATION_DEFAULT = LOCATION_BOTTOM_CENTER;
     public static final Class PROPERTY_FOOTER2_LOCATION_TYPE = String.class;
 
     public static final String PROPERTY_FOOTER2_GAP_KEY = PROPERTY_FOOTER2_FORMAT_ROOT_KEY + ".offset";
     public static final String PROPERTY_FOOTER2_GAP_LABEL = "Footer Gap";
     public static final String PROPERTY_FOOTER2_GAP_TOOLTIP = "Percentage of scene size to place footer away from the edge of the scene image";
     private static final String PROPERTY_FOOTER2_GAP_ALIAS = PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 40.0;
+    public static final Double PROPERTY_FOOTER2_GAP_DEFAULT = 50.0;
     public static final double PROPERTY_FOOTER2_GAP_MIN = -100;
     public static final double PROPERTY_FOOTER2_GAP_MAX = 100;
     public static final String PROPERTY_FOOTER2_GAP_INTERVAL = "[" + MetaDataLayerType.PROPERTY_MARGIN_GAP_MIN + "," + MetaDataLayerType.PROPERTY_MARGIN_GAP_MAX + "]";
@@ -543,7 +543,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FOOTER2_FONT_SIZE_LABEL = "Footer Font Size";
     public static final String PROPERTY_FOOTER2_FONT_SIZE_TOOLTIP = "Set size of the footer text";
     private static final String PROPERTY_FOOTER2_FONT_SIZE_ALIAS =  PROPERTY_FOOTER2_FORMAT_ROOT_ALIAS + "Size";
-    public static final int PROPERTY_FOOTER2_FONT_SIZE_DEFAULT = 15;
+    public static final int PROPERTY_FOOTER2_FONT_SIZE_DEFAULT = 20;
     public static final Class PROPERTY_FOOTER2_FONT_SIZE_TYPE = Integer.class;
     public static final int PROPERTY_FOOTER2_FONT_SIZE_MIN = 6;
     public static final int PROPERTY_FOOTER2_FONT_SIZE_MAX = 70;
