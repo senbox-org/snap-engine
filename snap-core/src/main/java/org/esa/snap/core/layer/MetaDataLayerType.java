@@ -137,20 +137,6 @@ public class MetaDataLayerType extends LayerType {
     public static final Class PROPERTY_MARGIN_TEXTFIELD2_TYPE = String.class;
 
 
-    public static final String PROPERTY_MARGIN_METADATA_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata";
-    public static final String PROPERTY_MARGIN_METADATA_LABEL = "PROPERTY List";
-    public static final String PROPERTY_MARGIN_METADATA_TOOLTIP = "Adds information properties";
-    public static final String PROPERTY_MARGIN_METADATA_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata";
-    public static final String PROPERTY_MARGIN_METADATA_DEFAULT = "file,product_type";
-    public static final Class PROPERTY_MARGIN_METADATA_TYPE = String.class;
-
-    public static final String PROPERTY_MARGIN_METADATA2_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata2";
-    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "PROPERTIES List";
-    public static final String PROPERTY_MARGIN_METADATA2_TOOLTIP = "Adds information properties";
-    public static final String PROPERTY_MARGIN_METADATA2_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata2";
-    public static final String PROPERTY_MARGIN_METADATA2_DEFAULT = "file_location,band,band_description";
-    public static final Class PROPERTY_MARGIN_METADATA2_TYPE = String.class;
-
     public static final String PROPERTY_MARGIN_PROPERTY_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".property.heading";
     public static final String PROPERTY_MARGIN_PROPERTY_HEADING_LABEL = "PROPERTIES Section Heading";
     public static final String PROPERTY_MARGIN_PROPERTY_HEADING_TOOLTIP = "Heading of the PROPERTY section";
@@ -172,6 +158,20 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_BAND_HEADING_DEFAULT = "Band Metadata (Band_Attributes): <PROPERTY=band>";
     public static final Class PROPERTY_MARGIN_BAND_HEADING_TYPE = String.class;
 
+
+    public static final String PROPERTY_MARGIN_METADATA_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata";
+    public static final String PROPERTY_MARGIN_METADATA_LABEL = "PROPERTY List";
+    public static final String PROPERTY_MARGIN_METADATA_TOOLTIP = "Adds information properties";
+    public static final String PROPERTY_MARGIN_METADATA_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata";
+    public static final String PROPERTY_MARGIN_METADATA_DEFAULT = "file,product_type,scene_date_long,file_location";
+    public static final Class PROPERTY_MARGIN_METADATA_TYPE = String.class;
+
+    public static final String PROPERTY_MARGIN_METADATA2_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata2";
+    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "PROPERTIES List";
+    public static final String PROPERTY_MARGIN_METADATA2_TOOLTIP = "Adds information properties";
+    public static final String PROPERTY_MARGIN_METADATA2_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata2";
+    public static final String PROPERTY_MARGIN_METADATA2_DEFAULT = "band,band_description,units,scene_size";
+    public static final Class PROPERTY_MARGIN_METADATA2_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA3_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata3";
     public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOBAL_ATTRIBUTES List";
@@ -326,21 +326,21 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD_TOOLTIP = "Adds a title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield";
-    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<GLOBAL_ATTR=title>";
+    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)<br><GLOBAL_ATTR=title>";
     public static final Class PROPERTY_HEADER_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD2_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield2";
     public static final String PROPERTY_HEADER_TEXTFIELD2_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD2_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD2_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield2";
-    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)";
+    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_long><br>File: <PROPERTY=file>";
     public static final Class PROPERTY_HEADER_TEXTFIELD2_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD3_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield3";
     public static final String PROPERTY_HEADER_TEXTFIELD3_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD3_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD3_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield3";
-    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "File: <PROPERTY=file><br><PROPERTY=scene_date>";
+    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "";
     public static final Class PROPERTY_HEADER_TEXTFIELD3_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD4_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield4";
