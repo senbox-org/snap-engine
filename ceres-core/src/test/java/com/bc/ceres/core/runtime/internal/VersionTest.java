@@ -16,12 +16,36 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
 import com.bc.ceres.core.runtime.Version;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
-public class VersionTest extends TestCase {
+public class VersionTest {
 
+    private static void testVersion(Version actualVersion,
+                                    int expectedMajor,
+                                    int expectedMinor,
+                                    int expectedMicro,
+                                    String expectedQualifier) {
+        assertEquals(expectedMajor, actualVersion.getMajor());
+        assertEquals(expectedMinor, actualVersion.getMinor());
+        assertEquals(expectedMicro, actualVersion.getMicro());
+        assertEquals(expectedQualifier, actualVersion.getQualifier());
+    }
+
+    private static void testVersion(Version actualVersion,
+                                    int[] expectedNumbers,
+                                    String expectedQualifier) {
+        assertEquals(expectedNumbers.length, actualVersion.getNumberCount());
+        for (int i = 0; i < expectedNumbers.length; i++) {
+            assertEquals("expectedNumbers[" + i + "]", expectedNumbers[i], actualVersion.getNumber(i));
+        }
+        assertEquals(expectedQualifier, actualVersion.getQualifier());
+    }
+
+    @Test
     public void testParsing() {
         try {
             Version.parseVersion(null);
@@ -67,6 +91,7 @@ public class VersionTest extends TestCase {
         testVersion(Version.parseVersion("13-4-9656-12A"), 13, 4, 9656, "12A");
     }
 
+    @Test
     public void testToString() {
         assertEquals("1.6.3-SNAPSHOT", new Version(1, 6, 3, "SNAPSHOT").toString());
         assertEquals("1.6.3-SNAPSHOT", Version.parseVersion("1.6.3-SNAPSHOT").toString());
@@ -76,6 +101,7 @@ public class VersionTest extends TestCase {
         assertEquals("10.3.2-RC4", new Version(10, 3, 2, "RC4").toString());
     }
 
+    @Test
     public void testPartSeparators() {
         assertEquals(Version.parseVersion("1.6"), Version.parseVersion("1.6"));
         assertEquals(Version.parseVersion("1.6"), Version.parseVersion("1-6"));
@@ -83,6 +109,7 @@ public class VersionTest extends TestCase {
         assertEquals(Version.parseVersion("1-6"), Version.parseVersion("1_6"));
     }
 
+    @Test
     public void testCompareMajor() {
         Version v1;
         Version v2;
@@ -93,13 +120,14 @@ public class VersionTest extends TestCase {
 
         v1 = new Version(4, 2, 6, "");
         v2 = new Version(4, 2, 6, "");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 6, "");
         v2 = new Version(3, 2, 6, "");
         assertTrue(v1.compareTo(v2) > 0);
     }
 
+    @Test
     public void testCompareMinor() {
         Version v1;
         Version v2;
@@ -110,13 +138,14 @@ public class VersionTest extends TestCase {
 
         v1 = new Version(4, 4, 12, "");
         v2 = new Version(4, 4, 12, "");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 4, 12, "");
         v2 = new Version(4, 1, 12, "");
         assertTrue(v1.compareTo(v2) > 0);
     }
 
+    @Test
     public void testCompareMicro() {
         Version v1;
         Version v2;
@@ -127,13 +156,14 @@ public class VersionTest extends TestCase {
 
         v1 = new Version(4, 2, 4, "");
         v2 = new Version(4, 2, 4, "");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 4, "");
         v2 = new Version(4, 2, 1, "");
         assertTrue(v1.compareTo(v2) > 0);
     }
 
+    @Test
     public void testCompareSnapshot() {
         Version v1;
         Version v2;
@@ -160,9 +190,10 @@ public class VersionTest extends TestCase {
 
         v1 = Version.parseVersion("2.2-SNAPSHOT");
         v2 = Version.parseVersion("2.2-SNAPSHOT");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
     }
 
+    @Test
     public void testCompareQualifier() {
         Version v1;
         Version v2;
@@ -174,7 +205,7 @@ public class VersionTest extends TestCase {
 
         v1 = new Version(4, 2, 1, "RC2");
         v2 = new Version(4, 2, 1, "RC2");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 1, "RC2");
         v2 = new Version(4, 2, 1, "RC1");
@@ -202,39 +233,18 @@ public class VersionTest extends TestCase {
 
         v1 = new Version(4, 2, 1, "");
         v2 = new Version(4, 2, 1, "0");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 1, "0000");
         v2 = new Version(4, 2, 1, "");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 1, "00.00");
         v2 = new Version(4, 2, 1, "");
-        assertTrue(v1.compareTo(v2) == 0);
+        assertEquals(0, v1.compareTo(v2));
 
         v1 = new Version(4, 2, 1, "54.324");
         v2 = new Version(4, 2, 1, "54");
         assertTrue(v1.compareTo(v2) > 0);
-    }
-
-    private static void testVersion(Version actualVersion,
-                                    int expectedMajor,
-                                    int expectedMinor,
-                                    int expectedMicro,
-                                    String expectedQualifier) {
-        assertEquals(expectedMajor, actualVersion.getMajor());
-        assertEquals(expectedMinor, actualVersion.getMinor());
-        assertEquals(expectedMicro, actualVersion.getMicro());
-        assertEquals(expectedQualifier, actualVersion.getQualifier());
-    }
-
-    private static void testVersion(Version actualVersion,
-                                    int[] expectedNumbers,
-                                    String expectedQualifier) {
-        assertEquals(expectedNumbers.length, actualVersion.getNumberCount());
-        for (int i = 0; i < expectedNumbers.length; i++) {
-            assertEquals("expectedNumbers[" + i + "]", expectedNumbers[i], actualVersion.getNumber(i));
-        }
-        assertEquals(expectedQualifier, actualVersion.getQualifier());
     }
 }

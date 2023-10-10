@@ -16,14 +16,15 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Vector;
 
-public class ProductManagerTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ProductManagerTest {
 
     private static final String _prodName = "TestProduct";
     private static final int _sceneWidth = 400;
@@ -34,30 +35,15 @@ public class ProductManagerTest extends TestCase {
     private Product product2;
     private Product product3;
 
-    public ProductManagerTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductManagerTest.class);
-    }
-
-    /**
-     * Initialization for the tests.
-     */
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         productManager = new ProductManager();
         product1 = new Product("product1", _prodName, _sceneWidth, _sceneHeight);
         product2 = new Product("product2", _prodName, _sceneWidth, _sceneHeight);
         product3 = new Product("product3", _prodName, _sceneWidth, _sceneHeight);
     }
 
-    @Override
-    protected void tearDown() {
-
-    }
-
+    @Test
     public void testAddProduct() {
         final ProductManagerListener listener = new ProductManagerListener();
         productManager.addListener(listener);
@@ -78,6 +64,7 @@ public class ProductManagerTest extends TestCase {
         assertEquals(0, removedProducts.size());
     }
 
+    @Test
     public void testRemoveProduct() {
         addAllProducts();
 
@@ -107,6 +94,7 @@ public class ProductManagerTest extends TestCase {
         assertSame(product2, removedProducts.get(0));
     }
 
+    @Test
     public void testRemoveAll() {
         addAllProducts();
         final ProductManagerListener listener = new ProductManagerListener();
@@ -123,7 +111,6 @@ public class ProductManagerTest extends TestCase {
         assertEquals(0, product2.getRefNo());
         assertEquals(0, product3.getRefNo());
 
-
         final Vector<Product> removedProducts = listener.getRemovedProducts();
         assertEquals(3, removedProducts.size());
         assertSame(product1, removedProducts.get(0));
@@ -134,16 +121,18 @@ public class ProductManagerTest extends TestCase {
         assertEquals(0, addedProducts.size());
     }
 
+    @Test
     public void testContainsProduct() {
-        assertEquals(false, productManager.containsProduct("product2"));
+        assertFalse(productManager.containsProduct("product2"));
 
         productManager.addProduct(product2);
-        assertEquals(true, productManager.containsProduct("product2"));
+        assertTrue(productManager.containsProduct("product2"));
 
         productManager.removeProduct(product2);
-        assertEquals(false, productManager.containsProduct("product2"));
+        assertFalse(productManager.containsProduct("product2"));
     }
 
+    @Test
     public void testGetNumProducts() {
         assertEquals(0, productManager.getProductCount());
         addAllProducts();
@@ -160,6 +149,7 @@ public class ProductManagerTest extends TestCase {
         assertEquals(0, productManager.getProductCount());
     }
 
+    @Test
     public void testGetProduct() {
         addAllProducts();
 
@@ -168,6 +158,7 @@ public class ProductManagerTest extends TestCase {
         assertSame(product3, productManager.getProduct(2));
     }
 
+    @Test
     public void testGetProductNames() {
         addAllProducts();
 
@@ -177,6 +168,7 @@ public class ProductManagerTest extends TestCase {
         assertEquals(names[2], product3.getName());
     }
 
+    @Test
     public void testAddProductsWithTheSameName() {
         final Product product1 = new Product("name", "t", 1, 1);
         final Product product2 = new Product("name", "t", 1, 1);
@@ -192,6 +184,7 @@ public class ProductManagerTest extends TestCase {
         assertSame(product3, productManager.getProduct(2));
     }
 
+    @Test
     public void testGetProductDisplayNames() {
         final Product product1 = new Product("name", "t", 1, 1);
         final Product product2 = new Product("name", "t", 1, 1);
@@ -208,6 +201,7 @@ public class ProductManagerTest extends TestCase {
         assertEquals("[3] name", names[2]);
     }
 
+    @Test
     public void testGetProductByDisplayName() {
         final Product product1 = new Product("name", "t", 1, 1);
         final Product product2 = new Product("name", "t", 1, 1);
@@ -223,6 +217,7 @@ public class ProductManagerTest extends TestCase {
         assertSame(product3, productManager.getProductByDisplayName("[3] name"));
     }
 
+    @Test
     public void testVirtualBandExpressionsAreUpdateIfForeignNodeNameChanged() {
         final Product product1 = new Product("P1", "t", 1, 1);
         final VirtualBand p1v1 = new VirtualBand("P1V1", ProductData.TYPE_FLOAT32, 1, 1, "42");
@@ -244,6 +239,7 @@ public class ProductManagerTest extends TestCase {
         assertEquals("$1.TheAnswer + $2.P2V1", p3v1.getExpression());
     }
 
+    @Test
     public void testMaskExpressionsAreUpdateIfForeignNodeNameChanged() {
         final Product product1 = new Product("P1", "t", 1, 1);
         final Product product2 = new Product("P2", "t", 1, 1);
@@ -260,17 +256,16 @@ public class ProductManagerTest extends TestCase {
         assertEquals("$1.TheAnswer == 42.0", Mask.BandMathsType.getExpression(mask));
     }
 
-
     private void addAllProducts() {
         productManager.addProduct(product1);
         productManager.addProduct(product2);
         productManager.addProduct(product3);
     }
 
-    private class ProductManagerListener implements ProductManager.Listener {
+    private static class ProductManagerListener implements ProductManager.Listener {
 
-        private Vector<Product> addedProducts = new Vector<>();
-        private Vector<Product> removedProducts = new Vector<>();
+        private final Vector<Product> addedProducts = new Vector<>();
+        private final Vector<Product> removedProducts = new Vector<>();
 
         public void productAdded(ProductManager.Event event) {
             addedProducts.add(event.getProduct());

@@ -16,14 +16,18 @@
 
 package com.bc.ceres.swing.selection.support;
 
-import junit.framework.TestCase;
 import com.bc.ceres.swing.selection.TracingSelectionChangeListener;
+import org.junit.Test;
 
-public class DefaultSelectionContextTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DefaultSelectionContextTest {
+
+    @Test
     public void testSelection() {
         DefaultSelectionContext context = new DefaultSelectionContext();
         assertNotNull(context.getSelection());
-        assertEquals(true, context.getSelection().isEmpty());
+        assertTrue(context.getSelection().isEmpty());
 
         TracingSelectionChangeListener listener = new TracingSelectionChangeListener();
         context.addSelectionChangeListener(listener);

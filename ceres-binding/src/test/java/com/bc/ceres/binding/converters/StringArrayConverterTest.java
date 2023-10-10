@@ -18,6 +18,9 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class StringArrayConverterTest extends AbstractConverterTest {
 
@@ -32,7 +35,7 @@ public class StringArrayConverterTest extends AbstractConverterTest {
     }
 
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         assertEquals("\u002C", ",");
         testValueType(String[].class);

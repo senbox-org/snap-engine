@@ -16,29 +16,32 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
-import com.bc.ceres.core.runtime.internal.HrefParser;
+import static org.junit.Assert.assertEquals;
 
-public class HrefParserTest extends TestCase {
+public class HrefParserTest {
     private MockHandler handler;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         handler = new MockHandler();
     }
 
+    @Test
     public void testEmpty() throws IOException {
         final HrefParser hrefParser = new HrefParser(new StringReader(""));
         hrefParser.parse(handler);
         assertEquals("", handler.toString());
     }
 
+    @Test
     public void testApacheDirListing() throws IOException {
         final String name = "html/apache-dir-listing.html";
         final InputStream resourceAsStream = HrefParserTest.class.getResourceAsStream(name);
@@ -55,6 +58,7 @@ public class HrefParserTest extends TestCase {
                         "", handler.toString());
     }
 
+    @Test
     public void testApacheDirListingWithVariations() throws IOException {
         final String name = "html/apache-dir-listing-var.html";
         final InputStream resourceAsStream = HrefParserTest.class.getResourceAsStream(name);

@@ -21,12 +21,15 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.runtime.Dependency;
 import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.Version;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.text.MessageFormat;
 
-public class ConsistencyCheckerTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ConsistencyCheckerTest {
+
+    @Test
     public void testAGoodSetup() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.1.xml",
@@ -38,7 +41,7 @@ public class ConsistencyCheckerTest extends TestCase {
                 "xml/consistency/module-c-1.0-needs-b-2.3.2.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          repositoryModuleFileNames);
+                repositoryModuleFileNames);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(2, moduleManager.getInstalledModuleItems().length);
@@ -52,31 +55,32 @@ public class ConsistencyCheckerTest extends TestCase {
         assertTrue(checker.check());
     }
 
+    @Test
     public void testWithDependencyToLowerVersionAsPresent() throws CoreException {
-            String[] installedModuleFileNames = {
-                    "xml/consistency/module-a-1.0.xml",
-                    "xml/consistency/module-b-2.4.xml",
-            };
-            String[] repositoryModuleFileNames = {
-                    "xml/consistency/module-a-1.2-needs-b-2.3.2.xml",
-                    "xml/consistency/module-c-1.0-needs-b-2.3.2.xml",
-            };
-            ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                              repositoryModuleFileNames);
-            moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
+        String[] installedModuleFileNames = {
+                "xml/consistency/module-a-1.0.xml",
+                "xml/consistency/module-b-2.4.xml",
+        };
+        String[] repositoryModuleFileNames = {
+                "xml/consistency/module-a-1.2-needs-b-2.3.2.xml",
+                "xml/consistency/module-c-1.0-needs-b-2.3.2.xml",
+        };
+        ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
+                repositoryModuleFileNames);
+        moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
-            assertEquals(2, moduleManager.getInstalledModuleItems().length);
-            assertEquals(1, moduleManager.getUpdatableModuleItems().length);
-            assertEquals(1, moduleManager.getAvailableModuleItems().length);
+        assertEquals(2, moduleManager.getInstalledModuleItems().length);
+        assertEquals(1, moduleManager.getUpdatableModuleItems().length);
+        assertEquals(1, moduleManager.getAvailableModuleItems().length);
 
-            ConsistencyChecker checker = new ConsistencyChecker(moduleManager);
+        ConsistencyChecker checker = new ConsistencyChecker(moduleManager);
 
-            findModuleItem(moduleManager.getAvailableModuleItems(), "module-c").setAction(ModuleItem.Action.INSTALL);
-            findModuleItem(moduleManager.getUpdatableModuleItems(), "module-a").setAction(ModuleItem.Action.UPDATE);
-            assertTrue(checker.check());
-        }
+        findModuleItem(moduleManager.getAvailableModuleItems(), "module-c").setAction(ModuleItem.Action.INSTALL);
+        findModuleItem(moduleManager.getUpdatableModuleItems(), "module-a").setAction(ModuleItem.Action.UPDATE);
+        assertTrue(checker.check());
+    }
 
-
+    @Test
     public void testWithMissingOptionalDependencies() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.0.xml",
@@ -87,7 +91,7 @@ public class ConsistencyCheckerTest extends TestCase {
                 "xml/consistency/module-c-1.0-needs-b-2.3.2.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          repositoryModuleFileNames);
+                repositoryModuleFileNames);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(2, moduleManager.getInstalledModuleItems().length);
@@ -101,9 +105,9 @@ public class ConsistencyCheckerTest extends TestCase {
 
         findModuleItem(moduleManager.getAvailableModuleItems(), "module-c").setAction(ModuleItem.Action.INSTALL);
         assertTrue(checker.check());
-
     }
 
+    @Test
     public void testUninstall() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.2-needs-b-2.3.2.xml",
@@ -111,7 +115,7 @@ public class ConsistencyCheckerTest extends TestCase {
                 "xml/consistency/module-b-2.3.2.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          new String[0]);
+                new String[0]);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(3, moduleManager.getInstalledModuleItems().length);
@@ -128,6 +132,7 @@ public class ConsistencyCheckerTest extends TestCase {
         assertTrue(checker.check());
     }
 
+    @Test
     public void testWithMissingDependencies() throws CoreException {
         String[] installedModuleFileNames = {
                 "xml/consistency/module-a-1.0.xml",
@@ -139,7 +144,7 @@ public class ConsistencyCheckerTest extends TestCase {
                 "xml/consistency/module-c-1.0-needs-b-2.3.2.xml",
         };
         ModuleManager moduleManager = TestHelpers.createModuleManager(installedModuleFileNames,
-                                                          repositoryModuleFileNames);
+                repositoryModuleFileNames);
         moduleManager.synchronizeWithRepository(ProgressMonitor.NULL);
 
         assertEquals(2, moduleManager.getInstalledModuleItems().length);
@@ -150,11 +155,11 @@ public class ConsistencyCheckerTest extends TestCase {
 
         findModuleItem(moduleManager.getAvailableModuleItems(), "module-c").setAction(ModuleItem.Action.INSTALL);
         assertFalse(checker.check());
-        assertMissingDependency(checker, "module-b", "2.3.2", "module-c","1.0");
+        assertMissingDependency(checker, "module-b", "2.3.2", "module-c", "1.0");
 
         findModuleItem(moduleManager.getUpdatableModuleItems(), "module-b").setAction(ModuleItem.Action.UPDATE);
         assertFalse(checker.check());
-        assertMissingDependency(checker, "module-a", "1.1", "module-b","2.3.2");
+        assertMissingDependency(checker, "module-a", "1.1", "module-b", "2.3.2");
 
     }
 
@@ -163,23 +168,23 @@ public class ConsistencyCheckerTest extends TestCase {
                                          String declaredByName,
                                          String declaredByVersion) {
         MissingDependencyInfo dependencyInfo = findDependency(checker.getMissingDependencies(),
-                                                                                 dependencyName,
-                                                                                 dependencyVersion);
+                dependencyName,
+                dependencyVersion);
         if (dependencyInfo == null) {
             String message = MessageFormat.format("Missing dependency to {0}-{1} by {2}-{3} not detected",
-                                                  dependencyName,
-                                                  dependencyVersion,
-                                                  declaredByName,
-                                                  declaredByVersion);
+                    dependencyName,
+                    dependencyVersion,
+                    declaredByName,
+                    declaredByVersion);
             fail(message);
         }
         Module[] neededbyModules = dependencyInfo.getDependentModules();
-        if(findModule(neededbyModules, declaredByName, declaredByVersion) == null) {
+        if (findModule(neededbyModules, declaredByName, declaredByVersion) == null) {
             String message = MessageFormat.format("Missing dependency to {0}-{1} is not declared by {2}-{3}",
-                                                  dependencyName,
-                                                  dependencyVersion,
-                                                  declaredByName,
-                                                  declaredByVersion);
+                    dependencyName,
+                    dependencyVersion,
+                    declaredByName,
+                    declaredByVersion);
             fail(message);
         }
     }
@@ -191,7 +196,7 @@ public class ConsistencyCheckerTest extends TestCase {
         for (MissingDependencyInfo missingDependency : missingDependencies) {
             Dependency dependency = missingDependency.getDependency();
             if (dependency.getModuleSymbolicName().equals(moduleName) &&
-                dependency.getVersion().equals(version)) {
+                    dependency.getVersion().equals(version)) {
                 return missingDependency;
             }
         }
@@ -216,6 +221,4 @@ public class ConsistencyCheckerTest extends TestCase {
         }
         return null;
     }
-
-
 }

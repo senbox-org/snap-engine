@@ -16,7 +16,10 @@
 
 package org.esa.snap.core.datamodel;
 
-import java.util.Arrays;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class MetadataAttributeTest extends AbstractNamedNodeTest {
 
@@ -24,24 +27,21 @@ public class MetadataAttributeTest extends AbstractNamedNodeTest {
     MetadataAttribute _attributeFloat = null;
     MetadataAttribute _attributeString = null;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _attributeInt = new MetadataAttribute("attributeInt", ProductData.createInstance(ProductData.TYPE_INT32, 3),
-                                              false);
+                false);
         _attributeFloat = new MetadataAttribute("attributeFloat", ProductData.createInstance(ProductData.TYPE_FLOAT32),
-                                                false);
+                false);
         _attributeString = new MetadataAttribute("attributeString",
-                                                 ProductData.createInstance(ProductData.TYPE_ASCII, 32), false);
+                ProductData.createInstance(ProductData.TYPE_ASCII, 32), false);
     }
 
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void testRsAttribute() {
         try {
             new MetadataAttribute(null, ProductData.createInstance(ProductData.TYPE_FLOAT32),
-                                  false);
+                    false);
             fail("new MetadataAttribute(null, false, Value.create(Value.TYPE_FLOAT32)) should not be possible");
         } catch (IllegalArgumentException e) {
         }
@@ -53,6 +53,7 @@ public class MetadataAttributeTest extends AbstractNamedNodeTest {
         }
     }
 
+    @Test
     public void testSetValueWithWrongType() {
         // rejects illegal type?
         try {
@@ -62,8 +63,8 @@ public class MetadataAttributeTest extends AbstractNamedNodeTest {
         }
     }
 
+    @Test
     public void testSetData() {
-
         try {
             _attributeInt.setDataElems(null);
             fail("IllegalArgumentException expected because data is null");
@@ -72,27 +73,30 @@ public class MetadataAttributeTest extends AbstractNamedNodeTest {
 
         // null --> new value: is modified ?
         _attributeInt.setDataElems(new int[]{1, 2, 3});
-        assertEquals(true, Arrays.equals(new int[]{1, 2, 3}, (int[]) _attributeInt.getDataElems()));
-        assertEquals(true, _attributeInt.isModified());
+        assertArrayEquals(new int[]{1, 2, 3}, (int[]) _attributeInt.getDataElems());
+        assertTrue(_attributeInt.isModified());
 
         // old value == new value?
         _attributeInt.setDataElems(new int[]{1, 2, 3});
-        assertEquals(true, Arrays.equals(new int[]{1, 2, 3}, (int[]) _attributeInt.getDataElems()));
-        assertEquals(true, _attributeInt.isModified());
+        assertArrayEquals(new int[]{1, 2, 3}, (int[]) _attributeInt.getDataElems());
+        assertTrue(_attributeInt.isModified());
     }
 
+    @Test
     public void testSetDescription() {
         testSetDescription(_attributeInt);
         testSetDescription(_attributeFloat);
         testSetDescription(_attributeString);
     }
 
+    @Test
     public void testSetUnit() {
         testSetUnit(_attributeInt);
         testSetUnit(_attributeFloat);
         testSetUnit(_attributeString);
     }
 
+    @Test
     public void testASCIIAttribute() {
         final MetadataAttribute attribute1 = new MetadataAttribute("name", ProductData.TYPE_ASCII, 1);
         attribute1.getData().setElems("new data");

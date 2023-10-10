@@ -19,12 +19,26 @@ package com.bc.ceres.binio.internal;
 import com.bc.ceres.binio.SequenceType;
 import com.bc.ceres.binio.SimpleType;
 import com.bc.ceres.binio.Type;
+import org.junit.Test;
+
 import static com.bc.ceres.binio.internal.CompoundTypeImplTest.DATASET_TYPE;
 import static com.bc.ceres.binio.internal.CompoundTypeImplTest.RECORD_TYPE;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class SequenceTypeImplTest extends TestCase {
+public class SequenceTypeImplTest {
 
+    private static void testSequenceType(SequenceType sequenceType, Type expectedElementType, int expectedElementCount, String expectedName, int expectedSize) {
+        assertEquals(expectedName, sequenceType.getName());
+        assertEquals(expectedSize, sequenceType.getSize());
+        assertSame(expectedElementType, sequenceType.getElementType());
+        assertEquals(expectedElementCount, sequenceType.getElementCount());
+        assertFalse(sequenceType.isSimpleType());
+        assertTrue(sequenceType.isCollectionType());
+        assertTrue(sequenceType.isSequenceType());
+        assertFalse(sequenceType.isCompoundType());
+    }
+
+    @Test
     public void testSimpleSequenceTypes() {
         testSequenceType(new SequenceTypeImpl(SimpleType.BYTE, 512), SimpleType.BYTE, 512, "byte[512]", 512);
         testSequenceType(new SequenceTypeImpl(SimpleType.UBYTE, 512), SimpleType.UBYTE, 512, "ubyte[512]", 512);
@@ -45,6 +59,7 @@ public class SequenceTypeImplTest extends TestCase {
         testSequenceType(new GrowableSequenceTypeImpl(SimpleType.DOUBLE), SimpleType.DOUBLE, 0, "double[]", 0);
     }
 
+    @Test
     public void testComplexSequenceTypes() {
         SequenceType sf = new GrowableSequenceTypeImpl(SimpleType.FLOAT);
         SequenceType ssf = new GrowableSequenceTypeImpl(sf);
@@ -76,18 +91,4 @@ public class SequenceTypeImplTest extends TestCase {
         sds = new GrowableSequenceTypeImpl(DATASET_TYPE);
         testSequenceType(sds, DATASET_TYPE, 0, "Dataset[]", 0);
     }
-
-
-    private static void testSequenceType(SequenceType sequenceType, Type expectedElementType, int expectedElementCount, String expectedName, int expectedSize) {
-        assertEquals(expectedName, sequenceType.getName());
-        assertEquals(expectedSize, sequenceType.getSize());
-        assertSame(expectedElementType, sequenceType.getElementType());
-        assertEquals(expectedElementCount, sequenceType.getElementCount());
-        assertEquals(false, sequenceType.isSimpleType());
-        assertEquals(true, sequenceType.isCollectionType());
-        assertEquals(true, sequenceType.isSequenceType());
-        assertEquals(false, sequenceType.isCompoundType());
-    }
-
-
 }

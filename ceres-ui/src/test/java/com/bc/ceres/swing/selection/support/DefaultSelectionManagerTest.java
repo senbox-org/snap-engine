@@ -16,20 +16,25 @@
 
 package com.bc.ceres.swing.selection.support;
 
-import junit.framework.TestCase;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.selection.TracingSelectionChangeListener;
+import org.junit.Test;
 
-public class DefaultSelectionManagerTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DefaultSelectionManagerTest {
+
+    @Test
     public void testDefaults() {
         DefaultSelectionManager sm = new DefaultSelectionManager(this);
         assertNull(sm.getSelectionContext());
         assertNotNull(sm.getSelection());
-        assertEquals(true, sm.getSelection().isEmpty());
+        assertTrue(sm.getSelection().isEmpty());
     }
 
+    @Test
     public void testSelectionManagement() {
         Selection selectionA = new DefaultSelection("A");
         Selection selectionB = new DefaultSelection("B");
@@ -89,8 +94,8 @@ public class DefaultSelectionManagerTest extends TestCase {
         assertEquals("sc(A);sc(B);sc(A);sc(B);", listener.trace);
     }
 
+    @Test
     public void testListeners() {
-
         SelectionChangeListener[] changeListeners;
 
         DefaultSelectionManager sm = new DefaultSelectionManager(this);

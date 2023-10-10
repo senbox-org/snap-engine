@@ -15,12 +15,16 @@
  */
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.awt.Color;
+import java.awt.*;
+
+import static org.junit.Assert.*;
 
 
-public class ImageInfoTest extends TestCase {
+public class ImageInfoTest {
+
+    @Test
     public void testImageInfo1Band() {
         final ColorPaletteDef cpd = new ColorPaletteDef(new ColorPaletteDef.Point[]{
                 new ColorPaletteDef.Point(100, Color.ORANGE),
@@ -30,7 +34,7 @@ public class ImageInfoTest extends TestCase {
         });
         ImageInfo imageInfo = new ImageInfo(cpd);
         assertSame(cpd, imageInfo.getColorPaletteDef());
-        assertEquals(null, imageInfo.getRgbChannelDef());
+        assertNull(imageInfo.getRgbChannelDef());
         assertEquals(4, imageInfo.getColorComponentCount());
         assertEquals(ImageInfo.NO_COLOR, imageInfo.getNoDataColor());
         assertEquals(ImageInfo.HistogramMatching.None, imageInfo.getHistogramMatching());
@@ -49,12 +53,13 @@ public class ImageInfoTest extends TestCase {
         assertEquals(ImageInfo.HistogramMatching.Equalize, imageInfo.getHistogramMatching());
     }
 
+    @Test
     public void testImageInfo3Bands() {
         final RGBChannelDef rgbcd = new RGBChannelDef(new String[]{
                 "radiance_13", "radiance_5", "radiance_2"
         });
         ImageInfo imageInfo = new ImageInfo(rgbcd);
-        assertEquals(null, imageInfo.getColorPaletteDef());
+        assertNull(imageInfo.getColorPaletteDef());
         assertSame(rgbcd, imageInfo.getRgbChannelDef());
         assertEquals(4, imageInfo.getColorComponentCount());
 

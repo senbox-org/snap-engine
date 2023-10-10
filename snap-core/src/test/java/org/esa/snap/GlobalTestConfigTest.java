@@ -15,36 +15,31 @@
  */
 package org.esa.snap;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.util.SystemUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Properties;
 
-public class GlobalTestConfigTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class GlobalTestConfigTest {
 
     private Properties _propertys;
 
-    public GlobalTestConfigTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(GlobalTestConfigTest.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         _propertys = System.getProperties();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         System.setProperties(_propertys);
     }
 
+    @Test
     public void testGetEnvisatTestDataDir() {
         File file = null;
         try {
@@ -55,7 +50,7 @@ public class GlobalTestConfigTest extends TestCase {
         assertNotNull(file);
 
         System.setProperty(GlobalTestConfig.SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME,
-                           SystemUtils.convertToLocalPath("C:/envi/test/data/"));
+                SystemUtils.convertToLocalPath("C:/envi/test/data/"));
         try {
             file = GlobalTestConfig.getSnapTestDataInputDirectory();
         } catch (SecurityException e) {
@@ -70,9 +65,8 @@ public class GlobalTestConfigTest extends TestCase {
             fail("SecurityException not expected");
         }
         final File defaultFile = new File(SystemUtils.getApplicationHomeDir(),
-                                          SystemUtils.convertToLocalPath(
-                                                  GlobalTestConfig.SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH));
+                SystemUtils.convertToLocalPath(
+                        GlobalTestConfig.SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH));
         assertEquals(defaultFile, file);
     }
-
 }

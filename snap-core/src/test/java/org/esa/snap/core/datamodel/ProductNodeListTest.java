@@ -16,11 +16,12 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Before;
+import org.junit.Test;
 
-public class ProductNodeListTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class ProductNodeListTest {
 
     private ProductNodeList<MetadataAttribute> _nodeList;
     private MetadataAttribute _attribute1;
@@ -28,16 +29,9 @@ public class ProductNodeListTest extends TestCase {
     private MetadataAttribute _attribute3;
     private MetadataAttribute _attribute4;
 
-    public ProductNodeListTest(String testName) {
-        super(testName);
-    }
 
-    public static Test suite() {
-        return new TestSuite(ProductNodeListTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _nodeList = new ProductNodeList<MetadataAttribute>();
         _attribute1 = new MetadataAttribute("attribute1", ProductData.createInstance(ProductData.TYPE_INT32), true);
         _attribute2 = new MetadataAttribute("attribute2", ProductData.createInstance(ProductData.TYPE_INT32), true);
@@ -45,10 +39,7 @@ public class ProductNodeListTest extends TestCase {
         _attribute4 = new MetadataAttribute("attribute4", ProductData.createInstance(ProductData.TYPE_INT32), true);
     }
 
-    @Override
-    protected void tearDown() {
-    }
-
+    @Test
     public void testGetAt() {
         addAllNodes();
 
@@ -72,6 +63,7 @@ public class ProductNodeListTest extends TestCase {
         removeAllNodes();
     }
 
+    @Test
     public void testGet() {
         addAllNodes();
         assertEquals(_nodeList.get("attribute1"), _attribute1);
@@ -82,24 +74,26 @@ public class ProductNodeListTest extends TestCase {
         assertEquals(_nodeList.get("ATTRIBUTE2"), _attribute2);
         assertEquals(_nodeList.get("ATTRIBUTE3"), _attribute3);
         assertEquals(_nodeList.get("ATTRIBUTE4"), _attribute4);
-        assertEquals(_nodeList.get("ATTRIBUTEX"), null);
+        assertNull(_nodeList.get("ATTRIBUTEX"));
         removeAllNodes();
     }
 
+    @Test
     public void testContains() {
         addAllNodes();
-        assertEquals(_nodeList.contains("attribute1"), true);
-        assertEquals(_nodeList.contains("attribute2"), true);
-        assertEquals(_nodeList.contains("attribute3"), true);
-        assertEquals(_nodeList.contains("attribute4"), true);
-        assertEquals(_nodeList.contains("ATTRIBUTE1"), true);
-        assertEquals(_nodeList.contains("ATTRIBUTE2"), true);
-        assertEquals(_nodeList.contains("ATTRIBUTE3"), true);
-        assertEquals(_nodeList.contains("ATTRIBUTE4"), true);
-        assertEquals(_nodeList.contains("ATTRIBUTEX"), false);
+        assertTrue(_nodeList.contains("attribute1"));
+        assertTrue(_nodeList.contains("attribute2"));
+        assertTrue(_nodeList.contains("attribute3"));
+        assertTrue(_nodeList.contains("attribute4"));
+        assertTrue(_nodeList.contains("ATTRIBUTE1"));
+        assertTrue(_nodeList.contains("ATTRIBUTE2"));
+        assertTrue(_nodeList.contains("ATTRIBUTE3"));
+        assertTrue(_nodeList.contains("ATTRIBUTE4"));
+        assertFalse(_nodeList.contains("ATTRIBUTEX"));
         removeAllNodes();
     }
 
+    @Test
     public void testGetNames() {
         addAllNodes();
         String[] names = _nodeList.getNames();
@@ -110,6 +104,7 @@ public class ProductNodeListTest extends TestCase {
         removeAllNodes();
     }
 
+    @Test
     public void testToArray() {
         addAllNodes();
         ProductNode[] nodes = _nodeList.toArray();
@@ -120,6 +115,7 @@ public class ProductNodeListTest extends TestCase {
         removeAllNodes();
     }
 
+    @Test
     public void testIndexOf() {
         addAllNodes();
         assertEquals(_nodeList.indexOf("attribute1"), 0);
@@ -134,6 +130,7 @@ public class ProductNodeListTest extends TestCase {
         removeAllNodes();
     }
 
+    @Test
     public void testAddAndRemoveAndSize() {
         assertEquals(_nodeList.size(), 0);
         _nodeList.add(_attribute1);
@@ -155,50 +152,9 @@ public class ProductNodeListTest extends TestCase {
         _nodeList.add(_attribute2);
         _nodeList.add(_attribute3);
         _nodeList.add(_attribute4);
-
-//        final ProductNode[] children = _owner.getChildren();
-//        assertEquals(4, children.length);
-//        assertSame(_attribute1, children[0]);
-//        assertSame(_attribute2, children[1]);
-//        assertSame(_attribute3, children[2]);
-//        assertSame(_attribute4, children[3]);
     }
 
     private void removeAllNodes() {
         _nodeList.removeAll();
-
-//        final ProductNode[] children = _owner.getChildren();
-//        assertEquals(0, children.length);
     }
-
-//    public void testChildren() {
-//        final ProductNode[] empty = _owner.getChildren();
-//        assertNotNull(empty);
-//        assertEquals(0, empty.length);
-//
-//        addAllNodes();
-//
-//        final ProductNode[] fourChildren = _owner.getChildren();
-//        assertNotNull(fourChildren);
-//        assertEquals(4, fourChildren.length);
-//        assertSame(_attribute1, fourChildren[0]);
-//        assertSame(_attribute2, fourChildren[1]);
-//        assertSame(_attribute3, fourChildren[2]);
-//        assertSame(_attribute4, fourChildren[3]);
-//
-//        _nodeList.remove(_attribute2);
-//
-//        final ProductNode[] threeChildren = _owner.getChildren();
-//        assertNotNull(threeChildren);
-//        assertEquals(3, threeChildren.length);
-//        assertSame(_attribute1, threeChildren[0]);
-//        assertSame(_attribute3, threeChildren[1]);
-//        assertSame(_attribute4, threeChildren[2]);
-//
-//        removeAllNodes();
-//
-//        final ProductNode[] secondEmpty = _owner.getChildren();
-//        assertNotNull(secondEmpty);
-//        assertEquals(0, secondEmpty.length);
-//    }
 }

@@ -15,9 +15,10 @@
  */
 package org.esa.snap.cluster;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import static java.lang.Math.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link MultinormalDistribution}.
@@ -25,8 +26,9 @@ import static java.lang.Math.*;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class MultinormalDistributionTest extends TestCase {
+public class MultinormalDistributionTest {
 
+    @Test
     public void test1D() {
         final Distribution dist =
                 new MultinormalDistribution(new double[]{0.0}, new double[][]{{1.0}});
@@ -38,6 +40,7 @@ public class MultinormalDistributionTest extends TestCase {
         assertEquals(expectedValue, dist.probabilityDensity(new double[]{1.0}), 1.0E-14);
     }
 
+    @Test
     public void test2D() {
         final Distribution dist =
                 new MultinormalDistribution(new double[]{0.0, 0.0}, new double[][]{{1.0, 0.0}, {0.0, 2.0}});

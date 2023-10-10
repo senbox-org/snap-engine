@@ -20,21 +20,30 @@ import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.binding.ValueSet;
+import org.junit.Test;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 
-public class PropertyPaneTest extends TestCase {
+public class PropertyPaneTest {
 
+    private static PropertyPane createPane(BindingProblemListener bpl) {
+        PropertyContainer vc = PropertyContainer.createObjectBacked(new V());
+
+        vc.getDescriptor("threshold").setValueRange(
+                ValueRange.parseValueRange("[0,1)")); // todo - not recognised (nf - 24.10.2007)
+        vc.getDescriptor("resamplingMethod").setValueSet(
+                new ValueSet(new String[]{"NN", "CC", "BQ"}));
+
+        BindingContext sbc = new BindingContext(vc, bpl);
+        return new PropertyPane(sbc);
+    }
+
+    @Test
     public void testComponentsInPanel() throws ConversionException {
         PropertyPane parametersPane = createPane(new BindingContext.SilentProblemHandler());
         JPanel panel = parametersPane.createPanel();
@@ -81,17 +90,4 @@ public class PropertyPaneTest extends TestCase {
         String productDescription = "All purpose";
         File imageFile = new File(".").getAbsoluteFile();
     }
-
-    private static PropertyPane createPane(BindingProblemListener bpl) throws ConversionException {
-        PropertyContainer vc = PropertyContainer.createObjectBacked(new V());
-
-        vc.getDescriptor("threshold").setValueRange(
-                ValueRange.parseValueRange("[0,1)")); // todo - not recognised (nf - 24.10.2007)
-        vc.getDescriptor("resamplingMethod").setValueSet(
-                new ValueSet(new String[]{"NN", "CC", "BQ"}));
-
-        BindingContext sbc = new BindingContext(vc, bpl);
-        return new PropertyPane(sbc);
-    }
-
 }

@@ -15,11 +15,14 @@
  */
 package org.esa.snap;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class GlobalTestToolsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class GlobalTestToolsTest {
 
+    @Test
     public void testCreateBytes() {
         final byte[] bytes = GlobalTestTools.createBytes(270);
 

@@ -15,20 +15,20 @@
  */
 package com.bc.ceres.binio.binx;
 
-import junit.framework.TestCase;
-
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URI;
-import java.io.IOException;
-import java.util.Map;
-
-import com.bc.ceres.binio.Type;
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataFormat;
+import org.junit.Test;
 
-public class DBL_SM_XXXX_MIR_SCSD1C_0200_Test extends TestCase {
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
+import static org.junit.Assert.*;
+
+public class DBL_SM_XXXX_MIR_SCSD1C_0200_Test {
+
+    @Test
     public void testBinXIO() throws URISyntaxException, IOException, BinXException {
         final URL resource = getClass().getResource("DBL_SM_XXXX_MIR_SCSD1C_0200.binXschema.xml");
         assertNotNull(resource);

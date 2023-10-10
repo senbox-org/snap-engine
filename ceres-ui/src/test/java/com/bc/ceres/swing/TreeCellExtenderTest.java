@@ -16,45 +16,17 @@
 
 package com.bc.ceres.swing;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.awt.event.MouseListener;
 
-public class TreeCellExtenderTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public void testActiveState() {
-        JTree tree = new JTree();
-        TreeCellExtender extender = new TreeCellExtender(tree);
-        assertSame(tree, extender.getTree());
-        assertEquals(false, extender.isActive());
-
-        MouseListener[] listeners = tree.getMouseListeners();
-        assertNotNull(listeners);
-        int oldLength = listeners.length;
-
-        extender.setActive(true);
-        assertEquals(true, extender.isActive());
-
-        listeners = tree.getMouseListeners();
-        int newLength = listeners.length;
-        assertEquals(oldLength + 1, newLength);
-
-
-    }
-
-    public void testEquip() {
-        JTree tree = new JTree();
-        TreeCellExtender extender = TreeCellExtender.equip(tree);
-        assertNotNull(extender);
-        assertSame(tree, extender.getTree());
-        assertEquals(true, extender.isActive());
-    }
+public class TreeCellExtenderTest {
 
     public static void main(String[] args) {
         final JFrame frame = new JFrame(TreeCellExtender.class.getSimpleName());
@@ -101,4 +73,31 @@ public class TreeCellExtenderTest extends TestCase {
         return new DefaultTreeModel(root);
     }
 
+    @Test
+    public void testActiveState() {
+        JTree tree = new JTree();
+        TreeCellExtender extender = new TreeCellExtender(tree);
+        assertSame(tree, extender.getTree());
+        assertFalse(extender.isActive());
+
+        MouseListener[] listeners = tree.getMouseListeners();
+        assertNotNull(listeners);
+        int oldLength = listeners.length;
+
+        extender.setActive(true);
+        assertTrue(extender.isActive());
+
+        listeners = tree.getMouseListeners();
+        int newLength = listeners.length;
+        assertEquals(oldLength + 1, newLength);
+    }
+
+    @Test
+    public void testEquip() {
+        JTree tree = new JTree();
+        TreeCellExtender extender = TreeCellExtender.equip(tree);
+        assertNotNull(extender);
+        assertSame(tree, extender.getTree());
+        assertTrue(extender.isActive());
+    }
 }

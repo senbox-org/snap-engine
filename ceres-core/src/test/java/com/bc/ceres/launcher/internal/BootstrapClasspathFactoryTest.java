@@ -18,12 +18,15 @@ package com.bc.ceres.launcher.internal;
 
 import com.bc.ceres.core.runtime.RuntimeConfigException;
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
-public class BootstrapClasspathFactoryTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class BootstrapClasspathFactoryTest {
+
+    @Test
     public void testGetFiles() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);
@@ -44,6 +47,7 @@ public class BootstrapClasspathFactoryTest extends TestCase {
         assertEquals(new File("lib/jhall-2.0.4.jar"), files[4]);
     }
 
+    @Test
     public void testGetFilesWithMultCeresCore_1() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);
@@ -65,6 +69,7 @@ public class BootstrapClasspathFactoryTest extends TestCase {
         assertEquals(new File("lib/jhall-2.0.4.jar"), files[4]);
     }
 
+    @Test
     public void testGetFilesWithMultCeresCore_2() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);

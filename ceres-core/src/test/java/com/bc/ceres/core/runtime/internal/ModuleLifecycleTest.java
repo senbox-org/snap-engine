@@ -16,9 +16,11 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.ProgressMonitor;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,26 +28,23 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Logger;
 
-public class ModuleLifecycleTest extends TestCase {
+public class ModuleLifecycleTest {
 
     private static final File MODULES_DIR = new File(Config.getDirForAppA(), "modules");
     private ModuleRegistry moduleRegistry;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         this.moduleRegistry = createModuleRegistry();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         moduleRegistry = null;
     }
 
-    public void testNothing() {
-    }
-
+    @Test
     public void testModuleLifecycle() throws CoreException {
-
         TestHelpers.assertModuleIsInstalled(getModule("module-a"));
         TestHelpers.assertModuleIsInstalled(getModule("module-b"));
         TestHelpers.assertModuleIsInstalled(getModule("module-c"));
@@ -54,11 +53,11 @@ public class ModuleLifecycleTest extends TestCase {
 
         resolveModules();
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 6, new ModuleImpl[] {});
-        TestHelpers.assertModuleIsResolved(getModule("module-b"), 3, new ModuleImpl[] {getModule("module-a")});
-        TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[] {getModule("module-b")});
-        TestHelpers.assertModuleIsResolved(getModule("module-d"), 2, new ModuleImpl[] {getModule("module-a")});
-        TestHelpers.assertModuleIsResolved(getModule("module-e"), 1, new ModuleImpl[] {getModule("module-b"), getModule("module-d")});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 6, ModuleImpl.EMPTY_ARRAY);
+        TestHelpers.assertModuleIsResolved(getModule("module-b"), 3, new ModuleImpl[]{getModule("module-a")});
+        TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[]{getModule("module-b")});
+        TestHelpers.assertModuleIsResolved(getModule("module-d"), 2, new ModuleImpl[]{getModule("module-a")});
+        TestHelpers.assertModuleIsResolved(getModule("module-e"), 1, new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
 
         startModules();
 
@@ -70,11 +69,11 @@ public class ModuleLifecycleTest extends TestCase {
 
         stopModules();
 
-        TestHelpers.assertModuleIsResolved(getModule("module-a"), 6, new ModuleImpl[] {});
-        TestHelpers.assertModuleIsResolved(getModule("module-b"), 3, new ModuleImpl[] {getModule("module-a")});
-        TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[] {getModule("module-b")});
-        TestHelpers.assertModuleIsResolved(getModule("module-d"), 2, new ModuleImpl[] {getModule("module-a")});
-        TestHelpers.assertModuleIsResolved(getModule("module-e"), 1, new ModuleImpl[] {getModule("module-b"), getModule("module-d")});
+        TestHelpers.assertModuleIsResolved(getModule("module-a"), 6, ModuleImpl.EMPTY_ARRAY);
+        TestHelpers.assertModuleIsResolved(getModule("module-b"), 3, new ModuleImpl[]{getModule("module-a")});
+        TestHelpers.assertModuleIsResolved(getModule("module-c"), 1, new ModuleImpl[]{getModule("module-b")});
+        TestHelpers.assertModuleIsResolved(getModule("module-d"), 2, new ModuleImpl[]{getModule("module-a")});
+        TestHelpers.assertModuleIsResolved(getModule("module-e"), 1, new ModuleImpl[]{getModule("module-b"), getModule("module-d")});
     }
 
     private ModuleImpl getModule(String symbolicName) {
@@ -91,11 +90,7 @@ public class ModuleLifecycleTest extends TestCase {
 
     private void startModules() throws CoreException {
         ModuleImpl[] modules = moduleRegistry.getModules();
-        Arrays.sort(modules, new Comparator<ModuleImpl>() {
-            public int compare(ModuleImpl o1, ModuleImpl o2) {
-                return o1.getRefCount() - o2.getRefCount();
-            }
-        });
+        Arrays.sort(modules, Comparator.comparingInt(ModuleImpl::getRefCount));
         for (ModuleImpl module : modules) {
             module.start();
         }

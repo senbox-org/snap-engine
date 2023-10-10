@@ -16,17 +16,19 @@
 
 package com.bc.ceres.binding;
 
-import com.bc.ceres.binding.validators.TypeValidator;
 import com.bc.ceres.binding.validators.MultiValidator;
 import com.bc.ceres.binding.validators.NotNullValidator;
-import junit.framework.TestCase;
+import com.bc.ceres.binding.validators.TypeValidator;
+import org.junit.Test;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PropertyTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class PropertyTest {
     private static final long LEGAL_PLONG = 999L;
     private static final Long LEGAL_OLONG = 999L;
     private static final String ILLEGAL = "42";
@@ -44,6 +46,7 @@ public class PropertyTest extends TestCase {
     double pdouble;
     Double odouble;
 
+    @Test
     public void testFactoryUsingClassFieldAccessor() throws ValidationException {
         testPLong(Property.createForField(this, "plong"), 0L);
         testOLong(Property.createForField(this, "olong"), null);
@@ -55,6 +58,7 @@ public class PropertyTest extends TestCase {
         assertEquals(LEGAL_OLONG, olong);
     }
 
+    @Test
     public void testFactoryUsingMapEntryAccessor() throws ValidationException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         testPLong(Property.createForMapEntry(map, "plong", Long.TYPE), 0L);
@@ -67,6 +71,7 @@ public class PropertyTest extends TestCase {
         assertEquals(LEGAL_OLONG, map.get("olong"));
     }
 
+    @Test
     public void testDefaultFactoryWithType() throws ValidationException {
         testPLong(Property.create("plong", Long.TYPE), 0L);
         testOLong(Property.create("olong", Long.class), null);
@@ -77,7 +82,7 @@ public class PropertyTest extends TestCase {
         assertNotNull(vm.getDescriptor());
         assertEquals("plong", vm.getDescriptor().getName());
         assertSame(Long.TYPE, vm.getDescriptor().getType());
-        assertEquals(true, vm.getDescriptor().isNotNull());
+        assertTrue(vm.getDescriptor().isNotNull());
         assertNotNull(vm.getDescriptor().getConverter());
         assertSame(MultiValidator.class, vm.getValidator().getClass());
         Validator[] validators = ((MultiValidator) vm.getValidator()).getValidators();
@@ -93,7 +98,7 @@ public class PropertyTest extends TestCase {
     private void testOLong(Property vm, Object expectedValue) throws ValidationException {
         assertNotNull(vm.getDescriptor());
         assertEquals("olong", vm.getDescriptor().getName());
-        assertEquals(false, vm.getDescriptor().isNotNull());
+        assertFalse(vm.getDescriptor().isNotNull());
         assertSame(Long.class, vm.getDescriptor().getType());
         assertNotNull(vm.getDescriptor().getConverter());
         assertSame(TypeValidator.class, vm.getValidator().getClass());
@@ -116,6 +121,7 @@ public class PropertyTest extends TestCase {
         }
     }
 
+    @Test
     public void testPropertyChangeEvents() throws ValidationException {
         final Property plong = Property.createForField(this, "plong");
         final Property olong = Property.createForField(this, "olong");

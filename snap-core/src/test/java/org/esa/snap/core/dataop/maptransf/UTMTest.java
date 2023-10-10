@@ -15,10 +15,13 @@
  */
 package org.esa.snap.core.dataop.maptransf;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class UTMTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class UTMTest {
+
+    @Test
     public void testGetProjectionParams() {
         double[] p;
 
@@ -56,6 +59,7 @@ public class UTMTest extends TestCase {
         assertEquals(+177.0, p[3], 1e-10);
     }
 
+    @Test
     public void testGetZoneIndexAndCentralMeridian() {
         assertEquals(0, UTM.getZoneIndex(-190f));
         assertEquals(0, UTM.getZoneIndex(-180f));

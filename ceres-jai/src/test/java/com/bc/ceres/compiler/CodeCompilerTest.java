@@ -17,14 +17,17 @@
 package com.bc.ceres.compiler;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.MessageFormat;
 
+import static org.junit.Assert.assertEquals;
 
-public final class CodeCompilerTest extends TestCase {
 
+public final class CodeCompilerTest {
+
+    @Test
     public void testIt() throws Exception {
         String pattern = "" +
                 "package com.bc.ceres.jai.opimage.exprc;\n" +
@@ -67,13 +70,11 @@ public final class CodeCompilerTest extends TestCase {
         }
 
         final String code = MessageFormat.format(pattern,
-                                                 className,
-                                                 varDecl.toString(),
-                                                 varDef.toString(),
-                                                 deref.toString(),
-                                                 expression);
-
-        System.out.println("code = " + code);
+                className,
+                varDecl.toString(),
+                varDef.toString(),
+                deref.toString(),
+                expression);
 
         File outputDir = new File("./target/test-classes");
         File[] classPath = {new File("./target/classes"), new File("./target/test-classes")};
@@ -83,5 +84,4 @@ public final class CodeCompilerTest extends TestCase {
         assertEquals(0.5 * (2 + 7), function.eval(1), 1e-10);
         assertEquals(0.5 * (3 + 8), function.eval(2), 1e-10);
     }
-
 }

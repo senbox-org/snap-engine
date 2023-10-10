@@ -19,6 +19,7 @@ package com.bc.ceres.binding.converters;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ValueSet;
+import org.junit.Test;
 
 public class ClassConverterTest extends AbstractConverterTest {
     private ClassConverter converter;
@@ -31,7 +32,7 @@ public class ClassConverterTest extends AbstractConverterTest {
         return converter;
     }
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(Class.class);
 

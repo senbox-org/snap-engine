@@ -17,7 +17,7 @@
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelSource;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedOp;
@@ -27,11 +27,24 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
-public class GenericMultiLevelSourceTest extends TestCase {
+
+public class GenericMultiLevelSourceTest {
     final double GEOPHYS_SCALING = 2.5;
     final int GEOPHYS_DATATYPE = DataBuffer.TYPE_DOUBLE;
 
+    static PlanarImage createSourceImage(int w, int h) {
+        final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+        bi.getRaster().setSample(0, 0, 0, 0);
+        bi.getRaster().setSample(1, 0, 0, 1);
+        bi.getRaster().setSample(0, 1, 0, 2);
+        bi.getRaster().setSample(1, 1, 0, 3);
+        return PlanarImage.wrapRenderedImage(bi);
+    }
+
+    @Test
     public void testIt() {
         final PlanarImage src = createSourceImage(256, 128);
 
@@ -61,15 +74,6 @@ public class GenericMultiLevelSourceTest extends TestCase {
 
     private GenericMultiLevelSource createGeophysicalSourceImage(PlanarImage src, int levelCount) {
         return new GeophysicalMultiLevelSource(src, levelCount);
-    }
-
-    static PlanarImage createSourceImage(int w, int h) {
-        final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
-        bi.getRaster().setSample(0, 0, 0, 0);
-        bi.getRaster().setSample(1, 0, 0, 1);
-        bi.getRaster().setSample(0, 1, 0, 2);
-        bi.getRaster().setSample(1, 1, 0, 3);
-        return PlanarImage.wrapRenderedImage(bi);
     }
 
     private class GeophysicalMultiLevelSource extends GenericMultiLevelSource {

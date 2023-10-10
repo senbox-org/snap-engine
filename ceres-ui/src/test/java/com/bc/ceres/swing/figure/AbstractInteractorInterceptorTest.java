@@ -16,14 +16,17 @@
 
 package com.bc.ceres.swing.figure;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class AbstractInteractorInterceptorTest extends TestCase {
+import static org.junit.Assert.assertTrue;
 
+public class AbstractInteractorInterceptorTest {
+
+    @Test
     public void testInterceptorImpl() {
         InteractorInterceptor listener = new AbstractInteractorInterceptor() {
         };
-        assertEquals(true, listener.interactorAboutToActivate(null));
-        assertEquals(true, listener.interactionAboutToStart(null, null));
+        assertTrue(listener.interactorAboutToActivate(null));
+        assertTrue(listener.interactionAboutToStart(null, null));
     }
 }

@@ -16,28 +16,31 @@
 
 package com.bc.ceres.core.runtime;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ProxyConfigTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class ProxyConfigTest {
+
+    @Test
     public void testDefaultValues() {
         ProxyConfig proxyConfig = new ProxyConfig();
         assertEquals("", proxyConfig.getHost());
         assertEquals(0, proxyConfig.getPort());
-        assertEquals(false, proxyConfig.isAuthorizationUsed());
+        assertFalse(proxyConfig.isAuthorizationUsed());
         assertEquals("", proxyConfig.getUsername());
         assertNotNull(proxyConfig.getPassword());
-        assertEquals(0, proxyConfig.getPassword().length);    
+        assertEquals(0, proxyConfig.getPassword().length);
     }
 
+    @Test
     public void testCryptDecrypt() {
-
         String s = ProxyConfig.scramble("An4nas?");
         assertNotNull(s);
-        assertFalse(s.equals("An4nas?"));
+        assertNotEquals("An4nas?", s);
         assertFalse(s.contains("An4nas?"));
 
         String t = ProxyConfig.descramble(s);
-        assertTrue(t.equals("An4nas?"));
+        assertEquals("An4nas?", t);
     }
 }

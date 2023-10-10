@@ -16,18 +16,41 @@
 
 package com.bc.ceres.jai;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 
-public class TileTest extends TestCase {
-    
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class TileTest {
+
+    private static void assertOutOfBounds(Opi image, Rectangle region) {
+        try {
+            image.getData(region);
+            fail("The specified region " + rstring(region) + " should not intersect with the image`s bounds " + rstring(image.getBounds()));
+        } catch (IllegalArgumentException e) {
+            assertEquals("The specified region, if not null, must intersect with the image`s bounds.", e.getMessage());
+        }
+    }
+
+    private static void assertWithinBounds(Opi image, Rectangle input, String expected) {
+        image.trace = "";
+        image.getData(input);
+        assertEquals(expected, image.trace);
+    }
+
+    private static String rstring(Rectangle rectangle) {
+        return "(" + rectangle.x + "," + rectangle.y + "," + rectangle.width + "," + rectangle.height + ")";
+    }
+
+    @Test
     public void testTilesHaveExpectedBounds() {
         int imageSize = 100;
         int tileSize = 50;
@@ -71,7 +94,7 @@ public class TileTest extends TestCase {
         // minX = 0, tileGridOffset = -15
         //
         image = new Opi(0, 0, imageSize, imageSize,
-                        -15, 0, tileSize, tileSize);
+                -15, 0, tileSize, tileSize);
         assertEquals(-15, image.getTileGridXOffset());
         assertEquals(3, image.getNumXTiles());
         assertEquals(0, image.getMinTileX());
@@ -90,7 +113,7 @@ public class TileTest extends TestCase {
         // minX = -20, tileGridOffset = -15
         //
         image = new Opi(-20, 0, imageSize, imageSize,
-                        -15, 0, tileSize, tileSize);
+                -15, 0, tileSize, tileSize);
         assertEquals(-15, image.getTileGridXOffset());
         assertEquals(3, image.getNumXTiles());
         assertEquals(-1, image.getMinTileX());
@@ -106,25 +129,6 @@ public class TileTest extends TestCase {
         assertOutOfBounds(image, new Rectangle(-20 + 100, 0, 1, 1));
     }
 
-    private static void assertOutOfBounds(Opi image, Rectangle region) {
-        try {
-            image.getData(region);
-            fail("The specified region "+rstring(region)+" should not intersect with the image`s bounds " + rstring(image.getBounds()));
-        } catch (IllegalArgumentException e) {
-            assertEquals("The specified region, if not null, must intersect with the image`s bounds.", e.getMessage());
-        }
-    }
-
-    private static void assertWithinBounds(Opi image, Rectangle input, String expected) {
-        image.trace = "";
-        image.getData(input);
-        assertEquals(expected, image.trace);
-    }
-
-    private static String rstring(Rectangle rectangle) {
-        return "(" + rectangle.x + "," + rectangle.y + "," + rectangle.width + "," + rectangle.height + ")";
-    }
-
     static class Opi extends SourcelessOpImage {
         String trace = "";
 
@@ -136,6 +140,5 @@ public class TileTest extends TestCase {
         protected void computeRect(PlanarImage[] sources, WritableRaster dest, Rectangle destRect) {
             trace += rstring(dest.getBounds()) + "," + rstring(destRect) + ";";
         }
-
     }
 }

@@ -17,23 +17,39 @@
 package org.esa.snap.core.datamodel;
 
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
+
+    private static void addRasterDataNodeToProduct(final Product product, final RasterDataNode rasterDataNode) {
+        if (rasterDataNode instanceof Band) {
+            product.addBand((Band) rasterDataNode);
+        } else if (rasterDataNode instanceof TiePointGrid) {
+            product.addTiePointGrid((TiePointGrid) rasterDataNode);
+        } else {
+            fail("couldn't add RasterDataNode to product. Node is of unknown type.");
+        }
+    }
 
     protected abstract RasterDataNode createRasterDataNode();
 
+    @Test
     public void testSetAndGetBandStatistics() {
         RasterDataNode rasterDataNode = createRasterDataNode();
-        assertEquals(null, rasterDataNode.getImageInfo());
+        assertNull(rasterDataNode.getImageInfo());
         final ImageInfo imageInfo = new ImageInfo(new ColorPaletteDef(0, 1));
         rasterDataNode.setImageInfo(imageInfo);
         assertSame(imageInfo, rasterDataNode.getImageInfo());
     }
 
+    @Test
     public void testValidMaskExpressionIsAdjustedIfNodeNameChanged() {
         final RasterDataNode rasterDataNode = createRasterDataNode();
         rasterDataNode.setValidPixelExpression("flagsBand.f1 || not flagsBand.f2");
         final Product product = new Product("p", "NoType",
-                                            rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight());
+                rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight());
         addRasterDataNodeToProduct(product, rasterDataNode);
 
         final FlagCoding flagCoding = new FlagCoding("f");
@@ -51,6 +67,7 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
         assertEquals("name is not changed", expectedExpression, currentExpression);
     }
 
+    @Test
     public void testUpdateExpression() {
         final String oldIdentifier = "oldIdent";
         final String newIdentifier = "newIdent";
@@ -93,15 +110,5 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
         node.updateExpression(oldIdentifier, newIdentifier);
         assertTrue(node.isModified());
         assertEquals(renamedExpression, node.getValidPixelExpression());
-    }
-
-    private static void addRasterDataNodeToProduct(final Product product, final RasterDataNode rasterDataNode) {
-        if (rasterDataNode instanceof Band) {
-            product.addBand((Band) rasterDataNode);
-        } else if (rasterDataNode instanceof TiePointGrid) {
-            product.addTiePointGrid((TiePointGrid) rasterDataNode);
-        } else {
-            fail("couldn't add RasterDataNode to product. Node is of unknown type.");
-        }
     }
 }

@@ -16,11 +16,14 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
+
+import static org.esa.snap.core.util.Debug.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link Rotator}..
@@ -28,9 +31,10 @@ import java.util.Arrays;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class RotatorTest extends TestCase {
+public class RotatorTest {
 
-    public void testRotatedPoleTransform() throws Exception {
+    @Test
+    public void testRotatedPoleTransform() {
         // Values are taken from http://www.arolla.ethz.ch/IDL/RotateGridInfo.pdf
         final double rotatedPoleLon = 10.0;
         final double rotatedPoleLat = 32.5;
@@ -49,6 +53,7 @@ public class RotatorTest extends TestCase {
         assertEquals(-11.137, p2.getY(), 0.05);
     }
 
+    @Test
     public void testRotateX() {
         final Point2D p1 = new Point2D.Double(0.0, 0.0);
         final Point2D p2 = new Point2D.Double(0.0, 5.0);
@@ -71,6 +76,7 @@ public class RotatorTest extends TestCase {
         assertEquals(5.0, p2.getY(), 1.0E-10);
     }
 
+    @Test
     public void testRotateY() {
         final Point2D p1 = new Point2D.Double(0.0, 45.0);
         final Point2D p2 = new Point2D.Double(0.0, 50.0);
@@ -93,6 +99,7 @@ public class RotatorTest extends TestCase {
         assertEquals(50.0, p2.getY(), 1.0E-10);
     }
 
+    @Test
     public void testRotateZ() {
         final Point2D p1 = new Point2D.Double(45.0, 0.0);
         final Point2D p2 = new Point2D.Double(50.0, 0.0);
@@ -115,6 +122,7 @@ public class RotatorTest extends TestCase {
         assertEquals(0.0, p2.getY(), 1.0E-10);
     }
 
+    @Test
     public void testRotateNorthPole() {
         final double[] lons = new double[]{0.0, 90.0, 180.0, -90.0, -180.0};
         final double[] lats = new double[]{80.0, 80.0, 80.0, 80.0, 80.0};
@@ -148,6 +156,7 @@ public class RotatorTest extends TestCase {
         assertEquals(80.0, lats[4], 1.0E-10);
     }
 
+    @Test
     public void testRotateSouthPole() {
         final double[] lons = new double[]{0.0, 90.0, 180.0, -90.0, -180.0};
         final double[] lats = new double[]{-80.0, -80.0, -80.0, -80.0, -80.0};
@@ -181,16 +190,17 @@ public class RotatorTest extends TestCase {
         assertEquals(-80.0, lats[4], 1.0E-10);
     }
 
+    @Test
     public void testRotateToGcpCenter() {
         final double[] lats = new double[]{
-                    85, 84, 83,
-                    75, 74, 73,
-                    65, 64, 63
+                85, 84, 83,
+                75, 74, 73,
+                65, 64, 63
         };
         final double[] lons = new double[]{
-                    -15, -5, 5,
-                    -16, -6, 4,
-                    -17, -7, 3
+                -15, -5, 5,
+                -16, -6, 4,
+                -17, -7, 3
         };
 
         final GeoPos geoPos = GcpGeoCoding.calculateCentralGeoPos(lons, lats);
@@ -208,98 +218,11 @@ public class RotatorTest extends TestCase {
         }
     }
 
-    // test that rotating really improves the GCP approximation
-    public void doNotTestRotationOfRealSceneOfItalianLakes() {
-        double[] x = new double[]{
-                    43.5,
-                    37.5,
-                    523.5,
-                    530.5,
-                    1075.5,
-                    1074.5,
-                    832.5,
-                    229.5,
-                    524.5
-        };
-        double[] y = new double[]{
-                    22.5,
-                    284.5,
-                    289.5,
-                    18.5,
-                    17.5,
-                    284.5,
-                    157.5,
-                    157.5,
-                    155.5
-        };
-        double[] lats = new double[]{
-                    49.27275,
-                    46.573524,
-                    45.553078,
-                    48.319298,
-                    46.770004,
-                    44.09146,
-                    46.09978,
-                    47.545685,
-                    46.92791
-        };
-        double[] lons = new double[]{
-                    6.051173,
-                    5.255776,
-                    11.624002,
-                    12.795015,
-                    19.971725,
-                    18.575577,
-                    16.156733,
-                    8.208557,
-                    12.158185
-        };
-
-        final GeoPos geoPos = GcpGeoCoding.calculateCentralGeoPos(lons, lats);
-
-        final Rotator rotator = new Rotator(geoPos.lon, geoPos.lat);
-        final double[] lons2 = Arrays.copyOf(lons, lons.length);
-        final double[] lats2 = Arrays.copyOf(lats, lats.length);
-
-        rotator.transform(lons2, lats2);
-
-        final GcpGeoCoding.RationalFunctionMap2D forwardMap =
-                    new GcpGeoCoding.RationalFunctionMap2D(2, 0, x, y, lons, lats);
-        final GcpGeoCoding.RationalFunctionMap2D forwardMap2 =
-                    new GcpGeoCoding.RationalFunctionMap2D(2, 0, x, y, lons2, lats2);
-
-        System.out.println("forwardMap.getRmseU() = " + forwardMap.getRmseU());
-        System.out.println("forwardMap.getRmseV() = " + forwardMap.getRmseV());
-        System.out.println("forwardMap2.getRmseU() = " + forwardMap2.getRmseU());
-        System.out.println("forwardMap2.getRmseV() = " + forwardMap2.getRmseV());
-        assertTrue(forwardMap.getRmseU() > forwardMap2.getRmseU());
-        assertTrue(forwardMap.getRmseV() > forwardMap2.getRmseV());
-
-        final GcpGeoCoding.RationalFunctionMap2D inverseMap =
-                    new GcpGeoCoding.RationalFunctionMap2D(2, 0, lons, lats, x, y);
-        final GcpGeoCoding.RationalFunctionMap2D inverseMap2 =
-                    new GcpGeoCoding.RationalFunctionMap2D(2, 0, lons2, lats2, x, y);
-
-        System.out.println("inverseMap.getRmseU() = " + inverseMap.getRmseU());
-        System.out.println("inverseMap.getRmseV() = " + inverseMap.getRmseV());
-        System.out.println("inverseMap2.getRmseU() = " + inverseMap2.getRmseU());
-        System.out.println("inverseMap2.getRmseV() = " + inverseMap2.getRmseV());
-        assertTrue(inverseMap.getRmseU() > inverseMap2.getRmseU());
-        // here the rotation worsens the GCP approximation! Why?
-        assertTrue(inverseMap.getRmseV() > inverseMap2.getRmseV());
-
-        rotator.transformInversely(lons2, lats2);
-
-        for (int i = 0; i < lats.length; i++) {
-            assertEquals(lats[i], lats2[i], 1.0E-6);
-            assertEquals(lons[i], lons2[i], 1.0E-6);
-        }
-    }
-
+    @Test
     public void testRotate10_20to0_0() {
         final Rotator rotator = new Rotator(20, 10);
 
-        final Point2D.Double rotatedPoint1 = new Point2D.Double(0d,0d);
+        final Point2D.Double rotatedPoint1 = new Point2D.Double(0d, 0d);
         final Point2D.Double rotatedPoint2 = new Point2D.Double(-5d, 0);
         final Point2D.Double rotatedPoint3 = new Point2D.Double(5d, 0);
 
@@ -308,7 +231,7 @@ public class RotatorTest extends TestCase {
         rotator.transformInversely(rotatedPoint3);
 
         assertEquals(20d, rotatedPoint1.getX(), 1e-14);
-        assertEquals(10d,rotatedPoint1.getY(), 1e-14);
+        assertEquals(10d, rotatedPoint1.getY(), 1e-14);
         assertEquals(14.9232, rotatedPoint2.getX(), 1e-4);
         assertEquals(9.9615, rotatedPoint2.getY(), 1e-4);
         assertEquals(25.0767, rotatedPoint3.getX(), 1e-4);

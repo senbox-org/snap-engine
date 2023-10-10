@@ -16,17 +16,20 @@
 
 package com.bc.ceres.binding.dom;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-public abstract class AbstractDomElementTest extends TestCase {
+import static org.junit.Assert.*;
+
+public abstract class AbstractDomElementTest {
 
     protected abstract DomElement createDomElement(String name);
 
     protected abstract DomElement createDomElement(String name, String value);
 
+    @Test
     public void testSingleElement() {
         DomElement element = createDomElement("x", "8");
         assertEquals("x", element.getName());
@@ -35,17 +38,17 @@ public abstract class AbstractDomElementTest extends TestCase {
 
         element = createDomElement("x", null);
         assertEquals("x", element.getName());
-        assertEquals(null, element.getValue());
+        assertNull(element.getValue());
         assertEquals("<x/>", element.toXml());
 
         final String name = "x";
         element = createDomElement(name);
         assertEquals("x", element.getName());
-        assertEquals(null, element.getValue());
+        assertNull(element.getValue());
         assertEquals("<x/>", element.toXml());
     }
 
-
+    @Test
     public void testAttribues() {
         DomElement element = createDomElement("point");
         assertNotNull(element.getAttributeNames());
@@ -57,7 +60,7 @@ public abstract class AbstractDomElementTest extends TestCase {
 
         assertNotNull(element.getAttributeNames());
 
-        final HashSet<String> names = new HashSet<String>(Arrays.asList(element.getAttributeNames()));
+        final HashSet<String> names = new HashSet<>(Arrays.asList(element.getAttributeNames()));
         assertEquals(3, names.size());
         assertTrue(names.contains("x"));
         assertTrue(names.contains("y"));
@@ -66,7 +69,7 @@ public abstract class AbstractDomElementTest extends TestCase {
         assertEquals("56", element.getAttribute("x"));
         assertEquals("24", element.getAttribute("y"));
         assertEquals("98", element.getAttribute("z"));
-        assertEquals(null, element.getAttribute("w"));
+        assertNull(element.getAttribute("w"));
 
         String xml = element.toXml();
         assertTrue(xml.startsWith("<point "));
@@ -76,6 +79,7 @@ public abstract class AbstractDomElementTest extends TestCase {
         assertTrue(xml.endsWith("/>"));
     }
 
+    @Test
     public void testChildren() {
         DomElement element = createDomElement("point");
         assertEquals(0, element.getChildCount());
@@ -102,14 +106,15 @@ public abstract class AbstractDomElementTest extends TestCase {
         assertSame(element, element.getChild("z").getParent());
 
         assertEquals("" +
-                "<point>\n" +
-                "<x>56</x>\n" +
-                "<y>24</y>\n" +
-                "<z>98</z>\n" +
-                "</point>",
-                     element.toXml().replace("  ", ""));
+                        "<point>\n" +
+                        "<x>56</x>\n" +
+                        "<y>24</y>\n" +
+                        "<z>98</z>\n" +
+                        "</point>",
+                element.toXml().replace("  ", ""));
     }
 
+    @Test
     public void testToXmlWithAttributesAndChildren() {
         DomElement element = createDomElement("layer");
         element.setAttribute("id", "a62b98ff5");
@@ -120,19 +125,17 @@ public abstract class AbstractDomElementTest extends TestCase {
         element.getChild("configuration").createChild("fillColor").setValue("123, 64,30");
         element.getChild("configuration").createChild("transparency").setValue("0.6");
         String xml = element.toXml();
-        //System.out.println("xml = " + xml);
 
         assertEquals("" +
-                "<layer id=\"a62b98ff5\">\n" +
-                "<name>ROI</name>\n" +
-                "<visible>true</visible>\n" +
-                "<configuration>\n" +
-                "<outlineColor>23,45,230</outlineColor>\n" +
-                "<fillColor>123, 64,30</fillColor>\n" +
-                "<transparency>0.6</transparency>\n" +
-                "</configuration>\n" +
-                "</layer>",
-                     xml.replace("  ", ""));
+                        "<layer id=\"a62b98ff5\">\n" +
+                        "<name>ROI</name>\n" +
+                        "<visible>true</visible>\n" +
+                        "<configuration>\n" +
+                        "<outlineColor>23,45,230</outlineColor>\n" +
+                        "<fillColor>123, 64,30</fillColor>\n" +
+                        "<transparency>0.6</transparency>\n" +
+                        "</configuration>\n" +
+                        "</layer>",
+                xml.replace("  ", ""));
     }
-
 }
