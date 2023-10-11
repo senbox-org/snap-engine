@@ -146,6 +146,10 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 totalSize.getData().setElemUInt(targetProduct.getRawStorageSize());
             }
 
+
+//            ProductUtils.markProductMetaDataFieldAsDerivedFrom(targetProduct);
+
+
             if (nearRangeOnLeft) {
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_near_lat", "first_near_long", 0.5f, 0.5f);
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_far_lat", "first_far_long",
@@ -534,6 +538,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (!isMetadataIgnored()) {
             ProductUtils.copyMetadata(sourceProduct, product);
         }
+
+        ProductUtils.markProductMetaDataFieldAsDerivedFrom(product);
+
         addTiePointGridsToProduct(product);
         addBandsToProduct(product);
         ProductUtils.copyMasks(sourceProduct, product);
