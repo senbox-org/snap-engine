@@ -49,10 +49,9 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
+import java.util.List;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -64,6 +63,8 @@ public class ProductUtils {
     private static String GLOBAL_ATTRIBUTES_KEY = "Global_Attributes";
     public static String METADATA_PROJECTION_KEY = "map_projection";
     public static String[] METADATA_POSSIBLE_PROJECTION_KEYS = {METADATA_PROJECTION_KEY, "projection", "crs"};
+    public static String[] METADATA_POSSIBLE_START_TIME_KEYS = {"time_coverage_start"};
+    public static String[] METADATA_POSSIBLE_END_TIME_KEYS = {"time_coverage_end"};
     public static String[] METADATA_POSSIBLE_SENSOR_KEYS = {"sensor_name", "instrument", "sensor"};
     public static String[] METADATA_POSSIBLE_PLATFORM_KEYS = {"platform"};
     public static String[] METADATA_POSSIBLE_PROCESSING_VERSION_KEYS = {"processing_version"};
@@ -1033,6 +1034,8 @@ public class ProductUtils {
         targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
         targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
         targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+        targetBand.setAngularValue(sourceBand.getAngularValue());
+        targetBand.setAngularBandIndex(sourceBand.getAngularBandIndex());
         targetBand.setSolarFlux(sourceBand.getSolarFlux());
     }
 
@@ -1390,6 +1393,38 @@ public class ProductUtils {
 
         return metaData;
     }
+
+
+
+    static ProductData.UTC parseUtcDate(String timeString) {
+        try {
+            if (timeString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z")) {
+                // ISO
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+            } else if (timeString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z")) {
+                // ISO with micros
+                timeString = timeString.substring(0, timeString.length() - 1);
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd'T'HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{2}\\d{2}T\\d{6}Z")) {
+                // ISO no-punctation
+                return ProductData.UTC.parse(timeString, "yyyyMMdd'T'HHmmss'Z'");
+            } else if (timeString.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}")) {
+                // MODIS
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{2}\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}")) {
+                // OCTS
+                return ProductData.UTC.parse(timeString, "yyyyMMdd HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{3}\\d{2}\\d{2}\\d{2}\\d{3}")) {
+                Date date = ProductData.UTC.createDateFormat("yyyyDDDHHmmssSSS").parse(timeString);
+                String milliSeconds = timeString.substring(timeString.length() - 3);
+                return ProductData.UTC.create(date, Long.parseLong(milliSeconds) * 1000);
+            }
+        } catch (ParseException ignored) {
+        }
+        return null;
+    }
+
+
 
     public static boolean isMetadataKeyExists(Product product, String key) {
         // Created by Daniel Knowles

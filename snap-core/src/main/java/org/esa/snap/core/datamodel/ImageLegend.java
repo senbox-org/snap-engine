@@ -101,12 +101,8 @@ public class ImageLegend {
     private final RasterDataNode raster;
     private boolean showTitle;
     private boolean showUnits;
-    private boolean unitsAltUse;
-    private boolean titleAltUse;
     private String titleText;
-    private String titleAlt;
     private String unitsText;
-    private String unitsAlt;
     private String unitsNull;
     private boolean convertCaret;
     private boolean unitsParenthesis;
@@ -191,6 +187,7 @@ public class ImageLegend {
 
     public enum FONT_SCRIPT {
         NORMAL,
+        REDUCED,
         SUPER_SCRIPT,
         SUBSCRIPT
     }
@@ -216,8 +213,6 @@ public class ImageLegend {
 
         imageLegendCopy.setShowTitle(isShowTitle());
         imageLegendCopy.setTitle(getTitleText());
-        imageLegendCopy.setTitleAlt(getTitleAlt());
-        imageLegendCopy.setTitleAltUse(isTitleAltUse());
         imageLegendCopy.setTitleFontSize(getTitleFontSize());
         imageLegendCopy.setTitleColor(getTitleColor());
         imageLegendCopy.setTitleFontName(getTitleFontName());
@@ -225,11 +220,9 @@ public class ImageLegend {
 
         imageLegendCopy.setShowUnits(isShowUnits());
         imageLegendCopy.setUnits(getUnitsText());
-        imageLegendCopy.setUnitsAlt(getUnitsAlt());
         imageLegendCopy.setUnitsNull(getUnitsNull());
         imageLegendCopy.setUnitsParenthesis(isUnitsParenthesis());
         imageLegendCopy.setConvertCaret(isConvertCaret());
-        imageLegendCopy.setUnitsAltUse(isUnitsAltUse());
         imageLegendCopy.setUnitsFontSize(getUnitsFontSize());
         imageLegendCopy.setUnitsColor(getUnitsColor());
         imageLegendCopy.setUnitsFontName(getUnitsFontName());
@@ -291,12 +284,8 @@ public class ImageLegend {
     public void initLegendWithPreferences(PropertyMap configuration, RasterDataNode raster) {
 
         setTitle(configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_KEY, ColorBarLayerType.PROPERTY_TITLE_DEFAULT));
-        setTitleAltUse(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_ALT_USE_KEY, ColorBarLayerType.PROPERTY_TITLE_ALT_USE_DEFAULT));
-        setTitleAlt(configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_ALT_KEY, ColorBarLayerType.PROPERTY_TITLE_ALT_DEFAULT));
 
         setUnits(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_KEY, ColorBarLayerType.PROPERTY_UNITS_DEFAULT));
-        setUnitsAltUse(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_ALT_USE_KEY, ColorBarLayerType.PROPERTY_UNITS_ALT_USE_DEFAULT));
-        setUnitsAlt(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_ALT_KEY, ColorBarLayerType.PROPERTY_UNITS_ALT_DEFAULT));
 
         setUnitsNull(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT));
 
@@ -588,13 +577,6 @@ public class ImageLegend {
         this.showTitle = usingHeader;
     }
 
-    public boolean isTitleAltUse() {
-        return titleAltUse;
-    }
-
-    public void setTitleAltUse(boolean titleAltUse) {
-        this.titleAltUse = titleAltUse;
-    }
 
     public String getTitleText() {
         return (titleText == null) ? "null-test" : titleText;
@@ -604,26 +586,8 @@ public class ImageLegend {
         this.titleText = titleText;
     }
 
-    public String getTitleAlt() {
-        if (titleAlt == null || titleAlt.length() == 0) {
-            return "";
-        } else {
-            return titleAlt;
-        }
-    }
-
-    public void setTitleAlt(String titleAlt) {
-        this.titleAlt = titleAlt;
-    }
 
 
-    public boolean isUnitsAltUse() {
-        return unitsAltUse;
-    }
-
-    public void setUnitsAltUse(boolean unitsAltUse) {
-        this.unitsAltUse = unitsAltUse;
-    }
 
     public String getUnitsText() {
         if (unitsText == null || unitsText.length() == 0) {
@@ -635,18 +599,6 @@ public class ImageLegend {
 
     public void setUnits(String unitsText) {
         this.unitsText = unitsText;
-    }
-
-    public String getUnitsAlt() {
-        if (unitsAlt == null || unitsAlt.length() == 0) {
-            return "";
-        } else {
-            return unitsAlt;
-        }
-    }
-
-    public void setUnitsAlt(String unitsAlt) {
-        this.unitsAlt = unitsAlt;
     }
 
 
@@ -1353,13 +1305,15 @@ public class ImageLegend {
         g2d.setFont(getTitleParameterFont());
 
 
-        String titleString;
-        if (isTitleAltUse()) {
-            titleString = getTitleAlt();
-        } else {
-            titleString = getTitleText();
-        }
-        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(titleString, g2d);
+        String titleString = getTitleText();
+
+        String textTagsRemoved =  DrawingUtils.getTextTagsRemoved(titleString);
+
+        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(textTagsRemoved, g2d);
+//        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(titleString, g2d);
+
+
+
         Rectangle2D titleSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
         AffineTransform transformOrig = g2d.getTransform();
@@ -1386,18 +1340,10 @@ public class ImageLegend {
 
 
         g2d.setFont(getTitleUnitsFont());
-        String unitsString;
-        if (isUnitsAltUse()) {
-            unitsString = getUnitsAlt();
-        } else {
-            unitsString = getUnitsText();
-        }
+        String unitsString = getUnitsText();
 
-        if (unitsString != null && unitsString.length() > 0) {
-            if (isUnitsParenthesis()) {
-                unitsString = "(" + unitsString + ")";
-            }
-        }
+        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
+
 
         Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(unitsString, g2d);
         Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
@@ -1459,6 +1405,22 @@ public class ImageLegend {
 
 
         g2d.setFont(originalFont);
+    }
+
+    private String getUnitsNullAndParenthesisFormatted(String unitsString) {
+        if (unitsString == null) {
+            unitsString = getUnitsNull();
+        } else {
+            unitsString = unitsString.trim();
+            if (unitsString.length() == 0 || unitsString.toLowerCase().equals("null")) {
+                unitsString = getUnitsNull();
+            }
+        }
+        if (isUnitsParenthesis() && unitsString.length() > 0 && !unitsString.startsWith("(") && !unitsString.endsWith(")")) {
+            unitsString = "(" + unitsString + ")";
+        }
+
+        return  unitsString;
     }
 
 
@@ -1745,13 +1707,7 @@ public class ImageLegend {
         g2d.setFont(getTitleParameterFont());
         g2d.setPaint(getTitleColor());
 
-        String titleString;
-        if (isTitleAltUse()) {
-            titleString = getTitleAlt();
-        } else {
-            titleString = getTitleText();
-        }
-
+        String titleString= getTitleText();
 
         titleString = MetadataUtils.getReplacedStringAllVariables(titleString, raster, "", MetadataUtils.INFO_PARAM_WAVE);
 
@@ -1769,29 +1725,15 @@ public class ImageLegend {
         g2d.setPaint(getUnitsColor());
 
         g2d.setFont(getTitleUnitsFont());
-        String unitsString;
-        if (isUnitsAltUse()) {
-            unitsString = getUnitsAlt();
-        } else {
-            unitsString = getUnitsText();
-        }
+        String unitsString = getUnitsText();
 
-        if (unitsString != null && unitsString.length() > 0) {
-            if (isUnitsParenthesis()) {
-                unitsString = "(" + unitsString + ")";
-            }
-        }
+        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
 
 
         unitsString = MetadataUtils.getReplacedStringAllVariables(unitsString, raster, "", MetadataUtils.INFO_PARAM_WAVE);
 
-        if (isUnitsParenthesis() && unitsString != null) {
-            if (unitsString.trim().startsWith("(") && unitsString.trim().endsWith(")")) {
-                // it already has parenthesis so leave it alone
-            } else {
-                unitsString = "(" + unitsString + ")";
-            }
-        }
+//        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
+
 
         DrawingUtils.drawText(g2d, unitsString, isConvertCaret());
 

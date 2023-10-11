@@ -69,9 +69,7 @@ public class ColorBarLayer extends Layer {
 
 
     String titlePreferences;
-    String titleAltPreferences;
     String unitsPreferences;
-    String unitsAltPreferences;
     String labelValuesActualPreferences;
     String labelValuesModePreferences;
     boolean populateLabelsTextfieldPreferences;
@@ -163,9 +161,7 @@ public class ColorBarLayer extends Layer {
                 locationVerticalPrevious = getColorBarLocationVerticalPlacement();
                 locationGapFactorPrevious = getLocationOffsetOutside();
                 titlePreferences = getTitle();
-                titleAltPreferences = getTitleAlt();
                 unitsPreferences = getUnits();
-                unitsAltPreferences = getUnitsAlt();
                 labelValuesActualPreferences = getLabelValuesActual();
                 labelValuesModePreferences = getLabelValuesMode();
                 populateLabelsTextfieldPreferences = getPopulateLabelsTextfield();
@@ -186,9 +182,7 @@ public class ColorBarLayer extends Layer {
 
             if (!imageLegendInitialized || (isAutoApplySchemes() != autoApplyPrevious)) {
                 setTitle(titlePreferences);
-                setTitleAlt(titleAltPreferences);
                 setUnits(unitsPreferences);
-                setUnitsAlt(unitsAltPreferences);
                 setColorBarLength(colorBarLengthPreferences);
 
                 if (isAutoApplySchemes()) {
@@ -197,17 +191,10 @@ public class ColorBarLayer extends Layer {
                             setTitle(schemeInfo.getColorBarTitle());
                         }
 
-                        if (schemeInfo.getColorBarTitleAlt() != null && schemeInfo.getColorBarTitleAlt().trim().length() > 0) {
-                            setTitleAlt(schemeInfo.getColorBarTitleAlt());
-                        }
-
                         if (schemeInfo.getColorBarUnits() != null && schemeInfo.getColorBarUnits().trim().length() > 0) {
                             setUnits(schemeInfo.getColorBarUnits());
                         }
 
-                        if (schemeInfo.getColorBarUnitsAlt() != null && schemeInfo.getColorBarUnitsAlt().trim().length() > 0) {
-                            setUnitsAlt(schemeInfo.getColorBarUnitsAlt());
-                        }
 
                         if (schemeInfo.getColorBarLengthStr() != null && schemeInfo.getColorBarLengthStr().trim().length() > 0) {
                             setColorBarLength(Integer.parseInt(schemeInfo.getColorBarLengthStr()));
@@ -389,12 +376,7 @@ public class ColorBarLayer extends Layer {
 
             // Title & Units Text
             // todo Danny
-//            imageLegend.setTitleAltUse(isTitleAltUse());
-            imageLegend.setTitleAltUse(false);
             imageLegend.setTitle(getTitle());
-            imageLegend.setTitleAlt(getTitleAlt());
-            imageLegend.setUnitsAltUse(isUnitsAltUse());
-            imageLegend.setUnitsAlt(getUnitsAlt());
             imageLegend.setUnits(getUnits());
             imageLegend.setUnitsNull(getUnitsNull());
             imageLegend.setConvertCaret(isConvertCaret());
@@ -888,11 +870,6 @@ public class ColorBarLayer extends Layer {
 
     // Title & Units Text
 
-    private boolean isTitleAltUse() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_ALT_USE_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_ALT_USE_DEFAULT);
-    }
-
     private String getTitle() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_KEY,
                 ColorBarLayerType.PROPERTY_TITLE_DEFAULT);
@@ -913,27 +890,8 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private String getTitleAlt() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_ALT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_ALT_DEFAULT);
-    }
-
-    private void setTitleAlt(String value) {
-        try {
-            String valueCurrent = getUnits();
-
-            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_ALT_KEY).setValue((Object) value);
-            }
-        } catch (ValidationException v) {
-        }
-    }
 
 
-    private boolean isUnitsAltUse() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_ALT_USE_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_ALT_USE_DEFAULT);
-    }
 
     private String getUnits() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_KEY,
@@ -952,21 +910,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private String getUnitsAlt() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_ALT_KEY,
-                ColorBarLayerType.PROPERTY_UNITS_ALT_DEFAULT);
-    }
-
-    private void setUnitsAlt(String value) {
-        try {
-            String valueCurrent = getUnits();
-
-            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_UNITS_ALT_KEY).setValue((Object) value);
-            }
-        } catch (ValidationException v) {
-        }
-    }
 
 
     private String getUnitsNull() {
