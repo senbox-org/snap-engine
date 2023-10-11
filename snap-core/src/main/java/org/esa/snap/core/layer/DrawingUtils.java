@@ -7,6 +7,7 @@ import java.awt.geom.Rectangle2D;
 
 public class DrawingUtils {
 
+    public static final double REDUCE_FONT_FACTOR = 0.75;
 
     public static void drawText(Graphics2D g2d, String headerString, boolean convertCaret) {
 
@@ -18,6 +19,9 @@ public class DrawingUtils {
         boolean currentIdxIsSubScript = false;  // indicates whether current idx is a superscript
         boolean containsSuperSubScript = false;
         boolean italicsOverride = false;
+        boolean currentIdxIsSmallScript = false;
+        boolean currentIdxIsSetLowerCase = false;
+        boolean currentIdxIsSetUpperCase = false;
         boolean boldOverride = false;
         boolean prevIdxNormal = true; // used to determine if subscript or superscript immediately follow normal
         boolean caratAwaitingEntry = false;
@@ -76,6 +80,39 @@ public class DrawingUtils {
                 ignoreThisIdx = true;
                 italicsOverride = false;
             }
+
+
+            if (isStartSmallScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSmallScript = true;
+            }
+
+            if (isEndSmallScript(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSmallScript = false;
+            }
+
+
+            if (isStartLowerCase(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSetLowerCase = true;
+            }
+
+            if (isEndLowerCase(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSetLowerCase = false;
+            }
+
+            if (isStartUpperCase(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSetUpperCase = true;
+            }
+
+            if (isEndUpperCase(headerString, idx)) {
+                ignoreThisIdx = true;
+                currentIdxIsSetUpperCase = false;
+            }
+
 
             if (isStartBold(headerString, idx)) {
                 ignoreThisIdx = true;
@@ -136,11 +173,23 @@ public class DrawingUtils {
                     g2d.setFont(boldFont);
                 }
 
+
+
+                if (currentIdxIsSetLowerCase && charStringCurrent != null) {
+                    charStringCurrent = charStringCurrent.toLowerCase();
+                }
+
+                if (currentIdxIsSetUpperCase && charStringCurrent != null) {
+                    charStringCurrent = charStringCurrent.toUpperCase();
+                }
+
                 ImageLegend.FONT_SCRIPT font_script;
                 if (currentIdxIsSuperScript) {
                     font_script = ImageLegend.FONT_SCRIPT.SUPER_SCRIPT;
                 } else if (currentIdxIsSubScript) {
                     font_script = ImageLegend.FONT_SCRIPT.SUBSCRIPT;
+                } else if (currentIdxIsSmallScript) {
+                    font_script = ImageLegend.FONT_SCRIPT.REDUCED;
                 } else {
                     font_script = ImageLegend.FONT_SCRIPT.NORMAL;
                 }
@@ -167,6 +216,31 @@ public class DrawingUtils {
     }
 
 
+    private static boolean isStartUpperCase(String text, int idx) {
+        return isStringOnIndex(text, idx, "<uc>") || isStringOnIndex(text, idx, "<UC>");
+    }
+
+    private static boolean isEndUpperCase(String text, int idx) {
+        return isStringOnIndex(text, idx, "</uc>") || isStringOnIndex(text, idx, "</UC>");
+    }
+
+    private static boolean isStartLowerCase(String text, int idx) {
+        return isStringOnIndex(text, idx, "<lc>") || isStringOnIndex(text, idx, "<LC>");
+    }
+
+    private static boolean isEndLowerCase(String text, int idx) {
+        return isStringOnIndex(text, idx, "</lc>") || isStringOnIndex(text, idx, "</LC>");
+    }
+
+
+
+    private static boolean isStartSmallScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "<small>") || isStringOnIndex(text, idx, "<SMALL>");
+    }
+
+    private static boolean isEndSmallScript(String text, int idx) {
+        return isStringOnIndex(text, idx, "</small>") || isStringOnIndex(text, idx, "</SMALL>");
+    }
 
     private static boolean isStartSubScript(String text, int idx) {
         return isStringOnIndex(text, idx, "<sub>") || isStringOnIndex(text, idx, "<SUB>");
@@ -248,12 +322,16 @@ public class DrawingUtils {
             int superScriptHeight = (int) Math.ceil(g2d.getFont().getSize() * 0.3);
 
             translateY = -superScriptHeight;
-            fontSize = (int) Math.ceil(g2d.getFont().getSize() * 0.75);
-        } else { // it is subscript
+            fontSize = (int) Math.ceil(g2d.getFont().getSize() * DrawingUtils.REDUCE_FONT_FACTOR);
+        } else if (fontScript == ImageLegend.FONT_SCRIPT.SUBSCRIPT) {
 //            int subScriptHeight = (int) Math.ceil(singleLetter.getHeight() * 0.1);
             int subScriptHeight = (int) Math.ceil(g2d.getFont().getSize() * 0.2);
             translateY = subScriptHeight;
-            fontSize = (int) Math.ceil(g2d.getFont().getSize() * 0.75);
+            fontSize = (int) Math.ceil(g2d.getFont().getSize() * DrawingUtils.REDUCE_FONT_FACTOR);
+        } else if (fontScript == ImageLegend.FONT_SCRIPT.REDUCED) {
+            fontSize = (int) Math.ceil(g2d.getFont().getSize() * DrawingUtils.REDUCE_FONT_FACTOR);
+        } else {
+            fontSize = g2d.getFont().getSize();
         }
 
         g2d.translate(0, translateY);
@@ -274,5 +352,31 @@ public class DrawingUtils {
         g2d.setFont(fontOrig);
     }
 
+
+    public static  String getTextTagsRemoved(String text) {
+        String textTagRemoved = text;
+
+        String[] tagKeys = {"sup", "sub", "i", "b", "small", "uc", "lc", "br"};
+
+        for (String tag : tagKeys) {
+            textTagRemoved = getTextTagRemoved(textTagRemoved, tag);
+        }
+
+        return textTagRemoved;
+    }
+
+    public static String getTextTagRemoved (String text, String tag) {
+
+        String textTagRemoved = text;
+
+        if (textTagRemoved != null && tag != null) {
+            textTagRemoved = textTagRemoved.replace("<" + tag.toLowerCase() + ">", "");
+            textTagRemoved = textTagRemoved.replace("<" + tag.toLowerCase() + "/>", "");
+            textTagRemoved = textTagRemoved.replace("<" + tag.toUpperCase() + ">", "");
+            textTagRemoved = textTagRemoved.replace("<" + tag.toUpperCase() + "/>", "");
+        }
+
+        return textTagRemoved;
+    }
 
 }
