@@ -115,9 +115,9 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_GAP_LABEL = "Margin Gap";
     public static final String PROPERTY_MARGIN_GAP_TOOLTIP = "Percentage of scene size to place metadata away from the edge of the scene image";
     private static final String PROPERTY_MARGIN_GAP_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_MARGIN_GAP_DEFAULT = 50.0;
-    public static final double PROPERTY_MARGIN_GAP_MIN = -100;
-    public static final double PROPERTY_MARGIN_GAP_MAX = 100;
+    public static final Double PROPERTY_MARGIN_GAP_DEFAULT = 70.0;
+    public static final double PROPERTY_MARGIN_GAP_MIN = -200;
+    public static final double PROPERTY_MARGIN_GAP_MAX = 200;
     public static final String PROPERTY_MARGIN_GAP_INTERVAL = "[" + MetaDataLayerType.PROPERTY_MARGIN_GAP_MIN + "," + MetaDataLayerType.PROPERTY_MARGIN_GAP_MAX + "]";
     public static final Class PROPERTY_MARGIN_GAP_TYPE = Double.class;
 
@@ -326,28 +326,36 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD_TOOLTIP = "Adds a title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield";
-    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)<br><GLOBAL_ATTR=title>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)<br><GLOBAL_ATTR=title>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=band_description> - Band: '<PROPERTY=band>'";
+//    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=mission_level_info> <PROPERTY=temporal_range_parenthesis>";
+    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=mission_level_info>";
     public static final Class PROPERTY_HEADER_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD2_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield2";
     public static final String PROPERTY_HEADER_TEXTFIELD2_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD2_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD2_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield2";
-    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_long><br>File: <PROPERTY=file>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_MONTHDDYYYY><br>File: <PROPERTY=file>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<GLOBAL_ATTR=platform>-<GLOBAL_ATTR=sensor>: <PROPERTY=product_type> <PROPERTY=temporal_range_parenthesis>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=mission_level_info> <PROPERTY=temporal_range_parenthesis>";
+    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=band_description>";
     public static final Class PROPERTY_HEADER_TEXTFIELD2_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD3_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield3";
     public static final String PROPERTY_HEADER_TEXTFIELD3_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD3_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD3_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield3";
-    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "";
+//    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_ddmmmyyyy><br>File: <PROPERTY=file>";
+//    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_ddmmmyyyy> <PROPERTY=temporal_range_parenthesis>";
+    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_info>";
     public static final Class PROPERTY_HEADER_TEXTFIELD3_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD4_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield4";
     public static final String PROPERTY_HEADER_TEXTFIELD4_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD4_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD4_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield4";
-    public static final String PROPERTY_HEADER_TEXTFIELD4_DEFAULT = "";
+    public static final String PROPERTY_HEADER_TEXTFIELD4_DEFAULT = "File: <PROPERTY=file> - Band: <PROPERTY=band>";
     public static final Class PROPERTY_HEADER_TEXTFIELD4_TYPE = String.class;
 
 
@@ -395,7 +403,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_GAP_LABEL = "Header Gap";
     public static final String PROPERTY_HEADER_GAP_TOOLTIP = "Percentage of scene size to place header away from the edge of the scene image";
     private static final String PROPERTY_HEADER_GAP_ALIAS = PROPERTY_HEADER_FORMAT_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_HEADER_GAP_DEFAULT = 6.0;
+    public static final Double PROPERTY_HEADER_GAP_DEFAULT = 5.0;
     public static final double PROPERTY_HEADER_GAP_MIN = -100;
     public static final double PROPERTY_HEADER_GAP_MAX = 100;
     public static final String PROPERTY_HEADER_GAP_INTERVAL = "[" + PROPERTY_HEADER_GAP_MIN + "," + PROPERTY_HEADER_GAP_MAX + "]";

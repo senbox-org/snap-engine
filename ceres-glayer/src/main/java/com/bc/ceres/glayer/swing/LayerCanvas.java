@@ -407,24 +407,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
         if (initiallyZoomingAll && !zoomedAll && maxVisibleModelBounds != null && !maxVisibleModelBounds.isEmpty()) {
             zoomedAll = true;
-            zoomAll();
-
-            double aspectTall = getZoomInitialAspectTall();
-            double aspectWide = getZoomInitialAspectWide();
-
-            double aspectRatio = maxVisibleModelBounds.getWidth() / maxVisibleModelBounds.getHeight();
-
-            if (aspectRatio <= aspectTall) {
-                // it is a tall scene
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialTall());
-
-            } else if (aspectRatio >= aspectWide) {
-                // it is a wide scene
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialWide());
-
-            } else {
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial());
-            }
+            zoomWithDefaultAspect();
         }
 
         final Graphics2D g2d = (Graphics2D) g;
@@ -460,6 +443,33 @@ public class LayerCanvas extends JPanel implements AdjustableView {
             System.out.println("LayerCanvas.paintComponent() took " + dt + " ms");
         }
     }
+
+
+
+    public void zoomWithDefaultAspect() {
+        if (maxVisibleModelBounds != null && !maxVisibleModelBounds.isEmpty()) {
+            zoomAll();
+
+            double aspectTall = getZoomInitialAspectTall();
+            double aspectWide = getZoomInitialAspectWide();
+
+            double aspectRatio = maxVisibleModelBounds.getWidth() / maxVisibleModelBounds.getHeight();
+
+            if (aspectRatio <= aspectTall) {
+                // it is a tall scene
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialTall());
+
+            } else if (aspectRatio >= aspectWide) {
+                // it is a wide scene
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialWide());
+
+            } else {
+                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial());
+            }
+        }
+    }
+
+
 
     // JComponent overrides
     /////////////////////////////////////////////////////////////////////////

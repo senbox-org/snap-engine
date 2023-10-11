@@ -53,7 +53,7 @@ public class ColorBarLayerType extends LayerType {
     // Color Bar Legend parameters
 
     // Preferences property prefix
-    private static final String PROPERTY_ROOT_KEY = "color.bar.legend";
+    private static final String PROPERTY_ROOT_KEY = "color.bar.legend.v8.5";
     private static final String PROPERTY_ROOT_ALIAS = "colorBarLegend";
 
 
@@ -103,20 +103,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_DEFAULT = "<PROPERTY=band_description>";
     public static final Class PROPERTY_TITLE_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_ALT_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt";
-    public static final String PROPERTY_TITLE_ALT_LABEL = "Title (Alternate)";
-    public static final String PROPERTY_TITLE_ALT_TOOLTIP = "Alternate title for the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_TITLE_ALT_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "Alt";
-    public static final String PROPERTY_TITLE_ALT_DEFAULT = "<PROPERTY=band>";
-    public static final Class PROPERTY_TITLE_ALT_TYPE = String.class;
-
-    public static final String PROPERTY_TITLE_ALT_USE_KEY = PROPERTY_HEADER_TITLE_ROOT_KEY + ".alt.use";
-    public static final String PROPERTY_TITLE_ALT_USE_LABEL = "Use Title (Alternate)";
-    public static final String PROPERTY_TITLE_ALT_USE_TOOLTIP = "Use Title (Alternate) instead of Title";
-    public static final String PROPERTY_TITLE_ALT_USE_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS + "AltUse";
-    public static final boolean PROPERTY_TITLE_ALT_USE_DEFAULT = false;
-    public static final Class PROPERTY_TITLE_ALT_USE_TYPE = Boolean.class;
-
 
 
     // Header Units
@@ -136,19 +122,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_UNITS_DEFAULT = "<PROPERTY=units>";
     public static final Class PROPERTY_UNITS_TYPE = String.class;
 
-    public static final String PROPERTY_UNITS_ALT_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt";
-    public static final String PROPERTY_UNITS_ALT_LABEL = "Units (Alternate)";
-    public static final String PROPERTY_UNITS_ALT_TOOLTIP = "Alternate units for the " + COLOR_LOWER_CASE + " bar";
-    public static final String PROPERTY_UNITS_ALT_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Alt";
-    public static final String PROPERTY_UNITS_ALT_DEFAULT = "<PROPERTY=band>; <PROPERTY=units>";
-    public static final Class PROPERTY_UNITS_ALT_TYPE = String.class;
-
-    public static final String PROPERTY_UNITS_ALT_USE_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".alt.use";
-    public static final String PROPERTY_UNITS_ALT_USE_LABEL = "Use Units (Alternate)";
-    public static final String PROPERTY_UNITS_ALT_USE_TOOLTIP = "Use Units (Alternate) instead of Units";
-    public static final String PROPERTY_UNITS_ALT_USE_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "AltUse";
-    public static final boolean PROPERTY_UNITS_ALT_USE_DEFAULT = false;
-    public static final Class PROPERTY_UNITS_ALT_USE_TYPE = Boolean.class;
 
     public static final String PROPERTY_UNITS_NULL_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null";
     public static final String PROPERTY_UNITS_NULL_LABEL = "Units Null Value";
@@ -477,7 +450,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scene Size Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale " + COLOR_LOWER_CASE + " bar legend relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
-    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 100.0;
+    public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 90.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MIN = 5;
     public static final double PROPERTY_IMAGE_SCALING_SIZE_MAX = 200;
@@ -1035,19 +1008,6 @@ public class ColorBarLayerType extends LayerType {
         titleModel.getDescriptor().setAlias(PROPERTY_TITLE_ALIAS);
         vc.addProperty(titleModel);
 
-        final Property titleAltModel = Property.create(PROPERTY_TITLE_ALT_KEY,
-                PROPERTY_TITLE_ALT_TYPE,
-                PROPERTY_TITLE_ALT_DEFAULT,
-                true);
-        titleAltModel.getDescriptor().setAlias(PROPERTY_TITLE_ALT_ALIAS);
-        vc.addProperty(titleAltModel);
-
-        final Property titleAltUseModel = Property.create(PROPERTY_TITLE_ALT_USE_KEY,
-                PROPERTY_TITLE_ALT_USE_TYPE,
-                PROPERTY_TITLE_ALT_USE_DEFAULT,
-                true);
-        titleAltUseModel.getDescriptor().setAlias(PROPERTY_TITLE_ALT_USE_ALIAS);
-        vc.addProperty(titleAltUseModel);
 
 
         final Property headerUnitsSectionModel = Property.create(PROPERTY_HEADER_UNITS_SECTION_KEY, Boolean.class, true, true);
@@ -1060,20 +1020,6 @@ public class ColorBarLayerType extends LayerType {
                 true);
         unitsModel.getDescriptor().setAlias(PROPERTY_UNITS_ALIAS);
         vc.addProperty(unitsModel);
-
-        final Property unitsAltModel = Property.create(PROPERTY_UNITS_ALT_KEY,
-                PROPERTY_UNITS_ALT_TYPE,
-                PROPERTY_UNITS_ALT_DEFAULT,
-                true);
-        unitsAltModel.getDescriptor().setAlias(PROPERTY_UNITS_ALT_ALIAS);
-        vc.addProperty(unitsAltModel);
-
-        final Property unitsAltUseModel = Property.create(PROPERTY_UNITS_ALT_USE_KEY,
-                PROPERTY_UNITS_ALT_USE_TYPE,
-                PROPERTY_UNITS_ALT_USE_DEFAULT,
-                true);
-        unitsAltUseModel.getDescriptor().setAlias(PROPERTY_UNITS_ALT_USE_ALIAS);
-        vc.addProperty(unitsAltUseModel);
 
         final Property unitsNullModel = Property.create(PROPERTY_UNITS_NULL_KEY,
                 PROPERTY_UNITS_NULL_TYPE,

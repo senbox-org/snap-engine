@@ -476,8 +476,8 @@ public class ColorSchemeManager {
 
                 enabled = validEntry;
 
-                colorSchemeInfo = new ColorSchemeInfo(id, primaryScheme, divider, displayName, description, standardCpdFilename, min, max, logScaled, enabled, universalCpdFilename, colorBarTitle, colorBarTitleAlt, colorBarLabels,
-                        colorBarUnits, colorBarUnitsAlt,  colorBarLabelScalingStr, colorBarLengthStr, colorPaletteAuxDir);
+                colorSchemeInfo = new ColorSchemeInfo(id, primaryScheme, divider, displayName, description, standardCpdFilename, min, max, logScaled, enabled, universalCpdFilename, colorBarTitle, colorBarLabels,
+                        colorBarUnits,  colorBarLabelScalingStr, colorBarLengthStr, colorPaletteAuxDir);
 
                 if (!colorSchemeInfo.isEnabled()) {
                     description = checkScheme(colorSchemeInfo);

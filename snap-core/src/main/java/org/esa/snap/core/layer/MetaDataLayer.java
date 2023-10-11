@@ -15,6 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -467,9 +468,22 @@ public class MetaDataLayer extends Layer {
 
 
         for (MetaDataOnImage.TextGlyph glyph : textGlyphs) {
-            Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(glyph.getText(), g2d);
+            Font origFontPreBounds = g2d.getFont();
+
+            int fontSize;
+
+            if (glyph.getText().contains("<small>") || glyph.getText().contains("<SMALL>") || glyph.getText().contains("</small>") || glyph.getText().contains("</SMALL>")) {
+                fontSize = (int) Math.ceil(g2d.getFont().getSize() * DrawingUtils.REDUCE_FONT_FACTOR);
+                Font boundsFont = new Font(g2d.getFont().getName(), g2d.getFont().getStyle(), fontSize);
+                g2d.setFont(boundsFont);
+            }
+
+            String textTagsRemoved =  DrawingUtils.getTextTagsRemoved(glyph.getText());
+
+            Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(textTagsRemoved, g2d);
             maxWidthInformationBlock = Math.max(labelBounds.getWidth(), maxWidthInformationBlock);
             heightInformationBlock += labelBounds.getHeight();
+            g2d.setFont(origFontPreBounds);
         }
 
 
@@ -500,7 +514,9 @@ public class MetaDataLayer extends Layer {
             double theta = (rotation / 180) * Math.PI;
             g2d.rotate(-1 * Math.PI + theta);
 
-            Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(glyph.getText(), g2d);
+            String textTagsRemoved =  DrawingUtils.getTextTagsRemoved(glyph.getText());
+            Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(textTagsRemoved, g2d);
+//            Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(glyph.getText(), g2d);
 
             String location;
             if (annotation == Annotation.HEADER) {
@@ -628,6 +644,7 @@ public class MetaDataLayer extends Layer {
         g2d.setPaint(origColor);
         g2d.setFont(origFont);
     }
+
 
 
 
