@@ -13,6 +13,13 @@ public class HdfActivatorTest {
     @Test
     @STTM("SNAP-3553")
     public void testActivate() {
+        // skip this test on ARM CPUs, we're not supporting these for now tb 2023-10-12
+        final String arch = System.getProperty("os.arch").toLowerCase();
+        if (arch.equals("aarch64")) {
+            System.out.println("HdfActivatorTest: skipping on ARM CPU");
+            return;
+        }
+
         HdfActivator.activate();
 
         try {
