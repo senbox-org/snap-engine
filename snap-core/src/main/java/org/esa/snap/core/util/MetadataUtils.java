@@ -489,11 +489,11 @@ public class MetadataUtils {
 
         if (addTemporalRange && temporalRange != null && temporalRange.length() > 0) {
             if ("MONTH".equals(temporalRange.toUpperCase())) {
-                value = getSceneStartDateTime(raster, DATE_FORMAT.MONTH_YYYY, TIME_FORMAT.NONE) + " (Year Composite)";
+                value = getSceneStartDateTime(raster, DATE_FORMAT.MONTH_YYYY, TIME_FORMAT.NONE) + " (Month Composite)";
             } else if ("DAY".equals(temporalRange.toUpperCase())) {
                 value = getSceneStartDateTime(raster, DATE_FORMAT.DD_MONTH_YYYY, TIME_FORMAT.NONE) + " (Day Composite)";
             } else if ("YEAR".equals(temporalRange.toUpperCase())) {
-                value = getSceneStartDateTime(raster, DATE_FORMAT.YYYY, TIME_FORMAT.NONE) + " (Month Composite)";
+                value = getSceneStartDateTime(raster, DATE_FORMAT.YYYY, TIME_FORMAT.NONE) + " (Year Composite)";
             } else {
                 value = value + " (" + temporalRange + " Composite)";
             }
