@@ -25,8 +25,13 @@
 
     <groupId>ncsa.hdf</groupId>
     <artifactId>lib-hdf</artifactId>
-    <version>2.7.1</version>
+    <version>${hdf.native.version}</version>
     <packaging>nbm</packaging>
+
+    <properties>
+        <snap.version>10.0.0-SNAPSHOT</snap.version>
+    </properties>
+
 
     <name>HDF Library</name>
     <description>A wrapper module for the native libraries used to read data products in HDF format.</description>
@@ -53,49 +58,31 @@
             <artifactId>jhdf5</artifactId>
             <version>2.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-runtime</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-core</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-natives</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>ncsa.hdf</groupId>
-                                    <artifactId>hdf-natives</artifactId>
-                                    <version>${hdf.version}</version>
-                                    <type>zip</type>
-                                    <outputDirectory>src/main/resources/lib</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.6.1</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>src/main/resources/lib</directory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>

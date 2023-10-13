@@ -89,6 +89,7 @@
 
                         <publicPackage>org.slf4j.*</publicPackage>
                         <publicPackage>org.apache.velocity.*</publicPackage>
+                        <publicPackage>sun.misc.Cleaner</publicPackage>
 
                         <publicPackage>com.bc.ceres.core</publicPackage>
                         <publicPackage>com.bc.ceres.core.runtime</publicPackage>
