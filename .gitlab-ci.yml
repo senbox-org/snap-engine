@@ -66,6 +66,20 @@ mvn-deploy-snapshot:
   rules:
     - if: $BUILD_FOR_INSTALLER == "false"
 
+windows:
+  stage: build
+  tags: [windows]
+  script:
+    - mvn clean package
+
+macos:
+  stage: build
+  tags: [mac]
+  variables:
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+  script:
+    - mvn clean package
+
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
   image: curlimages/curl  
