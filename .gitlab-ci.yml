@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.5.0"
+    ref: "3.6.1"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -67,16 +67,24 @@ mvn-deploy-snapshot:
     - if: $BUILD_FOR_INSTALLER == "false"
 
 windows:
-  stage: build
+  stage: test
   tags: [windows]
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
+  allow_failure: false
+  needs: []
   script:
     - mvn clean package
 
 macos:
-  stage: build
+  stage: test
   tags: [mac]
+  rules:
+    - if: $BUILD_FOR_INSTALLER == "false"
   variables:
     JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+  allow_failure: true
+  needs: []
   script:
     - mvn clean package
 
