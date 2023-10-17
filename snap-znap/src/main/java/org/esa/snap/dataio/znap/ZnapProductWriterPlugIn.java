@@ -25,8 +25,11 @@ import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
+import org.esa.snap.runtime.Config;
 
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
 
@@ -47,7 +50,14 @@ public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getDefaultFileExtensions() {
-        return new String[]{ZNAP_CONTAINER_EXTENSION, ZNAP_ZIP_CONTAINER_EXTENSION};
+        Preferences preferences = Config.instance("snap").load().preferences();
+        boolean useZip = preferences.getBoolean(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE,
+                ZnapPreferencesConstants.DEFAULT_USE_ZIP_ARCHIVE);
+        if (useZip) {
+            return new String[]{ZNAP_ZIP_CONTAINER_EXTENSION, ZNAP_CONTAINER_EXTENSION};
+        } else {
+            return new String[]{ZNAP_CONTAINER_EXTENSION, ZNAP_ZIP_CONTAINER_EXTENSION};
+        }
     }
 
     public String getDescription(Locale locale) {
