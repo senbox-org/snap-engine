@@ -130,7 +130,7 @@ public class OpenJpegExecRetriever {
             if (IS_OS_LINUX) {
                 category = OSCategory.LINUX_64;
             } else if (IS_OS_MAC_OSX) {
-                if (sysArch.contains("amd64")) {
+                if (sysArch.contains("amd64") || sysArch.contains("x86_64")) {
                     category = OSCategory.MAC_OS_X;
                 } else if (sysArch.contains("aarch64")) {
                     category = OSCategory.MAC_OS_X_AARCH64;
