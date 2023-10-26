@@ -7,7 +7,7 @@ variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-eclipse-temurin-8-alpine"
 
 macos:
-  when: never
+  when: manual
 
 windows:
-  when: never
+  when: manual
