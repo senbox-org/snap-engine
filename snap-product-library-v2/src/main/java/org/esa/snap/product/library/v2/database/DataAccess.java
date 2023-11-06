@@ -1074,7 +1074,7 @@ public class DataAccess {
     private static void insertProductRemoteAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {
         final PreparedStatement statement = connection.prepareStatement("INSERT INTO product_remote_attributes (product_id, name, value) VALUES (?, ?, ?)");
         for (Attribute attribute : remoteAttributes) {
-            if (attribute.getValue().length() <= MAXIMUM_REMOTE_ATTRIBUTE_VALUE) {
+            if (attribute.getValue() != null && attribute.getValue().length() <= MAXIMUM_REMOTE_ATTRIBUTE_VALUE) {
                 statement.setInt(1, productId);
                 statement.setString(2, attribute.getName());
                 statement.setString(3, attribute.getValue());

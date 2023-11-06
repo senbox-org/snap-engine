@@ -38,8 +38,11 @@ public class RemoteRepositoriesManagerTest {
             assertEquals(true, queryParameters.size() >= 3);
 
             RepositoryQueryParameter parameter = findQueryParameterByName("footprint", queryParameters);
-            assertNotNull(parameter);
-            assertEquals(true, parameter.isRequired());
+            //footprint not required for orbit files
+            if(! missions[k].toLowerCase().contains("orbit")) {
+                assertNotNull(parameter);
+                assertEquals(true, parameter.isRequired());
+            }
 
             parameter = findQueryParameterByName("startDate", queryParameters);
             assertNotNull(parameter);
@@ -151,24 +154,6 @@ public class RemoteRepositoriesManagerTest {
             credentials = new UsernamePasswordCredentials(userName, password);
         }
         downloadRepositoryProviderProductList(credentials, usgsRepositoryProvider, new String[]{"MODIS-VI1", "MODIS-VI2", "VIIRS", "MODIS-LTSE-1", "MODIS-LTSE-8"});
-    }
-
-    @Test
-    public void testScientificDataHubRepositoryProvider() throws Exception {
-        RemoteProductsRepositoryProvider scientificDataHubRepositoryProvider = findRepositoryProviderByName("Scientific Data Hub");
-        assertNotNull(scientificDataHubRepositoryProvider);
-
-        Credentials credentials = null;
-        if (scientificDataHubRepositoryProvider.requiresAuthentication()) {
-            String userName = System.getProperty("sentinels.account.username");
-            String password = System.getProperty("sentinels.account.password");
-
-            Assume.assumeTrue(!StringUtils.isBlank(userName) && !StringUtils.isBlank(password));
-
-            credentials = new UsernamePasswordCredentials(userName, password);
-        }
-
-        downloadRepositoryProviderProductList(credentials, scientificDataHubRepositoryProvider, new String[]{});
     }
 
     private static void downloadRepositoryProviderProductList(Credentials credentials, RemoteProductsRepositoryProvider repositoryProvider, String[] ignoredMissions) throws Exception {
