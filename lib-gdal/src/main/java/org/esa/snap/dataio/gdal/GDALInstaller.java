@@ -359,9 +359,7 @@ class GDALInstaller {
 
             copyDistributionArchiveAndInstall(gdalDistributionRootFolderPath, gdalVersion);
             fixUpPermissions(gdalNativeLibrariesFolderPath);
-            if (!gdalVersion.isJni()) {
-                checkDistributionIntegrity(gdalVersion);
-            }
+            checkDistributionIntegrity(gdalVersion);
             setSavedDistributionHash(distributionHash);
             setSavedModuleSpecificationVersion(moduleVersion);
         }
