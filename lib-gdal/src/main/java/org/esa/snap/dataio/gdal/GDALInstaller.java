@@ -353,7 +353,7 @@ class GDALInstaller {
         }
 
         if (canCopyGDALDistribution) {
-            deleteDistribution(gdalDistributionRootFolderPath.getParent());
+            deleteDistribution(gdalDistributionRootFolderPath);
             logger.log(Level.FINE, "create the folder '" + gdalDistributionRootFolderPath + "' to copy the GDAL distribution.");
             Files.createDirectories(gdalDistributionRootFolderPath);
 
