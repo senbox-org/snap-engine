@@ -14,7 +14,11 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 public class GDALLoaderTest extends AbstractGDALTest {
@@ -129,22 +133,30 @@ public class GDALLoaderTest extends AbstractGDALTest {
 
     @Test
     public void testGetBandDataType() {
-        assertNotNull(TEST_GDAL_LOADER);
-        GDALLoader.ensureGDALInitialised();
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtByte()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtByte()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtInt16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtInt16()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtUint16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtUint16()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtInt32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtInt32()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtUint32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtUint32()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtFloat32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtFloat32()));
-        assertEquals(getExpectedBandDataType(GDALConstConstants.gdtFloat64()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtFloat64()));
+        try {
+            assertNotNull(TEST_GDAL_LOADER);
+            GDALLoader.ensureGDALInitialised();
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtByte()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtByte()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtInt16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtInt16()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtUint16()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtUint16()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtInt32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtInt32()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtUint32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtUint32()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtFloat32()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtFloat32()));
+            assertEquals(getExpectedBandDataType(GDALConstConstants.gdtFloat64()), TEST_GDAL_LOADER.getBandDataType(GDALConstConstants.gdtFloat64()));
+        } catch (Exception e) {
+            fail("Error on testGetBandDataType(): " + e.getMessage());
+        }
     }
 
     @Test
     public void testGetGDALVersion() {
-        assertNotNull(TEST_GDAL_LOADER);
-        GDALLoader.ensureGDALInitialised();
-        assertEquals(TEST_GDAL_VERSION, TEST_GDAL_LOADER.getGdalVersion());
+        try {
+            assertNotNull(TEST_GDAL_LOADER);
+            GDALLoader.ensureGDALInitialised();
+            assertEquals(TEST_GDAL_VERSION, TEST_GDAL_LOADER.getGdalVersion());
+        } catch (Exception e) {
+            fail("Error on testGetGDALVersion(): " + e.getMessage());
+        }
     }
 
 }
