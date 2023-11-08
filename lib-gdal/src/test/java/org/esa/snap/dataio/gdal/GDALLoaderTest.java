@@ -27,7 +27,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     private Path testFilePath;
 
     private static URLClassLoader getExpectedGDALVersionLoader() throws Exception {
-        return new URLClassLoader(new URL[]{TEST_GDAL_VERSION.getJNILibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());
+        return new URLClassLoader(new URL[]{TEST_GDAL_VERSION.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());
     }
 
     private static int getExpectedGDALDataType(int bandDataType) {
