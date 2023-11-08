@@ -38,11 +38,7 @@ public class GDALInstallerTest {
 
     private void deleteGDALDirs() throws IOException {
         if (Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath())) {
-            Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_32X_JNI);
-            if (Files.exists(targetPath)) {
-                deleteFTree(targetPath);
-            }
-            targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_321_FULL);
+            final Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_321_FULL);
             if (Files.exists(targetPath)) {
                 deleteFTree(targetPath);
             }

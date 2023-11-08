@@ -28,7 +28,7 @@ public class GDALDistributionInstallerTest {
 
             }
             try (final Stream<Path> sp = Files.list(target)) {
-                if (!sp.findAny().isPresent()) {
+                if (sp.findAny().isEmpty()) {
                     Files.delete(target);
                 }
             }
@@ -39,11 +39,7 @@ public class GDALDistributionInstallerTest {
 
     private void deleteGDALDirs() throws IOException {
         if (Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath())) {
-            Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_32X_JNI);
-            if (Files.exists(targetPath)) {
-                deleteFTree(targetPath);
-            }
-            targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_321_FULL);
+            final Path targetPath = GDALVersionTest.getExpectedGDALVersionLocation(GDALVersion.GDAL_321_FULL);
             if (Files.exists(targetPath)) {
                 deleteFTree(targetPath);
             }
@@ -68,18 +64,6 @@ public class GDALDistributionInstallerTest {
         }
     }
 
-    private void testInstallJNIDistribution() {
-        try {
-            final GDALVersion gdalVersion = GDALVersion.GDAL_32X_JNI;
-            GDALDistributionInstaller.setupDistribution(gdalVersion);
-            assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
-            assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
-            assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));
-        } catch (IOException e) {
-            fail("Error on testSetupDistribution(): " + e.getMessage());
-        }
-    }
-
     private void testInstallBundleDistribution() {
         try {
             final GDALVersion gdalVersion = GDALVersion.GDAL_321_FULL;
@@ -95,7 +79,6 @@ public class GDALDistributionInstallerTest {
     @Test
     @STTM("SNAP-3523")
     public void testSetupDistribution() {
-        testInstallJNIDistribution();
         testInstallBundleDistribution();
     }
 

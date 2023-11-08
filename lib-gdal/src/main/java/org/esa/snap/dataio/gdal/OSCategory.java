@@ -136,25 +136,4 @@ public enum OSCategory {
         return this.architecture;
     }
 
-    /**
-     * Gets the absolute location of an executable on system by checking all PATH environment variable values.
-     *
-     * @param executableName the target executable name
-     * @return the absolute location of executable
-     */
-    public String[] getExecutableLocations(String executableName) {
-        List<String> executableLocations = new ArrayList<>();
-        final String pathEVValue = EnvironmentVariables.getEnvironmentVariable("PATH");
-        final String[] pathValues = pathEVValue.split(File.pathSeparator);
-        for (String pathValue : pathValues) {
-            final Path executableFilePath = Paths.get(pathValue).resolve(executableName);
-            if (Files.exists(executableFilePath)) {
-                executableLocations.add(pathValue);
-            }
-        }
-        if(executableLocations.isEmpty()){
-            logger.log(Level.WARNING, () -> executableName + " not found");
-        }
-        return executableLocations.toArray(new String[0]);
-    }
 }
