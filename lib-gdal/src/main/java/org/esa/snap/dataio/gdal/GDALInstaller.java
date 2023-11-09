@@ -22,8 +22,7 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.PosixFilePermission;
@@ -210,10 +209,10 @@ class GDALInstaller {
     }
 
     private static String fetchDistributionDirectoryHash(GDALVersion gdalVersion) throws Exception {
-        final URL sha256FileURLFromSources = gdalVersion.getSHA256FileURLFromSources();
-        if (sha256FileURLFromSources != null) {
-            try (Stream<String> lines = Files.lines(Paths.get(sha256FileURLFromSources.toURI()))) {
-                return lines.findFirst().orElse(null);
+        final InputStream sha256InputStreamFromSources = gdalVersion.getSHA256InputStreamFromSources();
+        if (sha256InputStreamFromSources != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(sha256InputStreamFromSources))) {
+                return reader.readLine();
             }
         }
         return null;
