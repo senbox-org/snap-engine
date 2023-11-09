@@ -578,6 +578,9 @@ public class FileUtils {
             try (Stream<Path> sp = Files.walk(targetDirectory).filter(Files::isRegularFile).sorted(pathComparatorOsIndependent)) {
                 final List<Path> targetFiles = sp.collect(Collectors.toList());
                 for (Path targetFile : targetFiles) {
+                    if (Files.isHidden(targetFile)) {
+                        continue;
+                    }
                     md.update(targetFile.getFileName().toString().toLowerCase().getBytes());
                     try (InputStream is = Files.newInputStream(targetFile); DigestInputStream dis = new DigestInputStream(is, md)) {
                         while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
