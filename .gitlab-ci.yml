@@ -83,10 +83,11 @@ macos:
     - if: $BUILD_FOR_INSTALLER == "false"
   variables:
     JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    TESTDATA_ROOT: "/Users/otb/testData"
   allow_failure: true
   needs: []
   script:
-    - mvn clean package
+    - mvn -q clean package
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
