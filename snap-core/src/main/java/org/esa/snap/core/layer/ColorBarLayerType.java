@@ -82,7 +82,7 @@ public class ColorBarLayerType extends LayerType {
             " applied <br>and the user subsequently changes the palette such is no longer matches scheme<br>" +
             "then the scheme will be turned off so the color bar legend match the altered color palette</html>";
     private static final String PROPERTY_SCHEME_LABELS_RESTRICT_ALIAS = PROPERTY_SCHEME_ALIAS_SUFFIX + "LabelsRestrict";
-    public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_LABELS_RESTRICT_DEFAULT = true;
     public static final Class PROPERTY_SCHEME_LABELS_RESTRICT_TYPE = Boolean.class;
 
 
@@ -766,7 +766,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Backdrop Border";
     public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_SHOW_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderShow";
-    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = false;
+    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = true;
     public static final Class PROPERTY_LEGEND_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.width";
@@ -817,21 +817,21 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_LABEL = "Bottom Margin";
     public static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_TOOLTIP = "Adjusts the bottom margin (relative to color bar orientation)d";
     private static final String PROPERTY_LEGEND_BORDER_GAP_BOTTOM_ALIAS = PROPERTY_LEGEND_BORDER_GAP_ROOT_ALIAS + "Bottom";
-    public static final double PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT = 0.5;
+    public static final double PROPERTY_LEGEND_BORDER_GAP_BOTTOM_DEFAULT = 0.3;
     public static final Class PROPERTY_LEGEND_BORDER_GAP_BOTTOM_TYPE = Double.class;
 
     public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_KEY = PROPERTY_LEGEND_BORDER_GAP_ROOT_KEY + ".leftside";
     public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_LABEL = "Left Margin";
     public static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_TOOLTIP = "Adjusts the left-side margin (relative to color bar orientation)";
     private static final String PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_ALIAS = PROPERTY_LEGEND_BORDER_GAP_ROOT_ALIAS + "LeftSide";
-    public static final double PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT = 0.6;
+    public static final double PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_DEFAULT = 0.3;
     public static final Class PROPERTY_LEGEND_BORDER_GAP_LEFTSIDE_TYPE = Double.class;
 
     public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_KEY = PROPERTY_LEGEND_BORDER_GAP_ROOT_KEY + ".rightside";
     public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_LABEL = "Right Margin";
     public static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_TOOLTIP = "Adjusts the right-side margin (relative to color bar orientation)";
     private static final String PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_ALIAS = PROPERTY_LEGEND_BORDER_GAP_ROOT_ALIAS + "RightSide";
-    public static final double PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT = 0.6;
+    public static final double PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_DEFAULT = 0.3;
     public static final Class PROPERTY_LEGEND_BORDER_GAP_RIGHTSIDE_TYPE = Double.class;
 
     public static final String PROPERTY_LEGEND_TITLE_GAP_KEY = PROPERTY_LEGEND_BORDER_GAP_ROOT_KEY + ".title.gap";
