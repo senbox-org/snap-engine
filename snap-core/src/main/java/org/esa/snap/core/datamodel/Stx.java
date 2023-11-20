@@ -47,12 +47,15 @@ public class Stx {
     private final double mean;
     private final double standardDeviation;
     private final double median;
+    private final double medianRaster;
+    private final boolean includesMedianRaster;
     private final int resolutionLevel;
     private final boolean logHistogram;
     private final boolean intHistogram;
     private final Histogram histogram;
 
     private final Scaling histogramScaling;
+    private  int rawTotal = -1; // optional field for adding on a total which includes no-data pixels
 
     private final double coefficientOfVariation;
     private final double enl;
@@ -75,6 +78,13 @@ public class Stx {
                double coeffOfVariation, double enl,
                boolean logHistogram, boolean intHistogram, Histogram histogram, int resolutionLevel) {
 
+        this(minimum, maximum, mean, 0.0, 0.0, 0.0, 0.0, false, logHistogram, intHistogram, histogram, resolutionLevel);
+
+    }
+
+    public Stx(double minimum, double maximum, double mean, double standardDeviation,
+               double coeffOfVariation, double enl, double medianRaster, boolean includesMedianRaster,
+               boolean logHistogram, boolean intHistogram, Histogram histogram, int resolutionLevel) {
         Assert.argument(!Double.isNaN(minimum), "minimum must not be NaN");
         Assert.argument(!Double.isInfinite(minimum), "minimum must not be infinity");
         Assert.argument(!Double.isNaN(maximum), "maximum must not be NaN");
@@ -99,6 +109,8 @@ public class Stx {
         this.intHistogram = intHistogram;
         this.histogram = histogram;
         this.resolutionLevel = resolutionLevel;
+        this.medianRaster = medianRaster;
+        this.includesMedianRaster = includesMedianRaster;
         this.coefficientOfVariation = coeffOfVariation;
         this.enl = enl;
     }
@@ -129,6 +141,13 @@ public class Stx {
      */
     public double getMedian() {
         return median;
+    }
+
+    /**
+     * @return The median value (raster based).
+     */
+    public double getMedianRaster() {
+        return medianRaster;
     }
 
     /**
@@ -301,4 +320,20 @@ public class Stx {
             return FastMath.exp(LN10 * value);
         }
     }
+
+    /**
+     * @return The minimum value.
+     */
+    public int getRawTotal() {
+        return rawTotal;
+    }
+
+    /**
+     * @return The minimum value.
+     */
+    public void setRawTotal(int rawTotal) {
+        this.rawTotal = rawTotal;
+    }
+
+
 }
