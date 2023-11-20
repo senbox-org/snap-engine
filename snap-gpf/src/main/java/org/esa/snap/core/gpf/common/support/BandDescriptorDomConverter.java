@@ -83,6 +83,22 @@ public class BandDescriptorDomConverter implements DomConverter {
                     desc.spectralBandwidth = Float.parseFloat(spectralBandwidth.getValue());
             }
 
+            DomElement angularValue = targetBand.getChild("angularValue");
+            if (angularValue != null) {
+                if(angularValue.getValue().equals("null"))
+                    desc.angularValue = null;
+                else
+                    desc.angularValue = Float.parseFloat(angularValue.getValue());
+            }
+
+            DomElement angularBandIndex = targetBand.getChild("angularBandIndex");
+            if (angularBandIndex != null) {
+                if(angularBandIndex.getValue().equals("null"))
+                    desc.angularBandIndex = null;
+                else
+                    desc.angularBandIndex = Integer.parseInt(angularBandIndex.getValue());
+            }
+
             DomElement scalingOffset = targetBand.getChild("scalingOffset");
             if (scalingOffset != null) {
                 if(scalingOffset.getValue().equals("null"))
@@ -149,6 +165,16 @@ public class BandDescriptorDomConverter implements DomConverter {
             if(bandDescriptor.spectralBandwidth != null) {
                 DomElement spectralBandwidth = targetBand.createChild("spectralBandwidth");
                 spectralBandwidth.setValue(String.valueOf(bandDescriptor.spectralBandwidth));
+            }
+
+            if(bandDescriptor.angularValue != null) {
+                DomElement angularValue = targetBand.createChild("angularValue");
+                angularValue.setValue(String.valueOf(bandDescriptor.angularValue));
+            }
+
+            if(bandDescriptor.angularBandIndex != null) {
+                DomElement angularBandIndex = targetBand.createChild("angularBandIndex");
+                angularBandIndex.setValue(String.valueOf(bandDescriptor.angularBandIndex));
             }
 
             if(bandDescriptor.scalingOffset != null) {
