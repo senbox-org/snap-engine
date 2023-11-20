@@ -766,7 +766,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Backdrop Border";
     public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_SHOW_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderShow";
-    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = false;
     public static final Class PROPERTY_LEGEND_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.width";
@@ -864,7 +864,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show Backdrop";
     public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the " + COLOR_LOWER_CASE + " bar legend backdrop";
     private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = false;
+    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
     public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
 
 
