@@ -1034,6 +1034,8 @@ public class ProductUtils {
         targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
         targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
         targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+        targetBand.setAngularValue(sourceBand.getAngularValue());
+        targetBand.setAngularBandIndex(sourceBand.getAngularBandIndex());
         targetBand.setSolarFlux(sourceBand.getSolarFlux());
     }
 
