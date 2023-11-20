@@ -1,8 +1,11 @@
 package org.esa.snap.core.datamodel;
 
 
+import org.esa.snap.core.util.ProductUtils;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Contains all info for a color scheme
@@ -19,6 +22,9 @@ public class ColorSchemeInfo {
     private String cpdFilenameColorBlind;
     private String colorBarTitle;
     private String colorBarLabels;
+    private String colorBarUnits;
+    private String colorBarLengthStr;
+    private String colorBarLabelScalingStr;
     private double minValue;
     private double maxValue;
     private boolean isLogScaled;
@@ -30,9 +36,16 @@ public class ColorSchemeInfo {
 
     private boolean useDisplayName = true;
 
-
     public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
+        this(name, primary, divider, displayName, description, cpdFilenameStandard, minValue, maxValue,
+                isLogScaled, enabled, cpdFilenameColorBlind, colorBarTitle, colorBarLabels, null, null, null, colorPaletteDir);
+
+    }
+
+    public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+                           boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels,
+                           String colorBarUnits, String colorBarLabelScalingStr, String colorBarLengthStr, File colorPaletteDir) {
         this.setName(name);
 
         this.primary = primary;
@@ -47,6 +60,9 @@ public class ColorSchemeInfo {
         this.cpdFilenameColorBlind = cpdFilenameColorBlind;
         this.colorBarLabels = colorBarLabels;
         this.colorBarTitle = colorBarTitle;
+        this.colorBarUnits = colorBarUnits;
+        this.colorBarLabelScalingStr = colorBarLabelScalingStr;
+        this.colorBarLengthStr = colorBarLengthStr;
         this.setColorPaletteDir(colorPaletteDir);
     }
 
@@ -171,12 +187,20 @@ public class ColorSchemeInfo {
         return colorBarTitle;
     }
 
-    public void setColorBarTitle(String colorBarTitle) {
-        this.colorBarTitle = colorBarTitle;
-    }
-
     public String getColorBarLabels() {
         return colorBarLabels;
+    }
+
+    public String getColorBarLabelScalingStr() {
+        return colorBarLabelScalingStr;
+    }
+
+    public String getColorBarLengthStr() {
+        return colorBarLengthStr;
+    }
+
+    public String getColorBarUnits() {
+        return colorBarUnits;
     }
 
     public void setColorBarLabels(String colorBarLabels) {
@@ -206,5 +230,136 @@ public class ColorSchemeInfo {
 
     public void setPrimary(boolean primary) {
         this.primary = primary;
+    }
+
+
+    public static String getColorBarTitle(String colorBarTitle, String bandname,  String description, float wavelength, float angle, String units, boolean allowWavelengthZero) {
+        
+        String wavelengthString = "";
+        if (wavelength > 0.0) {
+            if (Math.ceil(wavelength) == Math.round(wavelength)) {
+                wavelengthString = String.valueOf(Math.round(wavelength));
+            } else {
+                wavelengthString = String.valueOf(wavelength);
+            }
+        }
+        wavelengthString = String.valueOf(wavelength);
+        String angleString = String.valueOf(angle);
+
+
+        if (units == null) {
+            units = "";
+        }
+//        if (units != null && units.length() > 0) {
+//            units = "dimensionless";
+//        }
+
+        // Allow "%d" to become [WAVELENGTH] but only in the description
+        if (description != null && description.contains("%d")) {
+            while (colorBarTitle.contains("%d")) {
+                colorBarTitle = colorBarTitle.replace("%d", "[WAVELENGTH]");
+            }
+        }
+
+        if (colorBarTitle != null && colorBarTitle.trim().length() > 0) {
+            while(colorBarTitle.contains("[DESCRIPTION]")) {
+                colorBarTitle = colorBarTitle.replace("[DESCRIPTION]", description);
+            }
+
+            while(colorBarTitle.contains("<DESCRIPTION>")) {
+                colorBarTitle = colorBarTitle.replace("<DESCRIPTION>", description);
+            }
+            while(colorBarTitle.contains("[DESC]")) {
+                colorBarTitle = colorBarTitle.replace("[DESC]", description);
+            }
+
+            while(colorBarTitle.contains("<DESC>")) {
+                colorBarTitle = colorBarTitle.replace("<DESC>", description);
+            }
+
+            while(colorBarTitle.contains("[BANDNAME]")) {
+                colorBarTitle = colorBarTitle.replace("[BANDNAME]", bandname);
+            }
+
+            while(colorBarTitle.contains("<BANDNAME>")) {
+                colorBarTitle = colorBarTitle.replace("<BANDNAME>", bandname);
+            }
+
+            while(colorBarTitle.contains("[BAND]")) {
+                colorBarTitle = colorBarTitle.replace("[BAND]", bandname);
+            }
+
+            while(colorBarTitle.contains("<BAND>")) {
+                colorBarTitle = colorBarTitle.replace("<BAND>", bandname);
+            }
+
+            if (units != null) {
+                while (colorBarTitle.contains("[UNITS]")) {
+                    colorBarTitle = colorBarTitle.replace("[UNITS]", units);
+                }
+                while (colorBarTitle.contains("<UNITS>")) {
+                    colorBarTitle = colorBarTitle.replace("<UNITS>", units);
+                }
+                while (colorBarTitle.contains("[UNIT]")) {
+                    colorBarTitle = colorBarTitle.replace("[UNIT]", units);
+                }
+                while (colorBarTitle.contains("<UNIT>")) {
+                    colorBarTitle = colorBarTitle.replace("<UNIT>", units);
+                }
+            }
+
+            if (colorBarTitle.contains("[WAVELENGTH]") || colorBarTitle.contains("<WAVELENGTH>") ||
+                    colorBarTitle.contains("[WAVE]") || colorBarTitle.contains("<WAVE>")) {
+                if (wavelength > 0.0) {
+                    while (colorBarTitle.contains("[WAVELENGTH]")) {
+                        colorBarTitle = colorBarTitle.replace("[WAVELENGTH]", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("<WAVELENGTH>")) {
+                        colorBarTitle = colorBarTitle.replace("<WAVELENGTH>", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("[WAVE]")) {
+                        colorBarTitle = colorBarTitle.replace("[WAVE]", wavelengthString);
+                    }
+                    while (colorBarTitle.contains("<WAVE>")) {
+                        colorBarTitle = colorBarTitle.replace("<WAVE>", wavelengthString);
+                    }
+                } else {
+                    if (!allowWavelengthZero) {
+                        colorBarTitle = "";
+                    }
+                }
+            }
+
+            if (colorBarTitle.contains("[ANGLE]") || colorBarTitle.contains("<ANGLE>")) {
+                    while (colorBarTitle.contains("[ANGLE]")) {
+                        colorBarTitle = colorBarTitle.replace("[ANGLE]", angleString);
+                    }
+                    while (colorBarTitle.contains("<ANGLE>")) {
+                        colorBarTitle = colorBarTitle.replace("<ANGLE>", angleString);
+                    }
+            }
+        }
+
+        return  colorBarTitle;
+    }
+
+    public static ColorSchemeInfo getColorPaletteInfoByBandNameLookup(String bandName, Product product) {
+
+        ColorSchemeManager colorSchemeManager = ColorSchemeManager.getDefault();
+        if (colorSchemeManager != null) {
+
+            if (bandName != null) {
+                bandName.trim();
+            }
+
+            ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
+            for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
+                if (colorSchemeLookupInfo.isMatch(bandName, product)) {
+                    return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
+                }
+            }
+        }
+
+        return null;
     }
 }
