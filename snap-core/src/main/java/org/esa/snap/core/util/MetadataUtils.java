@@ -432,6 +432,7 @@ public class MetadataUtils {
 
             String sensor = ProductUtils.getMetaData(raster.getProduct(), ProductUtils.METADATA_POSSIBLE_SENSOR_KEYS);
             String platform = ProductUtils.getMetaData(raster.getProduct(), ProductUtils.METADATA_POSSIBLE_PLATFORM_KEYS);
+            String processingLevel = ProductUtils.getMetaData(raster.getProduct(), "processing_level");
             String productType = raster.getProduct().getProductType();
 
             if (sensor != null && sensor.length() > 0 && platform != null && platform.length() > 0) {
@@ -442,8 +443,11 @@ public class MetadataUtils {
                 value = platform;
             }
 
-            if (productType != null && productType.length() > 0) {
-                value = value + ": " + productType;
+            if (processingLevel != null && processingLevel.length() > 0) {
+                value = value + " " + processingLevel;
+
+//            if (productType != null && productType.length() > 0) {
+//                value = value + ": " + productType;
 
                 if (includeTemporalRange) {
                     String temporalRange = ProductUtils.getMetaData(raster.getProduct(), "temporal_range");

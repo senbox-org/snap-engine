@@ -177,6 +177,7 @@ public class ColorBarLayer extends Layer {
 
             if (!imageLegendInitialized || (isAutoApplySchemes() || isSchemeLabelsApply())) {
                 schemeInfo = ColorSchemeInfo.getColorPaletteInfoByBandNameLookup(raster.getName(), getProduct());
+//                schemeInfo = raster.getImageInfo().getColorSchemeInfo();
             }
 
 
@@ -206,6 +207,8 @@ public class ColorBarLayer extends Layer {
 
 
             if (!imageLegendInitialized || (isSchemeLabelsApply() != schemeLabelsApplyPrevious)) {
+//                schemeInfo = raster.getImageInfo().getColorSchemeInfo();
+
                 if (isSchemeLabelsApply()
                         && schemeInfo != null
                         && schemeInfo.getColorBarLabels() != null
@@ -272,6 +275,8 @@ public class ColorBarLayer extends Layer {
 
 
             if (imageLegendInitialized && isPaletteChanged() && isSchemeLabelsRestrict() && isSchemeLabelsApply()) {
+
+//                schemeInfo = raster.getImageInfo().getColorSchemeInfo();
 
                 if (!schemeOverRidden ) {
 
