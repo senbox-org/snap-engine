@@ -110,24 +110,24 @@ pending:
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "true"'
       when: never
-    when: always
+  when: always
 
 success:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "true"'
       when: never
-    when: on_success
+  when: on_success
 
 failure:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "true"'
       when: never
-    when: on_failure
+  when: on_failure
