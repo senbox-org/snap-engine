@@ -167,7 +167,7 @@ public class MetaDataLayerType extends LayerType {
     public static final Class PROPERTY_MARGIN_METADATA_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA2_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata2";
-    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "PROPERTIES List";
+    public static final String PROPERTY_MARGIN_METADATA2_LABEL = "PROPERTY List";
     public static final String PROPERTY_MARGIN_METADATA2_TOOLTIP = "Adds information properties";
     public static final String PROPERTY_MARGIN_METADATA2_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata2";
     public static final String PROPERTY_MARGIN_METADATA2_DEFAULT = "band,band_description,units,scene_size";
@@ -329,7 +329,7 @@ public class MetaDataLayerType extends LayerType {
 //    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "Band: <PROPERTY=band> (<PROPERTY=band_description>)<br><GLOBAL_ATTR=title>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=band_description> - Band: '<PROPERTY=band>'";
 //    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=mission_level_info> <PROPERTY=temporal_range_parenthesis>";
-    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=mission_level_info>";
+    public static final String PROPERTY_HEADER_TEXTFIELD_DEFAULT = "<PROPERTY=band_description> (<PROPERTY=mission_level_info>)";
     public static final Class PROPERTY_HEADER_TEXTFIELD_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD2_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield2";
@@ -339,7 +339,7 @@ public class MetaDataLayerType extends LayerType {
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_MONTHDDYYYY><br>File: <PROPERTY=file>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<GLOBAL_ATTR=platform>-<GLOBAL_ATTR=sensor>: <PROPERTY=product_type> <PROPERTY=temporal_range_parenthesis>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=mission_level_info> <PROPERTY=temporal_range_parenthesis>";
-    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=band_description>";
+    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "Band: <PROPERTY=band>  (File: <PROPERTY=file>)";
     public static final Class PROPERTY_HEADER_TEXTFIELD2_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD3_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield3";
@@ -355,7 +355,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD4_LABEL = "Header Text";
     public static final String PROPERTY_HEADER_TEXTFIELD4_TOOLTIP = "Adds a line to title/header to the Header-Footer Layer";
     public static final String PROPERTY_HEADER_TEXTFIELD4_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield4";
-    public static final String PROPERTY_HEADER_TEXTFIELD4_DEFAULT = "File: <PROPERTY=file> - Band: <PROPERTY=band>";
+    public static final String PROPERTY_HEADER_TEXTFIELD4_DEFAULT = "";
     public static final Class PROPERTY_HEADER_TEXTFIELD4_TYPE = String.class;
 
 

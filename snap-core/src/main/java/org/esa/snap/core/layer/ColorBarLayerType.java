@@ -759,25 +759,25 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_LEGEND_BORDER_SECTION_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".section";
     public static final String PROPERTY_LEGEND_BORDER_SECTION_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "Section";
-    public static final String PROPERTY_LEGEND_BORDER_SECTION_LABEL = "Legend Backdrop Border";
+    public static final String PROPERTY_LEGEND_BORDER_SECTION_LABEL = "Legend Border";
     public static final String PROPERTY_LEGEND_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the full legend";
 
     public static final String PROPERTY_LEGEND_BORDER_SHOW_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.show";
-    public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Backdrop Border";
+    public static final String PROPERTY_LEGEND_BORDER_SHOW_LABEL = "Show Legend Border";
     public static final String PROPERTY_LEGEND_BORDER_SHOW_TOOLTIP = "Display a border around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_SHOW_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderShow";
     public static final boolean PROPERTY_LEGEND_BORDER_SHOW_DEFAULT = false;
     public static final Class PROPERTY_LEGEND_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.width";
-    public static final String PROPERTY_LEGEND_BORDER_WIDTH_LABEL = "Legend Backdrop Border Width";
+    public static final String PROPERTY_LEGEND_BORDER_WIDTH_LABEL = "Legend Border Width";
     public static final String PROPERTY_LEGEND_BORDER_WIDTH_TOOLTIP = "Width of border line around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_WIDTH_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderWidth";
     public static final int PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT = 3;
     public static final Class PROPERTY_LEGEND_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_LEGEND_BORDER_COLOR_KEY = PROPERTY_LEGEND_BORDER_ROOT_KEY + ".border.color";
-    public static final String PROPERTY_LEGEND_BORDER_COLOR_LABEL = "Legend Backdrop Border " + COLOR_MIXED_CASE;
+    public static final String PROPERTY_LEGEND_BORDER_COLOR_LABEL = "Legend Border " + COLOR_MIXED_CASE;
     public static final String PROPERTY_LEGEND_BORDER_COLOR_TOOLTIP = COLOR_MIXED_CASE + " of border line around the full legend";
     private static final String PROPERTY_LEGEND_BORDER_COLOR_ALIAS = PROPERTY_LEGEND_BORDER_ROOT_ALIAS + "BorderColor";
     public static final Color PROPERTY_LEGEND_BORDER_COLOR_DEFAULT = Color.BLACK;
