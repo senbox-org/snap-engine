@@ -7,8 +7,8 @@ variables:
 
 # Only Java 11 is available
 windows:
-  when: never
+  when: manual
 
 # Only Java 11 is available
 macos:
-  when: never
+  when: manual
