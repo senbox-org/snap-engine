@@ -4,3 +4,11 @@ include:
 
 variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-eclipse-temurin-8"
+
+# Only Java 11 is available
+windows:
+  when: never
+
+# Only Java 11 is available
+macos:
+  when: never
