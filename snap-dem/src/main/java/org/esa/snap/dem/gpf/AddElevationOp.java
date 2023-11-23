@@ -117,7 +117,7 @@ public class AddElevationOp extends Operator {
             elevationBand.setNoDataValue(demNoDataValue);
             elevationBand.setNoDataValueUsed(true);
             pm.worked(1);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new OperatorException(e);
         } finally {
             pm.done();
@@ -213,6 +213,12 @@ public class AddElevationOp extends Operator {
     }
 
     private void initElevationModel() throws IOException {
+        if(demName == null || demName.isEmpty()) {
+            throw new OperatorException("DEM name is not specified.");
+        }
+        if(demResamplingMethod == null || demResamplingMethod.isEmpty()) {
+            throw new OperatorException("DEM resampling method is not specified.");
+        }
         if (demName.contains(externalDEMStr) && externalDEMFile != null) { // if external DEM file is specified by user
             dem = new FileElevationModel(externalDEMFile, demResamplingMethod, externalDEMNoDataValue);
             demNoDataValue = externalDEMNoDataValue;

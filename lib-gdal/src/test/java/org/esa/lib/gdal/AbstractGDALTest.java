@@ -30,7 +30,7 @@ public class AbstractGDALTest {
         if (IS_OS_LINUX && sysArch.contains("amd64")) {
             return OSCategory.LINUX_64;
         } else if (IS_OS_MAC_OSX) {
-            if (sysArch.contains("amd64")) {
+            if (sysArch.contains("amd64") || sysArch.contains("x86_64")) {
                 return OSCategory.MAC_OS_X;
             } else if (sysArch.contains("aarch64")) {
                 return OSCategory.MAC_OS_X_AARCH64;
