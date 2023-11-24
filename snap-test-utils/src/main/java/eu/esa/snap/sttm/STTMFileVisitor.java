@@ -10,12 +10,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.Stream;
 
 class STTMFileVisitor extends SimpleFileVisitor<Path> {
 
     private static final String REG_EX = "\\S*Test\\S*.java";
 
     private final List<STTMInfo> sttmInfos;
+    private static String moduleName;
 
     STTMFileVisitor(List<STTMInfo> sttmInfos) {
         this.sttmInfos = sttmInfos;
@@ -55,6 +57,7 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
                     sttmInfo.pckg = pckg;
                     sttmInfo.clazz = clazz;
                     sttmInfo.method = methodName;
+                    sttmInfo.module = moduleName;
                     resultList.add(sttmInfo);
                 }
                 // need to reset tb 2023-08-25
@@ -126,9 +129,7 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         final String fileName = file.getFileName().toString();
-        if (fileName.contains("DateTime")) {
-            System.out.println("fileName = " + fileName);
-        }
+
         if (!fileName.matches(REG_EX)) {
             return FileVisitResult.CONTINUE;
         }
@@ -137,6 +138,19 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
             final List<STTMInfo> fileSTTMInfos = extractSTTMInfo(reader);
             if (fileSTTMInfos.size() > 0) {
                 sttmInfos.addAll(fileSTTMInfos);
+            }
+        }
+
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        try (Stream<Path> list = Files.list(dir)) {
+            final boolean hasPom = list.anyMatch(path -> path.getFileName().toString().contains("pom.xml"));
+            if (hasPom) {
+                final int elemCount = dir.getNameCount();
+                moduleName = dir.subpath(elemCount - 1, elemCount).toString();
             }
         }
 
