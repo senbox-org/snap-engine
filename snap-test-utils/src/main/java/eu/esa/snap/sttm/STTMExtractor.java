@@ -9,12 +9,12 @@ import java.util.ArrayList;
 public class STTMExtractor {
 
     public static void main(String[] args) throws IOException {
-        validateInput(args);
+        final CmdLineArgs cmdLineArgs = validateInput(args);
 
         final ArrayList<STTMInfo> sttmInfos = new ArrayList<>();
 
         final STTMFileVisitor visitor = new STTMFileVisitor(sttmInfos);
-        for (final String arg : args) {
+        for (final String arg : cmdLineArgs.inputPaths) {
             Files.walkFileTree(Paths.get(arg), visitor);
         }
 
@@ -24,32 +24,31 @@ public class STTMExtractor {
             sttmInfo.jiraUrl = jiraUrl.concat(sttmInfo.jiraIssue);
         }
 
-
-        // @todo 1 sort by (issue/module/...) tb 2023-11-23
-
         final STTMExporter sttmExporter = new STTMExporter();
-        // @todo 1 tb/tb read from cmd-line 2023-11-23
-        final Path outPath = Paths.get("C:/Satellite/DELETE");
+        final Path outPath = Paths.get(cmdLineArgs.outputPath);
         sttmExporter.writeTo(outPath, sttmInfos);
-
-        /*
-        for (final STTMInfo sttmInfo : sttmInfos) {
-            System.out.println("issue:   " + sttmInfo.jiraIssue);
-            System.out.println("package: " + sttmInfo.pckg);
-            System.out.println("class:   " + sttmInfo.clazz);
-            System.out.println("method:  " + sttmInfo.method);
-            System.out.println("module:  " + sttmInfo.module);
-            System.out.println("------------------");
-        }
-        */
     }
 
-    static void validateInput(String[] args) {
+    static CmdLineArgs validateInput(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException("Must provide at least one project path.");
         }
 
+        final CmdLineArgs cmdLineArgs = new CmdLineArgs();
+        final ArrayList<String> inputPaths = new ArrayList<>();
+
+        boolean readOutput = false;
         for (final String arg : args) {
+            if (arg.equals("-o")) {
+                readOutput = true;
+                continue;
+            }
+            if (readOutput) {
+                cmdLineArgs.outputPath = arg;
+                readOutput = false;
+                continue;
+            }
+
             final Path projectDir = Paths.get(arg);
             if (!Files.exists(projectDir)) {
                 throw new IllegalArgumentException("Directory does not exist: " + projectDir);
@@ -57,6 +56,13 @@ public class STTMExtractor {
             if (!Files.isDirectory(projectDir)) {
                 throw new IllegalArgumentException("Input is not a directory: " + projectDir);
             }
+
+            inputPaths.add(projectDir.toString());
         }
+
+        // @todo 1 tb/tb check for output path 2023-11-27
+
+        cmdLineArgs.inputPaths = inputPaths.toArray(new String[0]);
+        return cmdLineArgs;
     }
 }

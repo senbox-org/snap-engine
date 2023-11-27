@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class STTMExtractorTest {
@@ -44,5 +45,40 @@ public class STTMExtractorTest {
                 fail("unabel to delete temp file: " + tempFile.getAbsolutePath());
             }
         }
+    }
+
+    @Test
+    @STTM("SNAP-3506")
+    public void testValidateInput_valid_dir() {
+        final String path = getValidPath();
+
+        final CmdLineArgs args = STTMExtractor.validateInput(new String[]{path});
+        assertEquals(1, args.inputPaths.length);
+    }
+
+    @Test
+    @STTM("SNAP-3506")
+    public void testValidateInput_two_valid_dirs() {
+        final String path = getValidPath();
+
+        final CmdLineArgs args = STTMExtractor.validateInput(new String[]{path, path});
+        assertEquals(2, args.inputPaths.length);
+    }
+
+    @Test
+    @STTM("SNAP-3506")
+    public void testValidateInput_valid_dir_and_output_dir() {
+        final String path = getValidPath();
+
+        final CmdLineArgs args = STTMExtractor.validateInput(new String[]{"-o", "output-path", path});
+
+        assertEquals("output-path", args.outputPath);
+        assertEquals(1, args.inputPaths.length);
+
+    }
+
+    private static String getValidPath() {
+        final String validPath = STTMExtractor.class.getClassLoader().getResource("").getPath();
+        return validPath.substring(1);
     }
 }

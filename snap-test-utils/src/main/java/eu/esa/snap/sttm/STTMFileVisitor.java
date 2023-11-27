@@ -15,9 +15,8 @@ import java.util.stream.Stream;
 class STTMFileVisitor extends SimpleFileVisitor<Path> {
 
     private static final String REG_EX = "\\S*Test\\S*.java";
-
-    private final List<STTMInfo> sttmInfos;
     private static String moduleName;
+    private final List<STTMInfo> sttmInfos;
 
     STTMFileVisitor(List<STTMInfo> sttmInfos) {
         this.sttmInfos = sttmInfos;
@@ -33,17 +32,19 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
         while ((line = reader.readLine()) != null) {
             line = line.trim(); // just to be sure to have no leading or trailing whitespace tb 2023-08-22
 
-            if (line.startsWith("package")) {
+            if (line.startsWith("package") && pckg == null) {
                 pckg = extractPackage(line);
+                continue;
             }
 
-            if (line.contains(" class ")) {
+            if (line.contains(" class ") && clazz == null) {
                 clazz = extractClass(line);
+                continue;
             }
 
             if (line.startsWith("@STTM(")) {
                 jiraIssues = extractJiraIssues(line);
-
+                continue;
             }
 
             if (line.startsWith("public ") && jiraIssues != null) {
