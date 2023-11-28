@@ -4,4 +4,5 @@ class CmdLineArgs {
 
     String[] inputPaths;
     String outputPath;
+    String jiraBaseUrl;
 }
