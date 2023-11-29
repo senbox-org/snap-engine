@@ -1,6 +1,7 @@
 package eu.esa.snap.sttm;
 
 import com.bc.ceres.annotation.STTM;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +14,10 @@ public class STTMExtractorTest {
 
     private static String getValidPath() {
         final String validPath = STTMExtractor.class.getClassLoader().getResource("").getPath();
-        return validPath.substring(1);
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return validPath.substring(1);
+        }
+        return validPath;
     }
 
     @Test
