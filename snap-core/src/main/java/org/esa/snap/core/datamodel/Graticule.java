@@ -357,6 +357,167 @@ public class Graticule {
         return parallelList;
     }
 
+
+
+    private  Coord getWesternmostCoord(final RasterDataNode raster, int yIncrement) {
+        // find farthest west point
+        yIncrement = 1;
+        double prevWesternmostLon = 1000;
+        Coord prevWesternmostCoord = null;
+
+        for (int y=0; y < raster.getRasterHeight() - 1; y += yIncrement) {
+            GeoPos geoPosCurr = new GeoPos();
+            PixelPos pixelPosCurr = new PixelPos(0, y);
+            raster.getGeoCoding().getGeoPos(pixelPosCurr, geoPosCurr);
+            if (geoPosCurr.isValid()) {
+                if (prevWesternmostLon == 1000) {
+                    prevWesternmostLon = geoPosCurr.lon;
+                    prevWesternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                } else {
+
+                    // determine if dateline crosses between points
+                    if (Math.abs(geoPosCurr.lon - prevWesternmostLon) > 180.0) {
+                        if (geoPosCurr.lon > prevWesternmostLon) {
+                            prevWesternmostLon = geoPosCurr.lon;
+                            prevWesternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                        }
+                    } else {
+                        if (geoPosCurr.lon < prevWesternmostLon) {
+                            prevWesternmostLon = geoPosCurr.lon;
+                            prevWesternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                        }
+                    }
+                }
+            }
+        }
+
+        return prevWesternmostCoord;
+    }
+
+
+
+
+    private  Coord getEasternmostCoord(final RasterDataNode raster, int yIncrement) {
+        // find farthest East point
+        yIncrement = 1;
+        double prevEasternmostLon = 1000;
+        Coord prevEasternmostCoord = null;
+
+        for (int y=0; y < raster.getRasterHeight() - 1; y += yIncrement) {
+            GeoPos geoPosCurr = new GeoPos();
+            PixelPos pixelPosCurr = new PixelPos(0, y);
+            raster.getGeoCoding().getGeoPos(pixelPosCurr, geoPosCurr);
+            if (geoPosCurr.isValid()) {
+                if (prevEasternmostLon == 1000) {
+                    prevEasternmostLon = geoPosCurr.lon;
+                    prevEasternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                } else {
+
+                    // determine if dateline crosses between points
+                    if (Math.abs(geoPosCurr.lon - prevEasternmostLon) > 180.0) {
+                        if (geoPosCurr.lon < prevEasternmostLon) {
+                            prevEasternmostLon = geoPosCurr.lon;
+                            prevEasternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                        }
+                    } else {
+                        if (geoPosCurr.lon > prevEasternmostLon) {
+                            prevEasternmostLon = geoPosCurr.lon;
+                            prevEasternmostCoord = new Coord(geoPosCurr, pixelPosCurr);
+                        }
+                    }
+                }
+            }
+        }
+
+        return prevEasternmostCoord;
+    }
+
+
+
+//
+//
+//    private static List<List<Coord>> computeLongitudeLineList(final RasterDataNode raster,
+//                                                         final double lonMajorStep,
+//                                                         final double latMinorStep) {
+//        List<List<Coord>> meridianList = new ArrayList<>();
+//        List<GeoPos> intersectionList = new ArrayList<>();
+//        GeoPos geoPos, int1, int2;
+//        PixelPos pixelPos;
+//        double lat, lon;
+//
+//        // find closest points
+//        // find number of possible lon lines
+//        int numPossibleLonLines = (int) Math.floor(360.0 / lonMajorStep) ;
+//        Coord[] lonLinesArray = new Coord[numPossibleLonLines];
+//
+//
+//        // find farthest west point
+//        int yIncrement = 1;
+//        double prevWesternmostLon = 1000;
+//        double currWesternmostLon = 1000;
+//        for (int y=0; y < raster.getRasterHeight() - 1; y += yIncrement) {
+//            GeoPos geoPosCurr = new GeoPos();
+//            raster.getGeoCoding().getGeoPos(new PixelPos(0, y), geoPosCurr);
+//            if (geoPosCurr.isValid()) {
+//                if (prevWesternmostLon == 1000) {
+//                    currWesternmostLon = geoPosCurr.lon;
+//                } else {
+//
+//                    // determine if dateline crosses between points
+//                    if (Math.abs(geoPosCurr.lon - currWesternmostLon) > 180.0) {
+//                        if (geoPosCurr.lon > currWesternmostLon) {
+//                            currWesternmostLon = geoPosCurr.lon;
+//                        }
+//                    } else {
+//                        if (geoPosCurr.lon < currWesternmostLon) {
+//                            currWesternmostLon = geoPosCurr.lon;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//
+//
+//        double mx = lonMajorStep * Math.floor(xMin / lonMajorStep);
+//        for (; mx <= xMax; mx += lonMajorStep) {
+//            intersectionList.clear();
+//            computeMeridianIntersections(geoBoundary, mx, intersectionList);
+//            if (intersectionList.size() > 0 && intersectionList.size() % 2 == 0) {
+//                final GeoPos[] intersections = intersectionList.toArray(new GeoPos[0]);
+//                Arrays.sort(intersections, new GeoPosLatComparator());
+//                List<Coord> meridian = new ArrayList<>();
+//                // loop reverse order
+//                for (int i = intersections.length - 2; i >= 0; i -= 2) {
+//                    int1 = intersections[i + 1];
+//                    int2 = intersections[i];
+//                    lat = int1.lat;
+//                    lon = int1.lon;
+//                    for (int k = 0; k <= 1; ) {
+//                        geoPos = new GeoPos(lat, limitLon(lon));
+//                        pixelPos = geoCoding.getPixelPos(geoPos, null);
+//
+//                        // DANNY added this to avoid adding in null pixels
+//                        if (pixelPos.isValid()) {
+//                            meridian.add(new Coord(geoPos, pixelPos));
+//                        }
+//                        lat -= latMinorStep;
+//                        if (lat <= int2.lat) {
+//                            lat = int2.lat;
+//                            k++;
+//                        }
+//                    }
+//                }
+//                meridianList.add(meridian);
+//            }
+//        }
+//        return meridianList;
+//    }
+
+
+
+
     private static List<List<Coord>> computeMeridianList(final GeoCoding geoCoding,
                                                          final GeoPos[] geoBoundary,
                                                          final double lonMajorStep,
