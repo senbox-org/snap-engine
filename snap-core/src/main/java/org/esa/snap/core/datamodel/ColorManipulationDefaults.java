@@ -68,7 +68,7 @@ public class ColorManipulationDefaults {
     // Color Manipulation Preferences parameters
 
     // Preferences property prefix
-    private static final String PROPERTY_ROOT_KEY = "color.manipulation.v8.5";
+    private static final String PROPERTY_ROOT_KEY = "color.manipulation.v9";
 
 
     // Palettes (Default)

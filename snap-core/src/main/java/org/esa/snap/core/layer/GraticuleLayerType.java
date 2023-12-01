@@ -40,7 +40,7 @@ import java.awt.geom.AffineTransform;
 public class GraticuleLayerType extends LayerType {
 
 
-    public static final String PROPERTY_ROOT = "map.gridlines.v8.5";
+    public static final String PROPERTY_ROOT = "graticule.v9";
 
     // Property Settings: Grid Spacing Section
 
