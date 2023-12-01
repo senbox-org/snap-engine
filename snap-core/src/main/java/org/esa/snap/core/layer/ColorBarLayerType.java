@@ -53,7 +53,7 @@ public class ColorBarLayerType extends LayerType {
     // Color Bar Legend parameters
 
     // Preferences property prefix
-    private static final String PROPERTY_ROOT_KEY = "color.bar.legend.v8.5";
+    private static final String PROPERTY_ROOT_KEY = "color.bar.legend.v9";
     private static final String PROPERTY_ROOT_ALIAS = "colorBarLegend";
 
 

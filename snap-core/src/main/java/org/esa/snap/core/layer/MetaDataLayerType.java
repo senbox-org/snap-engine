@@ -80,7 +80,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_FONT_STYLE_4 = "Monospaced";
 
 
-    private static final String PROPERTY_ROOT_KEY = "annotation.layer.v8.5";
+    private static final String PROPERTY_ROOT_KEY = "annotation.layer.v9";
     private static final String PROPERTY_ROOT_ALIAS = "AnnotationLayer";
 
 
