@@ -44,19 +44,22 @@ public class NoDataLayerType extends ImageLayer.Type {
 
     public static final String NO_DATA_LAYER_ID = "org.esa.snap.layers.noData";
     public static final String PROPERTY_NAME_COLOR = "color";
+    public static final String PROPERTY_NAME_VALID_GEO = "valid.geo";
     public static final String PROPERTY_NAME_RASTER = "raster";
-    public static final Color DEFAULT_COLOR = new Color(128, 128, 128);;
+    public static final Color DEFAULT_COLOR = Color.ORANGE;
+    public static final boolean DEFAULT_VALID_GEO = true;
 
     @Override
     public Layer createLayer(LayerContext ctx, PropertySet configuration) {
         final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
+        final boolean validGeo = (boolean) configuration.getValue(PROPERTY_NAME_VALID_GEO);
         Assert.notNull(color, PROPERTY_NAME_COLOR);
         final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
 
         MultiLevelSource multiLevelSource = (MultiLevelSource) configuration.getValue(
                 ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
         if (multiLevelSource == null) {
-            multiLevelSource = createMultiLevelSource(color, raster);
+            multiLevelSource = createMultiLevelSource(color, raster, validGeo);
             configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
         }
 
@@ -64,7 +67,7 @@ public class NoDataLayerType extends ImageLayer.Type {
         noDataLayer.addListener(new AbstractLayerListener() {
             @Override
             public void handleLayerPropertyChanged(Layer layer, PropertyChangeEvent event) {
-                if (event.getPropertyName().equals(PROPERTY_NAME_COLOR)) {
+                if (event.getPropertyName().equals(PROPERTY_NAME_COLOR) || event.getPropertyName().equals(PROPERTY_NAME_VALID_GEO)) {
                     renewMultiLevelSource(noDataLayer, (Color) event.getNewValue());
                 }
             }
@@ -83,6 +86,7 @@ public class NoDataLayerType extends ImageLayer.Type {
         prototype.getDescriptor(PROPERTY_NAME_RASTER).setNotNull(true);
 
         prototype.addProperty(Property.create(PROPERTY_NAME_COLOR, Color.class, DEFAULT_COLOR, true));
+        prototype.addProperty(Property.create(PROPERTY_NAME_VALID_GEO, Boolean.class, DEFAULT_VALID_GEO, true));
 
         return prototype;
 
@@ -91,18 +95,29 @@ public class NoDataLayerType extends ImageLayer.Type {
     public static void renewMultiLevelSource(ImageLayer layer, Color newColor) {
         final PropertySet configuration = layer.getConfiguration();
         final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
-        final MultiLevelSource source = createMultiLevelSource(newColor, raster);
+        final boolean validGeo = configuration.getValue(PROPERTY_NAME_VALID_GEO);
+        final MultiLevelSource source = createMultiLevelSource(newColor, raster, validGeo);
         configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, source);
         layer.setMultiLevelSource(source);
     }
 
-    private static MultiLevelSource createMultiLevelSource(Color newColor, RasterDataNode raster) {
+    private static MultiLevelSource createMultiLevelSource(Color newColor, RasterDataNode raster, boolean validGeo) {
         MultiLevelSource source;
         if (raster.getValidMaskExpression() != null) {
+            String expression = raster.getValidMaskExpression();
+            if (validGeo) {
+                    if (raster.getValidMaskExpression().trim().length() > 0) {
+                        expression = raster.getValidMaskExpression().trim() + " or LAT < -90 or LAT > 90 or nan(LAT) or nan(LON)";
+                    } else {
+                        expression = "LAT < -90 or LAT > 90 or nan(LAT) or nan(LON)";
+                    }
+            }
+
+
             final AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
             source = ColoredMaskImageMultiLevelSource.create(raster.getProduct(),
                                                              newColor,
-                                                             raster.getValidMaskExpression(),
+                                                             expression,
                                                              true,
                                                              transform);
         } else {
