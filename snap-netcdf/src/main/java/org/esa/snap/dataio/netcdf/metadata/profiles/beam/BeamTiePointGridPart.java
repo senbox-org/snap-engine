@@ -84,6 +84,19 @@ public class BeamTiePointGridPart extends ProfilePartIO {
                                                                data,
                                                                containsAngles);
                     CfBandPart.readCfBandAttributes(variable, grid);
+                    final Attribute description = variable.findAttribute("description");
+                    final Attribute unit = variable.findAttribute("unit");
+                    final Attribute fillValue = variable.findAttribute("_FillValue");
+                    if (description != null) {
+                        grid.setDescription(description.getStringValue());
+                    }
+                    if (unit != null) {
+                        grid.setUnit(unit.getStringValue());
+                    }
+                    if (fillValue != null) {
+                        grid.setNoDataValue((double) fillValue.getNumericValue());
+                        grid.setNoDataValueUsed(true);
+                    }
                     p.addTiePointGrid(grid);
                 }
             }
@@ -112,6 +125,15 @@ public class BeamTiePointGridPart extends ProfilePartIO {
             variable.addAttribute(OFFSET_Y, tiePointGrid.getOffsetY());
             variable.addAttribute(SUBSAMPLING_X, tiePointGrid.getSubSamplingX());
             variable.addAttribute(SUBSAMPLING_Y, tiePointGrid.getSubSamplingY());
+            if (tiePointGrid.getDescription() != null) {
+                variable.addAttribute("description", tiePointGrid.getDescription());
+            }
+            if (tiePointGrid.getUnit() != null) {
+                variable.addAttribute("unit", tiePointGrid.getUnit());
+            }
+            if (tiePointGrid.isNoDataValueUsed()) {
+                variable.addAttribute("_FillValue", tiePointGrid.getNoDataValue());
+            }
         }
     }
 
