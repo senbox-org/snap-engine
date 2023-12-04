@@ -403,7 +403,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_GAP_LABEL = "Header Gap";
     public static final String PROPERTY_HEADER_GAP_TOOLTIP = "Percentage of scene size to place header away from the edge of the scene image";
     private static final String PROPERTY_HEADER_GAP_ALIAS = PROPERTY_HEADER_FORMAT_ROOT_ALIAS + "Offset";
-    public static final Double PROPERTY_HEADER_GAP_DEFAULT = 5.0;
+    public static final Double PROPERTY_HEADER_GAP_DEFAULT = 4.0;
     public static final double PROPERTY_HEADER_GAP_MIN = -100;
     public static final double PROPERTY_HEADER_GAP_MAX = 100;
     public static final String PROPERTY_HEADER_GAP_INTERVAL = "[" + PROPERTY_HEADER_GAP_MIN + "," + PROPERTY_HEADER_GAP_MAX + "]";

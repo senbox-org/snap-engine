@@ -1061,10 +1061,19 @@ public class MetaDataLayer extends Layer {
     private double getPtsToPixelsMultiplier() {
 
         if (ptsToPixelsMultiplier == NULL_DOUBLE) {
+            double aspectRatio = raster.getRasterWidth() / raster.getRasterHeight();
+
             double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
             double avgSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2.0;
 
-            ptsToPixelsMultiplier = avgSideSize * 0.001;
+            double size;
+            if (aspectRatio > 1.5) {
+                size = avgSideSize;
+            } else {
+                size = raster.getRasterHeight();
+            }
+
+            ptsToPixelsMultiplier = size * 0.001;
         }
 
 
