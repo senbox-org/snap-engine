@@ -193,7 +193,7 @@ public class PropertyPane {
                 layout.setRowFill(rowIndex, TableLayout.Fill.BOTH);
             }
             if(components[0] instanceof JComboBox) {
-                layout.setRowWeightY(rowIndex, 1.0);
+                layout.setRowWeightX(rowIndex, 1.0);
                 layout.setCellFill(rowIndex, 1, TableLayout.Fill.NONE);
             }
             panel.add(components[0], cell(rowIndex, 1));
