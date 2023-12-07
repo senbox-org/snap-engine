@@ -59,14 +59,6 @@ mvn-release:
     - when: manual
       allow_failure: true
 
-mvn-deploy-release:
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-
-mvn-deploy-snapshot:
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-
 windows:
   stage: test
   tags: [windows]
@@ -110,17 +102,14 @@ pending:
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
-  when: always
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 success:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_success
 
 failure:
@@ -128,6 +117,5 @@ failure:
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_failure
