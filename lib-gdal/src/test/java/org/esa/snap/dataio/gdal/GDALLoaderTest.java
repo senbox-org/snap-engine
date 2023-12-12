@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
@@ -83,11 +84,13 @@ public class GDALLoaderTest extends AbstractGDALTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetInstance() {
         assertNotNull(GDALLoader.getInstance());
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testInitGDAL() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
@@ -101,6 +104,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetGDALVersionLoader() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
@@ -114,6 +118,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetGDALDataType() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
@@ -132,6 +137,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetBandDataType() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
@@ -149,6 +155,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetGDALVersion() {
         try {
             assertNotNull(TEST_GDAL_LOADER);

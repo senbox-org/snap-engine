@@ -14,7 +14,7 @@ import static org.junit.Assert.fail;
 public class GDALInstallerTest {
 
     @Test
-    @STTM("SNAP-3523")
+    @STTM("SNAP-3567")
     public void testCopyDistribution() {
         try {
             final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
