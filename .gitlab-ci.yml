@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.6.1"
+    ref: "3.7.1"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -16,6 +16,7 @@ include:
 variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
+  MAVEN_DEPLOY_SNAPSHOT_WITH_SLUG_ENABLED: "false"
   BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
   MVN_SEMREL_RELEASE_DISABLED: "true"
@@ -50,7 +51,7 @@ mvn-sonar:
   image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   allow_failure: true
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 # Used to publish release on Github (only manual action & non blocking)
 mvn-release:
@@ -58,19 +59,11 @@ mvn-release:
     - when: manual
       allow_failure: true
 
-mvn-deploy-release:
-  rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
-
-mvn-deploy-snapshot:
-  rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
-
 windows:
   stage: test
   tags: [windows]
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   allow_failure: false
   needs: []
   script:
@@ -80,17 +73,18 @@ macos:
   stage: test
   tags: [mac]
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
     JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    TESTDATA_ROOT: "/Users/otb/testData"
   allow_failure: true
   needs: []
   script:
-    - mvn clean package
+    - mvn -q clean package
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
-  image: curlimages/curl  
+  image: curlimages/curl
   variables:
     URL: "https://api.github.com/repos/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/statuses/${CI_COMMIT_SHA}"
     STATUS_NAME: snap-ci
@@ -108,20 +102,20 @@ pending:
   extends:
     - .report-status
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 success:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
-      when: on_success
+    - if: '$BUILD_FOR_INSTALLER == "false"'
+  when: on_success
 
 failure:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: $BUILD_FOR_INSTALLER == "false"
-      when: on_failure
+    - if: '$BUILD_FOR_INSTALLER == "false"'
+  when: on_failure

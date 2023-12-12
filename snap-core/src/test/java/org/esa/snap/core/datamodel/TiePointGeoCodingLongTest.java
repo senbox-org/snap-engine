@@ -22,10 +22,7 @@ import org.junit.runner.RunWith;
 
 import java.awt.geom.AffineTransform;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(LongTestRunner.class)
 public class TiePointGeoCodingLongTest {
