@@ -25,7 +25,7 @@ public class GDALDistributionInstallerTest {
     }
 
     @Test
-    @STTM("SNAP-3523")
+    @STTM("SNAP-3567")
     public void testSetupDistribution() {
         testInstallBundleDistribution();
     }

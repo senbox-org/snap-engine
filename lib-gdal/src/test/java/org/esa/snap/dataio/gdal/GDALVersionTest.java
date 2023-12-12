@@ -54,16 +54,19 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetGDALVersion() {
         assertEquals(TEST_VERSION, GDALVersion.getGDALVersion());
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetInternalVersion() {
         assertEquals(TEST_VERSION.id, GDALVersion.getInternalVersion().id);
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetId() {
         assertEquals(TEST_VERSION.id, TEST_VERSION.getId());
     }
@@ -77,6 +80,7 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetLocation() {
         assertEquals(getExpectedLocation(), TEST_VERSION.location);
         assertEquals(TEST_VERSION.location, TEST_VERSION.getLocation());
@@ -88,6 +92,7 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetZipFileURLFromSources() {
         assertEquals(getExpectedZipFileURLFromSources(), TEST_VERSION.getZipFileURLFromSources());
         try {
@@ -98,6 +103,7 @@ public class GDALVersionTest {
     }
 
     @Test
+    @STTM("SNAP-3567")
     public void testGetZipFilePath() {
         assertEquals(getExpectedZipFilePath(), TEST_VERSION.getZipFilePath());
         assertFalse(Files.exists(TEST_VERSION.getZipFilePath()));
