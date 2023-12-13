@@ -1,10 +1,15 @@
 package org.esa.snap.gpf;
 
+import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.dem.gpf.AddElevationOp;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,6 +22,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 
 public class AddElevationOpTest {
@@ -49,4 +55,37 @@ public class AddElevationOpTest {
         URI uri = new URI(url.toString());
         return uri.getPath();
     }
+
+    @Test
+    @STTM("SNAP-3576")
+    public void testDoExecute() {
+        Product product = TestUtils.createProduct("type", 10, 10);
+
+        AddElevationOp op = new AddElevationOp();
+        op.setSourceProduct(product);
+        op.setParameter("demName", "Copernicus 90m Global DEM");
+        Product trgProduct = op.getTargetProduct();
+        assertNotNull(trgProduct);
+
+        op.doExecute(ProgressMonitor.NULL);
+    }
+
+    @Test
+    @STTM("SNAP-3576")
+    public void testDoExecuteError() {
+        Product product = TestUtils.createProduct("type", 10, 10);
+
+        AddElevationOp op = new AddElevationOp();
+        op.setSourceProduct(product);
+        op.setParameter("demName", "");
+        op.setParameter("demResamplingMethod", "");
+        Product trgProduct = op.getTargetProduct();
+        assertNotNull(trgProduct);
+
+        Exception exception = assertThrows(OperatorException.class, () -> op.doExecute(ProgressMonitor.NULL));
+        System.out.println(exception.getMessage());
+        assertEquals("DEM name is not specified.", exception.getMessage());
+    }
+
+
 } 

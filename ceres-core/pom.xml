@@ -89,6 +89,7 @@
 
                         <publicPackage>org.slf4j.*</publicPackage>
                         <publicPackage>org.apache.velocity.*</publicPackage>
+                        <publicPackage>sun.misc.Cleaner</publicPackage>
 
                         <publicPackage>com.bc.ceres.core</publicPackage>
                         <publicPackage>com.bc.ceres.core.runtime</publicPackage>
@@ -97,7 +98,6 @@
                         <publicPackage>com.bc.ceres.core.runtime.support</publicPackage>
                         <publicPackage>com.bc.ceres.launcher</publicPackage>
                         <publicPackage>com.bc.ceres.util</publicPackage>
-                        <publicPackage>com.bc.ceres.test.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -113,13 +113,6 @@
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

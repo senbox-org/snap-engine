@@ -51,6 +51,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.engine_utilities.*</publicPackage>
+                        <publicPackage>org.apache.commons.compress.compressors.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

@@ -128,8 +128,8 @@ public final class XMLSupport {
         final MetadataAttribute[] metaAttributes = metadataElem.getAttributes();
         for (MetadataAttribute childMetaAttrib : metaAttributes) {
             final Element childDomElem = new Element("attrib");
-            setAttribute(childDomElem, "name", childMetaAttrib.getName());
-            setAttribute(childDomElem, "value", childMetaAttrib.getData().getElemString());
+            setAttribute(childDomElem, "name", childMetaAttrib.getName().trim());
+            setAttribute(childDomElem, "value", childMetaAttrib.getData().getElemString().trim());
             if ((childMetaAttrib.getUnit() != null && childMetaAttrib.getUnit().equalsIgnoreCase("utc")) ||
                     childMetaAttrib.getData() instanceof ProductData.UTC)
                 setAttribute(childDomElem, "type", String.valueOf(ProductData.TYPE_UTC));
