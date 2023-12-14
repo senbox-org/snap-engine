@@ -74,7 +74,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
 
     @Override
     protected ImageLayout buildMosaicImageLayout(int level) {
-        return null; // no image layout to configure the mosaic image since the tile images are configured
+        return ImageUtils.buildImageLayout(this.dataBufferType, this.imageReadBounds.width, this.imageReadBounds.height, level, this.defaultJAIReadTileSize);
     }
 
     @Override
