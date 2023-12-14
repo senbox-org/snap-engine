@@ -89,7 +89,7 @@ public class LayerUtils {
         Assert.notNull(mode, "mode");
         Assert.notNull(filter, "filter");
 
-        ArrayList<Layer> layers = new ArrayList<Layer>(16);
+        ArrayList<Layer> layers = new ArrayList<>(16);
         getChildLayers(root, mode, filter, layers);
         return layers;
     }
