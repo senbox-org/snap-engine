@@ -17,13 +17,8 @@
 package org.esa.snap.binning.support;
 
 import com.bc.ceres.core.Assert;
+import org.esa.snap.binning.*;
 import org.locationtech.jts.geom.Geometry;
-import org.esa.snap.binning.BinManager;
-import org.esa.snap.binning.BinningContext;
-import org.esa.snap.binning.CompositingType;
-import org.esa.snap.binning.DataPeriod;
-import org.esa.snap.binning.PlanetaryGrid;
-import org.esa.snap.binning.VariableContext;
 
 /**
  * The binning context.
@@ -39,24 +34,6 @@ public class BinningContextImpl implements BinningContext {
     private final CompositingType compositingType;
     private final DataPeriod dataPeriod;
     private final Geometry region;
-
-    @Deprecated
-    public BinningContextImpl(PlanetaryGrid planetaryGrid, BinManager binManager, CompositingType compositingType,
-                              int superSampling) {
-        this(planetaryGrid, binManager, compositingType, superSampling, -1, null, null);
-    }
-
-    @Deprecated
-    public BinningContextImpl(PlanetaryGrid planetaryGrid, BinManager binManager, CompositingType compositingType,
-                              int superSampling, DataPeriod dataPeriod) {
-        this(planetaryGrid, binManager, compositingType, superSampling, -1, dataPeriod, null);
-    }
-
-    @Deprecated
-    public BinningContextImpl(PlanetaryGrid planetaryGrid, BinManager binManager, CompositingType compositingType,
-                              int superSampling, DataPeriod dataPeriod, Geometry region) {
-        this(planetaryGrid, binManager, compositingType, superSampling, -1, dataPeriod, region);
-    }
 
     public BinningContextImpl(PlanetaryGrid planetaryGrid, BinManager binManager, CompositingType compositingType,
                               int superSampling, int maxDistanceOnEarth, DataPeriod dataPeriod, Geometry region) {

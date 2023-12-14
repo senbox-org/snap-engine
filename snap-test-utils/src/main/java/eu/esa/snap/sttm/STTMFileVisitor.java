@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 class STTMFileVisitor extends SimpleFileVisitor<Path> {
 
-    private static final String REG_EX = "\\S*Test\\S*.java";
+    private static final String REG_EX = "\\S*Test\\S*\\.java";
     private static String moduleName;
     private final List<STTMInfo> sttmInfos;
 
@@ -137,7 +137,7 @@ class STTMFileVisitor extends SimpleFileVisitor<Path> {
 
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             final List<STTMInfo> fileSTTMInfos = extractSTTMInfo(reader);
-            if (fileSTTMInfos.size() > 0) {
+            if (!fileSTTMInfos.isEmpty()) {
                 sttmInfos.addAll(fileSTTMInfos);
             }
         }

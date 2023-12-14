@@ -23,18 +23,12 @@ import com.bc.ceres.glayer.support.filters.IdFilter;
 import com.bc.ceres.glayer.support.filters.NameFilter;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 public class LayerUtils {
-    public enum SearchMode {
-        FLAT,
-        DEEP,
-    }
-
     public final static SearchMode SEARCH_FLAT = SearchMode.FLAT;
     public final static SearchMode SEARCH_DEEP = SearchMode.DEEP;
-
     private LayerUtils() {
     }
 
@@ -95,7 +89,7 @@ public class LayerUtils {
         Assert.notNull(mode, "mode");
         Assert.notNull(filter, "filter");
 
-        ArrayList<Layer> layers = new ArrayList<Layer>(16);
+        ArrayList<Layer> layers = new ArrayList<>(16);
         getChildLayers(root, mode, filter, layers);
         return layers;
     }
@@ -157,21 +151,8 @@ public class LayerUtils {
         return false;
     }
 
-
-    /**
-     * @deprecated since BEAM 4.7
-     */
-    @Deprecated
-    public static int getChildLayerIndex(Layer root, LayerFilter filter, SearchMode mode, int defaultIndex) {
-        return getChildLayerIndex(root, mode, defaultIndex, filter);
+    public enum SearchMode {
+        FLAT,
+        DEEP,
     }
-
-    /**
-     * @deprecated since BEAM 4.7
-     */
-    @Deprecated
-    public static Layer getChildLayer(Layer root, LayerFilter filter, SearchMode mode) {
-        return getChildLayer(root, mode, filter);
-    }
-
 }
