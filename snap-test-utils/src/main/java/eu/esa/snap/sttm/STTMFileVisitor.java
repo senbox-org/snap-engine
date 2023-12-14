@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 class STTMFileVisitor extends SimpleFileVisitor<Path> {
 
-    private static final String REG_EX = "\\S*Test\\S*.java";
+    private static final String REG_EX = "\\S*Test\\S*\\.java";
     private static String moduleName;
     private final List<STTMInfo> sttmInfos;
 
