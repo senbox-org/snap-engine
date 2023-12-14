@@ -20,12 +20,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 
 import javax.media.jai.PlanarImage;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.ConstantDescriptor;
-import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 
 /**
@@ -79,7 +74,7 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
      * when {@link #reset} is called on this multi-level image source. See {@link #getImage(int)}.
      * <p>
      * The dimension of the level image created must be the same as that obtained from
-     * {@link #getImageDimension(int, int, double)} for the scale associated with the
+     * {DefaultMultiLevelSource.getLevelImageBounds(Rectangle sourceBounds, double scale)} for the scale associated with the
      * given resolution level.
      *
      * @param level The resolution level.
