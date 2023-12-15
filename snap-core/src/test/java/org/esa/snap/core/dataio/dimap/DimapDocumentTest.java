@@ -199,7 +199,7 @@ public class DimapDocumentTest {
     }
 
     private Product createProduct(int geocodingType) {
-        Product product = new Product("test_product", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME, 1121, 2241);
+        Product product = new Product("test_product", "MER_FR__1P", 1121, 2241);
         product.setDescription("description");
         product.setStartTime(new ProductData.UTC(1234, 2045, 34));
         product.setEndTime(new ProductData.UTC(1234, 3045, 34));

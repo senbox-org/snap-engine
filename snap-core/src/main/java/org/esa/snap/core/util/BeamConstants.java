@@ -15,10 +15,6 @@
  */
 package org.esa.snap.core.util;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 /**
  * This interface is a container for constants specific for ENVISAT-products.
  *
@@ -29,130 +25,6 @@ import java.util.Locale;
 public interface BeamConstants {
 
 
-    String ENVISAT_FORMAT_NAME = "ENVISAT";
-
-    /**
-     * The string used to identify a file as an ENVISAT product. The value is <code>&quot;PRODUCT=\&quot;&quot;</code>.
-     */
-    String MAGIC_STRING = "PRODUCT=\"";
-
-    /**
-     * The string length for product type identifiers, e.g. "MER_RR__2P". The value is <code>10</code>.
-     */
-    int PRODUCT_TYPE_STRLEN = 10;
-
-    /**
-     * Product type ID for MERIS full resolution L1b products.
-     */
-    String MERIS_FR_L1B_PRODUCT_TYPE_NAME = "MER_FR__1P";
-    /**
-     * Product type ID for MERIS reduced resolution L1b products.
-     */
-    String MERIS_RR_L1B_PRODUCT_TYPE_NAME = "MER_RR__1P";
-    /**
-     * Product type ID for MERIS full resolution full swath geo/ortho-corrected L1b products.
-     */
-    String MERIS_FSG_L1B_PRODUCT_TYPE_NAME = "MER_FSG_1P";
-    /**
-     * Product type ID for MERIS Full Resolution Geo/Ortho-corrected L1b products.
-     */
-    String MERIS_FRG_L1B_PRODUCT_TYPE_NAME = "MER_FRG_1P";
-    /**
-     * Product type ID for MERIS full resolution L2 products.
-     */
-    String MERIS_FR_L2_PRODUCT_TYPE_NAME = "MER_FR__2P";
-    /**
-     * Product type ID for MERIS reduced resolution L2 products.
-     */
-    String MERIS_RR_L2_PRODUCT_TYPE_NAME = "MER_RR__2P";
-    /**
-     * Product type ID for AATSR L1b products.
-     */
-    String AATSR_L1B_TOA_PRODUCT_TYPE_NAME = "ATS_TOA_1P";
-    /**
-     * Product type ID for AATSR L2 products.
-     */
-    String AATSR_L2_NR_PRODUCT_TYPE_NAME = "ATS_NR__2P";
-
-    /**
-     * The size of all main product headers (MPH) in bytes. The value is <code>1247</code>.
-     */
-    int MPH_SIZE = 1247;
-
-    float MERIS_TIE_POINT_OFFSET_X = 0.5F;
-    float MERIS_TIE_POINT_OFFSET_Y = 0.5F;
-
-
-    /**
-     * Number of pixels in across track direction for the AATSR grid.
-     */
-    int AATSR_SCENE_RASTER_WIDTH = 512;
-
-    /**
-     * Number of localisation tie points in across track direction for the AATSR grid.
-     */
-    int AATSR_LOC_TIE_POINT_GRID_WIDTH = 23;
-    int AATSR_LOC_TIE_POINT_SUBSAMPLING_X = 25;
-    int AATSR_LOC_TIE_POINT_SUBSAMPLING_Y = 32;
-    int AATSR_LOC_TIE_POINT_RASTER_WIDTH = (AATSR_LOC_TIE_POINT_GRID_WIDTH - 1) * AATSR_LOC_TIE_POINT_SUBSAMPLING_X;
-    float AATSR_LOC_TIE_POINT_OFFSET_X = 0.5F * AATSR_SCENE_RASTER_WIDTH - 0.5F * AATSR_LOC_TIE_POINT_RASTER_WIDTH;
-
-    /**
-     * Number of solar angle tie points in across track direction for the AATSR grid.
-     */
-    int AATSR_SOL_TIE_POINT_GRID_WIDTH = 11;
-    int AATSR_SOL_TIE_POINT_SUBSAMPLING_X = 50;
-    int AATSR_SOL_TIE_POINT_SUBSAMPLING_Y = 32;
-    int AATSR_SOL_TIE_POINT_RASTER_WIDTH = (AATSR_SOL_TIE_POINT_GRID_WIDTH - 1) * AATSR_SOL_TIE_POINT_SUBSAMPLING_X;
-    float AATSR_SOL_TIE_POINT_OFFSET_X = 0.5F * AATSR_SCENE_RASTER_WIDTH - 0.5F * AATSR_SOL_TIE_POINT_RASTER_WIDTH;
-
-    /**
-     * Y-offset of AATSR tie-points corresponds to the upper bound of a pixel.
-     */
-    float AATSR_TIE_POINT_OFFSET_Y = 0.0F;
-
-    /**
-     * Number of localisation tie points in across track direction for the ASAR grid.
-     */
-    int ASAR_LOC_TIE_POINT_GRID_WIDTH = 11;
-    float ASAR_LOC_TIE_POINT_OFFSET_X = 0.0f;
-    float ASAR_LOC_TIE_POINT_OFFSET_Y = 0.0f;
-
-    /**
-     * The date format used in MPHs and SPHs. The value is <code>&quot;dd-MMM-yyyy HH:mm:ss.S&quot;</code>.
-     *
-     * @see java.text.DateFormat
-     */
-    DateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
-
-    /**
-     * The factor for angle values.
-     */
-    float DEGREE_FACTOR = 1.0e-06F;
-
-    String LAT_DS_NAME = "latitude";
-    String LON_DS_NAME = "longitude";
-
-    char DS_TYPE_ANNOTATION = 'A';
-    char DS_TYPE_GLOBAL_ANNOTATION = 'G';
-    char DS_TYPE_MEASUREMENT = 'M';
-    char DS_TYPE_AUXILIARY = 'R';
-
-    String MERIS_L1B_FLAGS_DS_NAME = "l1_flags";
-
-    String MERIS_DETECTOR_INDEX_DS_NAME = "detector_index";
-    String MERIS_SPECTRAL_SHIFT_INDEX_DS_NAME = "ssi";
-
-    String MERIS_LAT_DS_NAME = LAT_DS_NAME;
-    String MERIS_LON_DS_NAME = LON_DS_NAME;
-    String MERIS_SUN_ZENITH_DS_NAME = "sun_zenith";
-    String MERIS_SUN_AZIMUTH_DS_NAME = "sun_azimuth";
-    String MERIS_VIEW_ZENITH_DS_NAME = "view_zenith";
-    String MERIS_VIEW_AZIMUTH_DS_NAME = "view_azimuth";
-    String MERIS_DEM_ALTITUDE_DS_NAME = "dem_alt";
-
-    String MERIS_L1B_RADIANCE_1_BAND_NAME = "radiance_1";
-    String MERIS_L1B_RADIANCE_2_BAND_NAME = "radiance_2";
     String MERIS_L1B_RADIANCE_3_BAND_NAME = "radiance_3";
     String MERIS_L1B_RADIANCE_4_BAND_NAME = "radiance_4";
     String MERIS_L1B_RADIANCE_5_BAND_NAME = "radiance_5";
@@ -170,8 +42,8 @@ public interface BeamConstants {
      * The names of the Meris Level 1 spectral band names.
      */
     String[] MERIS_L1B_SPECTRAL_BAND_NAMES = {
-            MERIS_L1B_RADIANCE_1_BAND_NAME, // 0
-            MERIS_L1B_RADIANCE_2_BAND_NAME, // 1
+            "radiance_1", // 0
+            "radiance_2", // 1
             MERIS_L1B_RADIANCE_3_BAND_NAME, // 2
             MERIS_L1B_RADIANCE_4_BAND_NAME, // 3
             MERIS_L1B_RADIANCE_5_BAND_NAME, // 4
@@ -192,8 +64,8 @@ public interface BeamConstants {
      * The names of the Meris Level 1 non spectral band names.
      */
     String[] MERIS_L1B_NON_SPECTRAL_BAND_NAMES = new String[]{
-            MERIS_L1B_FLAGS_DS_NAME, // 15
-            MERIS_DETECTOR_INDEX_DS_NAME // 16
+            "l1_flags", // 15
+            "detector_index" // 16
     };
     int MERIS_L1B_NUM_NON_SPECTRAL_BANDS = MERIS_L1B_NON_SPECTRAL_BAND_NAMES.length;
 
@@ -261,16 +133,16 @@ public interface BeamConstants {
      * The names of the Meris ADS
      */
     String[] MERIS_TIE_POINT_GRID_NAMES = {
-            MERIS_LAT_DS_NAME, //  0
-            MERIS_LON_DS_NAME, //  1
-            MERIS_DEM_ALTITUDE_DS_NAME, //  2
+            "latitude", //  0
+            "longitude", //  1
+            "dem_alt", //  2
             "dem_rough", //  3
             "lat_corr", //  4
             "lon_corr", //  5
-            MERIS_SUN_ZENITH_DS_NAME, //  6
-            MERIS_SUN_AZIMUTH_DS_NAME, //  7
-            MERIS_VIEW_ZENITH_DS_NAME, //  8
-            MERIS_VIEW_AZIMUTH_DS_NAME, //  9
+            "sun_zenith", //  6
+            "sun_azimuth", //  7
+            "view_zenith", //  8
+            "view_azimuth", //  9
             "zonal_wind", // 10
             "merid_wind", // 11
             "atm_press", // 12
@@ -382,8 +254,8 @@ public interface BeamConstants {
             0.0F, // 6
     };
 
-    String AATSR_LAT_DS_NAME = LAT_DS_NAME;
-    String AATSR_LON_DS_NAME = LON_DS_NAME;
+    String AATSR_LAT_DS_NAME = "latitude";
+    String AATSR_LON_DS_NAME = "longitude";
     String AATSR_ALTITUDE_DS_NAME = "altitude";
     String AATSR_SUN_ELEV_NADIR_DS_NAME = "sun_elev_nadir";
     String AATSR_VIEW_ELEV_NADIR_DS_NAME = "view_elev_nadir";
