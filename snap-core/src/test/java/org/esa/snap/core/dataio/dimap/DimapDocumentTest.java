@@ -19,7 +19,6 @@ import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.jexp.ParseException;
-import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
 import org.jdom2.Document;
@@ -42,6 +41,10 @@ public class DimapDocumentTest {
     private final static int TIE_POINT_GEOCODING = 1;
     private final static int MAP_GEOCODING = 2;
     private static final int GCP_GEOCODING = 3;
+
+    private static Document createDOM(Product product, String nameDataDirectory) {
+        return new TestDOMBuilder(product, nameDataDirectory).createDOM();
+    }
 
     @Before
     public void setUp() {
@@ -112,6 +115,10 @@ public class DimapDocumentTest {
         assertEquals(expected + EnviHeader.FILE_EXTENSION, file);
     }
 
+//***************************************************************************************
+//************************************ END OF PUBLIC ************************************
+//***************************************************************************************
+
     @Test
     public void testGetBandDataFiles() throws ParseException {
         final Product product = createProduct(TIE_POINT_GEOCODING);
@@ -173,10 +180,6 @@ public class DimapDocumentTest {
                     e.getMessage().indexOf(expectedString) > -1);
         }
     }
-
-//***************************************************************************************
-//************************************ END OF PUBLIC ************************************
-//***************************************************************************************
 
     private Product createProductFromXML(String code) {
         final Document dom = createDom(code);
@@ -438,6 +441,14 @@ public class DimapDocumentTest {
         imageInfo.setHistogramMatching(ImageInfo.HistogramMatching.Normalize);
         return imageInfo;
     }
+
+    /*
+     * Creates a DOM represenation (BEAM-DIMAP format) of the given data product.
+     *
+     * @param product the data product
+     *
+     * @return a DOM in BEAM-DIMAP format
+     */
 
     public String getExpectedXML(Product product, int geocodingType, boolean withGeocoding,
                                  final boolean oldUtcFormat) {
@@ -920,18 +931,6 @@ public class DimapDocumentTest {
         return sw.toString();
     }
 
-    /*
-     * Creates a DOM represenation (BEAM-DIMAP format) of the given data product.
-     *
-     * @param product the data product
-     *
-     * @return a DOM in BEAM-DIMAP format
-     */
-
-    private static Document createDOM(Product product, String nameDataDirectory) {
-        return new TestDOMBuilder(product, nameDataDirectory).createDOM();
-    }
-
     /**
      * A class whose only purpose is to create a DOM from a given data product.
      */
@@ -946,11 +945,11 @@ public class DimapDocumentTest {
             this.nameDataDirectory = nameDataDirectory;
         }
 
-        final Product getProduct() {
+        Product getProduct() {
             return product;
         }
 
-        final Document createDOM() {
+        Document createDOM() {
             root = createRootElement(getProductFilename());
             addMetadataIdElements();
             addDatasetIdElements();
