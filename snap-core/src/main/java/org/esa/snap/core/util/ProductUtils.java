@@ -419,144 +419,6 @@ public class ProductUtils {
     }
 
     /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeoPos[] createGeoBoundary(Product product, int step) {
-        return GeoUtils.createGeoBoundary(product, step);
-    }
-
-    /**
-     * @deprecated no replacement
-     */
-    @Deprecated
-    public static GeoPos[] createGeoBoundary(Product product, Rectangle region, int step) {
-        return GeoUtils.createGeoBoundary(product, region, step, true);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeoPos[] createGeoBoundary(Product product, Rectangle region, int step,
-                                             final boolean usePixelCenter) {
-        return GeoUtils.createGeoBoundary(product, region, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeoPos[] createGeoBoundary(RasterDataNode rasterDataNode, Rectangle region, int step,
-                                             final boolean usePixelCenter) {
-        return GeoUtils.createGeoBoundary(rasterDataNode, region, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeoPos[] createGeoBoundary(RasterDataNode raster, Rectangle region, int step) {
-        return GeoUtils.createGeoBoundary(raster, region, step);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(Product product) {
-        return GeoUtils.createGeoBoundaryPaths(product);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(RasterDataNode rasterDataNode) {
-        return GeoUtils.createGeoBoundaryPaths(rasterDataNode);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(Product product, Rectangle region, int step) {
-        return GeoUtils.createGeoBoundaryPaths(product, region, step, true);
-    }
-
-    /**
-     * @deprecated no replacement
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(RasterDataNode rasterDataNode, Rectangle region, int step) {
-        return GeoUtils.createGeoBoundaryPaths(rasterDataNode, region, step, false);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(Product product, Rectangle region, int step, final boolean usePixelCenter) {
-        return GeoUtils.createGeoBoundaryPaths(product, region, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static GeneralPath[] createGeoBoundaryPaths(RasterDataNode rasterDataNode, Rectangle region, int step, final boolean usePixelCenter) {
-        return GeoUtils.createGeoBoundaryPaths(rasterDataNode, region, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated no replacement
-     */
-    @Deprecated
-    public static PixelPos[] createPixelBoundary(Product product, Rectangle rect, int step) {
-        final boolean usePixelCenter = true;
-        return createPixelBoundary(product, rect, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated no replacement
-     */
-    @Deprecated
-    public static PixelPos[] createPixelBoundary(Product product, Rectangle rect, int step,
-                                                 final boolean usePixelCenter) {
-        if (rect == null) {
-            rect = new Rectangle(0,
-                    0,
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight());
-        }
-        return createRectBoundary(rect, step, usePixelCenter);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static PixelPos[] createPixelBoundary(RasterDataNode raster, Rectangle rect, int step) {
-        return GeoUtils.createPixelBoundary(raster, rect, step);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static PixelPos[] createRectBoundary(Rectangle rect, int step) {
-        return GeoUtils.createPixelBoundaryFromRect(rect, step, true);
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static PixelPos[] createRectBoundary(final Rectangle rect, int step, final boolean usePixelCenter) {
-        return GeoUtils.createPixelBoundaryFromRect(rect, step, usePixelCenter);
-    }
-
-    /**
      * Copies the flag codings from the source product to the target.
      *
      * @param source the source product
@@ -685,8 +547,8 @@ public class ProductUtils {
         }
 
         ProductNodeGroup<Mask> sourceMaskGroup = sourceProduct.getMaskGroup();
-        for (int i = 0; i < sourceMaskNames.length; i++) {
-            Mask sourceMask = sourceMaskGroup.get(sourceMaskNames[i]);
+        for (String sourceMaskName : sourceMaskNames) {
+            Mask sourceMask = sourceMaskGroup.get(sourceMaskName);
             Mask.ImageType imageType = sourceMask.getImageType();
             if (imageType.getName().equals(Mask.BandMathsType.TYPE_NAME)) {
                 String expression = Mask.BandMathsType.getExpression(sourceMask);
@@ -786,6 +648,7 @@ public class ProductUtils {
     /**
      * Copies all bands which contain a flag-coding from the source product to the target product,
      * without copying all masks
+     *
      * @param sourceProduct   the source product
      * @param targetProduct   the target product
      * @param copySourceImage whether the source image of the source band should be copied.
@@ -850,7 +713,7 @@ public class ProductUtils {
         Guardian.assertNotNull("sourceProduct", sourceProduct);
         Guardian.assertNotNull("targetProduct", targetProduct);
 
-        if (gridName == null || gridName.length() == 0) {
+        if (gridName == null || gridName.isEmpty()) {
             return null;
         }
         final TiePointGrid sourceGrid = sourceProduct.getTiePointGrid(gridName);
@@ -941,7 +804,7 @@ public class ProductUtils {
         Guardian.assertNotNull("sourceProduct", sourceProduct);
         Guardian.assertNotNull("targetProduct", targetProduct);
 
-        if (sourceBandName == null || sourceBandName.length() == 0) {
+        if (sourceBandName == null || sourceBandName.isEmpty()) {
             return null;
         }
         final Band sourceBand = sourceProduct.getBand(sourceBandName);
@@ -1407,11 +1270,8 @@ public class ProductUtils {
 
         int normalized = 0;
         boolean negNormalized = false;
-        boolean posNormalized = false;
+        boolean posNormalized = minLon < -180.0;
 
-        if (minLon < -180.0) {
-            posNormalized = true;
-        }
         if (maxLon > 180.0) {
             negNormalized = true;
         }
@@ -1628,7 +1488,7 @@ public class ProductUtils {
                 }
             }
         });
-        return messages.toArray(new String[messages.size()]);
+        return messages.toArray(new String[0]);
     }
 
     /**
@@ -2191,7 +2051,7 @@ public class ProductUtils {
         while (featureIterator.hasNext()) {
             final SimpleFeature srcFeature = featureIterator.next();
             final Object defaultGeometry = srcFeature.getDefaultGeometry();
-            if (defaultGeometry != null && defaultGeometry instanceof Geometry) {
+            if (defaultGeometry instanceof Geometry) {
                 try {
                     final Geometry transformedGeometry = transformer.transform((Geometry) defaultGeometry);
                     final SimpleFeature targetFeature = SimpleFeatureBuilder.copy(srcFeature);

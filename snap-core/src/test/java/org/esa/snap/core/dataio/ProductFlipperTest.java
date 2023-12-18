@@ -16,10 +16,12 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,10 +64,11 @@ public class ProductFlipperTest {
                 7, 8, 9
         });
         product.addTiePointGrid(t3);
-        geoBoundaryPath = ProductUtils.createGeoBoundaryPaths(product);
+        geoBoundaryPath = GeoUtils.createGeoBoundaryPaths(product);
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testTiePointFlipping_Horizontal() throws IOException {
         final Product flipped = ProductFlipper.createFlippedProduct(product, ProductFlipper.FLIP_HORIZONTAL, "h", "h");
         final TiePointGrid flippedT1 = flipped.getTiePointGrid("t1");
@@ -87,7 +90,7 @@ public class ProductFlipperTest {
         assertEquals(3, flippedT2.getSubSamplingX(), 1.0e-6);
         assertEquals(3, flippedT2.getSubSamplingY(), 1.0e-6);
 
-        GeneralPath[] flippedPath = ProductUtils.createGeoBoundaryPaths(flipped);
+        GeneralPath[] flippedPath = GeoUtils.createGeoBoundaryPaths(flipped);
         assertEquals(1, flippedPath.length);
         final Rectangle2D expBounds = geoBoundaryPath[0].getBounds2D();
         final Rectangle2D actualBounds = flippedPath[0].getBounds2D();
@@ -98,6 +101,7 @@ public class ProductFlipperTest {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testTiePointFlipping_Vertical() throws IOException {
         final Product flipped = ProductFlipper.createFlippedProduct(product, ProductFlipper.FLIP_VERTICAL, "v", "v");
         final TiePointGrid flippedT1 = flipped.getTiePointGrid("t1");
@@ -119,7 +123,7 @@ public class ProductFlipperTest {
         assertEquals(3, flippedT2.getSubSamplingX(), 1.0e-6);
         assertEquals(3, flippedT2.getSubSamplingY(), 1.0e-6);
 
-        GeneralPath[] flippedPath = ProductUtils.createGeoBoundaryPaths(flipped);
+        GeneralPath[] flippedPath = GeoUtils.createGeoBoundaryPaths(flipped);
         assertEquals(1, flippedPath.length);
         final Rectangle2D expBounds = geoBoundaryPath[0].getBounds2D();
         final Rectangle2D actualBounds = flippedPath[0].getBounds2D();
@@ -130,6 +134,7 @@ public class ProductFlipperTest {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testTiePointFlipping_Both() throws IOException {
         final Product flipped = ProductFlipper.createFlippedProduct(product, ProductFlipper.FLIP_BOTH, "b", "b");
         final TiePointGrid flippedT1 = flipped.getTiePointGrid("t1");
@@ -147,7 +152,7 @@ public class ProductFlipperTest {
         assertEquals(7, flippedT2.getOffsetX(), 1.0e-6);
         assertEquals(9, flippedT2.getOffsetY(), 1.0e-6);
 
-        GeneralPath[] flippedPath = ProductUtils.createGeoBoundaryPaths(flipped);
+        GeneralPath[] flippedPath = GeoUtils.createGeoBoundaryPaths(flipped);
         assertEquals(1, flippedPath.length);
         final Rectangle2D expBounds = geoBoundaryPath[0].getBounds2D();
         final Rectangle2D actualBounds = flippedPath[0].getBounds2D();
@@ -158,6 +163,7 @@ public class ProductFlipperTest {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testTiePointFlipping_Sequence() throws IOException {
         final Product v = ProductFlipper.createFlippedProduct(product, ProductFlipper.FLIP_VERTICAL, "v", "v");
         final Product vh = ProductFlipper.createFlippedProduct(v, ProductFlipper.FLIP_HORIZONTAL, "vh", "vh");
@@ -180,7 +186,7 @@ public class ProductFlipperTest {
         assertEquals(1, vhbFlippedT2.getOffsetX(), 1.0e-6);
         assertEquals(1, vhbFlippedT2.getOffsetY(), 1.0e-6);
 
-        GeneralPath[] flippedPath = ProductUtils.createGeoBoundaryPaths(vhb);
+        GeneralPath[] flippedPath = GeoUtils.createGeoBoundaryPaths(vhb);
         assertEquals(1, flippedPath.length);
         assertEquals(geoBoundaryPath[0].getBounds2D(), flippedPath[0].getBounds2D());
     }
