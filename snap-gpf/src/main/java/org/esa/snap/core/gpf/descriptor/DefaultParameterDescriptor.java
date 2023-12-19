@@ -20,14 +20,8 @@ import com.bc.ceres.binding.ConverterRegistry;
 import com.bc.ceres.binding.Validator;
 import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.core.Assert;
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.core.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -70,6 +64,41 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
         this.name = name;
         this.dataType = dataType;
         this.valueSet = new String[0];
+    }
+
+    public static boolean isStructure(Class<?> type) {
+        return !isSimple(type) && !type.isArray();
+    }
+
+    public static boolean isSimple(Class<?> type) {
+        return type.isPrimitive()
+                || Boolean.class.isAssignableFrom(type)
+                || Character.class.isAssignableFrom(type)
+                || Number.class.isAssignableFrom(type)
+                || CharSequence.class.isAssignableFrom(type)
+                || ConverterRegistry.getInstance().getConverter(type) != null;
+    }
+
+    public static ParameterDescriptor[] getDataMemberDescriptors(Class<?> dataType) {
+        if (!isStructure(dataType)) {
+            return new ParameterDescriptor[0];
+        }
+        ArrayList<ParameterDescriptor> parameterDescriptors = new ArrayList<>();
+        Field[] declaredFields = dataType.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            int modifiers = declaredField.getModifiers();
+            if (!(Modifier.isTransient(modifiers) || Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))) {
+                Parameter annotation = declaredField.getAnnotation(Parameter.class);
+                if (annotation != null) {
+                    boolean isDeprecated = declaredField.getAnnotation(Deprecated.class) != null;
+                    parameterDescriptors.add(new AnnotationParameterDescriptor(declaredField.getName(), declaredField.getType(), isDeprecated,
+                            annotation));
+                } else {
+                    parameterDescriptors.add(new DefaultParameterDescriptor(declaredField.getName(), declaredField.getType()));
+                }
+            }
+        }
+        return parameterDescriptors.toArray(new ParameterDescriptor[parameterDescriptors.size()]);
     }
 
     private Object readResolve() {
@@ -202,6 +231,10 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
         return notEmpty != null ? notEmpty : false;
     }
 
+    public void setNotEmpty(boolean notEmpty) {
+        this.notEmpty = notEmpty;
+    }
+
     @Override
     public boolean isDeprecated() {
         return deprecated != null ? deprecated : false;
@@ -209,10 +242,6 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
 
     public void setDeprecated(boolean deprecated) {
         this.deprecated = deprecated;
-    }
-
-    public void setNotEmpty(boolean notEmpty) {
-        this.notEmpty = notEmpty;
     }
 
     @Override
@@ -269,97 +298,4 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
     public ParameterDescriptor[] getStructureMemberDescriptors() {
         return getDataMemberDescriptors(getDataType());
     }
-
-    public static boolean isStructure(Class<?> type) {
-        return !isSimple(type) && !type.isArray();
-    }
-
-    public static boolean isSimple(Class<?> type) {
-        return type.isPrimitive()
-               || Boolean.class.isAssignableFrom(type)
-               || Character.class.isAssignableFrom(type)
-               || Number.class.isAssignableFrom(type)
-               || CharSequence.class.isAssignableFrom(type)
-               || ConverterRegistry.getInstance().getConverter(type) != null;
-    }
-
-    public static ParameterDescriptor[] getDataMemberDescriptors(Class<?> dataType) {
-        if (!isStructure(dataType)) {
-            return new ParameterDescriptor[0];
-        }
-        ArrayList<ParameterDescriptor> parameterDescriptors = new ArrayList<>();
-        Field[] declaredFields = dataType.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            int modifiers = declaredField.getModifiers();
-            if (!(Modifier.isTransient(modifiers) || Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))) {
-                Parameter annotation = declaredField.getAnnotation(Parameter.class);
-                if (annotation != null) {
-                    boolean isDeprecated = declaredField.getAnnotation(Deprecated.class) != null;
-                    parameterDescriptors.add(new AnnotationParameterDescriptor(declaredField.getName(), declaredField.getType(), isDeprecated,
-                                                                               annotation));
-                } else {
-                    parameterDescriptors.add(new DefaultParameterDescriptor(declaredField.getName(), declaredField.getType()));
-                }
-            }
-        }
-        return parameterDescriptors.toArray(new ParameterDescriptor[parameterDescriptors.size()]);
-    }
-
-    /**
-     * @deprecated Class has no usage and has no API doc. It might be deleted without further notice.
-     */
-    @Deprecated
-    public static class XStreamConverter implements com.thoughtworks.xstream.converters.Converter {
-
-        public boolean canConvert(Class aClass) {
-            return DefaultParameterDescriptor.class.equals(aClass);
-        }
-
-        @Override
-        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-            DefaultParameterDescriptor headerParameter = (DefaultParameterDescriptor) source;
-            writer.addAttribute("name", headerParameter.getName());
-            writer.addAttribute("dataType", headerParameter.getDataType().toString());
-            writer.addAttribute("defaultValue", headerParameter.getDefaultValue());
-            writer.addAttribute("description", headerParameter.getDescription());
-            writer.addAttribute("label", headerParameter.getLabel());
-            writer.addAttribute("unit", headerParameter.getUnit());
-            writer.addAttribute("interval", headerParameter.getInterval());
-            writer.addAttribute("valueSet", StringUtils.arrayToString(headerParameter.getValueSet(), ","));
-            writer.addAttribute("condition", headerParameter.getCondition());
-            writer.addAttribute("pattern", headerParameter.getPattern());
-            writer.addAttribute("format", headerParameter.getFormat());
-            writer.addAttribute("notNull", String.valueOf(headerParameter.isNotNull()));
-            writer.addAttribute("notEmpty", String.valueOf(headerParameter.isNotEmpty()));
-        }
-
-        @Override
-        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-            DefaultParameterDescriptor headerParameter = new DefaultParameterDescriptor();
-
-            try {
-                headerParameter.setDataType(Class.forName(reader.getAttribute("dataType")));
-            } catch (ClassNotFoundException e) {
-                throw new ConversionException(e);
-            }
-            headerParameter.setName(reader.getAttribute("name"));
-            headerParameter.setDefaultValue(reader.getAttribute("defaultValue"));
-            headerParameter.setDescription(reader.getAttribute("description"));
-            headerParameter.setLabel(reader.getAttribute("label"));
-            headerParameter.setUnit(reader.getAttribute("unit"));
-            headerParameter.setInterval(reader.getAttribute("interval"));
-            final String valueSetString = reader.getAttribute("valueSet");
-            if (valueSetString != null) {
-                headerParameter.setValueSet(StringUtils.toStringArray(valueSetString, ","));
-            }
-            headerParameter.setCondition(reader.getAttribute("condition"));
-            headerParameter.setPattern(reader.getAttribute("pattern"));
-            headerParameter.setFormat(reader.getAttribute("format"));
-            headerParameter.setNotNull(Boolean.parseBoolean(reader.getAttribute("notNull")));
-            headerParameter.setNotEmpty(Boolean.parseBoolean(reader.getAttribute("notEmpty")));
-
-            return headerParameter;
-        }
-    }
-
 }

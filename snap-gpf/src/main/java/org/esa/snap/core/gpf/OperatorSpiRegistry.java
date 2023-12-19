@@ -54,7 +54,6 @@ public interface OperatorSpiRegistry {
      * or an alias name.
      *
      * @param operatorName a name identifying the operator SPI.
-     *
      * @return the operator SPI, or <code>null</code>
      */
     OperatorSpi getOperatorSpi(String operatorName);
@@ -63,7 +62,6 @@ public interface OperatorSpiRegistry {
      * Adds the given {@link OperatorSpi operatorSpi} to this registry.
      *
      * @param operatorSpi the SPI to add
-     *
      * @return {@code true}, if the {@link OperatorSpi} could be successfully added, otherwise {@code false}
      */
     boolean addOperatorSpi(OperatorSpi operatorSpi);
@@ -72,8 +70,7 @@ public interface OperatorSpiRegistry {
      * Adds the given {@link OperatorSpi operatorSpi} to this registry.
      *
      * @param operatorName an (alias) name used as key for the registration.
-     * @param operatorSpi the SPI to add
-     *
+     * @param operatorSpi  the SPI to add
      * @return {@code true}, if the {@link OperatorSpi} could be successfully added, otherwise {@code false}
      * @since BEAM 5
      */
@@ -83,25 +80,14 @@ public interface OperatorSpiRegistry {
      * Removes the given {@link OperatorSpi operatorSpi} this registry.
      *
      * @param operatorSpi the SPI to remove
-     *
      * @return {@code true}, if the SPI could be removed, otherwise {@code false}
      */
     boolean removeOperatorSpi(OperatorSpi operatorSpi);
 
     /**
-     * Sets an alias for the given SPI class name.
-     *
-     * @param aliasName    the alias
-     * @param spiClassName the name of the SPI class
-     * @deprecated since BEAM 5, used internally only
-     */
-    @Deprecated
-    void setAlias(String aliasName, String spiClassName);
-
-    /**
-     *  Gets a set of all aliases
+     * Gets a set of all aliases
      *
      * @return the Set&lt;string&gt; of alias keys
      */
-    public Set getAliases();
+    Set getAliases();
 }
