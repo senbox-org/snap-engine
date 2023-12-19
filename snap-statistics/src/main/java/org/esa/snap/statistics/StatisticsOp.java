@@ -439,25 +439,6 @@ public class StatisticsOp extends Operator {
         return measures.toArray(new String[0]);
     }
 
-    @Deprecated
-    /*
-     * will receive no replacement (@since 6.0.3)
-     */
-    public static String[] getAlgorithmNames(int[] percentiles) {
-        final List<String> algorithms = new ArrayList<>();
-        algorithms.add(MINIMUM);
-        algorithms.add(MAXIMUM);
-        algorithms.add(MEDIAN);
-        algorithms.add(AVERAGE);
-        algorithms.add(SIGMA);
-        for (int percentile : percentiles) {
-            algorithms.add(getPercentileName(percentile));
-        }
-        algorithms.add(MAX_ERROR);
-        algorithms.add(TOTAL);
-        return algorithms.toArray(new String[algorithms.size()]);
-    }
-
     private static String getPercentileName(int percentile) {
         return PERCENTILE_PREFIX + percentile + PERCENTILE_SUFFIX;
     }
