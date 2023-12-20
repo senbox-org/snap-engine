@@ -1,6 +1,5 @@
 package org.esa.snap.dataio.gdal;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 
@@ -124,9 +123,7 @@ class GDALDistributionInstaller {
      * @param gdalVersion the GDAL version to be setup
      */
     static void setupProj(GDALVersion gdalVersion) {
-        final Path projPath = SystemUtils.IS_OS_LINUX
-                ? gdalVersion.getNativeLibrariesFolderPath().resolve("share/share/proj")
-                : gdalVersion.getNativeLibrariesFolderPath().resolve("projlib");
+        final Path projPath = gdalVersion.getNativeLibrariesFolderPath().resolve("projlib");
         OSR.setPROJSearchPath(projPath.toString());
     }
 
