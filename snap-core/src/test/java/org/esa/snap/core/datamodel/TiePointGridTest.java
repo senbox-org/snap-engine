@@ -16,8 +16,8 @@
 
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.util.BeamConstants;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -281,12 +281,13 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testAccess_MERIS_TiePointGrid() {
         String tpgName = "x";
         int gridWidth = 4;
         int gridHeight = 3;
-        float offsetX = BeamConstants.MERIS_TIE_POINT_OFFSET_X;
-        float offsetY = BeamConstants.MERIS_TIE_POINT_OFFSET_Y;
+        float offsetX = 0.5F;
+        float offsetY = 0.5F;
         int subSamplingX = 5;
         int subSamplingY = 2;
         float[] tiepoints = new float[]{
@@ -359,14 +360,15 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testAccess_AATSR_LOC_TiePointGrid() {
         String tpgName = "x";
-        int gridWidth = BeamConstants.AATSR_LOC_TIE_POINT_GRID_WIDTH;
+        int gridWidth = 23;
         int gridHeight = 2;
-        float offsetX = BeamConstants.AATSR_LOC_TIE_POINT_OFFSET_X;
-        float offsetY = BeamConstants.MERIS_TIE_POINT_OFFSET_Y;
-        int subSamplingX = BeamConstants.AATSR_LOC_TIE_POINT_SUBSAMPLING_X;
-        int subSamplingY = BeamConstants.AATSR_LOC_TIE_POINT_SUBSAMPLING_Y;
+        float offsetX = 0.5F * 512 - 0.5F * (23 - 1) * 25;
+        float offsetY = 0.5F;
+        int subSamplingX = 25;
+        int subSamplingY = 32;
         float[] tiepoints = new float[]{
                 01f, 02f, 03f, 04f, 05f, 06f, 07f, 08f, 09f, 10f, 11f,
                 12f,

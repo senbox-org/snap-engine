@@ -24,11 +24,7 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * The parsed command-line arguments for GPT.
@@ -44,41 +40,24 @@ public class CommandLineArgs {
     public static final String DEFAULT_FORMAT_NAME = ProductIO.DEFAULT_FORMAT_NAME;
     public static final String VELOCITY_TEMPLATE_EXTENSION = ".vm";
 
-    /*
-      @deprecated since 6.0.4, use {@link #getDefaultTileCacheSize()} instead
-     */
-    @Deprecated()
-    public static final long DEFAULT_TILE_CACHE_SIZE_IN_M = getDefaultTileCacheSize();
-    /*
-      @deprecated since 6.0.4, use {@link #getDefaultTileSchedulerParallelism()} instead
-     */
-    @Deprecated()
-    public static final int DEFAULT_TILE_SCHEDULER_PARALLELISM = getDefaultTileSchedulerParallelism();
-
-    private String[] args;
+    private final String[] args;
     private String operatorName;
     private String graphFilePath;
     private String targetFilePath;
-    private TreeMap<String, String> parameterMap;
-    private TreeMap<String, String> sourceFilePathMap;
-    private Map<String, String> systemPropertiesMap;
+    private final TreeMap<String, String> parameterMap;
+    private final TreeMap<String, String> sourceFilePathMap;
+    private final Map<String, String> systemPropertiesMap;
     private String targetFormatName;
     private String parameterFilePath;
     private String metadataFilePath;
     private String velocityTemplateDirPath;
     private boolean helpRequested;
     private boolean diagnosticRequested;
-    private boolean stackTraceDump;
+    private final boolean stackTraceDump;
     private boolean clearCacheAfterRowWrite;
 
     private long tileCacheCapacity;
     private int tileSchedulerParallelism;
-
-    public static CommandLineArgs parseArgs(String... args) throws Exception {
-        CommandLineArgs lineArgs = new CommandLineArgs(args);
-        lineArgs.parseArgs();
-        return lineArgs;
-    }
 
     private CommandLineArgs(String[] args) {
         this.args = args.clone();
@@ -94,6 +73,12 @@ public class CommandLineArgs {
         stackTraceDump = isStackTraceDumpEnabled(args);
     }
 
+    public static CommandLineArgs parseArgs(String... args) throws Exception {
+        CommandLineArgs lineArgs = new CommandLineArgs(args);
+        lineArgs.parseArgs();
+        return lineArgs;
+    }
+
     static boolean isStackTraceDumpEnabled(String[] args) {
         // look for "-e" early do enable verbose error reports
         for (String arg : args) {
@@ -102,6 +87,18 @@ public class CommandLineArgs {
             }
         }
         return false;
+    }
+
+    public static long getDefaultTileCacheSize() {
+        return Config.instance().load().preferences().getLong("snap.jai.tileCacheSize", 512) * M;
+    }
+
+    public static int getDefaultTileSchedulerParallelism() {
+        return Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
+    }
+
+    private static Exception error(String m) {
+        return new Exception(m);
     }
 
     private void parseArgs() throws Exception {
@@ -231,16 +228,8 @@ public class CommandLineArgs {
         return parameterFilePath;
     }
 
-    public static long getDefaultTileCacheSize() {
-        return Config.instance().load().preferences().getLong("snap.jai.tileCacheSize", 512) * M;
-    }
-
     public long getTileCacheCapacity() {
         return tileCacheCapacity;
-    }
-
-    public static int getDefaultTileSchedulerParallelism() {
-        return Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
     }
 
     public int getTileSchedulerParallelism() {
@@ -335,10 +324,6 @@ public class CommandLineArgs {
             }
         }
         return null;
-    }
-
-    private static Exception error(String m) {
-        return new Exception(m);
     }
 
 }

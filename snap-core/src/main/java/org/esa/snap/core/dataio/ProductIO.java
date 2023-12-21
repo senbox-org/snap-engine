@@ -259,20 +259,6 @@ public class ProductIO {
     }
 
     /**
-     * Returns a product reader instance for the given file if any registered product reader can decode the given file.
-     *
-     * @param file the file to decode.
-     *
-     * @return a product reader for the given file or <code>null</code> if the file cannot be decoded.
-     *
-     * @deprecated Since BEAM 4.10. Use {@link #getProductReaderForInput(Object)} instead.
-     */
-    @Deprecated
-    public static ProductReader getProductReaderForFile(File file) {
-        return getProductReaderForInput(file);
-    }
-
-    /**
      * Tries to find a product reader instance suitable for the given input.
      * The method returns {@code null}, if no
      * registered product reader can handle the given {@code input} value.

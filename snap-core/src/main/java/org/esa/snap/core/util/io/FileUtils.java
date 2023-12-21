@@ -118,7 +118,7 @@ public class FileUtils {
     public static String exchangeExtension(String path, String extension) {
         Guardian.assertNotNullOrEmpty("path", path);
         Guardian.assertNotNull("extension", extension);
-        if (extension.length() > 0 && path.endsWith(extension)) {
+        if (!extension.isEmpty() && path.endsWith(extension)) {
             return path;
         }
         int extensionDotPos = getExtensionDotPos(path);
@@ -242,14 +242,6 @@ public class FileUtils {
     }
 
     /**
-     * @deprecated since SNAP 8.0, use {@link #getFilenameFromPath(String)} instead, this has been changed because of typo in method name.
-     */
-    @Deprecated
-    public static String getFileNameFromPath(String path) {
-        return getFilenameFromPath(path);
-    }
-
-    /**
      * Retrieves the file name from a complete path. example: "c:/testData/MERIS/meris_test.N1" will be converted to
      * "meris_test.N1"
      */
@@ -258,7 +250,7 @@ public class FileUtils {
         String filename;
         int lastChar = path.lastIndexOf(File.separator);
         if (lastChar >= 0) {
-            filename = path.substring(lastChar + 1, path.length());
+            filename = path.substring(lastChar + 1);
         } else {
             filename = path;
         }
@@ -275,7 +267,7 @@ public class FileUtils {
         if (dir == null) {
             return null;
         }
-        if (extension != null && extension.length() > 0) {
+        if (extension != null && !extension.isEmpty()) {
             return dir.listFiles(createExtensionFilenameFilter(extension));
         } else {
             return dir.listFiles();
@@ -292,7 +284,7 @@ public class FileUtils {
         if (dir == null) {
             return null;
         }
-        if (extension != null && extension.length() > 0) {
+        if (extension != null && !extension.isEmpty()) {
             return dir.list(createExtensionFilenameFilter(extension));
         } else {
             return dir.list();
@@ -307,7 +299,7 @@ public class FileUtils {
     public static FilenameFilter createExtensionFilenameFilter(String extension) {
         final String extensionLC = extension.toLowerCase();
         return (dir, name) -> name.length() > extensionLC.length()
-               && name.toLowerCase().endsWith(extensionLC);
+                && name.toLowerCase().endsWith(extensionLC);
     }
 
     /**
@@ -321,67 +313,6 @@ public class FileUtils {
         Guardian.assertNotNull("name", name);
         return StringUtils.createValidName(name, new char[]{'_', '-', '.'}, '_');
     }
-
-//    /**
-//     * Checks if the given file can be created with the given filesize.
-//     *
-//     * The given file must not be <code>null</code>. Also, the file must not exist and
-//     * must contain an absolute path.
-//     * @param file the file which will be checked
-//     * @param size the size to check
-//     * @return true if the given file can have the given size
-//     * @throws IllegalArgumentException if the conditions above are not met.
-//     */
-//    public static boolean isFilesizeAvailable(File file, long size) {
-//        final FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-//        if (file == null || !file.isAbsolute() || file.exists()
-//                || fileSystemView.isComputerNode(file)
-//                || fileSystemView.isDrive(file)
-//                || fileSystemView.isFileSystem(file)
-//                || fileSystemView.isFileSystemRoot(file)
-//                || fileSystemView.isFloppyDrive(file)
-////        || fileSystemView.isParent(file,)
-//                || fileSystemView.isRoot(file)
-//                || fileSystemView.isTraversable(file).booleanValue()) {
-//            throw new IllegalArgumentException("The given file is invalid");
-//        } else {
-//            RandomAccessFile randomAccessFile = null;
-//            try {
-//                   file.getParentFile().mkdirs();
-//                file.createNewFile();
-//                randomAccessFile = new RandomAccessFile(file, "rw");
-//                randomAccessFile.setLength(size);
-//            } catch (IOException e) {
-//                return false;
-//            } finally {
-//                if (randomAccessFile != null) {
-//                    try {
-//                        randomAccessFile.close();
-//                    } catch (IOException e) {
-//                    }
-//                }
-//                file.delete();
-//            }
-//            return true;
-//        }
-//    }
-
-//    public static String getAbsolutePath(File file) {
-//        if (file == null) {
-//            return null;
-//        }
-//        if (file.exists()) {
-//            return file.getAbsolutePath();
-//        }
-//        final File workingDir = SystemUtils.getCurrentWorkingDir();
-//        final String path = file.getPath();
-//        final String s = File.separator;
-//        if (path.startsWith(s)) {
-//            return workingDir + path;
-//        } else {
-//            return workingDir + s + path;
-//        }
-//    }
 
     /**
      * Gets a normalized URL representation for the given file.
@@ -487,7 +418,6 @@ public class FileUtils {
      *
      * @param uri The {@link URI} to create the {@link Path} from.
      * @return The converted {@link Path}.
-     *
      * @throws IOException              If the {@link Path} could not be created
      * @throws IllegalArgumentException If {@link URI} is not valid
      */
@@ -539,7 +469,6 @@ public class FileUtils {
      *
      * @param uri the uri which shall be corrected
      * @return the corrected URI
-     *
      * @throws IOException If the URI could not be converted into a {@link Path}
      */
     public static URI ensureJarURI(URI uri) throws IOException {
@@ -562,7 +491,7 @@ public class FileUtils {
     public static String computeHashForFile(Path targetFile) throws IOException {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
-            try (InputStream is = Files.newInputStream(targetFile); DigestInputStream dis = new DigestInputStream(is, md)){
+            try (InputStream is = Files.newInputStream(targetFile); DigestInputStream dis = new DigestInputStream(is, md)) {
                 while (dis.read(new byte[1024 * 1000], 0, 1024 * 1000) != -1) ; //empty loop to clear the data
                 return bytesToHex(md.digest());
             }

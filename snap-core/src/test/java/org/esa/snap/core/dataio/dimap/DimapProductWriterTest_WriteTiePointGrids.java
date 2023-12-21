@@ -15,12 +15,12 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -60,8 +60,9 @@ public class DimapProductWriterTest_WriteTiePointGrids {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testWriteProductNodes_TiePointGrid() {
-        Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
+        Product product = new Product("name", "MER_FR__1P",
                 50, 25);
         float[] expectedArray = getTiePointData(10, 5);
         TiePointGrid tiePointGrid = new TiePointGrid("name", 10, 5, 0, 0, 5, 5, expectedArray);

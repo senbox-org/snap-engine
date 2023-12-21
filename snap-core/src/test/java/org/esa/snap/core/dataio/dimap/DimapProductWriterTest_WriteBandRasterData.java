@@ -15,13 +15,13 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +31,7 @@ import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -62,7 +63,7 @@ public class DimapProductWriterTest_WriteBandRasterData {
         int offsetY = 1;
         int sourceWidth = sceneWidth - 2;
         int sourceHeight = sceneHeight - 2;
-        Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
+        Product product = new Product("name", "MER_FR__1P",
                 sceneWidth, sceneHeight);
         Band band = new Band("band", ProductData.TYPE_INT8, sceneWidth, sceneHeight);
         product.addBand(band);
@@ -87,7 +88,7 @@ public class DimapProductWriterTest_WriteBandRasterData {
     public void testWriteBandRasterData_SourceBuffer_toSmall() {
         int sceneWidth = 16;
         int sceneHeight = 12;
-        Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
+        Product product = new Product("name", "MER_FR__1P",
                 sceneWidth, sceneHeight);
         Band band = new Band("band", ProductData.TYPE_INT8, sceneWidth, sceneHeight);
         product.addBand(band);
@@ -100,7 +101,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
             fail("IllegalArgumentException expected because sourceBuffer is to small");
         } catch (IOException e) {
             fail("IOException not expected: " + e.getMessage());
-            e.printStackTrace();
         } catch (IllegalArgumentException e) {
         } finally {
             try {
@@ -114,7 +114,7 @@ public class DimapProductWriterTest_WriteBandRasterData {
     public void testWriteBandRasterData_SourceBuffer_toBig() {
         int sceneWidth = 16;
         int sceneHeight = 12;
-        Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
+        Product product = new Product("name", "MER_FR__1P",
                 sceneWidth, sceneHeight);
         Band band = new Band("band", ProductData.TYPE_INT8, sceneWidth, sceneHeight);
         product.addBand(band);
@@ -127,7 +127,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
             fail("IllegalArgumentException expected because sourceBuffer is to big");
         } catch (IOException e) {
             fail("IOException not expected: " + e.getMessage());
-            e.printStackTrace();
         } catch (IllegalArgumentException e) {
         } finally {
             try {
@@ -138,10 +137,11 @@ public class DimapProductWriterTest_WriteBandRasterData {
     }
 
     @Test
+    @STTM("SNAP-3508")
     public void testWriteBandRasterData_SourceRegionIsOutOfBandsRaster() {
         int sceneWidth = 16;
         int sceneHeight = 12;
-        Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME,
+        Product product = new Product("name", "MER_FR__1P",
                 sceneWidth, sceneHeight);
         Band band = new Band("band", ProductData.TYPE_INT8, sceneWidth, sceneHeight);
         product.addBand(band);
@@ -149,7 +149,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
         try {
             _productWriter.writeProductNodes(product, _outputFile);
         } catch (IOException e) {
-            e.printStackTrace();
             fail("IOException not expected");
         }
 
@@ -163,7 +162,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
                     sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because region is ot of band's region");
         } catch (IOException e) {
-            e.printStackTrace();
             fail("IOException not expected");
         } catch (IllegalArgumentException e) {
         }
@@ -178,7 +176,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
                     sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because region is ot of band's region");
         } catch (IOException e) {
-            e.printStackTrace();
             fail("IOException not expected");
         } catch (IllegalArgumentException e) {
         }
@@ -193,7 +190,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
                     sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because region is ot of band's region");
         } catch (IOException e) {
-            e.printStackTrace();
             fail("IOException not expected");
         } catch (IllegalArgumentException e) {
         }
@@ -208,7 +204,6 @@ public class DimapProductWriterTest_WriteBandRasterData {
                     sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because region is ot of band's region");
         } catch (IOException e) {
-            e.printStackTrace();
             fail("IOException not expected");
         } catch (IllegalArgumentException e) {
         }
@@ -226,9 +221,7 @@ public class DimapProductWriterTest_WriteBandRasterData {
     private ProductData getFilledSourceData(int size) {
         ProductData data = getSourceData(size);
         byte[] bytes = new byte[data.getNumElems()];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = 85;
-        }
+        Arrays.fill(bytes, (byte) 85);
         data.setElems(bytes);
         return data;
     }
