@@ -3,6 +3,7 @@ package org.esa.snap.statistics.percentile.interpolated;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.DateTimeUtils;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 class Utils {
 
     static Area createProductArea(Product product) {
-        GeneralPath[] boundary = ProductUtils.createGeoBoundaryPaths(product);
+        GeneralPath[] boundary = GeoUtils.createGeoBoundaryPaths(product);
         Area area = new Area();
         for (GeneralPath generalPath : boundary) {
             area.add(new Area(generalPath));
@@ -29,11 +30,7 @@ class Utils {
         final TreeMap<Long, List<Product>> groupedProducts = new TreeMap<Long, List<Product>>();
         for (Product product : products) {
             final long productMJD = getCenterDateAsModifiedJulianDay(product);
-            List<Product> productList = groupedProducts.get(productMJD);
-            if (productList == null) {
-                productList = new ArrayList<Product>();
-                groupedProducts.put(productMJD, productList);
-            }
+            List<Product> productList = groupedProducts.computeIfAbsent(productMJD, k -> new ArrayList<>());
             productList.add(product);
         }
         return groupedProducts;

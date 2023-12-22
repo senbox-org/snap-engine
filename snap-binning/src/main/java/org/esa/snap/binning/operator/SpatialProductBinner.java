@@ -18,6 +18,7 @@ package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.snap.core.util.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -40,10 +41,6 @@ import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.jexp.ParseException;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.StopWatch;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
@@ -316,7 +313,7 @@ public class SpatialProductBinner {
 
     // duplicate from SupsetOp find the right place for it
     private static Geometry computeProductGeometry(Product product) {
-         final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(product);
+         final GeneralPath[] paths = GeoUtils.createGeoBoundaryPaths(product);
          final Polygon[] polygons = new Polygon[paths.length];
          final GeometryFactory factory = new GeometryFactory();
          for (int i = 0; i < paths.length; i++) {

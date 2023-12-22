@@ -154,7 +154,7 @@ public class ServiceFinder {
     private void addSearchPathsFromPreferencesValue(String extraPaths) {
         if (extraPaths != null) {
             addSearchPaths(Stream.of(extraPaths.split(File.pathSeparator))
-                    .map(s -> Paths.get(s))
+                    .map(Paths::get)
                     .toArray(Path[]::new));
         }
     }
@@ -177,7 +177,7 @@ public class ServiceFinder {
                     String extension = FileUtils.getExtension(entry.toString());
                     if (".jar".compareToIgnoreCase(extension) == 0 || ".zip".compareToIgnoreCase(extension) == 0) {
                         try {
-                            try (FileSystem fs = FileSystems.newFileSystem(entry, (java.lang.ClassLoader) null)) {
+                            try (FileSystem fs = FileSystems.newFileSystem(entry, null)) {
                                 parseServiceRegistry(fs.getPath(servicesPath), modules);
                             }
                         } catch (IOException e) {
@@ -219,11 +219,6 @@ public class ServiceFinder {
         if (!services.isEmpty()) {
             modules.add(new Module(moduleRoot, services));
         }
-    }
-
-    @Deprecated
-    public void searchClassPath(boolean value) {
-        this.useClassPath = value;
     }
 
     /**

@@ -20,30 +20,11 @@ import org.esa.snap.core.jexp.EvalEnv;
 import org.esa.snap.core.jexp.Term;
 
 /**
- * An extension the the {@link java.lang.Math class}.
+ * An extension the {@link java.lang.Math class}.
  */
 public class ExtMath {
 
     private static final double INV_LN_10 = 1.0 / Math.log(10.0);
-
-    /**
-     * Returns the common logarithm, the logarithm with base 10 of a double value. Special cases:
-     * <ul>
-     * <li>If the argument is NaN or less than zero, then the result is NaN.</li>
-     * <li>If the argument is positive infinity, then the result is positive infinity.</li>
-     * <li>If the argument is positive zero or negative zero, then the result is negative infinity.</li>
-     * </ul>
-     *
-     * @param x number greater than 0.0.
-     *
-     * @return the natural logarithm of a.
-     *
-     * @deprecated since BEAM 4.10,  Use Java Math class
-     */
-    @Deprecated
-    public static double log10(final double x) {
-        return Math.log10(x);
-    }
 
     /**
      * Performs a fuzzy equal operation for the two given arguments.
@@ -51,7 +32,6 @@ public class ExtMath {
      * @param x1  the first value
      * @param x2  the second value
      * @param eps the maximum deviation
-     *
      * @return true, if x1 and x2 are equal
      */
     public static boolean feq(final double x1, final double x2, final double eps) {
@@ -64,7 +44,6 @@ public class ExtMath {
      * @param x1  the first value
      * @param x2  the second value
      * @param eps the maximum deviation
-     *
      * @return true, if x1 and x2 are not equal
      */
     public static boolean fneq(final double x1, final double x2, final double eps) {
@@ -80,7 +59,6 @@ public class ExtMath {
      * </ul>
      *
      * @param a the number
-     *
      * @return the signum of a
      */
     public static int sign(int a) {
@@ -96,7 +74,6 @@ public class ExtMath {
      * </ul>
      *
      * @param a the number
-     *
      * @return the signum of a
      */
     public static long sign(long a) {
@@ -113,7 +90,6 @@ public class ExtMath {
      * </ul>
      *
      * @param a the number
-     *
      * @return the signum of a
      */
     public static float sign(float a) {
@@ -133,7 +109,6 @@ public class ExtMath {
      * </ul>
      *
      * @param a the number
-     *
      * @return the signum of a
      */
     public static double sign(double a) {
@@ -149,7 +124,7 @@ public class ExtMath {
         for (Term arg : args) {
             sum += arg.evalD(env);
         }
-        return sum/(double)n;
+        return sum / (double) n;
     }
 
     public static double mean2(final EvalEnv env, final Term[] args) {
@@ -159,7 +134,7 @@ public class ExtMath {
             double v = arg.evalD(env);
             sqrSum += v * v;
         }
-        return sqrSum/(double)n;
+        return sqrSum / (double) n;
     }
 
     public static double mean4(final EvalEnv env, final Term[] args) {
@@ -168,7 +143,7 @@ public class ExtMath {
         for (Term arg : args) {
             sum += FastMath.pow(arg.evalD(env), 4);
         }
-        return sum/(double)n;
+        return sum / (double) n;
     }
 
     public static double sech(final double x) {

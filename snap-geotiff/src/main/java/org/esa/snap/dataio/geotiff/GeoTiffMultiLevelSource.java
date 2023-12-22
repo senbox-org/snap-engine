@@ -8,8 +8,7 @@ import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 
@@ -19,23 +18,12 @@ import java.util.ArrayList;
 public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource implements UncompressedTileOpImageCallback<Void>, GeoTiffBandSource {
 
     private final GeoTiffImageReader geoTiffImageReader;
-    private boolean isUnsignedInt;
     private final boolean isGlobalShifted180;
     private final int dataBufferType;
     private final int bandIndex;
     private final Double noDataValue;
     private final Dimension defaultJAIReadTileSize;
-
-    /**
-     * @deprecated use {@link GeoTiffMultiLevelSource#GeoTiffMultiLevelSource(GeoTiffImageReader, int, boolean, Rectangle, Dimension, int, GeoCoding, boolean, Double, Dimension)} instead
-     */
-    @Deprecated
-    public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, Rectangle imageReadBounds, Dimension mosaicImageTileSize,
-                                   int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180, Double noDataValue, Dimension defaultJAITileSize) {
-
-        this(geoTiffImageReader, dataBufferType, false, imageReadBounds, mosaicImageTileSize, bandIndex,
-             geoCoding, isGlobalShifted180, noDataValue, defaultJAITileSize);
-    }
+    private final boolean isUnsignedInt;
 
     public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, boolean interpretAsUnsignedInt, Rectangle imageReadBounds, Dimension mosaicImageTileSize,
                                    int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180, Double noDataValue, Dimension defaultJAITileSize) {
@@ -56,7 +44,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
                                               int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY, Void tileData) {
 
         return new GeoTiffTileOpImage(this.geoTiffImageReader, this, this.dataBufferType, isUnsignedInt, tileWidth, tileHeight,
-                                      tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
+                tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport);
     }
 
     @Override
@@ -71,7 +59,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
         } else {
             tileImages = buildUncompressedTileImages(level, this.imageReadBounds, this.tileSize.width, this.tileSize.height, 0.0f, 0.0f, this, null);
         }
-        if (tileImages.size() > 0) {
+        if (!tileImages.isEmpty()) {
             return buildMosaicOp(level, tileImages, true);
         }
         return null;
@@ -87,7 +75,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
         if (this.noDataValue == null) {
             return super.getMosaicOpBackgroundValues();
         }
-        return new double[] { this.noDataValue.doubleValue() };
+        return new double[]{this.noDataValue};
     }
 
     @Override
