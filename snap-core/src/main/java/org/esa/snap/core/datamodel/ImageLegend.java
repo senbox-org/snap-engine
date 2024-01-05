@@ -1709,7 +1709,7 @@ public class ImageLegend {
 
         String titleString= getTitleText();
 
-        titleString = MetadataUtils.getReplacedStringAllVariables(titleString, raster, "", MetadataUtils.INFO_PARAM_WAVE);
+        titleString = MetadataUtils.getReplacedStringAllVariables(titleString, raster, "","", MetadataUtils.INFO_PARAM_WAVE);
 
         DrawingUtils.drawText(g2d, titleString, isConvertCaret());
         g2d.setFont(origFont);
@@ -1730,7 +1730,7 @@ public class ImageLegend {
         unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
 
 
-        unitsString = MetadataUtils.getReplacedStringAllVariables(unitsString, raster, "", MetadataUtils.INFO_PARAM_WAVE);
+        unitsString = MetadataUtils.getReplacedStringAllVariables(unitsString, raster, "", "", MetadataUtils.INFO_PARAM_WAVE);
 
 //        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
 

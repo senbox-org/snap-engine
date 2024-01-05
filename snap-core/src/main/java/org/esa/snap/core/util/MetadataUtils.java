@@ -27,6 +27,7 @@ public class MetadataUtils {
     }
 
     private static final String INFO_PARAM_FILE = "FILE";
+    private static final String INFO_PARAM_SCENE_IMAGE_NAME = "SCENE_NAME";
     private static final String INFO_PARAM_TEMPORAL_RANGE_PARENTHESIS = "TEMPORAL_RANGE_PARENTHESIS";
     private static final String INFO_PARAM_MISSION_LEVEL_INFO = "MISSION_LEVEL_INFO";
     private static final String INFO_PARAM_MISSION_LEVEL_TEMPORAL_INFO = "MISSION_LEVEL_TEMPORAL_INFO";
@@ -84,6 +85,7 @@ public class MetadataUtils {
 
 
     public static String[] INFO_PARAMS = {
+            INFO_PARAM_SCENE_IMAGE_NAME,
             INFO_PARAM_FILE,
 //            INFO_PARAM_PROCESSING_VERSION,
 //            INFO_PARAM_SENSOR,
@@ -138,7 +140,7 @@ public class MetadataUtils {
     };
 
 
-    public static String getDerivedMeta(String infoKey, RasterDataNode raster, String percentD_ReplacementKey) {
+    public static String getDerivedMeta(String infoKey, RasterDataNode raster, String sceneImageName, String percentD_ReplacementKey) {
         String value = "";
 
 
@@ -147,6 +149,13 @@ public class MetadataUtils {
 
             switch (infoKey) {
 
+
+                case INFO_PARAM_SCENE_IMAGE_NAME:
+                    try {
+                        value = sceneImageName;
+                    } catch (Exception e) {
+                    }
+                    break;
 
                 case INFO_PARAM_FILE:
                     try {
@@ -294,7 +303,11 @@ public class MetadataUtils {
 //                    break;
 
                 case INFO_PARAM_BAND:
-                    value = raster.getName();
+                    if (raster.getProduct().getBand(raster.getName()) == null) {
+                        value = sceneImageName;
+                    } else {
+                        value = raster.getName();
+                    }
                     break;
 
 
@@ -303,10 +316,22 @@ public class MetadataUtils {
                     break;
 
                 case INFO_PARAM_BAND_DESCRIPTION:
-                    value = raster.getDescription();
-                    if (raster.getDescription() != null && raster.getDescription().length() > 0 && percentD_ReplacementKey != null && percentD_ReplacementKey.length() > 0) {
-                        value = value.replace("%d", getDerivedMeta(percentD_ReplacementKey, raster, ""));
+                    if (raster.getProduct().getBand(raster.getName()) == null) {
+                        value = sceneImageName;
+                    } else {
+                        value = raster.getDescription();
+
+                        if (value == null || value.trim().length() < 2) {
+                            // Description should be longer than 1 characters otherwise it really isn't a good description
+                            value = raster.getName();
+                        } else {
+                            if (raster.getDescription() != null && raster.getDescription().length() > 0 && percentD_ReplacementKey != null && percentD_ReplacementKey.length() > 0) {
+                                value = value.replace("%d", getDerivedMeta(percentD_ReplacementKey, raster, sceneImageName, ""));
+                            }
+                        }
                     }
+
+
 
                     break;
 
@@ -324,24 +349,36 @@ public class MetadataUtils {
 
                 case INFO_PARAM_WAVE:
                     //  value = String.valueOf(raster.getProduct().getBand(raster.getName()).getSpectralWavelength());
-                    float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
-                    if (wavelength > 0.0) {
-                        if (Math.ceil(wavelength) == Math.round(wavelength)) {
-                            value = String.valueOf(Math.round(wavelength));
-                        } else {
-                            value = String.valueOf(wavelength);
+                    if (raster.getProduct().getBand(raster.getName()) == null) {
+                        value = "";
+                    } else {
+                        float wavelength = raster.getProduct().getBand(raster.getName()).getSpectralWavelength();
+                        if (wavelength > 0.0) {
+                            if (Math.ceil(wavelength) == Math.round(wavelength)) {
+                                value = String.valueOf(Math.round(wavelength));
+                            } else {
+                                value = String.valueOf(wavelength);
+                            }
                         }
                     }
                     break;
 
                 case INFO_PARAM_ANGLE:
-                    value = String.valueOf(raster.getProduct().getBand(raster.getName()).getAngularValue());
+                    if (raster.getProduct().getBand(raster.getName()) == null) {
+                        value = "";
+                    } else {
+                        value = String.valueOf(raster.getProduct().getBand(raster.getName()).getAngularValue());
+                    }
                     break;
 
                 case INFO_PARAM_FLAG_CODING:
-                    try {
-                        value = String.valueOf(raster.getProduct().getBand(raster.getName()).getFlagCoding());
-                    } catch (Exception e) {
+                    if (raster.getProduct().getBand(raster.getName()) == null) {
+                        value = "";
+                    } else {
+                        try {
+                            value = String.valueOf(raster.getProduct().getBand(raster.getName()).getFlagCoding());
+                        } catch (Exception e) {
+                        }
                     }
                     break;
 
@@ -421,6 +458,9 @@ public class MetadataUtils {
 
         }
 
+        if (value == null) {
+            value = "";
+        }
 
         return value;
     }
@@ -752,14 +792,14 @@ public class MetadataUtils {
 
 
 
-    public static String getReplacedStringAllVariables(String inputText, RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
+    public static String getReplacedStringAllVariables(String inputText, RasterDataNode raster, String sceneImageName, String delimiter, String percentD_ReplacementKey) {
 
         String currentLine = inputText;
 
         try {
-            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "PROPERTY=", raster, delimiter, "");
-            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "GLOBAL_ATTRIBUTE=", raster, delimiter, "");
-            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "BAND_ATTRIBUTE=", raster, delimiter, "");
+            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "PROPERTY=", raster, sceneImageName, delimiter, "");
+            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "GLOBAL_ATTRIBUTE=", raster, sceneImageName, delimiter, "");
+            currentLine = MetadataUtils.getReplacedStringSingleVariableWrapper(currentLine, false, "BAND_ATTRIBUTE=", raster, sceneImageName, delimiter, "");
 
             if (currentLine != null) {
                 for (String infoKey : INFO_PARAMS) {
@@ -768,7 +808,11 @@ public class MetadataUtils {
 //                    currentLine = currentLine.replace(enclosedInfoKey, getDerivedMeta(infoKey.toUpperCase(), raster, percentD_ReplacementKey));
 
                     enclosedInfoKey = "<" + infoKey + ">";
-                    currentLine = currentLine.replace(enclosedInfoKey, getDerivedMeta(infoKey.toUpperCase(), raster, percentD_ReplacementKey));
+                    String derivedMeta = getDerivedMeta(infoKey.toUpperCase(), raster, sceneImageName, percentD_ReplacementKey);
+                    if (derivedMeta == null) {
+                        derivedMeta = "";
+                    }
+                    currentLine = currentLine.replace(enclosedInfoKey, derivedMeta);
 
 
 //                    enclosedInfoKey = "[" + infoKey + "]";
@@ -776,7 +820,7 @@ public class MetadataUtils {
 
 
                     enclosedInfoKey = "&lt;" + infoKey + "&gt;";
-                    currentLine = currentLine.replace(enclosedInfoKey, getDerivedMeta(infoKey.toUpperCase(), raster, percentD_ReplacementKey));
+                    currentLine = currentLine.replace(enclosedInfoKey, getDerivedMeta(infoKey.toUpperCase(), raster, sceneImageName, percentD_ReplacementKey));
                 }
             }
 
@@ -787,13 +831,13 @@ public class MetadataUtils {
         return currentLine;
     }
 
-    private static String getReplacedStringSingleVariableWrapper(String inputString, boolean showKeys, String replaceKey, RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
+    private static String getReplacedStringSingleVariableWrapper(String inputString, boolean showKeys, String replaceKey, RasterDataNode raster, String sceneImageName, String delimiter, String percentD_ReplacementKey) {
         String replacedText = inputString;
 
         try {
             String replaceKeyStart = "<";
             String replaceKeyEnd = ">";
-            replacedText = MetadataUtils.getReplacedStringSingleVariable(replacedText, false, replaceKeyStart, replaceKey, replaceKeyEnd, raster, delimiter, "");
+            replacedText = MetadataUtils.getReplacedStringSingleVariable(replacedText, false, replaceKeyStart, replaceKey, replaceKeyEnd, raster, sceneImageName, delimiter, "");
 
 //            replaceKeyStart = "{";
 //            replaceKeyEnd = "}";
@@ -807,14 +851,14 @@ public class MetadataUtils {
 
             replaceKeyStart = "&lt;";
             replaceKeyEnd = "&gt;";
-            replacedText = MetadataUtils.getReplacedStringSingleVariable(replacedText, false, replaceKeyStart, replaceKey, replaceKeyEnd, raster, delimiter, "");
+            replacedText = MetadataUtils.getReplacedStringSingleVariable(replacedText, false, replaceKeyStart, replaceKey, replaceKeyEnd, raster, sceneImageName, delimiter, "");
         } catch (Exception e) {
         }
 
         return replacedText;
     }
 
-    public static String getReplacedStringSingleVariable(String inputString, boolean showKeys, String replaceKeyStart, String replaceKey, String replaceKeyEnd, RasterDataNode raster, String delimiter, String percentD_ReplacementKey) {
+    public static String getReplacedStringSingleVariable(String inputString, boolean showKeys, String replaceKeyStart, String replaceKey, String replaceKeyEnd, RasterDataNode raster, String sceneImageName, String delimiter, String percentD_ReplacementKey) {
         if (inputString != null && inputString.length() > 0) {
 ////            inputString = inputString.replace("[FILE]", raster.getProduct().getName());
 ////            inputString = inputString.replace("[File]", raster.getProduct().getName());
@@ -961,7 +1005,10 @@ public class MetadataUtils {
 
                     switch (replaceKey) {
                         case "PROPERTY=":
-                            value = getDerivedMeta(metaId.toUpperCase(), raster, percentD_ReplacementKey);
+                            value = getDerivedMeta(metaId.toUpperCase(), raster, sceneImageName, percentD_ReplacementKey);
+                            if (value == null) {
+                                value = "";
+                            }
                             break;
 
                         case "GLOBAL_ATTRIBUTE=":

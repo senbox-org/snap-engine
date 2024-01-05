@@ -339,7 +339,7 @@ public class MetaDataLayerType extends LayerType {
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_MONTHDDYYYY><br>File: <PROPERTY=file>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<GLOBAL_ATTR=platform>-<GLOBAL_ATTR=sensor>: <PROPERTY=product_type> <PROPERTY=temporal_range_parenthesis>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=mission_level_info> <PROPERTY=temporal_range_parenthesis>";
-    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "Band: <PROPERTY=band>  (File: <PROPERTY=file>)";
+    public static final String PROPERTY_HEADER_TEXTFIELD2_DEFAULT = "<PROPERTY=scene_date_info>";
     public static final Class PROPERTY_HEADER_TEXTFIELD2_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD3_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield3";
@@ -348,7 +348,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_HEADER_TEXTFIELD3_ALIAS = PROPERTY_HEADER_CONTENTS_ROOT_ALIAS + "Textfield3";
 //    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_ddmmmyyyy><br>File: <PROPERTY=file>";
 //    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_ddmmmyyyy> <PROPERTY=temporal_range_parenthesis>";
-    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "<PROPERTY=scene_date_info>";
+    public static final String PROPERTY_HEADER_TEXTFIELD3_DEFAULT = "File: <PROPERTY=file>";
     public static final Class PROPERTY_HEADER_TEXTFIELD3_TYPE = String.class;
 
     public static final String PROPERTY_HEADER_TEXTFIELD4_KEY = PROPERTY_HEADER_CONTENTS_ROOT_KEY + ".textfield4";
@@ -631,6 +631,7 @@ public class MetaDataLayerType extends LayerType {
     // ---------------------------------------------------------
 
     public static final String PROPERTY_NAME_RASTER = "raster";
+    public static final String PROPERTY_NAME_SCENE_IMAGE = "metadata.layer.scene.image";
 
 
 
@@ -961,6 +962,12 @@ public class MetaDataLayerType extends LayerType {
         final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);
         vc.addProperty(rasterModel);
+
+        final Property sceneImageNameModel = Property.create(PROPERTY_NAME_SCENE_IMAGE, String.class);
+        sceneImageNameModel.getDescriptor().setNotNull(true);
+        vc.addProperty(sceneImageNameModel);
+
+
 
         final Property transformModel = Property.create(PROPERTY_NAME_TRANSFORM, new AffineTransform());
         transformModel.getDescriptor().setTransient(true);

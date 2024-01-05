@@ -27,6 +27,7 @@ public class MetaDataLayer extends Layer {
     private static final MetaDataLayerType LAYER_TYPE = LayerTypeRegistry.getLayerType(MetaDataLayerType.class);
 
     private RasterDataNode raster;
+    private String sceneImageName;
 
     private ProductNodeHandler productNodeHandler;
     private MetaDataOnImage headerFooter;
@@ -81,6 +82,44 @@ public class MetaDataLayer extends Layer {
         super(type, configuration);
         setName("Annotation Metadata Layer");
         this.raster = raster;
+        this.sceneImageName = configuration.getProperty(MetaDataLayerType.PROPERTY_NAME_SCENE_IMAGE).getValue();
+
+        // Trim off file index at start of scene name
+        if (sceneImageName != null) {
+            String sceneImageNameTmp = sceneImageName.trim();
+            boolean removeFileIndex = false;
+            boolean endOfIndex = false;
+
+            for (int i = 0; i < sceneImageName.length(); i++) {
+                if (sceneImageNameTmp.startsWith("[")) {
+                    removeFileIndex = true;
+                }
+
+                if (!removeFileIndex) {
+                    break;
+                }
+
+                if (sceneImageNameTmp.startsWith("]")) {
+                    endOfIndex = true;
+                }
+
+                int length = sceneImageNameTmp.length();
+                sceneImageNameTmp = sceneImageNameTmp.substring(1, length);
+                sceneImageNameTmp = sceneImageNameTmp.trim();
+
+                if (endOfIndex) {
+                    break;
+                }
+
+            }
+
+            this.sceneImageName = sceneImageNameTmp;
+        }
+
+
+
+
+
 
         productNodeHandler = new ProductNodeHandler();
         raster.getProduct().addProductNodeListener(productNodeHandler);
@@ -359,7 +398,10 @@ public class MetaDataLayer extends Layer {
                 if (META_TYPE.PROPERTY == meta_type) {
                     int length = currKey.length();
                     if (length > 2) {
-                        currParam = MetadataUtils.getDerivedMeta(currKey.toUpperCase(), raster, MetadataUtils.INFO_PARAM_WAVE);
+                        currParam = MetadataUtils.getDerivedMeta(currKey.toUpperCase(), raster, sceneImageName, MetadataUtils.INFO_PARAM_WAVE);
+                        if (currParam == null) {
+                            currParam = "";
+                        }
 
                         if (getMarginMetadataKeysShow()) {
                             currParam = currKey + getMarginMetadataDelimiter() + currParam;
@@ -805,21 +847,21 @@ public class MetaDataLayer extends Layer {
         String marginPropertyHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_PROPERTY_HEADING_KEY,
                 MetaDataLayerType.PROPERTY_MARGIN_PROPERTY_HEADING_DEFAULT);
 
-        return MetadataUtils.getReplacedStringAllVariables(marginPropertyHeading, raster, "", "");
+        return MetadataUtils.getReplacedStringAllVariables(marginPropertyHeading, raster, sceneImageName, "", "");
     }
 
     private String getMarginGlobalHeading() {
         String marginGlobalHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_GLOBAL_HEADING_KEY,
                 MetaDataLayerType.PROPERTY_MARGIN_GLOBAL_HEADING_DEFAULT);
 
-        return MetadataUtils.getReplacedStringAllVariables(marginGlobalHeading, raster, "", "");
+        return MetadataUtils.getReplacedStringAllVariables(marginGlobalHeading, raster, sceneImageName, "", "");
     }
 
     private String getMarginBandHeading() {
         String marginBandHeading = getConfigurationProperty(MetaDataLayerType.PROPERTY_MARGIN_BAND_HEADING_KEY,
                 MetaDataLayerType.PROPERTY_MARGIN_BAND_HEADING_DEFAULT);
 
-        return MetadataUtils.getReplacedStringAllVariables(marginBandHeading, raster, "", "");
+        return MetadataUtils.getReplacedStringAllVariables(marginBandHeading, raster, sceneImageName, "", "");
     }
 
 
@@ -934,7 +976,7 @@ public class MetaDataLayer extends Layer {
             String[] linesArray = text.split("(\\n|<br>)");
             for (String currentLine : linesArray) {
                 if (currentLine != null && currentLine.length() > 0) {
-                    currentLine = MetadataUtils.getReplacedStringAllVariables(currentLine, raster, delimiter, MetadataUtils.INFO_PARAM_WAVE);
+                    currentLine = MetadataUtils.getReplacedStringAllVariables(currentLine, raster, sceneImageName, delimiter, MetadataUtils.INFO_PARAM_WAVE);
                     lineArrayList.add(currentLine);
                 }
             }
