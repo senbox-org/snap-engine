@@ -322,28 +322,6 @@ public class ColorManipulationDefaults {
     public static boolean PROPERTY_INFORMATION_BUTTON_DEFAULT = true;
 
 
-    // RGB Options
-
-    private static final String PROPERTY_RGB_OPTIONS_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".rgb";
-
-    public static final String PROPERTY_RGB_OPTIONS_SECTION_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".section";
-    public static final String PROPERTY_RGB_OPTIONS_SECTION_LABEL = "RGB Options";
-    public static final String PROPERTY_RGB_OPTIONS_SECTION_TOOLTIP = "Options for the RGB Image";
-
-    public static final String PROPERTY_RGB_OPTIONS_MIN_MAX_RANGE_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.use.min.max.range";
-    public static final String PROPERTY_RGB_OPTIONS_MIN_MAX_RANGE_LABEL = "Use RGB Range";
-    public static final String PROPERTY_RGB_OPTIONS_MIN_MAX_RANGE_TOOLTIP = "Set default RGB range with the min and max  below (otherwise use statistics of the bands as default)";
-    public static boolean PROPERTY_RGB_OPTIONS_MIN_MAX_RANGE_DEFAULT = false;
-
-    public static final String PROPERTY_RGB_OPTIONS_MIN_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.min";
-    public static final String PROPERTY_RGB_OPTIONS_MIN_LABEL = "Range Button (Min)";
-    public static final String PROPERTY_RGB_OPTIONS_MIN_TOOLTIP = "The min value to use in the RGB (A..B) range button";
-    public static double PROPERTY_RGB_OPTIONS_MIN_DEFAULT = 0.0;
-
-    public static final String PROPERTY_RGB_OPTIONS_MAX_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.max";
-    public static final String PROPERTY_RGB_OPTIONS_MAX_LABEL = "Range Button (Max)";
-    public static final String PROPERTY_RGB_OPTIONS_MAX_TOOLTIP = "The max value to use in the RGB (A..B) range button";
-    public static double PROPERTY_RGB_OPTIONS_MAX_DEFAULT = 1.0;
 
 
     // Restore to defaults
