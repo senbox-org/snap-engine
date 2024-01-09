@@ -82,6 +82,7 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     public static final String PROPERTY_KEY_NAME = "name";
     public static final String PROPERTY_KEY_RED = "red";
+    public static final String PROPERTY_KEY_VALID_PIXEL_EXPRESSION = "valid_pixel_expression";
     public static final String PROPERTY_KEY_GREEN = "green";
     public static final String PROPERTY_KEY_BLUE = "blue";
     public static final String PROPERTY_KEY_ALPHA = "alpha";
@@ -104,6 +105,7 @@ public class RGBImageProfile implements ConfigurableExtension {
     private final static int A = 3;
 
     private String name;
+    private String validPixelExpression = null;
     private boolean internal;
     private final RGBChannelDef rgbChannelDef;
     private String[] pattern;
@@ -123,7 +125,7 @@ public class RGBImageProfile implements ConfigurableExtension {
     }
 
     public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern){
-        this(name, rgbaExpressions, pattern, null);
+        this(name, rgbaExpressions, null, pattern, null);
     }
 
 
@@ -141,7 +143,7 @@ public class RGBImageProfile implements ConfigurableExtension {
      *                        2. Will be matched against the product name
      *                        3. Will be matched against the description of the product
      */
-    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern, Range[] valueRanges) {
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String validPixelExpression, String[] pattern, Range[] valueRanges) {
         Assert.argument(name != null, "name != null");
         Assert.argument(rgbaExpressions != null, "rgbaExpressions != null");
         Assert.argument(rgbaExpressions.length == 3 || rgbaExpressions.length == 4,
@@ -180,6 +182,14 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getValidPixelExpression() {
+        return validPixelExpression;
+    }
+
+    public void setValidPixelExpression(String validPixelExpression) {
+        this.validPixelExpression = validPixelExpression;
     }
 
     public RGBChannelDef getRgbChannelDef() {
@@ -454,6 +464,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         } else {
             properties.remove(PROPERTY_KEY_INTERNAL);
         }
+        properties.put(PROPERTY_KEY_VALID_PIXEL_EXPRESSION, getValidPixelExpression());
 
         setRangeProperty(properties, getRedMinMax(), PROPERTY_KEY_RED_MIN, PROPERTY_KEY_RED_MAX);
         setRangeProperty(properties, getGreenMinMax(), PROPERTY_KEY_GREEN_MIN, PROPERTY_KEY_GREEN_MAX);
@@ -478,6 +489,7 @@ public class RGBImageProfile implements ConfigurableExtension {
      */
     public void setProperties(Properties properties) {
         final String name = properties.getProperty(PROPERTY_KEY_NAME);
+        final String validPixelExpression = properties.getProperty(PROPERTY_KEY_VALID_PIXEL_EXPRESSION);
         final String[] rgbaExpressions = new String[]{
                 getProperty(properties, new String[]{PROPERTY_KEY_RED, "r"}, ""),
                 getProperty(properties, new String[]{PROPERTY_KEY_GREEN, "g"}, ""),
@@ -487,6 +499,9 @@ public class RGBImageProfile implements ConfigurableExtension {
         final boolean internal = Boolean.parseBoolean(properties.getProperty(PROPERTY_KEY_INTERNAL, "false"));
         if (name != null) {
             setName(name);
+        }
+        if (validPixelExpression != null) {
+            setValidPixelExpression(validPixelExpression);
         }
         setInternal(internal);
         setRgbaExpressions(rgbaExpressions);
