@@ -174,6 +174,7 @@ public class RGBImageProfile implements ConfigurableExtension {
 
         this.name = name;
         this.pattern = pattern;
+        this.validPixelExpression = validPixelExpression;
     }
 
     public String getName() {
