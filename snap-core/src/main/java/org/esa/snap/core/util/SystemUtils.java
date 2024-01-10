@@ -564,7 +564,7 @@ public class SystemUtils {
             }
         }
         if (version != null) {
-            return version;
+            return version + "-Beta-RC4";
         }
         return "[no version info, missing ${SNAP_HOME}/" + VERSION_FILE_NAME + ".txt]";
     }
