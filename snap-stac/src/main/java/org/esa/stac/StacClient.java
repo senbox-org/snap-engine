@@ -1,5 +1,9 @@
 package org.esa.stac;
 
+// Author Alex McVittie, SkyWatch Space Applications Inc. December 2023
+
+
+import org.esa.snap.core.jexp.ParseException;
 import org.esa.stac.internal.DownloadModifier;
 import org.esa.stac.internal.STACUtils;
 import org.esa.stac.internal.StacCatalog;
@@ -48,7 +52,7 @@ public class StacClient implements STACUtils {
 
     // Performs a search and returns an array of STAC Items from the server that match
     // the search
-    public StacItem[] search(String [] collections, double [] bbox, String datetime){
+    public StacItem[] search(String [] collections, double [] bbox, String datetime) throws ParseException {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
         String validCollections = "";

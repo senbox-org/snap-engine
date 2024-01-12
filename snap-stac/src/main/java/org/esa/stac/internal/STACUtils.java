@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public interface STACUtils {
 
-    public static JSONObject getJSONFromURLStatic(String jsonURL){
+    static JSONObject getJSONFromURLStatic(String jsonURL){
         try {
             URL url = new URL(jsonURL);
             URLConnection request = url.openConnection();
