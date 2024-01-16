@@ -21,6 +21,7 @@ variables:
   MAVEN_DEPLOY_ENABLED: "true"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
+  SONAR_BASE_ARGS: sonar:sonar -Dsonar.projectKey=$CI_PROJECT_NAME
 
 # your pipeline stages
 stages:
@@ -58,14 +59,6 @@ mvn-release:
   rules:
     - when: manual
       allow_failure: true
-
-mvn-deploy-release:
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-
-mvn-deploy-snapshot:
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 windows:
   stage: test
@@ -110,17 +103,14 @@ pending:
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
-  when: always
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 success:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_success
 
 failure:
@@ -128,6 +118,5 @@ failure:
   extends:
     - .report-status
   rules:
-    - if: '$BUILD_FOR_INSTALLER == "true"'
-      when: never
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_failure

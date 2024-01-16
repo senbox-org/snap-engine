@@ -17,13 +17,14 @@
 package org.esa.snap.core.datamodel;
 
 
+import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 import static org.junit.Assert.*;
@@ -68,8 +69,8 @@ public class Scene_MultiSize_Test {
 
     }
 
-
     @Test
+    @STTM("SNAP-3508")
     public void testTransferMultiSizeGCToProduct() throws Exception {
 
         final Scene srcScene = SceneFactory.createScene(srcProduct);
@@ -92,8 +93,8 @@ public class Scene_MultiSize_Test {
         compareLastGeoPos(sourceB3, destB3);
         compareLastGeoPos(sourceB4, destB4);
 
-        Rectangle srcBounds = ProductUtils.createGeoBoundaryPaths(srcProduct)[0].getBounds();
-        Rectangle dstBounds = ProductUtils.createGeoBoundaryPaths(dstProduct)[0].getBounds();
+        Rectangle srcBounds = GeoUtils.createGeoBoundaryPaths(srcProduct)[0].getBounds();
+        Rectangle dstBounds = GeoUtils.createGeoBoundaryPaths(dstProduct)[0].getBounds();
         assertEquals(srcBounds, dstBounds);
 
     }

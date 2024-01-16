@@ -19,7 +19,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.util.BeamConstants;
 import org.esa.snap.core.util.ObjectUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -79,7 +78,7 @@ public class DimapWriteAndReadTest {
     private static Product createProduct() {
         final int sceneRasterWidth = 129;
         final int sceneRasterHeight = 161;
-        final Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME, sceneRasterWidth,
+        final Product product = new Product("name", "MER_FR__1P", sceneRasterWidth,
                 sceneRasterHeight);
         addFlagCoding(product);
         addIndexCoding(product);

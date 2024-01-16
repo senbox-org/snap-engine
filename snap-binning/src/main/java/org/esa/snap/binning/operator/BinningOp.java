@@ -54,6 +54,7 @@ import org.esa.snap.core.gpf.common.SubsetOp;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
 import org.esa.snap.core.gpf.graph.GraphIO;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.StopWatch;
@@ -774,7 +775,7 @@ public class BinningOp extends Operator {
         getLogger().info(String.format("Spatial binning of product '%s' done, %d observations seen, took %s", productName, numObs, stopWatch));
 
         if (region == null && regionArea != null) {
-            for (GeneralPath generalPath : ProductUtils.createGeoBoundaryPaths(sourceProduct)) {
+            for (GeneralPath generalPath : GeoUtils.createGeoBoundaryPaths(sourceProduct)) {
                 try {
                     Area area = new Area(generalPath);
                     regionArea.add(area);

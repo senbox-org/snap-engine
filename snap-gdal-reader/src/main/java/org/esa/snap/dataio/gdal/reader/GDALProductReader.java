@@ -144,7 +144,7 @@ public class GDALProductReader extends AbstractProductReader {
             double resolutionY = (adfGeoTransform[5] > 0) ? adfGeoTransform[5] : -adfGeoTransform[5];
             wellKnownText = wellKnownText.replaceAll(",?(AXIS\\[\"([A-Za-z]*?)\",[A-Z]*?])", "");
             CoordinateReferenceSystem mapCRS = CRS.parseWKT(wellKnownText);
-            return ImageUtils.buildCrsGeoCoding(originX, originY, resolutionX, resolutionY, imageWidth, imageHeight, mapCRS, subsetBounds, 0.5d, 0.5d);
+            return ImageUtils.buildCrsGeoCoding(originX, originY, resolutionX, resolutionY, imageWidth, imageHeight, mapCRS, subsetBounds);
         } else if (product != null) {
             String gcpProjection = gdalDataset.getGCPProjection();
 

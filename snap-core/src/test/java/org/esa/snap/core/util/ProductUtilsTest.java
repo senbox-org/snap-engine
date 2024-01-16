@@ -539,59 +539,6 @@ public class ProductUtilsTest {
     }
 
     @Test
-    public void testCreateRectBoundary_usePixelCenter_false() {
-        final boolean usePixelCenter = false;
-        final PixelPos[] rectBoundary = ProductUtils.createRectBoundary(new Rectangle(2, 3, 15, 20), 7,
-                                                                        usePixelCenter);
-        assertEquals(12, rectBoundary.length);
-        assertEquals(new PixelPos(2, 3), rectBoundary[0]);
-        assertEquals(new PixelPos(9, 3), rectBoundary[1]);
-        assertEquals(new PixelPos(16, 3), rectBoundary[2]);
-        assertEquals(new PixelPos(17, 3), rectBoundary[3]);
-        assertEquals(new PixelPos(17, 10), rectBoundary[4]);
-        assertEquals(new PixelPos(17, 17), rectBoundary[5]);
-        assertEquals(new PixelPos(17, 23), rectBoundary[6]);
-        assertEquals(new PixelPos(16, 23), rectBoundary[7]);
-        assertEquals(new PixelPos(9, 23), rectBoundary[8]);
-        assertEquals(new PixelPos(2, 23), rectBoundary[9]);
-        assertEquals(new PixelPos(2, 17), rectBoundary[10]);
-        assertEquals(new PixelPos(2, 10), rectBoundary[11]);
-    }
-
-    @Test
-    public void testCreateRectBoundary_usePixelCenter_true() {
-        final boolean usePixelCenter = true;
-        final PixelPos[] rectBoundary = ProductUtils.createRectBoundary(new Rectangle(2, 3, 15, 20), 7, usePixelCenter);
-        assertEquals(10, rectBoundary.length);
-        assertEquals(new PixelPos(2.5f, 3.5f), rectBoundary[0]);
-        assertEquals(new PixelPos(9.5f, 3.5f), rectBoundary[1]);
-        assertEquals(new PixelPos(16.5f, 3.5f), rectBoundary[2]);
-        assertEquals(new PixelPos(16.5f, 10.5f), rectBoundary[3]);
-        assertEquals(new PixelPos(16.5f, 17.5f), rectBoundary[4]);
-        assertEquals(new PixelPos(16.5f, 22.5f), rectBoundary[5]);
-        assertEquals(new PixelPos(9.5f, 22.5f), rectBoundary[6]);
-        assertEquals(new PixelPos(2.5f, 22.5f), rectBoundary[7]);
-        assertEquals(new PixelPos(2.5f, 17.5f), rectBoundary[8]);
-        assertEquals(new PixelPos(2.5f, 10.5f), rectBoundary[9]);
-    }
-
-    @Test
-    public void testCreateRectBoundary_without_usePixelCenter_Parameter() {
-        final PixelPos[] rectBoundary = ProductUtils.createRectBoundary(new Rectangle(2, 3, 15, 20), 7);
-        assertEquals(10, rectBoundary.length);
-        assertEquals(new PixelPos(2.5f, 3.5f), rectBoundary[0]);
-        assertEquals(new PixelPos(9.5f, 3.5f), rectBoundary[1]);
-        assertEquals(new PixelPos(16.5f, 3.5f), rectBoundary[2]);
-        assertEquals(new PixelPos(16.5f, 10.5f), rectBoundary[3]);
-        assertEquals(new PixelPos(16.5f, 17.5f), rectBoundary[4]);
-        assertEquals(new PixelPos(16.5f, 22.5f), rectBoundary[5]);
-        assertEquals(new PixelPos(9.5f, 22.5f), rectBoundary[6]);
-        assertEquals(new PixelPos(2.5f, 22.5f), rectBoundary[7]);
-        assertEquals(new PixelPos(2.5f, 17.5f), rectBoundary[8]);
-        assertEquals(new PixelPos(2.5f, 10.5f), rectBoundary[9]);
-    }
-
-    @Test
     public void testCopyFlagCoding() {
         final FlagCoding originalFlagCoding = new FlagCoding("sesame street character flags");
         originalFlagCoding.addFlag("erni", 1, "erni flag");
@@ -820,27 +767,18 @@ public class ProductUtilsTest {
     }
 
     @Test
-    public void testCreateGeoBoundary() {
-        final GeoPos[] geoPoses = ProductUtils.createGeoBoundary(createTestProduct(), null, 20, false);
-        for (int i = 0; i < geoPoses.length; i++) {
-            GeoPos geoPos = geoPoses[i];
-            assertTrue(String.format("geoPos at <%d> is invalid", i), geoPos.isValid());
-        }
-    }
-
-    @Test
     public void testAreRastersCompatible() {
         final Band band1 = new Band("band1", ProductData.TYPE_INT8, 16, 16);
         final Band band2 = new Band("band2", ProductData.TYPE_INT8, 8, 8);
         final TiePointGrid grid = new TiePointGrid("grid", 2, 2, 0, 0, 15, 15, new float[]{0f, 0f, 0f, 0f});
 
-        assertEquals(true, ProductUtils.areRastersEqualInSize());
-        assertEquals(true, ProductUtils.areRastersEqualInSize(band1));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(band2));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(grid));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(band1, band2));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(band1, grid));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(band2, grid));
+        assertTrue(ProductUtils.areRastersEqualInSize());
+        assertTrue(ProductUtils.areRastersEqualInSize(band1));
+        assertTrue(ProductUtils.areRastersEqualInSize(band2));
+        assertTrue(ProductUtils.areRastersEqualInSize(grid));
+        assertFalse(ProductUtils.areRastersEqualInSize(band1, band2));
+        assertTrue(ProductUtils.areRastersEqualInSize(band1, grid));
+        assertFalse(ProductUtils.areRastersEqualInSize(band2, grid));
     }
 
     @Test
@@ -855,18 +793,18 @@ public class ProductUtilsTest {
         p.addBand(band3);
         p.addTiePointGrid(grid);
 
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p, "band1"));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p, "band2"));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p, "band3"));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p, "grid"));
-        assertEquals(true, ProductUtils.areRastersEqualInSize(p, "band1", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band2", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band3", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band2", "band3", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band1", "band2", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band1", "band3", "grid"));
-        assertEquals(false, ProductUtils.areRastersEqualInSize(p, "band1", "band2", "band3"));
+        assertTrue(ProductUtils.areRastersEqualInSize(p));
+        assertTrue(ProductUtils.areRastersEqualInSize(p, "band1"));
+        assertTrue(ProductUtils.areRastersEqualInSize(p, "band2"));
+        assertTrue(ProductUtils.areRastersEqualInSize(p, "band3"));
+        assertTrue(ProductUtils.areRastersEqualInSize(p, "grid"));
+        assertTrue(ProductUtils.areRastersEqualInSize(p, "band1", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band2", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band3", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band2", "band3", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band1", "band2", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band1", "band3", "grid"));
+        assertFalse(ProductUtils.areRastersEqualInSize(p, "band1", "band2", "band3"));
         try {
             ProductUtils.areRastersEqualInSize(p, "band1", "dvfgzfj");
             fail("Exception expected");

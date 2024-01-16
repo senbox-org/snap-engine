@@ -17,14 +17,7 @@
 package com.bc.ceres.binding;
 
 import com.bc.ceres.binding.dom.DomConverter;
-import com.bc.ceres.binding.validators.ArrayValidator;
-import com.bc.ceres.binding.validators.IntervalValidator;
-import com.bc.ceres.binding.validators.MultiValidator;
-import com.bc.ceres.binding.validators.NotEmptyValidator;
-import com.bc.ceres.binding.validators.NotNullValidator;
-import com.bc.ceres.binding.validators.PatternValidator;
-import com.bc.ceres.binding.validators.TypeValidator;
-import com.bc.ceres.binding.validators.ValueSetValidator;
+import com.bc.ceres.binding.validators.*;
 import com.bc.ceres.core.Assert;
 
 import java.beans.PropertyChangeEvent;
@@ -52,7 +45,7 @@ public class PropertyDescriptor {
     private final Class<?> type;
     private volatile Validator effectiveValidator;
 
-    private Map<String, Object> attributes;
+    private final Map<String, Object> attributes;
     private PropertyChangeSupport attributeChangeSupport;
 
     private PropertySetDescriptor propertySetDescriptor;
@@ -76,9 +69,42 @@ public class PropertyDescriptor {
             setNotNull(true);
         }
         setDisplayName(createDisplayName(name));
-        if (type.isEnum() && getValueSet() == null)  {
+        if (type.isEnum() && getValueSet() == null) {
             setValueSet(new ValueSet(type.getEnumConstants()));
         }
+    }
+
+    private static boolean equals(Object a, Object b) {
+        return a == b || !(a == null || b == null) && a.equals(b);
+    }
+
+    public static String getDisplayName(PropertyDescriptor propertyDescriptor) {
+        String label = propertyDescriptor.getDisplayName();
+        if (label != null) {
+            return label;
+        }
+        String name = propertyDescriptor.getName().replace("_", " ");
+        return createDisplayName(name);
+    }
+
+    public static String createDisplayName(String name) {
+        StringBuilder sb = new StringBuilder(name.length());
+        for (int i = 0; i < name.length(); i++) {
+            char ch = name.charAt(i);
+            if (i == 0) {
+                sb.append(Character.toUpperCase(ch));
+            } else if (i < name.length() - 1
+                    && Character.isUpperCase(ch) &&
+                    Character.isLowerCase(name.charAt(i + 1))) {
+                sb.append(' ');
+                sb.append(Character.toLowerCase(ch));
+            } else if (ch == '_') {
+                sb.append(' ');
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
     }
 
     public String getName() {
@@ -174,16 +200,16 @@ public class PropertyDescriptor {
         return (Pattern) getAttribute("pattern");
     }
 
+    public void setPattern(Pattern pattern) {
+        setAttribute("pattern", pattern);
+    }
+
     public Object getDefaultValue() {
         return getAttribute("defaultValue");
     }
 
     public void setDefaultValue(Object defaultValue) {
         setAttribute("defaultValue", defaultValue);
-    }
-
-    public void setPattern(Pattern pattern) {
-        setAttribute("pattern", pattern);
     }
 
     public ValueSet getValueSet() {
@@ -196,6 +222,10 @@ public class PropertyDescriptor {
 
     public Converter<?> getConverter() {
         return getConverter(false);
+    }
+
+    public void setConverter(Converter<?> converter) {
+        setAttribute("converter", converter);
     }
 
     public Converter<?> getConverter(boolean notNull) {
@@ -214,10 +244,6 @@ public class PropertyDescriptor {
         }
     }
 
-    public void setConverter(Converter<?> converter) {
-        setAttribute("converter", converter);
-    }
-
     public DomConverter getDomConverter() {
         return (DomConverter) getAttribute("domConverter");
     }
@@ -234,6 +260,9 @@ public class PropertyDescriptor {
         setAttribute("validator", validator);
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    // Array/List item attributes
+
     Validator getEffectiveValidator() {
         if (effectiveValidator == null) {
             synchronized (this) {
@@ -249,12 +278,12 @@ public class PropertyDescriptor {
         return propertySetDescriptor;
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    // Generic attributes
+
     public void setPropertySetDescriptor(PropertySetDescriptor propertySetDescriptor) {
         this.propertySetDescriptor = propertySetDescriptor;
     }
-
-    //////////////////////////////////////////////////////////////////////////////
-    // Array/List item attributes
 
     public String getItemAlias() {
         return (String) getAttribute("itemAlias");
@@ -263,25 +292,6 @@ public class PropertyDescriptor {
     public void setItemAlias(String alias) {
         setAttribute("itemAlias", alias);
     }
-
-    /**
-     * @deprecated since BEAM 5
-     */
-    @Deprecated
-    public boolean getItemsInlined() {
-        return getBooleanProperty("itemsInlined");
-    }
-
-    /**
-     * @deprecated since BEAM 5
-     */
-    @Deprecated
-    public void setItemsInlined(boolean inlined) {
-        setAttribute("itemsInlined", inlined);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////
-    // Generic attributes
 
     public Object getAttribute(String name) {
         return attributes.get(name);
@@ -299,12 +309,19 @@ public class PropertyDescriptor {
         }
     }
 
+
+    /////////////////////////////////////////////////////////////////////////
+    // Package Local
+
     public final void addAttributeChangeListener(PropertyChangeListener listener) {
         if (attributeChangeSupport == null) {
             attributeChangeSupport = new PropertyChangeSupport(this);
         }
         attributeChangeSupport.addPropertyChangeListener(listener);
     }
+
+    /////////////////////////////////////////////////////////////////////////
+    // Private
 
     public final void removeAttributeChangeListener(PropertyChangeListener listener) {
         if (attributeChangeSupport != null) {
@@ -319,10 +336,6 @@ public class PropertyDescriptor {
         return this.attributeChangeSupport.getPropertyChangeListeners();
     }
 
-
-    /////////////////////////////////////////////////////////////////////////
-    // Package Local
-
     void initDefaults() {
         if (getConverter() == null) {
             setDefaultConverter();
@@ -331,9 +344,6 @@ public class PropertyDescriptor {
             setDefaultValue(Property.PRIMITIVE_ZERO_VALUES.get(getType()));
         }
     }
-
-    /////////////////////////////////////////////////////////////////////////
-    // Private
 
     private void firePropertyChange(String propertyName, Object newValue, Object oldValue) {
         if (attributeChangeSupport == null) {
@@ -346,11 +356,7 @@ public class PropertyDescriptor {
         }
     }
 
-    private static boolean equals(Object a, Object b) {
-        return a == b || !(a == null || b == null) && a.equals(b);
-    }
-
-    private boolean getBooleanProperty(String name) {
+    public boolean getBooleanProperty(String name) {
         Object v = getAttribute(name);
         return v != null && (Boolean) v;
     }
@@ -392,34 +398,5 @@ public class PropertyDescriptor {
             validator = new MultiValidator(validators);
         }
         return validator;
-    }
-
-    public static String getDisplayName(PropertyDescriptor propertyDescriptor) {
-        String label = propertyDescriptor.getDisplayName();
-        if (label != null) {
-            return label;
-        }
-        String name = propertyDescriptor.getName().replace("_", " ");
-        return createDisplayName(name);
-    }
-
-    public static String createDisplayName(String name) {
-        StringBuilder sb = new StringBuilder(name.length());
-        for (int i = 0; i < name.length(); i++) {
-            char ch = name.charAt(i);
-            if (i == 0) {
-                sb.append(Character.toUpperCase(ch));
-            } else if (i > 0 && i < name.length() - 1
-                    && Character.isUpperCase(ch) &&
-                    Character.isLowerCase(name.charAt(i + 1))) {
-                sb.append(' ');
-                sb.append(Character.toLowerCase(ch));
-            } else if (ch == '_'){
-                sb.append(' ');
-            } else {
-                sb.append(ch);
-            }
-        }
-        return sb.toString();
     }
 }

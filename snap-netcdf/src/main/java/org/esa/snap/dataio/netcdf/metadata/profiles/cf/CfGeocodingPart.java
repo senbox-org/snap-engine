@@ -51,6 +51,7 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
@@ -70,7 +71,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
-            geoCoding = readPixelBasedGeoCoding(p);
+            geoCoding = readPixelBasedGeoCoding(ctx, p);
         }
         // If there is still no geocoding, check special case of netcdf file which was converted
         // from hdf file and has 'StructMetadata.n' element.
@@ -364,7 +365,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelBasedGeoCoding(Product product) throws IOException {
+    private static GeoCoding readPixelBasedGeoCoding(ProfileReadContext ctx, Product product) throws IOException {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -386,8 +387,15 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final double[] longitudes = RasterUtils.loadGeoData(lonBand);
-        final double[] latitudes = RasterUtils.loadGeoData(latBand);
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final Variable lonVar = netcdfFile.findVariable(lonBand.getName());
+        final Variable latVar = netcdfFile.findVariable(latBand.getName());
+        if (lonVar == null || latVar == null)      {
+            return null;
+        }
+
+        final double[] longitudes = readVarAsDoubleArray(lonVar);
+        final double[] latitudes = readVarAsDoubleArray(latVar);
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
 
@@ -411,5 +419,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+    static double[] readVarAsDoubleArray(Variable lonVar) throws IOException {
+        final Array lonArray = lonVar.read();
+        return (double[]) lonArray.get1DJavaArray(DataType.DOUBLE);
     }
 }
