@@ -64,8 +64,7 @@ public class STACReader implements ProductReader {
         return stacProduct;
     }
 
-    @Override
-    public Product readProductNodesImpl(){
+    Product readProductNodesImpl(){
         return null;
     }
 

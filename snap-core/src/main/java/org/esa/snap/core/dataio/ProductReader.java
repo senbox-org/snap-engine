@@ -82,8 +82,6 @@ public interface ProductReader {
         throw new IOException("readTiePointGridRasterData not implemented");
     }
 
-    Product readProductNodesImpl();
-
     /**
      * Reads raster data from the data source specified by the given destination band into the given in-memory buffer
      * and region.
