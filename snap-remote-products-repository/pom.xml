@@ -113,11 +113,6 @@
         </dependency>
         <dependency>
             <groupId>ro.c-s.tao</groupId>
-            <artifactId>tao-datasources-scihub</artifactId>
-            <version>${tao.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ro.c-s.tao</groupId>
             <artifactId>tao-datasources-usgs</artifactId>
             <version>${tao.version}</version>
         </dependency>
