@@ -10,6 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -88,8 +90,10 @@ public class STTMExporterTest {
         assertTrue(fileName.contains("STTM_report"));
         assertTrue(fileName.contains(".xlsx"));
 
+        // make sure we have trailing zeros for month and day field - tb 2024-01-08
+        final DecimalFormat decimalFormat = new DecimalFormat("00");
         assertTrue(fileName.contains("_" + calendar.get(Calendar.YEAR)));
-        assertTrue(fileName.contains("_" + (calendar.get(Calendar.MONTH) + 1)));
-        assertTrue(fileName.contains("_" + calendar.get(Calendar.DAY_OF_MONTH)));
+        assertTrue(fileName.contains("_" + decimalFormat.format(calendar.get(Calendar.MONTH) + 1)));
+        assertTrue(fileName.contains("_" + decimalFormat.format(calendar.get(Calendar.DAY_OF_MONTH))));
     }
 }
