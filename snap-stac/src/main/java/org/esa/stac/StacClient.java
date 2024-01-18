@@ -11,10 +11,7 @@ import org.esa.stac.internal.StacItem;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
@@ -77,19 +74,32 @@ public class StacClient implements STACUtils {
         return items;
     }
 
+    // Search using a defined GeoJSON polygon.
+    // TODO implement.
     public void search(String [] collections, JSONObject intersects, String datetime){
+
+    }
+
+    private String signURL(StacItem.StacAsset asset){
+        if(signDownloads){
+            return downloadModifier.signURL(asset.getURL());
+        }else{
+             return asset.getURL();
+        }
+    }
+
+    public InputStream streamAsset(StacItem.StacAsset asset) throws IOException {
+        String downloadURL = signURL(asset);
+        InputStream inputStream = new URL(downloadURL).openStream();
+        return inputStream;
     }
 
     public void downloadAsset(StacItem.StacAsset asset, File targetFolder){
-        String downloadURL;
+
         String outputFilename = asset.getFileName();
 
         System.out.println("Downloading asset " + asset.getId());
-        if(signDownloads){
-            downloadURL = downloadModifier.signURL(asset.getURL());
-        }else{
-            downloadURL = asset.getURL();
-        }
+        String downloadURL = signURL(asset);
         try (BufferedInputStream in = new BufferedInputStream(new URL(downloadURL).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(new File(targetFolder.getAbsolutePath(), outputFilename))) {
             byte dataBuffer[] = new byte[1024];

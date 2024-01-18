@@ -2,11 +2,13 @@ package org.esa.stac;
 
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.stac.internal.EstablishedModifiers;
 import org.esa.stac.internal.StacCatalog;
 import org.esa.stac.internal.StacItem;
+import org.esa.stac.reader.STACMetadataFactory;
 import org.esa.stac.reader.STACReaderPlugIn;
 import org.junit.Test;
 
@@ -32,7 +34,10 @@ public class TestStac {
         System.out.println(results[35].getURL());
         System.out.println(results[35].getAsset("B08").getURL());
 
-        client.downloadItem(results[35], new File("/tmp"));
+        //client.downloadItem(results[35], new File("/tmp"));
+        STACMetadataFactory factory = new STACMetadataFactory(results[35]);
+        MetadataElement element = factory.generate();
+        System.out.println(3);
     }
 
     @Test

@@ -1,15 +1,13 @@
 package org.esa.stac.internal;
-import org.apache.velocity.runtime.directive.Parse;
-import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.jexp.ParseException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +31,8 @@ public class StacItem implements STACUtils {
     private List<StacAsset> dataAssets = new ArrayList<>();
     private List<StacAsset> metadataAssets = new ArrayList<>();
 
+    private JSONObject stacItemJSON;
+
     private void initStacItem(JSONObject stacItemJSON) throws ParseException{
         if (Objects.isNull(stacItemJSON)){
             throw new ParseException("Null JSON object passed in");
@@ -42,6 +42,7 @@ public class StacItem implements STACUtils {
                 || ! stacItemJSON.containsKey("assets")){
             throw new ParseException("Invalid STAC JSON");
         }
+        this.stacItemJSON = stacItemJSON;
         this.id = (String) stacItemJSON.get("id");
         this.linksJSON = (JSONArray) stacItemJSON.get("links");
         this.assetsJSON = (JSONObject) stacItemJSON.get("assets");
@@ -112,6 +113,9 @@ public class StacItem implements STACUtils {
         String [] assetArray = new String[assetsJSON.size()];
         assetArray = (String[]) assetsJSON.keySet().toArray(assetArray);
         return assetArray;
+    }
+    public JSONObject getItemJSON(){
+        return stacItemJSON;
     }
     public String getId(){
         return this.id;
