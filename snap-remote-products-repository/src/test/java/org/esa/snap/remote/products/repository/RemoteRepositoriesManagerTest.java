@@ -174,24 +174,6 @@ public class RemoteRepositoriesManagerTest {
         downloadRepositoryProviderProductList(credentials, usgsRepositoryProvider, new String[]{"MODIS-VI1", "MODIS-VI2", "VIIRS", "MODIS-LTSE-1", "MODIS-LTSE-8"});
     }
 
-    @Test
-    public void testScientificDataHubRepositoryProvider() throws Exception {
-        RemoteProductsRepositoryProvider scientificDataHubRepositoryProvider = findRepositoryProviderByName("Scientific Data Hub");
-        assertNotNull(scientificDataHubRepositoryProvider);
-
-        Credentials credentials = null;
-        if (scientificDataHubRepositoryProvider.requiresAuthentication()) {
-            String userName = System.getProperty("sentinels.account.username");
-            String password = System.getProperty("sentinels.account.password");
-
-            Assume.assumeTrue(!StringUtils.isBlank(userName) && !StringUtils.isBlank(password));
-
-            credentials = new UsernamePasswordCredentials(userName, password);
-        }
-
-        downloadRepositoryProviderProductList(credentials, scientificDataHubRepositoryProvider, new String[]{});
-    }
-
     private static RepositoryQueryParameter findQueryParameterByName(String name, List<RepositoryQueryParameter> queryParameters) {
         for (RepositoryQueryParameter queryParameter : queryParameters) {
             if (name.equals(queryParameter.getName())) {
