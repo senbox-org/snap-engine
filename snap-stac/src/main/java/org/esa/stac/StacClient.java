@@ -4,10 +4,7 @@ package org.esa.stac;
 
 
 import org.esa.snap.core.jexp.ParseException;
-import org.esa.stac.internal.DownloadModifier;
-import org.esa.stac.internal.STACUtils;
-import org.esa.stac.internal.StacCatalog;
-import org.esa.stac.internal.StacItem;
+import org.esa.stac.internal.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -28,13 +25,18 @@ public class StacClient implements STACUtils {
 
     private final String stacURL;
 
-    public StacClient(final String catalogURL) throws MalformedURLException {
+    public StacClient(final String catalogURL) throws Exception {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
-        this.signDownloads = false;
+        if(catalogURL.contains("planetarycomputer")){
+            this.downloadModifier = EstablishedModifiers.planetaryComputer();
+            this.signDownloads = true;
+        }else{
+            this.signDownloads = false;
+        }
     }
 
-    public StacClient(final String catalogURL, DownloadModifier modifierFunction){
+    public StacClient(final String catalogURL, DownloadModifier modifierFunction) throws Exception {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
         this.downloadModifier = modifierFunction;
@@ -49,7 +51,7 @@ public class StacClient implements STACUtils {
 
     // Performs a search and returns an array of STAC Items from the server that match
     // the search
-    public StacItem[] search(String [] collections, double [] bbox, String datetime) throws ParseException {
+    public StacItem[] search(String [] collections, double [] bbox, String datetime) throws Exception {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
         String validCollections = "";

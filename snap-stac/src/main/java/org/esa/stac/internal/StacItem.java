@@ -1,5 +1,6 @@
 package org.esa.stac.internal;
 import org.esa.snap.core.jexp.ParseException;
+import org.esa.stac.StacClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -7,6 +8,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +35,9 @@ public class StacItem implements STACUtils {
 
     private JSONObject stacItemJSON;
 
-    private void initStacItem(JSONObject stacItemJSON) throws ParseException{
+    private StacClient validStacClient;
+
+    private void initStacItem(JSONObject stacItemJSON) throws Exception {
         if (Objects.isNull(stacItemJSON)){
             throw new ParseException("Null JSON object passed in");
         }
@@ -45,6 +49,13 @@ public class StacItem implements STACUtils {
         this.stacItemJSON = stacItemJSON;
         this.id = (String) stacItemJSON.get("id");
         this.linksJSON = (JSONArray) stacItemJSON.get("links");
+        for (Object o : linksJSON){
+            JSONObject curLinkObject = (JSONObject) o;
+            if (curLinkObject.get("rel").equals("root")){
+                String mainURL = (String) curLinkObject.get("href");
+                validStacClient = new StacClient(mainURL);
+            }
+        }
         this.assetsJSON = (JSONObject) stacItemJSON.get("assets");
         for(Object o : assetsJSON.keySet()){
             StacAsset curAsset = new StacAsset((JSONObject) assetsJSON.get(o), (String) o);
@@ -66,19 +77,20 @@ public class StacItem implements STACUtils {
         return this.itemURL;
     }
 
-    public StacItem(String stacItemURL) throws ParseException{
+    public StacItem(String stacItemURL) throws Exception {
         initStacItem(getJSONFromURL(stacItemURL));
         this.itemURL = stacItemURL;
+
     }
-    public StacItem(JSONObject stacItemJSON) throws ParseException{
+    public StacItem(JSONObject stacItemJSON) throws Exception {
         initStacItem(stacItemJSON);
     }
-    public StacItem(File stacItemFile) throws IOException, org.json.simple.parser.ParseException, ParseException {
+    public StacItem(File stacItemFile) throws Exception {
         JSONObject stacItemJSON = (JSONObject) new JSONParser().parse(new FileReader(stacItemFile));
         initStacItem(stacItemJSON);
     }
 
-    public StacItem(Object productInputFile)throws ParseException {
+    public StacItem(Object productInputFile) throws Exception {
 
         JSONObject stacItemJSON = null;
 
@@ -102,6 +114,9 @@ public class StacItem implements STACUtils {
             stacItemJSON = (JSONObject) productInputFile;
         }
         initStacItem(stacItemJSON);
+    }
+    public StacClient getClient(){
+        return this.validStacClient;
     }
     public StacAsset getAsset(String assetID){
         if (assetsById.containsKey(assetID)){

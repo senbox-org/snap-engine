@@ -9,7 +9,9 @@ import org.esa.stac.internal.EstablishedModifiers;
 import org.esa.stac.internal.StacCatalog;
 import org.esa.stac.internal.StacItem;
 import org.esa.stac.reader.STACMetadataFactory;
+import org.esa.stac.reader.STACReader;
 import org.esa.stac.reader.STACReaderPlugIn;
+import org.esa.stac.reader.StacItemToProduct;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,7 +20,7 @@ import java.net.MalformedURLException;
 
 public class TestStac {
     @Test
-    public void testStac() throws MalformedURLException, ParseException {
+    public void testStac() throws Exception {
         StacClient client = new StacClient(
                 "https://planetarycomputer.microsoft.com/api/stac/v1",
                 EstablishedModifiers.planetaryComputer());
@@ -37,6 +39,8 @@ public class TestStac {
         //client.downloadItem(results[35], new File("/tmp"));
         STACMetadataFactory factory = new STACMetadataFactory(results[35]);
         MetadataElement element = factory.generate();
+        STACReader reader = new STACReader();
+
         System.out.println(3);
     }
 
@@ -49,6 +53,14 @@ public class TestStac {
         ProductReader reader = readerPlugIn.createReaderInstance();
         Product p = reader.readProductNodes(remoteProduct, null);
         System.out.println();
+    }
+
+    @Test
+    public void testCreateProduct() throws Exception {
+        String remoteProduct = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a/items/S2A_MSIL2A_20220828T190931_R056_T10TCR_20220830T153754";
+        StacClient client = new StacClient("https://planetarycomputer.microsoft.com/api/stac/v1", EstablishedModifiers.planetaryComputer());
+        StacItemToProduct converter = new StacItemToProduct(new StacItem(remoteProduct), client);
+        Product p = converter.createProduct();
     }
 
 

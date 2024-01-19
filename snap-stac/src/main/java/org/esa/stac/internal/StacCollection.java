@@ -13,7 +13,7 @@ public class StacCollection implements STACUtils {
 
     private final String collectionItemURL;
 
-    public StacCollection(String collectionURL){
+    public StacCollection(String collectionURL) throws Exception {
         this.collectionURL = collectionURL;
         collectionJSON = getJSONFromURL(collectionURL);
         collectionItemURL = getCollectionItemURL();
@@ -34,7 +34,7 @@ public class StacCollection implements STACUtils {
         return null;
     }
 
-    public StacItem[] getAllItems(){
+    public StacItem[] getAllItems() throws Exception {
         // Get the initial items
         JSONObject items = getJSONFromURL(collectionItemURL);
         JSONArray features = getAllFeatures(items);

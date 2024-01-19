@@ -18,7 +18,7 @@ public class StacCatalog implements StacComponent, STACUtils {
     private HashMap<String, String> collectionsWithURLs;
 
     private String title;
-    public StacCatalog(String catalogURL){
+    public StacCatalog(String catalogURL) throws Exception {
         rootURL = catalogURL;
 
         catalogJSON = getJSONFromURL(catalogURL);
@@ -78,7 +78,7 @@ public class StacCatalog implements StacComponent, STACUtils {
         return true;
     }
 
-    public StacCollection getCollection(String collectionName) {
+    public StacCollection getCollection(String collectionName) throws Exception {
         if (collectionsWithURLs.containsKey(collectionName)){
             return new StacCollection(collectionsWithURLs.get(collectionName));
         }
