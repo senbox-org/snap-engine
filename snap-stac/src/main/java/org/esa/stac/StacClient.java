@@ -1,15 +1,14 @@
 package org.esa.stac;
 
-// Author Alex McVittie, SkyWatch Space Applications Inc. December 2023
+// Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
+// The StacClient class acts as a way to search for STAC assets, and download these
+// STAC items and assets.
 
-
-import org.esa.snap.core.jexp.ParseException;
 import org.esa.stac.internal.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
@@ -28,7 +27,7 @@ public class StacClient implements STACUtils {
     public StacClient(final String catalogURL) throws Exception {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
-        if(catalogURL.contains("planetarycomputer")){
+        if(catalogURL.contains("planetarycomputer.microsoft.com")){
             this.downloadModifier = EstablishedModifiers.planetaryComputer();
             this.signDownloads = true;
         }else{
@@ -42,8 +41,6 @@ public class StacClient implements STACUtils {
         this.downloadModifier = modifierFunction;
         this.signDownloads = true;
     }
-
-
 
     public StacCatalog getCatalog(){
         return this.catalog;
@@ -71,16 +68,16 @@ public class StacClient implements STACUtils {
         JSONArray jsonFeatures =  getAllFeatures(queryResults);
         StacItem [] items = new StacItem[jsonFeatures.size()];
         for (int x = 0; x < jsonFeatures.size(); x++){
-            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+            items[x] = new StacItem(jsonFeatures.get(x), this);
         }
         return items;
     }
 
     // Search using a defined GeoJSON polygon.
     // TODO implement.
-    public void search(String [] collections, JSONObject intersects, String datetime){
-
-    }
+    //public void search(String [] collections, JSONObject intersects, String datetime){
+    //
+    //}
 
     private String signURL(StacItem.StacAsset asset){
         if(signDownloads){
@@ -96,7 +93,7 @@ public class StacClient implements STACUtils {
         return inputStream;
     }
 
-    public void downloadAsset(StacItem.StacAsset asset, File targetFolder){
+    public File downloadAsset(StacItem.StacAsset asset, File targetFolder){
 
         String outputFilename = asset.getFileName();
 
@@ -109,9 +106,11 @@ public class StacClient implements STACUtils {
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
+            return new File(targetFolder.getAbsolutePath(), outputFilename);
         } catch (IOException e) {
             // handle exception
         }
+        return null;
     }
 
     public void downloadItem(StacItem item, File targetFolder){

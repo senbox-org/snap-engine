@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.geotiff.GeoTiffImageReader;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReader;
@@ -14,9 +15,11 @@ import org.esa.stac.internal.StacItem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+// Main class that handles converting a STAC Item to a SNAP Product class object.
 
 public class StacItemToProduct {
 
@@ -39,15 +42,16 @@ public class StacItemToProduct {
         this.item = item;
         this.client = client;
         bandList = createBandList();
+        for (Band b : bandList){
+            if (b.getRasterWidth() > maxWidth){
+                maxWidth = b.getRasterWidth();
+                maxHeight = b.getRasterHeight();
+            }
+        }
     }
 
 
     public InputStream streamBand(String bandName) throws IOException {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         return client.streamAsset(getAsset(bandName));
     }
     private Product createTifProduct(InputStream is) throws Exception {
@@ -58,7 +62,12 @@ public class StacItemToProduct {
         return singleBandProduct;
     }
 
-    public Product createProduct() throws Exception {
+
+    public Product createProduct() throws Exception{
+        return createProduct(false, true);
+    }
+
+    public Product createProduct(boolean resampleBands, boolean streamData) throws Exception{
 
         Product product  = new Product(item.getId(), "Optical");
 
@@ -68,13 +77,40 @@ public class StacItemToProduct {
 
         product.getMetadataRoot().addElement(originalMetadata);
         for (Band b : bandList){
-            System.out.println("Streaming band " + b.getName());
-            InputStream bandInputStream = streamBand(b.getName());
-            Product singleBandProduct = createTifProduct(bandInputStream);
-            ProductUtils.copyBand(singleBandProduct.getBands()[0].getName(), singleBandProduct, b.getName(), product, true);
+            if(streamData){
+                System.out.println("Streaming band " + b.getName());
+                InputStream bandInputStream = streamBand(b.getName());
+                Product singleBandProduct = createTifProduct(bandInputStream);
+                ProductUtils.copyBand(singleBandProduct.getBands()[0].getName(), singleBandProduct, b.getName(), product, true);
+                if (b.getRasterWidth() == maxWidth){
+                    product.setSceneGeoCoding(singleBandProduct.getSceneGeoCoding());
+                }
+            }else{
+                // Grab geocoding from single band
+                if(product.getSceneGeoCoding() == null){
+                    InputStream bandInputStream = streamBand(b.getName());
+                    Product singleBandProduct = createTifProduct(bandInputStream);
+                    product.setSceneGeoCoding(singleBandProduct.getSceneGeoCoding());
+                }
+                product.addBand(b);
+            }
+
+        }
+        if(resampleBands && streamData){
+            ResamplingOp resamplingOp = new ResamplingOp();
+            resamplingOp.setParameter("targetWidth", maxWidth);
+            resamplingOp.setParameter("targetHeight", maxHeight);
+            resamplingOp.setParameter("upsamplingMethod", "Nearest");
+            resamplingOp.setParameter("downsamplingMethod", "Mean");
+            resamplingOp.setParameter("flagDownsamplingMethod", "First");
+            resamplingOp.setSourceProduct(product);
+            return resamplingOp.getTargetProduct();
+        }else{
+            return product;
         }
 
-        return product;
+
+
     }
 
     protected String getDataURL(String bandName){
@@ -104,6 +140,7 @@ public class StacItemToProduct {
                 }else{
                     name = asset.bandData.description;
                 }
+                name = name  + " (" + assetID + ")";
                 if(name.equals(bandName)){
                     return asset;
                 }
@@ -114,7 +151,6 @@ public class StacItemToProduct {
 
     private List<Band> createBandList(){
         List<Band> bandList = new ArrayList<>();
-
 
         for (String assetID : item.listAssetIds()){
             StacItem.StacAsset asset = item.getAsset(assetID);
@@ -127,6 +163,7 @@ public class StacItemToProduct {
                 }else{
                     name = asset.bandData.description;
                 }
+                name = name + " (" + assetID + ")";
                 Band b  = new Band(name, ProductData.TYPE_INT16, asset.getWidth(), asset.getHeight());
                 bandList.add(b);
             }

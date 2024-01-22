@@ -1,4 +1,9 @@
 package org.esa.stac.internal;
+
+// Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
+// The StacCatalog class allows you to interact with a specific catalog
+
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -60,7 +65,7 @@ public class StacCatalog implements StacComponent, STACUtils {
 
     @Override
     public String getRootURL() {
-        return null;
+        return rootURL;
     }
 
     public String getTitle() {
@@ -72,10 +77,6 @@ public class StacCatalog implements StacComponent, STACUtils {
     }
     public int getNumCollections(){
         return this.allCollections.length;
-    }
-
-    public boolean conformsTo(String confirmityCheck) {
-        return true;
     }
 
     public StacCollection getCollection(String collectionName) throws Exception {

@@ -70,7 +70,7 @@ public abstract class AbstractProductReader implements ProductReader {
     /**
      * The input source
      */
-    private Object input;
+    protected Object input;
 
     /**
      * The spectral and spatial subset definition used to read from the original data source.

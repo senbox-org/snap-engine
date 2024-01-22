@@ -1,5 +1,7 @@
 package org.esa.stac.internal;
 
+// TODO fully implement.
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -17,12 +19,12 @@ public class StacCollection implements STACUtils {
         this.collectionURL = collectionURL;
         collectionJSON = getJSONFromURL(collectionURL);
         collectionItemURL = getCollectionItemURL();
-        int x = 0;
     }
 
     public String getCollectionURL(){
         return collectionURL;
     }
+
     private String getCollectionItemURL(){
         JSONArray links = (JSONArray) collectionJSON.get("links");
         for (Object o : links){
@@ -34,6 +36,10 @@ public class StacCollection implements STACUtils {
         return null;
     }
 
+    public JSONObject getJSON(){
+        return collectionJSON;
+    }
+/*
     public StacItem[] getAllItems() throws Exception {
         // Get the initial items
         JSONObject items = getJSONFromURL(collectionItemURL);
@@ -48,7 +54,7 @@ public class StacCollection implements STACUtils {
         return null;
     }
 
-    public JSONObject getJSON(){
-        return collectionJSON;
-    }
+ */
+
+
 }

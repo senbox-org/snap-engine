@@ -1,4 +1,10 @@
 package org.esa.stac.internal;
+
+// Author Alex McVittie, SkyWatch Space Applications Inc. December 2023
+// The StacItem class allows you to interact with specific Items retrieved
+// from a StacCatalog.
+
+
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.stac.StacClient;
 import org.json.simple.JSONArray;
@@ -10,10 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class StacItem implements STACUtils {
 
@@ -32,10 +35,19 @@ public class StacItem implements STACUtils {
     private HashMap<String, StacAsset> assetsById = new HashMap<>();
     private List<StacAsset> dataAssets = new ArrayList<>();
     private List<StacAsset> metadataAssets = new ArrayList<>();
-
     private JSONObject stacItemJSON;
-
     private StacClient validStacClient;
+
+    public StacItem(Object productInputFile) throws Exception {
+        this.stacItemJSON = parseInputFile(productInputFile);
+        initStacItem(stacItemJSON);
+    }
+
+    public StacItem(Object productInputFile, StacClient client) throws Exception{
+        this.validStacClient = client;
+        this.stacItemJSON = parseInputFile(productInputFile);
+        initStacItem(stacItemJSON);
+    }
 
     private void initStacItem(JSONObject stacItemJSON) throws Exception {
         if (Objects.isNull(stacItemJSON)){
@@ -49,13 +61,6 @@ public class StacItem implements STACUtils {
         this.stacItemJSON = stacItemJSON;
         this.id = (String) stacItemJSON.get("id");
         this.linksJSON = (JSONArray) stacItemJSON.get("links");
-        for (Object o : linksJSON){
-            JSONObject curLinkObject = (JSONObject) o;
-            if (curLinkObject.get("rel").equals("root")){
-                String mainURL = (String) curLinkObject.get("href");
-                validStacClient = new StacClient(mainURL);
-            }
-        }
         this.assetsJSON = (JSONObject) stacItemJSON.get("assets");
         for(Object o : assetsJSON.keySet()){
             StacAsset curAsset = new StacAsset((JSONObject) assetsJSON.get(o), (String) o);
@@ -77,21 +82,7 @@ public class StacItem implements STACUtils {
         return this.itemURL;
     }
 
-    public StacItem(String stacItemURL) throws Exception {
-        initStacItem(getJSONFromURL(stacItemURL));
-        this.itemURL = stacItemURL;
-
-    }
-    public StacItem(JSONObject stacItemJSON) throws Exception {
-        initStacItem(stacItemJSON);
-    }
-    public StacItem(File stacItemFile) throws Exception {
-        JSONObject stacItemJSON = (JSONObject) new JSONParser().parse(new FileReader(stacItemFile));
-        initStacItem(stacItemJSON);
-    }
-
-    public StacItem(Object productInputFile) throws Exception {
-
+    private JSONObject parseInputFile(Object productInputFile) throws Exception{
         JSONObject stacItemJSON = null;
 
         if (productInputFile instanceof String){
@@ -113,9 +104,24 @@ public class StacItem implements STACUtils {
         }else if (productInputFile instanceof JSONObject){
             stacItemJSON = (JSONObject) productInputFile;
         }
-        initStacItem(stacItemJSON);
+        return stacItemJSON;
     }
+
     public StacClient getClient(){
+        if (this.validStacClient != null){
+            return this.validStacClient;
+        }
+        for (Object o : linksJSON){
+            JSONObject curLinkObject = (JSONObject) o;
+            if (curLinkObject.get("rel").equals("root")){
+                String mainURL = (String) curLinkObject.get("href");
+                try {
+                    validStacClient = new StacClient(mainURL);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         return this.validStacClient;
     }
     public StacAsset getAsset(String assetID){
@@ -127,6 +133,7 @@ public class StacItem implements STACUtils {
     public String [] listAssetIds(){
         String [] assetArray = new String[assetsJSON.size()];
         assetArray = (String[]) assetsJSON.keySet().toArray(assetArray);
+        Arrays.sort(assetArray);
         return assetArray;
     }
     public JSONObject getItemJSON(){

@@ -4,8 +4,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -27,9 +29,7 @@ public interface STACUtils {
             return (JSONObject) parser.parse(content);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
     }
@@ -56,9 +56,4 @@ public interface STACUtils {
         return getAllFeaturesRecursive(rootObject, new JSONArray());
     }
 
-    // To be used with MSFT Planetary data requests.
-    default String getPlanetaryToken(){
-        JSONObject authResponse = getJSONFromURL("https://planetarycomputer.microsoft.com/api/sas/v1/token/naip");
-        return (String) authResponse.get("token");
-    }
 }

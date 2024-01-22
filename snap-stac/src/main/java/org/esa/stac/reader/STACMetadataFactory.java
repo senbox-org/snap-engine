@@ -1,6 +1,5 @@
 package org.esa.stac.reader;
 
-import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.stac.internal.StacItem;
