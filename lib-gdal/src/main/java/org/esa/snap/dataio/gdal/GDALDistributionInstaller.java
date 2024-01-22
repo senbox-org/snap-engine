@@ -77,7 +77,7 @@ class GDALDistributionInstaller {
         logger.log(Level.FINE, "Set the GDAL_DATA environment variable on Linux with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
         gdalEnv.setLength(0);
-        gdalEnv.append("GDAL_PLUGINS=").append(libFolderPath.resolve("gdalplugins"));
+        gdalEnv.append("GDAL_DRIVER_PATH=").append(libFolderPath.resolve("gdalplugins"));
         logger.log(Level.FINE, "Set the GDAL_PLUGINS environment variable on Linux with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
     }
@@ -102,7 +102,7 @@ class GDALDistributionInstaller {
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
 
         gdalEnv.setLength(0);
-        gdalEnv.append("GDAL_PLUGINS=").append(gdalDistributionRootFolderPath.resolve("gdalplugins"));
+        gdalEnv.append("GDAL_DRIVER_PATH=").append(gdalDistributionRootFolderPath.resolve("gdalplugins"));
         logger.log(Level.FINE, "Set the GDAL_PLUGINS environment variable on Windows with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
     }
