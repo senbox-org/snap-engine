@@ -16,12 +16,7 @@
 
 package com.bc.ceres.binio.internal;
 
-import com.bc.ceres.binio.CollectionData;
-import com.bc.ceres.binio.CompoundData;
-import com.bc.ceres.binio.CompoundType;
-import com.bc.ceres.binio.DataAccessException;
-import com.bc.ceres.binio.DataContext;
-import com.bc.ceres.binio.SequenceData;
+import com.bc.ceres.binio.*;
 
 import java.io.IOException;
 
@@ -42,12 +37,6 @@ abstract class AbstractCompound extends AbstractCollection implements CompoundIn
     @Override
     public CompoundType getType() {
         return compoundType;
-    }
-
-    @Override
-    @Deprecated
-    public final CompoundType getCompoundType() {
-        return getType();
     }
 
     @Override

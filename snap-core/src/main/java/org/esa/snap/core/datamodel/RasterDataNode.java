@@ -329,7 +329,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
      * Sets a {@code MathTransform2D} from the local model CRS of this {@code RasterDataNode} to
      * a {@code Product}'s scene coordinate reference system. If the sceneToModelTransform is not the inverse
      * of this transform or cannot be derived from it, it must be set using {@code setSceneToModelTransform()}.
-     *
+     * <p>
      * Only use this method when you know that the model CRS of this {@code RasterDataNode} is different
      * than the {@code Product}'s scene CRS or when you want to model a special relationship between
      * different {@code RasterDataNode}'s. When no transformation from local model to scene is possible, use
@@ -374,7 +374,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
      * Sets a {@code MathTransform2D} from a {@code Product}'s scene coordinate reference system to
      * the local model CRS of this {@code RasterDataNode}. If the modelToSceneTransform is not the inverse
      * of this transformor cannot be derived from it, it must be set using {@code setModelToSceneTransform()}.
-     *
+     * <p>
      * Only use this method when you know that the model CRS of this {@code RasterDataNode} is different
      * than the {@code Product}'s scene CRS or when you want to model a special relationship between
      * different {@code RasterDataNode}'s. When no transformation from scene to local model is possible, use
@@ -1288,14 +1288,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     public abstract float[] getPixels(int x, int y, int w, int h, float[] pixels, ProgressMonitor pm);
 
     /**
-     * @see #getPixels(int, int, int, int, double[], ProgressMonitor)
-     * @deprecated since BEAM 4.11. Use {@link #getSourceImage()} instead.
-     */
-    public double[] getPixels(int x, int y, int w, int h, double[] pixels) {
-        return getPixels(x, y, w, h, pixels, ProgressMonitor.NULL);
-    }
-
-    /**
      * Retrieves the range of pixels specified by the coordinates as double array.
      * <p>
      * Note that this method can only be used if this object's internal raster data buffer has been
@@ -1314,7 +1306,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
      * @throws IllegalStateException if this object has no internal data buffer
      */
     public abstract double[] getPixels(int x, int y, int w, int h, double[] pixels, ProgressMonitor pm);
-
 
     /**
      * Sets a range of pixels specified by the coordinates as integer array.
@@ -2116,7 +2107,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     private boolean isValidPixelExpressionSet() {
-        return getValidPixelExpression() != null && getValidPixelExpression().trim().length() > 0;
+        return getValidPixelExpression() != null && !getValidPixelExpression().trim().isEmpty();
     }
 
     private int getReadBufferLineCount() {
@@ -2518,7 +2509,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
                 }
             }
         }
-        return rasterDataNodes.toArray(new RasterDataNode[rasterDataNodes.size()]);
+        return rasterDataNodes.toArray(new RasterDataNode[0]);
     }
 
     // Compare "rel" attribute according to NetCDF-U convention
@@ -2658,7 +2649,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
             for (int i = 0; i < numReadsMax; i++) {
                 final int y0 = i * readBufferLineCount;
                 final int restheight = height - y0;
-                final int linesToRead = restheight > readBufferLineCount ? readBufferLineCount : restheight;
+                final int linesToRead = Math.min(restheight, readBufferLineCount);
                 readBuffer = recycleOrCreateBuffer(getDataType(), width * linesToRead, readBuffer);
                 readRasterData(0, y0, width, linesToRead, readBuffer, SubProgressMonitor.create(pm, 1));
                 processor.processRasterDataBuffer(readBuffer, y0, linesToRead, SubProgressMonitor.create(pm, 1));

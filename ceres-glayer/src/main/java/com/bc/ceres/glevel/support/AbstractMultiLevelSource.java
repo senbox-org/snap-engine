@@ -20,12 +20,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 
 import javax.media.jai.PlanarImage;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.ConstantDescriptor;
-import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 
 /**
@@ -79,7 +74,7 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
      * when {@link #reset} is called on this multi-level image source. See {@link #getImage(int)}.
      * <p>
      * The dimension of the level image created must be the same as that obtained from
-     * {@link #getImageDimension(int, int, double)} for the scale associated with the
+     * {DefaultMultiLevelSource.getLevelImageBounds(Rectangle sourceBounds, double scale)} for the scale associated with the
      * given resolution level.
      *
      * @param level The resolution level.
@@ -115,50 +110,5 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
         if (level < 0 || level >= getModel().getLevelCount()) {
             throw new IllegalArgumentException("level=" + level + " < " + getModel().getLevelCount());
         }
-    }
-
-    /**
-     * Computes the dimension of an image at a certain level. The image dimension computed is the
-     * same as that obtained from {@code javax.media.jai.operator.ScaleDescriptor.create(...)}.
-     *
-     * @param width  The width of the image in pixels at level zero.
-     * @param height The height of the image in pixels at level zero.
-     * @param scale  The scale at the level of interest.
-     * @return the dimension of the image at the level of interest.
-     * @deprecated since Ceres 0.14, lower-level resolutions of image pyramids are computed in the JPEG2000-style,
-     * that is {@code newSize=(int)ceil(scale * size)} (ceiling integer),
-     * while JAI is {@code newSize=(int)ceil(scale * size - 0.5)} (rounding to nearest integer).
-     * Please use {@link DefaultMultiLevelSource#getImageRectangle(int, int, int, int, double)} instead.
-     */
-    @Deprecated
-    public static Dimension getImageDimension(int width, int height, double scale) {
-        final float scaleFactor = (float) (1.0 / scale);
-        final RenderedOp c = ConstantDescriptor.create((float) width, (float) height, new Float[]{0.0f}, null);
-        final RenderedOp s = ScaleDescriptor.create(c, scaleFactor, scaleFactor, 0.0f, 0.0f, null, null);
-        return new Dimension(s.getWidth(), s.getHeight());
-    }
-
-    /**
-     * Computes the rectangle of an image at a certain level. The image rectangle computed is the
-     * same as that obtained from {@code javax.media.jai.operator.ScaleDescriptor.create(...)}.
-     *
-     * @param minX   The image's minimum X coordinate in pixels at level zero.
-     * @param minY   The image's minimum Y coordinate in pixels at level zero.
-     * @param width  The width of the image in pixels at level zero.
-     * @param height The height of the image in pixels at level zero.
-     * @param scale  The scale at the level of interest.
-     * @return the dimension of the image at the level of interest.
-     * @deprecated since Ceres 0.14, lower-level resolutions of image pyramids are computed in the JPEG2000-style,
-     * that is {@code newSize=(int)ceil(scale * size)} (ceiling integer),
-     * while JAI is {@code newSize=(int)ceil(scale * size - 0.5)} (rounding to nearest integer).
-     * Please use {@link DefaultMultiLevelSource#getImageRectangle(int, int, int, int, double)} instead.
-     */
-    @Deprecated
-    public static Rectangle getImageRectangle(int minX, int minY, int width, int height, double scale) {
-        final float scaleFactor = (float) (1.0 / scale);
-        final RenderedOp c = ConstantDescriptor.create((float) width, (float) height, new Float[]{0.0f}, null);
-        final RenderedOp s1 = ScaleDescriptor.create(c, 1.0F, 1.0F, (float) minX, (float) minY, null, null);
-        final RenderedOp s2 = ScaleDescriptor.create(s1, scaleFactor, scaleFactor, 0.0F, 0.0F, null, null);
-        return new Rectangle(s2.getMinX(), s2.getMinY(), s2.getWidth(), s2.getHeight());
     }
 }

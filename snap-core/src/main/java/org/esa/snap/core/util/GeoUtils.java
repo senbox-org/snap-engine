@@ -1,10 +1,6 @@
 package org.esa.snap.core.util;
 
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.math.Range;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
@@ -12,7 +8,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -501,7 +497,7 @@ public class GeoUtils {
      * @param usePixelCenter {@code true} if the pixel center should be used
      * @return the rectangular boundary
      */
-    static PixelPos[] createPixelBoundaryFromRect(final Rectangle rect, int step, final boolean usePixelCenter) {
+    public static PixelPos[] createPixelBoundaryFromRect(final Rectangle rect, int step, final boolean usePixelCenter) {
         // package access for testing only tb 2020-01-30
         final double insetDistance = usePixelCenter ? 0.5 : 0.0;
         final int x1 = rect.x;
@@ -674,7 +670,7 @@ public class GeoUtils {
 
     public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion,
                                                             int numBorderPixels, boolean roundPixelRegion, boolean multiSize) {
-        
+
         final Geometry rasterGeometry = computeRasterGeometry(rasterGeoCoding, rasterWidth, rasterHeight, roundPixelRegion, multiSize);
         final Geometry regionIntersection = geometryRegion.intersection(rasterGeometry);
         if (regionIntersection.isEmpty()) {
@@ -685,8 +681,8 @@ public class GeoUtils {
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);
         Rectangle intersectedRect = pixelRegion.intersection(new Rectangle(rasterWidth, rasterHeight));
-        if(intersectedRect.width*intersectedRect.height==0 && !regionIntersection.isEmpty()) {
-            return new Rectangle(intersectedRect.x,intersectedRect.y,1,1);//subpixeling intersection correction
+        if (intersectedRect.width * intersectedRect.height == 0 && !regionIntersection.isEmpty()) {
+            return new Rectangle(intersectedRect.x, intersectedRect.y, 1, 1);//subpixeling intersection correction
         }
         return intersectedRect;
     }
@@ -723,8 +719,8 @@ public class GeoUtils {
     public static Geometry computeRasterGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, boolean usePixelCenter, boolean multiSize) {
         final Rectangle rect = new Rectangle(0, 0, rasterWidth, rasterHeight);
         final int step = Math.min(rect.width, rect.height) / 8;
-        if(!multiSize)
-            usePixelCenter=true;
+        if (!multiSize)
+            usePixelCenter = true;
         final GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rect, step > 0 ? step : 1, usePixelCenter);
         final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
@@ -797,7 +793,7 @@ public class GeoUtils {
             final GeoPos geoPos = new GeoPos(coordinate.y, coordinate.x);
             final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
             if (pixelPos.isValid()) {
-                if(round) {
+                if (round) {
                     x1 = min(x1, (int) round(pixelPos.x));
                     x2 = max(x2, (int) round(pixelPos.x));
                     y1 = min(y1, (int) round(pixelPos.y));
