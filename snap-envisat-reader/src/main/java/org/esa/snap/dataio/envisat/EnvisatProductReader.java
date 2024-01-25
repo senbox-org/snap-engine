@@ -408,6 +408,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
+    /*
     private void addGeoCodingToProduct(Product product) throws IOException {
         final Preferences preferences = Config.instance("snap").preferences();
         final boolean usePixelGeoCoding = preferences.getBoolean(SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING, false);
@@ -431,6 +432,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         geoCoding.initialize();
         product.setSceneGeoCoding(geoCoding);
     }
+     */
 
     private ComponentGeoCoding createPixelGeoCoding(Product product) throws IOException {
         final Band lonBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME);
