@@ -337,6 +337,10 @@ public class GDALProductReader extends AbstractProductReader {
                 org.esa.snap.dataio.gdal.drivers.Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1);
                 String bandName = computeBandName(gdalBand, bandIndex);
 
+                if(gdalBand.getOverviewCount() == 0) {
+                    gdalDataset.buildOverviews("NEAREST", new int[]{2, 4, 8, 16, 32, 64, 128});
+                }
+
                 if (subsetDef == null || subsetDef.isNodeAccepted(bandName)) {
                     int gdalDataType = gdalBand.getDataType();
                     BufferTypeDescriptor dataBufferType = BUFFER_TYPES.get(gdalDataType);
