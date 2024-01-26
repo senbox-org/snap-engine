@@ -59,7 +59,8 @@ public class TestClient {
         outputFile.delete();
 
     }
-
+/*
+    Very long running test. 
     @Test @Ignore
     public void testDownloadItem() throws Exception {
         File tmpDir = new File("/tmp");
@@ -70,4 +71,5 @@ public class TestClient {
         StacItem item = new StacItem(itemURL);
         client.downloadItem(item, tmpDir);
     }
+*/
 }
