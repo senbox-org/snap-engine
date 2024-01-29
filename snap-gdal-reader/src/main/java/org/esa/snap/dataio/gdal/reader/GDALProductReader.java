@@ -130,7 +130,7 @@ public class GDALProductReader extends AbstractProductReader {
 
     static GeoCoding buildGeoCoding(Dataset gdalDataset, Rectangle subsetBounds, Product product) throws FactoryException, TransformException {
         String wellKnownText = gdalDataset.getProjectionRef();
-        if (wellKnownText.contains("LOCAL_CS[\"Unknown\"]")) {
+        if (wellKnownText.contains("LOCAL_CS[\"Unknown\"")) {
             wellKnownText = "";
         }
         if (!StringUtils.isNullOrEmpty(wellKnownText)) {
