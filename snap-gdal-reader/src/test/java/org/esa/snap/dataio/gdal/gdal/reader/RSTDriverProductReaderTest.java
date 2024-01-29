@@ -153,33 +153,33 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
                assertEquals(0, finalProduct.getMaskGroup().getNodeNames().length);
                assertEquals(1, finalProduct.getBands().length);
                assertEquals("GDAL", finalProduct.getProductType());
-               assertEquals(15, finalProduct.getSceneRasterWidth());
-               assertEquals(10, finalProduct.getSceneRasterHeight());
+               assertEquals(16, finalProduct.getSceneRasterWidth());
+               assertEquals(11, finalProduct.getSceneRasterHeight());
 
                Band band = finalProduct.getBand("band_1");
                assertEquals(20, band.getDataType());
-               assertEquals(150, band.getNumDataElems());
+               assertEquals(176, band.getNumDataElems());
 
                float bandValue = band.getSampleFloat(2, 0);
-               assertEquals(208.0f, bandValue, 0);
+               assertEquals(187.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(6, 4);
-               assertEquals(36.0f, bandValue, 0);
+               assertEquals(15.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(8, 2);
-               assertEquals(254.0f, bandValue, 0);
+               assertEquals(233.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(6, 7);
-               assertEquals(96.0f, bandValue, 0);
+               assertEquals(75.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(9, 7);
-               assertEquals(99.0f, bandValue, 0);
+               assertEquals(78.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(11, 5);
-               assertEquals(61.0f, bandValue, 0);
+               assertEquals(40.0f, bandValue, 0);
 
                bandValue = band.getSampleFloat(10, 7);
-               assertEquals(100.0f, bandValue, 0);
+               assertEquals(79.0f, bandValue, 0);
            } catch (ConversionException e) {
                e.printStackTrace();
                assertTrue(e.getMessage(), false);
