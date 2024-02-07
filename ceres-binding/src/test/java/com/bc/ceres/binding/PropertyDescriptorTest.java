@@ -59,8 +59,8 @@ public class PropertyDescriptorTest {
     }
 
     private static void assertThatPrimitiveTypesAreAlwaysNotNull(Class<?> primitiveType, Class<?> wrapperType) {
-        assertEquals(true, new PropertyDescriptor("vd", primitiveType).isNotNull());
-        assertEquals(false, new PropertyDescriptor("vd", wrapperType).isNotNull());
+        assertTrue(new PropertyDescriptor("vd", primitiveType).isNotNull());
+        assertFalse(new PropertyDescriptor("vd", wrapperType).isNotNull());
     }
 
        @Test
