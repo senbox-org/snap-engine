@@ -129,11 +129,13 @@ public class GDALProductReader extends AbstractProductReader {
     }
 
     static GeoCoding buildGeoCoding(Dataset gdalDataset, Rectangle subsetBounds, Product product) throws FactoryException, TransformException {
-        String wellKnownText = gdalDataset.getProjectionRef();
-        if (wellKnownText.contains("LOCAL_CS[\"Unknown\"")) {
-            wellKnownText = "";
+        CoordinateReferenceSystem mapCRS;
+        try {
+            mapCRS = CRS.parseWKT(gdalDataset.getProjectionRef().replaceAll(",?(AXIS\\[\"([A-Za-z]*?)\",[A-Z]*?])", ""));
+        } catch (Exception e) {
+            mapCRS = null;
         }
-        if (!StringUtils.isNullOrEmpty(wellKnownText)) {
+        if (mapCRS != null) {
             int imageWidth = gdalDataset.getRasterXSize();
             int imageHeight = gdalDataset.getRasterYSize();
             double[] adfGeoTransform = new double[6];
@@ -142,8 +144,6 @@ public class GDALProductReader extends AbstractProductReader {
             double originY = adfGeoTransform[3];
             double resolutionX = adfGeoTransform[1];
             double resolutionY = (adfGeoTransform[5] > 0) ? adfGeoTransform[5] : -adfGeoTransform[5];
-            wellKnownText = wellKnownText.replaceAll(",?(AXIS\\[\"([A-Za-z]*?)\",[A-Z]*?])", "");
-            CoordinateReferenceSystem mapCRS = CRS.parseWKT(wellKnownText);
             return ImageUtils.buildCrsGeoCoding(originX, originY, resolutionX, resolutionY, imageWidth, imageHeight, mapCRS, subsetBounds);
         } else if (product != null) {
             String gcpProjection = gdalDataset.getGCPProjection();
