@@ -15,8 +15,8 @@ import static org.junit.Assume.assumeTrue;
 
 public class AbstractGDALTest {
 
-    public static final String PROPERTY_NAME_DATA_DIR = "snap.gdal.tests.data.dir";
-    private static final String TEST_FOLDER_NAME = "_lib_gdal";
+    public static final String PROPERTY_NAME_DATA_DIR = "snap.reader.tests.data.dir";
+    private static final String TEST_FOLDER_NAME = "_gdal";
 
     protected Path libGDALTestsFolderPath;
 
