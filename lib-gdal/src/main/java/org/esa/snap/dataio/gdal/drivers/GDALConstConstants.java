@@ -171,4 +171,14 @@ public class GDALConstConstants {
     public static Integer gciPaletteindex() {
         return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "GCI_PaletteIndex");
     }
+
+    /**
+     * Calls the JNI GDAL CPLE_FileIO constant
+     *
+     * @return the JNI GDAL CPLE_FileIO constant
+     */
+    public static Integer cpleFileIO() {
+        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "CPLE_FileIO");
+    }
+
 }
