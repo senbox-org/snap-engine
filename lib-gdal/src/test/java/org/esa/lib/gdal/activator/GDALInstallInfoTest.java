@@ -50,8 +50,8 @@ public class GDALInstallInfoTest {
 
     @After
     public void cleanUp() {
-        TEST_INSTANCE.setLocations(Paths.get(currentValue));
         if (currentValue != null) {
+            TEST_INSTANCE.setLocations(Paths.get(currentValue));
             writePreferencesValue(currentValue);
         }
     }

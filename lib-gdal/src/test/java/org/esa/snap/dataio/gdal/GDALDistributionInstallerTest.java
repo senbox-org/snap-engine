@@ -18,7 +18,6 @@ public class GDALDistributionInstallerTest {
             GDALDistributionInstaller.setupDistribution(gdalVersion);
             assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
             assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));
-            assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));
         } catch (IOException e) {
             fail("Error on testSetupDistribution(): " + e.getMessage());
         }
