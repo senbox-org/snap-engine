@@ -196,7 +196,7 @@ public class TypeValidatorTest {
         testValid(typeValidator, propertyContainer, s, this);
     }
 
-    private void testInvalid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object invalidValue) {
+    private static void testInvalid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object invalidValue) {
         final Property property = propertyContainer.getProperty(name);
         try {
             typeValidator.validateValue(property, invalidValue);
@@ -212,7 +212,7 @@ public class TypeValidatorTest {
         }
     }
 
-    private void testValid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object validValue) {
+    private static void testValid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object validValue) {
         final Property property = propertyContainer.getProperty(name);
         try {
             typeValidator.validateValue(property, validValue);

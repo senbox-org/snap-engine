@@ -89,7 +89,6 @@ public abstract class AbstractDomElementTest {
         element.addChild(createDomElement("z", "98"));
 
         assertNull(element.getParent());
-        assertNotNull(element.getChildCount());
         assertEquals(3, element.getChildCount());
 
         assertNotNull(element.getChild("x"));
@@ -105,8 +104,7 @@ public abstract class AbstractDomElementTest {
         assertSame(element, element.getChild("y").getParent());
         assertSame(element, element.getChild("z").getParent());
 
-        assertEquals("" +
-                        "<point>\n" +
+        assertEquals("<point>\n" +
                         "<x>56</x>\n" +
                         "<y>24</y>\n" +
                         "<z>98</z>\n" +
@@ -126,8 +124,7 @@ public abstract class AbstractDomElementTest {
         element.getChild("configuration").createChild("transparency").setValue("0.6");
         String xml = element.toXml();
 
-        assertEquals("" +
-                        "<layer id=\"a62b98ff5\">\n" +
+        assertEquals("<layer id=\"a62b98ff5\">\n" +
                         "<name>ROI</name>\n" +
                         "<visible>true</visible>\n" +
                         "<configuration>\n" +
