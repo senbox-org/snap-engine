@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
+import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +37,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
+import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 import static org.junit.Assert.*;
 
 public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
@@ -46,6 +49,8 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
     private List<Path> tempDirectories = new ArrayList<>();
     private ZnapProductWriter productWriter;
     private ZnapProductReader productReader;
+    private Preferences preferences;
+    private String oldValue;
 
     @Before
     public void setUp() throws Exception {
@@ -72,8 +77,12 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
 
         product.setSceneGeoCoding(new TiePointGeoCoding(lat, lon));
 
+        preferences = Config.instance("snap").load().preferences();
+        oldValue = preferences.get(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Properties properties = new Properties();
-        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+        properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
 
         productWriter = (ZnapProductWriter) new ZnapProductWriterPlugIn().createWriterInstance();
         productWriter.setPreferencesForTestPurposesOnly(properties);
@@ -95,6 +104,8 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
             }
         }
         tempDirectories.clear();
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, oldValue);
     }
 
     @Test
