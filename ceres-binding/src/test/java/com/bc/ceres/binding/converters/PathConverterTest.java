@@ -18,29 +18,34 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
-public class FileConverter implements Converter<File> {
+public class PathConverterTest extends AbstractConverterTest {
+
+    private PathConverter converter;
 
     @Override
-    public Class<File> getValueType() {
-        return File.class;
+    public Converter getConverter() {
+        if (converter == null) {
+            converter = new PathConverter();
+        }
+        return converter;
     }
 
-    @Override
-    public File parse(String text) throws ConversionException {
-        if (text.isEmpty()) {
-            return null;
-        }
-        return new File(text);
-    }
+    @Test
+    public void testConverter() throws ConversionException {
+        testValueType(Path.class);
 
-    @Override
-    public String format(File value) {
-        if (value == null) {
-            return "";
-        }
-        return value.getPath();
+        Path value = Path.of("/usr/local");
+
+        testParseSuccess(value, "/usr/local");
+        testParseSuccess(null, "");
+
+        testFormatSuccess(value.toAbsolutePath().toString(), value);
+        testFormatSuccess("", null);
+
+        assertNullCorrectlyHandled();
     }
 }

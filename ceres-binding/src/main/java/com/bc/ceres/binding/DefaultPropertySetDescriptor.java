@@ -55,7 +55,7 @@ public class DefaultPropertySetDescriptor implements PropertySetDescriptor {
     public String[] getPropertyNames() {
         if (propertyDescriptors != null) {
             Set<String> strings = propertyDescriptors.keySet();
-            return strings.toArray(new String[strings.size()]);
+            return strings.toArray(new String[0]);
         }else {
             return new String[0];
         }

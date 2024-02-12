@@ -20,7 +20,6 @@ import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 
 import java.awt.Font;
-import java.text.MessageFormat;
 
 public class FontConverter implements Converter<Font> {
 
@@ -52,7 +51,7 @@ public class FontConverter implements Converter<Font> {
     }
 
     private static String getStyleName(Font font) {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(6);
 
         if (font.isPlain()) {
             sb.append("plain");

@@ -112,7 +112,7 @@ public class PropertyTest {
         assertEquals(LEGAL_OLONG, vm.getValue());
     }
 
-    private void testSetIllegalValue(Property property) {
+    private static void testSetIllegalValue(Property property) {
         try {
             property.setValue(ILLEGAL);
             fail("ValidationException expected");
@@ -160,7 +160,7 @@ public class PropertyTest {
         testPCLDouble(odouble, listener, MODE_FUZZY);
     }
 
-    private void testPCLLong(Property model, ValueModelChangeListener listener) throws ValidationException {
+    private static void testPCLLong(Property model, ValueModelChangeListener listener) throws ValidationException {
         final int n0 = listener.events.size();
         model.setValue(1L);
         assertEquals(1, listener.events.size() - n0);
@@ -170,7 +170,7 @@ public class PropertyTest {
         assertEquals(2, listener.events.size() - n0);
     }
 
-    private void testPCLFloat(Property model, ValueModelChangeListener listener, String mode) throws ValidationException {
+    private static void testPCLFloat(Property model, ValueModelChangeListener listener, String mode) throws ValidationException {
         final int n0 = listener.events.size();
         model.setValue(1.0f);
         assertEquals(1, listener.events.size() - n0);
@@ -191,7 +191,7 @@ public class PropertyTest {
         }
     }
 
-    private void testPCLDouble(Property model, ValueModelChangeListener listener, String mode) throws ValidationException {
+    private static void testPCLDouble(Property model, ValueModelChangeListener listener, String mode) throws ValidationException {
         final int n0 = listener.events.size();
         model.setValue(1.0);
         assertEquals(1, listener.events.size() - n0);

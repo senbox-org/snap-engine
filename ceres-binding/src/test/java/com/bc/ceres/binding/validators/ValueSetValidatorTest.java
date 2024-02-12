@@ -44,11 +44,11 @@ public class ValueSetValidatorTest {
         validator.validateValue(createProperty(descriptor), "d");
     }
 
-    private Property createProperty(PropertyDescriptor descriptor) {
+    private static Property createProperty(PropertyDescriptor descriptor) {
         return new Property(descriptor, new DefaultPropertyAccessor());
     }
 
-    private PropertyDescriptor createPropertyDescriptor() {
+    private static PropertyDescriptor createPropertyDescriptor() {
         final PropertyDescriptor descriptor = new PropertyDescriptor("x", String.class);
         descriptor.setValueSet(new ValueSet(new Object[]{"a", "b", "c"}));
         return descriptor;
