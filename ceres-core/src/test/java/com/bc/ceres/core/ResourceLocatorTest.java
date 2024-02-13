@@ -23,24 +23,8 @@ public class ResourceLocatorTest {
         int size = resources.size();
         assertTrue(size > 5);
         for (Path resource : resources) {
-            //System.out.println("path = " + path);
             assertNotNull(resource);
             assertTrue(Files.exists(resource));
-
-            Path resolve = resource.resolve("..").resolve("..").resolve("module.xml").normalize();
-            System.out.println("resolve = " + resolve.toUri() + ", " + Files.exists(resolve));
-
-           //new ModuleReader(null).readFromManifest()
-
-/*
-            System.out.println("manifest: " + resource.toUri());
-            Manifest manifest = new Manifest(Files.newInputStream(resource));
-            Attributes mainAttributes = manifest.getMainAttributes();
-            Set<Map.Entry<Object, Object>> entries = mainAttributes.entrySet();
-            for (Map.Entry<Object, Object> entry : entries) {
-                System.out.println(">> " + entry.getKey() + ": " + entry.getValue());
-            }
-*/
         }
     }
 

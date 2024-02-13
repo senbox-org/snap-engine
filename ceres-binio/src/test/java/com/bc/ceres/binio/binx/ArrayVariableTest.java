@@ -18,7 +18,9 @@ package com.bc.ceres.binio.binx;
 
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataFormat;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +29,7 @@ import java.net.URL;
 
 import static org.junit.Assert.*;
 
+@RunWith(LongTestRunner.class)
 public class ArrayVariableTest {
 
     @Test
