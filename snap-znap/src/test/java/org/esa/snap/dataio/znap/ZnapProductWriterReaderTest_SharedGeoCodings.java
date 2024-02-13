@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Before;
@@ -37,8 +38,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
+import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 import static org.junit.Assert.*;
 
 public class ZnapProductWriterReaderTest_SharedGeoCodings {
@@ -46,11 +49,17 @@ public class ZnapProductWriterReaderTest_SharedGeoCodings {
     private Product product;
     private final List<Path> tempDirectories = new ArrayList<>();
     private Properties properties;
+    private String oldValue;
+    private Preferences preferences;
 
     @Before
     public void setUp() throws Exception {
+        preferences = Config.instance("snap").load().preferences();
+        oldValue = preferences.get(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         properties = new Properties();
-        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+        properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
         product = new Product("test", "type", 3, 4);
         final Date start = new Date();
         final Date end = new Date(start.getTime() + 4000);
@@ -93,6 +102,8 @@ public class ZnapProductWriterReaderTest_SharedGeoCodings {
 
     @After
     public void tearDown() {
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, oldValue);
+
         for (final Path tempDirectory : tempDirectories) {
             try {
                 if (Files.exists(tempDirectory)) {

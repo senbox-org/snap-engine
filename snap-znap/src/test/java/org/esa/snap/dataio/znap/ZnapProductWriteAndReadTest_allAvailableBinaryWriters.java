@@ -26,7 +26,9 @@ import org.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.envi.EnviProductWriterPlugIn;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdf4WriterPlugIn;
+import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 
 import static com.bc.ceres.core.ProgressMonitor.NULL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
@@ -50,6 +53,8 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
 
     private static Path baseTestPath;
     private Product dummy;
+    private String oldValue;
+    private Preferences preferences;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -79,6 +84,14 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
     @Before
     public void setUp() throws Exception {
         dummy = createDummyProduct();
+
+        preferences = Config.instance("snap").load().preferences();
+        oldValue = preferences.get(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
+    }
+
+    @After
+    public void tearDown() {
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, oldValue);
     }
 
     @Test
@@ -89,6 +102,9 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         properties.put(PROPERTY_NAME_BINARY_FORMAT, EnviProductWriterPlugIn.FORMAT_NAME);
         final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn(), properties);
         writer.setPreferencesForTestPurposesOnly(properties);
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Band band = dummy.getBand("band");
 
         final Path testDir = baseTestPath.resolve("ENVI");
@@ -130,6 +146,9 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         properties.put(PROPERTY_NAME_BINARY_FORMAT, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
         final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn(), properties);
         writer.setPreferencesForTestPurposesOnly(properties);
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Band band = dummy.getBand("band");
 
         //execution
@@ -168,6 +187,9 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         properties.put(PROPERTY_NAME_BINARY_FORMAT, BigGeoTiffProductWriterPlugIn.FORMAT_NAME);
         final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn(), properties);
         writer.setPreferencesForTestPurposesOnly(properties);
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Band band = dummy.getBand("band");
         final Path testDir = baseTestPath.resolve("GeoTIFF_BigTIFF");
 
@@ -206,6 +228,9 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
         properties.put(PROPERTY_NAME_BINARY_FORMAT, new CfNetCdf4WriterPlugIn().getFormatNames()[0]);
         final ZnapProductWriter writer = new ZnapProductWriter(new ZnapProductWriterPlugIn(), properties);
         writer.setPreferencesForTestPurposesOnly(properties);
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Band band = dummy.getBand("band");
 
         //execution
