@@ -115,6 +115,7 @@
         <module>lib-openjpeg</module>
         <module>lib-gdal</module>
         <module>snap-test-utils</module>
+        <module>snap-stac</module>
     </modules>
 
     <organization>
