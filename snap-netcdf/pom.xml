@@ -31,6 +31,10 @@
         ODESA.
     </description>
 
+    <properties>
+        <netcdf.version>5.3.3</netcdf.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -64,8 +68,9 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
+            <version>${netcdf.version}</version>
         </dependency>
-        
+
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
         Otherwise we always get on the command-line:
