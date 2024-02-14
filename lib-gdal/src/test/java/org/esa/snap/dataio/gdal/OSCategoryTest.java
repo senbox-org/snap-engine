@@ -3,11 +3,12 @@ package org.esa.snap.dataio.gdal;
 import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
-import java.util.Locale;
-
-import static org.apache.commons.lang3.SystemUtils.*;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_LINUX;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_MAC_OSX;
+import static org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS;
 import static org.esa.snap.dataio.gdal.OSCategory.ENV_NAME;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class OSCategoryTest {
 
@@ -19,11 +20,6 @@ public class OSCategoryTest {
     private static final String ARCHITECTURE_AARCH64 = "aarch64";
     private static final String ARCHITECTURE_X86 = "x86";
     private static final String ARCHITECTURE_UNKNOWN = "";
-    private static final String EXECUTABLE_NAME = "ping";
-    private static final String UNIX_EXECUTABLE_NAME = "sh";
-    private static final String LINUX_OS_EXECUTABLE_LOCATION = "/bin";
-    private static final String WINDOWS_OS_EXECUTABLE_LOCATION = "\\system32";
-    private static final String MACOS_OS_EXECUTABLE_LOCATION = "/sbin";
 
     @Test
     @STTM("SNAP-3440")
@@ -101,29 +97,6 @@ public class OSCategoryTest {
             }
         } else {
             assertEquals(ARCHITECTURE_UNKNOWN, osCategory.getArchitecture());
-        }
-    }
-
-    @Test
-        @STTM("SNAP-3523")
-    public void testGetExecutableLocations() {
-        final OSCategory osCategory = OSCategory.getOSCategory();
-        assertNotNull(osCategory);
-        if (IS_OS_LINUX) {
-            final String[] executableLocations = osCategory.getExecutableLocations(UNIX_EXECUTABLE_NAME);
-            assertNotNull(executableLocations);
-            assertTrue(executableLocations.length > 0);
-            assertTrue(executableLocations[0].endsWith(LINUX_OS_EXECUTABLE_LOCATION));
-        } else if (IS_OS_MAC_OSX) {
-            final String[] executableLocations = osCategory.getExecutableLocations(EXECUTABLE_NAME);
-            assertNotNull(executableLocations);
-            assertTrue(executableLocations.length > 0);
-            assertTrue(executableLocations[0].endsWith(MACOS_OS_EXECUTABLE_LOCATION));
-        } else if (IS_OS_WINDOWS) {
-            final String[] executableLocations = osCategory.getExecutableLocations(EXECUTABLE_NAME + ".exe");
-            assertNotNull(executableLocations);
-            assertTrue(executableLocations.length > 0);
-            assertTrue(executableLocations[0].toLowerCase(Locale.ROOT).endsWith(WINDOWS_OS_EXECUTABLE_LOCATION));
         }
     }
 

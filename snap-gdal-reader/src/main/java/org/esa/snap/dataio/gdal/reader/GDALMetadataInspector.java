@@ -31,14 +31,15 @@ public class GDALMetadataInspector implements MetadataInspector {
             int bandCount = gdalDataset.getRasterCount();
             for (int bandIndex = 0; bandIndex < bandCount; bandIndex++) {
                 // bands are not 0-base indexed, so we must add 1
-                Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1);
+                try (Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1)) {
 
-                String bandName = GDALProductReader.computeBandName(gdalBand, bandIndex);
-                metadata.getBandList().add(bandName);
+                    String bandName = GDALProductReader.computeBandName(gdalBand, bandIndex);
+                    metadata.getBandList().add(bandName);
 
-                String maskName = GDALProductReader.computeMaskName(gdalBand, bandName);
-                if (maskName != null) {
-                    metadata.getMaskList().add(maskName);
+                    String maskName = GDALProductReader.computeMaskName(gdalBand, bandName);
+                    if (maskName != null) {
+                        metadata.getMaskList().add(maskName);
+                    }
                 }
             }
 

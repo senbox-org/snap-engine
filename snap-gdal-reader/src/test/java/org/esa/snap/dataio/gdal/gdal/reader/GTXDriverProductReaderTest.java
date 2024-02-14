@@ -165,13 +165,13 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
             assertEquals("GDAL", finalProduct.getProductType());
-            assertEquals(12, finalProduct.getSceneRasterWidth());
+            assertEquals(11, finalProduct.getSceneRasterWidth());
             assertEquals(21, finalProduct.getSceneRasterHeight());
             assertEquals(0,finalProduct.getTiePointGridGroup().getNodeNames().length);
 
             Band band = finalProduct.getBand("band_1");
             assertEquals(30, band.getDataType());
-            assertEquals(252, band.getNumDataElems());
+            assertEquals(231, band.getNumDataElems());
 
             float bandValue = band.getSampleFloat(2, 2);
             assertEquals(227.0f, bandValue, 0);

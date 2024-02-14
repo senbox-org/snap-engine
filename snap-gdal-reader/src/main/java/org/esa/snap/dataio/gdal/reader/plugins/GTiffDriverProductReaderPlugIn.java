@@ -31,7 +31,7 @@ public class GTiffDriverProductReaderPlugIn extends AbstractDriverProductReaderP
         final Path filePath = getInput(input);
         try {
             // 2020-07-21 CC Added COG check
-            return Utils.isCOGGeoTIFF(filePath) ? DecodeQualification.INTENDED : DecodeQualification.UNABLE;
+            return Utils.isCOGGeoTIFF(filePath) ? DecodeQualification.INTENDED : DecodeQualification.SUITABLE;
         } catch (Exception e) {
             return DecodeQualification.UNABLE;
         }
