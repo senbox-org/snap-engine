@@ -1,0 +1,9 @@
+{
+    "testProducts": [
+        {
+            "id": "GDAL-COG-product",
+            "relativePath": "_gdal/s1a-1-cog.tiff",
+            "description": "GDAL COG product"
+        }
+    ]
+}
