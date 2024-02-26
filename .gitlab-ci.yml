@@ -1,3 +1,14 @@
 # included templates
 include:
   - 'https://gitlab.com/senbox-org/snap-engine/raw/master/.gitlab-ci.yml'
+
+variables:
+  MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-eclipse-temurin-8"
+
+# Only Java 11 is available
+windows:
+  when: manual
+
+# Only Java 11 is available
+macos:
+  when: manual
