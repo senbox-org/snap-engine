@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>10.0.0-RC2</version>
+        <version>10.0.0</version>
     </parent>
 
     <groupId>ncsa.hdf</groupId>
@@ -29,7 +29,7 @@
     <packaging>nbm</packaging>
 
     <properties>
-        <snap.version>10.0.0-RC2</snap.version>
+        <snap.version>10.0.0</snap.version>
     </properties>
 
 

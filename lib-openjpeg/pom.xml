@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>10.0.0-RC2</version>
+        <version>10.0.0</version>
     </parent>
 
     <artifactId>lib-openjpeg</artifactId>
