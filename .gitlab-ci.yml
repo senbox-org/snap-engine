@@ -21,7 +21,7 @@ variables:
   MAVEN_DEPLOY_ENABLED: "true"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
-  SONAR_BASE_ARGS: sonar:sonar -Dsonar.projectKey=$CI_PROJECT_NAME
+  SONAR_BASE_ARGS: "sonar:sonar -Dsonar.projectKey=$CI_PROJECT_NAME"
 
 # your pipeline stages
 stages:
@@ -65,10 +65,13 @@ windows:
   tags: [windows]
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
+    - if: '$CI_COMMIT_TAG != null'
+      when: manual
+      allow_failure: true
   allow_failure: false
   needs: []
   script:
-    - mvn clean package
+    - mvn clean package  %MAVEN_CLI_OPTS%
 
 macos:
   stage: test
@@ -81,7 +84,7 @@ macos:
   allow_failure: true
   needs: []
   script:
-    - mvn -q clean package %MAVEN_CLI_OPTS%
+    - mvn -q clean package
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
