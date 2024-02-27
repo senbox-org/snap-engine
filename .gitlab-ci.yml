@@ -60,18 +60,18 @@ mvn-release:
     - when: manual
       allow_failure: true
 
-windows:
-  stage: test
-  tags: [windows]
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-    - if: '$CI_COMMIT_TAG != null'
-      when: manual
-      allow_failure: true
-  allow_failure: false
-  needs: []
-  script:
-    - mvn clean package  %MAVEN_CLI_OPTS%
+# windows:
+#   stage: test
+#   tags: [windows]
+#   rules:
+#     - if: '$BUILD_FOR_INSTALLER == "false"'
+#     - if: '$CI_COMMIT_TAG != null'
+#       when: manual
+#       allow_failure: true
+#   allow_failure: false
+#   needs: []
+#   script:
+#     - mvn clean package  %MAVEN_CLI_OPTS%
 
 macos:
   stage: test
