@@ -81,7 +81,7 @@ macos:
   allow_failure: true
   needs: []
   script:
-    - mvn -q clean package
+    - mvn -q clean package %MAVEN_CLI_OPTS%
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
