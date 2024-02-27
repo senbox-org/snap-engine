@@ -3082,18 +3082,19 @@ public class Product extends ProductNode {
 
         @Override
         public boolean matches(String name) {
-            if (name != null && group != null) {
-                name = name.trim();
-                if (name.contains("/") || group.contains("/")) {
-                    // todo consider whether to split and use basename
-                    return name.contains(group);
-                }
 
-                if (name.equals(group) || name.startsWith(group + "_")) {
-                    return true;
-                } else {
-                    return false;
-                }
+            if (name != null && group != null) {
+                    name = name.trim();
+                    if (name.contains("/") || group.contains("/")) {
+                        // todo consider whether to split and use basename
+                        return name.contains(group);
+                    } else {
+                        if (name.equals(group) || name.startsWith(group + "_")) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
             } else {
                 return false;
             }
