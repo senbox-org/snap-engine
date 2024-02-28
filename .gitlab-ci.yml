@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.9.1"
+    ref: "3.7.1"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
