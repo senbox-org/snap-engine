@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>10.0.0-SNAPSHOT</version>
+    <version>11.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -51,7 +51,7 @@
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
-        <esa-snappy.version>10.0.0-SNAPSHOT</esa-snappy.version>
+        <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
     <modules>
