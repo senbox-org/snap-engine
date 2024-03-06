@@ -1,10 +1,12 @@
 package org.esa.snap.core.util;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.test.LongTestRunner;
 import com.google.common.jimfs.Jimfs;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
@@ -19,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Marco Peters
  */
+@RunWith(LongTestRunner.class)
 public class ResourceInstallerTest {
 
     private Path sourceDir;
