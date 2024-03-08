@@ -106,7 +106,6 @@
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>lib-hdf</artifactId>
-            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>

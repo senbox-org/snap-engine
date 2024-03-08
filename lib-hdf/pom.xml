@@ -25,7 +25,6 @@
 
     <groupId>ncsa.hdf</groupId>
     <artifactId>lib-hdf</artifactId>
-    <version>${hdf.native.version}</version>
     <packaging>nbm</packaging>
 
     <properties>
