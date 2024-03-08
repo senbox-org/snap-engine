@@ -267,6 +267,7 @@
             <dependency>
                 <groupId>ncsa.hdf</groupId>
                 <artifactId>lib-hdf</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
