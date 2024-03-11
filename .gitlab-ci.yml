@@ -17,6 +17,7 @@ variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   MAVEN_DEPLOY_SNAPSHOT_WITH_SLUG_ENABLED: "false"
+  BUILD_FOR_INSTALLER: "false"
   MAVEN_DEPLOY_ENABLED: "true"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
@@ -51,7 +52,7 @@ mvn-sonar:
   image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   allow_failure: true
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 # Used to publish release on Github (only manual action & non blocking)
 mvn-release:
@@ -63,7 +64,7 @@ windows:
   stage: test
   tags: [windows]
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
     GIT_STRATEGY: clone
     FF_ENABLE_JOB_CLEANUP: 'true'
@@ -78,7 +79,7 @@ macos:
   stage: test
   tags: [mac]
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
     JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
     TESTDATA_ROOT: "/Users/otb/testData"
@@ -107,14 +108,14 @@ pending:
   extends:
     - .report-status
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
 
 success:
   stage: .post
   extends:
     - .report-status
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_success
 
 failure:
@@ -122,5 +123,5 @@ failure:
   extends:
     - .report-status
   rules:
-    - if: '$CI_PIPELINE_TRIGGERED == "false"'
+    - if: '$BUILD_FOR_INSTALLER == "false"'
   when: on_failure
