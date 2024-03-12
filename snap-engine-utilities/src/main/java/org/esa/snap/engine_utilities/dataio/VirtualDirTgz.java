@@ -1,6 +1,9 @@
 package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
+import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.units.qual.A;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.commons.FilePath;
 import org.esa.snap.engine_utilities.commons.FilePathInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -20,8 +23,8 @@ import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -33,19 +36,20 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     private final Path archiveFile;
     private File extractDir;
+    private HashMap<String, File> locationMap;
 
     public VirtualDirTgz(File tgz) {
         if (tgz == null) {
             throw new IllegalArgumentException("Input file shall not be null");
         }
-        this.archiveFile = tgz.toPath();
+        archiveFile = tgz.toPath();
     }
 
     public VirtualDirTgz(Path tgz) {
         if (tgz == null) {
-            throw new NullPointerException("Input file shall not be null");
+            throw new IllegalArgumentException("Input file shall not be null");
         }
-        this.archiveFile = tgz;
+        archiveFile = tgz;
     }
 
     public static String getFilenameFromPath(String path) {
@@ -114,9 +118,13 @@ public class VirtualDirTgz extends VirtualDirEx {
     @Override
     public File getFile(String childRelativePath) throws IOException {
         ensureUnpacked(null);
-        File file = new File(this.extractDir, childRelativePath);
+        File file = new File(extractDir, childRelativePath);
         if (!(file.isFile() || file.isDirectory())) {
-            throw new FileNotFoundException("The path '"+childRelativePath+"' does not exist in the folder '"+this.extractDir.getAbsolutePath()+"'.");
+            final File fileFromMapping = locationMap.get(childRelativePath);
+            if (fileFromMapping == null) {
+                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + this.extractDir.getAbsolutePath() + "'.");
+            }
+            return fileFromMapping;
         }
         return file;
     }
@@ -178,16 +186,17 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public Path makeLocalTempFolder() throws IOException {
-        if (this.extractDir == null) {
-            this.extractDir = VirtualDir.createUniqueTempDir();
+        if (extractDir == null) {
+            extractDir = VirtualDir.createUniqueTempDir();
         }
-        return this.extractDir.toPath();
+        return extractDir.toPath();
     }
 
     public void ensureUnpacked(File unpackFolder) throws IOException {
-        if (this.extractDir == null) {
-            this.extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
+        if (extractDir == null) {
+            extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
 
+            locationMap = new HashMap<>();
             try (TarArchiveInputStream tarStream = buildTarInputStream()) {
                 byte[] data = new byte[TRANSFER_BUFFER_SIZE];
                 TarArchiveEntry entry;
@@ -200,8 +209,9 @@ public class VirtualDirTgz extends VirtualDirEx {
                         longLink = null;
                     }
                     if (entry.isDirectory()) {
-                        File directory = new File(this.extractDir, entryName);
-                        ensureDirectory(directory);
+                        File directory = new File(extractDir, entryName);
+                        ensureDirectory(directory, extractDir);
+
                         continue;
                     }
 
@@ -214,13 +224,13 @@ public class VirtualDirTgz extends VirtualDirEx {
 
                     File targetDir;
                     if (tarPath == null) {
-                        targetDir = this.extractDir;
+                        targetDir = extractDir;
                     } else {
-                        targetDir = new File(this.extractDir, tarPath);
+                        targetDir = new File(extractDir, tarPath);
                     }
 
-                    ensureDirectory(targetDir);
-                    File targetFile = new File(targetDir, fileNameFromPath);
+                    final File ensuredDirectory = ensureDirectory(targetDir, extractDir);
+                    final File targetFile = new File(ensuredDirectory, fileNameFromPath);
                     if (!entryIsLink && targetFile.isFile()) {
                         continue;
                     }
@@ -228,6 +238,8 @@ public class VirtualDirTgz extends VirtualDirEx {
                     if (!entryIsLink && !targetFile.createNewFile()) {
                         throw new IOException("Unable to create file: " + targetFile.getAbsolutePath());
                     }
+
+                    locationMap.put(entryName, targetFile);
 
                     try (FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
                          BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
@@ -270,12 +282,51 @@ public class VirtualDirTgz extends VirtualDirEx {
         }
     }
 
-    private void ensureDirectory(File targetDir) throws IOException {
+    private File ensureDirectory(File targetDir, File extractDir) throws IOException {
         if (!targetDir.isDirectory()) {
             if (!targetDir.mkdirs()) {
-                throw new IOException("unable to create directory: " + targetDir.getAbsolutePath());
+                final File ensuredTargetDir = ensureCorrectPathSegments(targetDir, extractDir);
+                if (!ensuredTargetDir.isDirectory()) {
+                    if (!ensuredTargetDir.mkdirs()) {
+                        throw new IOException("unable to create directory: " + ensuredTargetDir.getAbsolutePath());
+                    }
+                }
+                return ensuredTargetDir;
             }
         }
+
+        return targetDir;
+    }
+
+    static File ensureCorrectPathSegments(File targetDir, File extractDir) {
+        final String extractDirName = FileUtils.getFilenameWithoutExtension(extractDir);
+        final StringTokenizer stringTokenizer = new StringTokenizer(targetDir.getAbsolutePath(), File.separator);
+
+        final ArrayList<String> segmentList = new ArrayList<>();
+        int pathLength = 0;
+        while (stringTokenizer.hasMoreTokens()) {
+            final String token = stringTokenizer.nextToken();
+            segmentList.add(token);
+
+            pathLength += token.length() + 1;
+        }
+
+        if (pathLength > 255)  {
+            final long nanoTime = System.nanoTime();
+            Path path = Paths.get(extractDir.getAbsolutePath());
+            path = path.resolve(Long.toString(nanoTime));
+            return path.toFile();
+        }
+
+        final String[] segments = segmentList.toArray(new String[0]);
+        final int index = ArrayUtils.indexOf(segments, extractDirName) + 1;
+        Path path = Paths.get(extractDir.getAbsolutePath());
+        for (int i = index; i < segments.length; i++){
+            segments[i] = StringUtils.createValidName(segments[i], new char[]{'.', '-'}, '_');
+            path = path.resolve(segments[i]);
+        }
+
+        return path.toFile();
     }
 
     @Override
