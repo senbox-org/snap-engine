@@ -313,7 +313,7 @@ public class VirtualDirTgz extends VirtualDirEx {
         final int index = ArrayUtils.indexOf(segments, extractDirName) + 1;
         Path path = Paths.get(extractDir.getAbsolutePath());
         for (int i = index; i < segments.length; i++) {
-            segments[i] = StringUtils.createValidName(segments[i], new char[]{'.', '-'}, '_');
+            segments[i] = StringUtils.createValidName(segments[i], new char[]{'.', '-', '/'}, '_');
             path = path.resolve(segments[i]);
         }
 
