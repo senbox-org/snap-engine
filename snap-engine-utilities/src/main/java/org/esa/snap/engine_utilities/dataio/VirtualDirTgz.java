@@ -2,7 +2,6 @@ package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
 import org.apache.commons.lang3.ArrayUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.commons.FilePath;
 import org.esa.snap.engine_utilities.commons.FilePathInputStream;
@@ -20,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,52 +52,36 @@ public class VirtualDirTgz extends VirtualDirEx {
         archiveFile = tgz;
     }
 
-    public static String getFilenameFromPath(String path) {
-        int lastSepIndex = path.lastIndexOf("/");
-        if (lastSepIndex == -1) {
-            lastSepIndex = path.lastIndexOf("\\");
-            if (lastSepIndex == -1) {
-                return path;
-            }
-        }
-
-        return path.substring(lastSepIndex + 1);
-    }
-
     public static boolean isTgz(String filename) {
-        String lowerCaseFilename = filename.toLowerCase();
+        final String lowerCaseFilename = filename.toLowerCase();
         return lowerCaseFilename.endsWith(".tgz") || lowerCaseFilename.endsWith(".tar.gz");
     }
 
     public static boolean isTbz(String filename) {
-        String lcName = filename.toLowerCase();
+        final String lcName = filename.toLowerCase();
         return lcName.endsWith(".tar.bz") || lcName.endsWith(".tbz") ||
                 lcName.endsWith(".tar.bz2") || lcName.endsWith(".tbz2");
     }
 
-    public static boolean isTar(String filename) {
-        return ".tar".equals(FileUtils.getExtension(filename));
-    }
-
     @Override
     public String getBasePath() {
-        return this.archiveFile.toFile().getPath();
+        return archiveFile.toFile().getPath();
     }
 
     @Override
     public File getBaseFile() {
-        return this.archiveFile.toFile();
+        return archiveFile.toFile();
     }
 
     @Override
     public Path buildPath(String first, String... more) {
-        FileSystem fileSystem = this.archiveFile.getFileSystem();
+        FileSystem fileSystem = archiveFile.getFileSystem();
         return fileSystem.getPath(first, more);
     }
 
     @Override
     public String getFileSystemSeparator() {
-        FileSystem fileSystem = this.archiveFile.getFileSystem();
+        FileSystem fileSystem = archiveFile.getFileSystem();
         return fileSystem.getSeparator();
     }
 
@@ -122,7 +106,7 @@ public class VirtualDirTgz extends VirtualDirEx {
         if (!(file.isFile() || file.isDirectory())) {
             final File fileFromMapping = locationMap.get(childRelativePath);
             if (fileFromMapping == null) {
-                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + this.extractDir.getAbsolutePath() + "'.");
+                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + extractDir.getAbsolutePath() + "'.");
             }
             return fileFromMapping;
         }
@@ -151,20 +135,24 @@ public class VirtualDirTgz extends VirtualDirEx {
     }
 
     public boolean exists(String s) {
-        return Files.exists(this.archiveFile);
+        return Files.exists(archiveFile);
     }
 
     @Override
     public void close() {
-        if (this.extractDir != null) {
-            FileUtils.deleteTree(this.extractDir);
-            this.extractDir = null;
+        if (extractDir != null) {
+            FileUtils.deleteTree(extractDir);
+            extractDir = null;
+        }
+        if (locationMap != null) {
+            locationMap.clear();
+            locationMap = null;
         }
     }
 
     @Override
     public boolean isCompressed() {
-        final String fileName = this.archiveFile.getFileName().toString();
+        final String fileName = archiveFile.getFileName().toString();
         return isTgz(fileName) || isTbz(fileName);
     }
 
@@ -181,7 +169,7 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public File getTempDir() {
-        return this.extractDir;
+        return extractDir;
     }
 
     @Override
@@ -215,7 +203,7 @@ public class VirtualDirTgz extends VirtualDirEx {
                         continue;
                     }
 
-                    final String fileNameFromPath = getFilenameFromPath(entryName);
+                    final String fileNameFromPath = FileUtils.getFilenameFromPath(entryName);
                     final int pathIndex = entryName.indexOf(fileNameFromPath);
                     String tarPath = null;
                     if (pathIndex > 0) {
@@ -249,7 +237,7 @@ public class VirtualDirTgz extends VirtualDirEx {
                             bufferedOutputStream.write(data, 0, count);
                             //if the entry is a link, must be saved, since the name of the next entry depends on this
                             if (entryIsLink) {
-                                longLink = (longLink == null ? "" : longLink) + new String(data, 0, count);
+                                longLink = (longLink == null ? "" : longLink) + new String(data, 0, count, StandardCharsets.UTF_8);
                             } else {
                                 longLink = null;
                             }
@@ -270,7 +258,7 @@ public class VirtualDirTgz extends VirtualDirEx {
         CompressorInputStream compressorInputStream = null;
         InputStream stream = null;
         try {
-            stream = new BufferedInputStream(Files.newInputStream(this.archiveFile));
+            stream = new BufferedInputStream(Files.newInputStream(archiveFile));
             compressorInputStream = compressorStreamFactory.createCompressorInputStream(stream);
             return new TarArchiveInputStream(compressorInputStream);
         } catch (IOException | CompressorException | IllegalArgumentException ex) {
@@ -285,6 +273,8 @@ public class VirtualDirTgz extends VirtualDirEx {
     private File ensureDirectory(File targetDir, File extractDir) throws IOException {
         if (!targetDir.isDirectory()) {
             if (!targetDir.mkdirs()) {
+                // if this fails, we try to correct eventually present invalid characters in the path or
+                // shorten the path if it is too long for windows.
                 final File ensuredTargetDir = ensureCorrectPathSegments(targetDir, extractDir);
                 if (!ensuredTargetDir.isDirectory()) {
                     if (!ensuredTargetDir.mkdirs()) {
@@ -311,7 +301,8 @@ public class VirtualDirTgz extends VirtualDirEx {
             pathLength += token.length() + 1;
         }
 
-        if (pathLength > 255)  {
+        // overall target path is too long for windows, replace with a unique, shorter path
+        if (pathLength > 255) {
             final long nanoTime = System.nanoTime();
             Path path = Paths.get(extractDir.getAbsolutePath());
             path = path.resolve(Long.toString(nanoTime));
@@ -321,7 +312,7 @@ public class VirtualDirTgz extends VirtualDirEx {
         final String[] segments = segmentList.toArray(new String[0]);
         final int index = ArrayUtils.indexOf(segments, extractDirName) + 1;
         Path path = Paths.get(extractDir.getAbsolutePath());
-        for (int i = index; i < segments.length; i++){
+        for (int i = index; i < segments.length; i++) {
             segments[i] = StringUtils.createValidName(segments[i], new char[]{'.', '-'}, '_');
             path = path.resolve(segments[i]);
         }
@@ -330,7 +321,7 @@ public class VirtualDirTgz extends VirtualDirEx {
     }
 
     @Override
-    public String[] listAll(Pattern...patterns) {
+    public String[] listAll(Pattern... patterns) {
         List<String> fileNames;
         try (TarArchiveInputStream tis = buildTarInputStream()) {
 
@@ -349,7 +340,7 @@ public class VirtualDirTgz extends VirtualDirEx {
                 if (entryIsLink) {
                     int count;
                     while ((count = tis.read(data)) != -1) {
-                        longLink = (longLink == null ? "" : longLink) + new String(data, 0, count);
+                        longLink = (longLink == null ? "" : longLink) + new String(data, 0, count, StandardCharsets.UTF_8);
                     }
                 } else {
                     longLink = null;

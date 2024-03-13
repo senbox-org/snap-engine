@@ -44,6 +44,22 @@ public class VirtualDirTgzTest {
     }
 
     @Test
+    public void testIsTbz(){
+        assertFalse(VirtualDirTgz.isTbz("xxxxx.nc.gz"));
+        assertFalse(VirtualDirTgz.isTbz("xxxxx.ppt.gz"));
+        assertFalse(VirtualDirTgz.isTbz("xxxxx.gz"));
+        assertFalse(VirtualDirTgz.isTbz("xxxxx.tar"));
+        assertFalse(VirtualDirTgz.isTbz("xxxxx.geotiff"));
+
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.tbz"));
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.TBz"));
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.tar.bz"));
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.TAR.bz2"));
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.tar.bz2"));
+        assertTrue(VirtualDirTgz.isTbz("xxxxx.tbz2"));
+    }
+
+    @Test
     @STTM("SNAP-3627")
     public void testEnsureCorrectPathSegments() {
         final String sep = File.separator;
