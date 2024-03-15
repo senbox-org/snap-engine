@@ -1,5 +1,6 @@
 package org.esa.stac;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.stac.internal.StacCatalog;
@@ -12,10 +13,12 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(LongTestRunner.class)
 public class TestStacItemToProduct {
 
-    private String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
+    private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
     StacClient client;
 
     @Before
