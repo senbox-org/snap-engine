@@ -176,23 +176,6 @@ public class FilterOperator extends Operator {
         return targetBand;
     }
 
-    private static Band createFilterBand_bak(Filter filter, String bandName, Band band) {
-        FilterBand filterBand;
-        if (filter instanceof KernelFilter) {
-            final KernelFilter kernelFilter = (KernelFilter) filter;
-            filterBand = new ConvolutionFilterBand(bandName, band, kernelFilter.kernel, 1);
-        } else {
-            final GeneralFilter generalFilter = (GeneralFilter) filter;
-            filterBand = new GeneralFilterBand(bandName, band, generalFilter.operator, getKernel(generalFilter), 1);
-        }
-        final Band targetBand = new Band(bandName, ProductData.TYPE_FLOAT32, band.getRasterWidth(), band.getRasterHeight());
-        ProductUtils.copyRasterDataNodeProperties(band, targetBand);
-        ProductUtils.copySpectralBandProperties(band, targetBand);
-        targetBand.setDescription(String.format("Filter ''%s''", filter));
-        targetBand.setSourceImage(filterBand.getSourceImage());
-        return targetBand;
-    }
-
     private static Kernel getKernel(GeneralFilter filter) {
         final double[] kernelData = new double[filter.width * filter.height];
         Arrays.fill(kernelData, 1.0);
