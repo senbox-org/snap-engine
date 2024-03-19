@@ -111,12 +111,18 @@ public class TiffFileInfo {
             throw new IllegalStateException("no GEO_KEY_DIRECTORY");
         }
         final TIFFField field = getField(TAG_GEO_KEY_DIRECTORY___SPOT);
-        final int count = field.getCount();
-        final int[] ints = new int[count];
-        for (int i = 0; i < ints.length; i++) {
-            ints[i] = field.getAsInt(i);
+        try{
+            final int count = field.getCount();
+            final int[] ints = new int[count];
+            for (int i = 0; i < ints.length; i++) {
+                ints[i] = field.getAsInt(i);
+            }
+            return ints;
+        }catch (Exception e){
+            String [] fieldAsStr = field.getAsString(0).split(" ");
+            int [] ints = Arrays.stream(fieldAsStr).mapToInt(Integer::parseInt).toArray();
+            return ints;
         }
-        return ints;
     }
 
     private double[] getGeoDoubleParamValues() {

@@ -449,7 +449,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         boolean isGlobalShifted180 = false;
         if (info.containsField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT)) {
-            double[] tiePoints = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT).getAsDoubles();
+            TIFFField tiePointsField = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT);
+            double[] tiePoints;
+            try{
+                tiePoints = tiePointsField.getAsDoubles();
+            }catch (Exception e){
+                String tiePointsStr = tiePointsField.getAsString(0);
+                String [] tiePointsStrArray = tiePointsStr.split(" ");
+                tiePoints = Arrays.stream(tiePointsStrArray).mapToDouble(Double::parseDouble).toArray();
+            }
             int rasterWidth = defaultImageWidth; //product.getSceneRasterWidth();
             boolean isGlobal = isGlobal(rasterWidth, info);
             // check if we have a global geographic lat/lon with lon from 0..360 instead of -180..180
@@ -527,8 +535,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private static boolean isGlobal(int productWidth, TiffFileInfo info) {
         TIFFField pixelScaleField = info.getField(GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE);
+        double[] pixelScales;
         if (pixelScaleField != null) {
-            double[] pixelScales = pixelScaleField.getAsDoubles();
+            try{
+                pixelScales = pixelScaleField.getAsDoubles();
+            }catch (Exception e){
+                String [] pixelScaleStrArr = pixelScaleField.getAsString(0).split(" ");
+                pixelScales = Arrays.stream(pixelScaleStrArr).mapToDouble(Double::parseDouble).toArray();
+            }
 
             if (isPixelScaleValid(pixelScales)) {
                 double widthInDegree = pixelScales[0] * productWidth;
