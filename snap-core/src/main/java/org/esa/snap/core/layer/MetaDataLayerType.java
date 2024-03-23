@@ -144,18 +144,18 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_PROPERTY_HEADING_DEFAULT = "File/Band (Properties):";
     public static final Class PROPERTY_MARGIN_PROPERTY_HEADING_TYPE = String.class;
 
-    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".global.attrib.heading";
-    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_LABEL = "GLOBAL_ATTRIBUTES Section Heading";
-    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_TOOLTIP = "Heading of the GLOBAL_ATTRIBUTE section";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".file.meta.heading";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_LABEL = "FILE_META Section Heading";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_TOOLTIP = "Heading of the FILE_META section";
     public static final String PROPERTY_MARGIN_GLOBAL_HEADING_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "GlobalAttribHeading";
-    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_DEFAULT = "File Metadata (Global_Attributes):";
+    public static final String PROPERTY_MARGIN_GLOBAL_HEADING_DEFAULT = "File Metadata:";
     public static final Class PROPERTY_MARGIN_GLOBAL_HEADING_TYPE = String.class;
 
-    public static final String PROPERTY_MARGIN_BAND_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".band.attrib.heading";
-    public static final String PROPERTY_MARGIN_BAND_HEADING_LABEL = "BAND_ATTRIBUTES Section Heading";
-    public static final String PROPERTY_MARGIN_BAND_HEADING_TOOLTIP = "Heading of the BAND_ATTRIBUTE section";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_KEY = PROPERTY_MARGIN_ROOT_KEY + ".band.meta.heading";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_LABEL = "BAND_META Section Heading";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_TOOLTIP = "Heading of the BAND_META section";
     public static final String PROPERTY_MARGIN_BAND_HEADING_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "BandAttribHeading";
-    public static final String PROPERTY_MARGIN_BAND_HEADING_DEFAULT = "Band Metadata (Band_Attributes): <PROPERTY=band>";
+    public static final String PROPERTY_MARGIN_BAND_HEADING_DEFAULT = "Band Metadata: <PROPERTY=band>";
     public static final Class PROPERTY_MARGIN_BAND_HEADING_TYPE = String.class;
 
 
@@ -174,24 +174,24 @@ public class MetaDataLayerType extends LayerType {
     public static final Class PROPERTY_MARGIN_METADATA2_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA3_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata3";
-    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "GLOBAL_ATTRIBUTES List";
+    public static final String PROPERTY_MARGIN_METADATA3_LABEL = "FILE_META List";
     public static final String PROPERTY_MARGIN_METADATA3_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA3_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata3";
     public static final String PROPERTY_MARGIN_METADATA3_DEFAULT = "title, instrument, platform";
     public static final Class PROPERTY_MARGIN_METADATA3_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA4_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata4";
-    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "GLOBAL_ATTRIBUTES List";
+    public static final String PROPERTY_MARGIN_METADATA4_LABEL = "FILE_META List";
     public static final String PROPERTY_MARGIN_METADATA4_TOOLTIP = "Adds metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA4_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata4";
     public static final String PROPERTY_MARGIN_METADATA4_DEFAULT = "processing_version, processing_control_software_name";
     public static final Class PROPERTY_MARGIN_METADATA4_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA5_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata5";
-    public static final String PROPERTY_MARGIN_METADATA5_LABEL = "BAND_ATTRIBUTES List";
+    public static final String PROPERTY_MARGIN_METADATA5_LABEL = "BAND_META List";
     public static final String PROPERTY_MARGIN_METADATA5_TOOLTIP = "Adds band-metadata based on a key list";
     public static final String PROPERTY_MARGIN_METADATA5_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "Metadata5";
-    public static final String PROPERTY_MARGIN_METADATA5_DEFAULT = "long_name, units, valid_min, valid_max";
+    public static final String PROPERTY_MARGIN_METADATA5_DEFAULT = "";
     public static final Class PROPERTY_MARGIN_METADATA5_TYPE = String.class;
 
     public static final String PROPERTY_MARGIN_METADATA_KEYS_SHOW_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.keys.show";
@@ -218,21 +218,21 @@ public class MetaDataLayerType extends LayerType {
 
 
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.show.all";
-    public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_LABEL = "GLOBAL_ATTRIBUTES Show All *";
+    public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_LABEL = "FILE_META Show All *";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_TOOLTIP = "Display all metadata keys (does NOT include all processing control params)";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "MetadataShowAll";
     public static final boolean PROPERTY_MARGIN_METADATA_SHOW_ALL_DEFAULT = false;
     public static final Class PROPERTY_MARGIN_METADATA_SHOW_ALL_TYPE = Boolean.class;
 
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.process.control.show.all";
-    public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_LABEL = "GLOBAL_ATTRIBUTES Show All (Processing Control Params)";
+    public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_LABEL = "FILE_META Show All (Processing Control Params)";
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_TOOLTIP = "Display all metadata processing control params keys";
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "MetadataProcessControlShowAll";
     public static final boolean PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_DEFAULT = false;
     public static final Class PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_TYPE = Boolean.class;
 
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".band.metadata.show.all";
-    public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_LABEL = "BAND_ATTRIBUTES Show All";
+    public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_LABEL = "BAND_META Show All";
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_TOOLTIP = "Display all band metadata keys";
     public static final String PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "BandMetadataShow";
     public static final boolean PROPERTY_MARGIN_BAND_METADATA_SHOW_ALL_DEFAULT = false;
