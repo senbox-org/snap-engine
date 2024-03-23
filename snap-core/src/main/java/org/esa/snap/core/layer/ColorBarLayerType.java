@@ -100,7 +100,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_LABEL = "Title";
     public static final String PROPERTY_TITLE_TOOLTIP = "Title text for the header of the " + COLOR_LOWER_CASE + " bar";
     public static final String PROPERTY_TITLE_ALIAS = PROPERTY_HEADER_TITLE_ROOT_ALIAS;
-    public static final String PROPERTY_TITLE_DEFAULT = "<PROPERTY=band>";
+    public static final String PROPERTY_TITLE_DEFAULT = "<PROPERTY=band_description>";
     public static final Class PROPERTY_TITLE_TYPE = String.class;
 
 

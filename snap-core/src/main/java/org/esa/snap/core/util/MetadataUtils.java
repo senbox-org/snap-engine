@@ -937,6 +937,9 @@ public class MetadataUtils {
                     inputString = inputString.replace(replaceKeyStart + "GLOBAL_ATTR=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart + "Global_Attr=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart + "global_attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "file_meta=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "File_Meta=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "FILE_META=", replaceGoal);
                     break;
 
                 case "BAND_ATTRIBUTE=":
@@ -948,6 +951,9 @@ public class MetadataUtils {
                     inputString = inputString.replace(replaceKeyStart + "BAND_ATTR=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart + "Band_Attr=", replaceGoal);
                     inputString = inputString.replace(replaceKeyStart + "band_attr=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "band_meta=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "Band_Meta=", replaceGoal);
+                    inputString = inputString.replace(replaceKeyStart + "BAND_META=", replaceGoal);
                     break;
             }
 
