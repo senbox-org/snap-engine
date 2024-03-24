@@ -53,6 +53,10 @@ public class LayerCanvas extends JPanel implements AdjustableView {
     private double zoomInitial = 1.0;
     private double zoomInitialWide = 1.0;
     private double zoomInitialTall = 1.0;
+    private double shiftInitialX = 0.0;
+    private double shiftInitialY = 0.0;
+    private boolean positionCenterX = true;
+    private boolean positionCenterY = true;
     private double setZoomInitialAspectWide = 1.2;
     private double setZoomInitialAspectTall = 0.8;
     private boolean zoomedAll;
@@ -271,6 +275,35 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
 
 
+    public double getShiftInitialX() {
+        return shiftInitialX;
+    }
+
+    public void setShiftInitialX(double shiftInitialX) {
+        this.shiftInitialX = shiftInitialX;
+    }
+
+    public double getShiftInitialY() {
+        return shiftInitialY;
+    }
+    public void setShiftInitialY(double shiftInitialY) {
+        this.shiftInitialY = shiftInitialY;
+    }
+
+
+    public boolean getPositionCenterX() {
+        return positionCenterX;
+    }
+    public void setPositionCenterX(boolean positionCenterX) {
+        this.positionCenterX = positionCenterX;
+    }
+
+    public boolean getPositionCenterY() {
+        return positionCenterY;
+    }
+    public void setPositionCenterY(boolean positionCenterY) {
+        this.positionCenterY = positionCenterY;
+    }
 
 
     /////////////////////////////////////////////////////////////////////////
@@ -455,17 +488,58 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
             double aspectRatio = maxVisibleModelBounds.getWidth() / maxVisibleModelBounds.getHeight();
 
-            if (aspectRatio <= aspectTall) {
-                // it is a tall scene
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialTall());
+            boolean positionCenterX = true;
+            boolean positionCenterY = true;
+            getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial()/100.0);
 
-            } else if (aspectRatio >= aspectWide) {
-                // it is a wide scene
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialWide());
-
+            double offsetX;
+            if (getPositionCenterX()) {
+                offsetX = getViewport().getOffsetX() - (maxVisibleModelBounds.getWidth() * getShiftInitialX())/100.0;
             } else {
-                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial());
+                offsetX = -maxVisibleModelBounds.getWidth()*getShiftInitialX()/100.0;
             }
+
+            double offsetY;
+            if (getPositionCenterY()) {
+                offsetY = getViewport().getOffsetY() - (maxVisibleModelBounds.getHeight() * getShiftInitialY())/100.0;
+            } else {
+                offsetY = -maxVisibleModelBounds.getHeight()*getShiftInitialY()/100.0;
+            }
+
+            getViewport().setOffset(offsetX, offsetY);
+
+//            boolean anchorCenter = true;
+//            if (anchorCenter) {
+//                getViewport().setOffset(getViewport().getOffsetX() + (maxVisibleModelBounds.getWidth() * getShiftInitialX())/100.0, getViewport().getOffsetY() + (maxVisibleModelBounds.getHeight() * getShiftInitialY())/100.0);
+//            } else {
+//                getViewport().setOffset(maxVisibleModelBounds.getWidth()*getShiftInitialX()/100.0, maxVisibleModelBounds.getHeight()*getShiftInitialY()/100.0);
+//            }
+
+
+//            if (aspectRatio <= aspectTall) {
+//                // it is a tall scene
+//                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialTall()/100.0);
+//                if (anchorCenter) {
+//                    getViewport().setOffset(getViewport().getOffsetX() + (maxVisibleModelBounds.getWidth() * getShiftInitialX())/100.0, getViewport().getOffsetY() + (maxVisibleModelBounds.getHeight() * getShiftInitialY())/100.0);
+//                } else {
+//                    getViewport().setOffset(maxVisibleModelBounds.getWidth()*getShiftInitialX()/100.0, maxVisibleModelBounds.getHeight()*getShiftInitialY()/100.0);
+//                }
+//            } else if (aspectRatio >= aspectWide) {
+//                // it is a wide scene
+//                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitialWide()/100.0);
+//                if (anchorCenter) {
+//                    getViewport().setOffset(getViewport().getOffsetX() + (maxVisibleModelBounds.getWidth() * getShiftInitialX())/100.0, getViewport().getOffsetY() + (maxVisibleModelBounds.getHeight() * getShiftInitialY())/100.0);
+//                } else {
+//                    getViewport().setOffset(maxVisibleModelBounds.getWidth()*getShiftInitialX()/100.0, maxVisibleModelBounds.getHeight()*getShiftInitialY()/100.0);
+//                }
+//            } else {
+//                getViewport().setZoomFactor(getViewport().getZoomFactor() * getZoomInitial()/100.0);
+//                if (anchorCenter) {
+//                    getViewport().setOffset(getViewport().getOffsetX() + (maxVisibleModelBounds.getWidth() * getShiftInitialX())/100.0, getViewport().getOffsetY() + (maxVisibleModelBounds.getHeight() * getShiftInitialY())/100.0);
+//                } else {
+//                    getViewport().setOffset(maxVisibleModelBounds.getWidth()*getShiftInitialX()/100.0, maxVisibleModelBounds.getHeight()*getShiftInitialY()/100.0);
+//                }
+//            }
         }
     }
 
