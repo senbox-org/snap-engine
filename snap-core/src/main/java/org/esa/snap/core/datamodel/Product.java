@@ -808,6 +808,14 @@ public class Product extends ProductNode {
      * @return the geo-coding, can be {@code null} if this product is not geo-coded.
      */
     public GeoCoding getSceneGeoCoding() {
+        if (sceneGeoCoding == null && reader != null) {
+            try {
+                sceneGeoCoding = reader.readGeoCoding(this);
+            } catch (IOException e) {
+                // @todo 1 tb/tb think about this concept! 2024-01-25
+                throw new RuntimeException(e);
+            }
+        }
         return sceneGeoCoding;
     }
 
@@ -2720,7 +2728,7 @@ public class Product extends ProductNode {
         if (refBand != null) {
             if (sceneRasterSize == null) {
                 sceneRasterSize = new Dimension(refBand.getRasterWidth(), refBand.getRasterHeight());
-                if (sceneGeoCoding == null) {
+                if (getSceneGeoCoding() == null) {
                     sceneGeoCoding = refBand.getGeoCoding();
                 }
             }
@@ -2739,7 +2747,7 @@ public class Product extends ProductNode {
 
     private void handleVectorDataNodeAdded(ProductNodeEvent event) {
         final VectorDataNode sourceNode = (VectorDataNode) event.getSourceNode();
-        if (sourceNode.getFeatureCollection().size() > 0) {
+        if (!sourceNode.getFeatureCollection().isEmpty()) {
             final Mask mask = getMask(sourceNode);
             if (mask == null) {
                 addMask(sourceNode);
@@ -2777,7 +2785,7 @@ public class Product extends ProductNode {
     private void handleFeatureCollectionChange(ProductNodeEvent event) {
         final VectorDataNode sourceNode = (VectorDataNode) event.getSourceNode();
         final Mask mask = getMask(sourceNode);
-        if (sourceNode.getFeatureCollection().size() > 0) {
+        if (!sourceNode.getFeatureCollection().isEmpty()) {
             if (mask == null) {
                 addMask(sourceNode);
             }
@@ -3142,6 +3150,4 @@ public class Product extends ProductNode {
             return null;
         }
     }
-
-
 }
