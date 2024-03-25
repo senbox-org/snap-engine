@@ -17,9 +17,11 @@
 package com.bc.ceres.binio;
 
 import com.bc.ceres.binio.util.ByteArrayIOHandler;
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import static com.bc.ceres.binio.TypeBuilder.*;
 import static org.junit.Assert.assertEquals;
 
+@RunWith(LongTestRunner.class)
 public class ReadWriteTest {
 
     @Before

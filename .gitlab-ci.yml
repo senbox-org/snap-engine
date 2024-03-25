@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.7.1"
+    ref: "3.9.1"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -65,6 +65,11 @@ windows:
   tags: [windows]
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
+  variables:
+    GIT_STRATEGY: clone
+    FF_ENABLE_JOB_CLEANUP: 'true'
+    FF_USE_WINDOWS_LEGACY_PROCESS_STRATEGY: 'false'
+    MAVEN_CFG_DIR: C:\\Windows\\System32\\config\\systemprofile\\.m2
   allow_failure: false
   needs: []
   script:

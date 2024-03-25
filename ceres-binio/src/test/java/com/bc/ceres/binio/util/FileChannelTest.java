@@ -16,9 +16,11 @@
 
 package com.bc.ceres.binio.util;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.*;
 import java.nio.Buffer;
@@ -43,6 +45,7 @@ import static org.junit.Assert.assertTrue;
  * http://chaoticjava.com/posts/nio-efficient-ios-granular-bits/
  * http://chaoticjava.com/posts/nio-data-flow-made-resource-efficient/
  */
+@RunWith(LongTestRunner.class)
 public class FileChannelTest {
     private File file;
     private RandomAccessFile raf;

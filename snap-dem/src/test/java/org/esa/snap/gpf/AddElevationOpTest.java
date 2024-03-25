@@ -2,6 +2,7 @@ package org.esa.snap.gpf;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -11,6 +12,7 @@ import org.esa.snap.dem.gpf.AddElevationOp;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-
+@RunWith(LongTestRunner.class)
 public class AddElevationOpTest {
 
     private static final String PRODUCT_NAME =
@@ -50,7 +52,7 @@ public class AddElevationOpTest {
         assertEquals(38.6651268, sampleFloat, 1e-8);
     }
 
-    private String getResourcePath(String name) throws URISyntaxException {
+    private static String getResourcePath(String name) throws URISyntaxException {
         URL url = AddElevationOpTest.class.getResource(name);
         URI uri = new URI(url.toString());
         return uri.getPath();

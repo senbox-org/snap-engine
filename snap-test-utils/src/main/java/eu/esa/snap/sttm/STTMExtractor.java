@@ -25,7 +25,6 @@ public class STTMExtractor {
             Files.walkFileTree(Paths.get(arg), visitor);
         }
 
-        // @todo 3 allow to overwrite from cmd-line tb 2023-11-24
         final String jiraUrl = getJiraBaseUrl(cmdLineArgs);
         for (final STTMInfo sttmInfo : sttmInfos) {
             sttmInfo.jiraUrl = jiraUrl.concat(sttmInfo.jiraIssue);

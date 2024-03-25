@@ -388,18 +388,19 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int height = product.getSceneRasterHeight();
 
         final NetcdfFile netcdfFile = ctx.getNetcdfFile();
-        final Variable lonVar = netcdfFile.findVariable(lonBand.getName());
-        final Variable latVar = netcdfFile.findVariable(latBand.getName());
-        if (lonVar == null || latVar == null)      {
+        final String lonBandName = lonBand.getName();
+        final String latBandName = latBand.getName();
+
+        final GeoVariables result = getGeolocationVariables(netcdfFile, lonBandName, latBandName);
+        if (result.lonVar == null || result.latVar == null) {
             return null;
         }
 
-        final double[] longitudes = readVarAsDoubleArray(lonVar);
-        final double[] latitudes = readVarAsDoubleArray(latVar);
+        final double[] longitudes = readVarAsDoubleArray(result.lonVar);
+        final double[] latitudes = readVarAsDoubleArray(result.latVar);
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
-
-        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBandName, latBandName,
                                                   width, height, resolutionInKm);
 
         final boolean fractionalAccuracy = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
@@ -419,6 +420,35 @@ public class CfGeocodingPart extends ProfilePartIO {
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+    static GeoVariables getGeolocationVariables(NetcdfFile netcdfFile, String lonBandName, String latBandName) {
+        Variable lonVar = null;
+        Variable latVar = null;
+
+        final List<Variable> variables = netcdfFile.getVariables();
+
+        for (final Variable variable : variables) {
+            final String variableName = variable.getShortName();
+            if (variableName.equals(lonBandName)) {
+                lonVar = variable;
+                continue;
+            }
+            if (variableName.equals(latBandName)) {
+                latVar = variable;
+            }
+        }
+        return new GeoVariables(lonVar, latVar);
+    }
+
+    static class GeoVariables {
+        public final Variable lonVar;
+        public final Variable latVar;
+
+        public GeoVariables(Variable lonVar, Variable latVar) {
+            this.lonVar = lonVar;
+            this.latVar = latVar;
+        }
     }
 
     static double[] readVarAsDoubleArray(Variable lonVar) throws IOException {

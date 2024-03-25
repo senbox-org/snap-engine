@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
+        <version>11.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ceres-binio</artifactId>
@@ -19,10 +19,18 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
 			<scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-core</artifactId>
+            <scope>test</scope>
+            <type>test-jar</type>
         </dependency>
     </dependencies>
 

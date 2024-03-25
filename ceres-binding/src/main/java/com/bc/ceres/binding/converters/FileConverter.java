@@ -41,6 +41,6 @@ public class FileConverter implements Converter<File> {
         if (value == null) {
             return "";
         }
-        return ((File) value).getPath();
+        return value.getPath();
     }
 }

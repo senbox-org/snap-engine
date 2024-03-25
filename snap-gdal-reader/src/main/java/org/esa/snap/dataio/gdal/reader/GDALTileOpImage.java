@@ -74,105 +74,104 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
         private final Path[] paths;
         private final int bandIndex;
         final int[] index = new int[] { 0 };
-        private int width;
-        private int height;
 
         private ImageReader(GDALBandSource bandSource) {
             this.paths = bandSource.getSourceLocalFiles();
             // bands are not 0-base indexed, so we must add 1
             this.bandIndex = bandSource.getBandIndex() + 1;
-            this.width = -1;
-            this.height = -1;
         }
 
         protected abstract int getLevel();
 
         protected abstract int getDataBufferType();
 
-        int getBandWidth() {
-            if (this.width == -1) {
-                try (Dataset dataset = openDataset();
-                     Band band = openBand(dataset)) {
-                    this.width = band.getXSize();
-                    this.height = band.getYSize();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return this.width;
-        }
-
-        int getBandHeight() {
-            if (this.height == -1) {
-                try (Dataset dataset = openDataset();
-                     Band band = openBand(dataset)) {
-                    this.width = band.getXSize();
-                    this.height = band.getYSize();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return this.height;
-        }
-
         void close() {
         }
 
         Raster read(int areaX, int areaY, int areaWidth, int areaHeight) throws IOException {
-            try (Dataset dataset = openDataset();
-                 Band band = openBand(dataset)) {
-                final int pixels = areaWidth * areaHeight;
-                final int gdalBufferDataType = band.getDataType();
-                final int bufferSize = pixels * GDAL.getDataTypeSize(gdalBufferDataType);
-                final ByteBuffer data = ByteBuffer.allocateDirect(bufferSize);
-                data.order(ByteOrder.nativeOrder());
+            final int pixels = areaWidth * areaHeight;
+            final ByteBuffer data = readRasterFromDataset(areaX, areaY, areaWidth, areaHeight, pixels);
+            final int dataBufferType = getDataBufferType();
+            final DataBuffer imageDataBuffer = buildImageDataBuffer(data, dataBufferType, pixels);
+            return buildWritableRaster(imageDataBuffer, areaWidth, areaHeight);
+        }
 
-                final int dataBufferType = getDataBufferType();
-                final int xSizeToRead = Math.min(areaWidth, getBandWidth() -  areaX);
-                final int ySizeToRead = Math.min(areaHeight, getBandHeight() -  areaY);
-                final int returnVal = band.readRasterDirect(areaX, areaY, xSizeToRead, ySizeToRead, areaWidth, areaHeight, gdalBufferDataType, data);
-                if (returnVal == GDALConstConstants.ceNone()) {
-                    DataBuffer imageDataBuffer;
-                    switch (dataBufferType) {
-                        case DataBuffer.TYPE_BYTE:
-                            byte[] bytes = new byte[pixels];
-                            data.get(bytes);
-                            imageDataBuffer = new DataBufferByte(bytes, pixels);
-                            break;
-                        case DataBuffer.TYPE_SHORT:
-                            short[] shorts = new short[pixels];
-                            data.asShortBuffer().get(shorts);
-                            imageDataBuffer = new DataBufferShort(shorts, shorts.length);
-                            break;
-                        case DataBuffer.TYPE_USHORT:
-                            short[] ushorts = new short[pixels];
-                            data.asShortBuffer().get(ushorts);
-                            imageDataBuffer = new DataBufferUShort(ushorts, ushorts.length);
-                            break;
-                        case DataBuffer.TYPE_INT:
-                            int[] ints = new int[pixels];
-                            data.asIntBuffer().get(ints);
-                            imageDataBuffer = new DataBufferInt(ints, ints.length);
-                            break;
-                        case DataBuffer.TYPE_FLOAT:
-                            float[] floats = new float[pixels];
-                            data.asFloatBuffer().get(floats);
-                            imageDataBuffer = new DataBufferFloat(floats, floats.length);
-                            break;
-                        case DataBuffer.TYPE_DOUBLE:
-                            double[] doubles = new double[pixels];
-                            data.asDoubleBuffer().get(doubles);
-                            imageDataBuffer = new DataBufferDouble(doubles, doubles.length);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unknown data buffer type " + dataBufferType + ".");
+        ByteBuffer readRasterFromDataset(int areaX, int areaY, int areaWidth, int areaHeight, int pixels) throws IOException {
+            for (int retry = 0; ; retry++) {
+                if (retry > 0) {
+                    try {
+                        Thread.currentThread().wait(1000);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
                     }
-                    final SampleModel sampleModel = new ComponentSampleModel(imageDataBuffer.getDataType(), areaWidth, areaHeight, 1, areaWidth, index);
-                    return Raster.createWritableRaster(sampleModel, imageDataBuffer, null);
-                } else {
-                    throw new IOException("Failed to read the product band data: rectangle=[" + areaX + ", " + areaY + ", " + areaWidth + ", " + areaHeight + "]" + " returnVal=" + returnVal + ".");
+                }
+                try (Dataset dataset = openDataset();
+                     Band band = openBand(dataset)) {
+                    final int gdalBufferDataType = band.getDataType();
+                    final int bufferSize = pixels * GDAL.getDataTypeSize(gdalBufferDataType);
+                    final ByteBuffer data = ByteBuffer.allocateDirect(bufferSize);
+                    data.order(ByteOrder.nativeOrder());
+
+                    final int bandWidth = band.getXSize();
+                    final int bandHeight = band.getYSize();
+                    final int xSizeToRead = Math.min(areaWidth, bandWidth - areaX);
+                    final int ySizeToRead = Math.min(areaHeight, bandHeight - areaY);
+                    int returnVal = band.readRasterDirect(areaX, areaY, xSizeToRead, ySizeToRead, areaWidth, areaHeight, gdalBufferDataType, data);
+                    if (returnVal == GDALConstConstants.cpleFileIO() && retry < 1) {
+                        continue;
+                    }
+                    if (returnVal == GDALConstConstants.ceNone()) {
+                        return data;
+                    } else {
+                        throw new IOException("Failed to read the product band data: rectangle=[" + areaX + ", " + areaY + ", " + areaWidth + ", " + areaHeight + "]" + " returnVal=" + returnVal + ".");
+                    }
                 }
             }
+        }
+
+        DataBuffer buildImageDataBuffer(ByteBuffer data, int dataBufferType, int pixels) {
+            DataBuffer imageDataBuffer;
+            switch (dataBufferType) {
+                case DataBuffer.TYPE_BYTE:
+                    byte[] bytes = new byte[pixels];
+                    data.get(bytes);
+                    imageDataBuffer = new DataBufferByte(bytes, pixels);
+                    break;
+                case DataBuffer.TYPE_SHORT:
+                    short[] shorts = new short[pixels];
+                    data.asShortBuffer().get(shorts);
+                    imageDataBuffer = new DataBufferShort(shorts, shorts.length);
+                    break;
+                case DataBuffer.TYPE_USHORT:
+                    short[] ushorts = new short[pixels];
+                    data.asShortBuffer().get(ushorts);
+                    imageDataBuffer = new DataBufferUShort(ushorts, ushorts.length);
+                    break;
+                case DataBuffer.TYPE_INT:
+                    int[] ints = new int[pixels];
+                    data.asIntBuffer().get(ints);
+                    imageDataBuffer = new DataBufferInt(ints, ints.length);
+                    break;
+                case DataBuffer.TYPE_FLOAT:
+                    float[] floats = new float[pixels];
+                    data.asFloatBuffer().get(floats);
+                    imageDataBuffer = new DataBufferFloat(floats, floats.length);
+                    break;
+                case DataBuffer.TYPE_DOUBLE:
+                    double[] doubles = new double[pixels];
+                    data.asDoubleBuffer().get(doubles);
+                    imageDataBuffer = new DataBufferDouble(doubles, doubles.length);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown data buffer type " + dataBufferType + ".");
+            }
+            return imageDataBuffer;
+        }
+
+        Raster buildWritableRaster(DataBuffer imageDataBuffer, int areaWidth, int areaHeight) {
+            final int imageDataBufferType = imageDataBuffer.getDataType();
+            final SampleModel sampleModel = new ComponentSampleModel(imageDataBufferType, areaWidth, areaHeight, 1, areaWidth, index);
+            return Raster.createWritableRaster(sampleModel, imageDataBuffer, null);
         }
 
         private Dataset openDataset() {

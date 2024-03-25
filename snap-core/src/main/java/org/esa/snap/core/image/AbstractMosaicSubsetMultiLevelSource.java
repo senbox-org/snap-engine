@@ -368,7 +368,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             }
         }
         return tileCount;*/
-        return Math.round(imageSize / (float) tileSize);
+        return (int) Math.ceil(imageSize / (float) tileSize);
     }
 
     protected static int computeTopLeftDecompressedTileHeight(Rectangle imageCellReadBounds, int decompressedTileHeight) {

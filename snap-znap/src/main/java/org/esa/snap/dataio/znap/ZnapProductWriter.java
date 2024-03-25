@@ -159,7 +159,6 @@ import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.DEFA
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_BINARY_FORMAT;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_COMPRESSION_LEVEL;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_COMPRESSOR_ID;
-import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 import static ucar.nc2.constants.ACDD.TIME_END;
 import static ucar.nc2.constants.ACDD.TIME_START;
 import static ucar.nc2.constants.CDM.FILL_VALUE;
@@ -249,7 +248,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
         final Product product = getSourceProduct();
         dimensionNameGenerator.getDimensionNameFor("x", product.getSceneRasterWidth());
         dimensionNameGenerator.getDimensionNameFor("y", product.getSceneRasterHeight());
-        final boolean useZipArchive = getUseZipArchive();
+        final boolean useZipArchive = isUseZipArchive();
         final String stripedFilename = getFilenameWithoutExtension();
         if (useZipArchive) {
             outputRoot = parentDir.resolve(stripedFilename + ZNAP_ZIP_CONTAINER_EXTENSION);
@@ -753,10 +752,9 @@ public class ZnapProductWriter extends AbstractProductWriter {
         return compressionLevel;
     }
 
-    private boolean getUseZipArchive() {
-        String value = getPreference(PROPERTY_NAME_USE_ZIP_ARCHIVE, "" + DEFAULT_USE_ZIP_ARCHIVE);
-        value = value != null ? value.trim() : null;
-        final boolean useZipArchive = Boolean.parseBoolean(value);
+    // package access for testing only tb 2024-02-12
+    static boolean isUseZipArchive() {
+       final boolean useZipArchive = ZnapProductWriterPlugIn.isUseZipArchive();
         if (useZipArchive != DEFAULT_USE_ZIP_ARCHIVE) {
             final String insert = useZipArchive ? "" : "not ";
             LOG.fine("Znap format product writer will " + insert + "write into an zip archive.");
