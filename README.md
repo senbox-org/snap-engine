@@ -22,15 +22,3 @@ The common platform is jointly developed by SkyWatch, CS-FR, CS-RO and Brockmann
 
 How SNAP and the toolboxes can be built from source is documented in
 our [Developer Guide](https://senbox.atlassian.net/wiki/display/SNAP/Developer+Guide).
-
-### Build new version
-
-1. Build this project with:
-
-```sh
-mvn install deploy --no-transfer-progress --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true --projects=ceres-core,snap-gpf,snap-core,ceres-binding,ceres-ui,ceres-metadata,ceres-jai,ceres-glayer,ceres-binding,snap-runtime
-```
-
-2. Deploy esa-snappy
-
-3. Re-build this project completly

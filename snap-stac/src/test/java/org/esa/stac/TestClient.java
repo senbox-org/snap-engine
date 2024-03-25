@@ -1,5 +1,6 @@
 package org.esa.stac;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.stac.internal.EstablishedModifiers;
 import org.esa.stac.internal.StacCatalog;
 import org.esa.stac.internal.StacItem;
@@ -7,12 +8,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
 
+@RunWith(LongTestRunner.class)
 public class TestClient {
-    private String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
+    private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
+
     StacClient client;
 
     @Before
