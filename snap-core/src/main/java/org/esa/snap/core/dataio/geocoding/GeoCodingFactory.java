@@ -7,6 +7,7 @@ import org.esa.snap.core.dataio.geocoding.util.EllipsoidDistance;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Scene;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.geotools.referencing.datum.DefaultEllipsoid;
 
 import javax.media.jai.Interpolation;
@@ -58,6 +59,46 @@ public class GeoCodingFactory {
         ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
         targetBand.setSourceImage(getSourceImage(subsetDef, sourceBand));
         return targetBand;
+    }
+
+    // @todo 2 tb/tb this is not the correct place here move to a more logical location 2024-03-27
+    public static double interpolateLon(double wx, double wy, double d00, double d10, double d01, double d11) {
+        double range = computeRange(d00, d01, d10, d11);
+        if (range > 180) {
+            return interpolateSperical(wx, wy, d00, d10, d01, d11);
+        } else {
+            return MathUtils.interpolate2D(wx, wy, d00, d10, d01, d11);
+        }
+    }
+
+
+    private static double computeRange(double d00, double d01, double d10, double d11) {
+        double min = Math.min(d00, Math.min(d01, Math.min(d10, d11)));
+        double max = Math.max(d00, Math.max(d01, Math.max(d10, d11)));
+
+        return max - min;
+    }
+
+    private static double interpolateSperical(double wx, double wy, double d00, double d10, double d01, double d11) {
+        double r00 = Math.toRadians(d00);
+        double s00 = Math.sin(r00);
+        double c00 = Math.cos(r00);
+
+        double r01 = Math.toRadians(d01);
+        double s01 = Math.sin(r01);
+        double c01 = Math.cos(r01);
+
+        double r10 = Math.toRadians(d10);
+        double s10 = Math.sin(r10);
+        double c10 = Math.cos(r10);
+
+        double r11 = Math.toRadians(d11);
+        double s11 = Math.sin(r11);
+        double c11 = Math.cos(r11);
+
+        double sinAngle = MathUtils.interpolate2D(wx, wy, s00, s10, s01, s11);
+        double cosAngle = MathUtils.interpolate2D(wx, wy, c00, c10, c01, c11);
+        return MathUtils.RTOD * Math.atan2(sinAngle, cosAngle);
     }
 
     private static RenderedImage getSourceImage(ProductSubsetDef subsetDef, Band band) {

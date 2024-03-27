@@ -17,6 +17,7 @@ package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -677,23 +678,6 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testCreateGeoCodingForPixelGeoCoding() throws IOException {
-        final Band latBand = product.getBand("b1");
-        final Band lonBand = product.getBand("b2");
-        final float[] bandData = new float[product.getSceneRasterWidth() * product.getSceneRasterHeight()];
-        latBand.setDataElems(bandData);
-        lonBand.setDataElems(bandData);
-        final PixelGeoCoding sourcePixelGeoCoding = new PixelGeoCoding(latBand, lonBand,
-                "Not NaN", 4, ProgressMonitor.NULL);
-        final byte[] bytes = createPixelGeoCodingString(sourcePixelGeoCoding).getBytes(StandardCharsets.UTF_8);
-        final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
-        final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
-
-        assertNotNull(geoCoding);
-        assertEquals(ComponentGeoCoding.class, geoCoding.getClass());
-    }
-
-    @Test
     public void testCreateGeoCodingForCrsGeoCoding() throws Exception {
         final Rectangle imageBounds = new Rectangle(product.getSceneRasterWidth(),
                 product.getSceneRasterHeight());
@@ -851,13 +835,11 @@ public class DimapProductHelpersTest {
         return StringUtils.arrayToString(strings, "");
     }
 
-    private String createPixelGeoCodingString(BasicPixelGeoCoding geoCoding) {
+    private String createPixelGeoCodingString(GeoCoding geoCoding, String latBandName, String lonBandName) {
         return "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
                 "    <Geoposition>" + LS +
-                "        <LATITUDE_BAND>" + geoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + geoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <VALID_MASK_EXPRESSION>" + geoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-                "        <SEARCH_RADIUS>" + geoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + latBandName + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + lonBandName + "</LONGITUDE_BAND>" + LS +
                 "        <Pixel_Position_Estimator>" + LS +
                 "            <Coordinate_Reference_System>" + LS +
                 "                <Horizontal_CS>" + LS +
