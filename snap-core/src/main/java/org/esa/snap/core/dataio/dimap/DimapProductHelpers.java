@@ -17,6 +17,7 @@ package org.esa.snap.core.dataio.dimap;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.dataio.persistence.Item;
 import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
@@ -226,7 +227,7 @@ public class DimapProductHelpers {
     }
 
 
-    public static GeoCoding[] createGeoCoding(Document dom, Product product) {
+    public static GeoCoding[] createGeoCoding(Document dom, Product product) throws IOException {
         Debug.assertNotNull(dom);
         Debug.assertNotNull(product);
         final Element rootElem = dom.getRootElement();
@@ -511,7 +512,7 @@ public class DimapProductHelpers {
         }
     }
 
-    private static GeoCoding createGeoCodingFromElement(Product product, Element element) {
+    private static GeoCoding createGeoCodingFromElement(Product product, Element element) throws IOException {
         final Content content = element.detach();
         final GeoCoding[] geoCodings = createGeoCoding(new Document().addContent(content), product);
         if (geoCodings == null) {
@@ -595,7 +596,7 @@ public class DimapProductHelpers {
         return null;
     }
 
-    private static GeoCoding createPixelGeoCoding(Product product, Datum datum, Element geoPosElem) {
+    private static GeoCoding createPixelGeoCoding(Product product, Datum datum, Element geoPosElem) throws IOException {
         final String latBandName = geoPosElem.getChildTextTrim(DimapProductConstants.TAG_LATITUDE_BAND);
         final String lonBandName = geoPosElem.getChildTextTrim(DimapProductConstants.TAG_LONGITUDE_BAND);
         final Band latBand = product.getBand(latBandName);
@@ -617,7 +618,7 @@ public class DimapProductHelpers {
             product.setSceneGeoCoding(createGeoCoding(dom, product)[0]);
         }
 
-        return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, validMask, searchRadius);
+        return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand);
     }
 
     private static FXYGeoCoding createFXYGeoCoding(Datum datum, Element geoPosElem) {
