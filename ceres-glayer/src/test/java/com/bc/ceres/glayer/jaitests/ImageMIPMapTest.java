@@ -16,9 +16,11 @@
 
 package com.bc.ceres.glayer.jaitests;
 
+import com.bc.ceres.test.LongTestRunner;
 import com.sun.media.jai.codec.FileCacheSeekableStream;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.BandSelectDescriptor;
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+@RunWith(LongTestRunner.class)
 public class ImageMIPMapTest {
 
     private static void testRes(RenderedImage image, int w, int h, int tw, int th) {

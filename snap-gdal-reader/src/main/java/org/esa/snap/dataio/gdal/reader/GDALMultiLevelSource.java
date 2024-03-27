@@ -5,12 +5,16 @@ import org.esa.snap.core.image.AbstractMosaicSubsetMultiLevelSource;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.esa.snap.core.image.UncompressedTileOpImageCallback;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.dataio.gdal.drivers.Dataset;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDALConst;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -27,6 +31,35 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
     private final Double noDataValue;
     private final Dimension defaultJAIReadTileSize;
 
+    private static Dimension readTileSize(Path fromFile, int bandIndex) {
+        try (Dataset dataset = GDAL.open(fromFile.toString(), GDALConst.gaReadonly())) {
+            if (dataset == null) {
+                throw new IOException("Cannot open " + fromFile);
+            }
+            try (org.esa.snap.dataio.gdal.drivers.Band gdalBand = dataset.getRasterBand(bandIndex)) {
+                return new Dimension(gdalBand.getBlockXSize(), gdalBand.getBlockYSize());
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    /**
+     * Constructor to be used when the internal tile size is handled (i.e., read) by GDAL
+     */
+    public GDALMultiLevelSource(int dataBufferType, Rectangle imageReadBounds, int bandIndex,
+                                int levelCount, GeoCoding geoCoding, Double noDataValue, Path... sourceLocalFiles) {
+
+        super(levelCount, imageReadBounds, readTileSize(sourceLocalFiles[0], bandIndex + 1), geoCoding);
+        this.sourceLocalFiles = sourceLocalFiles;
+        this.dataBufferType = dataBufferType;
+        this.bandIndex = bandIndex;
+        this.noDataValue = noDataValue;
+        this.defaultJAIReadTileSize = this.tileSize;
+    }
+
+    /**
+     * Constructor to be used when the internal tile size to be used is passed from outside.
+     */
     public GDALMultiLevelSource(int dataBufferType, Rectangle imageReadBounds, Dimension tileSize, int bandIndex,
                          int levelCount, GeoCoding geoCoding, Double noDataValue, Dimension defaultJAIReadTileSize, Path... sourceLocalFiles) {
 
@@ -41,7 +74,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
 
     @Override
     protected ImageLayout buildMosaicImageLayout(int level) {
-        return null; // no image layout to configure the mosaic image since the tile images are configured
+        return ImageUtils.buildImageLayout(this.dataBufferType, this.imageReadBounds.width, this.imageReadBounds.height, level, this.defaultJAIReadTileSize);
     }
 
     @Override

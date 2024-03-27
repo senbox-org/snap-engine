@@ -16,9 +16,11 @@
 
 package org.esa.snap.dataio.envisat;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
@@ -29,6 +31,7 @@ import static org.junit.Assert.*;
  *
  * @author lveci
  */
+@RunWith(LongTestRunner.class)
 public class EnvisatAuxReaderTest {
 
     String ers1XCAFilePath = "org/esa/snap/dataio/testdata/ER1_XCA_AXNXXX20050321_000000_19910101_000000_20100101_000000.txt";

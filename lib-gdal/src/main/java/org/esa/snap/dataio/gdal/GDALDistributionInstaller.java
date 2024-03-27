@@ -1,6 +1,5 @@
 package org.esa.snap.dataio.gdal;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 
@@ -11,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * GDAL Distribution Installer class for installing GDAL on SNAP (internal distribution or JNI drivers).
+ * GDAL Distribution Installer class for installing GDAL on SNAP (internal distribution).
  *
  * @author Jean Coravu
  * @author Adrian Drăghici
@@ -23,7 +22,7 @@ class GDALDistributionInstaller {
     }
 
     /**
-     * Installs the internal GDAL library distribution if missing from SNAP and not installed on OS.
+     * Installs the internal GDAL library distribution.
      *
      * @param gdalVersion the GDAL version to be installed
      * @throws IOException When IO error occurs
@@ -63,30 +62,6 @@ class GDALDistributionInstaller {
     }
 
     /**
-     * Installs the GDAL JNI drivers if missing from SNAP and GDAL distribution installed on OS.
-     *
-     * @param gdalVersion the GDAL version to which JNI drivers be installed
-     * @throws IOException When IO error occurs
-     */
-    private static void installJNI(GDALVersion gdalVersion) throws IOException {
-        // install the GDAL JNI drivers from the distribution
-        final OSCategory osCategory = OSCategory.getOSCategory();
-        if (osCategory.getArchitecture() == null) {
-            final String msg = "No distribution folder found on " + osCategory.getOperatingSystemName() + ".";
-            logger.log(Level.FINE, msg);
-            throw new IllegalStateException(msg);
-        }
-
-        logger.log(Level.FINE, "Install the GDAL JNI drivers from the distribution on " + osCategory.getOperatingSystemName() + ".");
-
-        GDALInstaller.copyDistribution(gdalVersion);
-
-        logger.log(Level.FINE, "The GDAL JNI drivers has been copied on the local disk.");
-
-        logger.log(Level.FINE, "The GDAL library has been successfully installed.");
-    }
-
-    /**
      * Processes the UNIX OS specific post-install steps.
      * - adds the absolute path of the internal GDAL distribution installation location to the 'java.library.path'
      * - updates the PATH environment variable with the absolute path of the internal GDAL distribution installation location, when needed
@@ -102,7 +77,7 @@ class GDALDistributionInstaller {
         logger.log(Level.FINE, "Set the GDAL_DATA environment variable on Linux with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
         gdalEnv.setLength(0);
-        gdalEnv.append("GDAL_PLUGINS=").append(libFolderPath.resolve("gdalplugins"));
+        gdalEnv.append("GDAL_DRIVER_PATH=").append(libFolderPath.resolve("gdalplugins"));
         logger.log(Level.FINE, "Set the GDAL_PLUGINS environment variable on Linux with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
     }
@@ -127,7 +102,7 @@ class GDALDistributionInstaller {
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
 
         gdalEnv.setLength(0);
-        gdalEnv.append("GDAL_PLUGINS=").append(gdalDistributionRootFolderPath.resolve("gdalplugins"));
+        gdalEnv.append("GDAL_DRIVER_PATH=").append(gdalDistributionRootFolderPath.resolve("gdalplugins"));
         logger.log(Level.FINE, "Set the GDAL_PLUGINS environment variable on Windows with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
     }
@@ -139,11 +114,7 @@ class GDALDistributionInstaller {
      * @throws IOException When IO error occurs
      */
     static void setupDistribution(GDALVersion gdalVersion) throws IOException {
-        if (gdalVersion.isJni()) {
-            installJNI(gdalVersion);
-        } else {
-            installDistribution(gdalVersion);
-        }
+        installDistribution(gdalVersion);
     }
 
     /**
@@ -152,11 +123,8 @@ class GDALDistributionInstaller {
      * @param gdalVersion the GDAL version to be setup
      */
     static void setupProj(GDALVersion gdalVersion) {
-        if (!gdalVersion.isJni()) {
-            final Path projPath = SystemUtils.IS_OS_LINUX
-                    ? gdalVersion.getNativeLibrariesFolderPath().resolve("share/share/proj")
-                    : gdalVersion.getNativeLibrariesFolderPath().resolve("projlib");
-            OSR.setPROJSearchPath(projPath.toString());
-        }
+        final Path projPath = gdalVersion.getNativeLibrariesFolderPath().resolve("projlib");
+        OSR.setPROJSearchPath(projPath.toString());
     }
+
 }

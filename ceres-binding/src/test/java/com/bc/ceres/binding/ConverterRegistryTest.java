@@ -103,7 +103,7 @@ public class ConverterRegistryTest {
     }
 
     private static class MyFile extends File {
-        public MyFile() {
+        MyFile() {
             super("");
         }
     }

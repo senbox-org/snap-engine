@@ -18,12 +18,8 @@
 package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
-import org.esa.snap.engine_utilities.commons.AbstractVirtualPath;
-import org.esa.snap.engine_utilities.commons.FilePath;
-import org.esa.snap.engine_utilities.commons.FilePathInputStream;
-import org.esa.snap.engine_utilities.commons.VirtualDirPath;
-import org.esa.snap.engine_utilities.commons.VirtualZipPath;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.engine_utilities.commons.*;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 
@@ -31,11 +27,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,9 +62,8 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
     private int depth;
 
     protected VirtualDirEx() {
-        super();
 
-        this.depth = 1;
+        depth = 1;
     }
 
     public static VirtualDirEx build(Path path) throws IOException {
@@ -83,10 +74,10 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         AbstractVirtualPath virtualDir;
         if (Files.isRegularFile(path)) {
             // the path represents a file
-            if (VirtualDirEx.isPackedFile(path)) {
+            if (isPackedFile(path)) {
                 // the path represents an archive
                 String fileName = path.getFileName().toString();
-                if (VirtualDirTgz.isTgz(fileName) || VirtualDirTgz.isTar(fileName)) {
+                if (VirtualDirTgz.isTgz(fileName) || VirtualDirEx.isTar(fileName)) {
                     return new VirtualDirTgz(path);
                 } else {
                     // check if the file represents a zip archive
@@ -99,41 +90,42 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                     if (zipFile) {
                         virtualDir = new VirtualZipPath(path, copyFilesFromArchiveOnLocalDisk);
                     } else {
-                        throw new IllegalArgumentException("The path '"+ path +"' does not represent a zip archive. " + getPathClassNameExceptionMessage(path));
+                        throw new IllegalArgumentException("The path '" + path + "' does not represent a zip archive. " + getPathClassNameExceptionMessage(path));
                     }
                 }
             } else {
                 Path parentPath = path.getParent();
                 if (parentPath == null) {
-                    throw new IllegalArgumentException("Unable to retrieve the parent of the file '" + path +"'. " + getPathClassNameExceptionMessage(path));
-                } else if (Files.isDirectory(parentPath)){
+                    throw new IllegalArgumentException("Unable to retrieve the parent of the file '" + path + "'. " + getPathClassNameExceptionMessage(path));
+                } else if (Files.isDirectory(parentPath)) {
                     virtualDir = new VirtualDirPath(parentPath, copyFilesFromDirectoryOnLocalDisk);
                 } else {
-                    throw new IllegalArgumentException("Unable to check if the parent of the file '" + path +"' represents a directory. " + getPathClassNameExceptionMessage(path));
+                    throw new IllegalArgumentException("Unable to check if the parent of the file '" + path + "' represents a directory. " + getPathClassNameExceptionMessage(path));
                 }
             }
         } else if (Files.isDirectory(path)) {
             // the path represents a directory
             virtualDir = new VirtualDirPath(path, copyFilesFromDirectoryOnLocalDisk);
         } else {
-            throw new IllegalArgumentException("Unable to check if the path '"+ path +"' represents a file or a directory. " + getPathClassNameExceptionMessage(path));
+            throw new IllegalArgumentException("Unable to check if the path '" + path + "' represents a file or a directory. " + getPathClassNameExceptionMessage(path));
         }
         return new VirtualDirWrapper(virtualDir);
     }
 
     private static String getPathClassNameExceptionMessage(Path path) {
-        return "The path type is '" + path.getClass().getName()+"'.";
+        return "The path type is '" + path.getClass().getName() + "'.";
     }
 
     /**
      * Helper method to check if a file is either packed (i.e. tar file) or compressed.
      * The test is performed agains a set of pre-defined file extensions.
-     * @param filePath  The file to be tested
-     * @return  <code>true</code> if the file is packed or compressed, <code>false</code> otherwise
+     *
+     * @param filePath The file to be tested
+     * @return <code>true</code> if the file is packed or compressed, {@code false} otherwise
      */
     public static boolean isPackedFile(Path filePath) {
         String fileName = filePath.getFileName().toString();
-        int pointIndex = fileName.lastIndexOf(".");
+        int pointIndex = fileName.lastIndexOf('.');
         if (pointIndex <= 0) {
             return false;
         }
@@ -143,11 +135,13 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
 
     /**
      * Checks if the file name belongs to a tar file.
-     * @param filename  The name of the file to be tested.
-     * @return  <code>true</code> if the file is a tar file, <code>false</code> otherwise
+     *
+     * @param filename The name of the file to be tested.
+     * @return {@code true} if the file is a tar file, <code>false</code> otherwise
      */
     public static boolean isTar(String filename) {
-        return VirtualDirTgz.isTar(filename);
+        final String lcName = filename.toLowerCase();
+        return lcName.endsWith(".tar");
     }
 
     public abstract Path buildPath(String first, String... more);
@@ -161,13 +155,14 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
     public abstract Path makeLocalTempFolder() throws IOException;
 
     public void setFolderDepth(int value) {
-        this.depth = value;
+        depth = value;
     }
 
     /**
      * Finds the first occurrence of the pattern in the list of files of this instance.
-     * @param pattern   The pattern to be found.
-     * @return  The first found entry matching the pattern, or <code>null</code> if none found.
+     *
+     * @param pattern The pattern to be found.
+     * @return The first found entry matching the pattern, or {@code null} if none found.
      * @throws IOException in case of an IO error
      */
     public String findFirst(String pattern) throws IOException {
@@ -210,11 +205,12 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
 
     /**
      * List all the files contained in this virtual directory instance.
-     * @return  An array of file names
+     *
+     * @return An array of file names
      */
-    public String[] listAll(Pattern...patterns) {
+    public String[] listAll(Pattern... patterns) {
         File baseFile = getBaseFile();
-        if (VirtualDirTgz.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath())) {
+        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath())) {
             return listAll();
         } else {
             List<String> filesAndFolders;
@@ -232,7 +228,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         }
     }
 
-    private List<String> listFilesFromZipArchive(File baseFile, Pattern...patterns) throws IOException {
+    private List<String> listFilesFromZipArchive(File baseFile, Pattern... patterns) throws IOException {
         List<String> filesAndFolders = new ArrayList<>();
         try (FileSystem fileSystem = ZipFileSystemBuilder.newZipFileSystem(baseFile.toPath())) {
             for (Path root : fileSystem.getRootDirectories()) {
@@ -294,7 +290,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         return filesAndFolders;
     }
 
-    private List<String> listFilesFromFolder(File parent, Pattern...filters) throws IOException {
+    private List<String> listFilesFromFolder(File parent, Pattern... filters) throws IOException {
         List<String> filesAndFolders = new ArrayList<>();
         Path parentPath = parent.toPath();
         FileVisitor<Path> visitor = new ListFilesAndFolderVisitor() {
@@ -325,7 +321,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         return filesAndFolders;
     }
 
-    public static boolean matchFilters(String fileNameToCheck, Pattern...filters) {
+    public static boolean matchFilters(String fileNameToCheck, Pattern... filters) {
         return filters.length == 0 || Arrays.stream(filters).anyMatch(p -> p.matcher(fileNameToCheck).matches());
     }
 }

@@ -51,6 +51,7 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
@@ -70,7 +71,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
-            geoCoding = readPixelBasedGeoCoding(p);
+            geoCoding = readPixelBasedGeoCoding(ctx, p);
         }
         // If there is still no geocoding, check special case of netcdf file which was converted
         // from hdf file and has 'StructMetadata.n' element.
@@ -364,7 +365,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelBasedGeoCoding(Product product) throws IOException {
+    private static GeoCoding readPixelBasedGeoCoding(ProfileReadContext ctx, Product product) throws IOException {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -386,12 +387,20 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final double[] longitudes = RasterUtils.loadGeoData(lonBand);
-        final double[] latitudes = RasterUtils.loadGeoData(latBand);
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final String lonBandName = lonBand.getName();
+        final String latBandName = latBand.getName();
+
+        final GeoVariables result = getGeolocationVariables(netcdfFile, lonBandName, latBandName);
+        if (result.lonVar == null || result.latVar == null) {
+            return null;
+        }
+
+        final double[] longitudes = readVarAsDoubleArray(result.lonVar);
+        final double[] latitudes = readVarAsDoubleArray(result.latVar);
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
-
-        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBandName, latBandName,
                                                   width, height, resolutionInKm);
 
         final boolean fractionalAccuracy = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
@@ -411,5 +420,39 @@ public class CfGeocodingPart extends ProfilePartIO {
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+    static GeoVariables getGeolocationVariables(NetcdfFile netcdfFile, String lonBandName, String latBandName) {
+        Variable lonVar = null;
+        Variable latVar = null;
+
+        final List<Variable> variables = netcdfFile.getVariables();
+
+        for (final Variable variable : variables) {
+            final String variableName = variable.getShortName();
+            if (variableName.equals(lonBandName)) {
+                lonVar = variable;
+                continue;
+            }
+            if (variableName.equals(latBandName)) {
+                latVar = variable;
+            }
+        }
+        return new GeoVariables(lonVar, latVar);
+    }
+
+    static class GeoVariables {
+        public final Variable lonVar;
+        public final Variable latVar;
+
+        public GeoVariables(Variable lonVar, Variable latVar) {
+            this.lonVar = lonVar;
+            this.latVar = latVar;
+        }
+    }
+
+    static double[] readVarAsDoubleArray(Variable lonVar) throws IOException {
+        final Array lonArray = lonVar.read();
+        return (double[]) lonArray.get1DJavaArray(DataType.DOUBLE);
     }
 }

@@ -42,9 +42,9 @@ public class DataContextImpl implements DataContext {
 
     @Override
     public CompoundData getData() {
-        if (data == null ) {
+        if (data == null) {
             synchronized (this) {
-                if (data == null ) {
+                if (data == null) {
                     data = createData(0L);
                 }
             }
@@ -65,16 +65,6 @@ public class DataContextImpl implements DataContext {
     @Override
     public CompoundData createData(CompoundType type, long position) {
         return InstanceFactory.createCompound(this, null, type, position, format.getByteOrder());
-    }
-
-    @Override
-    public CompoundData getData(long position) {
-        return createData(format.getType(), position);
-    }
-
-    @Override
-    public CompoundData getData(CompoundType type, long position) {
-        return createData(type, position);
     }
 
     @Override

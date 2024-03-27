@@ -253,9 +253,14 @@ public class CfBandPart extends ProfilePartIO {
     static float getSpectralWavelength(Variable variable) {
         Attribute attribute = variable.findAttribute(Constants.RADIATION_WAVELENGTH);
         if (attribute == null) {
-            return 0;
+            return 0.f;
         }
-        final float value = getAttributeValue(attribute).floatValue();
+
+        final Number wavelengthValue = getAttributeValue(attribute);
+        if (wavelengthValue == null) {
+            return 0.f;
+        }
+        final float value = wavelengthValue.floatValue();
 
         final Attribute attUnit = variable.findAttribute(Constants.RADIATION_WAVELENGTH_UNIT);
         if (attUnit == null) {

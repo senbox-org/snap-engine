@@ -16,11 +16,13 @@
 
 package org.esa.snap.csv.dataio.reader;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.awt.image.Raster;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Olaf Danne
  * @author Thomas Storm
  */
+@RunWith(LongTestRunner.class)
 public class CsvProductReaderTest {
 
     private ProductReader reader;
