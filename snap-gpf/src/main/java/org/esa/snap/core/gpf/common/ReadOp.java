@@ -154,7 +154,16 @@ public class ReadOp extends Operator {
                 }
                 ProductUtils.copyProductNodes(openedProduct, this.targetProduct);
                 this.targetProduct.setFileLocation(openedProduct.getFileLocation());
-                this.targetProduct.setProductReader(openedProduct.getProductReader());
+                ProductReader productReader;
+                if (this.formatName != null && !this.formatName.trim().isEmpty()) {
+                    productReader = ProductIO.getProductReader(this.formatName);
+                    if (productReader == null) {
+                        throw new OperatorException("No product reader found for format '" + this.formatName + "'.");
+                    }
+                } else {
+                    productReader = openedProduct.getProductReader();
+                }
+                this.targetProduct.setProductReader(productReader);
             } else {
                 ProductReader productReader;
                 if (this.formatName != null && !this.formatName.trim().isEmpty()) {
