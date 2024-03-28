@@ -33,6 +33,7 @@ public class ColorSchemeInfo {
     private boolean primary;
     private File colorPaletteDir;
     private boolean duplicateEntry = false;
+    private static String NULL_SCHEME_ID = "NONE";
 
     private boolean useDisplayName = true;
 
@@ -355,6 +356,11 @@ public class ColorSchemeInfo {
             ArrayList<ColorSchemeLookupInfo> colorSchemeLookupInfos = colorSchemeManager.getColorSchemeLookupInfos();
             for (ColorSchemeLookupInfo colorSchemeLookupInfo : colorSchemeLookupInfos) {
                 if (colorSchemeLookupInfo.isMatch(bandName, product)) {
+                    if (colorSchemeLookupInfo.getScheme_id() == null ||
+                            colorSchemeLookupInfo.getScheme_id().trim().length() == 0 ||
+                            NULL_SCHEME_ID.equals(colorSchemeLookupInfo.getScheme_id())) {
+                        return null;
+                    }
                     return colorSchemeManager.getColorSchemeInfoBySchemeId(colorSchemeLookupInfo.getScheme_id());
                 }
             }

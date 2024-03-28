@@ -286,7 +286,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_LABEL = "Decimal Places";
     public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_TOOLTIP = "Decimal places to display the numeric tick mark labels";
     public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "DecimalPlaces";
-    public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT = 2;
+    public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT = 3;
     public static final Class PROPERTY_LABEL_VALUES_DECIMAL_PLACES_TYPE = Integer.class;
     public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MIN = 0;
     public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MAX = 10;
