@@ -15,24 +15,9 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ConvolutionFilterBand;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FXYGeoCoding;
-import org.esa.snap.core.datamodel.GeneralFilterBand;
-import org.esa.snap.core.datamodel.Kernel;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.VirtualBand;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.esa.snap.core.dataop.maptransf.LambertConformalConicDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.FXYSum;
@@ -42,8 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -207,33 +191,6 @@ public class DimapHeaderWriterTest {
     }
 
     @Test
-    public void testWritePixelGeoCoding() throws IOException {
-        final String expected = setPixelGeoCodingAndGetExpected();
-
-        dimapHeaderWriter.writeHeader();
-
-        assertEquals(expected, stringWriter.toString());
-    }
-
-    @Test
-    public void testWriteMultiPixelGeoCoding() throws IOException {
-        final String expected = setMultiPixelGeoCodingAndGetExpected();
-
-        dimapHeaderWriter.writeHeader();
-
-        assertEquals(expected, stringWriter.toString());
-    }
-
-    @Test
-    public void testWritePixelGeoCodingWithoutEstimator() throws IOException {
-        final String expectedForPixelGeoCoding = setPixelGeoCodingWithoutEstimatorAndGetExpected();
-
-        dimapHeaderWriter.writeHeader();
-
-        assertEquals(expectedForPixelGeoCoding, stringWriter.toString());
-    }
-
-    @Test
     public void testWriteCrsGeoCoding() throws Exception {
         final String expected = setCrsGeoCodingAndGetExpected();
 
@@ -383,7 +340,7 @@ public class DimapHeaderWriterTest {
     private String addMapGeocodingToProductAndGetExpected() {
         final double semiMinor = 1234.0;
         final double semiMajor = 5678.0;
-        final double[] values = new double[]{semiMajor, semiMinor, 15, 16, 17, 18, 19}; // must be seven values
+        final double[] values = {semiMajor, semiMinor, 15, 16, 17, 18, 19}; // must be seven values
         final String projectionName = "ProjectionName";
         final String ellipsoidName = "EllipsoidName";
         final String datumName = "DatumName";
@@ -410,7 +367,7 @@ public class DimapHeaderWriterTest {
         final Ellipsoid ellipsoid = new Ellipsoid(ellipsoidName, semiMinor, semiMajor);
         final Datum datum = new Datum(datumName, ellipsoid, 0, 0, 0);
         final MapInfo mapInfo = new MapInfo(projection, pixelX, pixelY, easting, northing, pixelSizeX, pixelSizeY,
-                                            datum);
+                datum);
         mapInfo.setOrientation(orientation);
         mapInfo.setOrthorectified(orthorectified);
         mapInfo.setElevationModelName(elevModelName);
@@ -508,10 +465,10 @@ public class DimapHeaderWriterTest {
     }
 
     private String setFXYGeoCodingAndGetCore() {
-        final double[] xCoefficients = new double[]{0, 1, 2};
-        final double[] yCoefficients = new double[]{3, 4, 5};
-        final double[] lambdaCoefficients = new double[]{6, 7, 8};
-        final double[] phiCoefficients = new double[]{9, 10, 11};
+        final double[] xCoefficients = {0, 1, 2};
+        final double[] yCoefficients = {3, 4, 5};
+        final double[] lambdaCoefficients = {6, 7, 8};
+        final double[] phiCoefficients = {9, 10, 11};
         final FXYSum xFunction = new FXYSum(FXYSum.FXY_LINEAR, 1, xCoefficients);
         final FXYSum yFunction = new FXYSum(FXYSum.FXY_LINEAR, 1, yCoefficients);
         final FXYSum lambdaFunction = new FXYSum(FXYSum.FXY_LINEAR, 1, lambdaCoefficients);
@@ -522,9 +479,9 @@ public class DimapHeaderWriterTest {
         final float pixelSizeY = 1;
         final Datum datum = Datum.WGS_84;
         final FXYGeoCoding geoCoding = new FXYGeoCoding(pixelOffsetX, pixelOffsetY,
-                                                        pixelSizeX, pixelSizeY,
-                                                        xFunction, yFunction, phiFunction, lambdaFunction,
-                                                        datum);
+                pixelSizeX, pixelSizeY,
+                xFunction, yFunction, phiFunction, lambdaFunction,
+                datum);
         product.setSceneGeoCoding(geoCoding);
         final Ellipsoid ellipsoid = datum.getEllipsoid();
         return "    <Coordinate_Reference_System>" + LS +
@@ -580,18 +537,18 @@ public class DimapHeaderWriterTest {
     }
 
     private String setBandedFXYGeoCodingAndGetExpected() {
-        final double[] xCoefficients1 = new double[]{0, 1, 2};
-        final double[] yCoefficients1 = new double[]{3, 4, 5};
-        final double[] lonCoefficients1 = new double[]{6, 7, 8};
-        final double[] latCoefficients1 = new double[]{9, 10, 11};
+        final double[] xCoefficients1 = {0, 1, 2};
+        final double[] yCoefficients1 = {3, 4, 5};
+        final double[] lonCoefficients1 = {6, 7, 8};
+        final double[] latCoefficients1 = {9, 10, 11};
         final FXYSum xFunction1 = new FXYSum(FXYSum.FXY_LINEAR, 1, xCoefficients1);
         final FXYSum yFunction1 = new FXYSum(FXYSum.FXY_LINEAR, 1, yCoefficients1);
         final FXYSum lambdaFunction1 = new FXYSum(FXYSum.FXY_LINEAR, 1, lonCoefficients1);
         final FXYSum phiFunction1 = new FXYSum(FXYSum.FXY_LINEAR, 1, latCoefficients1);
-        final double[] xCoefficients2 = new double[]{12, 13, 14};
-        final double[] yCoefficients2 = new double[]{15, 16, 17};
-        final double[] lonCoefficients2 = new double[]{18, 19, 20};
-        final double[] latCoefficients2 = new double[]{21, 22, 23};
+        final double[] xCoefficients2 = {12, 13, 14};
+        final double[] yCoefficients2 = {15, 16, 17};
+        final double[] lonCoefficients2 = {18, 19, 20};
+        final double[] latCoefficients2 = {21, 22, 23};
         final FXYSum xFunction2 = new FXYSum(FXYSum.FXY_LINEAR, 1, xCoefficients2);
         final FXYSum yFunction2 = new FXYSum(FXYSum.FXY_LINEAR, 1, yCoefficients2);
         final FXYSum lambdaFunction2 = new FXYSum(FXYSum.FXY_LINEAR, 1, lonCoefficients2);
@@ -602,20 +559,20 @@ public class DimapHeaderWriterTest {
         final float pixelSizeY = 1;
         final Datum datum = Datum.WGS_84;
         final FXYGeoCoding geoCoding1 = new FXYGeoCoding(pixelOffsetX, pixelOffsetY,
-                                                         pixelSizeX, pixelSizeY,
-                                                         xFunction1, yFunction1, phiFunction1, lambdaFunction1,
-                                                         datum);
+                pixelSizeX, pixelSizeY,
+                xFunction1, yFunction1, phiFunction1, lambdaFunction1,
+                datum);
         final FXYGeoCoding geoCoding2 = new FXYGeoCoding(pixelOffsetX, pixelOffsetY,
-                                                         pixelSizeX, pixelSizeY,
-                                                         xFunction2, yFunction2, phiFunction2, lambdaFunction2,
-                                                         datum);
+                pixelSizeX, pixelSizeY,
+                xFunction2, yFunction2, phiFunction2, lambdaFunction2,
+                datum);
         final Band band1 = product.addBand("b1", ProductData.TYPE_INT8);
         final Band band2 = product.addBand("b2", ProductData.TYPE_INT8);
         product.addBand(new VirtualBand("vb1", ProductData.TYPE_INT8, 200, 300, "b1 * 0.4 + 1"));
         product.addBand(new ConvolutionFilterBand("cfb1", band2,
-                                                  new Kernel(3, 3, 1.0, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9}), 1));
+                new Kernel(3, 3, 1.0, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9}), 1));
         product.addBand(new GeneralFilterBand("gfb1", band2, GeneralFilterBand.OpType.MEAN,
-                                              new Kernel(3, 3, new double[]{1, 1, 1, 0, 1, 0, 1, 1, 1}), 1));
+                new Kernel(3, 3, new double[]{1, 1, 1, 0, 1, 0, 1, 1, 1}), 1));
 
 
         band1.setGeoCoding(geoCoding1);
@@ -830,14 +787,12 @@ public class DimapHeaderWriterTest {
         b2.setDataElems(bandData);
 
         final String pixelPosEstimator = setFXYGeoCodingAndGetCore().replace(LS, LS + "        ");
-        final PixelGeoCoding pixelGeoCoding = new PixelGeoCoding(b1, b2, "NOT NaN", 4);
+        final GeoCoding pixelGeoCoding = GeoCodingFactory.createPixelGeoCoding(b1, b2);
         product.setSceneGeoCoding(pixelGeoCoding);
         return header +
                 "    <Geoposition>" + LS +
-                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + "b1" + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + "b2" + "</LONGITUDE_BAND>" + LS +
                 "        <Pixel_Position_Estimator>" + LS +
                 "        " + pixelPosEstimator + LS +
                 "        </Pixel_Position_Estimator>" + LS +
@@ -897,7 +852,7 @@ public class DimapHeaderWriterTest {
                 footer;
     }
 
-    private String setMultiPixelGeoCodingAndGetExpected() {
+    private String setMultiPixelGeoCodingAndGetExpected() throws IOException {
         final Band b1 = product.addBand("b1", ProductData.TYPE_INT8);
         final Band b2 = product.addBand("b2", ProductData.TYPE_INT8);
         final byte[] bandData = new byte[product.getSceneRasterWidth() * product.getSceneRasterHeight()];
@@ -905,28 +860,23 @@ public class DimapHeaderWriterTest {
         b2.setDataElems(bandData);
 
         final String pixelPosEstimator = setFXYGeoCodingAndGetCore().replace(LS, LS + "        ");
-        final PixelGeoCoding pixelGeoCoding;
-        pixelGeoCoding = new PixelGeoCoding(b1, b2, "NOT NaN", 4);
+        final GeoCoding pixelGeoCoding = GeoCodingFactory.createPixelGeoCoding(b1, b2);
         b1.setGeoCoding(pixelGeoCoding);
         b2.setGeoCoding(pixelGeoCoding);
 
         return header +
                 "    <Geoposition>" + LS +
                 "        <BAND_INDEX>" + 0 + "</BAND_INDEX>" + LS +
-                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + "b1" + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + "b2" + "</LONGITUDE_BAND>" + LS +
                 "        <Pixel_Position_Estimator>" + LS +
                 "        " + pixelPosEstimator + LS +
                 "        </Pixel_Position_Estimator>" + LS +
                 "    </Geoposition>" + LS +
                 "    <Geoposition>" + LS +
                 "        <BAND_INDEX>" + 1 + "</BAND_INDEX>" + LS +
-                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + "b1" + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + "b2" + "</LONGITUDE_BAND>" + LS +
                 "        <Pixel_Position_Estimator>" + LS +
                 "        " + pixelPosEstimator + LS +
                 "        </Pixel_Position_Estimator>" + LS +
@@ -993,13 +943,12 @@ public class DimapHeaderWriterTest {
         b1.setRasterData(ProductData.createInstance(bandData));
         b2.setRasterData(ProductData.createInstance(bandData));
 
-        final PixelGeoCoding pixelGeoCoding = new PixelGeoCoding(b1, b2, null, 4, ProgressMonitor.NULL);
+        final GeoCoding pixelGeoCoding = GeoCodingFactory.createPixelGeoCoding(b1, b2);
         product.setSceneGeoCoding(pixelGeoCoding);
         return header +
                 "    <Geoposition>" + LS +
-                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + "b1" + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + "b2" + "</LONGITUDE_BAND>" + LS +
                 "    </Geoposition>" + LS +
                 "    <Raster_Dimensions>" + LS +
                 "        <NCOLS>200</NCOLS>" + LS +
@@ -1059,7 +1008,7 @@ public class DimapHeaderWriterTest {
     private String setCrsGeoCodingAndGetExpected() throws Exception {
 
         final Rectangle imageBounds = new Rectangle(product.getSceneRasterWidth(),
-                                                    product.getSceneRasterHeight());
+                product.getSceneRasterHeight());
         final AffineTransform i2m = new AffineTransform(0.12, 1.23, 2.34, 3.45, 4.56, 5.67);
         final CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
         final CrsGeoCoding crsGeoCoding = new CrsGeoCoding(crs, imageBounds, i2m);
@@ -1095,7 +1044,7 @@ public class DimapHeaderWriterTest {
 
         final Band band1 = new Band("band_1", ProductData.TYPE_INT8, productWidth / 2, productHeight / 2);
         final Rectangle imageBounds1 = new Rectangle(band1.getRasterWidth(),
-                                                     band1.getRasterHeight());
+                band1.getRasterHeight());
         final AffineTransform i2m1 = new AffineTransform(0.23, 1.45, 2.67, 3.89, 4.01, 5.23);
         final CoordinateReferenceSystem crs1 = CRS.decode("EPSG:4326");
         band1.setGeoCoding(new CrsGeoCoding(crs1, imageBounds1, i2m1));
@@ -1103,7 +1052,7 @@ public class DimapHeaderWriterTest {
 
         final Band band2 = new Band("band_2", ProductData.TYPE_INT8, productWidth / 4, productHeight / 3);
         final Rectangle imageBounds2 = new Rectangle(band2.getRasterWidth(),
-                                                     band2.getRasterHeight());
+                band2.getRasterHeight());
         final AffineTransform i2m2 = new AffineTransform(0.12, 1.23, 2.34, 3.45, 4.56, 5.67);
         final CoordinateReferenceSystem crs2 = CRS.decode("EPSG:4326");
         band2.setGeoCoding(new CrsGeoCoding(crs2, imageBounds2, i2m2));

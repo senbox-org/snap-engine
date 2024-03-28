@@ -1,5 +1,6 @@
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.junit.Test;
@@ -90,7 +91,7 @@ public class ImageGeometryTest {
         // these are the outer bounds
         latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
         lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
+        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
 
         ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
                                                                          null, null, null, null, null, null, null, null, null);
@@ -114,7 +115,7 @@ public class ImageGeometryTest {
         // these are the outer bounds
         latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
         lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(new PixelGeoCoding2(latBand, lonBand, null, 2));
+        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
 
         Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
 

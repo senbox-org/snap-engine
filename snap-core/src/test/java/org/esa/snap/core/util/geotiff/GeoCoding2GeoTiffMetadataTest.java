@@ -1,11 +1,13 @@
 package org.esa.snap.core.util.geotiff;
 
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.*;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 
 import static org.esa.snap.core.util.geotiff.GeoTIFFCodes.*;
 import static org.junit.Assert.assertEquals;
@@ -23,8 +25,8 @@ public class GeoCoding2GeoTiffMetadataTest {
     }
 
     @Test
-    public void testFallbackGeoCoding() {
-        final PixelGeoCoding pixelGeoCoding = createPixelGeoCoding();
+    public void testFallbackGeoCoding() throws IOException {
+        final GeoCoding pixelGeoCoding = createPixelGeoCoding();
 
         final GeoTIFFMetadata metadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(pixelGeoCoding, 4, 4);
         assertEquals(ModelTypeGeographic, metadata.getGeoShortParam(GTModelTypeGeoKey));
@@ -50,7 +52,7 @@ public class GeoCoding2GeoTiffMetadataTest {
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84, imageBounds, i2m);
     }
 
-    private PixelGeoCoding createPixelGeoCoding() {
+    private GeoCoding createPixelGeoCoding() throws IOException {
         final float[] latitudes = {36.4774f, 36.6734f, 36.8468f, 37.002f,
                 36.8359f, 37.0334f, 37.2082f, 37.3645f,
                 37.1941f, 37.3931f, 37.5692f, 37.7268f,
@@ -70,6 +72,6 @@ public class GeoCoding2GeoTiffMetadataTest {
         product.addBand(longitude);
         product.addBand(latitude);
 
-        return new PixelGeoCoding(latitude, longitude, "", 2);
+        return GeoCodingFactory.createPixelGeoCoding(latitude, longitude);
     }
 }

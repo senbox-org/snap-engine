@@ -1,11 +1,11 @@
 package org.esa.snap.core.util;
 
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -19,6 +19,7 @@ import org.opengis.referencing.operation.TransformException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -369,10 +370,13 @@ public class DummyProductBuilder {
         }
     }
 
-    private static PixelGeoCoding createPixelGeoCoding(Product product, int sceneRasterWidth, int sceneRasterHeight, GP gp) {
+    private static GeoCoding createPixelGeoCoding(Product product, int sceneRasterWidth, int sceneRasterHeight, GP gp) {
         addLatLonBands(product, sceneRasterWidth, sceneRasterHeight, gp);
-        return new PixelGeoCoding(product.getBand("latitude"),
-                                  product.getBand("longitude"), null, 10);
+        try {
+            return GeoCodingFactory.createPixelGeoCoding(product.getBand("latitude"), product.getBand("longitude"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static TiePointGeoCoding createTiePointGeoCoding(Product product, int sceneRasterWidth, int sceneRasterHeight, int gridWidth, int gridHeight, GP gp) {

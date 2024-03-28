@@ -164,7 +164,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         final GeoRaster geoRaster;
         try {
-            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
+            geoRaster = calculateGeoRaster(destScene, lonVariableName, latVariableName);
         } catch (IOException e) {
             SystemUtils.LOG.warning("error loading geolocation data: " + e.getMessage());
             return false;
@@ -324,7 +324,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         return geoRaster;
     }
 
-    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) throws IOException {
+    private GeoRaster calculateGeoRaster(Scene destScene, String lonVariableName, String latVariableName) throws IOException {
         GeoRaster geoRaster;
         final Product destProduct = destScene.getProduct();
         final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);

@@ -57,7 +57,7 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCreateProduct_with_MapGeoCoding() {
+    public void testCreateProduct_with_MapGeoCoding() throws IOException {
         // preparation
         int geocodingType = MAP_GEOCODING;
         Product product = createProduct(geocodingType);
@@ -71,7 +71,7 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCreateProduct_with_TiePointGeoCoding() throws ParseException {
+    public void testCreateProduct_with_TiePointGeoCoding() throws ParseException, IOException {
         // preparation
         int geocodingType = TIE_POINT_GEOCODING;
         Product product = createProduct(geocodingType);
@@ -85,7 +85,7 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCanReadOldUtcFormat() {
+    public void testCanReadOldUtcFormat() throws IOException {
         // preparation
         int geocodingType = TIE_POINT_GEOCODING;
         final boolean oldUtcFormat = true;
@@ -181,7 +181,7 @@ public class DimapDocumentTest {
         }
     }
 
-    private Product createProductFromXML(String code) {
+    private Product createProductFromXML(String code) throws IOException {
         final Document dom = createDom(code);
         Product product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null);
         GeoCoding[] geocodings = DimapProductHelpers.createGeoCoding(dom, product);
