@@ -20,6 +20,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -128,10 +129,10 @@ public class CsvProductReader extends AbstractProductReader {
 
         final ComponentGeoCoding geoCoding;
         if (rasterResolutionString == null) {
-            geoCoding = org.esa.snap.core.dataio.geocoding.GeoCodingFactory.createPixelGeoCoding(latBand, lonBand);
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand);
         } else {
             final double resolutionInKm = Double.parseDouble(rasterResolutionString);
-            geoCoding = org.esa.snap.core.dataio.geocoding.GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, resolutionInKm);
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, resolutionInKm);
         }
 
         product.setSceneGeoCoding(geoCoding);
