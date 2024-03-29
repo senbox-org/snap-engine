@@ -2,6 +2,7 @@ package org.esa.snap.jp2.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
@@ -10,6 +11,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.runtime.LogUtils4Tests;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.media.jai.PlanarImage;
 import java.awt.Rectangle;
@@ -20,15 +22,12 @@ import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Created by jcoravu on 5/11/2019.
  */
+@RunWith(LongTestRunner.class)
 public class JP2ProductReaderTest {
-
-    public JP2ProductReaderTest() {
-    }
 
     @BeforeClass
     public static void initialize() throws Exception {

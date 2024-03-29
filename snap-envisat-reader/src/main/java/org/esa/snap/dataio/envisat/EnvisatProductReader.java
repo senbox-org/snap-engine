@@ -144,6 +144,30 @@ public class EnvisatProductReader extends AbstractProductReader {
         return createProduct();
     }
 
+    @Override
+    public GeoCoding readGeoCoding(Product product) throws IOException {
+        final Preferences preferences = Config.instance("snap").preferences();
+        final boolean usePixelGeoCoding = preferences.getBoolean(SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING, false);
+
+        final String productType = productFile.getProductType();
+
+        final ComponentGeoCoding geoCoding;
+        if (usePixelGeoCoding &&
+                (productType.equalsIgnoreCase(EnvisatConstants.MERIS_FSG_L1B_PRODUCT_TYPE_NAME) ||
+                        productType.equalsIgnoreCase(EnvisatConstants.MERIS_FRG_L1B_PRODUCT_TYPE_NAME))) {
+            geoCoding = createPixelGeoCoding(product);
+        } else {
+            geoCoding = createTiePointGeoCoding(product);
+        }
+
+        if (geoCoding == null) {
+            return null;
+        }
+
+        geoCoding.initialize();
+        return geoCoding;
+    }
+
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
      * directly owned by this reader. Its primary use is to allow the garbage collector to perform a vanilla job.
@@ -235,7 +259,7 @@ public class EnvisatProductReader extends AbstractProductReader {
 
         addBandsToProduct(product);
         addTiePointGridsToProduct(product);
-        addGeoCodingToProduct(product);
+        // addGeoCodingToProduct(product);
         initPointingFactory(product);
         if (!isMetadataIgnored()) {
             addHeaderAnnotationsToProduct(product);
@@ -384,6 +408,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
+    /*
     private void addGeoCodingToProduct(Product product) throws IOException {
         final Preferences preferences = Config.instance("snap").preferences();
         final boolean usePixelGeoCoding = preferences.getBoolean(SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING, false);
@@ -407,6 +432,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         geoCoding.initialize();
         product.setSceneGeoCoding(geoCoding);
     }
+     */
 
     private ComponentGeoCoding createPixelGeoCoding(Product product) throws IOException {
         final Band lonBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME);
