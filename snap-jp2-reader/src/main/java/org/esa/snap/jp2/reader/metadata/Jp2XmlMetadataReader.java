@@ -69,7 +69,7 @@ public class Jp2XmlMetadataReader {
                         }
                     }
                 }
-                channel.close();
+                mappedByteBuffer.clear();
             } catch (IOException e) {
                 e.printStackTrace();
             }
