@@ -16,6 +16,7 @@
 
 package org.esa.snap.collocation;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -28,12 +29,17 @@ import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.SourceProducts;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Color;
+import java.lang.reflect.Field;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -50,19 +56,19 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setSecondaryComponentPattern("${ORIGINAL_NAME}_S");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
-        assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
-        assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertTrue(op.getRenameReferenceComponents());
+        assertTrue(op.getRenameSecondaryComponents());
+        assertEquals("${ORIGINAL_NAME}_M", op.getReferenceComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getSecondaryComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -148,19 +154,19 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setSecondaryComponentPattern("${ORIGINAL_NAME}_S");
         op.setCopySecondaryMetadata(true);
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
-        assertTrue(op.getRenameMasterComponents());
-        assertTrue(op.getRenameSlaveComponents());
-        assertEquals("${ORIGINAL_NAME}_M", op.getMasterComponentPattern());
-        assertEquals("${ORIGINAL_NAME}_S", op.getSlaveComponentPattern());
+        assertTrue(op.getRenameReferenceComponents());
+        assertTrue(op.getRenameSecondaryComponents());
+        assertEquals("${ORIGINAL_NAME}_M", op.getReferenceComponentPattern());
+        assertEquals("${ORIGINAL_NAME}_S", op.getSecondaryComponentPattern());
         assertEquals(ResamplingType.NEAREST_NEIGHBOUR, op.getResamplingType());
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
 
@@ -240,10 +246,10 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
+        op.setSecondaryComponentPattern("${ORIGINAL_NAME}_S");
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
@@ -261,18 +267,18 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameSlaveComponents(false);
-        op.setSlaveComponentPattern("");
+        op.setRenameSecondaryComponents(false);
+        op.setSecondaryComponentPattern("");
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         try {
             op.getTargetProduct();
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("Target product already contains a raster data node with name 'latitude'. " +
-                            "Parameter slaveComponentPattern must be set.",
+                            "Parameter secondaryComponentPattern must be set.",
                     oe.getMessage());
         }
     }
@@ -284,10 +290,10 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameMasterComponents(false);
+        op.setRenameReferenceComponents(false);
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
@@ -313,10 +319,10 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
-        op.setRenameMasterComponents(true);
+        op.setRenameReferenceComponents(true);
 
-        op.setMasterProduct(masterProduct);
-        op.setSlaveProduct(slaveProduct);
+        op.setReferenceProduct(masterProduct);
+        op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
@@ -335,7 +341,75 @@ public class CollocateOpTest {
         assertTrue(indexCodingGroup.contains(targetProduct.getBand("l1_class_S").getIndexCoding()));
     }
 
-    private static final float[] wl = new float[]{
+    @Test
+    @STTM("SNAP-3660")
+    public void testParameterNaming() throws NoSuchFieldException {
+        final CollocateOp op = new CollocateOp();
+        final Class<? extends CollocateOp> collOpClass = op.getClass();
+
+        final Field sourceProductsField = collOpClass.getDeclaredField("sourceProducts");
+        final SourceProducts[] spAnnotation = sourceProductsField.getDeclaredAnnotationsByType(SourceProducts.class);
+        assertEquals(1, spAnnotation.length);
+        assertEquals("The source product(s) which serve(s) as secondary.", spAnnotation[0].description());
+        assertEquals("sourceProducts", spAnnotation[0].alias());
+
+        final Field referenceField = collOpClass.getDeclaredField("reference");
+        final SourceProduct[] refAnnotation = referenceField.getDeclaredAnnotationsByType(SourceProduct.class);
+        assertEquals(1, refAnnotation.length);
+        assertEquals("The source product which serves as reference.", refAnnotation[0].description());
+        assertEquals("reference", refAnnotation[0].alias());
+
+        final Field secondaryField = collOpClass.getDeclaredField("secondary");
+        final SourceProduct[] secAnnotation = secondaryField.getDeclaredAnnotationsByType(SourceProduct.class);
+        assertEquals(1, secAnnotation.length);
+        assertEquals("The source product which serves as secondary.", secAnnotation[0].description());
+        assertEquals("secondary", secAnnotation[0].alias());
+
+        final Field refProdNameField = collOpClass.getDeclaredField("referenceProductName");
+        final Parameter[] refProdNameAnnotations = refProdNameField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, refProdNameAnnotations.length);
+        assertEquals("referenceProductName", refProdNameAnnotations[0].alias());
+        assertEquals("Reference product name", refProdNameAnnotations[0].label());
+        assertEquals("The name of the reference product.", refProdNameAnnotations[0].description());
+
+        final Field targetProdField = collOpClass.getDeclaredField("targetProduct");
+        final TargetProduct[] targetProdAnnotations = targetProdField.getDeclaredAnnotationsByType(TargetProduct.class);
+        assertEquals(1, targetProdAnnotations.length);
+        assertEquals("The target product which will use the reference's grid.", targetProdAnnotations[0].description());
+
+        final Field copySecondaryMetadataField = collOpClass.getDeclaredField("copySecondaryMetadata");
+        final Parameter[] copySecondaryMetaAnnotations = copySecondaryMetadataField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, copySecondaryMetaAnnotations.length);
+        assertEquals("Copy metadata of secondary products", copySecondaryMetaAnnotations[0].label());
+        assertEquals("Copies also the metadata of the secondary products to the target.", copySecondaryMetaAnnotations[0].description());
+
+        final Field renameRefCompField = collOpClass.getDeclaredField("renameReferenceComponents");
+        final Parameter[] renameRefCompAnnotations = renameRefCompField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, renameRefCompAnnotations.length);
+        assertEquals("Whether or not components of the reference product shall be renamed in the target product.", renameRefCompAnnotations[0].description());
+
+        final Field renameSecCompField = collOpClass.getDeclaredField("renameSecondaryComponents");
+        final Parameter[] renameSecCompAnnotations = renameSecCompField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, renameSecCompAnnotations.length);
+        assertEquals("Whether or not components of the secondary product(s) shall be renamed in the target product.", renameSecCompAnnotations[0].description());
+
+        final Field refCompPatternField = collOpClass.getDeclaredField("referenceComponentPattern");
+        final Parameter[] refCompPatternAnnotations = refCompPatternField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, refCompPatternAnnotations.length);
+        assertEquals("The text pattern to be used when renaming reference components.", refCompPatternAnnotations[0].description());
+
+        final Field secCompPatternField = collOpClass.getDeclaredField("secondaryComponentPattern");
+        final Parameter[] secCompPatternAnnotations = secCompPatternField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, secCompPatternAnnotations.length);
+        assertEquals("The text pattern to be used when renaming secondary components.", secCompPatternAnnotations[0].description());
+
+        final Field resamplingTypeField = collOpClass.getDeclaredField("resamplingType");
+        final Parameter[] resampTypeAnnotations = resamplingTypeField.getDeclaredAnnotationsByType(Parameter.class);
+        assertEquals(1, resampTypeAnnotations.length);
+        assertEquals("The method to be used when resampling the secondary grid onto the reference grid.", resampTypeAnnotations[0].description());
+    }
+
+    private static final float[] wl = {
             412.6395569f,
             442.5160217f,
             489.8732910f,
