@@ -345,24 +345,96 @@ public class ReprojectionOp extends Operator {
         }
     }
 
+    private void reprojectSourceRaster_ifweevercanchangethisoperatortopreservetheencoding(RasterDataNode sourceRaster) {
+        final ReprojectionSettings reprojectionSettings = reprojectionSettingsProvider.getReprojectionSettings(sourceRaster);
+        final Rectangle imageRect = reprojectionSettings.getImageGeometry().getImageRect();
+        final Band targetBand = new Band(sourceRaster.getName(), sourceRaster.getDataType(), (int) imageRect.getWidth(), (int) imageRect.getHeight());
+        targetProduct.addBand(targetBand);
+        // transfer attributes from source to target
+        targetBand.setScalingOffset(sourceRaster.getScalingOffset());
+        targetBand.setScalingFactor(sourceRaster.getScalingFactor());
+        targetBand.setLog10Scaled(sourceRaster.isLog10Scaled());
+        targetBand.setDescription(sourceRaster.getDescription());
+        targetBand.setUnit(sourceRaster.getUnit());
+        if (sourceRaster.isNoDataValueUsed()) {
+            targetBand.setNoDataValue(sourceRaster.getNoDataValue());
+            targetBand.setNoDataValueUsed(true);
+        }
+        if (sourceRaster instanceof Band) {
+            final Band sourceBand = (Band) sourceRaster;
+            ProductUtils.copySpectralBandProperties(sourceBand, targetBand);
+            final FlagCoding sourceFlagCoding = sourceBand.getFlagCoding();
+            final IndexCoding sourceIndexCoding = sourceBand.getIndexCoding();
+            if (sourceFlagCoding != null) {
+                final String flagCodingName = sourceFlagCoding.getName();
+                final FlagCoding destFlagCoding = targetProduct.getFlagCodingGroup().get(flagCodingName);
+                targetBand.setSampleCoding(destFlagCoding);
+            } else if (sourceIndexCoding != null) {
+                final String indexCodingName = sourceIndexCoding.getName();
+                final IndexCoding destIndexCoding = targetProduct.getIndexCodingGroup().get(indexCodingName);
+                targetBand.setSampleCoding(destIndexCoding);
+            }
+        }
+        // create projected image
+        final MultiLevelImage sourceImage = sourceRaster.getSourceImage();
+        GeoCoding bandGeoCoding = reprojectionSettings.getGeoCoding();
+        if (bandGeoCoding != null) {
+            targetBand.setGeoCoding(bandGeoCoding);
+        }
+        final GeoCoding sourceGeoCoding = getSourceGeoCoding(sourceRaster);
+        final Interpolation resampling = getResampling(targetBand);
+        MultiLevelModel targetModel = reprojectionSettings.getTargetModel();
+        if (targetModel == null) {
+            targetModel = targetBand.getMultiLevelModel();
+            reprojectionSettings.setTargetModel(targetModel);
+        }
+        Reproject reprojection = reprojectionSettings.getReprojection();
+        if (reprojection == null) {
+            reprojection = new Reproject(targetModel.getLevelCount());
+            reprojectionSettings.setReprojection(reprojection);
+        }
+        MultiLevelImage projectedImage = createProjectedImage(sourceGeoCoding, sourceImage, reprojectionSettings.getSourceModel(),
+                                                              targetBand, resampling, targetModel, reprojection);
+        targetBand.setSourceImage(projectedImage);
+    }
+
     private void reprojectSourceRaster(RasterDataNode sourceRaster) {
         final ReprojectionSettings reprojectionSettings = reprojectionSettingsProvider.getReprojectionSettings(sourceRaster);
         final int targetDataType;
-        MultiLevelImage sourceImage;
+        final Number targetNoDataValue;
+        final MultiLevelImage sourceImage;
+        // distinguish cases for scaling and no data value handling
         if (sourceRaster.isScalingApplied()) {
+            // uint16-encoded measurements like Sentinel-2 MSI B10
             targetDataType = sourceRaster.getGeophysicalDataType();
-            sourceImage = sourceRaster.getGeophysicalImage();
-        } else {
+            targetNoDataValue = new Float(Float.NaN);
+            sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
+        } else if (ProductData.isFloatingPointType(sourceRaster.getDataType())) {
+            // native float bands like SZA
             targetDataType = sourceRaster.getDataType();
+            targetNoDataValue = new Float(Float.NaN);
+            sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
+        } else if (sourceRaster.getValidMaskExpression() != null || sourceRaster.isNoDataValueUsed()) {
+            // band with valid expression or no data value
+            targetDataType = sourceRaster.getDataType();
+            targetNoDataValue = getTargetNoDataValue(sourceRaster, targetDataType);
+            sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
+        } else {
+            // band that shall be transferred unchanged
+            targetDataType = sourceRaster.getDataType();
+            targetNoDataValue = getTargetNoDataValue(sourceRaster, targetDataType);
             sourceImage = sourceRaster.getSourceImage();
         }
-        final Number targetNoDataValue = getTargetNoDataValue(sourceRaster, targetDataType);
+
         final Rectangle imageRect = reprojectionSettings.getImageGeometry().getImageRect();
         final Band targetBand = new Band(sourceRaster.getName(), targetDataType, (int) imageRect.getWidth(), (int) imageRect.getHeight());
         targetProduct.addBand(targetBand);
+
         targetBand.setLog10Scaled(sourceRaster.isLog10Scaled());
-        targetBand.setNoDataValue(targetNoDataValue.doubleValue());
-        targetBand.setNoDataValueUsed(true);
+        if (sourceRaster.isNoDataValueUsed()) {
+            targetBand.setNoDataValue(targetNoDataValue.doubleValue());
+            targetBand.setNoDataValueUsed(true);
+        }
         targetBand.setDescription(sourceRaster.getDescription());
         targetBand.setUnit(sourceRaster.getUnit());
         GeoCoding bandGeoCoding = reprojectionSettings.getGeoCoding();
@@ -371,11 +443,6 @@ public class ReprojectionOp extends Operator {
         }
 
         final GeoCoding sourceGeoCoding = getSourceGeoCoding(sourceRaster);
-        final String exp = sourceRaster.getValidMaskExpression();
-        if (exp != null) {
-            sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
-        }
-
         final Interpolation resampling = getResampling(targetBand);
         MultiLevelModel targetModel = reprojectionSettings.getTargetModel();
         if (targetModel == null) {
