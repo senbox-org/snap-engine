@@ -15,10 +15,12 @@
  */
 package org.esa.snap.dem.dataio.ace;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.junit.Assume;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,6 +30,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+@RunWith(LongTestRunner.class)
 public class TestACEElevationModel {
 
     private final static double[] EXPECTED_DEM_VALUES = {

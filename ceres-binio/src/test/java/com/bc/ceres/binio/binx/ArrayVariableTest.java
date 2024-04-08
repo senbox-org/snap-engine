@@ -18,14 +18,21 @@ package com.bc.ceres.binio.binx;
 
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataFormat;
-import junit.framework.TestCase;
+import com.bc.ceres.test.LongTestRunner;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class ArrayVariableTest extends TestCase {
+import static org.junit.Assert.*;
+
+@RunWith(LongTestRunner.class)
+public class ArrayVariableTest {
+
+    @Test
     public void testBinX() throws IOException, BinXException, URISyntaxException {
         URL resource = getClass().getResource("ArrayVariable.binXschema.xml");
         assertNotNull(resource);
@@ -55,7 +62,7 @@ public class ArrayVariableTest extends TestCase {
         CompoundType datasetType = dataFormat.getType();
         assertNotNull(datasetType);
         assertEquals("Dataset", datasetType.getName());
-        assertEquals(5,datasetType.getMemberCount());
+        assertEquals(5, datasetType.getMemberCount());
         assertEquals("magic1", datasetType.getMember(0).getName());
         assertEquals("data1", datasetType.getMember(1).getName());
         assertEquals("magic2", datasetType.getMember(2).getName());
@@ -63,9 +70,10 @@ public class ArrayVariableTest extends TestCase {
         assertEquals("magic3", datasetType.getMember(4).getName());
 
         assertSame(ernieType, datasetType.getMember(1).getType());
-        assertSame(bertType,datasetType.getMember(3).getType());
+        assertSame(bertType, datasetType.getMember(3).getType());
     }
 
+    @Test
     public void testFormat() throws URISyntaxException, IOException, BinXException {
         URL resource = getClass().getResource("ArrayVariable.binXschema.xml");
         assertNotNull(resource);
@@ -76,7 +84,7 @@ public class ArrayVariableTest extends TestCase {
         assertEquals("ArrayVariableTest", format.getName());
         assertNotNull(format.getType());
         assertEquals("Dataset", format.getType().getName());
-        assertEquals(true, format.isTypeDef("Ernie"));
+        assertTrue(format.isTypeDef("Ernie"));
         assertTrue(format.getTypeDef("Ernie") instanceof CompoundType);
     }
 }

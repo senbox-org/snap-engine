@@ -16,14 +16,18 @@
 
 package com.bc.ceres.jai.opimage;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.KernelJAI;
 import javax.media.jai.TiledImage;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 
-public class DFTConvolveRIFTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class DFTConvolveRIFTest {
+
+    @Test
     public void testKernelImage() {
         float sum = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9;
 
@@ -34,8 +38,8 @@ public class DFTConvolveRIFTest extends TestCase {
         };
 
         TiledImage image = DFTConvolveRIF.createKernelImage(new BufferedImage(10, 10, BufferedImage.TYPE_BYTE_GRAY),
-                                                            DataBuffer.TYPE_FLOAT,
-                                                            new KernelJAI(3, 3, data));
+                DataBuffer.TYPE_FLOAT,
+                new KernelJAI(3, 3, data));
         assertEquals(10, image.getWidth());
         assertEquals(10, image.getHeight());
 
@@ -53,7 +57,7 @@ public class DFTConvolveRIFTest extends TestCase {
         // Upper right 2x3 pixels
         assertEquals(0.0f, image.getSampleFloat(8, 0, 0), 0.0f);
         assertEquals(4 / sum, image.getSampleFloat(9, 0, 0), 0.0f);
-        assertEquals(0.0f , image.getSampleFloat(8, 1, 0), 0.0f);
+        assertEquals(0.0f, image.getSampleFloat(8, 1, 0), 0.0f);
         assertEquals(7 / sum, image.getSampleFloat(9, 1, 0), 0.0f);
         assertEquals(0.0f, image.getSampleFloat(8, 2, 0), 0.0f);
         assertEquals(0.0f, image.getSampleFloat(9, 2, 0), 0.0f);
@@ -74,6 +78,7 @@ public class DFTConvolveRIFTest extends TestCase {
 
     }
 
+    @Test
     public void testNextBase2Size() {
         assertEquals(256, DFTConvolveRIF.getNextBase2Size(256));
         assertEquals(512, DFTConvolveRIF.getNextBase2Size(257));
@@ -81,5 +86,4 @@ public class DFTConvolveRIFTest extends TestCase {
         assertEquals(1024, DFTConvolveRIF.getNextBase2Size(513));
         assertEquals(1024, DFTConvolveRIF.getNextBase2Size(512 + 2 * 33));
     }
-
 }

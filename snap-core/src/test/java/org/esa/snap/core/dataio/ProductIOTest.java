@@ -17,40 +17,32 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.core.util.io.FileUtils;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
-public class ProductIOTest extends TestCase {
+public class ProductIOTest {
 
-    public ProductIOTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductIOTest.class);
-    }
-
+    @Test
     public void testThatDefaultReaderAndWriterAreImplemented() {
         assertNotNull(ProductIO.getProductReader("BEAM-DIMAP"));
         assertNotNull(ProductIO.getProductWriter("BEAM-DIMAP"));
     }
 
+    @Test
     public void testReadProductArgsChecking() {
         try {
             ProductIO.readProduct((File) null);
@@ -67,6 +59,7 @@ public class ProductIOTest extends TestCase {
         }
     }
 
+    @Test
     public void testHeaderIsRewrittenIfModified() throws IOException {
         final Product product = new DummyProductBuilder().create();
         final Path tempDirectory = Files.createTempDirectory("test-dir");

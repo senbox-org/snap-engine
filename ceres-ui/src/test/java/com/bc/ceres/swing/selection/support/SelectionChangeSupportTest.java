@@ -16,13 +16,17 @@
 
 package com.bc.ceres.swing.selection.support;
 
-import junit.framework.TestCase;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.bc.ceres.swing.selection.SelectionContext;
+import org.junit.Test;
 
-public class SelectionChangeSupportTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SelectionChangeSupportTest {
+
+    @Test
     public void testListenerHousekeeping() {
         SelectionChangeSupport ses = new SelectionChangeSupport(null);
 
@@ -46,6 +50,7 @@ public class SelectionChangeSupportTest extends TestCase {
         assertSame(listener2, listeners[1]);
     }
 
+    @Test
     public void testListenerDispatching() {
         SelectionChangeEvent event;
 
@@ -60,7 +65,6 @@ public class SelectionChangeSupportTest extends TestCase {
         testExpliciteEvent(new SelectionChangeSupport(null), eventSource2);
         testExpliciteEvent(new SelectionChangeSupport("A"), eventSource2);
 
-
         SelectionChangeSupport selectionChangeSupport;
 
         selectionChangeSupport = new SelectionChangeSupport();
@@ -73,7 +77,7 @@ public class SelectionChangeSupportTest extends TestCase {
         testImpliciteEvent(selectionChangeSupport, eventSource2);
     }
 
-    private Selection testExpliciteEvent(SelectionChangeSupport ses, Object expectedSource) {
+    private void testExpliciteEvent(SelectionChangeSupport ses, Object expectedSource) {
         SelectionContext selectionContext = new DefaultSelectionContext();
         Selection selection = new DefaultSelection("A");
 
@@ -91,11 +95,9 @@ public class SelectionChangeSupportTest extends TestCase {
         assertSame(selectionContext, listener2.event.getSelectionContext());
         assertSame(selection, listener1.event.getSelection());
         assertSame(selection, listener2.event.getSelection());
-
-        return selection;
     }
 
-    private Selection testImpliciteEvent(SelectionChangeSupport ses, Object expectedSource) {
+    private void testImpliciteEvent(SelectionChangeSupport ses, Object expectedSource) {
         SelectionContext selectionContext = new DefaultSelectionContext();
         Selection selection = new DefaultSelection("A");
 
@@ -113,8 +115,6 @@ public class SelectionChangeSupportTest extends TestCase {
         assertSame(selectionContext, listener2.event.getSelectionContext());
         assertSame(selection, listener1.event.getSelection());
         assertSame(selection, listener2.event.getSelection());
-
-        return selection;
     }
 
     private static class MySelectionChangeListener implements SelectionChangeListener {

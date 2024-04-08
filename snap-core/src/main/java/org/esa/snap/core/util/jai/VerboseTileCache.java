@@ -19,24 +19,15 @@ package org.esa.snap.core.util.jai;
 import com.sun.media.jai.util.CacheDiagnostics;
 
 import javax.media.jai.TileCache;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.util.Comparator;
 
 public class VerboseTileCache implements TileCache {
+    static boolean verbose = true;
     private final TileCache tileCache;
     private CacheDiagnostics cacheDiagnostics;
-
-    static boolean verbose = true;
-
-    public static boolean isVerbose() {
-        return verbose;
-    }
-
-    public static void setVerbose(boolean verbose) {
-        VerboseTileCache.verbose = verbose;
-    }
 
     public VerboseTileCache(TileCache tileCache) {
         this.tileCache = tileCache;
@@ -46,11 +37,22 @@ public class VerboseTileCache implements TileCache {
         }
     }
 
+    public static boolean isVerbose() {
+        return verbose;
+    }
+
+    public static void setVerbose(boolean verbose) {
+        VerboseTileCache.verbose = verbose;
+    }
+
+    private static String getTilePos(int tileX, int tileY) {
+        return "(" + tileX + "," + tileY + ")";
+    }
+
     public void add(RenderedImage renderedImage, int tileX, int tileY, Raster tile) {
         tileCache.add(renderedImage, tileX, tileY, tile);
         trace("add", renderedImage, tile, getTilePos(tileX, tileY));
     }
-
 
     public void add(RenderedImage renderedImage, int tileX, int tileY, Raster tile, Object o) {
         tileCache.add(renderedImage, tileX, tileY, tile, o);
@@ -66,10 +68,6 @@ public class VerboseTileCache implements TileCache {
         Raster tile = tileCache.getTile(renderedImage, tileX, tileY);
         trace("getTile", renderedImage, tile, getTilePos(tileX, tileY));
         return tile;
-    }
-
-    private static String getTilePos(int tileX, int tileY) {
-        return "(" + tileX + "," + tileY + ")";
     }
 
     public Raster[] getTiles(RenderedImage renderedImage) {
@@ -107,44 +105,46 @@ public class VerboseTileCache implements TileCache {
     }
 
     /**
-     * @deprecated does nothing; no replacement
-     */
-    @Deprecated
-    public void setTileCapacity(int i) {
-//        tileCache.setTileCapacity(i);
-    }
-
-    /**
      * @deprecated does nothing; returns always 0
      */
     @Deprecated
     public int getTileCapacity() {
+        // needs to be implemented, the JAI interface still has this method tb 2023-12-18
         return 0;
 //        return tileCache.getTileCapacity();
     }
 
-    public void setMemoryCapacity(long l) {
-        tileCache.setMemoryCapacity(l);
+    /**
+     * @deprecated does nothing; no replacement
+     */
+    @Deprecated
+    public void setTileCapacity(int i) {
+        // needs to be implemented, the JAI interface still has this method tb 2023-12-18
+//        tileCache.setTileCapacity(i);
     }
 
     public long getMemoryCapacity() {
         return tileCache.getMemoryCapacity();
     }
 
-    public void setMemoryThreshold(float v) {
-        tileCache.setMemoryThreshold(v);
+    public void setMemoryCapacity(long l) {
+        tileCache.setMemoryCapacity(l);
     }
 
     public float getMemoryThreshold() {
         return tileCache.getMemoryThreshold();
     }
 
-    public void setTileComparator(Comparator comparator) {
-        tileCache.setTileComparator(comparator);
+    public void setMemoryThreshold(float v) {
+        tileCache.setMemoryThreshold(v);
     }
 
     public Comparator getTileComparator() {
         return tileCache.getTileComparator();
+    }
+
+    public void setTileComparator(Comparator comparator) {
+        tileCache.setTileComparator(comparator);
     }
 
     private void trace(String method, RenderedImage image, Raster tile, String tilePos) {

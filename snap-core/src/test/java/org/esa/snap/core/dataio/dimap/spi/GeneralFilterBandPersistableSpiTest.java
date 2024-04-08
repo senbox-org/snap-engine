@@ -16,7 +16,6 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeneralFilterBand;
@@ -24,25 +23,30 @@ import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.ProductData;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-public class GeneralFilterBandPersistableSpiTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class GeneralFilterBandPersistableSpiTest {
 
     private GeneralFilterBandPersistableSpi _persistableSpi;
 
-    @Override
+    @Before
     public void setUp() {
         _persistableSpi = new GeneralFilterBandPersistableSpi();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         _persistableSpi = null;
     }
 
+    @Test
     public void testCanDecode_GoodElement() {
-
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
         final Attribute bandType = new Attribute(DimapProductConstants.ATTRIB_BAND_TYPE, "GeneralFilterBand");
@@ -52,15 +56,15 @@ public class GeneralFilterBandPersistableSpiTest extends TestCase {
         assertTrue(_persistableSpi.canDecode(bandInfo));
     }
 
+    @Test
     public void testCanDecode_NotSpectralBandInfo() {
-
         final Element element = new Element("SomeWhat");
 
         assertFalse(_persistableSpi.canDecode(element));
     }
 
+    @Test
     public void testCanDecode_NoBandType() {
-
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
         bandInfo.setContent(filterInfo);
@@ -68,6 +72,7 @@ public class GeneralFilterBandPersistableSpiTest extends TestCase {
         assertFalse(_persistableSpi.canDecode(bandInfo));
     }
 
+    @Test
     public void testCanDecode_NotCorrectBandType() {
         final Element bandInfo = new Element(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
         final Element filterInfo = new Element(DimapProductConstants.TAG_FILTER_BAND_INFO);
@@ -78,7 +83,7 @@ public class GeneralFilterBandPersistableSpiTest extends TestCase {
         assertFalse(_persistableSpi.canDecode(bandInfo));
     }
 
-
+    @Test
     public void testCanPersist() {
         final Band source = new Band("b", ProductData.TYPE_INT8, 2, 2);
         final GeneralFilterBand gfb = new GeneralFilterBand("test", source, GeneralFilterBand.OpType.MAX, new Kernel(3, 3, new double[3 * 3]), 1);
@@ -90,6 +95,7 @@ public class GeneralFilterBandPersistableSpiTest extends TestCase {
         assertFalse(_persistableSpi.canPersist(new Band("b", ProductData.TYPE_INT8, 2, 2)));
     }
 
+    @Test
     public void testCreatePersistable() {
         assertNotNull(_persistableSpi.createPersistable());
     }

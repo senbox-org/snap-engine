@@ -90,7 +90,7 @@ public class DefaultDomElement implements DomElement {
 
     @Override
     public String[] getAttributeNames() {
-        return attributeList != null ? attributeList.toArray(new String[attributeList.size()]) : new String[0];
+        return attributeList != null ? attributeList.toArray(new String[0]) : new String[0];
     }
 
     @Override
@@ -100,7 +100,7 @@ public class DefaultDomElement implements DomElement {
 
     @Override
     public DomElement[] getChildren() {
-        return elementList != null ? elementList.toArray(new DomElement[elementList.size()]) : new DomElement[0];
+        return elementList != null ? elementList.toArray(new DomElement[0]) : new DomElement[0];
     }
 
     @Override
@@ -114,7 +114,7 @@ public class DefaultDomElement implements DomElement {
                 children.add(domElement);
             }
         }
-        return children.toArray(new DomElement[children.size()]);
+        return children.toArray(new DomElement[0]);
     }
 
     @Override

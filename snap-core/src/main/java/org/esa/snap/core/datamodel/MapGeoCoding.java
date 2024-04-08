@@ -20,6 +20,7 @@ import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.geotools.CoordinateReferenceSystems;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -250,7 +251,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
     // Note: method uses getGeoPos, don't call before mapInfo properties are set
     private GeoPos[] createGeoBoundary(Rectangle rect) {
         final int step = (int) Math.max(16, (rect.getWidth() + rect.getHeight()) / 250);
-        final PixelPos[] rectBoundary = ProductUtils.createRectBoundary(rect, step);
+        final PixelPos[] rectBoundary = GeoUtils.createPixelBoundaryFromRect(rect, step, true);
         final GeoPos[] geoPoints = new GeoPos[rectBoundary.length];
         for (int i = 0; i < geoPoints.length; i++) {
             geoPoints[i] = getGeoPos(rectBoundary[i], null);

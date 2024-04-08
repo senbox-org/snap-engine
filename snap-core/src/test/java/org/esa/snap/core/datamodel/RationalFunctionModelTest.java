@@ -16,9 +16,11 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link RationalFunctionModel}.
@@ -26,12 +28,28 @@ import java.util.Random;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-public class RationalFunctionModelTest extends TestCase {
+public class RationalFunctionModelTest {
 
-    public void testConstuctor() {
-        // todo - complete
+    private static void assertApproximation(F f, int degreeP, int degreeQ, int iterationCount, int sampleCount) {
+        final double[] x = new double[sampleCount];
+        final double[] y = new double[sampleCount];
+        final double[] g = new double[sampleCount];
+
+        final Random random = new Random(17);
+        for (int i1 = 0; i1 < sampleCount; i1++) {
+            x[i1] = random.nextDouble();
+            y[i1] = random.nextDouble();
+            g[i1] = f.getValue(x[i1], y[i1]);
+        }
+
+        final RationalFunctionModel rfm = new RationalFunctionModel(degreeP, degreeQ, x, y, g, iterationCount);
+
+        for (int i = 0; i < sampleCount; i++) {
+            assertEquals(g[i], rfm.getValue(x[i], y[i]), 1.0E-10);
+        }
     }
 
+    @Test
     public void testGetValue() {
         final F f1 = new F1();
         assertApproximation(f1, 1, 0, 0, 4);
@@ -53,6 +71,7 @@ public class RationalFunctionModelTest extends TestCase {
         assertApproximation(f5, 3, 0, 0, 10);
     }
 
+    @Test
     public void testLatLonApproximation() { // from MERIS scene of Italian lakes
         double[] x = new double[]{43.5,
                 37.5,
@@ -100,23 +119,9 @@ public class RationalFunctionModelTest extends TestCase {
         }
     }
 
-    private static void assertApproximation(F f, int degreeP, int degreeQ, int iterationCount, int sampleCount) {
-        final double[] x = new double[sampleCount];
-        final double[] y = new double[sampleCount];
-        final double[] g = new double[sampleCount];
+    private interface F {
 
-        final Random random = new Random(17);
-        for (int i1 = 0; i1 < sampleCount; i1++) {
-            x[i1] = random.nextDouble();
-            y[i1] = random.nextDouble();
-            g[i1] = f.getValue(x[i1], y[i1]);
-        }
-
-        final RationalFunctionModel rfm = new RationalFunctionModel(degreeP, degreeQ, x, y, g, iterationCount);
-
-        for (int i = 0; i < sampleCount; i++) {
-            assertEquals(g[i], rfm.getValue(x[i], y[i]), 1.0E-10);
-        }
+        double getValue(double x, double y);
     }
 
     private static class F1 implements F {
@@ -188,10 +193,5 @@ public class RationalFunctionModelTest extends TestCase {
         public double getValue(double x, double y) {
             return 360.0 * random.nextDouble() - 180.0;
         }
-    }
-
-    private interface F {
-
-        public double getValue(double x, double y);
     }
 }

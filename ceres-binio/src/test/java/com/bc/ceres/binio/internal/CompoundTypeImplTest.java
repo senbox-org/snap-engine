@@ -18,9 +18,11 @@ package com.bc.ceres.binio.internal;
 
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.SimpleType;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class CompoundTypeImplTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class CompoundTypeImplTest {
 
     static final CompoundType COMPLEX = new CompoundTypeImpl("Complex", new CompoundMemberImpl[]{
             new CompoundMemberImpl("real", SimpleType.DOUBLE),
@@ -38,6 +40,7 @@ public class CompoundTypeImplTest extends TestCase {
             new CompoundMemberImpl("records", new GrowableSequenceTypeImpl(RECORD_TYPE)),
     });
 
+    @Test
     public void testCompoundTypes() {
         final CompoundType rt = RECORD_TYPE;
         assertEquals("Record", rt.getName());

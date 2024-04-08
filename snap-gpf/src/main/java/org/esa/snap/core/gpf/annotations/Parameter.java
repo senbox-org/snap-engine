@@ -22,12 +22,7 @@ import com.bc.ceres.binding.dom.DomConverter;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.Operator;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a processing parameter field of an {@link Operator Operator}.
@@ -41,14 +36,14 @@ public @interface Parameter {
 
     /**
      * @return An alias name for the parameter.
-     *         Defaults to the empty string (= not set).
+     * Defaults to the empty string (= not set).
      */
     String alias() default "";
 
     /**
      * @return An alias name for the elements of a parameter array.
-     *         Forces element-wise array conversion from and to DOM representation.
-     *         Defaults to the empty string (= not set).
+     * Forces element-wise array conversion from and to DOM representation.
+     * Defaults to the empty string (= not set).
      */
     String itemAlias() default "";
 
@@ -59,26 +54,26 @@ public @interface Parameter {
      * an object using the associated {@link Converter}.
      *
      * @return The default value.
-     *         Defaults to the empty string (= not set).
+     * Defaults to the empty string (= not set).
      * @see #converter()
      */
     String defaultValue() default "";
 
     /**
      * @return A human-readable version of the name to be used in user interfaces.
-     *         Defaults to the empty string (= not set).
+     * Defaults to the empty string (= not set).
      */
     String label() default "";
 
     /**
      * @return The parameter physical unit.
-     *         Defaults to the empty string (= not set).
+     * Defaults to the empty string (= not set).
      */
     String unit() default "";
 
     /**
      * @return The parameter description.
-     *         Defaults to the empty string (= not set).
+     * Defaults to the empty string (= not set).
      */
     String description() default "";
 
@@ -161,20 +156,11 @@ public @interface Parameter {
      */
     Class<? extends DomConverter> domConverter() default DomConverter.class;
 
-     /**
-     * Specifies which {@code RasterDataNode} subclass of the source products is used 
+    /**
+     * Specifies which {@code RasterDataNode} subclass of the source products is used
      * to fill the {@link #valueSet()} for this parameter.
-     * 
+     *
      * @return The raster data node type.
      */
     Class<? extends RasterDataNode> rasterDataNodeType() default RasterDataNode.class;
-
-
-    /**
-     * @return An arbitrary Boolean value which will be ignored.
-     * @see #itemAlias()
-     * @deprecated Since BEAM 5. Not used anymore. No replacement.
-     */
-    @Deprecated
-    boolean itemsInlined() default false;
 }

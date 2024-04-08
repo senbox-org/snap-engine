@@ -16,38 +16,31 @@
 
 package org.esa.snap.core.dataio;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 
-public class ProductSubsetDefTest extends TestCase {
+import static org.junit.Assert.*;
 
-    private ProductSubsetDef _subset;
+public class ProductSubsetDefTest {
+
     private static final float EPS = 1e-5f;
+    private ProductSubsetDef _subset;
 
-    public ProductSubsetDefTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductSubsetDefTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _subset = new ProductSubsetDef("undefined");
     }
 
+    @Test
     public void testAddBandName() {
         String[] names;
 
         //at start getNodeNames must return null
         names = _subset.getNodeNames();
-        assertEquals("names must be null", null, names);
+        assertNull("names must be null", names);
 
         //null parameter throws IllegalArgumentException
         //getNodeNames must still return null
@@ -57,7 +50,7 @@ public class ProductSubsetDefTest extends TestCase {
         } catch (IllegalArgumentException e) {
         }
         names = _subset.getNodeNames();
-        assertEquals("names must be null", null, names);
+        assertNull("names must be null", names);
 
         //enpty String parameter throws IllegalArgumentException
         //getNodeNames must still return null
@@ -67,7 +60,7 @@ public class ProductSubsetDefTest extends TestCase {
         } catch (IllegalArgumentException e) {
         }
         names = _subset.getNodeNames();
-        assertEquals("names must be null", null, names);
+        assertNull("names must be null", names);
 
         //adds first band name and getNodeNames must return a filled
         //String[] with one entry
@@ -93,6 +86,7 @@ public class ProductSubsetDefTest extends TestCase {
         assertEquals("Index 1 contains", "band2", names[1]);
     }
 
+    @Test
     public void testSetBandNames() {
         String[] names;
 
@@ -109,9 +103,9 @@ public class ProductSubsetDefTest extends TestCase {
         assertEquals("length must be two", 2, names.length);
         assertEquals("expected Name", "band1", names[0]);
         assertEquals("expected Name", "band2", names[1]);
-
     }
 
+    @Test
     public void testRemoveBandName() {
         String[] names;
         _subset.setNodeNames(new String[]{"band1", "band2"});
@@ -121,18 +115,19 @@ public class ProductSubsetDefTest extends TestCase {
         assertEquals("expected Name", "band2", names[1]);
 
         // removeNodeName "band1"
-        assertEquals(true, _subset.removeNodeName("band1"));
+        assertTrue(_subset.removeNodeName("band1"));
         // second remove returns false because band1 already removed
-        assertEquals(false, _subset.removeNodeName("band1"));
+        assertFalse(_subset.removeNodeName("band1"));
         names = _subset.getNodeNames();
         assertEquals("length must be two", 1, names.length);
         assertEquals("expected Name", "band2", names[0]);
 
         // removeNodeName "band2"
-        assertEquals(true, _subset.removeNodeName("band2"));
-        assertEquals("subset must be null", null, _subset.getNodeNames());
+        assertTrue(_subset.removeNodeName("band2"));
+        assertNull("subset must be null", _subset.getNodeNames());
     }
 
+    @Test
     public void testGetAndSetRegion() {
         assertNull("initially, getRegion() should return null", _subset.getRegion());
 
@@ -151,11 +146,11 @@ public class ProductSubsetDefTest extends TestCase {
         assertEquals(55, _subset.getRegion().height);
 
         // Check that getRegion() returns new rectangle instances each time it is called
-        assertTrue(_subset.getRegion() != _subset.getRegion());
+        assertNotSame(_subset.getRegion(), _subset.getRegion());
 
         // reset subset region
         _subset.setSubsetRegion(null);
-        assertEquals(null, _subset.getRegion());
+        assertNull(_subset.getRegion());
 
         // IllegalArgumentException if x is negative
         try {
@@ -207,6 +202,7 @@ public class ProductSubsetDefTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetAndSetSubSampling() {
         assertEquals("initially, getSubSamplingX() should return 1", 1.0f, _subset.getSubSamplingX(), EPS);
         assertEquals("initially, getSubSamplingY() should return 1", 1.0f, _subset.getSubSamplingY(), EPS);
@@ -239,11 +235,10 @@ public class ProductSubsetDefTest extends TestCase {
             assertEquals(11.0f, _subset.getSubSamplingX(), EPS);
             assertEquals(17.0f, _subset.getSubSamplingY(), EPS);
         }
-
     }
 
+    @Test
     public void testGetRasterSize() {
-
         _subset.setSubSampling(1, 1);
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 1, 1), 0));
         assertEquals(new Dimension(1, 1), _subset.getSceneRasterSize(100, 100));
@@ -268,7 +263,6 @@ public class ProductSubsetDefTest extends TestCase {
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
         assertEquals(new Dimension(55, 6), _subset.getSceneRasterSize(100, 100));
 
-
         _subset.setSubSampling(3, 3);
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 10, 1), 0));
@@ -290,13 +284,14 @@ public class ProductSubsetDefTest extends TestCase {
         assertEquals(new Dimension(44, 5), _subset.getSceneRasterSize(100, 100));
     }
 
+    @Test
     public void testMetadataIgnored() {
         ProductSubsetDef subsetInfo = new ProductSubsetDef("undefined");
         //after creation isIgnoreMetadata must be false
-        assertEquals(false, subsetInfo.isIgnoreMetadata());
+        assertFalse(subsetInfo.isIgnoreMetadata());
         subsetInfo.setIgnoreMetadata(true);
-        assertEquals(true, subsetInfo.isIgnoreMetadata());
+        assertTrue(subsetInfo.isIgnoreMetadata());
         subsetInfo.setIgnoreMetadata(false);
-        assertEquals(false, subsetInfo.isIgnoreMetadata());
+        assertFalse(subsetInfo.isIgnoreMetadata());
     }
 }

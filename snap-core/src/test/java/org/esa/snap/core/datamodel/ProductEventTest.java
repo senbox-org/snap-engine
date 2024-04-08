@@ -16,23 +16,17 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class ProductEventTest extends TestCase {
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
-    public ProductEventTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductEventTest.class);
-    }
+public class ProductEventTest {
 
     /**
      * Tests the functionality for the constructor
      */
+    @Test
     public void testRsProductEvent() {
         try {
             new ProductNodeEvent(null, 0);
@@ -44,6 +38,7 @@ public class ProductEventTest extends TestCase {
     /**
      * Tests the functionality of getNamedNode.
      */
+    @Test
     public void testGetNamedNode() {
         ProductNodeEvent event;
         MetadataElement testNode;

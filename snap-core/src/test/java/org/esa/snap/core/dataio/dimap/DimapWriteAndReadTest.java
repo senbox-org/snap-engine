@@ -16,27 +16,22 @@
 package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ObjectUtils;
-import org.esa.snap.core.util.BeamConstants;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class DimapWriteAndReadTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class DimapWriteAndReadTest {
 
     private final DimapProductWriterPlugIn _writerPlugIn = new DimapProductWriterPlugIn();
     private final DimapProductReaderPlugIn _readerPlugIn = new DimapProductReaderPlugIn();
@@ -45,71 +40,6 @@ public class DimapWriteAndReadTest extends TestCase {
     private File _ioDir;
     private Product _product;
 
-    public DimapWriteAndReadTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return new TestSuite(DimapWriteAndReadTest.class);
-    }
-
-    @Override
-    protected void setUp() {
-        GlobalTestTools.deleteTestDataOutputDirectory();
-        _writer = new DimapProductWriter(_writerPlugIn);
-        _reader = new DimapProductReader(_readerPlugIn);
-        _ioDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
-        _product = createProduct();
-    }
-
-    @Override
-    protected void tearDown() {
-        try {
-            if (_writer != null) {
-                _writer.close();
-            }
-            if (_reader != null) {
-                _reader.close();
-            }
-        } catch (IOException e) {
-        }
-        GlobalTestTools.deleteTestDataOutputDirectory();
-    }
-
-    public void testWriteAndReadProductNodes_withoutSubsetInfo() throws IOException {
-        final File file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
-        _writer.writeProductNodes(_product, file);
-        writeAllBandRasterDataFully();
-        Product currentProduct = _reader.readProductNodes(file, null);
-
-        assertEquals("", compareProducts(_product, currentProduct));
-    }
-
-    public void testWriteAndReadProductNodes_GivenFilenameWithoutExtension() throws IOException {
-        Product currentProduct = null;
-
-        File file = new File(_ioDir, "testproduct");
-        _writer.writeProductNodes(_product, file);
-        writeAllBandRasterDataFully();
-        file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
-        currentProduct = _reader.readProductNodes(file, null);
-
-        assertEquals("", compareProducts(_product, currentProduct));
-    }
-
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////           E N D     O F     P U B L I C              //////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-
-    private void writeAllBandRasterDataFully() throws IOException {
-        final Band[] bands = _product.getBands();
-        for (final Band band : bands) {
-            if (_product.getProductWriter().shouldWrite(band)) {
-                band.writeRasterDataFully(ProgressMonitor.NULL);
-            }
-        }
-    }
-
     private static String compareProducts(Product expProduct, Product currentProduct) throws IOException {
         final StringBuffer diff = new StringBuffer();
         if (currentProduct == null) {
@@ -117,28 +47,28 @@ public class DimapWriteAndReadTest extends TestCase {
         } else {
             if (!expProduct.getName().equals(currentProduct.getName())) {
                 diff.append(
-                            "Product_Name expected <" + expProduct.getName() + "> but was <" + currentProduct.getName() + ">\r\n");
+                        "Product_Name expected <" + expProduct.getName() + "> but was <" + currentProduct.getName() + ">\r\n");
             }
             if (!expProduct.getProductType().equals(currentProduct.getProductType())) {
                 diff.append(
-                            "Product_Type expected <" + expProduct.getProductType() + "> but was <" + currentProduct.getProductType() + ">\r\n");
+                        "Product_Type expected <" + expProduct.getProductType() + "> but was <" + currentProduct.getProductType() + ">\r\n");
             }
             if (expProduct.getSceneRasterWidth() != currentProduct.getSceneRasterWidth()) {
                 diff.append(
-                            "Product_SceneWidth expected <" + expProduct.getSceneRasterWidth() + "> but was <" + currentProduct.getSceneRasterWidth() + ">\r\n");
+                        "Product_SceneWidth expected <" + expProduct.getSceneRasterWidth() + "> but was <" + currentProduct.getSceneRasterWidth() + ">\r\n");
             }
             if (expProduct.getSceneRasterHeight() != currentProduct.getSceneRasterHeight()) {
                 diff.append(
-                            "Product_SceneHeight expected <" + expProduct.getSceneRasterHeight() + "> but was <" + currentProduct.getSceneRasterHeight() + ">\r\n");
+                        "Product_SceneHeight expected <" + expProduct.getSceneRasterHeight() + "> but was <" + currentProduct.getSceneRasterHeight() + ">\r\n");
             }
             if (expProduct.getNumBands() != currentProduct.getNumBands()) {
                 diff.append(
-                            "Product_numBands expected <" + expProduct.getNumBands() + "> but was <" + currentProduct.getNumBands() + ">\r\n");
+                        "Product_numBands expected <" + expProduct.getNumBands() + "> but was <" + currentProduct.getNumBands() + ">\r\n");
             }
             compareBands(expProduct, currentProduct, diff);
             if (expProduct.getNumTiePointGrids() != currentProduct.getNumTiePointGrids()) {
                 diff.append(
-                            "Product_numTiePointGrids expected <" + expProduct.getNumTiePointGrids() + "> but was <" + currentProduct.getNumTiePointGrids() + ">\r\n");
+                        "Product_numTiePointGrids expected <" + expProduct.getNumTiePointGrids() + "> but was <" + currentProduct.getNumTiePointGrids() + ">\r\n");
             }
             compareTiePointGrids(expProduct, currentProduct, diff);
         }
@@ -148,8 +78,8 @@ public class DimapWriteAndReadTest extends TestCase {
     private static Product createProduct() {
         final int sceneRasterWidth = 129;
         final int sceneRasterHeight = 161;
-        final Product product = new Product("name", BeamConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME, sceneRasterWidth,
-                                            sceneRasterHeight);
+        final Product product = new Product("name", "MER_FR__1P", sceneRasterWidth,
+                sceneRasterHeight);
         addFlagCoding(product);
         addIndexCoding(product);
         addBands(product);
@@ -173,6 +103,10 @@ public class DimapWriteAndReadTest extends TestCase {
         product.getIndexCodingGroup().add(indexCoding);
     }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////           E N D     O F     P U B L I C              //////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
     private static void compareTiePointGrids(Product expProduct, Product currentProduct, StringBuffer diff) {
         final String[] expTiePointGridNames = expProduct.getTiePointGridNames();
         final String[] currentTiePointGridNames = currentProduct.getTiePointGridNames();
@@ -181,46 +115,46 @@ public class DimapWriteAndReadTest extends TestCase {
             final TiePointGrid currentTPGrid = currentProduct.getTiePointGrid(currentTiePointGridNames[i]);
             if (!expTPGrid.getName().equals(currentTPGrid.getName())) {
                 diff.append(
-                            "Name of TiePointGrid " + i + " expected <" + expTPGrid.getName() + "> but was <" + currentTPGrid.getName() + ">\r\n");
+                        "Name of TiePointGrid " + i + " expected <" + expTPGrid.getName() + "> but was <" + currentTPGrid.getName() + ">\r\n");
             }
             if (expTPGrid.getDataType() != currentTPGrid.getDataType()) {
                 diff.append(
-                            "DataType of TiePointGrid " + i + " expected <" + expTPGrid.getDataType() + "> but was <" + currentTPGrid.getDataType() + ">\r\n");
+                        "DataType of TiePointGrid " + i + " expected <" + expTPGrid.getDataType() + "> but was <" + currentTPGrid.getDataType() + ">\r\n");
             }
             if (expTPGrid.getGridWidth() != currentTPGrid.getGridWidth()) {
                 diff.append(
-                            "GridWidth of TiePointGrid " + i + " expected <" + expTPGrid.getGridWidth() + "> but was <" + currentTPGrid.getGridWidth() + ">\r\n");
+                        "GridWidth of TiePointGrid " + i + " expected <" + expTPGrid.getGridWidth() + "> but was <" + currentTPGrid.getGridWidth() + ">\r\n");
             }
             if (expTPGrid.getGridHeight() != currentTPGrid.getGridHeight()) {
                 diff.append(
-                            "GridHeight of TiePointGrid " + i + " expected <" + expTPGrid.getGridHeight() + "> but was <" + currentTPGrid.getGridHeight() + ">\r\n");
+                        "GridHeight of TiePointGrid " + i + " expected <" + expTPGrid.getGridHeight() + "> but was <" + currentTPGrid.getGridHeight() + ">\r\n");
             }
             if (expTPGrid.getOffsetX() != currentTPGrid.getOffsetX()) {
                 diff.append(
-                            "OffsetX of TiePointGrid " + i + " expected <" + expTPGrid.getOffsetX() + "> but was <" + currentTPGrid.getOffsetX() + ">\r\n");
+                        "OffsetX of TiePointGrid " + i + " expected <" + expTPGrid.getOffsetX() + "> but was <" + currentTPGrid.getOffsetX() + ">\r\n");
             }
             if (expTPGrid.getOffsetY() != currentTPGrid.getOffsetY()) {
                 diff.append(
-                            "OffsetY of TiePointGrid " + i + " expected <" + expTPGrid.getOffsetY() + "> but was <" + currentTPGrid.getOffsetY() + ">\r\n");
+                        "OffsetY of TiePointGrid " + i + " expected <" + expTPGrid.getOffsetY() + "> but was <" + currentTPGrid.getOffsetY() + ">\r\n");
             }
             if (expTPGrid.getSubSamplingX() != currentTPGrid.getSubSamplingX()) {
                 diff.append(
-                            "SubSamplingX of TiePointGrid " + i + " expected <" + expTPGrid.getSubSamplingX() + "> but was <" + currentTPGrid.getSubSamplingX() + ">\r\n");
+                        "SubSamplingX of TiePointGrid " + i + " expected <" + expTPGrid.getSubSamplingX() + "> but was <" + currentTPGrid.getSubSamplingX() + ">\r\n");
             }
             if (expTPGrid.getSubSamplingY() != currentTPGrid.getSubSamplingY()) {
                 diff.append(
-                            "SubSamplingY of TiePointGrid " + i + " expected <" + expTPGrid.getSubSamplingY() + "> but was <" + currentTPGrid.getSubSamplingY() + ">\r\n");
+                        "SubSamplingY of TiePointGrid " + i + " expected <" + expTPGrid.getSubSamplingY() + "> but was <" + currentTPGrid.getSubSamplingY() + ">\r\n");
             }
             if (!expTPGrid.getGridData().equalElems(currentTPGrid.getGridData())) {
                 diff.append("Data of TiePointGrid " + i + " are not equal>\r\n");
             }
             if (!expTPGrid.getDescription().equals(currentTPGrid.getDescription())) {
                 diff.append(
-                            "Description of TiePointGrid " + i + " expected <" + expTPGrid.getDescription() + "> but was <" + currentTPGrid.getDescription() + ">\r\n");
+                        "Description of TiePointGrid " + i + " expected <" + expTPGrid.getDescription() + "> but was <" + currentTPGrid.getDescription() + ">\r\n");
             }
             if (!expTPGrid.getUnit().equals(currentTPGrid.getUnit())) {
                 diff.append(
-                            "Unit of TiePointGrid " + i + " expected <" + expTPGrid.getUnit() + "> but was <" + currentTPGrid.getUnit() + ">\r\n");
+                        "Unit of TiePointGrid " + i + " expected <" + expTPGrid.getUnit() + "> but was <" + currentTPGrid.getUnit() + ">\r\n");
             }
         }
     }
@@ -241,10 +175,10 @@ public class DimapWriteAndReadTest extends TestCase {
             floats[i] = i * 3.54f;
         }
         final TiePointGrid tpg = new TiePointGrid(name,
-                                                  gridWidth, gridHeight,
-                                                  offX, offY,
-                                                  stepX, stepY,
-                                                  floats);
+                gridWidth, gridHeight,
+                offX, offY,
+                stepX, stepY,
+                floats);
         tpg.setDescription(name + "-Description");
         tpg.setUnit(name + "-unit");
         return tpg;
@@ -258,15 +192,15 @@ public class DimapWriteAndReadTest extends TestCase {
             final Band currentBand = currentBands[i];
             if (!expBand.getName().equals(currentBand.getName())) {
                 diff.append(
-                            "Name of Band " + i + " expected <" + expBand.getName() + "> but was <" + currentBand.getName() + ">\r\n");
+                        "Name of Band " + i + " expected <" + expBand.getName() + "> but was <" + currentBand.getName() + ">\r\n");
             }
             if (!expBand.getDescription().equals(currentBand.getDescription())) {
                 diff.append(
-                            "Description of Band " + i + " expected <" + expBand.getDescription() + "> but was <" + currentBand.getDescription() + ">\r\n");
+                        "Description of Band " + i + " expected <" + expBand.getDescription() + "> but was <" + currentBand.getDescription() + ">\r\n");
             }
             if (expBand.getDataType() != currentBand.getDataType()) {
                 diff.append(
-                            "DataType of Band " + i + " expected <" + expBand.getDataType() + "> but was <" + currentBand.getDataType() + ">\r\n");
+                        "DataType of Band " + i + " expected <" + expBand.getDataType() + "> but was <" + currentBand.getDataType() + ">\r\n");
             }
             if (expBand.getRasterWidth() != currentBand.getRasterWidth()) {
                 diff.append(
@@ -276,28 +210,28 @@ public class DimapWriteAndReadTest extends TestCase {
                 diff.append(
                         "RasterHeight of Band " + i + " expected <" + expBand.getRasterHeight() + "> but was <" + currentBand.getRasterHeight() + ">\r\n");
             }
-            if (expBand.getFlagCoding() != null && !(currentBand.getFlagCoding() != null)) {
+            if (expBand.getFlagCoding() != null && currentBand.getFlagCoding() == null) {
                 diff.append(
-                            "FlagCoding of Band " + i + " expected non null\r\n");
+                        "FlagCoding of Band " + i + " expected non null\r\n");
             }
             if (expBand.getFlagCoding() != null && currentBand.getFlagCoding() != null && !expBand.getFlagCoding().getName().equals(currentBand.getFlagCoding().getName())) {
                 diff.append(
-                            "FlagCoding of Band " + i + " not equal\r\n");
+                        "FlagCoding of Band " + i + " not equal\r\n");
             }
-            if (expBand.getIndexCoding() != null && !(currentBand.getIndexCoding() != null)) {
+            if (expBand.getIndexCoding() != null && currentBand.getIndexCoding() == null) {
                 diff.append(
-                            "IndexCoding of Band " + i + " expected non null\r\n");
+                        "IndexCoding of Band " + i + " expected non null\r\n");
             }
             if (expBand.getIndexCoding() != null && currentBand.getIndexCoding() != null && !expBand.getIndexCoding().getName().equals(currentBand.getIndexCoding().getName())) {
                 diff.append(
-                            "IndexCoding of Band " + i + " not equal\r\n");
+                        "IndexCoding of Band " + i + " not equal\r\n");
             }
             final String validMaskExpression = expBand.getValidPixelExpression();
             if (validMaskExpression != null) {
                 if (!validMaskExpression.equals(currentBand.getValidPixelExpression())) {
                     diff.append("ValidMaskExpression <" + currentBand.getValidPixelExpression() +
-                                "> of Band " + i + " is not equal to expected mask <" +
-                                validMaskExpression + ">\r\n");
+                            "> of Band " + i + " is not equal to expected mask <" +
+                            validMaskExpression + ">\r\n");
                 }
             }
             final AffineTransform expTransform = expBand.getImageToModelTransform();
@@ -391,5 +325,60 @@ public class DimapWriteAndReadTest extends TestCase {
             productData.setElemDoubleAt(i, i * 2.4 * scaleFactor);
         }
         band.setData(productData);
+    }
+
+    @Before
+    public void setUp() {
+        GlobalTestTools.deleteTestDataOutputDirectory();
+        _writer = new DimapProductWriter(_writerPlugIn);
+        _reader = new DimapProductReader(_readerPlugIn);
+        _ioDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
+        _product = createProduct();
+    }
+
+    @After
+    public void tearDown() {
+        try {
+            if (_writer != null) {
+                _writer.close();
+            }
+            if (_reader != null) {
+                _reader.close();
+            }
+        } catch (IOException e) {
+        }
+        GlobalTestTools.deleteTestDataOutputDirectory();
+    }
+
+    @Test
+    public void testWriteAndReadProductNodes_withoutSubsetInfo() throws IOException {
+        final File file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        _writer.writeProductNodes(_product, file);
+        writeAllBandRasterDataFully();
+        Product currentProduct = _reader.readProductNodes(file, null);
+
+        assertEquals("", compareProducts(_product, currentProduct));
+    }
+
+    @Test
+    public void testWriteAndReadProductNodes_GivenFilenameWithoutExtension() throws IOException {
+        Product currentProduct;
+
+        File file = new File(_ioDir, "testproduct");
+        _writer.writeProductNodes(_product, file);
+        writeAllBandRasterDataFully();
+        file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        currentProduct = _reader.readProductNodes(file, null);
+
+        assertEquals("", compareProducts(_product, currentProduct));
+    }
+
+    private void writeAllBandRasterDataFully() throws IOException {
+        final Band[] bands = _product.getBands();
+        for (final Band band : bands) {
+            if (_product.getProductWriter().shouldWrite(band)) {
+                band.writeRasterDataFully(ProgressMonitor.NULL);
+            }
+        }
     }
 }

@@ -16,7 +16,9 @@
 
 package org.esa.snap.core.datamodel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.esa.snap.core.util.Guardian.assertEquals;
 
 /**
  * RasterDataNode Tester.
@@ -26,10 +28,11 @@ import junit.framework.TestCase;
  * @since <pre>03/31/2005</pre>
  */
 
-public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
+public class RasterDataNode_NoDataTest_LikeMerisProducts {
 
     private RasterDataNode _node;
 
+    @Test
     public void testSetNoDataValue_SetNoDataValue_UByte_WithScalingLinkeAeroOptThick_MER_RR__2P() {
         short noDataValue;
         double geophysNoDataValue;
@@ -40,16 +43,17 @@ public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
 
         noDataValue = 120;
         _node.setNoDataValue(noDataValue);
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
     }
 
+    @Test
     public void testSetRawNoDataValue_SetNoDataValue_UByte_WithScalingLikeAlgal_MER_RR__2P() {
         short noDataValue;
         double geophysNoDataValue;
@@ -60,16 +64,17 @@ public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
 
         noDataValue = 120;
         _node.setNoDataValue(noDataValue);
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
     }
 
+    @Test
     public void testSetRawNoDataValue_SetNoDataValue_UShort_WithScalingLikeReflec_MER_RR__2P() {
         int noDataValue;
         double geophysNoDataValue;
@@ -80,16 +85,17 @@ public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
 
         noDataValue = 120;
         _node.setNoDataValue(noDataValue);
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
     }
 
+    @Test
     public void testSetRawNoDataValue_SetNoDataValue_UShort_WithScalingLikeTotalSusp_MER_RR__2P() {
         int noDataValue;
         double geophysNoDataValue;
@@ -100,16 +106,17 @@ public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
 
         noDataValue = 120;
         _node.setNoDataValue(noDataValue);
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(),true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
     }
 
+    @Test
     public void testSetRawNoDataValue_SetNoDataValue_UShort_WithScalingLikeRadiance5_MER_RR__1P() {
         int noDataValue;
         double geophysNoDataValue;
@@ -120,21 +127,21 @@ public class RasterDataNode_NoDataTest_LikeMerisProducts extends TestCase {
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
 
         noDataValue = 120;
         _node.setNoDataValue(noDataValue);
         geophysNoDataValue = _node.getGeophysicalNoDataValue();
         _node.setGeophysicalNoDataValue(4f);
         _node.setGeophysicalNoDataValue(geophysNoDataValue);
-        assertEquals("Expected "+ noDataValue+" but was " + _node.getNoDataValue(),true, noDataValue == _node.getNoDataValue());
+        assertEquals("Expected " + noDataValue + " but was " + _node.getNoDataValue(), true, noDataValue == _node.getNoDataValue());
     }
 
     private void initNode(final int type,
                           final double scalingFactor,
                           final double scalingOffset,
                           final boolean log10scaled) {
-        final Product product = new Product("X", "Y", 10,10);
+        final Product product = new Product("X", "Y", 10, 10);
         _node = product.addBand("name", type);
         _node.setScalingFactor(scalingFactor);
         _node.setScalingOffset(scalingOffset);

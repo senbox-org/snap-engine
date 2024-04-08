@@ -27,15 +27,7 @@ import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import com.bc.ceres.jai.operator.PaintDescriptor;
 import com.bc.ceres.jai.operator.ReinterpretDescriptor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RGBChannelDef;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Stx;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.IntMap;
@@ -43,39 +35,11 @@ import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.Histogram;
-import javax.media.jai.ImageLayout;
-import javax.media.jai.JAI;
-import javax.media.jai.LookupTableJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.BandMergeDescriptor;
-import javax.media.jai.operator.BandSelectDescriptor;
-import javax.media.jai.operator.ClampDescriptor;
-import javax.media.jai.operator.CompositeDescriptor;
-import javax.media.jai.operator.ConstantDescriptor;
-import javax.media.jai.operator.FormatDescriptor;
-import javax.media.jai.operator.InvertDescriptor;
-import javax.media.jai.operator.LookupDescriptor;
-import javax.media.jai.operator.MatchCDFDescriptor;
-import javax.media.jai.operator.MaxDescriptor;
-import javax.media.jai.operator.MinDescriptor;
-import javax.media.jai.operator.MultiplyConstDescriptor;
-import javax.media.jai.operator.RescaleDescriptor;
-import javax.media.jai.operator.SubtractFromConstDescriptor;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
+import javax.media.jai.*;
+import javax.media.jai.operator.*;
+import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.geom.AffineTransform;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
+import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,32 +56,16 @@ public class ImageManager {
     private static final boolean CACHE_INTERMEDIATE_TILES = Config.instance().preferences().getBoolean("snap.enableIntermediateTileCaching", false);
 
 
+    public ImageManager() {
+    }
+
     public static ImageManager getInstance() {
         return Holder.instance;
     }
 
-    public ImageManager() {
-    }
-
-    public PlanarImage getSourceImage(RasterDataNode rasterDataNode, int level) {
-        return getLevelImage(rasterDataNode.getSourceImage(), level);
-    }
-
-
-    public PlanarImage getValidMaskImage(final RasterDataNode rasterDataNode, int level) {
-        if (rasterDataNode.isValidMaskUsed()) {
-            return getLevelImage(rasterDataNode.getValidMaskImage(), level);
-        }
-        return null;
-    }
-
-    public PlanarImage getGeophysicalImage(RasterDataNode rasterDataNode, int level) {
-        return getLevelImage(rasterDataNode.getGeophysicalImage(), level);
-    }
-
     public static ImageLayout createSingleBandedImageLayout(RasterDataNode rasterDataNode) {
         return createSingleBandedImageLayout(rasterDataNode,
-                                             getDataBufferType(rasterDataNode.getDataType()));
+                getDataBufferType(rasterDataNode.getDataType()));
     }
 
     public static ImageLayout createSingleBandedImageLayout(RasterDataNode rasterDataNode, int dataBufferType) {
@@ -135,13 +83,13 @@ public class ImageManager {
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, tileWidth, tileHeight);
         ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
         return new ImageLayout(0, 0,
-                               width,
-                               height,
-                               0, 0,
-                               tileWidth,
-                               tileHeight,
-                               sampleModel,
-                               colorModel);
+                width,
+                height,
+                0, 0,
+                tileWidth,
+                tileHeight,
+                sampleModel,
+                colorModel);
     }
 
     public static ImageLayout createSingleBandedImageLayout(int dataBufferType,
@@ -150,11 +98,11 @@ public class ImageManager {
                                                             Dimension tileSize,
                                                             ResolutionLevel level) {
         return createSingleBandedImageLayout(dataBufferType,
-                                             null,
-                                             sourceWidth,
-                                             sourceHeight,
-                                             tileSize,
-                                             level);
+                null,
+                sourceWidth,
+                sourceHeight,
+                tileSize,
+                level);
     }
 
     public static ImageLayout createSingleBandedImageLayout(int dataBufferType,
@@ -169,26 +117,18 @@ public class ImageManager {
         if (sourceHeight < 0) {
             throw new IllegalArgumentException("sourceHeight");
         }
-        Assert.notNull("level");
-        /*
-        final Rectangle destRectangle = AbstractMultiLevelSource.getImageRectangle(sourcePos != null ? sourcePos.x : 0,
-                                                                                   sourcePos != null ? sourcePos.y : 0,
-                                                                                   sourceWidth,
-                                                                                   sourceHeight,
-                                                                                   level.getScale());
-                                                                                   */
 
         Rectangle sourceBounds = new Rectangle(sourcePos != null ? sourcePos.x : 0,
-                                               sourcePos != null ? sourcePos.y : 0,
-                                               sourceWidth,
-                                               sourceHeight);
+                sourcePos != null ? sourcePos.y : 0,
+                sourceWidth,
+                sourceHeight);
         final Rectangle destBounds = DefaultMultiLevelSource.getLevelImageBounds(sourceBounds, level.getScale());
 
         final int destWidth = destBounds.width;
         final int destHeight = destBounds.height;
         tileSize = tileSize != null ? tileSize : JAIUtils.computePreferredTileSize(destWidth, destHeight, 1);
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType,
-                                                                           tileSize.width, tileSize.height);
+                tileSize.width, tileSize.height);
         ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
 
         if (colorModel == null) {
@@ -196,19 +136,19 @@ public class ImageManager {
             ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
             int[] nBits = {DataBuffer.getDataTypeSize(dataType)};
             colorModel = new ComponentColorModel(cs, nBits, false, true,
-                                                 Transparency.OPAQUE,
-                                                 dataType);
+                    Transparency.OPAQUE,
+                    dataType);
         }
 
         return new ImageLayout(destBounds.x,
-                               destBounds.y,
-                               destWidth,
-                               destHeight,
-                               0, 0,
-                               tileSize.width,
-                               tileSize.height,
-                               sampleModel,
-                               colorModel);
+                destBounds.y,
+                destWidth,
+                destHeight,
+                0, 0,
+                tileSize.width,
+                tileSize.height,
+                sampleModel,
+                colorModel);
     }
 
     public static int getDataBufferType(int productDataType) {
@@ -258,85 +198,9 @@ public class ImageManager {
             tileSize = preferredTileSize;
         } else {
             tileSize = JAIUtils.computePreferredTileSize(product.getSceneRasterWidth(),
-                                                         product.getSceneRasterHeight(), 1);
+                    product.getSceneRasterHeight(), 1);
         }
         return tileSize;
-    }
-
-    public RenderedImage createColoredBandImage(RasterDataNode[] rasterDataNodes,
-                                                ImageInfo imageInfo,
-                                                int level) {
-        Assert.notNull(rasterDataNodes, "rasterDataNodes");
-        Assert.state(rasterDataNodes.length == 1
-                             || rasterDataNodes.length == 3
-                             || rasterDataNodes.length == 4,
-                     "invalid number of bands"
-        );
-
-        prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
-        if (rasterDataNodes.length == 1) {
-            return createColored1BandImage(rasterDataNodes[0], imageInfo, level);
-        } else {
-            return createColored3BandImage(rasterDataNodes, imageInfo, level);
-        }
-    }
-
-    private PlanarImage createColored1BandImage(RasterDataNode valueBand, ImageInfo valueImageInfo, int level) {
-        Assert.notNull(valueBand, "valueBand");
-        if (valueImageInfo == null) {
-            valueImageInfo = valueBand.getImageInfo(ProgressMonitor.NULL); // CP_V
-        }
-        Assert.notNull(valueImageInfo, "valueImageInfo");
-        PlanarImage sourceImage = getSourceImage(valueBand, level); // V
-        PlanarImage valueValidMaskImage = getValidMaskImage(valueBand, level); // VM
-        PlanarImage valueImage = createByteIndexedImage(valueBand, sourceImage, valueImageInfo);
-        valueImage = createMatchCdfImage(valueImage, valueImageInfo.getHistogramMatching(), new Stx[]{valueBand.getStx()});
-        valueImage = createLookupRgbImage(valueBand, valueImage, valueImageInfo);
-        RasterDataNode uncertaintyBand = getUncertaintyBand(valueBand);
-        if (uncertaintyBand != null) {
-            ImageInfo uncertaintyImageInfo = uncertaintyBand.getImageInfo(ProgressMonitor.NULL); // CP_U,
-            ImageInfo.UncertaintyVisualisationMode visualisationMode = uncertaintyImageInfo.getUncertaintyVisualisationMode();
-            if (visualisationMode != ImageInfo.UncertaintyVisualisationMode.None) {
-                PlanarImage uncertaintySourceImage = getSourceImage(uncertaintyBand, level);  // U
-                PlanarImage uncertaintyValidMaskImage = getValidMaskImage(uncertaintyBand, level); // UM
-                if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Transparency_Blending) {
-                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
-                    valueImage = paint(valueImage,
-                                       confidenceImage, new Color(0, 0, 0, 0),
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
-                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Monochromatic_Blending) {
-                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
-                    valueImage = paint(valueImage,
-                                       confidenceImage, uncertaintyImageInfo.getColorPaletteDef().getLastPoint().getColor(),
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
-                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Blending) {
-                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
-                    //PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
-                    PlanarImage distrustImage = SubtractFromConstDescriptor.create(confidenceImage, new double[]{255}, createDefaultRenderingHints(confidenceImage, null));
-                    PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
-                    valueImage = paint(valueImage, confidenceImage, uncertaintyImage);
-                    valueImage = paint(valueImage,
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
-                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Overlay) {
-                    PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
-                    PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
-                    valueImage = paint(valueImage, 0.5, uncertaintyImage);
-                    valueImage = paint(valueImage,
-                                       valueValidMaskImage, valueImageInfo.getNoDataColor(),
-                                       uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
-                } else {
-                    Assert.state(false, "unknown uncertainty visualisation mode " + visualisationMode);
-                }
-                return valueImage;
-            }
-        }
-        if (valueValidMaskImage != null) {
-            valueImage = paint(valueImage, valueValidMaskImage, valueImageInfo.getNoDataColor());
-        }
-        return valueImage;
     }
 
     /**
@@ -399,9 +263,9 @@ public class ImageManager {
     private static PlanarImage paint(PlanarImage sourceImage, double transparency, PlanarImage maskColorImage) {
         RenderingHints renderingHints = createDefaultRenderingHints(sourceImage, null);
         RenderedImage maskImage = ConstantDescriptor.create((float) sourceImage.getWidth(),
-                                                            (float) sourceImage.getHeight(),
-                                                            new Byte[]{(byte) (255 * (1.0 - transparency))},
-                                                            renderingHints);
+                (float) sourceImage.getHeight(),
+                new Byte[]{(byte) (255 * (1.0 - transparency))},
+                renderingHints);
         return paintImpl(sourceImage, maskColorImage, maskImage, renderingHints);
     }
 
@@ -427,29 +291,9 @@ public class ImageManager {
         }
 
         return CompositeDescriptor.create(sourceImage, maskColorImage,
-                                          maskImage, null, false,
-                                          targetHasAlpha ? CompositeDescriptor.DESTINATION_ALPHA_LAST : CompositeDescriptor.NO_DESTINATION_ALPHA,
-                                          renderingHints);
-    }
-
-    private PlanarImage createColored3BandImage(RasterDataNode[] rasters, ImageInfo rgbImageInfo, int level) {
-        Assert.notNull(rasters, "rasters");
-        Assert.notNull(rgbImageInfo, "rgbImageInfo");
-        RenderedImage[] images = new RenderedImage[rasters.length];
-        RenderedImage[] validMaskImages = new RenderedImage[rasters.length];
-        Stx[] stxs = new Stx[rasters.length];
-        for (int i = 0; i < rasters.length; i++) {
-            RasterDataNode raster = rasters[i];
-            stxs[i] = raster.getStx();
-            RenderedImage sourceImage = getSourceImage(raster, level);
-            images[i] = createByteIndexedImage(raster,
-                                               sourceImage,
-                                               rgbImageInfo.getRgbChannelDef().getMinDisplaySample(i),
-                                               rgbImageInfo.getRgbChannelDef().getMaxDisplaySample(i),
-                                               rgbImageInfo.getRgbChannelDef().getGamma(i));
-            validMaskImages[i] = getValidMaskImage(raster, level);
-        }
-        return createMergeRgbaOp(images, validMaskImages, rgbImageInfo.getHistogramMatching(), stxs);
+                maskImage, null, false,
+                targetHasAlpha ? CompositeDescriptor.DESTINATION_ALPHA_LAST : CompositeDescriptor.NO_DESTINATION_ALPHA,
+                renderingHints);
     }
 
     private static PlanarImage createByteIndexedImage(RasterDataNode raster,
@@ -472,15 +316,6 @@ public class ImageManager {
         }
     }
 
-    private PlanarImage createByteIndexedImage(RasterDataNode band, PlanarImage sourceImage, ImageInfo imageInfo, boolean invertRamp) {
-        ColorPaletteDef colorPaletteDef = imageInfo.getColorPaletteDef();
-        if (invertRamp) {
-            return createByteIndexedImage(band, sourceImage, colorPaletteDef.getMaxDisplaySample(), colorPaletteDef.getMinDisplaySample(), 1.0);
-        } else {
-            return createByteIndexedImage(band, sourceImage, colorPaletteDef.getMinDisplaySample(), colorPaletteDef.getMaxDisplaySample(), 1.0);
-        }
-    }
-
     private static boolean isClassificationBand(RasterDataNode raster) {
         return ((raster instanceof Band) ? ((Band) raster).getIndexCoding() : null) != null;
     }
@@ -495,7 +330,7 @@ public class ImageManager {
 
         if (mustReinterpretSourceImage(raster, sourceImage)) {
             sourceImage = ReinterpretDescriptor.create(sourceImage, 1.0, 0.0, ReinterpretDescriptor.LINEAR,
-                                                       ReinterpretDescriptor.INTERPRET_BYTE_SIGNED, null);
+                    ReinterpretDescriptor.INTERPRET_BYTE_SIGNED, null);
         }
 
         final boolean logarithmicDisplay = raster.getImageInfo().isLogScaled();
@@ -504,14 +339,14 @@ public class ImageManager {
             if (!rasterIsLog10Scaled) {
                 final double offset = raster.scaleInverse(0.0);
                 sourceImage = ReinterpretDescriptor.create(sourceImage, 1.0, -offset, ReinterpretDescriptor.LOGARITHMIC,
-                                                           ReinterpretDescriptor.AWT, null);
+                        ReinterpretDescriptor.AWT, null);
                 newMin = Math.log10(newMin - offset);
                 newMax = Math.log10(newMax - offset);
             }
         } else {
             if (rasterIsLog10Scaled) {
                 sourceImage = ReinterpretDescriptor.create(sourceImage, raster.getScalingFactor(), raster.getScalingOffset(), ReinterpretDescriptor.EXPONENTIAL,
-                                                           ReinterpretDescriptor.AWT, null);
+                        ReinterpretDescriptor.AWT, null);
                 newMin = minSample;
                 newMax = maxSample;
             }
@@ -605,9 +440,9 @@ public class ImageManager {
         }
         RenderingHints hints = createDefaultRenderingHints(sourceImage, null);
         sourceImage = ClampDescriptor.create(sourceImage,
-                                             new double[]{keyMin - 1},
-                                             new double[]{keyMax + 1},
-                                             hints);
+                new double[]{keyMin - 1},
+                new double[]{keyMax + 1},
+                hints);
         return LookupDescriptor.create(sourceImage, lookup, hints);
     }
 
@@ -796,76 +631,10 @@ public class ImageManager {
         return PlanarImage.wrapRenderedImage(image);
     }
 
-    public ImageInfo getImageInfo(RasterDataNode[] rasters) {
-        Assert.notNull(rasters, "rasters");
-        Assert.argument(rasters.length == 1 || rasters.length == 3, "rasters.length == 1 || rasters.length == 3");
-        if (rasters.length == 1) {
-            RasterDataNode raster = rasters[0];
-            Assert.state(raster.getImageInfo() != null, "raster.getImageInfo() != null");
-            return raster.getImageInfo();
-        } else {
-            final RGBChannelDef rgbChannelDef = new RGBChannelDef();
-            for (int i = 0; i < rasters.length; i++) {
-                RasterDataNode raster = rasters[i];
-                Assert.state(rasters[i].getImageInfo() != null, "rasters[i].getImageInfo() != null");
-                ImageInfo imageInfo = raster.getImageInfo();
-                rgbChannelDef.setSourceName(i, raster.getName());
-                rgbChannelDef.setMinDisplaySample(i, imageInfo.getColorPaletteDef().getMinDisplaySample());
-                rgbChannelDef.setMaxDisplaySample(i, imageInfo.getColorPaletteDef().getMaxDisplaySample());
-            }
-            return new ImageInfo(rgbChannelDef);
-        }
-    }
-
-    /*
-     * Non-API.
-     */
-    public void prepareImageInfos(RasterDataNode[] rasterDataNodes, ProgressMonitor pm) {
-        int numTaskSteps = 0;
-        for (RasterDataNode raster : rasterDataNodes) {
-            numTaskSteps += raster.getImageInfo() == null ? 1 : 0;
-        }
-
-        pm.beginTask("Computing image statistics", numTaskSteps);
-        try {
-            for (final RasterDataNode raster : rasterDataNodes) {
-                final ImageInfo imageInfo = raster.getImageInfo();
-                if (imageInfo == null) {
-                    raster.getImageInfo(SubProgressMonitor.create(pm, 1));
-                }
-            }
-        } finally {
-            pm.done();
-        }
-    }
-
-
-    /*
-     * Non-API.
-     */
-    public int getStatisticsLevel(RasterDataNode raster, int levelCount) {
-        final long imageSize = (long) raster.getRasterWidth() * raster.getRasterHeight();
-        final int statisticsLevel;
-        if (imageSize <= DefaultMultiLevelModel.DEFAULT_MAX_LEVEL_PIXEL_COUNT) {
-            statisticsLevel = 0;
-        } else {
-            statisticsLevel = levelCount - 1;
-        }
-        return statisticsLevel;
-    }
-
-    public PlanarImage createColoredMaskImage(Product product, String expression, Color color, boolean invertMask,
-                                              int level) {
-        // todo - [multisize_products] fix: rasterDataNode arg is null --> default product scene raster image layout will be used!! (nf)
-        MultiLevelImage maskImage = product.getMaskImage(expression, null);
-        RenderedImage levelImage = maskImage.getImage(level);
-        return createColoredMaskImage(color, levelImage, invertMask);
-    }
-
     public static PlanarImage createColoredMaskImage(Color color, RenderedImage alphaImage, boolean invertAlpha) {
         RenderingHints hints = createDefaultRenderingHints(alphaImage, null);
         return createColoredMaskImage(color, invertAlpha ? InvertDescriptor.create(alphaImage, hints) : alphaImage,
-                                      hints);
+                hints);
     }
 
     public static PlanarImage createColoredMaskImage(RenderedImage maskImage, Color color, double opacity) {
@@ -934,27 +703,18 @@ public class ImageManager {
             return PlanarImage.wrapRenderedImage(image);
         }
         return FormatDescriptor.create(image,
-                                       dataType,
-                                       createDefaultRenderingHints(image, targetLayout));
+                dataType,
+                createDefaultRenderingHints(image, targetLayout));
     }
-
-    /**
-     * @deprecated since SNAP 2, use {@link Product#findImageToModelTransform(GeoCoding)}
-     */
-    @Deprecated
-    public static AffineTransform getImageToModelTransform(GeoCoding geoCoding) {
-        return Product.findImageToModelTransform(geoCoding);
-    }
-
 
     private static PlanarImage createRescaleOp(RenderedImage src, double factor, double offset) {
         if (factor == 1.0 && offset == 0.0) {
             return PlanarImage.wrapRenderedImage(src);
         }
         return RescaleDescriptor.create(src,
-                                        new double[]{factor},
-                                        new double[]{offset},
-                                        createDefaultRenderingHints(src, null));
+                new double[]{factor},
+                new double[]{offset},
+                createDefaultRenderingHints(src, null));
     }
 
     private static PlanarImage createLookupOp(RenderedImage src, byte[][] lookupTable) {
@@ -1036,9 +796,9 @@ public class ImageManager {
                     alpha = (256 * i) / colorPalette.length;
                 }
                 colorPalette[i] = new Color(color.getRed(),
-                                            color.getGreen(),
-                                            color.getBlue(),
-                                            alpha);
+                        color.getGreen(),
+                        color.getBlue(),
+                        alpha);
             }
         }
         return colorPalette;
@@ -1072,14 +832,6 @@ public class ImageManager {
         return boSaCo;
     }
 
-    private static class BorderSamplesAndColors {
-
-        double sample1;
-        double sample2;
-        Color color1;
-        Color color2;
-    }
-
     private static Color computeColor(double sample, BorderSamplesAndColors boSaCo) {
         final double f = (sample - boSaCo.sample1) / (boSaCo.sample2 - boSaCo.sample1);
         final double r1 = boSaCo.color1.getRed();
@@ -1095,6 +847,199 @@ public class ImageManager {
         final int blue = (int) MathUtils.roundAndCrop(b1 + f * (b2 - b1), 0L, 255L);
         final int alpha = (int) MathUtils.roundAndCrop(a1 + f * (a2 - a1), 0L, 255L);
         return new Color(red, green, blue, alpha);
+    }
+
+    public PlanarImage getSourceImage(RasterDataNode rasterDataNode, int level) {
+        return getLevelImage(rasterDataNode.getSourceImage(), level);
+    }
+
+    public PlanarImage getValidMaskImage(final RasterDataNode rasterDataNode, int level) {
+        if (rasterDataNode.isValidMaskUsed()) {
+            return getLevelImage(rasterDataNode.getValidMaskImage(), level);
+        }
+        return null;
+    }
+
+    public PlanarImage getGeophysicalImage(RasterDataNode rasterDataNode, int level) {
+        return getLevelImage(rasterDataNode.getGeophysicalImage(), level);
+    }
+
+    public RenderedImage createColoredBandImage(RasterDataNode[] rasterDataNodes,
+                                                ImageInfo imageInfo,
+                                                int level) {
+        Assert.notNull(rasterDataNodes, "rasterDataNodes");
+        Assert.state(rasterDataNodes.length == 1
+                        || rasterDataNodes.length == 3
+                        || rasterDataNodes.length == 4,
+                "invalid number of bands"
+        );
+
+        prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
+        if (rasterDataNodes.length == 1) {
+            return createColored1BandImage(rasterDataNodes[0], imageInfo, level);
+        } else {
+            return createColored3BandImage(rasterDataNodes, imageInfo, level);
+        }
+    }
+
+    private PlanarImage createColored1BandImage(RasterDataNode valueBand, ImageInfo valueImageInfo, int level) {
+        Assert.notNull(valueBand, "valueBand");
+        if (valueImageInfo == null) {
+            valueImageInfo = valueBand.getImageInfo(ProgressMonitor.NULL); // CP_V
+        }
+        Assert.notNull(valueImageInfo, "valueImageInfo");
+        PlanarImage sourceImage = getSourceImage(valueBand, level); // V
+        PlanarImage valueValidMaskImage = getValidMaskImage(valueBand, level); // VM
+        PlanarImage valueImage = createByteIndexedImage(valueBand, sourceImage, valueImageInfo);
+        valueImage = createMatchCdfImage(valueImage, valueImageInfo.getHistogramMatching(), new Stx[]{valueBand.getStx()});
+        valueImage = createLookupRgbImage(valueBand, valueImage, valueImageInfo);
+        RasterDataNode uncertaintyBand = getUncertaintyBand(valueBand);
+        if (uncertaintyBand != null) {
+            ImageInfo uncertaintyImageInfo = uncertaintyBand.getImageInfo(ProgressMonitor.NULL); // CP_U,
+            ImageInfo.UncertaintyVisualisationMode visualisationMode = uncertaintyImageInfo.getUncertaintyVisualisationMode();
+            if (visualisationMode != ImageInfo.UncertaintyVisualisationMode.None) {
+                PlanarImage uncertaintySourceImage = getSourceImage(uncertaintyBand, level);  // U
+                PlanarImage uncertaintyValidMaskImage = getValidMaskImage(uncertaintyBand, level); // UM
+                if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Transparency_Blending) {
+                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
+                    valueImage = paint(valueImage,
+                            confidenceImage, new Color(0, 0, 0, 0),
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Monochromatic_Blending) {
+                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
+                    valueImage = paint(valueImage,
+                            confidenceImage, uncertaintyImageInfo.getColorPaletteDef().getLastPoint().getColor(),
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Blending) {
+                    PlanarImage confidenceImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, true);
+                    //PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
+                    PlanarImage distrustImage = SubtractFromConstDescriptor.create(confidenceImage, new double[]{255}, createDefaultRenderingHints(confidenceImage, null));
+                    PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
+                    valueImage = paint(valueImage, confidenceImage, uncertaintyImage);
+                    valueImage = paint(valueImage,
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                } else if (visualisationMode == ImageInfo.UncertaintyVisualisationMode.Polychromatic_Overlay) {
+                    PlanarImage distrustImage = createByteIndexedImage(uncertaintyBand, uncertaintySourceImage, uncertaintyImageInfo, false);
+                    PlanarImage uncertaintyImage = createLookupRgbImage(uncertaintyBand, distrustImage, uncertaintyImageInfo);
+                    valueImage = paint(valueImage, 0.5, uncertaintyImage);
+                    valueImage = paint(valueImage,
+                            valueValidMaskImage, valueImageInfo.getNoDataColor(),
+                            uncertaintyValidMaskImage, uncertaintyImageInfo.getNoDataColor());
+                } else {
+                    Assert.state(false, "unknown uncertainty visualisation mode " + visualisationMode);
+                }
+                return valueImage;
+            }
+        }
+        if (valueValidMaskImage != null) {
+            valueImage = paint(valueImage, valueValidMaskImage, valueImageInfo.getNoDataColor());
+        }
+        return valueImage;
+    }
+
+    private PlanarImage createColored3BandImage(RasterDataNode[] rasters, ImageInfo rgbImageInfo, int level) {
+        Assert.notNull(rasters, "rasters");
+        Assert.notNull(rgbImageInfo, "rgbImageInfo");
+        RenderedImage[] images = new RenderedImage[rasters.length];
+        RenderedImage[] validMaskImages = new RenderedImage[rasters.length];
+        Stx[] stxs = new Stx[rasters.length];
+        for (int i = 0; i < rasters.length; i++) {
+            RasterDataNode raster = rasters[i];
+            stxs[i] = raster.getStx();
+            RenderedImage sourceImage = getSourceImage(raster, level);
+            images[i] = createByteIndexedImage(raster,
+                    sourceImage,
+                    rgbImageInfo.getRgbChannelDef().getMinDisplaySample(i),
+                    rgbImageInfo.getRgbChannelDef().getMaxDisplaySample(i),
+                    rgbImageInfo.getRgbChannelDef().getGamma(i));
+            validMaskImages[i] = getValidMaskImage(raster, level);
+        }
+        return createMergeRgbaOp(images, validMaskImages, rgbImageInfo.getHistogramMatching(), stxs);
+    }
+
+    private PlanarImage createByteIndexedImage(RasterDataNode band, PlanarImage sourceImage, ImageInfo imageInfo, boolean invertRamp) {
+        ColorPaletteDef colorPaletteDef = imageInfo.getColorPaletteDef();
+        if (invertRamp) {
+            return createByteIndexedImage(band, sourceImage, colorPaletteDef.getMaxDisplaySample(), colorPaletteDef.getMinDisplaySample(), 1.0);
+        } else {
+            return createByteIndexedImage(band, sourceImage, colorPaletteDef.getMinDisplaySample(), colorPaletteDef.getMaxDisplaySample(), 1.0);
+        }
+    }
+
+    public ImageInfo getImageInfo(RasterDataNode[] rasters) {
+        Assert.notNull(rasters, "rasters");
+        Assert.argument(rasters.length == 1 || rasters.length == 3, "rasters.length == 1 || rasters.length == 3");
+        if (rasters.length == 1) {
+            RasterDataNode raster = rasters[0];
+            Assert.state(raster.getImageInfo() != null, "raster.getImageInfo() != null");
+            return raster.getImageInfo();
+        } else {
+            final RGBChannelDef rgbChannelDef = new RGBChannelDef();
+            for (int i = 0; i < rasters.length; i++) {
+                RasterDataNode raster = rasters[i];
+                Assert.state(rasters[i].getImageInfo() != null, "rasters[i].getImageInfo() != null");
+                ImageInfo imageInfo = raster.getImageInfo();
+                rgbChannelDef.setSourceName(i, raster.getName());
+                rgbChannelDef.setMinDisplaySample(i, imageInfo.getColorPaletteDef().getMinDisplaySample());
+                rgbChannelDef.setMaxDisplaySample(i, imageInfo.getColorPaletteDef().getMaxDisplaySample());
+            }
+            return new ImageInfo(rgbChannelDef);
+        }
+    }
+
+    /*
+     * Non-API.
+     */
+    public void prepareImageInfos(RasterDataNode[] rasterDataNodes, ProgressMonitor pm) {
+        int numTaskSteps = 0;
+        for (RasterDataNode raster : rasterDataNodes) {
+            numTaskSteps += raster.getImageInfo() == null ? 1 : 0;
+        }
+
+        pm.beginTask("Computing image statistics", numTaskSteps);
+        try {
+            for (final RasterDataNode raster : rasterDataNodes) {
+                final ImageInfo imageInfo = raster.getImageInfo();
+                if (imageInfo == null) {
+                    raster.getImageInfo(SubProgressMonitor.create(pm, 1));
+                }
+            }
+        } finally {
+            pm.done();
+        }
+    }
+
+    /*
+     * Non-API.
+     */
+    public int getStatisticsLevel(RasterDataNode raster, int levelCount) {
+        final long imageSize = (long) raster.getRasterWidth() * raster.getRasterHeight();
+        final int statisticsLevel;
+        if (imageSize <= DefaultMultiLevelModel.DEFAULT_MAX_LEVEL_PIXEL_COUNT) {
+            statisticsLevel = 0;
+        } else {
+            statisticsLevel = levelCount - 1;
+        }
+        return statisticsLevel;
+    }
+
+    public PlanarImage createColoredMaskImage(Product product, String expression, Color color, boolean invertMask,
+                                              int level) {
+        // todo - [multisize_products] fix: rasterDataNode arg is null --> default product scene raster image layout will be used!! (nf)
+        MultiLevelImage maskImage = product.getMaskImage(expression, null);
+        RenderedImage levelImage = maskImage.getImage(level);
+        return createColoredMaskImage(color, levelImage, invertMask);
+    }
+
+    private static class BorderSamplesAndColors {
+
+        double sample1;
+        double sample2;
+        Color color1;
+        Color color2;
     }
 
     // Initialization on demand holder idiom

@@ -16,28 +16,25 @@
 
 package org.esa.snap.core.dataop.maptransf.geotools;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.referencing.operation.DefaultMathTransformFactory;
-import org.opengis.referencing.FactoryException;
+import org.junit.Test;
 import org.opengis.referencing.crs.ProjectedCRS;
-import org.opengis.referencing.operation.OperationMethod;
-import org.opengis.referencing.operation.Projection;
-import org.opengis.util.GenericName;
 
-import java.util.Set;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
-public class CoordinateReferenceSystemsTest extends TestCase {
+public class CoordinateReferenceSystemsTest {
 
-    public void testCoordinateReferenceSystems() throws FactoryException {
+    @Test
+    public void testCoordinateReferenceSystems() {
         final MapProjection gp = MapProjectionRegistry.getProjection(new IdentityTransformDescriptor().getName());
 
         assertSame(DefaultGeographicCRS.WGS84,
-                   CoordinateReferenceSystems.getCRS(gp, Datum.WGS_84));
+                CoordinateReferenceSystems.getCRS(gp, Datum.WGS_84));
 
         for (final MapProjection projection : MapProjectionRegistry.getProjections()) {
             if (!(projection.getMapTransform().getDescriptor() instanceof IdentityTransformDescriptor)) {
@@ -48,6 +45,9 @@ public class CoordinateReferenceSystemsTest extends TestCase {
         }
     }
 
+    // @todo - this method does not assert anything - tb 2023-09-08
+    /*
+    @Test
     public void testProjectionNamesAndAliases() {
         final DefaultMathTransformFactory mtf = new DefaultMathTransformFactory();
         Set<OperationMethod> methods = mtf.getAvailableMethods(Projection.class);
@@ -60,5 +60,5 @@ public class CoordinateReferenceSystemsTest extends TestCase {
             }
         }
     }
-
+     */
 }

@@ -105,10 +105,6 @@ public class CommandLineUsageTest {
         @Parameter
         Bar bar;
 
-        @Parameter
-        @Deprecated
-        float baz;
-
         @Override
         public void initialize() throws OperatorException {
         }

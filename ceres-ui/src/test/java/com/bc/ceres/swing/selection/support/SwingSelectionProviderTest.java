@@ -19,17 +19,17 @@ package com.bc.ceres.swing.selection.support;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.SelectionChangeListener;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JList;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import static org.junit.Assert.*;
 
-public class SwingSelectionProviderTest extends TestCase {
+
+public class SwingSelectionProviderTest {
 
     private static final Object[] LIST_DATA = new Object[]{
             "Sauerkraut", "Zwiebeln", "Äpfel", "Wacholderbeeren"
@@ -70,60 +70,6 @@ public class SwingSelectionProviderTest extends TestCase {
                 TREE_GEMUESE,
                 TREE_OBST,
         };
-    }
-
-    public void testListSelectionProvider() {
-        final JList list = new JList(LIST_DATA);
-        final ListSelectionContext selectionContext = new ListSelectionContext(list);
-        assertSame(list, selectionContext.getList());
-        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
-        testListSelectionProvider(selectionContext);
-
-        final JList otherList = new JList(LIST_DATA);
-        otherList.setSelectedIndices(new int[]{2, 0, 3});
-        selectionContext.setList(otherList);
-        assertSame(otherList, selectionContext.getList());
-        assertEquals(new DefaultSelection<Object>("Sauerkraut", "Äpfel", "Wacholderbeeren"),
-                     selectionContext.getSelection());
-        testListSelectionProvider(selectionContext);
-    }
-
-    public void testTreeSelectionProvider() {
-        final JTree tree = new JTree(TREE_DATA);
-        final TreeSelectionContext selectionContext = new TreeSelectionContext(tree);
-        assertSame(tree, selectionContext.getTree());
-        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
-        testTreeSelectionProvider(selectionContext);
-
-        final JTree otherTree = new JTree(TREE_DATA);
-        otherTree.setSelectionPaths(new TreePath[]{
-                new TreePath(new Object[]{TREE_GEMUESE, LEAF_SAUERKRAUT}),
-                new TreePath(new Object[]{TREE_OBST, LEAF_AEPFEL}),
-                new TreePath(new Object[]{TREE_OBST, LEAF_BEEREN}),
-        });
-        selectionContext.setTree(otherTree);
-        assertSame(otherTree, selectionContext.getTree());
-//        assertEquals(new DefaultSelection(new Object[]{"Sauerkraut", "Äpfel", "Wacholderbeeren"}),
-//                     selectionContext.getSelection());
-        testTreeSelectionProvider(selectionContext);
-    }
-
-    public void testTableSelectionProvider() {
-        final JTable table = new JTable(TABLE_DATA, TABLE_CNAMES);
-        final TableSelectionContext selectionContext = new TableSelectionContext(table);
-        assertSame(table, selectionContext.getTable());
-        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
-        testTableSelectionProvider(selectionContext);
-
-        final JTable otherTable = new JTable(TABLE_DATA, TABLE_CNAMES);
-        otherTable.setRowSelectionInterval(2, 2);
-        otherTable.addRowSelectionInterval(0, 0);
-        otherTable.addRowSelectionInterval(3, 3);
-        selectionContext.setTable(otherTable);
-        assertSame(otherTable, selectionContext.getTable());
-        assertEquals(new DefaultSelection<Object>(new Object[]{0, 2, 3}),
-                     selectionContext.getSelection());
-        testTableSelectionProvider(selectionContext);
     }
 
     private static void testListSelectionProvider(ListSelectionContext selectionContext) {
@@ -217,6 +163,63 @@ public class SwingSelectionProviderTest extends TestCase {
         assertNotSame(selection, selectionContext.getSelection());
         assertEquals(selection, selectionContext.getSelection());
         assertEquals("1;2;0;4;", listener.callSeq);
+    }
+
+    @Test
+    public void testListSelectionProvider() {
+        final JList list = new JList(LIST_DATA);
+        final ListSelectionContext selectionContext = new ListSelectionContext(list);
+        assertSame(list, selectionContext.getList());
+        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
+        testListSelectionProvider(selectionContext);
+
+        final JList otherList = new JList(LIST_DATA);
+        otherList.setSelectedIndices(new int[]{2, 0, 3});
+        selectionContext.setList(otherList);
+        assertSame(otherList, selectionContext.getList());
+        assertEquals(new DefaultSelection<Object>("Sauerkraut", "Äpfel", "Wacholderbeeren"),
+                selectionContext.getSelection());
+        testListSelectionProvider(selectionContext);
+    }
+
+    @Test
+    public void testTreeSelectionProvider() {
+        final JTree tree = new JTree(TREE_DATA);
+        final TreeSelectionContext selectionContext = new TreeSelectionContext(tree);
+        assertSame(tree, selectionContext.getTree());
+        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
+        testTreeSelectionProvider(selectionContext);
+
+        final JTree otherTree = new JTree(TREE_DATA);
+        otherTree.setSelectionPaths(new TreePath[]{
+                new TreePath(new Object[]{TREE_GEMUESE, LEAF_SAUERKRAUT}),
+                new TreePath(new Object[]{TREE_OBST, LEAF_AEPFEL}),
+                new TreePath(new Object[]{TREE_OBST, LEAF_BEEREN}),
+        });
+        selectionContext.setTree(otherTree);
+        assertSame(otherTree, selectionContext.getTree());
+//        assertEquals(new DefaultSelection(new Object[]{"Sauerkraut", "Äpfel", "Wacholderbeeren"}),
+//                     selectionContext.getSelection());
+        testTreeSelectionProvider(selectionContext);
+    }
+
+    @Test
+    public void testTableSelectionProvider() {
+        final JTable table = new JTable(TABLE_DATA, TABLE_CNAMES);
+        final TableSelectionContext selectionContext = new TableSelectionContext(table);
+        assertSame(table, selectionContext.getTable());
+        assertSame(DefaultSelection.EMPTY, selectionContext.getSelection());
+        testTableSelectionProvider(selectionContext);
+
+        final JTable otherTable = new JTable(TABLE_DATA, TABLE_CNAMES);
+        otherTable.setRowSelectionInterval(2, 2);
+        otherTable.addRowSelectionInterval(0, 0);
+        otherTable.addRowSelectionInterval(3, 3);
+        selectionContext.setTable(otherTable);
+        assertSame(otherTable, selectionContext.getTable());
+        assertEquals(new DefaultSelection<Object>(0, 2, 3),
+                selectionContext.getSelection());
+        testTableSelectionProvider(selectionContext);
     }
 
     private static class SelectionChangeHandler implements SelectionChangeListener {

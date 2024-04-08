@@ -16,17 +16,20 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
+import com.bc.ceres.core.runtime.Constants;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.bc.ceres.core.runtime.Constants;
+import static org.junit.Assert.*;
 
 
-public class IOHelperTest extends TestCase {
-    public void testUrlToFileWithNull() throws MalformedURLException {
+public class IOHelperTest {
+
+    @Test
+    public void testUrlToFileWithNull() {
         try {
             UrlHelper.urlToFile(null);
             fail();
@@ -35,17 +38,20 @@ public class IOHelperTest extends TestCase {
         }
     }
 
+    @Test
     public void testUrlToFileWithValidFileUrl() throws MalformedURLException {
         File file = new File("").getAbsoluteFile();
         URL fileUrl = file.toURI().toURL();
         assertEquals(file, UrlHelper.urlToFile(fileUrl));
     }
 
+    @Test
     public void testUrlToFileWithInvalidFileUrl() throws MalformedURLException {
         URL someUrl = new URL("http://www.google.com");
-        assertEquals(null, UrlHelper.urlToFile(someUrl));
+        assertNull(UrlHelper.urlToFile(someUrl));
     }
 
+    @Test
     public void testUrlToFileWithAJarEntry() throws MalformedURLException {
         File dir = new File("").getAbsoluteFile();
         File file = new File(dir, "test.jar");
@@ -54,6 +60,7 @@ public class IOHelperTest extends TestCase {
         assertEquals(file, UrlHelper.urlToFile(jarUrl));
     }
 
+    @Test
     public void testUrlToFileWithAJarFile() throws MalformedURLException {
         File dir = new File("").getAbsoluteFile();
         File file = new File(dir, "test.jar");
@@ -62,7 +69,8 @@ public class IOHelperTest extends TestCase {
         assertEquals(file, UrlHelper.urlToFile(jarUrl));
     }
 
-    public void testFileToUrlWithNull() throws MalformedURLException {
+    @Test
+    public void testFileToUrlWithNull() {
         try {
             UrlHelper.fileToUrl(null);
             fail();
@@ -71,14 +79,15 @@ public class IOHelperTest extends TestCase {
         }
     }
 
+    @Test
     public void testFileToUrlWithValidFile() throws MalformedURLException {
         File file = new File("").getAbsoluteFile();
         URL fileUrl = file.toURI().toURL();
         assertEquals(fileUrl, UrlHelper.fileToUrl(file));
     }
 
-
     // prerequisite for ...
+    @Test
     public void testThatDirectoryUrlsAlwaysEndWithASlash() {
         File dir = new File("").getAbsoluteFile();
         while (dir != null) {
@@ -88,7 +97,7 @@ public class IOHelperTest extends TestCase {
         }
     }
 
-
+    @Test
     public void testManifestToLocationUrl() throws MalformedURLException {
         try {
             UrlHelper.manifestToLocationUrl(null);
@@ -118,8 +127,8 @@ public class IOHelperTest extends TestCase {
         assertEquals(locationUrl, UrlHelper.manifestToLocationUrl(manifestUrl));
     }
 
-
-    public void testLoctionToManifestUrl() throws MalformedURLException {
+    @Test
+    public void testLocationToManifestUrl() throws MalformedURLException {
         try {
             UrlHelper.locationToManifestUrl(null);
             fail();

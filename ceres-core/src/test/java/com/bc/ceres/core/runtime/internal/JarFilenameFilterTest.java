@@ -16,13 +16,16 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
-public class JarFilenameFilterTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public void testNPE(String name) {
+public class JarFilenameFilterTest {
+
+    @Test
+    public void testNPE() {
         try {
             JarFilenameFilter.isJarName(null);
             fail();
@@ -30,6 +33,7 @@ public class JarFilenameFilterTest extends TestCase {
         }
     }
 
+    @Test
     public void testAccept() {
         JarFilenameFilter filter = new JarFilenameFilter();
         File dir = new File(".");
@@ -48,6 +52,7 @@ public class JarFilenameFilterTest extends TestCase {
         assertFalse(filter.accept(dir, ""));
     }
 
+    @Test
     public void testIsJarName() {
         assertTrue(JarFilenameFilter.isJarName("xstream.jar"));
         assertTrue(JarFilenameFilter.isJarName("xstream.JAR"));

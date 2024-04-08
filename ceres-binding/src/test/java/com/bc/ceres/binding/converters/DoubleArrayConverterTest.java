@@ -18,6 +18,7 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
 
 public class DoubleArrayConverterTest extends AbstractConverterTest {
 
@@ -32,7 +33,7 @@ public class DoubleArrayConverterTest extends AbstractConverterTest {
         return converter;
     }
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(double[].class);
         testParseSuccess(new double[]{-2.3, -1.1, 0.09, 1.8, 2.1, 3.45, 4.3}, "-2.3,-1.1, 0.09,1.8  \n,2.1,3.45,4.3");

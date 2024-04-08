@@ -19,21 +19,26 @@ package com.bc.ceres.swing.figure.support;
 import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureChangeEvent;
 import com.bc.ceres.swing.figure.FigureChangeListener;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.awt.geom.Rectangle2D;
 
-public class DefaultFigureCollectionTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class DefaultFigureCollectionTest {
+
+    @Test
     public void testDefaultProperties() {
         DefaultFigureCollection fc = new DefaultFigureCollection();
-        assertEquals(true, fc.isSelectable());
-        assertEquals(true, fc.isCollection());
+        assertTrue(fc.isSelectable());
+        assertTrue(fc.isCollection());
         assertEquals(Figure.Rank.NOT_SPECIFIED, fc.getRank());
         assertEquals(new Rectangle2D.Double(), fc.getBounds());
         assertEquals(1, fc.getMaxSelectionStage());
         assertEquals(0, fc.getFigureCount());
     }
 
+    @Test
     public void testThatChildChangesArePropagated() {
         DefaultFigureCollection fc = new DefaultFigureCollection();
         DefaultFigureCollection f1 = new DefaultFigureCollection();
@@ -54,6 +59,7 @@ public class DefaultFigureCollectionTest extends TestCase {
         assertEquals(f2, listener.lastEvent.getSourceFigure());
     }
 
+    @Test
     public void testAddingAndRemovingChildren() {
         DefaultFigureCollection fc = new DefaultFigureCollection();
         assertEquals(0, fc.getFigureCount());
@@ -88,6 +94,7 @@ public class DefaultFigureCollectionTest extends TestCase {
         assertEquals(0, fc.getFigureCount());
     }
 
+    @Test
     public void testListener() {
         DefaultFigureCollection fc = new DefaultFigureCollection();
         MyFigureListener listener = new MyFigureListener();

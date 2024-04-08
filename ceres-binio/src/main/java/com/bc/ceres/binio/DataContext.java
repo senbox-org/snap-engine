@@ -43,7 +43,6 @@ public interface DataContext {
      * In contrast to {@link #createData()}, the method will always return the same compound instance.
      *
      * @return The instance of a data compound.
-     *
      * @see #createData()
      * @see #getFormat()
      */
@@ -54,7 +53,6 @@ public interface DataContext {
      * at the beginning of the stream or file.
      *
      * @return An instance of a data compound.
-     *
      * @see #getFormat()
      */
     CompoundData createData();
@@ -64,9 +62,7 @@ public interface DataContext {
      * at the given stream or file position.
      *
      * @param position The file position in bytes.
-     *
      * @return An instance of a data compound.
-     *
      * @see #getFormat()
      */
     CompoundData createData(long position);
@@ -77,7 +73,6 @@ public interface DataContext {
      *
      * @param type     The compound type.
      * @param position The file position in bytes.
-     *
      * @return An instance of a data compound.
      */
     CompoundData createData(CompoundType type, long position);
@@ -86,37 +81,4 @@ public interface DataContext {
      * Disposes this context and releases all associated resources.
      */
     void dispose();
-
-
-
-    /**
-     * Creates an instance of a compound with I/O starting
-     * at the given stream or file position.
-     * The type of the compound is the same as the format's compound type.
-     *
-     * @param position The file position in bytes.
-     *
-     * @return An instance of a data compound.
-     *
-     * @see #createData()
-     * @see #getFormat()
-     * @deprecated use {@link #createData(long)} instead
-     */
-    @Deprecated
-    CompoundData getData(long position);
-
-    /**
-     * Creates an instance of a compound with the given type and with I/O starting
-     * at the given stream or file position.
-     *
-     * @param type     The compound type.
-     * @param position The file position in bytes.
-     *
-     * @return An instance of a data compound.
-     *
-     * @see #getFormat()
-     * @deprecated use {@link #createData(long)} instead
-     */
-    @Deprecated
-    CompoundData getData(CompoundType type, long position);
 }

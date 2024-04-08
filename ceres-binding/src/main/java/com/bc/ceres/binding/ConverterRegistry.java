@@ -31,6 +31,7 @@ import com.bc.ceres.binding.converters.FontConverter;
 import com.bc.ceres.binding.converters.IntegerConverter;
 import com.bc.ceres.binding.converters.IntervalConverter;
 import com.bc.ceres.binding.converters.LongConverter;
+import com.bc.ceres.binding.converters.PathConverter;
 import com.bc.ceres.binding.converters.PatternConverter;
 import com.bc.ceres.binding.converters.ShortConverter;
 import com.bc.ceres.binding.converters.StringConverter;
@@ -41,6 +42,7 @@ import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +86,7 @@ public class ConverterRegistry {
         setConverter(Color.class, new ColorConverter());
         setConverter(Date.class, new DateFormatConverter());
         setConverter(File.class, new FileConverter());
+        setConverter(Path.class, new PathConverter());
         setConverter(URL.class, new UrlConverter());
         setConverter(Font.class, new FontConverter());
         setConverter(Pattern.class, new PatternConverter());
@@ -139,7 +142,7 @@ public class ConverterRegistry {
         }
         return (Converter<T>) converter;
     }
-    
+
     // Initialization on demand holder idiom
     private static class Holder {
         private static final ConverterRegistry instance = new ConverterRegistry();

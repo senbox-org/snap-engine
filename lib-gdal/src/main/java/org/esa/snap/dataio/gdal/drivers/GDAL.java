@@ -26,6 +26,8 @@ public class GDAL extends GDALBase {
     private final MethodHandle getDriverByNameHandle;
     private final MethodHandle buildVRTHandle;
     private final MethodHandle getLastErrorHandle;
+    private final MethodHandle setCacheMaxHandle;
+    private final MethodHandle getCacheMaxHandle;
 
     static {
         gdalClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
@@ -54,7 +56,8 @@ public class GDAL extends GDALBase {
                                             gdalDatasetClass,
                                             String.class, datasetArray.getClass(), GDALReflection.fetchGDALLibraryClass(BuildVRTOptions.CLASS_NAME));
         getLastErrorHandle = createStaticHandle(gdalClass, "GetLastErrorMsg", String.class);
-
+        setCacheMaxHandle = createStaticHandle(gdalClass, "SetCacheMax", void.class, int.class);
+        getCacheMaxHandle = createStaticHandle(gdalClass, "GetCacheMax", int.class);
     }
 
     /**
@@ -154,5 +157,13 @@ public class GDAL extends GDALBase {
 
     public static String getLastErrorMsg(){
         return (String) invokeStatic(instance.getLastErrorHandle);
+    }
+
+    public static Integer getCacheMax() {
+        return (Integer) invokeStatic(instance.getCacheMaxHandle);
+    }
+
+    public static void setCacheMax(int nBytes) {
+        invokeStatic(instance.setCacheMaxHandle, nBytes);
     }
 }

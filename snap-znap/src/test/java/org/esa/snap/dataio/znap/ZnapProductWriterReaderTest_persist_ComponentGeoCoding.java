@@ -30,6 +30,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.junit.After;
 import org.junit.Before;
@@ -44,10 +45,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -64,6 +67,8 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
     private Product product;
     private ZnapProductWriter productWriter;
     private ZnapProductReader productReader;
+    private Preferences preferences;
+    private String oldValue;
 
     @Before
     public void setUp() throws Exception {
@@ -100,8 +105,12 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
         sceneGeoCoding.initialize();
         product.setSceneGeoCoding(sceneGeoCoding);
 
+        preferences = Config.instance("snap").load().preferences();
+        oldValue = preferences.get(PROPERTY_NAME_USE_ZIP_ARCHIVE, "true");
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+
         final Properties properties = new Properties();
-        properties.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
+        properties.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, "false");
 
         productWriter = (ZnapProductWriter) new ZnapProductWriterPlugIn().createWriterInstance();
         productWriter.setPreferencesForTestPurposesOnly(properties);
@@ -123,6 +132,8 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
             }
         }
         tempDirectories.clear();
+
+        preferences.put(PROPERTY_NAME_USE_ZIP_ARCHIVE, oldValue);
     }
 
     @Test
