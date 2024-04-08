@@ -1,0 +1,97 @@
+{
+  "id": "GDAL-COG-product",
+  "decodeQualification": "INTENDED",
+  "expectedContent": {
+    "sceneWidth": 25862,
+    "sceneHeight": 16721,
+    "geoCoding": {
+      "coordinates": [
+        {
+          "x": 11154.0,
+          "y": 8988.0,
+          "lat": 45.998573999491384,
+          "lon": 70.68177916523905
+        },
+        {
+          "x": 19201.0,
+          "y": 10850.0,
+          "lat": 46.47127279677198,
+          "lon": 71.93753478359196
+        }
+      ],
+      "reverseAccuracy": 1218.4170126202807
+    },
+    "bands": [
+      {
+        "name": "band_1",
+        "bandWidth": 25862,
+        "bandHeight": 16721,
+        "noDataValue": "0.0",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 1349,
+            "y": 2979,
+            "value": 133.0
+          },
+          {
+            "x": 17717,
+            "y": 14222,
+            "value": 112.0
+          }
+        ]
+      }
+    ],
+    "masks": [
+      {
+        "name": "nodata_band_1",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
+        "color": "255,255,255"
+      }
+    ],
+    "metadata": [
+      {
+        "path": "Image info/Component/signed",
+        "value": "false"
+      },
+      {
+        "path": "Image info/Component/overview count",
+        "value": "6"
+      },
+      {
+        "path": "Image info/Component/color interpretation",
+        "value": "Gray"
+      },
+      {
+        "path": "Image info/Component/overviews",
+        "value": "12931x8360, 6465x4180, 3232x2090, 1616x1045, 808x522, 404x261"
+      },
+      {
+        "path": "Image info/Component/overviews",
+        "value": "12931x8360, 6465x4180, 3232x2090, 1616x1045, 808x522, 404x261"
+      },
+      {
+        "path": "Image info/Component/overviews",
+        "value": "12931x8360, 6465x4180, 3232x2090, 1616x1045, 808x522, 404x261"
+      },
+      {
+        "path": "Image info/Component/block size",
+        "value": "25862x16721"
+      },
+      {
+        "path": "Image info/Component/data type",
+        "value": "UInt16"
+      },
+      {
+        "path": "Image info/Component/signed",
+        "value": "false"
+      },
+      {
+        "path": "Image info/Component/precision",
+        "value": "16"
+      }
+    ]
+  }
+}

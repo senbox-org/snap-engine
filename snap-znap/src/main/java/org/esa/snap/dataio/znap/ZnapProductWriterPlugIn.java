@@ -19,14 +19,18 @@
 package org.esa.snap.dataio.znap;
 
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.*;
+import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.DEFAULT_USE_ZIP_ARCHIVE;
+import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 
 import org.esa.snap.core.dataio.EncodeQualification;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.runtime.Config;
 
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
 
@@ -47,7 +51,11 @@ public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getDefaultFileExtensions() {
-        return new String[]{ZNAP_CONTAINER_EXTENSION, ZNAP_ZIP_CONTAINER_EXTENSION};
+        if (isUseZipArchive()) {
+            return new String[]{ZNAP_ZIP_CONTAINER_EXTENSION};
+        } else {
+            return new String[]{ZNAP_CONTAINER_EXTENSION};
+        }
     }
 
     public String getDescription(Locale locale) {
@@ -56,5 +64,12 @@ public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
 
     public SnapFileFilter getProductFileFilter() {
         return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
+    }
+
+    static boolean isUseZipArchive() {
+        final Preferences preferences = Config.instance("snap").load().preferences();
+        String value = preferences.get(PROPERTY_NAME_USE_ZIP_ARCHIVE, Boolean.toString(DEFAULT_USE_ZIP_ARCHIVE));
+        value = value != null ? value.trim() : null;
+        return Boolean.parseBoolean(value);
     }
 }

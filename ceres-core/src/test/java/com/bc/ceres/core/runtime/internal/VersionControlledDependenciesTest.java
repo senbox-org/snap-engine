@@ -18,21 +18,16 @@ package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.Version;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 
-public class VersionControlledDependenciesTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+public class VersionControlledDependenciesTest {
 
-    @Override
-    protected void setUp() throws Exception {
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-    }
-
+    @Test
     public void testDependencyIsSmallerThanRequired() throws IOException, CoreException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/dependencies/versioned/module-base-1.0.xml",
@@ -44,9 +39,10 @@ public class VersionControlledDependenciesTest extends TestCase {
             fail("ResolveException expected, because module-a has dependency to module-base-2.0");
         } catch (ResolveException e) {
             // ignore
-        }        
+        }
     }
 
+    @Test
     public void testDependencyIsBiggerThanRequired() throws IOException, CoreException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/dependencies/versioned/module-base-3.0.xml",
@@ -64,6 +60,7 @@ public class VersionControlledDependenciesTest extends TestCase {
         }
     }
 
+    @Test
     public void testDependencyWithTwoModules() throws IOException, CoreException {
         ModuleRegistry moduleRegistry = TestHelpers.createModuleRegistry(new String[]{
                 "xml/dependencies/versioned/module-base-3.0.xml",
@@ -79,7 +76,7 @@ public class VersionControlledDependenciesTest extends TestCase {
             assertEquals(new Version(3, 0, 0, ""), dependencyOfA.getVersion());
         } catch (ResolveException e) {
             fail("ResolveException not expected, because " +
-                 "module-a has dependency to module-base-2.0 and 3.0 is available ");
+                    "module-a has dependency to module-base-2.0 and 3.0 is available ");
         }
         try {
             ModuleImpl moduleB = moduleRegistry.getModules("module-b")[0];
@@ -89,8 +86,7 @@ public class VersionControlledDependenciesTest extends TestCase {
             assertEquals(new Version(3, 0, 0, ""), dependencyOfB.getVersion());
         } catch (ResolveException e) {
             fail("ResolveException not expected, because " +
-                 "module-b has no version requirement.");
+                    "module-b has no version requirement.");
         }
     }
-
 }

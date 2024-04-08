@@ -17,6 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.binning.BinManager;
 import org.esa.snap.binning.CompositingType;
 import org.esa.snap.binning.ProductCustomizer;
@@ -33,6 +34,7 @@ import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Rectangle;
@@ -48,6 +50,7 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Marco Peters
  */
+@RunWith(LongTestRunner.class)
 public class ProductTemporalBinRendererTest {
 
     @BeforeClass

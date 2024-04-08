@@ -17,13 +17,7 @@ package org.esa.snap.engine_utilities.gpf;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.math.MathUtils;
@@ -41,14 +35,16 @@ import java.util.Arrays;
  */
 public final class ReaderUtils {
 
+    private static final String[] MONTHS = new String[]{"JAN", "FEB", "MAR", "APR", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+
     public static Band createVirtualPhaseBand(final Product product, final Band bandI, final Band bandQ, final String countStr) {
         final String expression = "atan2(" + bandQ.getName() + ',' + bandI.getName() + ')';
 
         final VirtualBand virtBand = new VirtualBand("Phase" + countStr,
-                                                     ProductData.TYPE_FLOAT32,
-                                                     bandI.getRasterWidth(),
-                                                     bandI.getRasterHeight(),
-                                                     expression);
+                ProductData.TYPE_FLOAT32,
+                bandI.getRasterWidth(),
+                bandI.getRasterHeight(),
+                expression);
         virtBand.setUnit(Unit.PHASE);
         virtBand.setDescription("Phase from complex data");
         if (bandI.isNoDataValueUsed()) {
@@ -78,7 +74,7 @@ public final class ReaderUtils {
         final String bandNameI = bandI.getName();
         final double nodatavalueI = bandI.getNoDataValue();
         final String bandNameQ = bandQ.getName();
-        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : " +
+        final String expression = bandNameI + " == " + nodatavalueI + " ? " + nodatavalueI + " : " +
                 bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ;
 
         String name = bandName;
@@ -86,10 +82,10 @@ public final class ReaderUtils {
             name += suffix;
         }
         final VirtualBand virtBand = new VirtualBand(name,
-                                                     ProductData.TYPE_FLOAT32,
-                                                     bandI.getRasterWidth(),
-                                                     bandI.getRasterHeight(),
-                                                     expression);
+                ProductData.TYPE_FLOAT32,
+                bandI.getRasterWidth(),
+                bandI.getRasterHeight(),
+                expression);
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         virtBand.setNoDataValueUsed(true);
@@ -115,7 +111,7 @@ public final class ReaderUtils {
         final String bandNameI = bandI.getName();
         final double nodatavalueI = bandI.getNoDataValue();
         final String bandNameQ = bandQ.getName();
-        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : 10.0*log10(" +
+        final String expression = bandNameI + " == " + nodatavalueI + " ? " + nodatavalueI + " : 10.0*log10(" +
                 bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ + ")";
 
         String name = bandName;
@@ -144,23 +140,6 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
-     * otherwise it returns null;
-     *
-     * @param input an input object of unknown type
-     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
-     */
-    @Deprecated
-    public static File getFileFromInput(final Object input) {
-        if (input instanceof String) {
-            return new File((String) input);
-        } else if (input instanceof File) {
-            return (File) input;
-        }
-        return null;
-    }
-
-    /**
      * Returns a <code>Path</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
      *
@@ -171,9 +150,9 @@ public final class ReaderUtils {
         if (input instanceof String) {
             return Paths.get((String) input);
         } else if (input instanceof File) {
-            return ((File)input).toPath();
+            return ((File) input).toPath();
         } else if (input instanceof Path) {
-            return (Path)input;
+            return (Path) input;
         }
         return null;
     }
@@ -188,20 +167,20 @@ public final class ReaderUtils {
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double) (gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double) (gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
         final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                                                      subSamplingX, subSamplingY, fineLatTiePoints);
+                subSamplingX, subSamplingY, fineLatTiePoints);
         latGrid.setUnit(Unit.DEGREES);
 
         final float[] fineLonTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                                                      subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid);
@@ -221,20 +200,20 @@ public final class ReaderUtils {
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        double subSamplingX = product.getSceneRasterWidth() / (double)(gridWidth - 1);
-        double subSamplingY = product.getSceneRasterHeight() / (double)(gridHeight - 1);
+        double subSamplingX = product.getSceneRasterWidth() / (double) (gridWidth - 1);
+        double subSamplingY = product.getSceneRasterHeight() / (double) (gridHeight - 1);
         if (subSamplingX == 0 || subSamplingY == 0)
             return;
 
         final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                                                      subSamplingX, subSamplingY, fineLatTiePoints);
+                subSamplingX, subSamplingY, fineLatTiePoints);
         latGrid.setUnit(Unit.DEGREES);
 
         final float[] fineLonTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                                                      subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid);
@@ -279,10 +258,10 @@ public final class ReaderUtils {
                 final double wi = betaC - i0;
 
                 fineTiePoints[k++] = (float) MathUtils.interpolate2D(wi, wj,
-                                                                     coarseTiePoints[i0 + j0 * coarseGridWidth],
-                                                                     coarseTiePoints[i1 + j0 * coarseGridWidth],
-                                                                     coarseTiePoints[i0 + j1 * coarseGridWidth],
-                                                                     coarseTiePoints[i1 + j1 * coarseGridWidth]);
+                        coarseTiePoints[i0 + j0 * coarseGridWidth],
+                        coarseTiePoints[i1 + j0 * coarseGridWidth],
+                        coarseTiePoints[i0 + j1 * coarseGridWidth],
+                        coarseTiePoints[i1 + j1 * coarseGridWidth]);
             }
         }
     }
@@ -322,10 +301,10 @@ public final class ReaderUtils {
                 final double wi = betaC - i0;
 
                 fineTiePoints[k++] = (float) MathUtils.interpolate2D(wi, wj,
-                                                                     coarseTiePoints[i0 + j0 * coarseGridWidth],
-                                                                     coarseTiePoints[i1 + j0 * coarseGridWidth],
-                                                                     coarseTiePoints[i0 + j1 * coarseGridWidth],
-                                                                     coarseTiePoints[i1 + j1 * coarseGridWidth]);
+                        coarseTiePoints[i0 + j0 * coarseGridWidth],
+                        coarseTiePoints[i1 + j0 * coarseGridWidth],
+                        coarseTiePoints[i0 + j1 * coarseGridWidth],
+                        coarseTiePoints[i1 + j1 * coarseGridWidth]);
             }
         }
     }
@@ -367,11 +346,9 @@ public final class ReaderUtils {
         if (elem == null)
             return AbstractMetadata.NO_METADATA_UTC;
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
-                                                    new char[]{':','.','-'}, ' ').trim();
+                new char[]{':', '.', '-'}, ' ').trim();
         return AbstractMetadata.parseUTC(timeStr, timeFormat);
     }
-
-    private static String[] MONTHS = new String[] {"JAN","FEB","MAR","APR","JUN","JUL","AUG","SEP","OCT","NOV","DEC"};
 
     public static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
         Guardian.assertNotNull("name", name);
@@ -384,8 +361,8 @@ public final class ReaderUtils {
         Arrays.sort(sortedValidChars);
         final StringBuilder validName = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
-            String month = name.substring(i, Math.min(name.length(), i+3));
-            if(StringUtils.contains(MONTHS, month)) {
+            String month = name.substring(i, Math.min(name.length(), i + 3));
+            if (StringUtils.contains(MONTHS, month)) {
                 i += 2;
                 validName.append(month);
                 continue;

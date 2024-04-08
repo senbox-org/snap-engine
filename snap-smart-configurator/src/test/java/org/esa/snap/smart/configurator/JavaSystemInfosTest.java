@@ -17,7 +17,9 @@ package org.esa.snap.smart.configurator;
  */
 
 
+import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
@@ -26,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Nicolas Ducoin
  */
+@RunWith(LongTestRunner.class)
 public class JavaSystemInfosTest {
 
     private static final SystemInfos systemInfos = JavaSystemInfos.getInstance(1, 2);

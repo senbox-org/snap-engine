@@ -22,15 +22,19 @@ import com.bc.ceres.core.runtime.Constants;
 import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeConfigException;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 
+import static org.junit.Assert.*;
 
-public class RuntimeAppATest extends TestCase {
+
+public class RuntimeAppATest {
     private RuntimeImpl runtime;
 
-    @Override
+    @Before
     public void setUp() throws CoreException, RuntimeConfigException {
         System.setProperty("ceres.context", "appA");
         System.setProperty("appA.home", Config.getDirForAppA().toString());
@@ -39,12 +43,13 @@ public class RuntimeAppATest extends TestCase {
         runtime.start();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         runtime.stop();
         runtime = null;
     }
 
+    @Test
     public void testLocations() {
         RuntimeConfig config = runtime.getRuntimeConfig();
 
@@ -64,13 +69,13 @@ public class RuntimeAppATest extends TestCase {
         assertTrue(modulesDirPath.replace("\\", "/").endsWith("target/test-classes/testdirs/app-a/modules"));
     }
 
+    @Test
     public void testAllExpectedModulesPresent() {
-
         Module[] modules = runtime.getModules();
         assertNotNull(modules);
         assertTrue(modules.length >= 6);
 
-        HashMap<String, Module> map = new HashMap<String, Module>(modules.length);
+        HashMap<String, Module> map = new HashMap<>(modules.length);
         for (Module module : modules) {
             map.put(module.getSymbolicName(), module);
         }
@@ -82,6 +87,7 @@ public class RuntimeAppATest extends TestCase {
         assertNotNull(map.get(Constants.SYSTEM_MODULE_NAME));
     }
 
+    @Test
     public void testSystemModule() {
         Module systemModule = runtime.getModule();
         assertNotNull(systemModule);

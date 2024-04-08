@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.nc.N3Variable;
@@ -9,15 +10,16 @@ import org.junit.Before;
 import org.junit.Test;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
+import ucar.nc2.AttributeContainerMutable;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CfBandPartTest {
 
@@ -60,7 +62,20 @@ public class CfBandPartTest {
 
     @Test
     public void testDecodeSpectralWavelength_noWavelengthAtt() throws IOException {
-        assertThat(CfBandPart.getSpectralWavelength(variable), is(0f));
+        assertThat(CfBandPart.getSpectralWavelength(variable), is(0.0f));
+    }
+
+    @Test
+    @STTM("SNAP-3601")
+    public void testDecodeSpectralWavelength_emptyWavelengthAtt() throws IOException {
+        final Variable mockVar = mock(Variable.class);
+
+        final Attribute attribute = mock(Attribute.class);
+        when(attribute.getNumericValue()).thenReturn(null);
+
+        when(mockVar.findAttribute(Constants.RADIATION_WAVELENGTH)).thenReturn(attribute);
+
+        assertThat(CfBandPart.getSpectralWavelength(mockVar), is(0.0f));
     }
 
     @Test

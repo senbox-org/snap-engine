@@ -16,10 +16,16 @@
 
 package com.bc.ceres.binding.validators;
 
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.ValidationException;
 import junit.framework.TestCase;
-import com.bc.ceres.binding.*;
+import org.junit.Test;
 
-public class TypeValidatorTest extends TestCase {
+import static org.junit.Assert.fail;
+
+public class TypeValidatorTest {
+
     private boolean booleanValue;
     private char charValue;
     private byte byteValue;
@@ -32,7 +38,8 @@ public class TypeValidatorTest extends TestCase {
     private TestCase baseValue;
     private TypeValidatorTest derivedValue;
 
-    public void testValidation() throws ValidationException {
+    @Test
+    public void testValidation() {
         final TypeValidator typeValidator = new TypeValidator();
         final PropertyContainer propertyContainer = PropertyContainer.createObjectBacked(this);
 
@@ -40,146 +47,156 @@ public class TypeValidatorTest extends TestCase {
 
         s = "booleanValue";
         testValid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "byteValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testValid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testValid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "shortValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testValid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testValid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "intValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testValid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "longValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testValid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "floatValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testValid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "doubleValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testValid(typeValidator, propertyContainer, s, 123.0);
         testInvalid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "stringValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testValid(typeValidator, propertyContainer, s, null);
         testValid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "baseValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testValid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testValid(typeValidator, propertyContainer, s, new TestCase(){});
-        testValid(typeValidator, propertyContainer, s, this);
+        testInvalid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
+        testInvalid(typeValidator, propertyContainer, s, this);
 
         s = "derivedValue";
         testInvalid(typeValidator, propertyContainer, s, true);
-        testInvalid(typeValidator, propertyContainer, s, (char)123);
-        testInvalid(typeValidator, propertyContainer, s, (byte)123);
-        testInvalid(typeValidator, propertyContainer, s, (short)123);
+        testInvalid(typeValidator, propertyContainer, s, (char) 123);
+        testInvalid(typeValidator, propertyContainer, s, (byte) 123);
+        testInvalid(typeValidator, propertyContainer, s, (short) 123);
         testInvalid(typeValidator, propertyContainer, s, 123);
         testInvalid(typeValidator, propertyContainer, s, 123L);
         testInvalid(typeValidator, propertyContainer, s, 123.0F);
         testInvalid(typeValidator, propertyContainer, s, 123.0);
         testValid(typeValidator, propertyContainer, s, null);
         testInvalid(typeValidator, propertyContainer, s, "xyz");
-        testInvalid(typeValidator, propertyContainer, s, new TestCase(){});
+        testValid(typeValidator, propertyContainer, s, new TypeValidatorTest() {
+        });
         testValid(typeValidator, propertyContainer, s, this);
     }
 
-    private void testInvalid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object invalidValue){
+    private static void testInvalid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object invalidValue) {
         final Property property = propertyContainer.getProperty(name);
         try {
             typeValidator.validateValue(property, invalidValue);
@@ -195,7 +212,7 @@ public class TypeValidatorTest extends TestCase {
         }
     }
 
-    private void testValid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object validValue) {
+    private static void testValid(TypeValidator typeValidator, PropertyContainer propertyContainer, String name, Object validValue) {
         final Property property = propertyContainer.getProperty(name);
         try {
             typeValidator.validateValue(property, validValue);

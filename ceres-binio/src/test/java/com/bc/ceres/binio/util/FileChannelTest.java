@@ -16,16 +16,19 @@
 
 package com.bc.ceres.binio.util;
 
-import junit.framework.TestCase;
+import com.bc.ceres.test.LongTestRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * See also:
@@ -42,58 +45,10 @@ import java.nio.channels.FileChannel;
  * http://chaoticjava.com/posts/nio-efficient-ios-granular-bits/
  * http://chaoticjava.com/posts/nio-data-flow-made-resource-efficient/
  */
-public class FileChannelTest extends TestCase {
+@RunWith(LongTestRunner.class)
+public class FileChannelTest {
     private File file;
     private RandomAccessFile raf;
-
-    /**
-     * Sets up the fixture, for example, open a network connection.
-     * This method is called before a test is executed.
-     */
-    @Override
-    protected void setUp() throws Exception {
-        file = new File("test.dat");
-        file.delete();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        try {
-            if (raf != null) {
-                raf.close();
-            }
-        } finally {
-            file.delete();
-        }
-    }
-
-    public void testIt() throws IOException {
-        raf = new RandomAccessFile(file, "rw");
-        FileChannel channel = raf.getChannel();
-        assertTrue(channel.isOpen());
-        byte[] array = new byte[16];
-        ByteBuffer buffer = ByteBuffer.wrap(array);
-        buffer.putLong(123456789);
-        buffer.putLong(987654321);
-        buffer.rewind();
-        int n = channel.write(buffer);
-        channel.force(true);
-        assertEquals(16, n);
-        assertEquals(16, channel.size());
-        channel.close();
-
-        raf = new RandomAccessFile(file, "r");
-        channel = raf.getChannel();
-        assertEquals(16, channel.size());
-        array = new byte[16];
-        buffer = ByteBuffer.wrap(array);
-        channel.read(buffer);
-        buffer.rewind();
-        assertEquals(123456789, buffer.getLong());
-        assertEquals(987654321, buffer.getLong());
-        channel.close();
-    }
-
 
     /**
      * read some raw bytes from a file
@@ -180,5 +135,54 @@ public class FileChannelTest extends TestCase {
      */
     public static void main(String[] args) throws IOException {
         readRawBytes();
+    }
+
+    /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    @Before
+    public void setUp() throws Exception {
+        file = new File("test.dat");
+        file.delete();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (raf != null) {
+                raf.close();
+            }
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    public void testIt() throws IOException {
+        raf = new RandomAccessFile(file, "rw");
+        FileChannel channel = raf.getChannel();
+        assertTrue(channel.isOpen());
+        byte[] array = new byte[16];
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        buffer.putLong(123456789);
+        buffer.putLong(987654321);
+        buffer.rewind();
+        int n = channel.write(buffer);
+        channel.force(true);
+        assertEquals(16, n);
+        assertEquals(16, channel.size());
+        channel.close();
+
+        raf = new RandomAccessFile(file, "r");
+        channel = raf.getChannel();
+        assertEquals(16, channel.size());
+        array = new byte[16];
+        buffer = ByteBuffer.wrap(array);
+        channel.read(buffer);
+        buffer.rewind();
+        assertEquals(123456789, buffer.getLong());
+        assertEquals(987654321, buffer.getLong());
+        channel.close();
     }
 }

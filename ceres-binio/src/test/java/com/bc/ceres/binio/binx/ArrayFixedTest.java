@@ -15,17 +15,23 @@
  */
 package com.bc.ceres.binio.binx;
 
-import junit.framework.TestCase;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URI;
-
 import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataFormat;
+import com.bc.ceres.test.LongTestRunner;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class ArrayFixedTest extends TestCase {
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import static org.junit.Assert.*;
+
+@RunWith(LongTestRunner.class)
+public class ArrayFixedTest {
+
+    @Test
     public void testBinX() throws IOException, BinXException, URISyntaxException {
         URL resource = getClass().getResource("ArrayFixed.binXschema.xml");
         assertNotNull(resource);
@@ -51,6 +57,7 @@ public class ArrayFixedTest extends TestCase {
         assertSame(arrayCompoundType, datasetType.getMember(1).getType());
     }
 
+    @Test
     public void testFormat() throws URISyntaxException, IOException, BinXException {
         URL resource = getClass().getResource("ArrayFixed.binXschema.xml");
         assertNotNull(resource);
@@ -61,8 +68,7 @@ public class ArrayFixedTest extends TestCase {
         assertEquals("ArrayFixedTest", format.getName());
         assertNotNull(format.getType());
         assertEquals("Dataset", format.getType().getName());
-        assertEquals(true, format.isTypeDef("FixedFloat32ArrayType"));
+        assertTrue(format.isTypeDef("FixedFloat32ArrayType"));
         assertTrue(format.getTypeDef("FixedFloat32ArrayType") instanceof CompoundType);
     }
-
 }

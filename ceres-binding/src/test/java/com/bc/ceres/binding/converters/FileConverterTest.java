@@ -18,6 +18,7 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import org.junit.Test;
 
 import java.io.File;
 
@@ -33,7 +34,7 @@ public class FileConverterTest extends AbstractConverterTest {
         return converter;
     }
 
-    @Override
+    @Test
     public void testConverter() throws ConversionException {
         testValueType(File.class);
 

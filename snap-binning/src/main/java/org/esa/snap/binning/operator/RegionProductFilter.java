@@ -16,6 +16,7 @@
 
 package org.esa.snap.binning.operator;
 
+import org.esa.snap.core.util.GeoUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
@@ -43,7 +44,7 @@ class RegionProductFilter extends BinningProductFilter {
 
     @Override
     protected boolean acceptForBinning(Product product) {
-        GeneralPath[] geoBoundaryPaths = ProductUtils.createGeoBoundaryPaths(product);
+        GeneralPath[] geoBoundaryPaths = GeoUtils.createGeoBoundaryPaths(product);
         for (GeneralPath geoBoundaryPath : geoBoundaryPaths) {
             Geometry boundary = getPolygon(geoBoundaryPath);
             if (boundary.intersects(region)) {

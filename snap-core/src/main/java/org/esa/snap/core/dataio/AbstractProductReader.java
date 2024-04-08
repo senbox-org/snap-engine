@@ -17,10 +17,7 @@ package org.esa.snap.core.dataio;
 
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.SystemUtils;
@@ -70,7 +67,7 @@ public abstract class AbstractProductReader implements ProductReader {
     /**
      * The input source
      */
-    private Object input;
+    protected Object input;
 
     /**
      * The spectral and spatial subset definition used to read from the original data source.
@@ -211,6 +208,12 @@ public abstract class AbstractProductReader implements ProductReader {
      * @throws IOException if an I/O error occurs
      */
     protected abstract Product readProductNodesImpl() throws IOException;
+
+
+    @Override
+    public GeoCoding readGeoCoding(Product product) throws IOException {
+        return null;
+    }
 
     /**
      * Reads raster data from the data source specified by the given destination band into the given in-memory buffer

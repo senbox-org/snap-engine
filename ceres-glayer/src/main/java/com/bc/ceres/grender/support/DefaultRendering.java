@@ -38,12 +38,6 @@ public class DefaultRendering implements Rendering {
         this.graphics = graphics;
     }
 
-    @Deprecated
-    public DefaultRendering(Graphics2D graphics, Viewport viewport) {
-        setGraphics(graphics);
-        setViewport(viewport);
-    }
-
     @Override
     public Graphics2D getGraphics() {
         return graphics;

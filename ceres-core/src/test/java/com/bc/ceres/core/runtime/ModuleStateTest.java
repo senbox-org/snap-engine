@@ -16,9 +16,14 @@
 
 package com.bc.ceres.core.runtime;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ModuleStateTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class ModuleStateTest {
+
+    @Test
     public void testIsOneOf() {
         assertFalse(ModuleState.NULL.isOneOf(ModuleState.NULL));
         assertFalse(ModuleState.INSTALLED.isOneOf(ModuleState.NULL));
@@ -35,8 +40,6 @@ public class ModuleStateTest extends TestCase {
                 ModuleState.RESOLVED,
                 ModuleState.STARTING,
                 ModuleState.STOPPING));
-
-
 
         assertFalse(ModuleState.ACTIVE.isOneOf(ModuleState.NULL));
         assertFalse(ModuleState.ACTIVE.isOneOf(ModuleState.INSTALLED));

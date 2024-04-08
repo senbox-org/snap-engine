@@ -35,7 +35,7 @@ public class MultiValidator implements Validator {
     }
 
     public Validator[] getValidators() {
-        return validators.toArray(new Validator[validators.size()]);
+        return validators.toArray(new Validator[0]);
     }
 
     public void addValidator(Validator validator) {

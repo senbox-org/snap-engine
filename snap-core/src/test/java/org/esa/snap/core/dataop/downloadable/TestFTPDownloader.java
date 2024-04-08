@@ -15,9 +15,11 @@
  */
 package org.esa.snap.core.dataop.downloadable;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.Assume;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.Map;
  *
  * @author lveci
  */
+@RunWith(LongTestRunner.class)
 public class TestFTPDownloader {
 
     @Test

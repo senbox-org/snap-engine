@@ -16,17 +16,19 @@
 
 package com.bc.ceres.binding;
 
-import junit.framework.TestCase;
+import com.bc.ceres.binding.converters.IntegerConverter;
+import org.junit.Test;
 
 import java.util.List;
 
-import com.bc.ceres.binding.converters.IntegerConverter;
+import static org.junit.Assert.*;
 
-public class ValueSetTest extends TestCase {
+public class ValueSetTest {
 
     private List<Object> objects;
 
-    public void testParseValueSet()  {
+    @Test
+    public void testParseValueSet() {
         ValueSet valueSet = null;
         try {
             valueSet = ValueSet.parseValueSet(new String[]{"1", "2", "3", "5", "8"}, new IntegerConverter());
@@ -49,17 +51,18 @@ public class ValueSetTest extends TestCase {
         }
     }
 
+    @Test
     public void testContains() {
-        ValueSet valueSet = new ValueSet(new Integer[] {1, 2, 3, 5, 8});
-        assertEquals(true, valueSet.contains(1));
-        assertEquals(true, valueSet.contains(2));
-        assertEquals(true, valueSet.contains(3));
-        assertEquals(true, valueSet.contains(5));
-        assertEquals(true, valueSet.contains(8));
+        ValueSet valueSet = new ValueSet(new Integer[]{1, 2, 3, 5, 8});
+        assertTrue(valueSet.contains(1));
+        assertTrue(valueSet.contains(2));
+        assertTrue(valueSet.contains(3));
+        assertTrue(valueSet.contains(5));
+        assertTrue(valueSet.contains(8));
 
-        assertEquals(false, valueSet.contains(-1));
-        assertEquals(false, valueSet.contains(0));
-        assertEquals(false, valueSet.contains(4));
-        assertEquals(false, valueSet.contains(9));
+        assertFalse(valueSet.contains(-1));
+        assertFalse(valueSet.contains(0));
+        assertFalse(valueSet.contains(4));
+        assertFalse(valueSet.contains(9));
     }
 }

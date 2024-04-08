@@ -15,8 +15,8 @@ import static org.junit.Assume.assumeTrue;
 
 public class AbstractGDALTest {
 
-    public static final String PROPERTY_NAME_DATA_DIR = "snap.gdal.tests.data.dir";
-    private static final String TEST_FOLDER_NAME = "_lib_gdal";
+    public static final String PROPERTY_NAME_DATA_DIR = "snap.reader.tests.data.dir";
+    private static final String TEST_FOLDER_NAME = "_gdal";
 
     protected Path libGDALTestsFolderPath;
 
@@ -30,7 +30,7 @@ public class AbstractGDALTest {
         if (IS_OS_LINUX && sysArch.contains("amd64")) {
             return OSCategory.LINUX_64;
         } else if (IS_OS_MAC_OSX) {
-            if (sysArch.contains("amd64")) {
+            if (sysArch.contains("amd64") || sysArch.contains("x86_64")) {
                 return OSCategory.MAC_OS_X;
             } else if (sysArch.contains("aarch64")) {
                 return OSCategory.MAC_OS_X_AARCH64;

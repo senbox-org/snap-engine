@@ -229,7 +229,7 @@ public class PropertyContainer implements PropertySet {
 
     @Override
     public Property[] getProperties() {
-        return propertyList.toArray(new Property[propertyList.size()]);
+        return propertyList.toArray(new Property[0]);
     }
 
     @Override
@@ -287,8 +287,7 @@ public class PropertyContainer implements PropertySet {
         if (property == null) {
             return null;
         }
-        //noinspection unchecked
-        return (T) property.getValue();
+        return property.getValue();
     }
 
     @Override
@@ -349,8 +348,7 @@ public class PropertyContainer implements PropertySet {
 
     private static void collectProperties(Class<?> type, PropertyDescriptorFactory descriptorFactory, PropertyAccessorFactory accessorFactory, PropertySet propertySet) {
         Map<String, Field> fields = getPropertyFields(type);
-        for (String key : fields.keySet()) {
-            Field field = fields.get(key);
+        for (Field field : fields.values()) {
             PropertyDescriptor descriptor = descriptorFactory.createValueDescriptor(field);
             if (descriptor != null) {
                 descriptor.initDefaults();

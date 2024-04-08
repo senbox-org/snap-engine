@@ -19,9 +19,11 @@ package com.bc.ceres.glayer.support;
 import com.bc.ceres.glayer.CollectionLayer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.support.filters.NameFilter;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class LayerUtilsTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class LayerUtilsTest {
 
     static Layer createLayerTree() {
         Layer root = new CollectionLayer("R");
@@ -38,6 +40,7 @@ public class LayerUtilsTest extends TestCase {
         return root;
     }
 
+    @Test
     public void testGetChildLayerIndex() {
         Layer root = createLayerTree();
 
@@ -65,6 +68,7 @@ public class LayerUtilsTest extends TestCase {
 
     }
 
+    @Test
     public void testGetLayerPath() {
         Layer root = createLayerTree();
         Layer layerA = LayerUtils.getChildLayerByName(root, "A");
@@ -85,7 +89,7 @@ public class LayerUtilsTest extends TestCase {
         assertSame(layerC2, pathC2[2]);
     }
 
-
+    @Test
     public void testGetRootLayer() {
         Layer root = createLayerTree();
         Layer directRoot = LayerUtils.getRootLayer(root);

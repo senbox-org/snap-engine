@@ -16,9 +16,14 @@
 
 package com.bc.ceres.core;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class  AssertTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class AssertTest {
+
+    @Test
     public void testState() {
         try {
             Assert.state(true);
@@ -41,6 +46,7 @@ public class  AssertTest extends TestCase {
         }
     }
 
+    @Test
     public void testNotNull() {
         try {
             Assert.notNull("");
@@ -63,6 +69,7 @@ public class  AssertTest extends TestCase {
         }
     }
 
+    @Test
     public void testLegalArgument() {
         try {
             Assert.argument(true);

@@ -121,9 +121,7 @@ public class OperatorSpiRegistryImpl implements OperatorSpiRegistry {
         String className = getName(classNames, operatorName);
         if (className != null) {
             service = serviceRegistry.getService(className);
-            if (service != null) {
-                return service;
-            }
+            return service;
         }
 
         return null;
@@ -198,19 +196,6 @@ public class OperatorSpiRegistryImpl implements OperatorSpiRegistry {
      */
     public Set<String> getAliases() {
         return classNames.keySet();
-    }
-
-    /**
-     * Sets an alias for the given SPI class name.
-     *
-     * @param aliasName    the alias
-     * @param spiClassName the name of the SPI class
-     * @deprecated since BEAM 5, used internally only
-     */
-    @Deprecated
-    @Override
-    public void setAlias(String aliasName, String spiClassName) {
-        registerAlias(spiClassName, aliasName);
     }
 
     private void registerAlias(String spiClassName, String aliasName) {

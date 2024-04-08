@@ -18,22 +18,12 @@ package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductManager;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.SourceProducts;
-import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.gpf.annotations.TargetProperty;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.gpf.annotations.*;
 import org.esa.snap.core.gpf.internal.OperatorContext;
 
 import javax.media.jai.BorderExtender;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -241,22 +231,6 @@ public abstract class Operator {
      */
     public boolean canComputeTileStack() {
         return context.isComputeTileStackMethodImplemented();
-    }
-
-    /**
-     * Deactivates the {@link #computeTile(Band, Tile, ProgressMonitor) computeTile}
-     * method. This method can be called from within the {@link #initialize()} method if the current operator configuration prevents
-     * the computation of tiles of individual, independent target bands.
-     *
-     * @throws IllegalStateException if the {@link #computeTileStack(Map, Rectangle, ProgressMonitor) computeTileStack} method is not implemented
-     * @deprecated since SNAP 3.0. Override {@link #canComputeTile()} instead.
-     */
-    @Deprecated
-    protected final void deactivateComputeTileMethod() throws IllegalStateException {
-        if (!canComputeTileStack()) {
-            throw new IllegalStateException("!canComputeTileStack()");
-        }
-        //context.setComputeTileMethodImplemented(false);
     }
 
     /**
@@ -569,13 +543,6 @@ public abstract class Operator {
     }
 
     /**
-     * Non-API.
-     */
-    public void stopTileComputationObservation() {
-        context.stopTileComputationObservation();
-    }
-
-    /**
      * Sets the logger which can be used to log information during initialisation and tile computation.
      *
      * @param logger The logger.
@@ -583,6 +550,13 @@ public abstract class Operator {
     public final void setLogger(Logger logger) {
         Assert.notNull(logger, "logger");
         context.setLogger(logger);
+    }
+
+    /**
+     * Non-API.
+     */
+    public void stopTileComputationObservation() {
+        context.stopTileComputationObservation();
     }
 
     /**

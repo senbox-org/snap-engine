@@ -17,11 +17,10 @@
 package com.bc.ceres.binio.internal;
 
 import com.bc.ceres.binio.*;
-import static com.bc.ceres.binio.TypeBuilder.*;
 import com.bc.ceres.binio.smos.SmosProduct;
 import com.bc.ceres.binio.util.ByteArrayIOHandler;
 import com.bc.ceres.binio.util.ImageIOHandler;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -31,9 +30,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 
+import static com.bc.ceres.binio.TypeBuilder.*;
+import static org.junit.Assert.*;
 
-public class InstanceTest extends TestCase {
 
+public class InstanceTest {
+
+    // create a pseudo VarSequenceType
+    static VarSequenceType _SEQ(final Type elementType, final int elementCount) {
+        return new VarElementCountSequenceType(elementType) {
+            @Override
+            protected int resolveElementCount(CollectionData parent) {
+                return elementCount;
+            }
+        };
+    }
+
+    @Test
     public void testGeneratedInstanceTypes() throws IOException {
         final byte[] byteData = SmosProduct.createTestProductData(SmosProduct.MIR_SCLF1C_FORMAT.getByteOrder());
         final TracingIOHandler ioHandler = new TracingIOHandler(new ByteArrayIOHandler(byteData));
@@ -56,9 +69,8 @@ public class InstanceTest extends TestCase {
         assertSame(FixCompound.class, btData.getClass());
     }
 
-
+    @Test
     public void testFixSequenceOfSimples() throws IOException {
-
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MemoryCacheImageOutputStream ios = new MemoryCacheImageOutputStream(baos);
         ios.setByteOrder(ByteOrder.LITTLE_ENDIAN);
@@ -76,16 +88,17 @@ public class InstanceTest extends TestCase {
 
         assertEquals(3, sequenceInstance.getElementCount());
         assertEquals(3 * 4, sequenceInstance.getSize());
-        assertEquals(false, sequenceInstance.isDataAccessible());
+        assertFalse(sequenceInstance.isDataAccessible());
 
         sequenceInstance.makeDataAccessible();
 
-        assertEquals(true, sequenceInstance.isDataAccessible());
+        assertTrue(sequenceInstance.isDataAccessible());
         assertEquals(2134, sequenceInstance.getInt(0));
         assertEquals(45, sequenceInstance.getInt(1));
         assertEquals(36134, sequenceInstance.getInt(2));
     }
 
+    @Test
     public void testFixCompound() throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MemoryCacheImageOutputStream ios = new MemoryCacheImageOutputStream(baos);
@@ -96,8 +109,8 @@ public class InstanceTest extends TestCase {
         ios.close();
 
         CompoundType type = COMPOUND("compoundTestType",
-                                     MEMBER("a", SimpleType.UINT),
-                                     MEMBER("b", SimpleType.FLOAT));
+                MEMBER("a", SimpleType.UINT),
+                MEMBER("b", SimpleType.FLOAT));
         assertFalse(FixCompound.isCompoundTypeWithinSizeLimit(type, 7));
         assertTrue(FixCompound.isCompoundTypeWithinSizeLimit(type, 8));
         assertTrue(FixCompound.isCompoundTypeWithinSizeLimit(type, 9));
@@ -108,18 +121,19 @@ public class InstanceTest extends TestCase {
                 new ByteArrayIOHandler(byteData));
 
         CompoundInstance compoundInstance = InstanceFactory.createCompound(context, null, type, 4,
-                                                                           ByteOrder.LITTLE_ENDIAN);
+                ByteOrder.LITTLE_ENDIAN);
         assertSame(FixCompound.class, compoundInstance.getClass());
 
         assertEquals(2, compoundInstance.getElementCount());
         assertEquals(2 * 4, compoundInstance.getSize());
         assertEquals(4, compoundInstance.getPosition());
         assertEquals(type, compoundInstance.getType());
-        assertEquals(true, compoundInstance.isSizeResolved());
+        assertTrue(compoundInstance.isSizeResolved());
         assertEquals(55, compoundInstance.getInt(0));
         assertEquals(27.88f, compoundInstance.getFloat(1), 0.00001f);
     }
 
+    @Test
     public void testFixCompoundOfFixCompounds() throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MemoryCacheImageOutputStream ios = new MemoryCacheImageOutputStream(baos);
@@ -132,9 +146,9 @@ public class InstanceTest extends TestCase {
 
         final CompoundType complexType = COMPOUND("Complex", MEMBER("x", DOUBLE), MEMBER("y", DOUBLE));
         CompoundType type = COMPOUND("compoundTestType",
-                                     MEMBER("x", SimpleType.DOUBLE),
-                                     MEMBER("y", SimpleType.DOUBLE),
-                                     MEMBER("z", complexType));
+                MEMBER("x", SimpleType.DOUBLE),
+                MEMBER("y", SimpleType.DOUBLE),
+                MEMBER("z", complexType));
         assertFalse(FixCompound.isCompoundTypeWithinSizeLimit(type, 31));
         assertTrue(FixCompound.isCompoundTypeWithinSizeLimit(type, 32));
         assertTrue(FixCompound.isCompoundTypeWithinSizeLimit(type, 33));
@@ -145,14 +159,14 @@ public class InstanceTest extends TestCase {
                 new ByteArrayIOHandler(byteData));
 
         CompoundInstance compoundInstance = InstanceFactory.createCompound(context, null, type, 0,
-                                                                           ByteOrder.LITTLE_ENDIAN);
+                ByteOrder.LITTLE_ENDIAN);
         assertSame(FixCompound.class, compoundInstance.getClass());
 
         assertEquals(3, compoundInstance.getElementCount());
         assertEquals(2 * 8 + 16, compoundInstance.getSize());
         assertEquals(0, compoundInstance.getPosition());
         assertEquals(type, compoundInstance.getType());
-        assertEquals(true, compoundInstance.isSizeResolved());
+        assertTrue(compoundInstance.isSizeResolved());
         assertEquals(11.0, compoundInstance.getDouble(1), 0.0);
         assertEquals(19.0, compoundInstance.getCompound(2).getDouble(0), 0.0);
         assertEquals(67.0, compoundInstance.getCompound(2).getDouble(1), 0.0);
@@ -160,13 +174,9 @@ public class InstanceTest extends TestCase {
         final CompoundData complexData = compoundInstance.getCompound(2);
         complexData.setDouble(0, 67.0);
         complexData.setDouble(0, 19.0);
-
-        // todo - uncomment and make test run (rq-20091005)
-        // compoundInstance.setCompound(2, complexData);
-        // assertEquals(19.0, compoundInstance.getCompound(2).getDouble(0), 0.0);
-        // assertEquals(67.0, compoundInstance.getCompound(2).getDouble(1), 0.0);
     }
 
+    @Test
     public void testVarCompound() throws Exception {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MemoryCacheImageOutputStream ios = new MemoryCacheImageOutputStream(baos);
@@ -178,8 +188,8 @@ public class InstanceTest extends TestCase {
         ios.close();
 
         CompoundType type = COMPOUND("compoundTestType",
-                                     MEMBER("count", SimpleType.INT),
-                                     MEMBER("list", VAR_SEQUENCE(SimpleType.DOUBLE, "count")));
+                MEMBER("count", SimpleType.INT),
+                MEMBER("list", VAR_SEQUENCE(SimpleType.DOUBLE, "count")));
 
         DataFormat format = new DataFormat(type, ByteOrder.BIG_ENDIAN);
         assertFalse(FixCompound.isCompoundTypeWithinSizeLimit(type, 4));
@@ -213,21 +223,21 @@ public class InstanceTest extends TestCase {
         assertEquals(333.3, sequenceData.getDouble(2), 1e-10);
     }
 
+    @Test
     public void testFixSequenceOfFixCollections() throws IOException {
-
         final int n = 11;
         final CompoundType type =
                 COMPOUND("U",
-                         MEMBER("A", INT),
-                         MEMBER("B",
+                        MEMBER("A", INT),
+                        MEMBER("B",
                                 SEQUENCE(
                                         COMPOUND("P",
-                                                 MEMBER("X", DOUBLE),
-                                                 MEMBER("Y", DOUBLE)),
+                                                MEMBER("X", DOUBLE),
+                                                MEMBER("Y", DOUBLE)),
                                         n
                                 )
-                         ),
-                         MEMBER("C", INT)
+                        ),
+                        MEMBER("C", INT)
                 );
 
         assertTrue(type.isSizeKnown());
@@ -260,8 +270,8 @@ public class InstanceTest extends TestCase {
         assertEquals(87654321, compoundData.getInt(2));
     }
 
+    @Test
     public void testFixSequenceOfVarCollections() throws IOException {
-
         final int ni = 2;
         final int nj = 3;
         final CompoundType pointType = COMPOUND("Point", MEMBER("X", DOUBLE), MEMBER("Y", DOUBLE));
@@ -296,15 +306,15 @@ public class InstanceTest extends TestCase {
         for (int j = 0; j < nj; j++) {
             for (int i = 0; i < ni; i++) {
                 assertEquals("i=" + i + ",j=" + j, 20.0 + 0.1 * i + 0.2 * j,
-                             compoundData.getSequence(0).getSequence(j).getCompound(i).getDouble(0), 1e-10);
+                        compoundData.getSequence(0).getSequence(j).getCompound(i).getDouble(0), 1e-10);
                 assertEquals("i=" + i + ",j=" + j, 40.0 + 0.1 * i + 0.2 * j,
-                             compoundData.getSequence(0).getSequence(j).getCompound(i).getDouble(1), 1e-10);
+                        compoundData.getSequence(0).getSequence(j).getCompound(i).getDouble(1), 1e-10);
             }
         }
     }
 
+    @Test
     public void testNestedFixSequenceOfVarCollections() throws IOException {
-
         final int ni = 4;
         final int nj = 2;
         final int nk = 3;
@@ -351,20 +361,10 @@ public class InstanceTest extends TestCase {
                 final SequenceData coordsData = kjData.getSequence("Coords");
                 for (int i = 0; i < ni; i++) {
                     assertEquals("i=" + i + ",j=" + j + ",k=" + k,
-                                 10.0 * i + 0.1 * j + 0.2 * k,
-                                 coordsData.getDouble(i), 1e-10);
+                            10.0 * i + 0.1 * j + 0.2 * k,
+                            coordsData.getDouble(i), 1e-10);
                 }
             }
         }
-    }
-
-    // create a pseudo VarSequenceType
-    static VarSequenceType _SEQ(final Type elementType, final int elementCount) {
-        return new VarElementCountSequenceType(elementType) {
-            @Override
-            protected int resolveElementCount(CollectionData parent) throws IOException {
-                return elementCount;
-            }
-        };
     }
 }

@@ -16,15 +16,18 @@
 
 package com.bc.ceres.compiler;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.HashSet;
 
-import com.bc.ceres.compiler.CodeMapper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-public class CodeMapperTest extends TestCase {
+public class CodeMapperTest {
+
+    @Test
     public void testCodeMapper() {
-        final HashSet<String> nameSet = new HashSet<String>();
+        final HashSet<String> nameSet = new HashSet<>();
         nameSet.add("b1");
         nameSet.add("b2");
         nameSet.add("b3");

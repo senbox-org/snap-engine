@@ -16,15 +16,19 @@
 
 package com.bc.ceres.binding;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-public class ConverterRegistryTest extends TestCase {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
-    public void testPrimitiveTypes()  {
+public class ConverterRegistryTest {
+
+    @Test
+    public void testPrimitiveTypes() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
         assertNotNull(r.getConverter(Boolean.TYPE));
         assertNotNull(r.getConverter(Character.TYPE));
@@ -45,7 +49,8 @@ public class ConverterRegistryTest extends TestCase {
         assertNotNull(r.getConverter(double[].class));
     }
 
-    public void testPrimitiveTypeWrappers()  {
+    @Test
+    public void testPrimitiveTypeWrappers() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
         assertNotNull(r.getConverter(Boolean.class));
         assertNotNull(r.getConverter(Character.class));
@@ -66,7 +71,8 @@ public class ConverterRegistryTest extends TestCase {
         assertNotNull(r.getConverter(Double[].class));
     }
 
-    public void testObjects()  {
+    @Test
+    public void testObjects() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
         assertNotNull(r.getConverter(String.class));
         assertNotNull(r.getConverter(File.class));
@@ -84,8 +90,8 @@ public class ConverterRegistryTest extends TestCase {
         assertNotNull(r.getConverter(U.class));
     }
 
-
-    public void testDerivedObjects()  {
+    @Test
+    public void testDerivedObjects() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
 
         assertSame(r.getConverter(File.class), r.getConverter(MyFile.class));
@@ -93,11 +99,11 @@ public class ConverterRegistryTest extends TestCase {
     }
 
     enum U {
-        A,B,C
+        A, B, C
     }
 
     private static class MyFile extends File {
-        public MyFile() {
+        MyFile() {
             super("");
         }
     }

@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.util.io;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.junit.Assert;
@@ -127,12 +128,13 @@ public class FileUtilsTest {
 
     @Test
     public void testExtractFileName() {
-        String path1 = "home" + File.separator + "tom" + File.separator + "tesfile1.dim";
-        String path2 = "C:" + File.separator + "Data" + File.separator + "TestFiles" + File.separator + "tesfile2.dim";
-        String path3 = File.separator + "tesfile3.dim";
-        String expected1 = "tesfile1.dim";
-        String expected2 = "tesfile2.dim";
-        String expected3 = "tesfile3.dim";
+        final String expected1 = "tesfile1.dim";
+        final String expected2 = "tesfile2.dim";
+        final String expected3 = "tesfile3.dim";
+
+        final String path1 = "home" + File.separator + "tom" + File.separator + expected1;
+        final String path2 = "C:" + File.separator + "Data" + File.separator + "TestFiles" + File.separator + expected2;
+        final String path3 = File.separator + expected3;
 
         // check that null is not allowed as argument
         try {
@@ -144,6 +146,19 @@ public class FileUtilsTest {
         assertEquals(expected1, getFilenameFromPath(path1));
         assertEquals(expected2, getFilenameFromPath(path2));
         assertEquals(expected3, getFilenameFromPath(path3));
+    }
+
+    @Test
+    @STTM("SNAP-3627")
+    public void testExtractFileName_worksWithSeparatorsFromDifferentOs() {
+        final String expected = "file.xml";
+        final String pathLinux = "/home/tom/the/" + expected;
+        final String pathWindows = "C:\\users\\tom\\" + expected;
+        final String pathMixed = "C:\\users/tom\\" + expected;
+
+        assertEquals(expected, getFilenameFromPath(pathLinux));
+        assertEquals(expected, getFilenameFromPath(pathWindows));
+        assertEquals(expected, getFilenameFromPath(pathMixed));
     }
 
     @Test

@@ -81,7 +81,7 @@ public enum OSCategory {
                 category = OSCategory.LINUX_64;
             }
         } else if (IS_OS_MAC_OSX) {
-            if (sysArch.contains("amd64")) {
+            if (sysArch.contains("amd64") || sysArch.contains("x86_64")) {
                 category = OSCategory.MAC_OS_X;
             } else if (sysArch.contains("aarch64")) {
                 category = OSCategory.MAC_OS_X_AARCH64;
@@ -136,25 +136,4 @@ public enum OSCategory {
         return this.architecture;
     }
 
-    /**
-     * Gets the absolute location of an executable on system by checking all PATH environment variable values.
-     *
-     * @param executableName the target executable name
-     * @return the absolute location of executable
-     */
-    public String[] getExecutableLocations(String executableName) {
-        List<String> executableLocations = new ArrayList<>();
-        final String pathEVValue = EnvironmentVariables.getEnvironmentVariable("PATH");
-        final String[] pathValues = pathEVValue.split(File.pathSeparator);
-        for (String pathValue : pathValues) {
-            final Path executableFilePath = Paths.get(pathValue).resolve(executableName);
-            if (Files.exists(executableFilePath)) {
-                executableLocations.add(pathValue);
-            }
-        }
-        if(executableLocations.isEmpty()){
-            logger.log(Level.WARNING, () -> executableName + " not found");
-        }
-        return executableLocations.toArray(new String[0]);
-    }
 }

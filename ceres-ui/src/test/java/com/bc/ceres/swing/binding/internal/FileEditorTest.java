@@ -18,44 +18,46 @@ package com.bc.ceres.swing.binding.internal;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.BindingContext;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.io.File;
 
-public class FileEditorTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public void testIsApplicable() throws Exception {
+public class FileEditorTest {
+
+    @Test
+    public void testIsApplicable() {
         FileEditor fileEditor = new FileEditor();
-        
+
         PropertyDescriptor fileDescriptor = new PropertyDescriptor("test", File.class);
         assertTrue(fileEditor.isValidFor(fileDescriptor));
-        
+
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
         assertFalse(fileEditor.isValidFor(doubleDescriptor));
     }
-    
-    public void testCreateEditorComponent() throws Exception {
+
+    @Test
+    public void testCreateEditorComponent() {
         FileEditor fileEditor = new FileEditor();
-        
+
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("file");
         assertSame(File.class, propertyDescriptor.getType());
-        
+
         assertTrue(fileEditor.isValidFor(propertyDescriptor));
         JComponent editorComponent = fileEditor.createEditorComponent(propertyDescriptor, bindingContext);
         assertNotNull(editorComponent);
         assertSame(JPanel.class, editorComponent.getClass());
         assertEquals(2, editorComponent.getComponentCount());
-        
+
         JComponent[] components = bindingContext.getBinding("file").getComponents();
         assertEquals(1, components.length);
         assertSame(JTextField.class, components[0].getClass());
     }
-    
+
     private static class V {
         File file;
     }

@@ -19,16 +19,19 @@ package com.bc.ceres.binding;
 import com.bc.ceres.binding.converters.DoubleConverter;
 import com.bc.ceres.binding.converters.IntegerConverter;
 import com.bc.ceres.binding.converters.StringConverter;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+import static org.junit.Assert.*;
 
-public class PropertyContainerTest extends TestCase {
 
+public class PropertyContainerTest {
+
+    @Test
     public void testValueBackedValueContainer() throws ValidationException {
         PropertyContainer pc = PropertyContainer.createValueBacked(Pojo.class);
 
@@ -40,6 +43,7 @@ public class PropertyContainerTest extends TestCase {
         assertEquals("(name:null-->Ernie)(age:0-->16)(weight:0.0-->72.9)(code:" + '\0' + "-->#)", pcl.trace);
     }
 
+    @Test
     public void testMapBackedValueContainer() throws ValidationException {
         final HashMap<String, Object> map = new HashMap<>();
         PropertyContainer pc = PropertyContainer.createMapBacked(map, Pojo.class);
@@ -53,10 +57,11 @@ public class PropertyContainerTest extends TestCase {
         assertEquals("(name:null-->Ernie)(age:0-->16)(weight:0.0-->72.9)(code:" + '\0' + "-->#)", pcl.trace);
         assertEquals('#', map.get("code"));
         assertEquals("Ernie", map.get("name"));
-        assertEquals(16, (int)map.get("age"));
-        assertEquals(72.9, (double)map.get("weight"), 1.0e-6);
+        assertEquals(16, (int) map.get("age"));
+        assertEquals(72.9, (double) map.get("weight"), 1.0e-6);
     }
 
+    @Test
     public void testObjectBackedValueContainer() throws ValidationException {
         Pojo pojo = new Pojo();
         PropertyContainer pc = PropertyContainer.createObjectBacked(pojo);
@@ -69,7 +74,7 @@ public class PropertyContainerTest extends TestCase {
         assertEquals('#', pojo.code);
         assertEquals("Ernie", pojo.name);
         assertEquals(16, pojo.age);
-        assertEquals(72.9, pojo.weight);
+        assertEquals(72.9, pojo.weight, 1e-8);
     }
 
     private void testValueContainerModels(PropertyContainer vc) throws ValidationException {
@@ -86,7 +91,7 @@ public class PropertyContainerTest extends TestCase {
         final Property age = vc.getProperty("age");
         assertNotNull(age);
         age.setValue(16);
-        assertEquals(16, (int)age.getValue());
+        assertEquals(16, (int) age.getValue());
         try {
             age.setValue("");
             fail("ValidationException expected");
@@ -96,7 +101,7 @@ public class PropertyContainerTest extends TestCase {
         final Property weight = vc.getProperty("weight");
         assertNotNull(weight);
         weight.setValue(72.9);
-        assertEquals(72.9, (double)weight.getValue(), 1.0e-6);
+        assertEquals(72.9, weight.getValue(), 1.0e-6);
         try {
             weight.setValue("");
             fail("ValidationException expected");
@@ -106,7 +111,7 @@ public class PropertyContainerTest extends TestCase {
         final Property code = vc.getProperty("code");
         assertNotNull(code);
         code.setValue('#');
-        assertEquals('#', (char)code.getValue());
+        assertEquals('#', (char) code.getValue());
         try {
             code.setValue(2.5);
             fail("ValidationException expected");
@@ -117,6 +122,7 @@ public class PropertyContainerTest extends TestCase {
         assertNull(unknownModel);
     }
 
+    @Test
     public void testDefaultValues() throws ValidationException {
         PropertyDescriptorFactory valueDescriptorFactory = new MyValueDescriptorFactory();
 
@@ -154,34 +160,40 @@ public class PropertyContainerTest extends TestCase {
     }
 
     private void testInitialValuesUsed(PropertyContainer container) {
-        assertEquals('\0', (char)container.getValue("code"));
-        assertEquals(null, container.getValue("name"));
-        assertEquals(0, (int)container.getValue("age"));
-        assertEquals(0.0, (double)container.getValue("weight"), 1.0e-6);
+        assertEquals('\0', (char) container.getValue("code"));
+        assertNull(container.getValue("name"));
+        assertEquals(0, (int) container.getValue("age"));
+        assertEquals(0.0, container.getValue("weight"), 1.0e-6);
         testUnhandledValues(container);
     }
 
     private void testCurrentValuesUsed(PropertyContainer container) {
-        assertEquals('X', (char)container.getValue("code"));
+        assertEquals('X', (char) container.getValue("code"));
         assertEquals("Hermann", container.getValue("name"));
-        assertEquals(59, (int)container.getValue("age"));
-        assertEquals(82.5, (double)container.getValue("weight"), 1.0e-6);
+        assertEquals(59, (int) container.getValue("age"));
+        assertEquals(82.5, container.getValue("weight"), 1.0e-6);
         testUnhandledValues(container);
     }
 
     private void testDefaultValuesUsed(PropertyContainer container) {
-        assertEquals('Y', (char)container.getValue("code"));
+        assertEquals('Y', (char) container.getValue("code"));
         assertEquals("Kurt", container.getValue("name"));
-        assertEquals(42, (int)container.getValue("age"));
-        assertEquals(90.0, (double)container.getValue("weight"), 1.0e-6);
+        assertEquals(42, (int) container.getValue("age"));
+        assertEquals(90.0, container.getValue("weight"), 1.0e-6);
         testUnhandledValues(container);
     }
 
     private void testUnhandledValues(PropertyContainer container) {
-        assertEquals('\0', (char)container.getValue("codeNoDefault"));
-        assertEquals(null, container.getValue("nameNoDefault"));
-        assertEquals(0, (int)container.getValue("ageNoDefault"));
-        assertEquals(0.0, (double)container.getValue("weightNoDefault"), 1.0e-6);
+        assertEquals('\0', (char) container.getValue("codeNoDefault"));
+        assertNull(container.getValue("nameNoDefault"));
+        assertEquals(0, (int) container.getValue("ageNoDefault"));
+        assertEquals(0.0, container.getValue("weightNoDefault"), 1.0e-6);
+    }
+
+    @Test
+    public void testDerivedClassReflectionWorksInBaseClassInitializer() {
+        assertEquals(42, new B().x);
+        assertEquals(99, new B(99).x);
     }
 
     abstract static class PojoBase {
@@ -220,11 +232,6 @@ public class PropertyContainerTest extends TestCase {
         }
     }
 
-    public void testDerivedClassReflectionWorksInBaseClassInitializer() {
-        assertEquals(42, new B().x);
-        assertEquals(99, new B(99).x);
-    }
-
     private static class MyPropertyChangeListener implements PropertyChangeListener {
 
         String trace = "";
@@ -257,5 +264,4 @@ public class PropertyContainerTest extends TestCase {
             return descriptor;
         }
     }
-
 }
