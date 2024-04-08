@@ -67,6 +67,7 @@ windows:
     GIT_STRATEGY: clone
     FF_ENABLE_JOB_CLEANUP: 'true'
     FF_USE_WINDOWS_LEGACY_PROCESS_STRATEGY: 'false'
+    JAVA_HOME: C:\\Program Files\\Zulu\\zulu-11
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
     - if: '$CI_COMMIT_TAG != null'
