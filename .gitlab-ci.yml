@@ -76,6 +76,7 @@ windows:
     FF_ENABLE_JOB_CLEANUP: 'true'
     FF_USE_WINDOWS_LEGACY_PROCESS_STRATEGY: 'false'
     MAVEN_CFG_DIR: C:\\Windows\\System32\\config\\systemprofile\\.m2
+    JAVA_HOME: C:\\Program Files\\Zulu\\zulu-11
   allow_failure: false
   needs: []
   script:
