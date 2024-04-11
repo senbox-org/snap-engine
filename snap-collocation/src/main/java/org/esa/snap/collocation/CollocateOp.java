@@ -258,7 +258,7 @@ public class CollocateOp extends Operator {
             }
         }
 
-        //Set the master product from the source product if masterProductName has not been defined: The first single sized product.
+        //Set the master product from the source product if referenceProductName has not been defined: The first single sized product.
         if (referenceProduct == null && (referenceProductName == null || referenceProductName.length() == 0)) {
             //no master product, so the first one single size will be selected
             for (Product product : slaveProductList) {
