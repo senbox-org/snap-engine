@@ -46,7 +46,7 @@ public class NoDataLayerType extends ImageLayer.Type {
     public static final String PROPERTY_NAME_COLOR = "color";
     public static final String PROPERTY_NAME_VALID_GEO = "valid.geo";
     public static final String PROPERTY_NAME_RASTER = "raster";
-    public static final Color DEFAULT_COLOR = Color.ORANGE;
+    public static final Color DEFAULT_COLOR = new Color(128,128,128);
     public static final boolean DEFAULT_VALID_GEO = true;
 
     @Override
