@@ -279,9 +279,11 @@ public final class DimapProductConstants {
     public static final String TAG_DATA_TYPE = "DATA_TYPE";
     public static final String TAG_SOLAR_FLUX = "SOLAR_FLUX";
     public static final String TAG_SPECTRAL_BAND_INDEX = "SPECTRAL_BAND_INDEX";
+    public static final String TAG_ANGULAR_BAND_INDEX = "ANGULAR_BAND_INDEX";
     public static final String TAG_SOLAR_FLUX_UNIT = "SOLAR_FLUX_UNIT";
     public static final String TAG_BANDWIDTH = "BANDWIDTH";
     public static final String TAG_BAND_WAVELEN = "BAND_WAVELEN";
+    public static final String TAG_BAND_ANGULAR_VALUE = "BAND_ANGULAR_VALUE";
     public static final String TAG_WAVELEN_UNIT = "WAVELEN_UNIT";
     public static final String TAG_FLAG_CODING_NAME = "FLAG_CODING_NAME";
     public static final String TAG_INDEX_CODING_NAME = "INDEX_CODING_NAME";
