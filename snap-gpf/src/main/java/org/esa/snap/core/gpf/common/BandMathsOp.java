@@ -183,6 +183,13 @@ public class BandMathsOp extends Operator {
          * Target band's spectral wavelength in nm.
          */
         public Float spectralWavelength;
+
+
+        public Float angularValue;
+
+
+        public Integer angularBandIndex;
+
         /**
          * Target band's spectral bandwidth in nm.
          */
@@ -412,6 +419,12 @@ public class BandMathsOp extends Operator {
         }
         if (bandDescriptor.spectralWavelength != null) {
             targetBand.setSpectralWavelength(bandDescriptor.spectralWavelength);
+        }
+        if (bandDescriptor.angularValue != null) {
+            targetBand.setAngularValue(bandDescriptor.angularValue);
+        }
+        if (bandDescriptor.angularBandIndex != null) {
+            targetBand.setAngularBandIndex(bandDescriptor.angularBandIndex);
         }
         if (bandDescriptor.spectralBandwidth != null) {
             targetBand.setSpectralBandwidth(bandDescriptor.spectralBandwidth);
