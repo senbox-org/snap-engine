@@ -219,7 +219,12 @@ public final class DimapHeaderWriter extends XmlWriter {
                         printLine(indent + 2, DimapProductConstants.TAG_SPECTRAL_BAND_INDEX,
                                   band.getSpectralBandIndex());
                     }
+                    if (band.getAngularBandIndex() > -1) {
+                        printLine(indent + 2, DimapProductConstants.TAG_ANGULAR_BAND_INDEX,
+                                band.getAngularBandIndex());
+                    }
                     printLine(indent + 2, DimapProductConstants.TAG_BAND_WAVELEN, band.getSpectralWavelength());
+                    printLine(indent + 2, DimapProductConstants.TAG_BAND_ANGULAR_VALUE, band.getAngularValue());
                     printLine(indent + 2, DimapProductConstants.TAG_BANDWIDTH, band.getSpectralBandwidth());
                     final FlagCoding flagCoding = band.getFlagCoding();
                     if (flagCoding != null) {

@@ -323,6 +323,8 @@ public class ProductFlipper extends AbstractProductBuilder {
                 }
                 destBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
                 destBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
+                destBand.setAngularValue(sourceBand.getAngularValue());
+                destBand.setAngularBandIndex(sourceBand.getAngularBandIndex());
                 destBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
                 destBand.setSolarFlux(sourceBand.getSolarFlux());
                 FlagCoding sourceFlagCoding = sourceBand.getFlagCoding();
