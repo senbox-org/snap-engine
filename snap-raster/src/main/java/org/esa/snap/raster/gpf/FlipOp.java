@@ -105,6 +105,9 @@ public final class FlipOp extends Operator {
         for (Band srcBand : sourceBands) {
             final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
             targetBand.setSourceImage(srcBand.getSourceImage());
+            targetBand.setValidPixelExpression(srcBand.getValidPixelExpression());
+            targetBand.setNoDataValue(srcBand.getNoDataValue());
+            targetBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
         }
     }
 
