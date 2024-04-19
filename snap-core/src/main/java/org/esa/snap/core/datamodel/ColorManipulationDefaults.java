@@ -273,7 +273,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".include.colorbar";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_LABEL = "Include Palettes Image";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_TOOLTIP = "Include Palettes Image";
-    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = false;
+    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = true;
 
     public static final String PROPERTY_PALETTE_SORT_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".sort";
     public static final String PROPERTY_PALETTE_SORT_LABEL = "Sort";
@@ -285,6 +285,11 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
+
+    public static final String PROPERTY_PALETTE_SHOW_DISABLED_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".show.disabled";
+    public static final String PROPERTY_PALETTE_SHOW_DISABLED_LABEL = "Show Disabled Palettes";
+    public static final String PROPERTY_PALETTE_SHOW_DISABLED_TOOLTIP = "<html>Show disabled palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
+    public static boolean PROPERTY_PALETTE_SHOW_DISABLED_DEFAULT = false;
 
     public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".remove.extension";
     public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_LABEL = "Remove Filename Extension";
