@@ -328,6 +328,7 @@ public class GeoPos {
 
         if (decimalFormat) {
             sb.append(Math.abs(value));
+            sb.append("°");
         } else {
             sb.append(degree);
             sb.append("°");
