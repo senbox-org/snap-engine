@@ -21,7 +21,8 @@ public class StatisticsOpTest_ValidateInputTest {
         statisticsOp.setParameterDefaultValues();
         statisticsOp.startDate = ProductData.UTC.parse("2010-01-31 14:45:23", "yyyy-MM-ss hh:mm:ss");
         statisticsOp.endDate = ProductData.UTC.parse("2010-01-31 14:46:23", "yyyy-MM-ss hh:mm:ss");
-        statisticsOp.accuracy = 0;
+        int accuracy = 0;
+        statisticsOp.numBins = (int) Math.pow(10, accuracy);
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
     }
 
@@ -31,7 +32,8 @@ public class StatisticsOpTest_ValidateInputTest {
 
     @Test
     public void testValidation_PrecisionLessThanMinPrecision() {
-        statisticsOp.accuracy = -1;
+        int accuracy = -1;
+        statisticsOp.numBins = -1;
 
         try {
             statisticsOp.validateInput();
@@ -43,13 +45,14 @@ public class StatisticsOpTest_ValidateInputTest {
 
     @Test
     public void testValidation_PrecisionGreaterThanMaxPrecision() {
-        statisticsOp.accuracy = 7;
+        int accuracy = 7;
+        statisticsOp.numBins = (int) Math.pow(10, accuracy);
 
         try {
             statisticsOp.validateInput();
             fail();
         } catch (OperatorException expected) {
-            assertEquals("Parameter 'accuracy' must be less than or equal to 6", expected.getMessage());
+            assertEquals("Parameter 'accuracy' must be less than or equal to 7", expected.getMessage());
         }
     }
 
