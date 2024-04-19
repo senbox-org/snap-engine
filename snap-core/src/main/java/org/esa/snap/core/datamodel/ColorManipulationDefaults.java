@@ -273,7 +273,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".include.colorbar";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_LABEL = "Include Palettes Image";
     public static final String PROPERTY_PALETTE_INCLUDE_IMAGE_TOOLTIP = "Include Palettes Image";
-    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = false;
+    public static boolean PROPERTY_PALETTE_INCLUDE_IMAGE_DEFAULT = true;
 
     public static final String PROPERTY_PALETTE_SORT_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".sort";
     public static final String PROPERTY_PALETTE_SORT_LABEL = "Sort";
