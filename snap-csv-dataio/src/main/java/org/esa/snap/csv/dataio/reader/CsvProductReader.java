@@ -19,21 +19,9 @@ package org.esa.snap.csv.dataio.reader;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ForwardCoding;
-import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.dataio.geocoding.InverseCoding;
-import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
-import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelTimeCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
@@ -49,13 +37,7 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.stream.DoubleStream;
 
-import static org.esa.snap.csv.dataio.Constants.LAT_NAMES;
-import static org.esa.snap.csv.dataio.Constants.LON_NAMES;
-import static org.esa.snap.csv.dataio.Constants.NAME_METADATA_ELEMENT_CSV_HEADER_PROPERTIES;
-import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
-import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH;
-import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_COLUMN;
-import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_PATTERN;
+import static org.esa.snap.csv.dataio.Constants.*;
 
 /**
  * The CsvProductReader is able to read a CSV file as a product.
@@ -144,38 +126,16 @@ public class CsvProductReader extends AbstractProductReader {
         }
 
         final String rasterResolutionString = source.getProperties().get(PROPERTY_NAME_RASTER_RESOLUTION);
+
+        final ComponentGeoCoding geoCoding;
         if (rasterResolutionString == null) {
-            setDefaultGeoCoding(latBand, lonBand);
-            return;
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand);
+        } else {
+            final double resolutionInKm = Double.parseDouble(rasterResolutionString);
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, resolutionInKm);
         }
 
-        lonBand.loadRasterData();
-        latBand.loadRasterData();
-
-        final int rasterWidth = lonBand.getRasterWidth();
-        final int rasterHeight = lonBand.getRasterHeight();
-        final int size = rasterWidth * rasterHeight;
-
-        final double[] longitudes = lonBand.getGeophysicalImage().getImage(0).getData()
-                .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-        final double[] latitudes = latBand.getGeophysicalImage().getImage(0).getData()
-                .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
-        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
-                                                  rasterWidth, rasterHeight, Double.parseDouble(rasterResolutionString));
-
-        final ForwardCoding forwardCoding = ComponentFactory.getForward(PixelForward.KEY);
-        final InverseCoding inverseCoding = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
-        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding);
-        geoCoding.initialize();
-
         product.setSceneGeoCoding(geoCoding);
-    }
-
-    private void setDefaultGeoCoding(Band latBand, Band lonBand) {
-        final String validMask = latBand.getValidMaskExpression();
-        final int searchRadius = 5;
-        GeoCoding gc = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, validMask, searchRadius);
-        product.setSceneGeoCoding(gc);
     }
 
     private Band fetchBand(String[] names) {
@@ -239,7 +199,7 @@ public class CsvProductReader extends AbstractProductReader {
 
     private boolean isUTC(AttributeDescriptor descriptor) {
         final Class<?> binding = descriptor.getType().getBinding();
-        return binding.getSimpleName().toLowerCase().equals("utc");
+        return "utc".equalsIgnoreCase(binding.getSimpleName());
     }
 
     private double[] getTimeMJD(String colName) throws IOException {
@@ -347,19 +307,19 @@ public class CsvProductReader extends AbstractProductReader {
     }
 
     int getProductDataType(Class<?> type) {
-        if (type.getSimpleName().toLowerCase().equals("string")) {
+        if ("string".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_ASCII;
-        } else if (type.getSimpleName().toLowerCase().equals("float")) {
+        } else if ("float".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_FLOAT32;
-        } else if (type.getSimpleName().toLowerCase().equals("double")) {
+        } else if ("double".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_FLOAT64;
-        } else if (type.getSimpleName().toLowerCase().equals("byte")) {
+        } else if ("byte".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_INT8;
-        } else if (type.getSimpleName().toLowerCase().equals("short")) {
+        } else if ("short".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_INT16;
-        } else if (type.getSimpleName().toLowerCase().equals("integer")) {
+        } else if ("integer".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_INT32;
-        } else if (type.getSimpleName().toLowerCase().equals("utc")) {
+        } else if ("utc".equalsIgnoreCase(type.getSimpleName())) {
             return ProductData.TYPE_UTC;
         }
         throw new IllegalArgumentException("Unsupported type '" + type + "'.");
@@ -372,11 +332,11 @@ public class CsvProductReader extends AbstractProductReader {
 
     private boolean isAccessibleBandType(Class<?> type) {
         final String className = type.getSimpleName().toLowerCase();
-        return className.equals("float") ||
-                className.equals("double") ||
-                className.equals("byte") ||
-                className.equals("short") ||
-                className.equals("integer");
+        return "float".equals(className) ||
+                "double".equals(className) ||
+                "byte".equals(className) ||
+                "short".equals(className) ||
+                "integer".equals(className);
     }
 
     static class CSVTimeCoding extends PixelTimeCoding {

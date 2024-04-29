@@ -16,6 +16,8 @@
 package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -34,6 +36,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -49,7 +52,7 @@ public class DimapProductHelpersTest {
     private static final String _ellipsoidName = "EllipsoidName";
     private static final double _semiMinor = 1234.0;
     private static final double _semiMajor = 5678.0;
-    private static final double[] _expValues = new double[]{_semiMajor, _semiMinor, 15, 16, 17, 18, 19};
+    private static final double[] _expValues = {_semiMajor, _semiMinor, 15, 16, 17, 18, 19};
     private static final String _datumName = "DatumName";
     private static final float _pixelX = 3.2f;
     private static final float _pixelY = 4.3f;
@@ -69,9 +72,9 @@ public class DimapProductHelpersTest {
     private static final String[] _paramUnit = LambertConformalConicDescriptor.PARAMETER_UNITS;
     private static final String[] _paramNames = LambertConformalConicDescriptor.PARAMETER_NAMES;
 
-    private static final int[] _notMandatoryLines = new int[]{2, 4, 5, 7, 25, 29, 33, 37, 41, 45, 49};
+    private static final int[] _notMandatoryLines = {2, 4, 5, 7, 25, 29, 33, 37, 41, 45, 49};
 
-    private final String[] _xmlMapGeocodingStringStyleV1_4_0 = new String[]{
+    private final String[] _xmlMapGeocodingStringStyleV1_4_0 = {
             "<" + DimapProductConstants.TAG_ROOT + ">" + LS,
             /*  1 */
             "    <Coordinate_Reference_System>" + LS,
@@ -235,10 +238,10 @@ public class DimapProductHelpersTest {
 
     // fields special for FXYGeoCoding
     private final Datum _datum = Datum.WGS_84;
-    private final double[] _xCoefficients = new double[]{0, 1, 2};
-    private final double[] _yCoefficients = new double[]{3, 4, 5};
-    private final double[] _latCoefficients = new double[]{6, 7, 8};
-    private final double[] _lonCoefficients = new double[]{9, 10, 11};
+    private final double[] _xCoefficients = {0, 1, 2};
+    private final double[] _yCoefficients = {3, 4, 5};
+    private final double[] _latCoefficients = {6, 7, 8};
+    private final double[] _lonCoefficients = {9, 10, 11};
     private final FXYGeoCoding fxyGeoCoding = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
             FXYSum.createFXYSum(1, _xCoefficients),
             FXYSum.createFXYSum(1, _yCoefficients),
@@ -301,20 +304,20 @@ public class DimapProductHelpersTest {
                     "    </Geoposition>" + LS +
                     "</" + DimapProductConstants.TAG_ROOT + ">";
 
-    private final double[] _xCoefficients1 = new double[]{0, 1, 2};
-    private final double[] _yCoefficients1 = new double[]{3, 4, 5};
-    private final double[] _latCoefficients1 = new double[]{6, 7, 8};
-    private final double[] _lonCoefficients1 = new double[]{9, 10, 11};
+    private final double[] _xCoefficients1 = {0, 1, 2};
+    private final double[] _yCoefficients1 = {3, 4, 5};
+    private final double[] _latCoefficients1 = {6, 7, 8};
+    private final double[] _lonCoefficients1 = {9, 10, 11};
     private final FXYGeoCoding _fxyGeoCoding1 = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
             FXYSum.createFXYSum(1, _xCoefficients1),
             FXYSum.createFXYSum(1, _yCoefficients1),
             FXYSum.createFXYSum(1, _latCoefficients1),
             FXYSum.createFXYSum(1, _lonCoefficients1),
             _datum);
-    private final double[] _xCoefficients2 = new double[]{12, 13, 14};
-    private final double[] _yCoefficients2 = new double[]{15, 16, 17};
-    private final double[] _latCoefficients2 = new double[]{18, 19, 20};
-    private final double[] _lonCoefficients2 = new double[]{21, 22, 23};
+    private final double[] _xCoefficients2 = {12, 13, 14};
+    private final double[] _yCoefficients2 = {15, 16, 17};
+    private final double[] _latCoefficients2 = {18, 19, 20};
+    private final double[] _lonCoefficients2 = {21, 22, 23};
     private final FXYGeoCoding _fxyGeoCoding2 = new FXYGeoCoding(_pixelX, _pixelY, _pixelSizeX, _pixelSizeY,
             FXYSum.createFXYSum(1, _xCoefficients2),
             FXYSum.createFXYSum(1, _yCoefficients2),
@@ -424,7 +427,7 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testCreateGeoCodingForMapProjectionWithOldDimapFormat() {
+    public void testCreateGeoCodingForMapProjectionWithOldDimapFormat() throws IOException {
         final String projectionName = "Lambert Conformal Conic";
 
         final double pixelX = 1.0;
@@ -450,7 +453,7 @@ public class DimapProductHelpersTest {
         final LambertConformalConicDescriptor expDescriptor = new LambertConformalConicDescriptor();
         final MapTransform expTransform = expDescriptor.createTransform(null);
         final Document dom = DimapProductHelpers.createDom(
-                new ByteArrayInputStream(xmlMapGeocodingStringStyleOldFormat.getBytes()));
+                new ByteArrayInputStream(xmlMapGeocodingStringStyleOldFormat.getBytes(StandardCharsets.UTF_8)));
 
         //test
         GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
@@ -489,18 +492,18 @@ public class DimapProductHelpersTest {
         assertEquals(expTransform.getClass(), actualTransform.getClass());
 
         final double[] actualValues = actualTransform.getParameterValues();
-        assertTrue(Arrays.equals(expTransform.getParameterValues(), actualValues));
+        assertArrayEquals(expTransform.getParameterValues(), actualValues, 0.0);
 
         final MapTransformDescriptor actualDescriptor = actualTransform.getDescriptor();
         assertEquals(expDescriptor.getClass(), actualDescriptor.getClass());
     }
 
     @Test
-    public void testCreateGeoCodingForMapProjectionWithFullValidDimap_1_4_0_Format() {
+    public void testCreateGeoCodingForMapProjectionWithFullValidDimap_1_4_0_Format() throws IOException {
         final int[] allLines = new int[0];
 
         final String fullXMLString = createXMLString(allLines);
-        final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(fullXMLString.getBytes()));
+        final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(fullXMLString.getBytes(StandardCharsets.UTF_8)));
         final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
 
         assertNotNull(geoCoding);
@@ -542,10 +545,10 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testCreateGeoCodingForMapProjectionWithValidDimap_1_4_0_Format() {
+    public void testCreateGeoCodingForMapProjectionWithValidDimap_1_4_0_Format() throws IOException {
 
         final String xmlStringWithoutNotMandatoryLines = createXMLString(_notMandatoryLines);
-        final byte[] bytes = xmlStringWithoutNotMandatoryLines.getBytes();
+        final byte[] bytes = xmlStringWithoutNotMandatoryLines.getBytes(StandardCharsets.UTF_8);
         final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
         final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
 
@@ -586,7 +589,7 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testCreateGeoCodingForMapProjectionWithInvalidDimap_1_4_0_Format() {
+    public void testCreateGeoCodingForMapProjectionWithInvalidDimap_1_4_0_Format() throws IOException {
         Document dom;
 
         // without ellipsoid name Element
@@ -663,46 +666,14 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testCreateGeoCodingForFXYGeoCoding() {
-        final byte[] bytes = _xmlFXYGeoCodingString.getBytes();
+    public void testCreateGeoCodingForFXYGeoCoding() throws IOException {
+        final byte[] bytes = _xmlFXYGeoCodingString.getBytes(StandardCharsets.UTF_8);
         final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
         final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
 
         assertNotNull(geoCoding);
         assertEquals(FXYGeoCoding.class, geoCoding.getClass());
-        assertEqual(this.fxyGeoCoding, (FXYGeoCoding) geoCoding);
-
-    }
-
-    @Test
-    public void testCreateGeoCodingForPixelGeoCoding() throws IOException {
-        String origGCProperty = System.getProperty("snap.useAlternatePixelGeoCoding", "false");
-        try {
-            System.setProperty("snap.useAlternatePixelGeoCoding", "true");
-            final Band latBand = product.getBand("b1");
-            final Band lonBand = product.getBand("b2");
-            final float[] bandData = new float[product.getSceneRasterWidth() * product.getSceneRasterHeight()];
-            latBand.setDataElems(bandData);
-            lonBand.setDataElems(bandData);
-            final PixelGeoCoding sourcePixelGeoCoding = new PixelGeoCoding(latBand, lonBand,
-                    "Not NaN", 4, ProgressMonitor.NULL);
-            final byte[] bytes = createPixelGeoCodingString(sourcePixelGeoCoding).getBytes();
-            final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
-            final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
-
-            assertNotNull(geoCoding);
-            assertEquals(PixelGeoCoding.class, geoCoding.getClass());
-            final PixelGeoCoding pixelGeoCoding = (PixelGeoCoding) geoCoding;
-
-            assertEquals("b1", pixelGeoCoding.getLatBand().getName());
-            assertEquals("b2", pixelGeoCoding.getLonBand().getName());
-            assertEquals("Not NaN", pixelGeoCoding.getValidMask());
-            assertEquals(4, pixelGeoCoding.getSearchRadius());
-            assertNotNull(pixelGeoCoding.getPixelPosEstimator());
-            assertEqual(fxyGeoCoding, (FXYGeoCoding) pixelGeoCoding.getPixelPosEstimator());
-        } finally {
-            System.setProperty("snap.useAlternatePixelGeoCoding", origGCProperty);
-        }
+        assertEqual(fxyGeoCoding, (FXYGeoCoding) geoCoding);
 
     }
 
@@ -713,7 +684,7 @@ public class DimapProductHelpersTest {
         final AffineTransform expectedI2m = new AffineTransform(0.12, 1.23, 2.34, 3.45, 4.56, 5.67);
         final CoordinateReferenceSystem expectedCrs = CRS.decode("EPSG:4326");
         final byte[] bytes = createCrsGeoCodingString(
-                new CrsGeoCoding(expectedCrs, imageBounds, expectedI2m)).getBytes();
+                new CrsGeoCoding(expectedCrs, imageBounds, expectedI2m)).getBytes(StandardCharsets.UTF_8);
         final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
         final GeoCoding geoCoding = DimapProductHelpers.createGeoCoding(dom, product)[0];
 
@@ -743,9 +714,9 @@ public class DimapProductHelpersTest {
         final CoordinateReferenceSystem crs2 = CRS.decode("EPSG:4326");
         final CrsGeoCoding crsGeoCoding2 = new CrsGeoCoding(crs2, imageBounds2, i2m2);
 
-        final CoordinateReferenceSystem[] expectedCrs = new CoordinateReferenceSystem[]{crs1, crs2};
-        final AffineTransform[] i2ms = new AffineTransform[]{i2m1, i2m2};
-        final byte[] bytes = createCrsGeoCodingString(new CrsGeoCoding[]{crsGeoCoding1, crsGeoCoding2}).getBytes();
+        final CoordinateReferenceSystem[] expectedCrs = {crs1, crs2};
+        final AffineTransform[] i2ms = {i2m1, i2m2};
+        final byte[] bytes = createCrsGeoCodingString(new CrsGeoCoding[]{crsGeoCoding1, crsGeoCoding2}).getBytes(StandardCharsets.UTF_8);
 
         final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
         final GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
@@ -765,8 +736,8 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    public void testReadingGeoCodingPerBand() {
-        final byte[] bytes = _xmlBandedFXYGeoCodingString.getBytes();
+    public void testReadingGeoCodingPerBand() throws IOException {
+        final byte[] bytes = _xmlBandedFXYGeoCodingString.getBytes(StandardCharsets.UTF_8);
         final Document dom = DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
         final GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
 
@@ -848,7 +819,7 @@ public class DimapProductHelpersTest {
 
     private Document createDom(final int[] withoutMandatoryLine) {
         final String xmlStringWithoutNotMandatoryLines = createXMLString(withoutMandatoryLine);
-        final byte[] bytes = xmlStringWithoutNotMandatoryLines.getBytes();
+        final byte[] bytes = xmlStringWithoutNotMandatoryLines.getBytes(StandardCharsets.UTF_8);
         return DimapProductHelpers.createDom(new ByteArrayInputStream(bytes));
     }
 
@@ -864,13 +835,11 @@ public class DimapProductHelpersTest {
         return StringUtils.arrayToString(strings, "");
     }
 
-    private String createPixelGeoCodingString(BasicPixelGeoCoding geoCoding) {
+    private String createPixelGeoCodingString(GeoCoding geoCoding, String latBandName, String lonBandName) {
         return "<" + DimapProductConstants.TAG_ROOT + ">" + LS +
                 "    <Geoposition>" + LS +
-                "        <LATITUDE_BAND>" + geoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
-                "        <LONGITUDE_BAND>" + geoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
-                "        <VALID_MASK_EXPRESSION>" + geoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
-                "        <SEARCH_RADIUS>" + geoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <LATITUDE_BAND>" + latBandName + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + lonBandName + "</LONGITUDE_BAND>" + LS +
                 "        <Pixel_Position_Estimator>" + LS +
                 "            <Coordinate_Reference_System>" + LS +
                 "                <Horizontal_CS>" + LS +
