@@ -163,7 +163,7 @@ public class GDAL extends GDALBase {
         return (Integer) invokeStatic(instance.getCacheMaxHandle);
     }
 
-    public static void getCacheMax(int nBytes) {
+    public static void setCacheMax(int nBytes) {
         invokeStatic(instance.setCacheMaxHandle, nBytes);
     }
 }
