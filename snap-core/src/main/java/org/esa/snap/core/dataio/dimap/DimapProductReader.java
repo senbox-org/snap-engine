@@ -20,21 +20,10 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeReader;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.GeometryDescriptor;
-import org.esa.snap.core.datamodel.PlacemarkDescriptor;
-import org.esa.snap.core.datamodel.PlacemarkDescriptorRegistry;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VectorDataNode;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -48,12 +37,8 @@ import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,7 +47,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 /**
- * The <code>DimapProductReader</code> class is an implementation of the <code>ProductReader</code> interface
+ * The <code>DimapProductReader</code> class is an implementation of the {@code ProductReader} interface
  * exclusively for data products having the BEAM-DIMAP product format.
  *
  * @author Sabine Embacher
@@ -86,7 +71,7 @@ public class DimapProductReader extends AbstractProductReader {
     /**
      * Construct a new instance of a product reader for the given BEAM-DIMAP product reader plug-in.
      *
-     * @param readerPlugIn the given BEAM-DIMAP product writer plug-in, must not be <code>null</code>
+     * @param readerPlugIn the given BEAM-DIMAP product writer plug-in, must not be {@code null}
      */
     public DimapProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
@@ -105,9 +90,9 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     /**
-     * Provides an implementation of the <code>readProductNodes</code> interface method. Clients implementing this
+     * Provides an implementation of the {@code readProductNodes} interface method. Clients implementing this
      * method can be sure that the input object and eventually the subset information has already been set.
-     * <p>This method is called as a last step in the <code>readProductNodes(input, subsetInfo)</code> method.
+     * <p>This method is called as a last step in the {@code readProductNodes(input, subsetInfo)} method.
      *
      * @throws java.io.IOException        if an I/O error occurs
      * @throws IllegalFileFormatException if the input file in not decodeable
@@ -135,8 +120,8 @@ public class DimapProductReader extends AbstractProductReader {
         initInput();
         Document dom = readDom();
 
-        this.product = existingProduct == null ? DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null) : existingProduct;
-        this.product.setProductReader(this);
+        product = existingProduct == null ? DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null) : existingProduct;
+        product.setProductReader(this);
 
         if (existingProduct == null) {
             tiePointGridInfoMap = readTiePointGrids(dom);
@@ -147,20 +132,19 @@ public class DimapProductReader extends AbstractProductReader {
             readVectorData(Product.DEFAULT_IMAGE_CRS, true);
 
             // read GCPs and pins from DOM (old-style)
-            DimapProductHelpers.addGcps(dom, this.product);
-            DimapProductHelpers.addPins(dom, this.product);
+            DimapProductHelpers.addGcps(dom, product);
+            DimapProductHelpers.addPins(dom, product);
 
             initGeoCodings(dom);
             readVectorData(product.getSceneCRS(), false);
-            DimapProductHelpers.addMaskUsages(dom, this.product);
+            DimapProductHelpers.addMaskUsages(dom, product);
         }
-        this.product.setFileLocation(inputFile);
-        this.product.setModified(false);
-        return this.product;
+        product.setFileLocation(inputFile);
+        product.setModified(false);
+        return product;
     }
 
-
-    private void initGeoCodings(Document dom) {
+    private void initGeoCodings(Document dom) throws IOException {
         final GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
         if (geoCodings != null) {
             if (geoCodings.length == 1) {
@@ -179,14 +163,14 @@ public class DimapProductReader extends AbstractProductReader {
             final Band lonBand = product.getBand("longitude");
             final Band latBand = product.getBand("latitude");
             if (latBand != null && lonBand != null) {
-                final GeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 6);
+                final GeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand);
                 product.setSceneGeoCoding(geoCoding);
             }
         }
     }
 
     private void bindBandsToFiles(Document dom) {
-        bandDataFiles = DimapProductHelpers.getBandDataFiles(dom, product, getInputDir());
+        bandDataFiles = DimapProductHelpers.getBandDataFiles(dom, product, inputDir);
         final Band[] bands = product.getBands();
         for (final Band band : bands) {
             if (band instanceof VirtualBand || band instanceof FilterBand) {
@@ -257,12 +241,11 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     /**
-     * The template method which is called by the {@link AbstractProductReader#readBandRasterDataImpl(int, int, int, int, int, int, Band, int, int, int, int, ProductData, com.bc.ceres.core.ProgressMonitor)} }
+     * The template method which is called by the  }
      * method after an optional spatial subset has been applied to the input parameters.
-     * <p>The destination band, buffer and region parameters are exactly the ones passed to the original {@link
-     * AbstractProductReader#readBandRasterDataImpl} call. Since the
-     * <code>destOffsetX</code> and <code>destOffsetY</code> parameters are already taken into acount in the
-     * <code>sourceOffsetX</code> and <code>sourceOffsetY</code> parameters, an implementor of this method is free to
+     * <p>The destination band, buffer and region parameters are exactly the ones passed to the original  call. Since the
+     * <code>destOffsetX</code> and {@code destOffsetY} parameters are already taken into acount in the
+     * <code>sourceOffsetX</code> and {@code sourceOffsetY} parameters, an implementor of this method is free to
      * ignore them.
      *
      * @param sourceOffsetX the absolute X-offset in source raster co-ordinates
@@ -310,12 +293,12 @@ public class DimapProductReader extends AbstractProductReader {
                     final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
                     long inputPos = sourcePosY + sourceOffsetX;
                     destPos = readLineRasterDataImpl(sourceStepX, sourceWidth, destPos, destWidth, destBuffer,
-                                                     inputStream, longType, line, inputPos);
+                            inputStream, longType, line, inputPos);
                 }
                 pm.worked(1);
             } catch (IOException e) {
                 throw new IOException("DimapProductReader: Unable to read file '" + dataFile + "' referenced by '"
-                                      + destBand.getName() + "'.", e);
+                        + destBand.getName() + "'.", e);
             }
         } finally {
             pm.done();
@@ -336,7 +319,8 @@ public class DimapProductReader extends AbstractProductReader {
                 inputStream.readFully(doubles, 0, doubles.length);
                 int i = 0;
                 for (double d : doubles) {
-                    fullData[i++] = (float) d;
+                    fullData[i] = (float) d;
+                    i++;
                 }
             }
             final float[] destData = (float[]) destBuffer.getElems();
@@ -386,8 +370,8 @@ public class DimapProductReader extends AbstractProductReader {
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
      * directly owned by this reader. Its primary use is to allow the garbage collector to perform a vanilla job.
      * <p>This method should be called only if it is for sure that this object instance will never be used again. The
-     * results of referencing an instance of this class after a call to <code>close()</code> are undefined.
-     * <p>Overrides of this method should always call <code>super.close();</code> after disposing this instance.
+     * results of referencing an instance of this class after a call to {@code close()} are undefined.
+     * <p>Overrides of this method should always call {@code super.close();} after disposing this instance.
      *
      * @throws IOException if an I/O error occurs
      */
@@ -422,7 +406,7 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) {
-        try (FileReader reader = new FileReader(vectorFile)) {
+        try (FileReader reader = new FileReader(vectorFile, StandardCharsets.UTF_8)) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
                 public CoordinateReferenceSystem getFeatureCrs(Product product) {
@@ -436,9 +420,9 @@ public class DimapProductReader extends AbstractProductReader {
             };
             OptimalPlacemarkDescriptorProvider descriptorProvider = new OptimalPlacemarkDescriptorProvider();
             VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getName(), reader, product,
-                                                                      crsProvider, descriptorProvider, modelCrs,
-                                                                      VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
-                                                                      ProgressMonitor.NULL);
+                    crsProvider, descriptorProvider, modelCrs,
+                    VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
+                    ProgressMonitor.NULL);
             if (vectorDataNode != null) {
                 final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
                 final VectorDataNode existing = vectorDataGroup.get(vectorDataNode.getName());
@@ -456,7 +440,7 @@ public class DimapProductReader extends AbstractProductReader {
         return vectorDataDir.listFiles((dir, name) -> {
             if (name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
                 if (onlyGCPs) {
-                    return name.equals("ground_control_points.csv");
+                    return "ground_control_points.csv".equals(name);
                 } else {
                     return true;
                 }
