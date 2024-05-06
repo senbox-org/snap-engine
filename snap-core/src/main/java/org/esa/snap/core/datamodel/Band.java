@@ -98,6 +98,7 @@ public class Band extends AbstractBand {
         // By default a band is not a spectral band,
         // so spectral band index must be -1
         setAngularBandIndex(-1);
+        setAngularValue((float)(-999));
         setSpectralBandIndex(-1);
         setDateBandIndex(-1);
         setModified(false);
