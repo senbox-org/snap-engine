@@ -84,7 +84,10 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
 
         product = new Product(outputFile.getName(), "BINNED-L3", outputRegion.width, outputRegion.height);
         product.setProductWriter(productWriter);
-        product.setPreferredTileSize(64, 64);
+        product.setPreferredTileSize(
+                Integer.getInteger("snap.dataio.writer.tileHeight", 64),
+                Integer.getInteger("snap.dataio.writer.tileWidth", 64)
+        );
         product.setSceneGeoCoding(geoCoding);
         product.setStartTime(startTime);
         product.setEndTime(endTime);
