@@ -94,8 +94,11 @@ public class BeamTiePointGridPart extends ProfilePartIO {
                         grid.setUnit(unit.getStringValue());
                     }
                     if (fillValue != null) {
-                        grid.setNoDataValue((double) fillValue.getNumericValue());
-                        grid.setNoDataValueUsed(true);
+                        final Number numericValue = fillValue.getNumericValue();
+                        if (numericValue != null) {
+                            grid.setNoDataValue(numericValue.doubleValue());
+                            grid.setNoDataValueUsed(true);
+                        }
                     }
                     p.addTiePointGrid(grid);
                 }
