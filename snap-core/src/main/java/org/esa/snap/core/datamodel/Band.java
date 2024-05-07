@@ -68,6 +68,7 @@ public class Band extends AbstractBand {
     public static final String PROPERTY_NAME_DATE = "date";
     public static final String PROPERTY_NAME_ANGULAR_BAND_INDEX = "angularBandIndex";
     public static final String PROPERTY_NAME_ANGULAR_VALUE = "angularValue";
+    public static final float ANGULAR_VIEW_NULL_VALUE = -999;
 
     /**
      * If this band contains flag data, this is the flag coding.
@@ -98,7 +99,7 @@ public class Band extends AbstractBand {
         // By default a band is not a spectral band,
         // so spectral band index must be -1
         setAngularBandIndex(-1);
-        setAngularValue((float)(-999));
+        setAngularValue((float)(ANGULAR_VIEW_NULL_VALUE));
         setSpectralBandIndex(-1);
         setDateBandIndex(-1);
         setModified(false);
