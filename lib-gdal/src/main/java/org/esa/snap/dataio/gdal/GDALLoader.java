@@ -51,6 +51,7 @@ public final class GDALLoader {
     private GDALLoaderClassLoader gdalVersionLoader;
 
     private Map<Integer, Integer> bandToGDALDataTypes;
+    private static Boolean GDALDistributionInitializedOnce = false;
 
     private GDALLoader() {
 
@@ -70,10 +71,15 @@ public final class GDALLoader {
      */
     public static void ensureGDALInitialised(){
         if (INSTANCE.isNotInitialised()) {
-            getInstance().initGDAL();
-            if (INSTANCE.isNotInitialised()) {
-                throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
-            }
+              synchronized (GDALDistributionInitializedOnce) {
+                if (!GDALDistributionInitializedOnce) {
+                    getInstance().initGDAL();
+                    if (INSTANCE.isNotInitialised()) {
+                        throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
+                    }
+                    GDALDistributionInitializedOnce = true;
+                 }
+             }
         }
     }
 
