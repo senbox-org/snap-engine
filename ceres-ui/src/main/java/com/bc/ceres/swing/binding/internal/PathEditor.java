@@ -40,7 +40,7 @@ public class PathEditor extends PropertyEditor {
             currentPath.ifPresent(path -> fileChooser.setSelectedFile(path.toFile()));
             int i = fileChooser.showDialog(editorPanel, "Select");
             if (i == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null) {
-                binding.setPropertyValue(fileChooser.getSelectedFile());
+                binding.setPropertyValue(fileChooser.getSelectedFile().toPath());
             }
         });
         editorPanel.add(etcButton, BorderLayout.EAST);
