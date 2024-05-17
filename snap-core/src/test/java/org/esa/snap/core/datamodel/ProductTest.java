@@ -17,6 +17,7 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.checkerframework.checker.units.qual.N;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
@@ -75,11 +76,6 @@ public class ProductTest {
         }
     }
 
-    private static MapProjection createMapProjectionForTestSetGeocoding() {
-        MapTransform mapTransform = new IdentityTransformDescriptor().createTransform(null);
-        return new MapProjection("p1", mapTransform, "unit");
-    }
-
     @Before
     public void setUp() throws Exception {
         product = new Product("product", _prodType, _sceneWidth, _sceneHeight);
@@ -92,14 +88,14 @@ public class ProductTest {
         product.acceptVisitor(visitor);
         List<String> visitedList = visitor.getVisitedList();
 
-        assertEquals(true, visitedList.contains("bands"));
-        assertEquals(true, visitedList.contains("tie_point_grids"));
-        assertEquals(true, visitedList.contains("masks"));
-        assertEquals(true, visitedList.contains("index_codings"));
-        assertEquals(true, visitedList.contains("flag_codings"));
-        assertEquals(true, visitedList.contains("pins"));
-        assertEquals(true, visitedList.contains("ground_control_points"));
-        assertEquals(true, visitedList.contains("vector_data"));
+        assertTrue(visitedList.contains("bands"));
+        assertTrue(visitedList.contains("tie_point_grids"));
+        assertTrue(visitedList.contains("masks"));
+        assertTrue(visitedList.contains("index_codings"));
+        assertTrue(visitedList.contains("flag_codings"));
+        assertTrue(visitedList.contains("pins"));
+        assertTrue(visitedList.contains("ground_control_points"));
+        assertTrue(visitedList.contains("vector_data"));
 
         try {
             product.acceptVisitor(null);
@@ -866,6 +862,84 @@ public class ProductTest {
 
         product.setPreferredTileSize(null);
         assertEquals(null, product.getPreferredTileSize());
+    }
+
+    @Test
+    public void testEqualsOrNaN() {
+        assertTrue(Product.equalsOrNaN(Double.NaN, Double.NaN, 0.0001f));
+        assertTrue(Product.equalsOrNaN(2.8, 2.8, 0.0001f));
+        assertTrue(Product.equalsOrNaN(2.8, 2.8000001, 0.0001f));
+        assertTrue(Product.equalsOrNaN(-29.49999999, -29.5, 0.0001f));
+
+        assertFalse(Product.equalsOrNaN(-23.5, Double.NaN, 0.004f));
+        assertFalse(Product.equalsOrNaN(Double.NaN, 107.4, 0.004f));
+        assertFalse(Product.equalsOrNaN(107.41, 107.4, 0.001f));
+    }
+
+    @Test
+    public void testEqualsLatLon() {
+        final GeoPos pos1 = new GeoPos();
+        final GeoPos pos2 = new GeoPos();
+
+        pos1.lon = 0.0;
+        pos1.lat = 0.0;
+        pos2.lon = 0.0;
+        pos2.lat = 0.0;
+        assertTrue(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = Double.NaN;
+        pos1.lat = 0.0;
+        pos2.lon = Double.NaN;
+        pos2.lat = 0.0;
+        assertTrue(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 0.0;
+        pos1.lat = Double.NaN;
+        pos2.lon = 0.0;
+        pos2.lat = Double.NaN;
+        assertTrue(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 0.0;
+        pos1.lat = 11.0;
+        pos2.lon = 0.0;
+        pos2.lat = 11.00002;
+        assertTrue(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = -108.0;
+        pos1.lat = 0.0;
+        pos2.lon = -107.99999;
+        pos2.lat = 0.0;
+        assertTrue(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 1.0;
+        pos1.lat = 2.0;
+        pos2.lon = 3.0;
+        pos2.lat = 4.0;
+        assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = Double.NaN;
+        pos1.lat = 0.0;
+        pos2.lon = 0.0;
+        pos2.lat = 0.0;
+        assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 0.0;
+        pos1.lat = 0.0;
+        pos2.lon = 0.0;
+        pos2.lat = Double.NaN;
+        assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 1.5;
+        pos1.lat = 0.0;
+        pos2.lon = 1.6;
+        pos2.lat = 0.0;
+        assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
+
+        pos1.lon = 0.0;
+        pos1.lat = -22.5;
+        pos2.lon = 0.0;
+        pos2.lat = -22.52;
+        assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
     }
 
     private static class MyProductNodeListener implements ProductNodeListener {
