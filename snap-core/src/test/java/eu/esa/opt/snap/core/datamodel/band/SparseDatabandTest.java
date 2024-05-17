@@ -1,9 +1,8 @@
 package eu.esa.opt.snap.core.datamodel.band;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.AbstractBand;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -11,7 +10,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class SparseDatabandTest {
 
@@ -96,8 +95,8 @@ public class SparseDatabandTest {
     @Test
     @STTM("SNAP-1691")
     public void testGetPixel_noData() {
-       final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT32, 5, 8, new NoDataProvider());
-       band.setNoDataValue(-1);
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT32, 5, 8, new NoDataProvider());
+        band.setNoDataValue(-1);
 
         assertEquals(-1, band.getPixelInt(1, 1));
         assertEquals(-1.f, band.getPixelFloat(2, 2), 1e-8);
@@ -110,7 +109,7 @@ public class SparseDatabandTest {
         final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 9, new OneDataProvider());
         band.setNoDataValue(-999);
 
-        assertEquals(-1, band.getPixelInt(3, 4));
+        assertEquals(-2, band.getPixelInt(3, 4));
         assertEquals(-1.67f, band.getPixelFloat(3, 4), 1e-8);
         assertEquals(-1.67, band.getPixelDouble(3, 4), 1e-8);
 
@@ -136,6 +135,276 @@ public class SparseDatabandTest {
         assertEquals(Double.NaN, band.getPixelDouble(1, 5), 1e-8);
     }
 
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixel_threeDataPoints_scaled() {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(-999);
+        band.setScalingFactor(0.5);
+        band.setScalingOffset(-6.0);
+
+        assertEquals(9, band.getPixelInt(1, 2));
+        assertEquals(-22.f, band.getPixelFloat(2, 2), 1e-8);
+        assertEquals(48.5, band.getPixelDouble(2, 3), 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_noData_int() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(-1);
+
+        final int[] expected = {-1, -1, -1, -1};
+        final int[] targetData = new int[4];
+        band.readPixels(0, 0, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_noData_float() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(Float.MIN_VALUE);
+
+        final float[] expected = {Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE};
+        final float[] targetData = new float[4];
+        band.readPixels(0, 0, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8F);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_noData_double() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(Double.NaN);
+
+        final double[] expected = {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        final double[] targetData = new double[4];
+        band.readPixels(0, 0, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_oneDataPoint_int() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new OneDataProvider());
+        band.setNoDataValue(-1);
+
+        final int[] expected = {-1, -2, -1, -1};
+        final int[] targetData = new int[4];
+        band.readPixels(2, 4, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_oneDataPoint_float() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Float.MIN_VALUE);
+
+        final float[] expected = {Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE, -1.67f};
+        final float[] targetData = new float[4];
+        band.readPixels(2, 3, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8F);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_oneDataPoint_double() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Double.NaN);
+
+        final double[] expected = {Double.NaN, Double.NaN, -1.67, Double.NaN, Double.NaN, Double.NaN};
+        final double[] targetData = new double[6];
+        band.readPixels(1, 4, 3, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_threeDataPoints_int() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(-1234);
+
+        final int[] expected = {-1234, 30, -32,
+                -1234, -1234, 109};
+        final int[] targetData = new int[6];
+        band.readPixels(0, 2, 3, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_threeDataPoints_int_partlyCovered() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(-99);
+
+        final int[] expected = {-99, -99, -32, -99};
+        final int[] targetData = new int[4];
+        band.readPixels(2, 1, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadPixels_threeDataPoints_float_scaled() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new ThreeInt16DataProvider());
+        band.setNoDataValue(Float.NaN);
+        band.setScalingFactor(0.5);
+        band.setScalingOffset(-11.34);
+
+        final float[] expected = {3.66f, -27.34f, Float.NaN, 43.16f};
+        final float[] targetData = new float[4];
+        band.readPixels(1, 2, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8F);
+    }
+
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_oneDataPoint_int() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new OneDataProvider());
+        band.setNoDataValue(-1);
+        band.ensureRasterData();
+
+        final int[] expected = {-1, -2, -1, -1};
+        final int[] targetData = new int[4];
+        band.getPixels(2, 4, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_int_notLoaded() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new OneDataProvider());
+
+        try {
+            final int[] targetData = new int[4];
+            band.getPixels(2, 4, 2, 2, targetData, ProgressMonitor.NULL);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_oneDataPoint_float() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Float.MIN_VALUE);
+        band.ensureRasterData();
+
+        final float[] expected = {Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE, -1.67f};
+        final float[] targetData = new float[4];
+        band.getPixels(2, 3, 2, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8F);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_float_notLoaded() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new OneDataProvider());
+
+        try {
+            final float[] targetData = new float[4];
+            band.getPixels(2, 4, 2, 2, targetData, ProgressMonitor.NULL);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_oneDataPoint_double() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Double.NaN);
+        band.ensureRasterData();
+
+        final double[] expected = {Double.NaN, Double.NaN, -1.67, Double.NaN, Double.NaN, Double.NaN};
+        final double[] targetData = new double[6];
+        band.getPixels(1, 4, 3, 2, targetData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, targetData, 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetPixels_double_notLoaded() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new OneDataProvider());
+
+        try {
+            final double[] targetData = new double[4];
+            band.getPixels(2, 4, 2, 2, targetData, ProgressMonitor.NULL);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadRasterData_oneDataPoint_int() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT16, 4, 6, new OneDataProvider());
+        band.setNoDataValue(-1);
+
+        final int[] expected = {-1, -2, -1, -1};
+        final int[] targetData = new int[4];
+        final ProductData productData = ProductData.createInstance(targetData);
+        band.readRasterData(2, 4, 2, 2, productData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, (int[]) productData.getElems());
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadRasterData_oneDataPoint_float() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT32, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Float.MIN_VALUE);
+
+        final float[] expected = {Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE, -1.67f};
+        final float[] targetData = new float[4];
+        final ProductData productData = ProductData.createInstance(targetData);
+        band.readRasterData(2, 3, 2, 2, productData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, (float[]) productData.getElems(), 1e-8F);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadRasterData_oneDataPoint_double() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new OneDataProvider());
+        band.setNoDataValue(Double.NaN);
+
+        final double[] expected = {Double.NaN, Double.NaN, -1.67, Double.NaN, Double.NaN, Double.NaN};
+        final double[] targetData = new double[6];
+        final ProductData productData = ProductData.createInstance(targetData);
+        band.readRasterData(1, 4, 3, 2, productData, ProgressMonitor.NULL);
+
+        assertArrayEquals(expected, (double[]) productData.getElems(), 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testReadRasterData_oneDataPoint_invalidTargetType() throws IOException {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 4, 6, new OneDataProvider());
+        final ProductData productData = ProductData.createInstance(new byte[6]);
+
+        try {
+            band.readRasterData(1, 4, 3, 2, productData, ProgressMonitor.NULL);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+
+    }
 
     private static class NoDataProvider implements SparseDataProvider {
         @Override
@@ -160,6 +429,17 @@ public class SparseDatabandTest {
             points[0] = new DataPoint(1, 2, 19.3);
             points[1] = new DataPoint(2, 2, 20.17);
             points[2] = new DataPoint(2, 3, 21.06);
+            return points;
+        }
+    }
+
+    private static class ThreeInt16DataProvider implements SparseDataProvider {
+        @Override
+        public DataPoint[] get() {
+            final DataPoint[] points = new DataPoint[3];
+            points[0] = new DataPoint(1, 2, 30);
+            points[1] = new DataPoint(2, 2, -32);
+            points[2] = new DataPoint(2, 3, 109);
             return points;
         }
     }

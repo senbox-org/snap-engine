@@ -9,6 +9,7 @@ import org.esa.snap.core.datamodel.ProductVisitor;
 import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class SparseDataBand extends AbstractBand {
 
@@ -58,7 +59,7 @@ public class SparseDataBand extends AbstractBand {
 
     @Override
     public int getPixelInt(int x, int y) {
-        return (int) getPixelDouble(x, y);
+        return (int) Math.round(getPixelDouble(x, y));
     }
 
     @Override
@@ -71,29 +72,193 @@ public class SparseDataBand extends AbstractBand {
         ensureData();
         for (DataPoint point : data) {
             if (point.getX() == x && point.getY() == y) {
-                return point.getValue();
+                double value = point.getValue();
+                if (isScalingApplied()) {
+                    return scale(value);
+                } else {
+                    return value;
+                }
             }
         }
         return getNoDataValue();
     }
 
     @Override
+    public int[] readPixels(int x, int y, int w, int h, int[] pixels, ProgressMonitor pm) throws IOException {
+        pm.beginTask("readPixels", 100);
+
+        final int noDataValue = (int) Math.round(getNoDataValue());
+        Arrays.fill(pixels, noDataValue);
+
+        ensureData();
+
+        pm.worked(50);
+
+        final Rectangle dataRegion = new Rectangle(x, y, w, h);
+        for (final DataPoint dataPoint : data) {
+            final int dataX = dataPoint.getX();
+            final int dataY = dataPoint.getY();
+            if (dataRegion.contains(dataX, dataY)) {
+                final int offset = dataX - x + (dataY - y) * w;
+                double value = dataPoint.getValue();
+                if (isScalingApplied()) {
+                    value = scale(value);
+                }
+                pixels[offset] = (int) Math.round(value);
+            }
+        }
+
+        pm.done();
+
+        return pixels;
+    }
+
+    @Override
+    public int[] getPixels(int x, int y, int w, int h, int[] pixels, ProgressMonitor pm) {
+        if (data == null) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        int[] result;
+        try {
+            result = readPixels(x, y, w, h, pixels, pm);
+        } catch (IOException e) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        return result;
+    }
+
+    @Override
+    public float[] readPixels(int x, int y, int w, int h, float[] pixels, ProgressMonitor pm) throws IOException {
+        pm.beginTask("readPixels", 100);
+
+        final float noDataValue = (float) getNoDataValue();
+        Arrays.fill(pixels, noDataValue);
+
+        ensureData();
+
+        pm.worked(50);
+
+        final Rectangle dataRegion = new Rectangle(x, y, w, h);
+        for (final DataPoint dataPoint : data) {
+            final int dataX = dataPoint.getX();
+            final int dataY = dataPoint.getY();
+            if (dataRegion.contains(dataX, dataY)) {
+                final int offset = dataX - x + (dataY - y) * w;
+                double value = dataPoint.getValue();
+                if (isScalingApplied()) {
+                    value = scale(value);
+                }
+                pixels[offset] = (float) value;
+            }
+        }
+
+        pm.done();
+
+        return pixels;
+    }
+
+    @Override
+    public float[] getPixels(int x, int y, int w, int h, float[] pixels, ProgressMonitor pm) {
+        if (data == null) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        float[] result;
+        try {
+            result = readPixels(x, y, w, h, pixels, pm);
+        } catch (IOException e) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        return result;
+    }
+
+    @Override
+    public double[] readPixels(int x, int y, int w, int h, double[] pixels, ProgressMonitor pm) throws IOException {
+        pm.beginTask("readPixels", 100);
+
+        final double noDataValue = getNoDataValue();
+        Arrays.fill(pixels, noDataValue);
+
+        ensureData();
+
+        pm.worked(50);
+
+        final Rectangle dataRegion = new Rectangle(x, y, w, h);
+        for (final DataPoint dataPoint : data) {
+            final int dataX = dataPoint.getX();
+            final int dataY = dataPoint.getY();
+            if (dataRegion.contains(dataX, dataY)) {
+                final int offset = dataX - x + (dataY - y) * w;
+                double value = dataPoint.getValue();
+                if (isScalingApplied()) {
+                    value = scale(value);
+                }
+                pixels[offset] = value;
+            }
+        }
+
+        pm.done();
+
+        return pixels;
+    }
+
+    @Override
+    public double[] getPixels(int x, int y, int w, int h, double[] pixels, ProgressMonitor pm) {
+        if (data == null) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        double[] result;
+        try {
+            result = readPixels(x, y, w, h, pixels, pm);
+        } catch (IOException e) {
+            throw new IllegalStateException("data not loaded yet");
+        }
+
+        return result;
+    }
+
+    @Override
     public void readRasterDataFully(ProgressMonitor pm) throws IOException {
-        throw new RuntimeException("not implemented");
+        ensureData();
     }
 
     @Override
     public void readRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData, ProgressMonitor pm) throws IOException {
-        throw new RuntimeException("not implemented");
+        int type = rasterData.getType();
+        switch (type) {
+            case ProductData.TYPE_INT32:
+                final int[] intData = (int[]) rasterData.getElems();
+                readPixels(offsetX, offsetY, width, height, intData, pm);
+                break;
+
+            case ProductData.TYPE_FLOAT32:
+                final float[] floatData = (float[]) rasterData.getElems();
+                readPixels(offsetX, offsetY, width, height, floatData, pm);
+                break;
+
+            case ProductData.TYPE_FLOAT64:
+                final double[] doubleData = (double[]) rasterData.getElems();
+                readPixels(offsetX, offsetY, width, height, doubleData, pm);
+                break;
+
+            default:
+                throw new IllegalStateException("not implemented for the requested data type");
+        }
     }
 
     @Override
     public void writeRasterDataFully(ProgressMonitor pm) throws IOException {
+        // @todo 3 tb/** could be implemented if required 2025-05-16 tb
         throw new RuntimeException("not implemented");
     }
 
     @Override
     public void writeRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData, ProgressMonitor pm) throws IOException {
+        // @todo 3 tb/** could be implemented if required 2025-05-16 tb
         throw new RuntimeException("not implemented");
     }
 
@@ -117,12 +282,22 @@ public class SparseDataBand extends AbstractBand {
 
     @Override
     public void acceptVisitor(ProductVisitor visitor) {
-        throw new RuntimeException("not implemented");
+       // do nothing 2025-05-16 tb
     }
 
     @Override
     protected RenderedImage createSourceImage() {
         throw new RuntimeException("not implemented");
+    }
+
+    @Override
+    public void ensureRasterData() {
+        ensureData();
+    }
+
+    @Override
+    public void unloadRasterData() {
+        data = null;
     }
 
     private void ensureData() {

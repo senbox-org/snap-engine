@@ -1,10 +1,12 @@
 package org.esa.stac;
 
-import com.bc.ceres.binding.Validator;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(LongTestRunner.class)
 public class TestDownloadModifier {
     @Test
     public void testPlanetaryModifier() {
