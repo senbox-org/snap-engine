@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
   ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
@@ -116,7 +116,17 @@
         <module>lib-gdal</module>
         <module>snap-test-utils</module>
         <module>snap-stac</module>
+        <module>snap-engine-coverage</module>
     </modules>
+
+    <profiles>
+        <profile>
+        <id>exclude-from-build</id>
+        <modules>
+            <module>snap-engine-coverage</module>
+        </modules>
+        </profile>
+    </profiles>
 
     <organization>
         <name>European Space Agency (ESA)</name>
