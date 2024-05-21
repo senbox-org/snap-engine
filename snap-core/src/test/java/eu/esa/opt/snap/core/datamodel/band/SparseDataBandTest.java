@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
-public class SparseDatabandTest {
+public class SparseDataBandTest {
 
     @Test
     @STTM("SNAP-1691")
@@ -403,7 +403,32 @@ public class SparseDatabandTest {
             fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
         }
+    }
 
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetRasterData_int()  {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_INT32, 4, 6, new OneDataProvider());
+        band.setNoDataValue(-1);
+
+        final ProductData rasterData = band.getRasterData();
+        assertEquals(ProductData.TYPE_INT32, rasterData.getType());
+        assertEquals(24, rasterData.getNumElems());
+        assertEquals(-1, rasterData.getElemIntAt(0));
+        assertEquals(-2, rasterData.getElemIntAt(19));
+    }
+
+    @Test
+    @STTM("SNAP-1691")
+    public void testGetRasterData_double()  {
+        final SparseDataBand band = new SparseDataBand("test", ProductData.TYPE_FLOAT64, 5, 5, new OneDataProvider());
+        band.setNoDataValue(Double.NaN);
+
+        final ProductData rasterData = band.getRasterData();
+        assertEquals(ProductData.TYPE_FLOAT64, rasterData.getType());
+        assertEquals(25, rasterData.getNumElems());
+        assertEquals(Double.NaN, rasterData.getElemDoubleAt(1), 1e-8);
+        assertEquals(-1.67, rasterData.getElemDoubleAt(23), 1e-8);
     }
 
     private static class NoDataProvider implements SparseDataProvider {

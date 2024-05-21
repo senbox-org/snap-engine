@@ -1,23 +1,29 @@
 package eu.esa.opt.snap.core.datamodel.band;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelModel;
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.AbstractBand;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductVisitor;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.SystemUtils;
 
 import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
-public class SparseDataBand extends AbstractBand {
+public class SparseDataBand extends Band {
 
     private final SparseDataProvider dataProvider;
     private DataPoint[] data;
 
-    public SparseDataBand(String name, int dataType, int rasterWidth, int rasterHeight, SparseDataProvider dataProvider) {
-        super(name, dataType, rasterWidth, rasterHeight);
+    public SparseDataBand(String name, int dataType, int width, int height, SparseDataProvider dataProvider) {
+        super(name, dataType, width, height);
         this.dataProvider = dataProvider;
         data = null;
     }
@@ -282,17 +288,39 @@ public class SparseDataBand extends AbstractBand {
 
     @Override
     public void acceptVisitor(ProductVisitor visitor) {
-       // do nothing 2025-05-16 tb
+        // do nothing 2025-05-16 tb
     }
 
     @Override
     protected RenderedImage createSourceImage() {
-        throw new RuntimeException("not implemented");
+        final MultiLevelModel model = createMultiLevelModel();
+        final RenderedImage image = ImageUtils.createRenderedImage(getRasterWidth(),
+                getRasterHeight(),
+                getRasterData());
+        return new DefaultMultiLevelImage(new DefaultMultiLevelSource(image, model));
     }
 
     @Override
     public void ensureRasterData() {
         ensureData();
+    }
+
+    @Override
+    public ProductData getRasterData() {
+        ensureData();
+
+        final int rasterWidth = getRasterWidth();
+        final int rasterHeight = getRasterHeight();
+        final int numElements = rasterWidth * rasterHeight;
+        final ProductData productData = ProductData.createInstance(getDataType(), numElements);
+
+        try {
+            readRasterData(0, 0, rasterWidth, rasterHeight, productData, ProgressMonitor.NULL);
+        } catch (IOException e) {
+            SystemUtils.LOG.severe(e.getMessage());
+        }
+
+        return productData;
     }
 
     @Override
