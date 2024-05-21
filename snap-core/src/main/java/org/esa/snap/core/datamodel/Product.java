@@ -64,6 +64,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -91,7 +92,7 @@ import java.util.stream.Stream;
  *
  * @author Norman Fomferra
  */
-public class Product extends ProductNode {
+public class Product extends ProductNode implements Closeable {
 
     public static final String METADATA_ROOT_NAME = "metadata";
     public static final String HISTORY_ROOT_NAME = "history";
@@ -252,19 +253,19 @@ public class Product extends ProductNode {
                     ProductReader reader) {
         super(name);
         Guardian.assertNotNullOrEmpty("type", type);
-        this.productType = type;
+        productType = type;
         this.reader = reader;
         this.sceneRasterSize = sceneRasterSize;
-        this.metadataRoot = new MetadataElement(METADATA_ROOT_NAME);
-        this.metadataRoot.setOwner(this);
+        metadataRoot = new MetadataElement(METADATA_ROOT_NAME);
+        metadataRoot.setOwner(this);
 
-        this.bandGroup = new ProductNodeGroup<>(this, "bands", true);
-        this.tiePointGridGroup = new ProductNodeGroup<>(this, "tie_point_grids", true);
-        this.vectorDataGroup = new VectorDataNodeProductNodeGroup();
-        this.indexCodingGroup = new ProductNodeGroup<>(this, "index_codings", true);
-        this.flagCodingGroup = new ProductNodeGroup<>(this, "flag_codings", true);
-        this.maskGroup = new ProductNodeGroup<>(this, "masks", true);
-        this.quicklookGroup = new ProductNodeGroup<>(this, "quicklooks", true);
+        bandGroup = new ProductNodeGroup<>(this, "bands", true);
+        tiePointGridGroup = new ProductNodeGroup<>(this, "tie_point_grids", true);
+        vectorDataGroup = new VectorDataNodeProductNodeGroup();
+        indexCodingGroup = new ProductNodeGroup<>(this, "index_codings", true);
+        flagCodingGroup = new ProductNodeGroup<>(this, "flag_codings", true);
+        maskGroup = new ProductNodeGroup<>(this, "masks", true);
+        quicklookGroup = new ProductNodeGroup<>(this, "quicklooks", true);
 
         pinGroup = createPinGroup();
         gcpGroup = createGcpGroup();
@@ -381,15 +382,17 @@ public class Product extends ProductNode {
             }
             return geoCoding.getImageCRS();
         } else {
-            return Product.DEFAULT_IMAGE_CRS;
+            return DEFAULT_IMAGE_CRS;
         }
     }
 
-    private static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
+    // package access for testing only tb 2024-05-15
+    static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
         return equalsOrNaN(pos1.lat, pos2.lat, eps) && equalsOrNaN(pos1.lon, pos2.lon, eps);
     }
 
-    private static boolean equalsOrNaN(double v1, double v2, float eps) {
+    // package access for testing only tb 2024-05-15
+    static boolean equalsOrNaN(double v1, double v2, float eps) {
         return MathUtils.equalValues(v1, v2, eps) || (Double.isNaN(v1) && Double.isNaN(v2));
     }
 
@@ -756,6 +759,11 @@ public class Product extends ProductNode {
         }
 
         fileLocation = null;
+    }
+
+    @Override
+    public void close() throws IOException {
+        dispose();
     }
 
     /**
@@ -2866,6 +2874,7 @@ public class Product extends ProductNode {
         };
         acceptVisitor(productVisitorAdapter);
     }
+
 
     /**
      * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)

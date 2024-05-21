@@ -17,9 +17,7 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.annotation.STTM;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
@@ -31,9 +29,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ProductFlipperTest {
 
@@ -261,5 +257,35 @@ public class ProductFlipperTest {
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
         }
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testCreateFlipped_bandPropertiesAreCopied() throws IOException {
+        final Band band = new Band("test_me", ProductData.TYPE_INT32, 2, 2);
+        band.setSpectralBandIndex(1);
+        band.setSpectralWavelength(2.f);
+        band.setAngularValue(3.f);
+        band.setAngularBandIndex(4);
+        band.setSpectralBandwidth(5.f);
+        band.setValidPixelExpression("blabla");
+        band.setNoDataValueUsed(true);
+        band.setNoDataValue(6.f);
+        band.setSolarFlux(7.f);
+        product.addBand(band);
+
+        final Product flipped = ProductFlipper.createFlippedProduct(product, ProductFlipper.FLIP_HORIZONTAL, "h", "h");
+        final Band flippedBand = flipped.getBand("test_me");
+        assertNotNull(flippedBand);
+        assertEquals(1, flippedBand.getSpectralBandIndex());
+        assertEquals(2.f, flippedBand.getSpectralWavelength(), 1e-8);
+        assertEquals(3.f, flippedBand.getAngularValue(), 1e-8);
+        assertEquals(4, flippedBand.getAngularBandIndex());
+        assertEquals(5.f, flippedBand.getSpectralBandwidth(), 1e-8);
+        assertEquals("blabla", flippedBand.getValidPixelExpression());
+        assertTrue(flippedBand.isNoDataValueUsed());
+        assertTrue(flippedBand.isNoDataValueSet());
+        assertEquals(6.f, flippedBand.getNoDataValue(), 1e-8);
+        assertEquals(7.f, flippedBand.getSolarFlux(), 1e-8);
     }
 }

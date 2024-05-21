@@ -1644,8 +1644,10 @@ public class DimapProductHelpers {
                 setUnit(element, band);
                 setSpectralWaveLength(element, band);
                 setSpectralBandWidth(element, band);
+                setAngularValue(element, band);
                 setSolarFlux(element, band);
                 setSpectralBandIndex(element, band);
+                setAngularBandIndex(element, band);
                 setScaling(element, band);
                 setFlagCoding(element, band, product);
                 setIndexCoding(element, band, product);
@@ -1693,6 +1695,15 @@ public class DimapProductHelpers {
                 band.setSpectralBandIndex(Integer.parseInt(spectralBandIndex));
             } else {
                 band.setSpectralBandIndex(-1);
+            }
+        }
+
+        private static void setAngularBandIndex(final Element element, final Band band) {
+            final String angularBandIndex = element.getChildTextTrim(DimapProductConstants.TAG_ANGULAR_BAND_INDEX);
+            if (angularBandIndex != null) {
+                band.setAngularBandIndex(Integer.parseInt(angularBandIndex));
+            } else {
+                band.setAngularBandIndex(-1);
             }
         }
 
@@ -1827,6 +1838,14 @@ public class DimapProductHelpers {
                 band.setSpectralBandwidth(Float.parseFloat(bandWidth));
             }
         }
+
+        private static void setAngularValue(final Element element, final Band band) {
+            final String angularValue = element.getChildTextTrim(DimapProductConstants.TAG_BAND_ANGULAR_VALUE);
+            if (angularValue != null) {
+                band.setAngularValue(Float.parseFloat(angularValue));
+            }
+        }
+
 
         private void addCollectedAncillaryVariables() {
             Set<Map.Entry<RasterDataNode, List<String>>> entries = ancillaryVariables.entrySet();
