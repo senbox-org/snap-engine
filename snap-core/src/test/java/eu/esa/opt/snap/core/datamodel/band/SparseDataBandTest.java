@@ -21,16 +21,19 @@ public class SparseDataBandTest {
 
         try {
             band.writePixels(0, 0, 2, 2, new int[0], null);
+            fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
         }
 
         try {
             band.writePixels(0, 0, 2, 2, new float[0], null);
+            fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
         }
 
         try {
             band.writePixels(0, 0, 2, 2, new double[0], null);
+            fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
         }
     }
