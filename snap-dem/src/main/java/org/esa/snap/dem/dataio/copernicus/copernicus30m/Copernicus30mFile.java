@@ -4,8 +4,11 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
+
+import java.awt.*;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
+import org.esa.snap.core.gpf.common.SubsetOp;
 import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
@@ -26,8 +29,8 @@ public class Copernicus30mFile extends ElevationFile {
         if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
 
             ResamplingOp resampler = new ResamplingOp();
-            resampler.setParameter("targetWidth", 3600);
-            resampler.setParameter("targetHeight", 3600);
+            resampler.setParameter("targetWidth", 3601);
+            resampler.setParameter("targetHeight", 3601);
             resampler.setParameter("upsampling", "Bilinear");
             resampler.setParameter("downsampling", "First");
             resampler.setParameter("flagDownsampling", "First");
@@ -35,13 +38,16 @@ public class Copernicus30mFile extends ElevationFile {
             Product resampled = resampler.getTargetProduct();
             product.getName();
             resampled.getBandAt(0).readRasterDataFully();
-            ProductIO.writeProduct(resampled, localFile.getAbsolutePath(), "GeoTIFF");
 
-            //System.out.println("Size is now "+ resampled.getSceneRasterWidth() + " by " + resampled.getSceneRasterHeight());
+            SubsetOp subsetOp = new SubsetOp();
+            subsetOp.setSourceProduct(resampled);
+            subsetOp.setRegion(new Rectangle(1, 1, 3600, 3600));
+            Product subsetProd = subsetOp.getTargetProduct();
+            ProductIO.writeProduct(subsetProd, localFile.getAbsolutePath(), "GeoTIFF");
 
-            tile = new CopernicusElevationTile(demModel, resampled);
+            tile = new CopernicusElevationTile(demModel, subsetProd);
 
-        }else{
+        } else {
             tile = new CopernicusElevationTile(demModel, product);
         }
         demModel.updateCache(tile);

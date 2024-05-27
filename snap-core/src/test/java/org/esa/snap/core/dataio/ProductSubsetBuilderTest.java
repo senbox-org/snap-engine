@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
@@ -218,6 +219,39 @@ public class ProductSubsetBuilderTest {
         assertEquals("G1", product2.getGcpGroup().get(0).getName());
         assertEquals("G2", product2.getGcpGroup().get(1).getName());
         assertEquals("G3", product2.getGcpGroup().get(2).getName());
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testBandPropertiesArePreserved() throws IOException {
+        final Band band = new Band("test_me", ProductData.TYPE_INT32, 2, 2);
+        band.setSpectralBandIndex(2);
+        band.setSpectralWavelength(3.f);
+        band.setAngularValue(4.f);
+        band.setAngularBandIndex(5);
+        band.setSpectralBandwidth(6.f);
+        band.setValidPixelExpression("schwafel");
+        band.setNoDataValueUsed(true);
+        band.setNoDataValue(7.f);
+        band.setSolarFlux(8.f);
+        product.addBand(band);
+
+        final ProductSubsetDef subsetDef = null;
+        final Product subset = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subset", "");
+
+        final Band subsetBand = subset.getBand("test_me");
+        assertNotNull(subsetBand);
+        assertEquals(2, subsetBand.getSpectralBandIndex());
+        assertEquals(3.f, subsetBand.getSpectralWavelength(), 1e-8);
+        assertEquals(4.f, subsetBand.getAngularValue(), 1e-8);
+        assertEquals(5, subsetBand.getAngularBandIndex());
+        assertEquals(6.f, subsetBand.getSpectralBandwidth(), 1e-8);
+        assertEquals("schwafel", subsetBand.getValidPixelExpression());
+        assertTrue(subsetBand.isNoDataValueUsed());
+        assertTrue(subsetBand.isNoDataValueSet());
+        assertEquals(7.f, subsetBand.getNoDataValue(), 1e-8);
+        assertEquals(8.f, subsetBand.getSolarFlux(), 1e-8);
+
     }
 
     private void attachIndexCodedBand() {

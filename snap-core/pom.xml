@@ -76,6 +76,7 @@
                         <publicPackage>org.esa.snap</publicPackage>
                         <publicPackage>org.esa.snap.runtime.*</publicPackage>
                         <publicPackage>org.esa.snap.dataio.*</publicPackage>
+                        <publicPackage>eu.esa.opt.snap.core.datamodel.band.*</publicPackage>
                         <publicPackage>org.esa.snap.core.*</publicPackage>
                         <publicPackage>org.esa.snap.nn.*</publicPackage>
                         <publicPackage>org.esa.snap.examples.*</publicPackage>
