@@ -2,6 +2,9 @@ package org.esa.snap.dem.dataio.copernicus;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CopernicusDownloader {
 
@@ -37,7 +40,7 @@ public class CopernicusDownloader {
         return name.toString();
     }
 
-    public boolean downloadTiles(double lat, double lon, int resolution) throws Exception{
+    public boolean downloadTiles(double lat, double lon, int resolution) throws Exception {
         String installDir = this.installDir.getAbsolutePath();
         String download_path = "";
         String target_filename = "";
@@ -45,26 +48,30 @@ public class CopernicusDownloader {
         int latRounded = (int) lat;
         int lonRounded = (int) lon;
 
-        if (resolution == 30){
+        if (resolution == 30) {
             String name = createTileFilename(latRounded, lonRounded, "10");
             download_path = s3_prefix_30m + "/" + name + "/" + name + ".tif";
             target_filename = name + ".tif";
-        }else{
+        } else {
             String name = createTileFilename(latRounded, lonRounded, "30");
             download_path = s3_prefix_90m + "/" + name + "/" + name + ".tif";
             target_filename = name + ".tif";
         }
         //System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
 
-        try{
+        try {
             BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream());
+            final Path installDirPath = Paths.get(installDir);
+            if (Files.notExists(installDirPath)) {
+                Files.createDirectories(installDirPath);
+            }
             FileOutputStream fileOutputStream = new FileOutputStream(installDir + "/" + target_filename);
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = is.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new FileNotFoundException("Tile does not exist");
         }
         return true;
