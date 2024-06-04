@@ -2294,26 +2294,20 @@ public class ProductUtils {
      * @return The geophysical sample value as a 64-bit floating point value.
      */
     public static double getGeophysicalSampleAsDouble(RasterDataNode raster, int pixelX, int pixelY, int level) {
-        final PlanarImage image = ImageManager.getInstance().getSourceImage(raster, level);
-        final int tileX = image.XToTileX(pixelX);
-        final int tileY = image.YToTileY(pixelY);
-        final Raster data = image.getTile(tileX, tileY);
-        if (data == null) {
-            // Weird condition - should actually not come here at all
-            return Double.NaN;
+        if (level != 0) {
+            // final double levelScale = Math.pow(2, level);
+            // pixelX = (int) Math.round(pixelX * levelScale);
+            // pixelY = (int) Math.round(pixelY * levelScale);
+
+            // The bitwise operation is ~3 times faster than the three lines above
+            pixelX = pixelX << level;
+            pixelY = pixelY << level;
         }
-        final double sample;
-        if (raster.getDataType() == ProductData.TYPE_INT8) {
-            sample = (byte) data.getSample(pixelX, pixelY, 0);
-        } else if (raster.getDataType() == ProductData.TYPE_UINT32) {
-            sample = data.getSample(pixelX, pixelY, 0) & 0xFFFFFFFFL;
-        } else {
-            sample = data.getSampleDouble(pixelX, pixelY, 0);
+        try {
+            return raster.readPixels(pixelX, pixelY, 1, 1, new double[1])[0];
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        if (raster.isScalingApplied()) {
-            return raster.scale(sample);
-        }
-        return sample;
     }
 
     /**
