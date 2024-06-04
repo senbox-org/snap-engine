@@ -13,47 +13,65 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.stac.internal;
+package org.esa.stac;
 
 // TODO fully implement.
 
+import org.esa.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.Objects;
 
-public class StacCollection implements STACUtils {
+public class StacCollection implements StacComponent {
 
-    private JSONObject collectionJSON;
+    private final JSONObject collectionJSON;
 
     private final String collectionURL;
 
     private final String collectionItemURL;
 
-    public StacCollection(String collectionURL) throws Exception {
+    public StacCollection(final String collectionURL) {
         this.collectionURL = collectionURL;
         collectionJSON = getJSONFromURL(collectionURL);
         collectionItemURL = getCollectionItemURL();
     }
 
-    public String getCollectionURL(){
+    public String getCollectionURL() {
         return collectionURL;
     }
 
-    private String getCollectionItemURL(){
-        JSONArray links = (JSONArray) collectionJSON.get("links");
-        for (Object o : links){
+    private String getCollectionItemURL() {
+        JSONArray links = (JSONArray) collectionJSON.get(LINKS);
+        for (Object o : links) {
             JSONObject j = ((JSONObject) o);
-            if(j.containsKey("rel") && Objects.equals(j.get("rel"), "items")){
-                return (String) j.get("href");
+            if (j.containsKey(REL) && Objects.equals(j.get(REL), "items")) {
+                return (String) j.get(HREF);
             }
         }
         return null;
     }
 
-    public JSONObject getJSON(){
+    @Override
+    public JSONObject getJSON() {
         return collectionJSON;
     }
+
+    @Override
+    public String getId() {
+        return (String) collectionJSON.get(ID);
+    }
+
+    @Override
+    public String getSelfURL() {
+        return getURL(collectionJSON, SELF);
+    }
+
+    @Override
+    public String getRootURL() {
+        return getURL(collectionJSON, ROOT);
+    }
+
 /*
     public StacItem[] getAllItems() throws Exception {
         // Get the initial items

@@ -19,52 +19,51 @@ import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
-import org.esa.stac.internal.StacItem;
+import org.esa.stac.StacItem;
 import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.util.Locale;
 
-public class STACReaderPlugIn implements ProductReaderPlugIn {
+public class StacReaderPlugIn implements ProductReaderPlugIn {
 
     public static final String[] FORMAT_NAMES = new String[]{"STAC"};
     public static final String[] JSON_FILE_EXTENSION = {".json"};
 
-    public STACReaderPlugIn(){
+    public StacReaderPlugIn() {
 
     }
 
-
     @Override
     public DecodeQualification getDecodeQualification(Object productInputFile) {
-        if (productInputFile instanceof String){
-            try{
-                if (((String) productInputFile).startsWith("http")){
+        if (productInputFile instanceof String) {
+            try {
+                if (((String) productInputFile).startsWith("http")) {
                     new StacItem((String) productInputFile);
-                }else{
+                } else {
                     new StacItem(new File((String) productInputFile));
                 }
                 return DecodeQualification.INTENDED;
-            }catch (Exception e){
+            } catch (Exception e) {
                 return DecodeQualification.UNABLE;
             }
-        }else if (productInputFile instanceof File){
-            try{
+        } else if (productInputFile instanceof File) {
+            try {
                 new StacItem((File) productInputFile);
-            }catch (Exception e){
+            } catch (Exception e) {
                 return DecodeQualification.UNABLE;
             }
             return DecodeQualification.INTENDED;
-        }else if (productInputFile instanceof JSONObject){
-            try{
+        } else if (productInputFile instanceof JSONObject) {
+            try {
                 new StacItem((JSONObject) productInputFile);
-            }catch (Exception e){
+            } catch (Exception e) {
                 return DecodeQualification.UNABLE;
             }
             return DecodeQualification.INTENDED;
-        }else if (productInputFile instanceof StacItem){
+        } else if (productInputFile instanceof StacItem) {
             return DecodeQualification.INTENDED;
-        }else {
+        } else {
             return DecodeQualification.UNABLE;
         }
     }
@@ -76,7 +75,7 @@ public class STACReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new STACReader(this);
+        return new StacReader(this);
     }
 
 

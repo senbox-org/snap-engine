@@ -17,23 +17,25 @@ package org.esa.stac.reader;
 
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
-import org.esa.stac.internal.StacItem;
+import org.esa.stac.StacItem;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 // Class to convert a STAC Item JSON structure into SNAP metadata structure
-public class STACMetadataFactory {
+public class StacMetadataFactory {
 
 
-    private JSONObject itemJSON;
-    public STACMetadataFactory(StacItem item){
-        this.itemJSON = item.getItemJSON();
+    private final JSONObject itemJSON;
+
+    public StacMetadataFactory(StacItem item) {
+        this.itemJSON = item.getJSON();
     }
-    public STACMetadataFactory(JSONObject itemJSON){
+
+    public StacMetadataFactory(JSONObject itemJSON) {
         this.itemJSON = itemJSON;
     }
 
-    public MetadataElement generate(){
+    public MetadataElement generate() {
         MetadataElement root = new MetadataElement(AbstractMetadata.ORIGINAL_PRODUCT_METADATA);
         buildMetadata(root, itemJSON);
         return root;

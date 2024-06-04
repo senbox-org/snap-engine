@@ -15,26 +15,30 @@
  */
 package org.esa.stac.reader;
 
-import org.esa.snap.core.dataio.*;
+import org.esa.snap.core.dataio.IllegalFileFormatException;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReader;
-import org.esa.stac.internal.StacItem;
+import org.esa.stac.StacItem;
 
+import java.io.File;
 import java.io.IOException;
 
-public class STACReader extends GeoTiffProductReader {
+public class StacReader extends GeoTiffProductReader {
 
-    private ProductReaderPlugIn readerPlugIn;
+    private final ProductReaderPlugIn readerPlugIn;
 
-    public STACReader(ProductReaderPlugIn readerPlugIn) {
+    public StacReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
         this.readerPlugIn = readerPlugIn;
 
     }
-    public STACReader() {
-        super(new STACReaderPlugIn());
-        this.readerPlugIn = new STACReaderPlugIn();
+
+    public StacReader() {
+        super(new StacReaderPlugIn());
+        this.readerPlugIn = new StacReaderPlugIn();
     }
 
     @Override
@@ -42,14 +46,19 @@ public class STACReader extends GeoTiffProductReader {
         return this.readerPlugIn;
     }
 
-
     @Override
-    public Product readProductNodes(Object input, ProductSubsetDef subsetDef) throws IOException, IllegalFileFormatException {
+    public Product readProductNodes(Object input, ProductSubsetDef subsetDef) throws IOException {
         StacItem item = null;
 
-        try{
-            item = new StacItem(input);
-        }catch(ParseException e){
+        try {
+            if (input instanceof String) {
+                item = new StacItem((String) input);
+            } else if (input instanceof File) {
+                item = new StacItem((File) input);
+            } else {
+                throw new IllegalFileFormatException("Product input must be a URL for File.");
+            }
+        } catch (ParseException e) {
             throw new IOException("Product is an invalid STAC item.");
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -66,13 +75,19 @@ public class STACReader extends GeoTiffProductReader {
     }
 
     @Override
-    protected Product readProductNodesImpl() throws IOException{
+    protected Product readProductNodesImpl() throws IOException {
 
         StacItem item = null;
 
-        try{
-            item = new StacItem(input);
-        }catch(ParseException e){
+        try {
+            if (input instanceof String) {
+                item = new StacItem((String) input);
+            } else if (input instanceof File) {
+                item = new StacItem((File) input);
+            } else {
+                throw new IllegalFileFormatException("Product input must be a URL for File.");
+            }
+        } catch (ParseException e) {
             throw new IOException("Product is an invalid STAC item.");
         } catch (Exception e) {
             throw new RuntimeException(e);

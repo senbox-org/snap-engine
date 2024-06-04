@@ -13,11 +13,11 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.stac;
+package org.esa.stac.reader;
 
 import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.stac.internal.StacItem;
-import org.esa.stac.reader.STACMetadataFactory;
+import org.esa.stac.StacClient;
+import org.esa.stac.StacItem;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -27,7 +27,7 @@ import org.junit.Test;
 
 public class TestMetadataFactory {
 
-    private String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
+    private final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
     StacClient client;
 
     @Before
@@ -37,8 +37,8 @@ public class TestMetadataFactory {
 
     @Test
     public void testFactoryFromItem() throws Exception {
-        StacItem item = new StacItem("https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2", client );
-        STACMetadataFactory factory = new STACMetadataFactory(item);
+        StacItem item = new StacItem("https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2");
+        StacMetadataFactory factory = new StacMetadataFactory(item);
         MetadataElement origRoot = factory.generate();
         Assert.assertTrue(origRoot.containsAttribute("id"));
         Assert.assertEquals("LC09_L2SP_047028_20221031_02_T2", origRoot.getAttributeString("id"));
@@ -54,7 +54,7 @@ public class TestMetadataFactory {
         String jsonString = "{\"a\": 3, \"b\":{\"c\":false, \"d\":[\"e\",\"f\",\"g\"], \"h\":[{\"i\":34, \"j\":45}, {\"l\":0}], \"m\":{\"n\":true, \"o\": false}}}";
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(jsonString);
-        STACMetadataFactory factory = new STACMetadataFactory(json);
+        StacMetadataFactory factory = new StacMetadataFactory(json);
         MetadataElement origRoot = factory.generate();
         Assert.assertTrue(origRoot.containsAttribute("a"));
         Assert.assertTrue(origRoot.containsElement("b"));

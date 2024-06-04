@@ -13,12 +13,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.stac.internal;
+package org.esa.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
 // The StacCatalog class allows you to interact with a specific catalog
 
 
+import org.esa.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -26,36 +27,38 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class StacCatalog implements StacComponent, STACUtils {
-    private String rootURL;
+public class StacCatalog implements StacComponent {
 
-    private JSONObject catalogJSON;
+    private final String rootURL;
 
-    private JSONObject collectionJSON;
+    private final JSONObject catalogJSON;
 
-    private String [] allCollections;
+    private final JSONObject collectionJSON;
 
-    private HashMap<String, String> collectionsWithURLs;
+    private final String[] allCollections;
 
-    private String title;
-    public StacCatalog(String catalogURL) throws Exception {
+    private final HashMap<String, String> collectionsWithURLs;
+
+    private final String title;
+
+    public StacCatalog(String catalogURL) {
         rootURL = catalogURL;
 
         catalogJSON = getJSONFromURL(catalogURL);
         collectionJSON = getJSONFromURL(catalogURL + "/collections");
 
-        title = (String) catalogJSON.get("title");
+        title = (String) catalogJSON.get(TITLE);
 
         collectionsWithURLs = new HashMap<>();
 
         // Store list of collections
         allCollections = new String[((JSONArray) collectionJSON.get("collections")).size()];
-        for (int x = 0; x < ((JSONArray) collectionJSON.get("collections")).size(); x++){
+        for (int x = 0; x < ((JSONArray) collectionJSON.get("collections")).size(); x++) {
             JSONObject curCollection = (JSONObject) ((JSONArray) collectionJSON.get("collections")).get(x);
-            allCollections[x] = (String) curCollection.get("id");
-            for (Object o: (JSONArray) curCollection.get("links")){
-                if (Objects.equals("self", ((JSONObject) o).get("rel"))){
-                    collectionsWithURLs.put((String) curCollection.get("id"), (String) ((JSONObject) o).get("href"));
+            allCollections[x] = (String) curCollection.get(ID);
+            for (Object o : (JSONArray) curCollection.get(LINKS)) {
+                if (Objects.equals(SELF, ((JSONObject) o).get(REL))) {
+                    collectionsWithURLs.put((String) curCollection.get(ID), (String) ((JSONObject) o).get(HREF));
                 }
             }
         }
@@ -87,23 +90,24 @@ public class StacCatalog implements StacComponent, STACUtils {
         return this.title;
     }
 
-    public String [] listCollections(){
+    public String[] listCollections() {
         return this.allCollections;
     }
-    public int getNumCollections(){
+
+    public int getNumCollections() {
         return this.allCollections.length;
     }
 
-    public StacCollection getCollection(String collectionName) throws Exception {
-        if (collectionsWithURLs.containsKey(collectionName)){
+    public StacCollection getCollection(String collectionName) {
+        if (collectionsWithURLs.containsKey(collectionName)) {
             return new StacCollection(collectionsWithURLs.get(collectionName));
         }
         return null;
     }
 
-    public boolean containsCollection(String collectionName){
-        for (String collection : allCollections){
-            if (Objects.equals(collectionName, collection)){
+    public boolean containsCollection(String collectionName) {
+        for (String collection : allCollections) {
+            if (Objects.equals(collectionName, collection)) {
                 return true;
             }
         }

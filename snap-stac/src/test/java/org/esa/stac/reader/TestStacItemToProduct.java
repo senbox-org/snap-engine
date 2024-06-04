@@ -13,18 +13,15 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.stac;
+package org.esa.stac.reader;
 
-import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.stac.internal.StacItem;
-import org.esa.stac.reader.StacItemToProduct;
+import org.esa.stac.StacClient;
+import org.esa.stac.StacItem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(LongTestRunner.class)
 public class TestStacItemToProduct {
 
     private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
@@ -45,7 +42,6 @@ public class TestStacItemToProduct {
         Assert.assertNotNull(productNoStreaming.getSceneGeoCoding());
         Assert.assertEquals(16, productNoStreaming.getNumBands());
     }
-    
 
 
 }

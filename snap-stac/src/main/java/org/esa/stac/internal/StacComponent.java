@@ -17,31 +17,45 @@ package org.esa.stac.internal;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 public interface StacComponent {
 
-    String stac_version = "stac_version";
+    String STAC_VERSION = "stac_version";
 
-    String id = "id";
-    String description = "description";
-    String title = "title";
-    String type = "type";
-    String license = "license";
-    String providers = "providers";
+    String ID = "id";
+    String DESCRIPTION = "description";
+    String TITLE = "title";
+    String TYPE = "type";
+    String FEATURE = "feature";
 
-    String assets = "assets";
+    String BBOX = "bbox";
+    String GEOMETRY = "geometry";
+    String COORDINATES = "coordinates";
 
-    String links = "links";
-    String rel = "rel";
-    String href = "href";
-    String self = "self";
-    String root = "root";
-    String parent = "parent";
-    String child = "child";
-    String item = "item";
+    String PROPERTIES = "properties";
+    String ASSETS = "assets";
+    String LICENSE = "license";
+    String PROVIDERS = "providers";
+
+    String LINKS = "links";
+    String REL = "rel";
+    String HREF = "href";
+    String SELF = "self";
+    String ROOT = "root";
+    String PARENT = "parent";
+    String CHILD = "child";
+    String ITEM = "item";
 
     JSONObject getJSON();
-
 
     String getId();
 
@@ -50,16 +64,37 @@ public interface StacComponent {
     String getRootURL();
 
     default String getURL(final JSONObject json, final String relType) {
-        if (json.containsKey(links)) {
-            final JSONArray linksArray = (JSONArray) json.get(links);
+        if (json.containsKey(LINKS)) {
+            final JSONArray linksArray = (JSONArray) json.get(LINKS);
             for (Object o : linksArray) {
                 final JSONObject link = (JSONObject) o;
-                String relStr = (String) link.get(rel);
+                String relStr = (String) link.get(REL);
                 if (relStr.equals(relType)) {
-                    return (String) link.get(href);
+                    return (String) link.get(HREF);
                 }
             }
         }
         return null;
+    }
+
+    static JSONObject getJSONFromURLStatic(String jsonURL) {
+        try {
+            URL url = new URL(jsonURL);
+            URLConnection request = url.openConnection();
+            request.connect();
+            String content = new String(
+                    ((InputStream) request.getContent()).readAllBytes(), StandardCharsets.UTF_8
+            );
+            JSONParser parser = new JSONParser();
+            return (JSONObject) parser.parse(content);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    default JSONObject getJSONFromURL(String jsonURL) {
+        return getJSONFromURLStatic(jsonURL);
     }
 }

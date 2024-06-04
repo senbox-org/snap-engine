@@ -19,71 +19,93 @@ package org.esa.stac;
 // The StacClient class acts as a way to search for STAC assets, and download these
 // STAC items and assets.
 
-import org.esa.stac.internal.*;
+import org.esa.stac.internal.DownloadModifier;
+import org.esa.stac.internal.EstablishedModifiers;
+import org.esa.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 
-public class StacClient implements STACUtils {
+
+public class StacClient {
 
     private DownloadModifier downloadModifier;
 
-    private boolean signDownloads;
+    private final boolean signDownloads;
 
     public String title;
 
-    private StacCatalog catalog;
+    private final StacCatalog catalog;
 
     private final String stacURL;
 
-    public StacClient(final String catalogURL) throws Exception {
+    public StacClient(final String catalogURL) {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
-        if(catalogURL.contains("planetarycomputer.microsoft.com")){
+        if (catalogURL.contains("planetarycomputer.microsoft.com")) {
             this.downloadModifier = EstablishedModifiers.planetaryComputer();
             this.signDownloads = true;
-        }else{
+        } else {
             this.signDownloads = false;
         }
     }
 
-    public StacClient(final String catalogURL, DownloadModifier modifierFunction) throws Exception {
+    public StacClient(final String catalogURL, final DownloadModifier modifierFunction) {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
         this.downloadModifier = modifierFunction;
         this.signDownloads = true;
     }
 
-    public StacCatalog getCatalog(){
+    public static StacClient createClient(final StacItem stacItem) throws IOException {
+        for (Object o : stacItem.linksArray) {
+            JSONObject curLinkObject = (JSONObject) o;
+            if (curLinkObject.get(StacComponent.REL).equals(StacComponent.ROOT)) {
+                String mainURL = (String) curLinkObject.get(StacComponent.HREF);
+                try {
+                    return new StacClient(mainURL);
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+        }
+        throw new IOException("No root link found in STAC item");
+    }
+
+    public StacCatalog getCatalog() {
         return this.catalog;
     }
 
     // Performs a search and returns an array of STAC Items from the server that match
     // the search
-    public StacItem[] search(String [] collections, double [] bbox, String datetime) throws Exception {
+    public StacItem[] search(final String[] collections, final double[] bbox, String datetime) throws Exception {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
         String validCollections = "";
-        for (String collectionName : collections){
-            if (this.catalog.containsCollection(collectionName)){
+        for (String collectionName : collections) {
+            if (this.catalog.containsCollection(collectionName)) {
                 validCollections = validCollections + collectionName + ",";
             }
         }
-        if (Objects.equals(validCollections, "")){
+        if (Objects.equals(validCollections, "")) {
             return new StacItem[0];
         }
         validCollections = validCollections.substring(0, validCollections.length() - 1);
         String query = searchEndpoint + "collections=" + validCollections +
                 "&bbox=" + bboxStr +
                 "&datetime=" + datetime;
-        JSONObject queryResults = getJSONFromURL(query);
-        JSONArray jsonFeatures =  getAllFeatures(queryResults);
-        StacItem [] items = new StacItem[jsonFeatures.size()];
-        for (int x = 0; x < jsonFeatures.size(); x++){
-            items[x] = new StacItem(jsonFeatures.get(x), this);
+        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+        JSONArray jsonFeatures = getAllFeatures(queryResults);
+        StacItem[] items = new StacItem[jsonFeatures.size()];
+        for (int x = 0; x < jsonFeatures.size(); x++) {
+            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
         }
         return items;
     }
@@ -94,11 +116,11 @@ public class StacClient implements STACUtils {
     //
     //}
 
-    private String signURL(StacItem.StacAsset asset){
-        if(signDownloads){
+    private String signURL(StacItem.StacAsset asset) {
+        if (signDownloads) {
             return downloadModifier.signURL(asset.getURL());
-        }else{
-             return asset.getURL();
+        } else {
+            return asset.getURL();
         }
     }
 
@@ -108,7 +130,7 @@ public class StacClient implements STACUtils {
         return inputStream;
     }
 
-    public File downloadAsset(StacItem.StacAsset asset, File targetFolder){
+    public File downloadAsset(StacItem.StacAsset asset, File targetFolder) {
 
         String outputFilename = asset.getFileName();
 
@@ -116,7 +138,7 @@ public class StacClient implements STACUtils {
         String downloadURL = signURL(asset);
         try (BufferedInputStream in = new BufferedInputStream(new URL(downloadURL).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(new File(targetFolder.getAbsolutePath(), outputFilename))) {
-            byte dataBuffer[] = new byte[1024];
+            byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
@@ -128,13 +150,31 @@ public class StacClient implements STACUtils {
         return null;
     }
 
-    public void downloadItem(StacItem item, File targetFolder){
+    public void downloadItem(StacItem item, File targetFolder) {
         File outputFolder = new File(targetFolder, item.getId());
         outputFolder.mkdirs();
         System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.getAbsolutePath());
-        for (String s : item.listAssetIds()){
+        for (String s : item.listAssetIds()) {
             StacItem.StacAsset curAsset = item.getAsset(s);
             downloadAsset(curAsset, outputFolder);
         }
+    }
+
+    private JSONArray getAllFeaturesRecursive(JSONObject rootObject, JSONArray returnArray) {
+        JSONArray features = (JSONArray) rootObject.get("features");
+        JSONArray links = (JSONArray) rootObject.get(StacComponent.LINKS);
+        returnArray.addAll(features);
+        for (Object o : links) {
+            if (Objects.equals("next", ((JSONObject) o).get(StacComponent.REL))) {
+                getAllFeaturesRecursive(
+                        StacComponent.getJSONFromURLStatic((String) ((JSONObject) o).get(StacComponent.HREF)),
+                        returnArray);
+            }
+        }
+        return returnArray;
+    }
+
+    private JSONArray getAllFeatures(JSONObject rootObject) {
+        return getAllFeaturesRecursive(rootObject, new JSONArray());
     }
 }
