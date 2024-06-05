@@ -49,6 +49,42 @@ public class TestClient {
     }
 
     @Test
+    public void testSearchWorldCover() throws Exception {
+        StacItem[] results = client.search(
+                new String[]{"esa-worldcover"},
+                new double[]{-124.2751, 45.5469, -123.9613, 45.7458},
+                null);
+        Assert.assertEquals(2, results.length);
+
+        File tmpDir = new File("/tmp");
+        if (!tmpDir.exists()) {
+            return;
+        }
+
+        File folder = client.downloadItem(results[0], tmpDir);
+        Assert.assertTrue(folder.exists());
+        Assert.assertEquals(2, folder.listFiles().length);
+    }
+
+    @Test
+    public void testSearchESRILULC() throws Exception {
+        StacItem[] results = client.search(
+                new String[]{"io-lulc"},
+                new double[]{-124.2751, 45.5469, -123.9613, 45.7458},
+                null);
+        Assert.assertEquals(1, results.length);
+
+        File tmpDir = new File("/tmp");
+        if (!tmpDir.exists()) {
+            return;
+        }
+
+        File folder = client.downloadItem(results[0], tmpDir);
+        Assert.assertTrue(folder.exists());
+        Assert.assertEquals(1, folder.listFiles().length);
+    }
+
+    @Test
     public void testStream() throws Exception {
         String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
         StacItem item = new StacItem(itemURL);
@@ -73,17 +109,18 @@ public class TestClient {
         outputFile.delete();
 
     }
-/*
-    Very long running test. 
-    @Test @Ignore
-    public void testDownloadItem() throws Exception {
-        File tmpDir = new File("/tmp");
-        if(!tmpDir.exists()){
-            return;
-        }
-        String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
-        StacItem item = new StacItem(itemURL);
-        client.downloadItem(item, tmpDir);
-    }
-*/
+
+    //Very long running test.
+//    @Test
+//    public void testDownloadItem() throws Exception {
+//        File tmpDir = new File("/tmp");
+//        if(!tmpDir.exists()){
+//            return;
+//        }
+//        String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
+//        StacItem item = new StacItem(itemURL);
+//        File folder = client.downloadItem(item, tmpDir);
+//        Assert.assertTrue(folder.exists());
+//    }
+
 }

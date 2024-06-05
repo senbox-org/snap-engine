@@ -83,8 +83,7 @@ public class StacClient {
         return this.catalog;
     }
 
-    // Performs a search and returns an array of STAC Items from the server that match
-    // the search
+    // Performs a search and returns an array of STAC Items from the server that match the search
     public StacItem[] search(final String[] collections, final double[] bbox, String datetime) throws Exception {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
@@ -99,8 +98,9 @@ public class StacClient {
         }
         validCollections = validCollections.substring(0, validCollections.length() - 1);
         String query = searchEndpoint + "collections=" + validCollections +
-                "&bbox=" + bboxStr +
-                "&datetime=" + datetime;
+                "&bbox=" + bboxStr;
+        if(datetime != null) query = query + "&datetime=" + datetime;
+
         JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
         JSONArray jsonFeatures = getAllFeatures(queryResults);
         StacItem[] items = new StacItem[jsonFeatures.size()];
@@ -150,7 +150,7 @@ public class StacClient {
         return null;
     }
 
-    public void downloadItem(StacItem item, File targetFolder) {
+    public File downloadItem(StacItem item, File targetFolder) {
         File outputFolder = new File(targetFolder, item.getId());
         outputFolder.mkdirs();
         System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.getAbsolutePath());
@@ -158,6 +158,7 @@ public class StacClient {
             StacItem.StacAsset curAsset = item.getAsset(s);
             downloadAsset(curAsset, outputFolder);
         }
+        return outputFolder;
     }
 
     private JSONArray getAllFeaturesRecursive(JSONObject rootObject, JSONArray returnArray) {
