@@ -16,7 +16,7 @@
 package org.esa.stac.database;
 
 import org.esa.snap.core.util.SystemUtils;
-import org.h2gis.functions.factory.H2GISFunctions;
+//import org.h2gis.functions.factory.H2GISFunctions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public abstract class AbstractDatabase implements Database {
             }
             try {
                 if (currentDatabaseVersion == 0) {
-                    H2GISFunctions.load(connection);
+                    //H2GISFunctions.load(connection);
                 }
                 connection.setAutoCommit(false);
                 for (Map.Entry<Integer, List<String>> entry : allStatements.entrySet()) {

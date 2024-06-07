@@ -15,7 +15,7 @@
  */
 package org.esa.stac.database;
 
-import org.h2gis.utilities.SpatialResultSet;
+//import org.h2gis.utilities.SpatialResultSet;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -29,11 +29,11 @@ public class StacRecord {
     public String stacID, selfHREF;
     public Timestamp time;
 
-    public StacRecord(final SpatialResultSet resultSet) throws SQLException {
-        int id = resultSet.getInt("id");
-        stacID = resultSet.getString(STAC_ID);
-        selfHREF = resultSet.getString(SELF_HREF);
-
-        time = resultSet.getTimestamp(ACQUISITION_DATE);
-    }
+//    public StacRecord(final SpatialResultSet resultSet) throws SQLException {
+//        int id = resultSet.getInt("id");
+//        stacID = resultSet.getString(STAC_ID);
+//        selfHREF = resultSet.getString(SELF_HREF);
+//
+//        time = resultSet.getTimestamp(ACQUISITION_DATE);
+//    }
 }
