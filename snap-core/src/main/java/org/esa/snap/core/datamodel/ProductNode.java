@@ -105,12 +105,13 @@ public abstract class ProductNode extends ExtensibleObject {
     private void setNodeName(String trimmedName, boolean silent) {
         Guardian.assertNotNullOrEmpty("name contains only spaces", trimmedName);
         if (!ObjectUtils.equalObjects(name, trimmedName)) {
-            Product product = getProduct();
-            if (product != null) {
-                Assert.argument(!product.containsRasterDataNode(trimmedName),
-                                "The Product '" + product.getName() + "' already contains " +
-                                "a raster data node with the name '" + trimmedName + "'.");
-            }
+//			  Removed check in order to fix issue SNAP-3631
+//            Product product = getProduct();
+//            if (product != null) {
+//                Assert.argument(!product.containsRasterDataNode(trimmedName),
+//                                "The Product '" + product.getName() + "' already contains " +
+//                                "a raster data node with the name '" + trimmedName + "'.");
+//            }
             if (!isValidNodeName(trimmedName)) {
                 throw new IllegalArgumentException("The given name '" + trimmedName + "' is not a valid node name.");
             }
