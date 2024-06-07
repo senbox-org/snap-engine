@@ -38,7 +38,7 @@ public class StacClient {
 
     private DownloadModifier downloadModifier;
 
-    private final boolean signDownloads;
+    private boolean signDownloads;
 
     public String title;
 
@@ -47,21 +47,22 @@ public class StacClient {
     private final String stacURL;
 
     public StacClient(final String catalogURL) {
-        this.stacURL = catalogURL;
-        this.catalog = new StacCatalog(catalogURL);
-        if (catalogURL.contains("planetarycomputer.microsoft.com")) {
-            this.downloadModifier = EstablishedModifiers.planetaryComputer();
-            this.signDownloads = true;
-        } else {
-            this.signDownloads = false;
-        }
+        this(catalogURL, null);
     }
 
     public StacClient(final String catalogURL, final DownloadModifier modifierFunction) {
         this.stacURL = catalogURL;
         this.catalog = new StacCatalog(catalogURL);
-        this.downloadModifier = modifierFunction;
-        this.signDownloads = true;
+        this.signDownloads = false;
+        if(modifierFunction != null) {
+            this.downloadModifier = modifierFunction;
+            this.signDownloads = true;
+        } else {
+            if (catalogURL.contains("planetarycomputer.microsoft.com")) {
+                this.downloadModifier = EstablishedModifiers.planetaryComputer();
+                this.signDownloads = true;
+            }
+        }
     }
 
     public static StacClient createClient(final StacItem stacItem) throws IOException {
@@ -116,7 +117,7 @@ public class StacClient {
     //
     //}
 
-    private String signURL(StacItem.StacAsset asset) {
+    public String signURL(StacItem.StacAsset asset) {
         if (signDownloads) {
             return downloadModifier.signURL(asset.getURL());
         } else {
@@ -130,8 +131,8 @@ public class StacClient {
         return inputStream;
     }
 
-    public File downloadAsset(StacItem.StacAsset asset, File targetFolder) {
-
+    public File downloadAsset(StacItem.StacAsset asset, File targetFolder) throws IOException {
+        targetFolder.mkdirs();
         String outputFilename = asset.getFileName();
 
         System.out.println("Downloading asset " + asset.getId());
@@ -144,13 +145,10 @@ public class StacClient {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
             return new File(targetFolder.getAbsolutePath(), outputFilename);
-        } catch (IOException e) {
-            // handle exception
         }
-        return null;
     }
 
-    public File downloadItem(StacItem item, File targetFolder) {
+    public File downloadItem(StacItem item, File targetFolder) throws IOException {
         File outputFolder = new File(targetFolder, item.getId());
         outputFolder.mkdirs();
         System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.getAbsolutePath());
