@@ -22,10 +22,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
-            <scope>compile</scope>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-engine-utilities</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -39,10 +45,16 @@
         </dependency>
 
         <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>h2gis</artifactId>
             <version>1.5.0</version>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>org.mockito</groupId>

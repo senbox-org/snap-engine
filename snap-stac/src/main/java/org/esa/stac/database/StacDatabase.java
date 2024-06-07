@@ -16,8 +16,8 @@
 package org.esa.stac.database;
 
 import org.esa.stac.StacItem;
-import org.h2gis.utilities.SFSUtilities;
-import org.h2gis.utilities.SpatialResultSet;
+//import org.h2gis.utilities.SFSUtilities;
+//import org.h2gis.utilities.SpatialResultSet;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -142,19 +142,18 @@ public class StacDatabase extends AbstractDatabase {
     public List<StacRecord> search(final Map<String, Object> parameterValues) throws SQLException {
 
         String sqlQuery = generateSQLQuery(parameterValues);
-
         System.out.println(sqlQuery);
 
-        final Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
-
         final List<StacRecord> recordList = new ArrayList<>();
-        try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sqlQuery)) {
-            try (SpatialResultSet resultSet = prepareStatement.executeQuery().unwrap(SpatialResultSet.class)) {
-                while (resultSet.next()) {
-                    recordList.add(new StacRecord(resultSet));
-                }
-            }
-        }
+//        final Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
+//
+//        try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sqlQuery)) {
+//            try (SpatialResultSet resultSet = prepareStatement.executeQuery().unwrap(SpatialResultSet.class)) {
+//                while (resultSet.next()) {
+//                    recordList.add(new StacRecord(resultSet));
+//                }
+//            }
+//        }
         return recordList;
     }
 
