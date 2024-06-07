@@ -59,17 +59,17 @@ public class CopernicusDownloader {
         }
         //System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
 
-        try {
-            BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream());
+        try (BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream())) {;
             final Path installDirPath = Paths.get(installDir);
             if (Files.notExists(installDirPath)) {
                 Files.createDirectories(installDirPath);
             }
-            FileOutputStream fileOutputStream = new FileOutputStream(installDir + "/" + target_filename);
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = is.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(installDir + "/" + target_filename)) {
+                byte[] dataBuffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = is.read(dataBuffer, 0, 1024)) != -1) {
+                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+                }
             }
         } catch (Exception e) {
             throw new FileNotFoundException("Tile does not exist");
