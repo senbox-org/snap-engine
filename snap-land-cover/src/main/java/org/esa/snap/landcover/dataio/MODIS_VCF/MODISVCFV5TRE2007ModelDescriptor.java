@@ -18,8 +18,8 @@ package org.esa.snap.landcover.dataio.MODIS_VCF;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.engine_utilities.util.Settings;
-import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
-import org.esa.snap.landcover.dataio.LandCoverModel;
+import org.esa.snap.landcover.AbstractLandCoverModelDescriptor;
+import org.esa.snap.landcover.LandCoverModel;
 
 import java.io.File;
 import java.io.IOException;

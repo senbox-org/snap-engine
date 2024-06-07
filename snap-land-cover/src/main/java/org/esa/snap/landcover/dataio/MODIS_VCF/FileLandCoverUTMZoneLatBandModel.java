@@ -18,9 +18,9 @@ package org.esa.snap.landcover.dataio.MODIS_VCF;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.landcover.dataio.FileLandCoverModel;
-import org.esa.snap.landcover.dataio.FileLandCoverTile;
-import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
+import org.esa.snap.landcover.FileLandCoverModel;
+import org.esa.snap.landcover.FileLandCoverTile;
+import org.esa.snap.landcover.LandCoverModelDescriptor;
 import uk.me.jstott.jcoord.LatLng;
 
 import java.io.File;

@@ -39,11 +39,11 @@ import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
-import org.esa.snap.landcover.dataio.FileLandCoverModelDescriptor;
-import org.esa.snap.landcover.dataio.LandCoverFactory;
-import org.esa.snap.landcover.dataio.LandCoverModel;
-import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
-import org.esa.snap.landcover.dataio.LandCoverModelRegistry;
+import org.esa.snap.landcover.FileLandCoverModelDescriptor;
+import org.esa.snap.landcover.LandCoverFactory;
+import org.esa.snap.landcover.LandCoverModel;
+import org.esa.snap.landcover.LandCoverModelDescriptor;
+import org.esa.snap.landcover.LandCoverModelRegistry;
 
 import java.awt.image.RenderedImage;
 import java.io.File;
