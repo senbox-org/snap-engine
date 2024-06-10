@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.landcover;
+package org.esa.snap.landcover.dataio;
 
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;

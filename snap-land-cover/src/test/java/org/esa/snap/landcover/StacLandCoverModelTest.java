@@ -17,6 +17,8 @@ package org.esa.snap.landcover;
 
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.landcover.dataio.ESRILULC.ESRILULC2020ModelDescriptor;
+import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
+import org.esa.snap.landcover.dataio.StacLandCoverModel;
 import org.junit.Before;
 import org.junit.Test;
 

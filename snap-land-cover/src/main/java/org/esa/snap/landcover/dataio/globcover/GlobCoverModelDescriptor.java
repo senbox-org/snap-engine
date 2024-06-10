@@ -18,9 +18,9 @@ package org.esa.snap.landcover.dataio.globcover;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.engine_utilities.util.Settings;
-import org.esa.snap.landcover.AbstractLandCoverModelDescriptor;
-import org.esa.snap.landcover.FileLandCoverModel;
-import org.esa.snap.landcover.LandCoverModel;
+import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
+import org.esa.snap.landcover.dataio.FileLandCoverModel;
+import org.esa.snap.landcover.dataio.LandCoverModel;
 
 import java.io.File;
 import java.io.IOException;

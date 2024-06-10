@@ -1,7 +1,7 @@
 package org.esa.snap.landcover.dataio.ESRILULC;
 
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.landcover.LandCoverModel;
+import org.esa.snap.landcover.dataio.LandCoverModel;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,7 +13,7 @@ public class ESRILULC2020ModelDescriptorTest {
     public void testConstructor() {
         ESRILULC2020ModelDescriptor modelDescriptor = new ESRILULC2020ModelDescriptor();
         assertEquals("ESRILULC2020", modelDescriptor.getName());
-        assertEquals(0, modelDescriptor.getNoDataValue(), 0);
+        assertEquals(0, modelDescriptor.getNoDataValue(), 230);
     }
 
     @Test

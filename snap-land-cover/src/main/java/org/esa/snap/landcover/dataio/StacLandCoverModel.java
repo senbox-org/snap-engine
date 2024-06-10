@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.landcover;
+package org.esa.snap.landcover.dataio;
 
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -22,8 +22,10 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.stac.StacClient;
-import org.esa.stac.StacItem;
+import org.esa.snap.stac.StacClient;
+import org.esa.snap.stac.StacItem;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.io.File;
@@ -38,6 +40,7 @@ public class StacLandCoverModel implements LandCoverModel {
     private final StacClient client;
     protected final LandCoverModelDescriptor descriptor;
     protected String aoiWKT;
+    protected JSONObject aoiGeoJSON;
     protected FileLandCoverTile[] tileList = null;
 
     protected static final ProductReaderPlugIn productReaderPlugIn = new GeoTiffProductReaderPlugIn();
@@ -67,22 +70,41 @@ public class StacLandCoverModel implements LandCoverModel {
      */
     @Override
     public void setAOIGeoCoding(final GeoCoding geoCoding, final Dimension rasterDim) {
-        final List<GeoPos> geometry = new ArrayList<>();
-        geometry.add(geoCoding.getGeoPos(new PixelPos(0, 0), null));
-        geometry.add(geoCoding.getGeoPos(new PixelPos(rasterDim.width, 0), null));
-        geometry.add(geoCoding.getGeoPos(new PixelPos(rasterDim.width, rasterDim.height), null));
-        geometry.add(geoCoding.getGeoPos(new PixelPos(0, rasterDim.height), null));
-        geometry.add(geoCoding.getGeoPos(new PixelPos(0, 0), null));
+        final List<GeoPos> coords = new ArrayList<>();
+        coords.add(geoCoding.getGeoPos(new PixelPos(0, 0), null));
+        coords.add(geoCoding.getGeoPos(new PixelPos(rasterDim.width, 0), null));
+        coords.add(geoCoding.getGeoPos(new PixelPos(rasterDim.width, rasterDim.height), null));
+        coords.add(geoCoding.getGeoPos(new PixelPos(0, rasterDim.height), null));
+        coords.add(geoCoding.getGeoPos(new PixelPos(0, 0), null));
 
-        aoiWKT = toWKT(geometry);
+        aoiGeoJSON = toGeoJSON(coords);
     }
 
-    private static String toWKT(final List<GeoPos> geometry) {
+    private static JSONObject toGeoJSON(final List<GeoPos> coords) {
+
+        JSONObject geometry = new JSONObject();
+        JSONArray coordinates = new JSONArray();
+        JSONArray holesArray = new JSONArray();
+        coordinates.add(holesArray);
+        geometry.put("type", "Polygon");
+        geometry.put("coordinates", coordinates);
+
+        for (GeoPos geoPos : coords) {
+            JSONArray lonlats = new JSONArray();
+            holesArray.add(lonlats);
+            lonlats.add(geoPos.lon);
+            lonlats.add(geoPos.lat);
+        }
+
+        return geometry;
+    }
+
+    private static String toWKT(final List<GeoPos> coords) {
 
         StringBuilder wkt = new StringBuilder();
         wkt.append("POLYGON").append("((");
 
-        for (GeoPos geoPos : geometry) {
+        for (GeoPos geoPos : coords) {
             wkt.append(geoPos.lon)
                     .append(" ")
                     .append(geoPos.lat)
@@ -105,10 +127,10 @@ public class StacLandCoverModel implements LandCoverModel {
     }
 
     @Override
-    public double getLandCover(final GeoPos geoPos) throws Exception {
+    public synchronized double getLandCover(final GeoPos geoPos) throws Exception {
         try {
             if (tileList == null) {
-                search();
+                search(aoiGeoJSON);
             }
             for (FileLandCoverTile tile : tileList) {
                 if (tile.getTileGeocoding() == null)
@@ -133,10 +155,10 @@ public class StacLandCoverModel implements LandCoverModel {
         }
     }
 
-    private synchronized void search() throws Exception {
+    private synchronized void search(JSONObject aoi) throws Exception {
         StacItem[] results = client.search(
                 new String[]{"io-lulc"},
-                new double[]{-124.2751, 45.5469, -123.9613, 45.7458},
+                aoi,
                 null);
 
         downloadAssets(results);
@@ -153,11 +175,13 @@ public class StacLandCoverModel implements LandCoverModel {
                 String fileName = asset.getFileName();
                 URL remoteURL = new URL(client.signURL(asset));
 
-                System.out.println("Downloading " + fileName + " from " + remoteURL);
-                File folder = client.downloadAsset(asset, descriptor.getInstallDir());
-                File[] files = folder.listFiles();
-
                 File localFile = new File(descriptor.getInstallDir(), fileName);
+                if(!localFile.exists()) {
+
+                    System.out.println("Downloading " + fileName + " from " + remoteURL);
+                    File folder = client.downloadAsset(asset, descriptor.getInstallDir());
+                }
+
                 ProductReader reader = productReaderPlugIn.createReaderInstance();
                 FileLandCoverTile tile = new FileLandCoverTile(this, localFile, remoteURL, reader, ".tif");
                 tiles.add(tile);
@@ -166,26 +190,6 @@ public class StacLandCoverModel implements LandCoverModel {
 
         tileList = tiles.toArray(new FileLandCoverTile[0]);
     }
-
-//    private void downloadAssets(List<StacRecord> recordList) throws Exception {
-//        final List<FileLandCoverTile> tiles = new ArrayList<>();
-//        for(StacRecord stacRecord : recordList) {
-//
-//            StacItem stacItem = client.getItem(stacRecord.selfHREF);
-//
-//            Map<String, Assets.Asset> assets = stacItem.getImageAssets();
-//
-//            String href = assets.values().iterator().next().href;
-//            String fileName = href.substring(href.lastIndexOf("/")+1);
-//            File localFile = new File(descriptor.getInstallDir(), fileName);
-//            URL remoteURL = new URL(href.replace(fileName, ""));
-//            ProductReader reader = productReaderPlugIn.createReaderInstance();
-//            FileLandCoverTile tile = new FileLandCoverTile(this, localFile, remoteURL, reader, ".tif");
-//            tiles.add(tile);
-//        }
-//
-//        tileList = tiles.toArray(new FileLandCoverTile[0]);
-//    }
 
     @Override
     public PixelPos getIndex(final GeoPos geoPos) {
