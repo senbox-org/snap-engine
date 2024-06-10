@@ -3,8 +3,9 @@
  */
 package org.esa.snap.dataio.bigtiff;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -40,6 +41,9 @@ public class BigGeoTiffWriterTest {
         final Band bandInt16 = outProduct.addBand("B1", ProductData.TYPE_INT16);
         bandInt16.setDataElems(createShortData(getProductSize(), 23));
         ImageManager.getInstance().getSourceImage(bandInt16, 0);
+        final Band bandInt16_2 = outProduct.addBand("B2", ProductData.TYPE_INT16);
+        bandInt16_2.setDataElems(createShortData(getProductSize(), 23));
+        ImageManager.getInstance().getSourceImage(bandInt16_2, 0);
     }
 
     @After
@@ -57,6 +61,22 @@ public class BigGeoTiffWriterTest {
     public void testWriteProductIssue3631() {
     	// verify the name of the product
     	assertEquals("P", outProduct.getName());
+    	// check that the product has two bands named B1 and B2
+    	final String[] bandNames = outProduct.getBandNames();
+    	assertArrayEquals(new String[] {"B1", "B2"}, bandNames);
+
+    	// verify that two bands with the same name cannot be defined.
+    	final Band b2 = outProduct.getBand("B2");
+    	assertNotNull(b2);
+
+    	try {
+    		b2.setName("B1");
+    		fail("Two bands with the same name were defined!");
+    	} catch(Exception ex) {
+    		if (!(ex instanceof IllegalArgumentException)) {
+        		fail("Invalid exception thrown when setting the same name for a band: " + ex.getClass().getName());
+    		}
+    	}
     	
         // save the product with the name of a band
     	final File location = new File(TEST_DIR, "B1.tif");

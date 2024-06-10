@@ -99,19 +99,30 @@ public abstract class ProductNode extends ExtensibleObject {
      */
     public void setName(final String name) {
         Guardian.assertNotNull("name", name);
-        setNodeName(name.trim(), false);
+        setNodeName(name.trim(), false, false);
     }
 
-    private void setNodeName(String trimmedName, boolean silent) {
+    /**
+     * Perform various checks and set the new name . 
+     * 
+     * @param trimmedName the name
+     * @param silent signal or not the change
+     * @param allowSameName allow the name to be identical to another item's name 
+     */
+    protected void setNodeName(String trimmedName, boolean silent, boolean allowSameName) {
+    	// The method is made protected in order to be called from the Product class to 
+    	// allow the name of the product to be identical to the name of a band
+    	// This was needed for issue SNAP-3631
         Guardian.assertNotNullOrEmpty("name contains only spaces", trimmedName);
         if (!ObjectUtils.equalObjects(name, trimmedName)) {
-//			  Removed check in order to fix issue SNAP-3631
-//            Product product = getProduct();
-//            if (product != null) {
-//                Assert.argument(!product.containsRasterDataNode(trimmedName),
-//                                "The Product '" + product.getName() + "' already contains " +
-//                                "a raster data node with the name '" + trimmedName + "'.");
-//            }
+        	if (!allowSameName) {
+                Product product = getProduct();
+                if (product != null) {
+                    Assert.argument(!product.containsRasterDataNode(trimmedName),
+                                    "The Product '" + product.getName() + "' already contains " +
+                                    "a raster data node with the name '" + trimmedName + "'.");
+                }
+        	}
             if (!isValidNodeName(trimmedName)) {
                 throw new IllegalArgumentException("The given name '" + trimmedName + "' is not a valid node name.");
             }
