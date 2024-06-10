@@ -2892,7 +2892,7 @@ public class Product extends ProductNode implements Closeable {
         int indexOf(String name);
     }
 
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BGEntry
+    @Deprecated // use eu.esa.snap.core.datamodel.group.Entry
     interface Entry {
 
         boolean matches(String name);
@@ -3086,7 +3086,7 @@ public class Product extends ProductNode implements Closeable {
 
     }
 
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BGEntryImpl
+    @Deprecated // use eu.esa.snap.core.datamodel.group.EntryImpl
     private static class EntryImpl implements Entry {
 
         private final String group;
@@ -3102,7 +3102,7 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BGWildCardEntry
+    @Deprecated // use eu.esa.snap.core.datamodel.group.WildCardEntry
     private static class WildCardEntry implements Entry {
 
         private final WildcardMatcher wildcardMatcher;

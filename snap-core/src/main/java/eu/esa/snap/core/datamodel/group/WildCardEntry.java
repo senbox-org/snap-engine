@@ -2,11 +2,11 @@ package eu.esa.snap.core.datamodel.group;
 
 import org.esa.snap.core.util.io.WildcardMatcher;
 
-public class BGWildCardEntry implements BGEntry {
+public class WildCardEntry implements Entry {
 
     private final WildcardMatcher wildcardMatcher;
 
-    protected BGWildCardEntry(String group) {
+    protected WildCardEntry(String group) {
         wildcardMatcher = new WildcardMatcher(group);
     }
 

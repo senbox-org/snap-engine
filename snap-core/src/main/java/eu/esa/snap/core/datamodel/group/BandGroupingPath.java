@@ -3,22 +3,22 @@ package eu.esa.snap.core.datamodel.group;
 public class BandGroupingPath {
 
     private final String[] groups;
-    private final BGEntry[] entries;
+    private final Entry[] entries;
 
     BandGroupingPath(String[] groups) {
         this.groups = groups;
-        entries = new BGEntry[groups.length];
+        entries = new Entry[groups.length];
         for (int i = 0; i < groups.length; i++) {
             if (groups[i].contains("*") || groups[i].contains("?")) {
-                entries[i] = new BGWildCardEntry(groups[i]);
+                entries[i] = new WildCardEntry(groups[i]);
             } else {
-                entries[i] = new BGEntryImpl(groups[i]);
+                entries[i] = new EntryImpl(groups[i]);
             }
         }
     }
 
     boolean contains(String name) {
-        for (BGEntry entry : entries) {
+        for (Entry entry : entries) {
             if (!entry.matches(name)) {
                 return false;
             }

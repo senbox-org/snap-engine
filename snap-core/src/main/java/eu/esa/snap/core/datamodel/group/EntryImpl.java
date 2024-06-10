@@ -1,13 +1,12 @@
 package eu.esa.snap.core.datamodel.group;
 
-public class BGEntryImpl implements BGEntry {
+public class EntryImpl implements Entry {
 
     private final String group;
 
-    protected BGEntryImpl(String group) {
+    protected EntryImpl(String group) {
         this.group = group;
     }
-
 
     @Override
     public boolean matches(String name) {
