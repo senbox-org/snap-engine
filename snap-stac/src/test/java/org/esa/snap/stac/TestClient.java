@@ -15,15 +15,17 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
 
-//@RunWith(LongTestRunner.class)
+@RunWith(LongTestRunner.class)
 public class TestClient {
     private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
 
@@ -63,7 +65,7 @@ public class TestClient {
 
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
-        Assert.assertEquals(2, folder.listFiles().length);
+        Assert.assertEquals(4, folder.listFiles().length);
     }
 
     @Test
@@ -81,7 +83,7 @@ public class TestClient {
 
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
-        Assert.assertEquals(1, folder.listFiles().length);
+        Assert.assertEquals(3, folder.listFiles().length);
     }
 
     @Test

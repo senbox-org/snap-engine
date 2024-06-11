@@ -25,6 +25,10 @@ public class EstablishedModifiers {
             for (int tryCount = 0; tryCount < 20; tryCount++) {
                 try {
                     JSONObject signedObject = StacComponent.getJSONFromURLStatic(signingURL + input);
+                    String expiry = (String) signedObject.get("msft:expiry");
+                    if(expiry == null) {
+                        return input;
+                    }
                     return (String) signedObject.get("href");
                 } catch (Exception e) {
                     try {

@@ -111,6 +111,32 @@ public class StacClient {
         return items;
     }
 
+    // Performs a search and returns an array of STAC Items from the server that match the search
+    public StacItem[] search(final String[] collections, final JSONObject geometry, String datetime) throws Exception {
+        String searchEndpoint = stacURL + "/search?";
+        String validCollections = "";
+        for (String collectionName : collections) {
+            if (this.catalog.containsCollection(collectionName)) {
+                validCollections = validCollections + collectionName + ",";
+            }
+        }
+        if (Objects.equals(validCollections, "")) {
+            return new StacItem[0];
+        }
+        validCollections = validCollections.substring(0, validCollections.length() - 1);
+        String query = searchEndpoint + "collections=" + validCollections +
+                "&intersects=" + geometry;
+        if(datetime != null) query = query + "&datetime=" + datetime;
+
+        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+        JSONArray jsonFeatures = getAllFeatures(queryResults);
+        StacItem[] items = new StacItem[jsonFeatures.size()];
+        for (int x = 0; x < jsonFeatures.size(); x++) {
+            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+        }
+        return items;
+    }
+
     // Search using a defined GeoJSON polygon.
     // TODO implement.
     //public void search(String [] collections, JSONObject intersects, String datetime){
@@ -134,6 +160,9 @@ public class StacClient {
     public File downloadAsset(StacItem.StacAsset asset, File targetFolder) throws IOException {
         targetFolder.mkdirs();
         String outputFilename = asset.getFileName();
+        if(outputFilename.contains("?")) {
+            outputFilename = outputFilename.substring(0, outputFilename.indexOf("?"));
+        }
 
         System.out.println("Downloading asset " + asset.getId());
         String downloadURL = signURL(asset);

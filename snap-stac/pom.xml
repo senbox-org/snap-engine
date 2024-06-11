@@ -76,6 +76,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.*</publicPackage>
+                        <publicPackage>org.json.simple.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
