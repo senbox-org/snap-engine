@@ -21,6 +21,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bc.ceres.annotation.STTM;
+
 /**
  * Tests for the BigGeoTiff writter
  */
@@ -58,6 +60,7 @@ public class BigGeoTiffWriterTest {
      * Verify SNAP-3631
      */
     @Test
+    @STTM("SNAP-3631")
     public void testWriteProductIssue3631() {
     	// verify the name of the product
     	assertEquals("P", outProduct.getName());
