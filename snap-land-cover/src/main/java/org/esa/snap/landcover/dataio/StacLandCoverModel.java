@@ -39,7 +39,6 @@ public class StacLandCoverModel implements LandCoverModel {
 
     private final StacClient client;
     protected final LandCoverModelDescriptor descriptor;
-    protected String aoiWKT;
     protected JSONObject aoiGeoJSON;
     protected FileLandCoverTile[] tileList = null;
 
@@ -99,23 +98,6 @@ public class StacLandCoverModel implements LandCoverModel {
         return geometry;
     }
 
-    private static String toWKT(final List<GeoPos> coords) {
-
-        StringBuilder wkt = new StringBuilder();
-        wkt.append("POLYGON").append("((");
-
-        for (GeoPos geoPos : coords) {
-            wkt.append(geoPos.lon)
-                    .append(" ")
-                    .append(geoPos.lat)
-                    .append(",");
-        }
-
-        wkt.setLength(wkt.length() - 1);
-        wkt.append("))");
-        return wkt.toString();
-    }
-
     @Override
     public LandCoverModelDescriptor getDescriptor() {
         return descriptor;
@@ -155,22 +137,49 @@ public class StacLandCoverModel implements LandCoverModel {
         }
     }
 
-    private synchronized void search(JSONObject aoi) throws Exception {
+    private synchronized void search(final JSONObject aoi) throws Exception {
         StacItem[] results = client.search(
-                new String[]{"io-lulc"},
+                new String[]{descriptor.getCollectionId()},
                 aoi,
                 null);
 
+        results = filterItems(results);
+
         downloadAssets(results);
+    }
+
+    protected StacItem[] filterItems(final StacItem[] items) {
+        final List<StacItem> filteredItems = new ArrayList<>();
+        for(StacItem item : items) {
+            String version = (String)item.getProperties().get("esa_worldcover:product_version");
+            if(version != null && version.equals("2.0.0")) {
+                filteredItems.add(item);
+            }
+        }
+        if(filteredItems.isEmpty()) {
+            return items;
+        }
+        return filteredItems.toArray(new StacItem[0]);
+    }
+
+    protected String[] filterAssets(final String[] assetsIds) {
+        final List<String> filteredAssetsIds = new ArrayList<>();
+        for(String assetID : assetsIds) {
+            if(assetID.equals("data") || assetID.equals("map")) {
+                filteredAssetsIds.add(assetID);
+            }
+        }
+        return filteredAssetsIds.toArray(new String[0]);
     }
 
     private void downloadAssets(final StacItem[] results) throws Exception {
         final List<FileLandCoverTile> tiles = new ArrayList<>();
         for (StacItem item : results) {
 
-            for (String assetID : item.listAssetIds()) {
-                if(!assetID.equals("data"))
-                    continue;
+            String[] assetIds = filterAssets(item.listAssetIds());
+
+            for (String assetID : assetIds) {
+
                 StacItem.StacAsset asset = item.getAsset(assetID);
                 String fileName = asset.getFileName();
                 URL remoteURL = new URL(client.signURL(asset));

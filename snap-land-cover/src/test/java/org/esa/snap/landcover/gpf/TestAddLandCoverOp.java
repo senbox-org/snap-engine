@@ -48,14 +48,14 @@ public class TestAddLandCoverOp {
     }
 
     @Test
-    public void testESRILULC2020() throws Exception {
+    public void testESAWorldCover() throws Exception {
 
         final double[] expectedValues = {
-                6.0, 9.0, 2.0, 6.0, 6.0, 6.0, 2.0, 3.0
+                100.0, 70.0, 10.0, 30.0, 100.0, 30.0, 10.0, 30.0
         };
 
-        final LandCoverDataset dataset = new LandCoverDataset("ESRILULC2020",
-                "land_cover_ESRILULC2020", 230.0, expectedValues);
+        final LandCoverDataset dataset = new LandCoverDataset("ESA_WorldCover",
+                "land_cover_ESA_WorldCover", 0.0, expectedValues);
 
         process(dataset);
     }

@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.landcover.dataio.ESRILULC;
+package org.esa.snap.landcover.dataio.worldcover;
 
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.ResourceInstaller;
@@ -25,21 +25,21 @@ import org.esa.snap.landcover.dataio.StacLandCoverModel;
 import java.io.File;
 import java.nio.file.Path;
 
-public class ESRILULC2020ModelDescriptor extends AbstractLandCoverModelDescriptor {
+public class WorldCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
 
-    public static final String NAME = "ESRILULC2020";
+    public static final String NAME = "ESA_WorldCover";
 
     private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
             "LandCover" + File.separator + NAME);
 
-    public ESRILULC2020ModelDescriptor() {
+    public WorldCoverModelDescriptor() {
         name = NAME;
-        NO_DATA_VALUE = 230;
+        NO_DATA_VALUE = 0;
         installDir = INSTALL_DIR;
         remotePath = "https://planetarycomputer.microsoft.com/api/stac/v1";
 
         final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(this.getClass());
-        colourIndexFile = moduleBasePath.resolve("org/esa/snap/landcover/auxdata/esri2020/esri2020_index.col");
+        colourIndexFile = moduleBasePath.resolve("org/esa/snap/landcover/auxdata/worldcover/worldcover_index.col");
     }
 
     @Override
@@ -54,6 +54,6 @@ public class ESRILULC2020ModelDescriptor extends AbstractLandCoverModelDescripto
 
     @Override
     public String getCollectionId() {
-        return "io-lulc";
+        return "esa-worldcover";
     }
 }

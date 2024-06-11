@@ -117,9 +117,42 @@ public interface LandCoverModelDescriptor {
      */
     boolean installFiles();
 
+    /**
+     * Returns the index coding of the land cover model.
+     *
+     * @return the index coding
+     */
     IndexCoding getIndexCoding();
 
+    /**
+     * Returns the image info of the land cover model.
+     *
+     * @return the image info
+     */
     ImageInfo getImageInfo();
 
+    /**
+     * Returns the data type of the land cover model.
+     *
+     * @return the data type
+     */
     int getDataType();
+
+    /**
+     * Returns the collection id of the land cover model.
+     *
+     * @return the collection id
+     */
+    default String getCollectionId() {
+        return null;
+    }
+
+    /**
+     * Returns the grouping of the land cover model to subcategorize in the UI.
+     *
+     * @return the grouping
+     */
+    default String getGrouping() {
+        return null;
+    }
 }
