@@ -18,7 +18,7 @@ public class BandGroupingImpl extends AbstractList<String[]> implements BandGrou
 
     protected BandGroupingImpl(String[][] inputPaths) {
         autoGroupingPaths = new BandGroupingPath[inputPaths.length];
-        this.indexes = new Index[inputPaths.length];
+        indexes = new Index[inputPaths.length];
         for (int i = 0; i < inputPaths.length; i++) {
             final BandGroupingPath autoGroupingPath = new BandGroupingPath(inputPaths[i]);
             autoGroupingPaths[i] = autoGroupingPath;
@@ -148,15 +148,14 @@ public class BandGroupingImpl extends AbstractList<String[]> implements BandGrou
     }
 
 
-    private static class Index {
+    static class Index {
 
         final int index;
         final BandGroupingPath path;
 
-        private Index(BandGroupingPath path, int index) {
+        Index(BandGroupingPath path, int index) {
             this.path = path;
             this.index = index;
         }
-
     }
 }

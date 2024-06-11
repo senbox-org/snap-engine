@@ -2,7 +2,7 @@ package eu.esa.snap.core.datamodel.group;
 
 import org.esa.snap.core.util.io.WildcardMatcher;
 
-public class WildCardEntry implements Entry {
+class WildCardEntry implements Entry {
 
     private final WildcardMatcher wildcardMatcher;
 

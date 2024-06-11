@@ -17,6 +17,7 @@ public class BandGroupingPath {
         }
     }
 
+    // @todo 1 discuss with Sabine, I think the method does not do what is expected from name tb 2024-06-11
     boolean contains(String name) {
         for (Entry entry : entries) {
             if (!entry.matches(name)) {

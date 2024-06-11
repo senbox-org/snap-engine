@@ -1,6 +1,6 @@
 package eu.esa.snap.core.datamodel.group;
 
-public class EntryImpl implements Entry {
+class EntryImpl implements Entry {
 
     private final String group;
 
