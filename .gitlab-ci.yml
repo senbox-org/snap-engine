@@ -85,7 +85,7 @@ windows:
 
 macos:
   stage: test
-  tags: [mac]
+  tags: [saas-macos-medium-m1]
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
