@@ -21,4 +21,18 @@ public interface BandGrouping extends List<String[]> {
      * @return The index of the group path or {@code -1} if no group path matches the given name.
      */
     int indexOf(String name);
+
+    /**
+     * Retrieves the name of the BandGrouping.
+     *
+     * @return a name or an empty String
+     */
+    String getName();
+
+    /**
+     * Associates a name with the BandGrouping
+     *
+     * @param name the name
+     */
+    void setName(String name);
 }

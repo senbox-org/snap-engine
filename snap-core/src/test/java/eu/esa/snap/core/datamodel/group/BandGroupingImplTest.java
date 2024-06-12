@@ -52,7 +52,7 @@ public class BandGroupingImplTest {
         assertFalse(theOne.equals(theDifferent));
         assertFalse(theDifferent.equals(theOther));
 
-        assertFalse(theDifferent.equals(new Double(23.778)));
+        assertFalse(theDifferent.equals(23.778));
     }
 
     @Test
@@ -132,5 +132,16 @@ public class BandGroupingImplTest {
         assertEquals(10, bandGrouping.size());
 
         assertNull(BandGroupingImpl.parse(""));
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testSetGetName() {
+        final BandGroupingImpl bandGrouping = new BandGroupingImpl(new String[0][]);
+
+        assertEquals("", bandGrouping.getName());
+
+        bandGrouping.setName("heffalump");
+        assertEquals("heffalump", bandGrouping.getName());
     }
 }

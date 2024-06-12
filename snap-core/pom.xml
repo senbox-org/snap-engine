@@ -246,6 +246,11 @@
             <version>3.9.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+
         <!-- JUnit dependency is needed because it is used in production code -->
         <dependency>
             <groupId>junit</groupId>
