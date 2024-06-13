@@ -84,6 +84,7 @@
                         <publicPackage>com.google.re2j.*</publicPackage>
                         <publicPackage>tec.uom.*</publicPackage>
                         <publicPackage>si.uom.*</publicPackage>
+                        <publicPackage>org.json.simple.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
