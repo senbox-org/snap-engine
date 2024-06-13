@@ -177,4 +177,67 @@ public class BandGroupIOTest {
         assertEquals("{\"bandGroups\":[{\"paths\":[[\"L1B\"],[\"dim\",\"rad\"]],\"name\":\"Anna\"},{\"paths\":[[\"_err\",\"_unc\"],[\"geo_\",\"in-situ_\"]],\"name\":\"Bert\"},{\"paths\":[[\"sensor_sync\"]],\"name\":\"Christa\"}]}",
                 jsonContent);
     }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testWriteAndRead() throws IOException, ParseException {
+        final BandGroupingImpl grouping_1 = new BandGroupingImpl(new String[][]{{"L3*"},
+                {"vza", "zenith"}});
+        grouping_1.setName("Anna");
+
+        final BandGroupingImpl grouping_2 = new BandGroupingImpl(new String[][]{{"_err", "_unc"},
+                {"L2B", "L2C"}});
+        grouping_2.setName("Bert");
+
+        final ByteArrayOutputStream jsonStream = new ByteArrayOutputStream();
+
+        BandGroupIO.write(new BandGroupingImpl[]{grouping_1, grouping_2}, jsonStream);
+
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(jsonStream.toByteArray());
+        final BandGrouping[] read = BandGroupIO.read(inputStream);
+
+        assertEquals(2, read.length);
+        assertEquals("Anna", read[0].getName());
+        assertArrayEquals(new String[]{"L3*"}, read[0].get(0));
+
+        assertEquals("Bert", read[1].getName());
+        assertArrayEquals(new String[]{"L2B", "L2C"}, read[1].get(1));
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testReadAndWrite() throws IOException, ParseException {
+        final String streamData = "{\"bandGroups\" : [" +
+                "  {" +
+                "    \"name\" : \"Tick\"" +
+                "    \"paths\" : [" +
+                "      [\"the\", \"duck\"]" +
+                "    ]" +
+                "  }," +
+                "  {" +
+                "    \"name\" : \"Trick\"" +
+                "    \"paths\" : [" +
+                "      [\"another\", \"duck\"]," +
+                "      [\"Faehnlein\", \"Fieselschweif\"]" +
+                "    ]" +
+                "  }," +
+                "  {" +
+                "    \"name\" : \"Track\"" +
+                "    \"paths\" : [" +
+                "      [\"young\", \"duck\"]," +
+                "      [\"living\", \"Entenhausen\"]" +
+                "    ]" +
+                "  } " +
+                "]" +
+                "}";
+        final ByteArrayInputStream jsonStream = new ByteArrayInputStream(streamData.getBytes(StandardCharsets.UTF_8));
+
+        final BandGrouping[] bandGroupings = BandGroupIO.read(jsonStream);
+
+        final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        BandGroupIO.write(bandGroupings, outStream);
+
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"the\",\"duck\"]],\"name\":\"Tick\"},{\"paths\":[[\"another\",\"duck\"],[\"Faehnlein\",\"Fieselschweif\"]],\"name\":\"Trick\"},{\"paths\":[[\"young\",\"duck\"],[\"living\",\"Entenhausen\"]],\"name\":\"Track\"}]}",
+                outStream.toString());
+    }
 }
