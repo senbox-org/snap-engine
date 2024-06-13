@@ -23,7 +23,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(LongTestRunner.class)
 public class TestClient {
@@ -125,4 +128,58 @@ public class TestClient {
 //        Assert.assertTrue(folder.exists());
 //    }
 
+//    @Test
+//    public void testParseCatalog() throws IOException {
+//        Catalog catalog = parser.parseCatalogResponse(catalog());
+//        assert(catalog != null);
+//    }
+//
+//    @Test
+//    public void testParseCollectionList() throws IOException {
+//        CollectionList collections = parser.parseCollectionsResponse(readCollections());
+//        assert (collections != null);
+//    }
+//    @Test
+//    public void testParseCollection() throws IOException {
+//        Collection collection = parser.parseCollectionResponse(collection());
+//        assert(collection != null);
+//    }
+//
+//    @Test
+//    public void testParseItemCollection() throws IOException {
+//        ItemCollection itemCollection = parser.parseItemCollectionResponse(readItems());
+//        assert(itemCollection != null);
+//    }
+//
+//    @Test
+//    public void testCatalog() throws IOException {
+//        Catalog catalog = client.getCatalog();
+//        assert (catalog != null);
+//    }
+//
+//    @Test
+//    public void testCollectionList() throws IOException {
+//        CollectionList collectionList = client.listCollections();
+//        assert (collectionList != null);
+//    }
+
+//    @Test
+//    public void testItems() throws IOException {
+//        final String collectionName = "sentinel-2-l2a";
+//        ItemCollection itemCollection = client.listItems(collectionName);
+//        assert(itemCollection != null);
+//        Item item = client.getItem(collectionName, itemCollection.getFeatures().get(0).getId());
+//        assert (item != null);
+//    }
+
+    @Test
+    public void testSearchParams() throws Exception {
+        final String collectionName = "sentinel-2-l2a";
+        Map<String, Object> params = new HashMap<>();
+        params.put("bbox", "20.2201924985,43.6884447292,29.62654341,48.2208812526");
+        params.put("datetime", "2022-05-01T00:00:00Z/2022-05-02T23:59:59Z");
+        StacItem[] results = client.search(new String[]{collectionName}, params);
+        assert (results != null);
+
+    }
 }

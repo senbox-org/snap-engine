@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -137,11 +138,54 @@ public class StacClient {
         return items;
     }
 
-    // Search using a defined GeoJSON polygon.
-    // TODO implement.
-    //public void search(String [] collections, JSONObject intersects, String datetime){
-    //
-    //}
+    /**
+     * Returns the first page of items that match the given parameters from a collection
+     * @param collections    The collection name
+     * @param parameters     The search criteria
+     */
+    public StacItem[] search(String[] collections, Map<String, Object> parameters) throws Exception {
+        return search(collections, parameters, 0, 0);
+    }
+
+    /**
+     * Returns a page of items that match the given parameters from a collection
+     * @param collections    The collection name
+     * @param parameters        The search criteria
+     * @param pageNumber        The page number (1-based)
+     * @param pageSize          The page size
+     */
+    public StacItem[] search(String[] collections, Map<String, Object> parameters, int pageNumber, int pageSize) throws Exception {
+
+        String searchEndpoint = stacURL + "/search?";
+        String validCollections = "";
+        for (String collectionName : collections) {
+            if (this.catalog.containsCollection(collectionName)) {
+                validCollections = validCollections + collectionName + ",";
+            }
+        }
+        if (Objects.equals(validCollections, "")) {
+            return new StacItem[0];
+        }
+        validCollections = validCollections.substring(0, validCollections.length() - 1);
+        String query = searchEndpoint + "collections=" + validCollections + "&";
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            query += entry.getKey()+"="+entry.getValue()+"&";
+        }
+        if (pageNumber > 0 & pageSize > 0) {
+            query +="page="+pageSize+"&limit="+pageSize;
+        }
+        if (query.charAt(query.length() - 1) == '&') {
+            query = query.substring(0, query.length() - 1);
+        }
+
+        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+        JSONArray jsonFeatures = getAllFeatures(queryResults);
+        StacItem[] items = new StacItem[jsonFeatures.size()];
+        for (int x = 0; x < jsonFeatures.size(); x++) {
+            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+        }
+        return items;
+    }
 
     public String signURL(StacItem.StacAsset asset) {
         if (signDownloads) {

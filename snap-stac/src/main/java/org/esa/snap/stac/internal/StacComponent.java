@@ -77,7 +77,7 @@ public interface StacComponent {
         return null;
     }
 
-    static JSONObject getJSONFromURLStatic(String jsonURL) {
+    static JSONObject getJSONFromURLStatic(final String jsonURL) {
         try {
             URL url = new URL(jsonURL);
             URLConnection request = url.openConnection();
@@ -94,7 +94,7 @@ public interface StacComponent {
         }
     }
 
-    default JSONObject getJSONFromURL(String jsonURL) {
+    default JSONObject getJSONFromURL(final String jsonURL) {
         return getJSONFromURLStatic(jsonURL);
     }
 }
