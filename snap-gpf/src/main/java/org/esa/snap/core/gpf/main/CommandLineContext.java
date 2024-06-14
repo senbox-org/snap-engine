@@ -31,6 +31,10 @@ import java.util.logging.Logger;
 public interface CommandLineContext extends SimpleFileSystem {
     Product readProduct(String productFilepath) throws IOException;
 
+    default Product readProduct(String productFilePath, Map<String, String> readParams) throws IOException {
+        return readProduct(productFilePath);
+    }
+
     void writeProduct(Product targetProduct, String filePath, String formatName, boolean clearCacheAfterRowWrite) throws IOException;
 
     Graph readGraph(String filePath, Map<String, String> templateVariables) throws GraphException, IOException;
