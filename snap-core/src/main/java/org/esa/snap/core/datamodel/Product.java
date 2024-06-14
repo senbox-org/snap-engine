@@ -2868,9 +2868,22 @@ public class Product extends ProductNode implements Closeable {
         };
         acceptVisitor(productVisitorAdapter);
     }
-
+    
 
     /**
+     * Sets this product's name. 
+     * 
+     * <p> The name can be identical to a band name.
+     *
+     * @param name The name.
+     */
+    @Override
+    public void setName(final String name) {
+        Guardian.assertNotNull("name", name);
+        setNodeName(name.trim(), false, true);
+    }
+
+	/**
      * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
      * as a tree of product nodes.
      *
