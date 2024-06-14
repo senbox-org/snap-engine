@@ -484,6 +484,7 @@ public class CommandLineTool implements GraphProcessingObserver {
             for (String param : additionalParams) {
                 if (rawParametersMap.containsKey(param)) {
                     subsetParams.put(param, rawParametersMap.get(param));
+                    rawParametersMap.remove(param);
                 }
             }
         }
