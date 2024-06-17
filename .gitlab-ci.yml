@@ -93,7 +93,6 @@ macos:
     # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
     JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
     TESTDATA_ROOT: "/Users/otb/testData"
-  allow_failure: true
   needs: []
   script:
     - mvn -q clean package
