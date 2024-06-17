@@ -17,14 +17,11 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.checkerframework.checker.units.qual.N;
+import eu.esa.snap.core.datamodel.group.BandGrouping;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.util.ProductUtilsTest;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
@@ -414,7 +411,7 @@ public class ProductTest {
         listener.pname = "";
         final String uv = "u:v";
         product.setAutoGrouping(uv);
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
         assertEquals(2, autoGrouping.size());
         assertEquals("u", autoGrouping.get(0)[0]);
         assertEquals("v", autoGrouping.get(1)[0]);
@@ -437,7 +434,7 @@ public class ProductTest {
         assertEquals("autoGrouping", listener.pname);
 
         listener.pname = "";
-        product.setAutoGrouping((Product.AutoGrouping) null);
+        product.setAutoGrouping((BandGrouping) null);
         assertEquals("", listener.pname);
     }
 
@@ -445,7 +442,7 @@ public class ProductTest {
     public void testGetAndSetBandAutoGroupingOrder() {
         final Product product = new Product("A", "B", 10, 10);
         product.setAutoGrouping("L_1:L_1_err:L_2:L_2_err:L_10:L_10_err:L_11:L_11_err:L_21:L_21_err");
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
 
         assertNotNull(autoGrouping);
         assertEquals(10, autoGrouping.size());
@@ -487,7 +484,7 @@ public class ProductTest {
     public void testGetAndSetBandAutoGroupingSubGroups() {
         final Product product = new Product("A", "B", 10, 10);
         product.setAutoGrouping("L_1:L_1/err:L_2:L_2/err:L_10:L_10/err:L_11:L_11/err:L_21:L_21/err");
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
 
         assertNotNull(autoGrouping);
         assertEquals(10, autoGrouping.size());
@@ -529,7 +526,7 @@ public class ProductTest {
     public void testGetAndSetBandAutoGroupingSubGroupsWithWildcards() {
         final Product product = new Product("A", "B", 10, 10);
         product.setAutoGrouping("L_1:L_1/*err*CAM*:L_2:L_2/*err*CAM*:L_10:L_10/*err*CAM*:L_11:L_11/*err*CAM*:L_21:L_21/*err*CAM*");
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
 
         assertNotNull(autoGrouping);
         assertEquals(10, autoGrouping.size());
@@ -571,7 +568,7 @@ public class ProductTest {
     public void testGetAndSetBandAutoGroupingNestedSubGroupsWithWildcards() {
         final Product product = new Product("A", "B", 10, 10);
         product.setAutoGrouping("L_1:L_1/*err*CAM*:L_1/*err*CAM*/5:L_2:L_2/*err*CAM*:L_2/*err*CAM*/5");
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
 
         assertNotNull(autoGrouping);
         assertEquals(6, autoGrouping.size());
@@ -597,7 +594,7 @@ public class ProductTest {
     public void testSettingOfAutoGroupingWithEmptyStrings() {
         final Product product = new Product("A", "B", 10, 10);
         product.setAutoGrouping("L_1:L_1/*err*CAM*::L_2::L_2/*err*CAM*::L_2/*err*CAM*/");
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGrouping autoGrouping = product.getAutoGrouping();
 
         assertNotNull(autoGrouping);
         assertEquals(5, autoGrouping.size());

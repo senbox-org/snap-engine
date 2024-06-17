@@ -1,4 +1,4 @@
-package eu.esa.opt.snap.core.datamodel.band;
+package eu.esa.snap.core.datamodel.band;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelModel;
@@ -15,7 +15,6 @@ import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 public class SparseDataBand extends Band {
 

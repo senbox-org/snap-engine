@@ -19,6 +19,7 @@ package org.esa.snap.collocation;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import eu.esa.snap.core.datamodel.group.BandGrouping;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -889,7 +890,7 @@ public class CollocateOp extends Operator {
     }
 
     private void collectAutoGrouping(List<String> paths, Product product, String componentPattern) {
-        Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        BandGrouping autoGrouping = product.getAutoGrouping();
         if (autoGrouping == null) {
             return;
         }
