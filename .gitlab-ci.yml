@@ -86,12 +86,13 @@ windows:
 macos:
   stage: test
   tags: [mac]
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
     TESTDATA_ROOT: "/Users/otb/testData"
-  allow_failure: true
   needs: []
   script:
     - mvn -q clean package

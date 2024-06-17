@@ -630,10 +630,19 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.15.1</version>
             </dependency>
+
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>2.15.1</version>
+            </dependency>
+
+
+            <!-- JSON helper ############################################# -->
+            <dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>1.1.1</version>
             </dependency>
 
             <!-- Test Libraries ############################################# -->

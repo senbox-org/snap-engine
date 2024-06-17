@@ -1,4 +1,4 @@
-package eu.esa.opt.snap.core.datamodel.band;
+package eu.esa.snap.core.datamodel.band;
 
 import com.bc.ceres.annotation.STTM;
 import org.junit.Test;

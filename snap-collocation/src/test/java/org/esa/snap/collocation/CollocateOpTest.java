@@ -17,6 +17,7 @@
 package org.esa.snap.collocation;
 
 import com.bc.ceres.annotation.STTM;
+import eu.esa.snap.core.datamodel.group.BandGrouping;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -140,7 +141,7 @@ public class CollocateOpTest {
         assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_M"));
         assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_S"));
 
-        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+        BandGrouping autoGrouping = targetProduct.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(2, autoGrouping.size());
         assertArrayEquals(new String[]{"*radiance*_M"}, autoGrouping.get(0));
@@ -232,7 +233,7 @@ public class CollocateOpTest {
         assertNotNull(targetProduct.getIndexCodingGroup().get("l1_class_M"));
         assertNotNull(targetProduct.getIndexCodingGroup().get("l2_class_S"));
 
-        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+        BandGrouping autoGrouping = targetProduct.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(2, autoGrouping.size());
         assertArrayEquals(new String[]{"*radiance*_M"}, autoGrouping.get(0));
@@ -252,7 +253,7 @@ public class CollocateOpTest {
         op.setSecondary(slaveProduct);
 
         Product targetProduct = op.getTargetProduct();
-        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+        BandGrouping autoGrouping = targetProduct.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(3, autoGrouping.size());
         assertArrayEquals(new String[]{"*nadir*_M"}, autoGrouping.get(0));

@@ -22,6 +22,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import eu.esa.snap.core.datamodel.group.*;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -68,14 +69,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -186,7 +180,7 @@ public class Product extends ProductNode implements Closeable {
     private PointingFactory pointingFactory;
     private String quicklookBandName;
     private Dimension preferredTileSize;
-    private AutoGrouping autoGrouping;
+    private BandGrouping autoGrouping;
     private Map<String, WeakReference<MultiLevelImage>> maskCache;
     /**
      * The maximum number of resolution levels common to all band images.
@@ -2465,8 +2459,8 @@ public class Product extends ProductNode implements Closeable {
      * @return The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public AutoGrouping getAutoGrouping() {
-        return this.autoGrouping;
+    public BandGrouping getAutoGrouping() {
+        return autoGrouping;
     }
 
     /**
@@ -2488,7 +2482,7 @@ public class Product extends ProductNode implements Closeable {
      */
     public void setAutoGrouping(String pattern) {
         Assert.notNull(pattern, "text");
-        setAutoGrouping(AutoGroupingImpl.parse(pattern));
+        setAutoGrouping(BandGroupingImpl.parse(pattern));
     }
 
     /**
@@ -2497,8 +2491,8 @@ public class Product extends ProductNode implements Closeable {
      * @param autoGrouping The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public void setAutoGrouping(AutoGrouping autoGrouping) {
-        AutoGrouping old = this.autoGrouping;
+    public void setAutoGrouping(BandGrouping autoGrouping) {
+        BandGrouping old = this.autoGrouping;
         if (!ObjectUtils.equalObjects(old, autoGrouping)) {
             this.autoGrouping = autoGrouping;
             fireProductNodeChanged("autoGrouping", old, this.autoGrouping);
@@ -2874,14 +2868,28 @@ public class Product extends ProductNode implements Closeable {
         };
         acceptVisitor(productVisitorAdapter);
     }
-
+    
 
     /**
+     * Sets this product's name. 
+     * 
+     * <p> The name can be identical to a band name.
+     *
+     * @param name The name.
+     */
+    @Override
+    public void setName(final String name) {
+        Guardian.assertNotNull("name", name);
+        setNodeName(name.trim(), false, true);
+    }
+
+	/**
      * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
      * as a tree of product nodes.
      *
      * @since BEAM 4.8
      */
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGrouping
     public interface AutoGrouping extends List<String[]> {
 
         static AutoGrouping parse(String text) {
@@ -2897,12 +2905,14 @@ public class Product extends ProductNode implements Closeable {
         int indexOf(String name);
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.Entry
     interface Entry {
 
         boolean matches(String name);
 
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingImpl
     private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
 
         private static final String GROUP_SEPARATOR = "/";
@@ -3056,6 +3066,7 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingPath
     private static class AutoGroupingPath {
 
         private final String[] groups;
@@ -3088,6 +3099,7 @@ public class Product extends ProductNode implements Closeable {
 
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.EntryImpl
     private static class EntryImpl implements Entry {
 
         private final String group;
@@ -3103,6 +3115,7 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.WildCardEntry
     private static class WildCardEntry implements Entry {
 
         private final WildcardMatcher wildcardMatcher;
