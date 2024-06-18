@@ -1,11 +1,14 @@
 package eu.esa.snap.core.datamodel.group;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class BandGroupingImplTest {
+public class BandGroupImplTest {
 
     @Test
     @STTM("SNAP-3702")
@@ -13,7 +16,7 @@ public class BandGroupingImplTest {
         final BandGroupingPath bandGroupingPath = new BandGroupingPath(new String[]{"whatever"});
         final int idx = 27;
 
-        BandGroupingImpl.Index index = new BandGroupingImpl.Index(bandGroupingPath, idx);
+        BandGroupImpl.Index index = new BandGroupImpl.Index(bandGroupingPath, idx);
         assertEquals(idx, index.index);
         assertEquals(bandGroupingPath, index.path);
     }
@@ -26,7 +29,7 @@ public class BandGroupingImplTest {
                 new String[]{"L_1_err"}
         };
 
-        final BandGroupingImpl bandGrouping = new BandGroupingImpl(paths);
+        final BandGroupImpl bandGrouping = new BandGroupImpl(paths);
         assertEquals(1501189701, bandGrouping.hashCode());
     }
 
@@ -41,9 +44,9 @@ public class BandGroupingImplTest {
         };
         final String[][] empty = new String[0][];
 
-        final BandGroupingImpl theOne = new BandGroupingImpl(paths);
-        final BandGroupingImpl theOther = new BandGroupingImpl(paths);
-        final BandGroupingImpl theDifferent = new BandGroupingImpl(empty);
+        final BandGroupImpl theOne = new BandGroupImpl(paths);
+        final BandGroupImpl theOther = new BandGroupImpl(paths);
+        final BandGroupImpl theDifferent = new BandGroupImpl(empty);
 
         assertTrue(theOne.equals(theOther));
         assertTrue(theOther.equals(theOne));
@@ -63,11 +66,11 @@ public class BandGroupingImplTest {
                 new String[]{"L_1_err"}
         };
 
-        BandGroupingImpl bandGrouping = new BandGroupingImpl(paths);
+        BandGroupImpl bandGrouping = new BandGroupImpl(paths);
         assertEquals("L_1/L_2:L_1_err", bandGrouping.format());
 
         final String[][] empty = new String[0][];
-        bandGrouping = new BandGroupingImpl(empty);
+        bandGrouping = new BandGroupImpl(empty);
         assertEquals("", bandGrouping.format());
     }
 
@@ -79,7 +82,7 @@ public class BandGroupingImplTest {
                 new String[]{"dark", "bright"}
         };
 
-        BandGroupingImpl bandGrouping = new BandGroupingImpl(paths);
+        BandGroupImpl bandGrouping = new BandGroupImpl(paths);
         assertEquals(2, bandGrouping.size());
     }
 
@@ -91,7 +94,7 @@ public class BandGroupingImplTest {
                 new String[]{"dark", "bright"}
         };
 
-        final BandGroupingImpl bandGrouping = new BandGroupingImpl(paths);
+        final BandGroupImpl bandGrouping = new BandGroupImpl(paths);
         final String[] resultPaths = bandGrouping.get(1);
         assertEquals(2, resultPaths.length);
         assertEquals("dark", resultPaths[0]);
@@ -121,27 +124,70 @@ public class BandGroupingImplTest {
         };
 
         // @todo tb/** this is odd behaviour! 2024-06-11
-        final BandGroupingImpl bandGrouping = new BandGroupingImpl(paths);
+        final BandGroupImpl bandGrouping = new BandGroupImpl(paths);
         assertEquals(-1, bandGrouping.indexOf("dark"));
     }
 
     @Test
     @STTM("SNAP-3702")
     public void testParse() {
-        BandGrouping bandGrouping = BandGroupingImpl.parse("L_1:L_1/err:L_2:L_2/err:L_10:L_10/err:L_11:L_11/err:L_21:L_21/err");
-        assertEquals(10, bandGrouping.size());
+        BandGroup bandGroup = BandGroupImpl.parse("L_1:L_1/err:L_2:L_2/err:L_10:L_10/err:L_11:L_11/err:L_21:L_21/err");
+        assertEquals(10, bandGroup.size());
 
-        assertNull(BandGroupingImpl.parse(""));
+        assertNull(BandGroupImpl.parse(""));
     }
 
     @Test
     @STTM("SNAP-3702")
     public void testSetGetName() {
-        final BandGroupingImpl bandGrouping = new BandGroupingImpl(new String[0][]);
+        final BandGroupImpl bandGrouping = new BandGroupImpl(new String[0][]);
 
         assertEquals("", bandGrouping.getName());
 
         bandGrouping.setName("heffalump");
         assertEquals("heffalump", bandGrouping.getName());
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testGetMatchingBandnames_emptyGrouping() {
+        final BandGroupImpl bandGrouping = new BandGroupImpl(new String[0][]);
+
+        final Product product = new Product("testy", "test_type");
+        product.addBand(new Band("short", ProductData.TYPE_INT16, 5, 6));
+        product.addBand(new Band("shorter", ProductData.TYPE_INT16, 5, 6));
+
+        String[] names = bandGrouping.getMatchingBandNames(product);
+        assertEquals(0, names.length);
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testGetMatchingBandnames_oneGrouping() {
+        final BandGroupImpl bandGrouping = (BandGroupImpl) BandGroupImpl.parse("L_1:L_1_err");
+
+        final Product product = new Product("testy", "test_type");
+        product.addBand(new Band("L_1_CAM1", ProductData.TYPE_INT16, 5, 6));
+        product.addBand(new Band("shorter", ProductData.TYPE_INT16, 5, 6));
+
+        String[] names = bandGrouping.getMatchingBandNames(product);
+        assertEquals(1, names.length);
+        assertEquals("L_1_CAM1", names[0]);
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testGetMatchingBandnames_twoGroupings() {
+        final BandGroupImpl bandGrouping = (BandGroupImpl) BandGroupImpl.parse("M*_rho_toa/lambda0:FWHM");
+
+        final Product product = new Product("testy", "test_type");
+        product.addBand(new Band("M08_rho_toa", ProductData.TYPE_INT16, 5, 6));
+        product.addBand(new Band("lambda0_c02", ProductData.TYPE_INT16, 5, 6));
+        product.addBand(new Band("unmatched", ProductData.TYPE_INT16, 5, 6));
+
+        String[] names = bandGrouping.getMatchingBandNames(product);
+        assertEquals(2, names.length);
+        assertEquals("M08_rho_toa", names[0]);
+        assertEquals("lambda0_c02", names[1]);
     }
 }

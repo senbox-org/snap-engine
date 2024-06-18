@@ -15,7 +15,7 @@
  */
 package org.esa.snap.core.gpf.common;
 
-import eu.esa.snap.core.datamodel.group.BandGrouping;
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.util.GeoUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -253,7 +253,7 @@ public class SubsetOpTest {
 
         Product tp = op.getTargetProduct();
         assertEquals(2, tp.getNumBands());
-        BandGrouping autoGrouping = tp.getAutoGrouping();
+        BandGroup autoGrouping = tp.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(1, autoGrouping.size());
         assertArrayEquals(new String[]{"radiance"}, autoGrouping.get(0));

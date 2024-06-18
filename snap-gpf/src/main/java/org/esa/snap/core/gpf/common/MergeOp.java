@@ -16,7 +16,7 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import eu.esa.snap.core.datamodel.group.BandGrouping;
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
@@ -189,9 +189,9 @@ public class MergeOp extends Operator {
     }
 
     private void mergeAutoGrouping(Product srcProduct) {
-        final BandGrouping srcAutoGrouping = srcProduct.getAutoGrouping();
+        final BandGroup srcAutoGrouping = srcProduct.getAutoGrouping();
         if (srcAutoGrouping != null && !srcAutoGrouping.isEmpty()) {
-            final BandGrouping targetAutoGrouping = targetProduct.getAutoGrouping();
+            final BandGroup targetAutoGrouping = targetProduct.getAutoGrouping();
             if (targetAutoGrouping == null) {
                 targetProduct.setAutoGrouping(srcAutoGrouping);
             } else {

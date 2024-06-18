@@ -27,6 +27,15 @@ public class BandGroupingPath {
         return true;
     }
 
+    boolean matchesGrouping(String name) {
+        for (Entry entry : entries) {
+            if (entry.matches(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     String[] getInputPath() {
         return groups;
     }
