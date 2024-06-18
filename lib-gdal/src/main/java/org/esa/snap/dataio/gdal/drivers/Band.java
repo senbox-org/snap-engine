@@ -77,15 +77,15 @@ public class Band extends GDALBase implements Closeable {
             readRasterDirectHandle = createHandle(bandClass, "ReadRaster_Direct", int.class,
                                                   int.class, int.class, int.class, int.class, int.class, int.class, int.class, ByteBuffer.class);
             writeRasterByteHandle = createHandle(bandClass, "WriteRaster", int.class,
-                                                 int.class, int.class, int.class, int.class, byte[].class);
+                                                 int.class, int.class, int.class, int.class, int.class, byte[].class);
             writeRasterShortHandle = createHandle(bandClass, "WriteRaster", int.class,
-                                                  int.class, int.class, int.class, int.class, short[].class);
+                                                  int.class, int.class, int.class, int.class, int.class, short[].class);
             writeRasterIntHandle = createHandle(bandClass, "WriteRaster", int.class,
-                                                int.class, int.class, int.class, int.class, int[].class);
+                                                int.class, int.class, int.class, int.class, int.class, int[].class);
             writeRasterFloatHandle = createHandle(bandClass, "WriteRaster", int.class,
-                                                  int.class, int.class, int.class, int.class, float[].class);
+                                                  int.class, int.class, int.class, int.class, int.class, float[].class);
             writeRasterDoubleHandle = createHandle(bandClass, "WriteRaster", int.class,
-                                                   int.class, int.class, int.class, int.class, double[].class);
+                                                   int.class, int.class, int.class, int.class, int.class, double[].class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

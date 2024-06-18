@@ -42,6 +42,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,12 +56,24 @@ import java.util.logging.Logger;
 public class GDALProductWriter extends AbstractProductWriter {
 
     private static final Logger logger = Logger.getLogger(GDALProductWriter.class.getName());
+    private static final Map<Integer, Integer> gdalTypeMap;
     private final GDALDriverInfo writerDriver;
     private String[] writeOptions;
     private Dataset gdalDataset;
 
-    private int gdalDataType;
     private Driver gdalDriver;
+
+    static {
+        gdalTypeMap = new HashMap<>();
+        gdalTypeMap.put(ProductData.TYPE_INT8, GDALConstConstants.gdtByte());
+        gdalTypeMap.put(ProductData.TYPE_UINT8, GDALConstConstants.gdtByte());
+        gdalTypeMap.put(ProductData.TYPE_INT16, GDALConstConstants.gdtInt16());
+        gdalTypeMap.put(ProductData.TYPE_UINT16, GDALConstConstants.gdtUint16());
+        gdalTypeMap.put(ProductData.TYPE_INT32, GDALConstConstants.gdtInt32());
+        gdalTypeMap.put(ProductData.TYPE_UINT32, GDALConstConstants.gdtUint32());
+        gdalTypeMap.put(ProductData.TYPE_FLOAT32, GDALConstConstants.gdtFloat32());
+        gdalTypeMap.put(ProductData.TYPE_FLOAT64, GDALConstConstants.gdtFloat64());
+    }
 
     public GDALProductWriter(ProductWriterPlugIn writerPlugIn, GDALDriverInfo writerDriver) {
         super(writerPlugIn);
@@ -112,11 +126,13 @@ public class GDALProductWriter extends AbstractProductWriter {
         int bandCount = sourceProduct.getNumBands();
 
         Band sourceBand = sourceProduct.getBandAt(0);
-        this.gdalDataType = GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType());
+        int gdalDataType = GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType());
         for (int i = 1; i < bandCount; i++) {
             sourceBand = sourceProduct.getBandAt(i);
-            if (this.gdalDataType != GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType())) {
-                throw new IllegalArgumentException("GDAL Geotiff writer cannot write a product containing bands with different data types (the data type of band index " + i + " is " + sourceBand.getDataType() + ", different from band index 0).");
+            if (gdalDataType != GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType())) {
+                gdalDataType = GDALConstConstants.gdtFloat32();
+                break;
+                //throw new IllegalArgumentException("GDAL Geotiff writer cannot write a product containing bands with different data types (the data type of band index " + i + " is " + sourceBand.getDataType() + ", different from band index 0).");
             }
         }
 
@@ -124,8 +140,8 @@ public class GDALProductWriter extends AbstractProductWriter {
         if (!StringUtils.endsWithIgnoreCase(fileName, this.writerDriver.getExtensionName())) {
             throw new IllegalArgumentException("The extension of the file name '" + fileName + "' is unknown.");
         }
-        if (!this.writerDriver.canExportProduct(this.gdalDataType)) {
-            String gdalDataTypeName = GDAL.getDataTypeName(this.gdalDataType);
+        if (!this.writerDriver.canExportProduct(gdalDataType)) {
+            String gdalDataTypeName = GDAL.getDataTypeName(gdalDataType);
             String message = MessageFormat.format("The GDAL driver ''{0}'' does not support the data type ''{1}'' to create a new product." +
                             " The available types are ''{2}''.",
                     this.writerDriver.getDriverDisplayName(), gdalDataTypeName, this.writerDriver.getCreationDataTypes());
@@ -148,13 +164,13 @@ public class GDALProductWriter extends AbstractProductWriter {
 
         String gdalWriteOptions = Config.instance().preferences().get("snap.dataio.gdal.creationoptions", "TILED=YES");
         if (gdalWriteOptions.contains("COMPRESS") && !gdalWriteOptions.contains("PREDICTOR")) {
-            if (this.gdalDataType == GDALConstConstants.gdtByte() ||
-                    this.gdalDataType == GDALConstConstants.gdtUint16() ||
-                    this.gdalDataType == GDALConstConstants.gdtInt16() ||
-                    this.gdalDataType == GDALConstConstants.gdtUint32() ||
-                    this.gdalDataType == GDALConstConstants.gdtInt32() ||
-                    this.gdalDataType == GDALConstConstants.gdtCInt16() ||
-                    this.gdalDataType == GDALConstConstants.gdtCInt32()) {
+            if (gdalDataType == GDALConstConstants.gdtByte() ||
+                    gdalDataType == GDALConstConstants.gdtUint16() ||
+                    gdalDataType == GDALConstConstants.gdtInt16() ||
+                    gdalDataType == GDALConstConstants.gdtUint32() ||
+                    gdalDataType == GDALConstConstants.gdtInt32() ||
+                    gdalDataType == GDALConstConstants.gdtCInt16() ||
+                    gdalDataType == GDALConstConstants.gdtCInt32()) {
                 gdalWriteOptions += "PREDICTOR=2";
 
             } else {
@@ -162,7 +178,7 @@ public class GDALProductWriter extends AbstractProductWriter {
             }
         }
         writeOptions = StringUtils.stringToArray(gdalWriteOptions, ";");
-        this.gdalDataset = this.gdalDriver.create(outputFile.toString(), imageWidth, imageHeight, bandCount, this.gdalDataType, writeOptions);
+        this.gdalDataset = this.gdalDriver.create(outputFile.toString(), imageWidth, imageHeight, bandCount, gdalDataType, writeOptions);
         if (this.gdalDataset == null) {
             throw new NullPointerException("Failed creating the file to export the product for driver '" + this.gdalDriver.getLongName() + "'.");
         }
@@ -205,27 +221,36 @@ public class GDALProductWriter extends AbstractProductWriter {
             if (gdalBand == null) {
                 throw new NullPointerException("Failed creating the band with index " + bandIndex + " to export the product for driver '" + this.gdalDriver.getLongName() + "'.");
             }
-
             int result;
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+            final int dataType = sourceBand.getDataType();
             try {
-                if (this.gdalDataType == GDALConstConstants.gdtByte()) {
-                    byte[] data = (byte[]) sourceBuffer.getElems();
-                    result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, this.gdalDataType, data);
-                } else if (this.gdalDataType == GDALConstConstants.gdtInt16() || this.gdalDataType == GDALConstConstants.gdtUint16()) {
-                    short[] data = (short[]) sourceBuffer.getElems();
-                    result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, this.gdalDataType, data);
-                } else if (this.gdalDataType == GDALConstConstants.gdtInt32() || this.gdalDataType == GDALConstConstants.gdtUint32()) {
-                    int[] data = (int[]) sourceBuffer.getElems();
-                    result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, this.gdalDataType, data);
-                } else if (this.gdalDataType == GDALConstConstants.gdtFloat32()) {
-                    float[] data = (float[]) sourceBuffer.getElems();
-                    result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, this.gdalDataType, data);
-                } else if (this.gdalDataType == GDALConstConstants.gdtFloat64()) {
-                    double[] data = (double[]) sourceBuffer.getElems();
-                    result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, this.gdalDataType, data);
-                } else {
-                    throw new IllegalArgumentException("Unknown GDAL data type " + this.gdalDataType + ".");
+                switch (dataType) {
+                    case ProductData.TYPE_UINT8:
+                    case ProductData.TYPE_INT8:
+                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                                      gdalTypeMap.get(dataType), (byte[]) sourceBuffer.getElems());
+                        break;
+                    case ProductData.TYPE_INT16:
+                    case ProductData.TYPE_UINT16:
+                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                                      gdalTypeMap.get(dataType), (short[]) sourceBuffer.getElems());
+                        break;
+                    case ProductData.TYPE_INT32:
+                    case ProductData.TYPE_UINT32:
+                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                                      gdalTypeMap.get(dataType), (int[]) sourceBuffer.getElems());
+                        break;
+                    case ProductData.TYPE_FLOAT32:
+                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                                      gdalTypeMap.get(dataType), (float[]) sourceBuffer.getElems());
+                        break;
+                    case ProductData.TYPE_FLOAT64:
+                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                                      gdalTypeMap.get(dataType), (double[]) sourceBuffer.getElems());
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown GDAL data type " + dataType + ".");
                 }
 
                 if (result != GDALConst.ceNone()) {
