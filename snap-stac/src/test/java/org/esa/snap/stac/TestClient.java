@@ -23,10 +23,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(LongTestRunner.class)
 public class TestClient {
@@ -128,49 +129,21 @@ public class TestClient {
 //        Assert.assertTrue(folder.exists());
 //    }
 
-//    @Test
-//    public void testParseCatalog() throws IOException {
-//        Catalog catalog = parser.parseCatalogResponse(catalog());
-//        assert(catalog != null);
-//    }
-//
-//    @Test
-//    public void testParseCollectionList() throws IOException {
-//        CollectionList collections = parser.parseCollectionsResponse(readCollections());
-//        assert (collections != null);
-//    }
-//    @Test
-//    public void testParseCollection() throws IOException {
-//        Collection collection = parser.parseCollectionResponse(collection());
-//        assert(collection != null);
-//    }
-//
-//    @Test
-//    public void testParseItemCollection() throws IOException {
-//        ItemCollection itemCollection = parser.parseItemCollectionResponse(readItems());
-//        assert(itemCollection != null);
-//    }
-//
-//    @Test
-//    public void testCatalog() throws IOException {
-//        Catalog catalog = client.getCatalog();
-//        assert (catalog != null);
-//    }
-//
-//    @Test
-//    public void testCollectionList() throws IOException {
-//        CollectionList collectionList = client.listCollections();
-//        assert (collectionList != null);
-//    }
 
-//    @Test
-//    public void testItems() throws IOException {
-//        final String collectionName = "sentinel-2-l2a";
-//        ItemCollection itemCollection = client.listItems(collectionName);
-//        assert(itemCollection != null);
-//        Item item = client.getItem(collectionName, itemCollection.getFeatures().get(0).getId());
-//        assert (item != null);
-//    }
+    @Test
+    public void testCollectionList() {
+        String[] collectionList = client.getCatalog().listCollections();
+        assert (collectionList != null);
+    }
+
+    @Test
+    public void testGetCollection() {
+        String[] collectionList = client.getCatalog().listCollections();
+        assert (collectionList != null);
+
+        StacCollection collection = client.getCatalog().getCollection(collectionList[0]);
+        assert (collection != null);
+    }
 
     @Test
     public void testSearchParams() throws Exception {
@@ -180,6 +153,25 @@ public class TestClient {
         params.put("datetime", "2022-05-01T00:00:00Z/2022-05-02T23:59:59Z");
         StacItem[] results = client.search(new String[]{collectionName}, params);
         assert (results != null);
+    }
+
+    @Test
+    public void testPlanetaryComputer_Catalog() {
+        final StacClient client = new StacClient(catalogURL);
+        StacCatalog catalog = client.getCatalog();
+
+        assertEquals("getId", "microsoft-pc", catalog.getId());
+        assertEquals("getVersion", "1.0.0", catalog.getVersion());
+
+        String[] collections = catalog.listCollections();
+        for(String collection : collections) {
+            System.out.println(collection);
+        }
+
+        StacCollection asterCollection = catalog.getCollection("aster-l1t");
+
+        System.out.println(asterCollection.getJSON());
 
     }
+
 }

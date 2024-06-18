@@ -17,7 +17,6 @@ package org.esa.snap.stac;
 
 // TODO fully implement.
 
-import org.esa.snap.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 

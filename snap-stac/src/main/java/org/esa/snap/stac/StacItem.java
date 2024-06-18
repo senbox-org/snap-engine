@@ -16,8 +16,6 @@
 package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. December 2023
-// The StacItem class allows you to interact with specific Items retrieved
-// from a StacCatalog.
 
 
 import org.esa.snap.core.datamodel.ProductData;
@@ -30,7 +28,6 @@ import org.esa.snap.stac.extensions.Provider;
 import org.esa.snap.stac.extensions.SAR;
 import org.esa.snap.stac.extensions.SNAP;
 import org.esa.snap.stac.internal.GeoCodingSupport;
-import org.esa.snap.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -49,6 +46,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The StacItem class allows you to interact with specific Items retrieved
+ * from a StacCatalog.
+ */
 @SuppressWarnings("unchecked")
 public class StacItem implements StacComponent {
 
@@ -81,6 +82,12 @@ public class StacItem implements StacComponent {
     private JSONArray providersArray;
     private JSONArray keywordsArray;
 
+    /**
+     * Creates a new StacItem object from a given URL
+     *
+     * @param inputStr The URL of the StacItem
+     * @throws Exception
+     */
     public StacItem(String inputStr) throws Exception {
         JSONObject json;
         try {
@@ -97,6 +104,12 @@ public class StacItem implements StacComponent {
         initStacItem(json);
     }
 
+    /**
+     * Creates a new StacItem object from a given File
+     *
+     * @param productInputFile The file of the StacItem
+     * @throws Exception
+     */
     public StacItem(File productInputFile) throws Exception {
         try {
             initStacItem((JSONObject) new JSONParser().parse(new FileReader(productInputFile)));
@@ -105,6 +118,12 @@ public class StacItem implements StacComponent {
         }
     }
 
+    /**
+     * Creates a new StacItem object from a given JSONObject
+     *
+     * @param json The path of the StacItem
+     * @throws Exception
+     */
     public StacItem(JSONObject json) throws Exception {
         initStacItem(json);
     }

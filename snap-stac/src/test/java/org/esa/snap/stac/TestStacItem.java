@@ -28,7 +28,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class TestStacItem {
@@ -111,7 +113,7 @@ public class TestStacItem {
         assertNotNull(resource);
         Path path = Paths.get(resource.toURI());
 
-        //assertTrue(StacItem.isStacItem(path));
+        assertTrue(StacItem.isStacItem(path));
     }
 
     @Test
@@ -120,13 +122,13 @@ public class TestStacItem {
         assertNotNull(resource);
         Path path = Paths.get(resource.toURI());
 
-        //assertFalse(StacItem.isStacItem(path));
+        assertFalse(StacItem.isStacItem(path));
     }
 
     @Test
     public void testIsStacItemRemoteCatalog() throws Exception {
         URL url = new URL("https://tamn.snapplanet.io");
 
-        //assertFalse(StacItem.isStacItem(url));
+        assertFalse(StacItem.isStacItem(url));
     }
 }

@@ -16,12 +16,9 @@
 package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
-// The StacClient class acts as a way to search for STAC assets, and download these
-// STAC items and assets.
 
 import org.esa.snap.stac.internal.DownloadModifier;
 import org.esa.snap.stac.internal.EstablishedModifiers;
-import org.esa.snap.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -34,7 +31,10 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 
-
+/**
+ *  The StacClient class acts as a way to search for STAC assets, and download these
+ *  STAC items and assets.
+ */
 public class StacClient {
 
     private DownloadModifier downloadModifier;
@@ -81,11 +81,21 @@ public class StacClient {
         throw new IOException("No root link found in STAC item");
     }
 
+    /**
+     * Retrieves the catalog description from the remote STAC service
+     */
     public StacCatalog getCatalog() {
         return this.catalog;
     }
 
-    // Performs a search and returns an array of STAC Items from the server that match the search
+    /**
+     * Performs a search and returns an array of STAC Items from the server that match the search
+     * @param collections
+     * @param bbox
+     * @param datetime
+     * @return
+     * @throws Exception
+     */
     public StacItem[] search(final String[] collections, final double[] bbox, String datetime) throws Exception {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];

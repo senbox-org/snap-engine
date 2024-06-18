@@ -15,6 +15,7 @@
  */
 package org.esa.snap.stac.internal;
 
+import org.esa.snap.stac.StacComponent;
 import org.json.simple.JSONObject;
 
 public class EstablishedModifiers {
