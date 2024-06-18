@@ -23,6 +23,8 @@ import org.esa.snap.engine_utilities.util.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Holds information about a dem file.
@@ -32,9 +34,10 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
     private final SRTM3GeoTiffElevationModel demModel;
 
     private static final String remoteHTTP1 = "https://download.esa.int/step/auxdata/dem/SRTM90/tiff/";
-    private static final String remoteHTTP2 = "http://skywatch-auxdata.s3-us-west-2.amazonaws.com/dem/SRTM90/tiff/";
     
     private static String remoteHTTP = Settings.instance().get("DEM.srtm3GeoTiffDEM_HTTP", remoteHTTP1);
+
+    private static final Logger logger = Logger.getLogger(SRTM3GeoTiffFile.class.getName());
     static {
         // if old property files still contain old bucket
         if(remoteHTTP.startsWith("http://srtm.csi.cgiar.org") || remoteHTTP.startsWith("http://cgiar-csi-srtm")) {
@@ -56,14 +59,17 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
     protected Boolean getRemoteFile() {
         try {
             boolean found = getRemoteHttpFile(remoteHTTP);
-            if(!found) {
+            if (!found) {
+                logger.log(Level.WARNING, localZipFile + " not found at  " + remoteHTTP + "trying " + remoteHTTP1);
                 found = getRemoteHttpFile(remoteHTTP1);
             }
             return found;
         } catch (Exception e) {
+            logger.log(Level.WARNING, "Unable to download " + localZipFile + " from " + remoteHTTP + " or " + remoteHTTP1, e);
             try {
                 return getRemoteHttpFile(remoteHTTP1);
             } catch (Exception e2) {
+                logger.log(Level.SEVERE, "Unable to download " + localZipFile + " from " + remoteHTTP1, e2);
                 return false;
             }
         }
