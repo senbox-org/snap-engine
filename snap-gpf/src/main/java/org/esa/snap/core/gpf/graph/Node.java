@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.graph;
 
 
 import com.bc.ceres.binding.dom.DomElement;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 
@@ -43,6 +44,7 @@ public class Node {
     private String operatorName;
     private SourceList sourceList;
     private DomElement configuration;
+    @XStreamOmitField
     private GraphNodeUpdater graphNodeUpdater;
 
     /**
