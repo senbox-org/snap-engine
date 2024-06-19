@@ -24,6 +24,7 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.stac.StacClient;
 import org.esa.snap.stac.StacItem;
+import org.esa.snap.stac.extensions.Assets;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -180,7 +181,7 @@ public class StacLandCoverModel implements LandCoverModel {
 
             for (String assetID : assetIds) {
 
-                StacItem.StacAsset asset = item.getAsset(assetID);
+                Assets.Asset asset = item.getAsset(assetID);
                 String fileName = asset.getFileName();
                 URL remoteURL = new URL(client.signURL(asset));
 
