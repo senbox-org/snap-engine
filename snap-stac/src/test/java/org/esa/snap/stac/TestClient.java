@@ -15,15 +15,21 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-//@RunWith(LongTestRunner.class)
+import static org.junit.Assert.assertEquals;
+
+@RunWith(LongTestRunner.class)
 public class TestClient {
     private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
 
@@ -63,7 +69,7 @@ public class TestClient {
 
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
-        Assert.assertEquals(2, folder.listFiles().length);
+        Assert.assertEquals(4, folder.listFiles().length);
     }
 
     @Test
@@ -81,7 +87,7 @@ public class TestClient {
 
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
-        Assert.assertEquals(1, folder.listFiles().length);
+        Assert.assertEquals(3, folder.listFiles().length);
     }
 
     @Test
@@ -122,5 +128,50 @@ public class TestClient {
 //        File folder = client.downloadItem(item, tmpDir);
 //        Assert.assertTrue(folder.exists());
 //    }
+
+
+    @Test
+    public void testCollectionList() {
+        String[] collectionList = client.getCatalog().listCollections();
+        assert (collectionList != null);
+    }
+
+    @Test
+    public void testGetCollection() {
+        String[] collectionList = client.getCatalog().listCollections();
+        assert (collectionList != null);
+
+        StacCollection collection = client.getCatalog().getCollection(collectionList[0]);
+        assert (collection != null);
+    }
+
+    @Test
+    public void testSearchParams() throws Exception {
+        final String collectionName = "sentinel-2-l2a";
+        Map<String, Object> params = new HashMap<>();
+        params.put("bbox", "20.2201924985,43.6884447292,29.62654341,48.2208812526");
+        params.put("datetime", "2022-05-01T00:00:00Z/2022-05-02T23:59:59Z");
+        StacItem[] results = client.search(new String[]{collectionName}, params);
+        assert (results != null);
+    }
+
+    @Test
+    public void testPlanetaryComputer_Catalog() {
+        final StacClient client = new StacClient(catalogURL);
+        StacCatalog catalog = client.getCatalog();
+
+        assertEquals("getId", "microsoft-pc", catalog.getId());
+        assertEquals("getVersion", "1.0.0", catalog.getVersion());
+
+        String[] collections = catalog.listCollections();
+        for(String collection : collections) {
+            System.out.println(collection);
+        }
+
+        StacCollection asterCollection = catalog.getCollection("aster-l1t");
+
+        System.out.println(asterCollection.getJSON());
+
+    }
 
 }

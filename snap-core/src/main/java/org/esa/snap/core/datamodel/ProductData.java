@@ -2033,7 +2033,7 @@ public abstract class ProductData implements Cloneable {
          *
          * @param numElems the number of elements, must not be less than one
          */
-        protected Long(int numElems) {
+        public Long(int numElems) {
             this(new long[numElems]);
         }
 
@@ -2042,7 +2042,7 @@ public abstract class ProductData implements Cloneable {
          *
          * @param array the elements
          */
-        protected Long(long[] array) {
+        public Long(long[] array) {
             super(TYPE_INT64);
             _array = array;
         }

@@ -22,7 +22,10 @@ variables:
   MAVEN_DEPLOY_ARGS: "deploy"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
-  SONAR_BASE_ARGS: sonar:sonar -Dsonar.projectKey=$CI_PROJECT_NAME
+  SONAR_BASE_ARGS: |
+    sonar:sonar -Dsonar.projectKey=${CI_PROJECT_NAME}
+    -Dsonar.exclusions=${CI_PROJECT_NAME}-coverage
+    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=${MAVEN_CFG_DIR}/repository
@@ -86,12 +89,13 @@ windows:
 macos:
   stage: test
   tags: [mac]
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
     TESTDATA_ROOT: "/Users/otb/testData"
-  allow_failure: true
   needs: []
   script:
     - mvn -q clean package

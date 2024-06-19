@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.stac.internal;
+package org.esa.snap.stac;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -77,7 +77,7 @@ public interface StacComponent {
         return null;
     }
 
-    static JSONObject getJSONFromURLStatic(String jsonURL) {
+    static JSONObject getJSONFromURLStatic(final String jsonURL) {
         try {
             URL url = new URL(jsonURL);
             URLConnection request = url.openConnection();
@@ -94,7 +94,7 @@ public interface StacComponent {
         }
     }
 
-    default JSONObject getJSONFromURL(String jsonURL) {
+    default JSONObject getJSONFromURL(final String jsonURL) {
         return getJSONFromURLStatic(jsonURL);
     }
 }

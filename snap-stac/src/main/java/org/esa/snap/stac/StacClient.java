@@ -16,12 +16,9 @@
 package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
-// The StacClient class acts as a way to search for STAC assets, and download these
-// STAC items and assets.
 
 import org.esa.snap.stac.internal.DownloadModifier;
 import org.esa.snap.stac.internal.EstablishedModifiers;
-import org.esa.snap.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -31,9 +28,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import java.util.Objects;
 
-
+/**
+ *  The StacClient class acts as a way to search for STAC assets, and download these
+ *  STAC items and assets.
+ */
 public class StacClient {
 
     private DownloadModifier downloadModifier;
@@ -80,11 +81,21 @@ public class StacClient {
         throw new IOException("No root link found in STAC item");
     }
 
+    /**
+     * Retrieves the catalog description from the remote STAC service
+     */
     public StacCatalog getCatalog() {
         return this.catalog;
     }
 
-    // Performs a search and returns an array of STAC Items from the server that match the search
+    /**
+     * Performs a search and returns an array of STAC Items from the server that match the search
+     * @param collections
+     * @param bbox
+     * @param datetime
+     * @return
+     * @throws Exception
+     */
     public StacItem[] search(final String[] collections, final double[] bbox, String datetime) throws Exception {
         String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
@@ -111,11 +122,80 @@ public class StacClient {
         return items;
     }
 
-    // Search using a defined GeoJSON polygon.
-    // TODO implement.
-    //public void search(String [] collections, JSONObject intersects, String datetime){
-    //
-    //}
+    // Performs a search and returns an array of STAC Items from the server that match the search
+    public StacItem[] search(final String[] collections, final JSONObject geometry, String datetime) throws Exception {
+        String searchEndpoint = stacURL + "/search?";
+        String validCollections = "";
+        for (String collectionName : collections) {
+            if (this.catalog.containsCollection(collectionName)) {
+                validCollections = validCollections + collectionName + ",";
+            }
+        }
+        if (Objects.equals(validCollections, "")) {
+            return new StacItem[0];
+        }
+        validCollections = validCollections.substring(0, validCollections.length() - 1);
+        String query = searchEndpoint + "collections=" + validCollections +
+                "&intersects=" + geometry;
+        if(datetime != null) query = query + "&datetime=" + datetime;
+
+        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+        JSONArray jsonFeatures = getAllFeatures(queryResults);
+        StacItem[] items = new StacItem[jsonFeatures.size()];
+        for (int x = 0; x < jsonFeatures.size(); x++) {
+            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+        }
+        return items;
+    }
+
+    /**
+     * Returns the first page of items that match the given parameters from a collection
+     * @param collections    The collection name
+     * @param parameters     The search criteria
+     */
+    public StacItem[] search(String[] collections, Map<String, Object> parameters) throws Exception {
+        return search(collections, parameters, 0, 0);
+    }
+
+    /**
+     * Returns a page of items that match the given parameters from a collection
+     * @param collections    The collection name
+     * @param parameters        The search criteria
+     * @param pageNumber        The page number (1-based)
+     * @param pageSize          The page size
+     */
+    public StacItem[] search(String[] collections, Map<String, Object> parameters, int pageNumber, int pageSize) throws Exception {
+
+        String searchEndpoint = stacURL + "/search?";
+        String validCollections = "";
+        for (String collectionName : collections) {
+            if (this.catalog.containsCollection(collectionName)) {
+                validCollections = validCollections + collectionName + ",";
+            }
+        }
+        if (Objects.equals(validCollections, "")) {
+            return new StacItem[0];
+        }
+        validCollections = validCollections.substring(0, validCollections.length() - 1);
+        String query = searchEndpoint + "collections=" + validCollections + "&";
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            query += entry.getKey()+"="+entry.getValue()+"&";
+        }
+        if (pageNumber > 0 & pageSize > 0) {
+            query +="page="+pageSize+"&limit="+pageSize;
+        }
+        if (query.charAt(query.length() - 1) == '&') {
+            query = query.substring(0, query.length() - 1);
+        }
+
+        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+        JSONArray jsonFeatures = getAllFeatures(queryResults);
+        StacItem[] items = new StacItem[jsonFeatures.size()];
+        for (int x = 0; x < jsonFeatures.size(); x++) {
+            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+        }
+        return items;
+    }
 
     public String signURL(StacItem.StacAsset asset) {
         if (signDownloads) {
@@ -134,6 +214,9 @@ public class StacClient {
     public File downloadAsset(StacItem.StacAsset asset, File targetFolder) throws IOException {
         targetFolder.mkdirs();
         String outputFilename = asset.getFileName();
+        if(outputFilename.contains("?")) {
+            outputFilename = outputFilename.substring(0, outputFilename.indexOf("?"));
+        }
 
         System.out.println("Downloading asset " + asset.getId());
         String downloadURL = signURL(asset);

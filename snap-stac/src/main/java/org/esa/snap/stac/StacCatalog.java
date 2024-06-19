@@ -16,10 +16,8 @@
 package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
-// The StacCatalog class allows you to interact with a specific catalog
 
 
-import org.esa.snap.stac.internal.StacComponent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -27,6 +25,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**
+ * The StacCatalog class allows you to interact with a specific catalog
+ */
 public class StacCatalog implements StacComponent {
 
     private final String rootURL;
@@ -39,15 +40,15 @@ public class StacCatalog implements StacComponent {
 
     private final HashMap<String, String> collectionsWithURLs;
 
-    private final String title;
-
+    /**
+     *
+     * @param catalogURL
+     */
     public StacCatalog(String catalogURL) {
         rootURL = catalogURL;
 
         catalogJSON = getJSONFromURL(catalogURL);
         collectionJSON = getJSONFromURL(catalogURL + "/collections");
-
-        title = (String) catalogJSON.get(TITLE);
 
         collectionsWithURLs = new HashMap<>();
 
@@ -73,7 +74,7 @@ public class StacCatalog implements StacComponent {
 
     @Override
     public String getId() {
-        return null;
+        return (String) catalogJSON.get(ID);
     }
 
     @Override
@@ -86,8 +87,12 @@ public class StacCatalog implements StacComponent {
         return rootURL;
     }
 
+    public String getVersion() {
+        return (String) catalogJSON.get(STAC_VERSION);
+    }
+
     public String getTitle() {
-        return this.title;
+        return (String) catalogJSON.get(TITLE);
     }
 
     public String[] listCollections() {
@@ -113,6 +118,4 @@ public class StacCatalog implements StacComponent {
         }
         return false;
     }
-
-
 }
