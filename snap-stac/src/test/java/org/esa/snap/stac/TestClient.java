@@ -16,6 +16,7 @@
 package org.esa.snap.stac;
 
 import com.bc.ceres.test.LongTestRunner;
+import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -108,7 +109,7 @@ public class TestClient {
 
         String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
         StacItem item = new StacItem(itemURL);
-        StacItem.StacAsset asset = item.getAsset(item.listAssetIds()[0]);
+        Assets.Asset asset = item.getAsset(item.listAssetIds()[0]);
         File outputFile = client.downloadAsset(asset, tmpDir);
         Assert.assertTrue(outputFile.exists());
         Assert.assertEquals(117392, outputFile.length());

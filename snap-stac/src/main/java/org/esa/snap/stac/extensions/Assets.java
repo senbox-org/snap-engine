@@ -125,12 +125,14 @@ public class Assets implements StacExtension {
         final JSONObject json;
         public final String name;
         public String href, title, description, type, role;
+        private String fileName;
 
         public Asset(final String name, final JSONObject json) {
             this.json = json;
             this.name = name;
             if(json.containsKey(Assets.href)) {
                 this.href = (String)json.get(Assets.href);
+                this.fileName = this.href.split("/")[this.href.split("/").length - 1];
             }
             if(json.containsKey(Assets.title)) {
                 this.title = (String)json.get(Assets.title);
@@ -159,6 +161,7 @@ public class Assets implements StacExtension {
             this.description = descriptionValue;
             this.type = typeValue;
             this.role = roleValue;
+            this.fileName = this.href.split("/")[this.href.split("/").length - 1];
 
             json.put(Assets.title, title);
             json.put(Assets.href, href);
@@ -214,6 +217,18 @@ public class Assets implements StacExtension {
                 return (JSONArray) json.get(EO.bands);
             }
             return new JSONArray();
+        }
+
+        public String getURL() {
+            return this.href;
+        }
+
+        public String getFileName() {
+            return this.fileName;
+        }
+
+        public String getId() {
+            return this.name;
         }
     }
 }

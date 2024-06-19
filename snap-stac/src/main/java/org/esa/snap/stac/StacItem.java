@@ -77,9 +77,9 @@ public class StacItem implements StacComponent {
     private String itemURL;
     private String version;
     private File jsonFile;
-    private final HashMap<String, StacAsset> assetsById = new HashMap<>();
-    private final List<StacAsset> dataAssets = new ArrayList<>();
-    private final List<StacAsset> metadataAssets = new ArrayList<>();
+    private final HashMap<String, Assets.Asset> assetsById = new HashMap<>();
+    private final List<Assets.Asset> dataAssets = new ArrayList<>();
+    private final List<Assets.Asset> metadataAssets = new ArrayList<>();
 
     private JSONObject propertiesJSON;
     private JSONObject assetsJSON;
@@ -184,13 +184,13 @@ public class StacItem implements StacComponent {
 
         this.assetsJSON = (JSONObject) stacItemJSON.get(ASSETS);
         for (Object o : assetsJSON.keySet()) {
-            StacAsset curAsset = new StacAsset((JSONObject) assetsJSON.get(o), (String) o);
-            assetsById.put((String) o, curAsset);
+            final Assets.Asset asset = new Assets.Asset((String)o, (JSONObject)assetsJSON.get(o));
+            assetsById.put((String) o, asset);
 
-            if (curAsset.getRole() != null && Objects.equals(METADATAROLE, curAsset.getRole())) {
-                metadataAssets.add(curAsset);
+            if (asset.role != null && Objects.equals(METADATAROLE, asset.role)) {
+                metadataAssets.add(asset);
             } else {
-                dataAssets.add(curAsset);
+                dataAssets.add(asset);
             }
         }
 
@@ -218,7 +218,6 @@ public class StacItem implements StacComponent {
             throw new IOException("Null JSON object passed in");
         }
         if (!stacItemJSON.containsKey(ID)
-                || !stacItemJSON.containsKey(LINKS)
                 || !stacItemJSON.containsKey(ASSETS)) {
             throw new IOException("Invalid STAC JSON");
         }
@@ -324,7 +323,7 @@ public class StacItem implements StacComponent {
         return assetsJSON;
     }
 
-    public StacAsset getAsset(String assetID) {
+    public Assets.Asset getAsset(String assetID) {
         if (assetsById.containsKey(assetID)) {
             return assetsById.get(assetID);
         }
@@ -431,89 +430,5 @@ public class StacItem implements StacComponent {
 
     public Map<String, Assets.Asset> getImageAssets() {
         return Assets.getImageAssets(assetsJSON);
-    }
-
-    public static class StacAsset {
-        private final String href;
-        private final String title;
-        private final String id;
-        private final JSONObject assetJSON;
-        public EOBandData bandData;
-        private final List<String> roles;
-        private final String fileName;
-
-        private int width = 0;
-        private int height = 0;
-
-        StacAsset(JSONObject asset, String id) {
-            this.id = id;
-            this.title = (String) asset.get("title");
-            this.href = (String) asset.get("href");
-            this.assetJSON = asset;
-            if (asset.containsKey("eo:bands")) {
-                bandData = new EOBandData(
-                        (JSONObject) ((JSONArray) asset.get("eo:bands")).get(0));
-            }
-            if (asset.containsKey("proj:shape")) {
-                this.width = (int) (long) ((JSONArray) asset.get("proj:shape")).get(0);
-                this.height = (int) (long) ((JSONArray) asset.get("proj:shape")).get(1);
-
-            }
-            roles = (List<String>) asset.get("roles");
-            fileName = this.href.split("/")[this.href.split("/").length - 1];
-        }
-
-        public String getTitle() {
-            return this.title;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getURL() {
-            return this.href;
-        }
-
-        public int getWidth() {
-            return this.width;
-        }
-
-        public int getHeight() {
-            return this.height;
-        }
-
-        public JSONObject getJSON() {
-            return this.assetJSON;
-        }
-
-        public String getRole() {
-            if(roles == null)
-                return null;
-            return roles.get(0);
-        }
-
-    }
-
-    public static class EOBandData {
-        public double centerWavelength;
-        public double fullWidthHalfMax;
-        public String name;
-        public String description;
-        public String commonName;
-
-        public EOBandData(JSONObject eoBandData) {
-            commonName = "";
-
-            this.centerWavelength = (double) eoBandData.get("center_wavelength");
-            this.fullWidthHalfMax = (double) eoBandData.get("full_width_half_max");
-            this.name = (String) eoBandData.get("name");
-            this.description = (String) eoBandData.get("description");
-            this.commonName = (String) eoBandData.get("common_name");
-        }
     }
 }

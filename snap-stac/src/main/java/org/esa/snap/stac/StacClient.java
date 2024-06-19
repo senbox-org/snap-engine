@@ -17,6 +17,7 @@ package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
 
+import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.DownloadModifier;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.json.simple.JSONArray;
@@ -197,7 +198,7 @@ public class StacClient {
         return items;
     }
 
-    public String signURL(StacItem.StacAsset asset) {
+    public String signURL(Assets.Asset asset) {
         if (signDownloads) {
             return downloadModifier.signURL(asset.getURL());
         } else {
@@ -205,13 +206,13 @@ public class StacClient {
         }
     }
 
-    public InputStream streamAsset(StacItem.StacAsset asset) throws IOException {
+    public InputStream streamAsset(Assets.Asset asset) throws IOException {
         String downloadURL = signURL(asset);
         InputStream inputStream = new URL(downloadURL).openStream();
         return inputStream;
     }
 
-    public File downloadAsset(StacItem.StacAsset asset, File targetFolder) throws IOException {
+    public File downloadAsset(Assets.Asset asset, File targetFolder) throws IOException {
         targetFolder.mkdirs();
         String outputFilename = asset.getFileName();
         if(outputFilename.contains("?")) {
@@ -236,7 +237,7 @@ public class StacClient {
         outputFolder.mkdirs();
         System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.getAbsolutePath());
         for (String s : item.listAssetIds()) {
-            StacItem.StacAsset curAsset = item.getAsset(s);
+            Assets.Asset curAsset = item.getAsset(s);
             downloadAsset(curAsset, outputFolder);
         }
         return outputFolder;
