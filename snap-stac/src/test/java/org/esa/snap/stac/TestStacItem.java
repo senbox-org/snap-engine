@@ -15,6 +15,7 @@
  */
 package org.esa.snap.stac;
 
+import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -72,13 +73,13 @@ public class TestStacItem {
     @Test
     public void testGetAsset() throws Exception {
         StacItem item = new StacItem(stacItemURL);
-        StacItem.StacAsset asset = item.getAsset("trad");
+        Assets.Asset asset = item.getAsset("trad");
         assertNotNull(item.getAsset("trad"));
         assertEquals("https://landsateuwest.blob.core.windows.net/landsat-c2/level-2/standard/oli-tirs/2022/047/028/LC09_L2SP_047028_20221031_20221102_02_T2/LC09_L2SP_047028_20221031_20221102_02_T2_ST_TRAD.TIF", asset.getURL());
-        assertEquals("Thermal Radiance Band", asset.getTitle());
+        assertEquals("Thermal Radiance Band", asset.title);
         assertEquals("trad", asset.getId());
         assertEquals("LC09_L2SP_047028_20221031_20221102_02_T2_ST_TRAD.TIF", asset.getFileName());
-        assertEquals("data", asset.getRole());
+        assertEquals("data", asset.role);
     }
 
     @Test
