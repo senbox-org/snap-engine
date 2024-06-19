@@ -15,6 +15,10 @@
  */
 package org.esa.snap.stac.internal;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+
 public class JsonUtils {
 
     public static int getInt(final Object o) {
@@ -42,5 +46,10 @@ public class JsonUtils {
             return Double.NEGATIVE_INFINITY;
         }
         return Double.parseDouble((String) o);
+    }
+
+    public static String prettyPrint(final Object json) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
 }

@@ -18,13 +18,16 @@ package org.esa.snap.stac;
 // Author Alex McVittie, SkyWatch Space Applications Inc. December 2023
 
 
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.extensions.Basics;
 import org.esa.snap.stac.extensions.DateTime;
+import org.esa.snap.stac.extensions.EO;
 import org.esa.snap.stac.extensions.ExtensionFactory;
 import org.esa.snap.stac.extensions.Provider;
+import org.esa.snap.stac.extensions.Raster;
 import org.esa.snap.stac.extensions.SAR;
 import org.esa.snap.stac.extensions.SNAP;
 import org.esa.snap.stac.internal.GeoCodingSupport;
@@ -35,6 +38,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -44,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -71,6 +76,7 @@ public class StacItem implements StacComponent {
 
     private String itemURL;
     private String version;
+    private File jsonFile;
     private final HashMap<String, StacAsset> assetsById = new HashMap<>();
     private final List<StacAsset> dataAssets = new ArrayList<>();
     private final List<StacAsset> metadataAssets = new ArrayList<>();
@@ -88,7 +94,7 @@ public class StacItem implements StacComponent {
      * @param inputStr The URL of the StacItem
      * @throws Exception
      */
-    public StacItem(String inputStr) throws Exception {
+    public StacItem(String inputStr) throws IOException {
         JSONObject json;
         try {
             if (inputStr.startsWith("http")) {
@@ -99,7 +105,7 @@ public class StacItem implements StacComponent {
                 json = createEmptyStacItem(inputStr);
             }
         } catch (Exception e) {
-            throw new ParseException("Unable to parse JSON from given path");
+            throw new IOException("Unable to parse JSON from given path");
         }
         initStacItem(json);
     }
@@ -110,11 +116,12 @@ public class StacItem implements StacComponent {
      * @param productInputFile The file of the StacItem
      * @throws Exception
      */
-    public StacItem(File productInputFile) throws Exception {
+    public StacItem(File productInputFile) throws IOException {
         try {
+            jsonFile = productInputFile;
             initStacItem((JSONObject) new JSONParser().parse(new FileReader(productInputFile)));
         } catch (Exception e) {
-            throw new ParseException("Unable to parse JSON from given local file.");
+            throw new IOException("Unable to parse JSON from given local file.");
         }
     }
 
@@ -124,7 +131,7 @@ public class StacItem implements StacComponent {
      * @param json The path of the StacItem
      * @throws Exception
      */
-    public StacItem(JSONObject json) throws Exception {
+    public StacItem(JSONObject json) throws IOException {
         initStacItem(json);
     }
 
@@ -148,7 +155,7 @@ public class StacItem implements StacComponent {
         return json;
     }
 
-    private void initStacItem(final JSONObject json) throws Exception {
+    private void initStacItem(final JSONObject json) throws IOException {
         validate(json);
 
         this.stacItemJSON = json;
@@ -206,14 +213,14 @@ public class StacItem implements StacComponent {
         }
     }
 
-    private static void validate(final JSONObject stacItemJSON) throws ParseException {
+    private static void validate(final JSONObject stacItemJSON) throws IOException {
         if (Objects.isNull(stacItemJSON)) {
-            throw new ParseException("Null JSON object passed in");
+            throw new IOException("Null JSON object passed in");
         }
         if (!stacItemJSON.containsKey(ID)
                 || !stacItemJSON.containsKey(LINKS)
                 || !stacItemJSON.containsKey(ASSETS)) {
-            throw new ParseException("Invalid STAC JSON");
+            throw new IOException("Invalid STAC JSON");
         }
     }
 
@@ -313,6 +320,10 @@ public class StacItem implements StacComponent {
         return propertiesJSON;
     }
 
+    public JSONObject getAssets() {
+        return assetsJSON;
+    }
+
     public StacAsset getAsset(String assetID) {
         if (assetsById.containsKey(assetID)) {
             return assetsById.get(assetID);
@@ -325,6 +336,54 @@ public class StacItem implements StacComponent {
         assetArray = (String[]) assetsJSON.keySet().toArray(assetArray);
         Arrays.sort(assetArray);
         return assetArray;
+    }
+
+    public JSONArray getBands() throws IOException {
+        JSONArray bandArray = new JSONArray();
+        if (propertiesJSON.containsKey(EO.bands)) {
+            bandArray = (JSONArray) propertiesJSON.get(EO.bands);
+        }
+        if (propertiesJSON.containsKey(Raster.bands)) {
+            if (bandArray.isEmpty()) {
+                bandArray = (JSONArray) propertiesJSON.get(Raster.bands);
+            } else {
+                JSONArray rasterArray = (JSONArray) propertiesJSON.get(Raster.bands);
+                if(bandArray.size() != rasterArray.size()) {
+                    throw new IOException("EO bands and raster bands are not the same size");
+                }
+                for (int i = 0; i < bandArray.size(); ++i) {
+                    JSONObject band = (JSONObject)bandArray.get(i);
+                    JSONObject raster = (JSONObject)rasterArray.get(i);
+                    for(Object key : raster.keySet()) {
+                        band.put(key, raster.get(key));
+                    }
+                }
+            }
+        }
+        return bandArray;
+    }
+
+    public void setBandProperties(final Band band) throws IOException {
+        final JSONArray bandsArray = getEOBands();
+        for (Object o : bandsArray) {
+            final JSONObject bandProperties = (JSONObject) o;
+            if (band.getName().equalsIgnoreCase((String) bandProperties.get(EO.name)) ||
+                    band.getName().equalsIgnoreCase((String) bandProperties.get(EO.common_name))) {
+                EO.getBandProperties(band, bandProperties);
+                return;
+            }
+        }
+    }
+
+    public JSONArray getEOBands() throws IOException {
+        if (propertiesJSON.containsKey(EO.bands)) {
+            return (JSONArray) propertiesJSON.get(EO.bands);
+        }
+        throw new IOException("EO band properties not found");
+    }
+
+    public File getJSONFile() {
+        return jsonFile;
     }
 
     public String getVersion() {
@@ -363,6 +422,15 @@ public class StacItem implements StacComponent {
             SystemUtils.LOG.severe("Unable to parse " + url);
             return false;
         }
+    }
+
+    public Assets.Asset addAsset(final String name, final String titleValue, final String descriptionValue,
+                                 final String hrefValue, final String typeValue, final String roleValue) {
+        return Assets.addAsset(assetsJSON, name, titleValue, descriptionValue, hrefValue, typeValue, roleValue);
+    }
+
+    public Map<String, Assets.Asset> getImageAssets() {
+        return Assets.getImageAssets(assetsJSON);
     }
 
     public static class StacAsset {

@@ -15,7 +15,6 @@
  */
 package org.esa.snap.stac;
 
-import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,7 +87,7 @@ public class TestStacItem {
             // Provide an invalid JSON as a String
             new StacItem("{ \"invalid\": \"json\" }");
             fail("Expected ParseException for invalid STAC JSON");
-        } catch (ParseException e) {
+        } catch (IOException e) {
             assertEquals("Invalid STAC JSON", e.getMessage());
         } catch (Exception e) {
             fail("Unexpected exception type: " + e.getClass().getName());
@@ -100,7 +100,7 @@ public class TestStacItem {
             // Provide a non-existent file
             new StacItem(new File("nonexistent.json"));
             fail("Expected ParseException for unable to parse JSON from given local file");
-        } catch (ParseException e) {
+        } catch (IOException e) {
             assertEquals("Unable to parse JSON from given local file.", e.getMessage());
         } catch (Exception e) {
             fail("Unexpected exception type: " + e.getClass().getName());
