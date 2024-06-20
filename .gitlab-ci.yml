@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.9.1"
+    ref: "3.9.2"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -22,10 +22,10 @@ variables:
   MAVEN_DEPLOY_ARGS: "deploy"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
+  MAVEN_BUILD_ARGS: verify
   SONAR_BASE_ARGS: |
     sonar:sonar -Dsonar.projectKey=${CI_PROJECT_NAME}
-    -Dsonar.exclusions=${CI_PROJECT_NAME}-coverage
-    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
+    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_DIR}/${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=${MAVEN_CFG_DIR}/repository

@@ -296,7 +296,6 @@
   </dependencies>
 
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <plugin>
             <groupId>org.jacoco</groupId>
@@ -311,15 +310,11 @@
                 </execution>
             </executions>
             <configuration>
-                <outputDirectory>
-                    ${project.reporting.outputDirectory}/jacoco-aggregate
-                </outputDirectory>
                 <excludes>
                     <exclude>**/gdal-*.zip</exclude>
                 </excludes>
             </configuration>
         </plugin>
       </plugins>
-    </pluginManagement>
   </build>
 </project>
