@@ -50,7 +50,6 @@
         <buildDate>${maven.build.timestamp}</buildDate>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
-        <sonar.exclusions>*/src</sonar.exclusions>
         <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
