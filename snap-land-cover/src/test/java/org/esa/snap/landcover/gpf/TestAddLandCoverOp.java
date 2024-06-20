@@ -13,14 +13,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.landcover;
+package org.esa.snap.landcover.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.engine_utilities.util.TestUtils;
-import org.esa.snap.landcover.gpf.AddLandCoverOp;
 import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +43,19 @@ public class TestAddLandCoverOp {
 
         final LandCoverDataset dataset = new LandCoverDataset("GLC2000",
                 "land_cover_GLC2000", 23.0, expectedValues);
+
+        process(dataset);
+    }
+
+    @Test
+    public void testESAWorldCover() throws Exception {
+
+        final double[] expectedValues = {
+                100.0, 70.0, 10.0, 30.0, 100.0, 30.0, 10.0, 30.0
+        };
+
+        final LandCoverDataset dataset = new LandCoverDataset("ESA_WorldCover",
+                "land_cover_ESA_WorldCover", 0.0, expectedValues);
 
         process(dataset);
     }

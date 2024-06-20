@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2024 by SkyWatch Space Applications Inc. http://www.skywatch.com
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -13,43 +13,47 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.landcover.dataio.AAFC;
+package org.esa.snap.landcover.dataio.ESRILULC;
 
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.engine_utilities.util.Settings;
 import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
-import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
+import org.esa.snap.landcover.dataio.StacLandCoverModel;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 
-public class ACGEO2016CropSMAPVEXModelDescriptor extends AbstractLandCoverModelDescriptor {
+public class ESRILULC2020ModelDescriptor extends AbstractLandCoverModelDescriptor {
 
-    public static final String NAME = "AAFC Canada 2016 Crop SMAPVEX";
+    public static final String NAME = "ESRILULC2020";
 
     private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC");
-    private static final File file = new File(INSTALL_DIR, "ACGEO_2016_CI_SMAPVEX_30m_v3.zip");
+            "LandCover" + File.separator + NAME);
 
-    public ACGEO2016CropSMAPVEXModelDescriptor() {
-        remotePath = "http://step.esa.int/auxdata/landcover/AAFC/AESB_EOS_Crop_2016/";
+    public ESRILULC2020ModelDescriptor() {
         name = NAME;
+        NO_DATA_VALUE = 230;
         installDir = INSTALL_DIR;
-        NO_DATA_VALUE = -9999d;
+        remotePath = "https://planetarycomputer.microsoft.com/api/stac/v1";
+
         final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(this.getClass());
-        colourIndexFile = moduleBasePath.resolve("org/esa/snap/landcover/auxdata/aafc/aafc_crop_index.col");
+        colourIndexFile = moduleBasePath.resolve("org/esa/snap/landcover/auxdata/esri2020/esri2020_index.col");
     }
 
     @Override
-    public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
-        return new FileLandCoverModel(this, new File[]{file}, resampling);
+    public LandCoverModel createLandCoverModel(final Resampling resampling) {
+        return new StacLandCoverModel(this, resampling);
     }
 
     @Override
-    public String getGrouping() {
-        return "AAFC Crop Index";
+    public boolean isInstalled() {
+        return true;
+    }
+
+    @Override
+    public String getCollectionId() {
+        return "io-lulc";
     }
 }
