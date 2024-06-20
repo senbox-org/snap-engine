@@ -25,7 +25,6 @@ variables:
   SONAR_BASE_ARGS: |
     sonar:sonar -Dsonar.projectKey=${CI_PROJECT_NAME}
     -Dsonar.exclusions=${CI_PROJECT_NAME}-coverage
-    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=${MAVEN_CFG_DIR}/repository
