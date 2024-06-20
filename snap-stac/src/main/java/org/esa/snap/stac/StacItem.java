@@ -381,6 +381,10 @@ public class StacItem implements StacComponent {
         throw new IOException("EO band properties not found");
     }
 
+    public void setJSONFile(File file) {
+        this.jsonFile = file;
+    }
+
     public File getJSONFile() {
         return jsonFile;
     }
