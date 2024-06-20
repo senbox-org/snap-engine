@@ -11,16 +11,31 @@
 
     <artifactId>snap-stac</artifactId>
 
+    <packaging>nbm</packaging>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mockito.version>3.4.0</mockito.version>
     </properties>
+
     <dependencies>
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <scope>compile</scope>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-engine-utilities</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -32,6 +47,52 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2gis</artifactId>
+            <version>1.5.0</version>
+        </dependency-->
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <configuration>
+                    <publicPackages>
+                        <publicPackage>org.esa.snap.*</publicPackage>
+                        <publicPackage>org.json.simple.*</publicPackage>
+                    </publicPackages>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
