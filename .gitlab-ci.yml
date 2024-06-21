@@ -56,7 +56,9 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  image: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
+  # image: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
+  # variables:
+  #   JAVA_HOME: /usr/lib/jvm/zulu11-ca-amd64
   allow_failure: true
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
