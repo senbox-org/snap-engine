@@ -117,15 +117,6 @@
         <module>snap-stac</module>
     </modules>
 
-    <profiles>
-        <profile>
-        <id>exclude-from-build</id>
-        <modules>
-            <module>snap-engine-coverage</module>
-        </modules>
-        </profile>
-    </profiles>
-
     <organization>
         <name>European Space Agency (ESA)</name>
         <url>https://step.esa.int/</url>
@@ -1186,7 +1177,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.7.9</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
