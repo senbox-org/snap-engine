@@ -1194,7 +1194,7 @@
                 </executions>
                 <configuration>
                     <excludes>
-                        <exclude>**/gdal-*.zip</exclude>
+                        <exclude>**/gdal-*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
