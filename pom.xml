@@ -50,11 +50,6 @@
         <buildDate>${maven.build.timestamp}</buildDate>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
-        <sonar.exclusions>*/src</sonar.exclusions>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/snap-engine-coverage/target/site/
-            jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
         <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
@@ -120,17 +115,7 @@
         <module>lib-gdal</module>
         <module>snap-test-utils</module>
         <module>snap-stac</module>
-        <module>snap-engine-coverage</module>
     </modules>
-
-    <profiles>
-        <profile>
-        <id>exclude-from-build</id>
-        <modules>
-            <module>snap-engine-coverage</module>
-        </modules>
-        </profile>
-    </profiles>
 
     <organization>
         <name>European Space Agency (ESA)</name>
@@ -934,8 +919,8 @@
                             <jna.debug_load>true</jna.debug_load>
                             <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
-                        <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
-                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>
+                        <!-- <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine> -->
                     </configuration>
                 </plugin>
 
@@ -1247,6 +1232,18 @@
                         <id>default</id>
                         <reports>
                             <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- select non-aggregate reports -->
+                            <report>report</report>
                         </reports>
                     </reportSet>
                 </reportSets>
