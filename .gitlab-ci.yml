@@ -49,16 +49,12 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/**/target/*.jar"
       - "${MAVEN_PROJECT_DIR}/**/target/classes"
       - "${MAVEN_PROJECT_DIR}/**/target/*.nbm"
-      #- "${MAVEN_PROJECT_DIR}/**/target/site/jacoco/jacoco.csv"
       - "${MAVEN_PROJECT_DIR}/**/target/site"
       - "${MAVEN_PROJECT_DIR}/**/target/surefire-reports"
       - "${MAVEN_PROJECT_DIR}/etc"
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  # image: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
-  # variables:
-  #   JAVA_HOME: /usr/lib/jvm/zulu11-ca-amd64
   allow_failure: true
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
