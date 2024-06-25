@@ -17,49 +17,66 @@ package com.bc.ceres.swing.binding.internal;
 
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.swing.binding.Binding;
 import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.ComponentAdapter;
 import org.junit.Test;
 
 import javax.swing.*;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 public class PathEditorTest {
 
-  @Test
-  public void testIsApplicable() {
-    PathEditor pathEditor = new PathEditor();
+    @Test
+    public void testIsApplicable() {
+        PathEditor pathEditor = new PathEditor();
 
-    PropertyDescriptor fileDescriptor = new PropertyDescriptor("test", Path.class);
-    assertTrue(pathEditor.isValidFor(fileDescriptor));
+        PropertyDescriptor fileDescriptor = new PropertyDescriptor("test", Path.class);
+        assertTrue(pathEditor.isValidFor(fileDescriptor));
 
-    PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
-    assertFalse(pathEditor.isValidFor(doubleDescriptor));
-  }
+        PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
+        assertFalse(pathEditor.isValidFor(doubleDescriptor));
+    }
 
-  @Test
-  public void testCreateEditorComponent() {
-    PathEditor pathEditor = new PathEditor();
+    @Test
+    public void testCreateEditorComponent() {
+        PathEditor pathEditor = new PathEditor();
 
-    PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
-    BindingContext bindingContext = new BindingContext(propertyContainer);
-    PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("filePath");
-    assertSame(Path.class, propertyDescriptor.getType());
+        PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
+        BindingContext bindingContext = new BindingContext(propertyContainer);
+        PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("filePath");
+        assertSame(Path.class, propertyDescriptor.getType());
 
-    assertTrue(pathEditor.isValidFor(propertyDescriptor));
-    JComponent editorComponent = pathEditor.createEditorComponent(propertyDescriptor, bindingContext);
-    assertNotNull(editorComponent);
-    assertSame(JPanel.class, editorComponent.getClass());
-    assertEquals(2, editorComponent.getComponentCount());
+        assertTrue(pathEditor.isValidFor(propertyDescriptor));
+        JComponent editorComponent = pathEditor.createEditorComponent(propertyDescriptor, bindingContext);
+        assertNotNull(editorComponent);
+        assertSame(JPanel.class, editorComponent.getClass());
+        assertEquals(2, editorComponent.getComponentCount());
 
-    JComponent[] components = bindingContext.getBinding("filePath").getComponents();
-    assertEquals(1, components.length);
-    assertSame(JTextField.class, components[0].getClass());
-  }
+        JComponent[] components = bindingContext.getBinding("filePath").getComponents();
+        assertEquals(1, components.length);
+        assertSame(JTextField.class, components[0].getClass());
+    }
 
-  private static class V {
+    @Test
+    public void testGetCurrentPath() {
+        PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
+        BindingContext bindingContext = new BindingContext(propertyContainer);
+        PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("filePath");
 
-    Path filePath;
-  }
+        final JTextField textField = new JTextField();
+        final ComponentAdapter adapter = new TextComponentAdapter(textField);
+        final Binding binding = bindingContext.bind(propertyDescriptor.getName(), adapter);
+        Optional<Path> currentPath = PathEditor.getCurrentPath(propertyDescriptor, binding);
+        assertNotNull(currentPath);
+        assertFalse(currentPath.isPresent());
+    }
+
+    private static class V {
+
+        Path filePath;
+    }
 }
