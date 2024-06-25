@@ -55,6 +55,7 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   allow_failure: true
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
