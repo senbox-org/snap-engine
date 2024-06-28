@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import org.esa.snap.jni.EnvironmentVariables;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,6 +44,7 @@ public class GDAL extends GDALBase {
      * Creates new instance for this driver
      */
     private GDAL() throws NoSuchMethodException, IllegalAccessException {
+        EnvironmentVariables.setEnvironmentVariable("GDAL_DATA");
         getDataTypeNameHandle = createStaticHandle(gdalClass, "GetDataTypeName", String.class, int.class);
         getDataTypeByNameHandle = createStaticHandle(gdalClass, "GetDataTypeByName", int.class, String.class);
         final Class<?> gdalDatasetClass = GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME);

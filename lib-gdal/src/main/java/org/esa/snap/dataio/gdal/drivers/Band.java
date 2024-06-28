@@ -47,6 +47,12 @@ public class Band extends GDALBase implements Closeable {
     private final MethodHandle writeRasterIntHandle;
     private final MethodHandle writeRasterFloatHandle;
     private final MethodHandle writeRasterDoubleHandle;
+    private final MethodHandle writeRasterDirectHandle;
+    private final MethodHandle setOffsetHandle;
+    private final MethodHandle setScaleHandle;
+    private final MethodHandle setNoDataValueHandle;
+    private final MethodHandle setUnitTypeHandle;
+    private final MethodHandle setDescriptionHandle;
 
     /**
      * Creates new instance for this driver
@@ -86,6 +92,13 @@ public class Band extends GDALBase implements Closeable {
                                                   int.class, int.class, int.class, int.class, int.class, float[].class);
             writeRasterDoubleHandle = createHandle(bandClass, "WriteRaster", int.class,
                                                    int.class, int.class, int.class, int.class, int.class, double[].class);
+            writeRasterDirectHandle = createHandle(bandClass, "WriteRaster_Direct", int.class,
+                                                   int.class, int.class, int.class, int.class, int.class, ByteBuffer.class);
+            setOffsetHandle = createHandle(bandClass, "SetOffset", int.class, double.class);
+            setScaleHandle = createHandle(bandClass, "SetScale", int.class, double.class);
+            setNoDataValueHandle = createHandle(bandClass, "SetNoDataValue", int.class, double.class);
+            setUnitTypeHandle = createHandle(bandClass, "SetUnitType", int.class, String.class);
+            setDescriptionHandle = createHandle(bandClass, "SetDescription", void.class, String.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -348,6 +361,30 @@ public class Band extends GDALBase implements Closeable {
      */
     public Integer writeRaster(int xoff, int yoff, int xsize, int ysize, int bufType, double[] array) {
         return (Integer) invoke(writeRasterDoubleHandle, this.jniBandInstance, xoff, yoff, xsize, ysize, bufType, array);
+    }
+
+    public Integer writeRasterDirect(int xoff, int yoff, int xsize, int ysize, int bufType, ByteBuffer buffer) {
+        return (Integer) invoke(writeRasterDirectHandle, this.jniBandInstance, xoff, yoff, xsize, ysize, bufType, buffer);
+    }
+
+    public Integer setOffset(double value) {
+        return (Integer) invoke(setOffsetHandle, this.jniBandInstance, value);
+    }
+
+    public Integer setScale(double value) {
+        return (Integer) invoke(setScaleHandle, this.jniBandInstance, value);
+    }
+
+    public Integer setNoDataValue(double value) {
+        return (Integer) invoke(setNoDataValueHandle, this.jniBandInstance, value);
+    }
+
+    public Integer setUnitType(String unit) {
+        return (Integer) invoke(setUnitTypeHandle, this.jniBandInstance, unit);
+    }
+
+    public void setDescription(String description) {
+        invoke(setDescriptionHandle, this.jniBandInstance, description);
     }
 
     @Override

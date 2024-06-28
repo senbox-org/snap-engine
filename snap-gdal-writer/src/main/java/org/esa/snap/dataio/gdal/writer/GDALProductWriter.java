@@ -36,15 +36,15 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,8 +58,9 @@ public class GDALProductWriter extends AbstractProductWriter {
     private static final Logger logger = Logger.getLogger(GDALProductWriter.class.getName());
     private static final Map<Integer, Integer> gdalTypeMap;
     private final GDALDriverInfo writerDriver;
-    private String[] writeOptions;
     private Dataset gdalDataset;
+    private String[] writeOptions;
+    private int gdalDataType;
 
     private Driver gdalDriver;
 
@@ -126,7 +127,7 @@ public class GDALProductWriter extends AbstractProductWriter {
         int bandCount = sourceProduct.getNumBands();
 
         Band sourceBand = sourceProduct.getBandAt(0);
-        int gdalDataType = GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType());
+        gdalDataType = GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType());
         for (int i = 1; i < bandCount; i++) {
             sourceBand = sourceProduct.getBandAt(i);
             if (gdalDataType != GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType())) {
@@ -149,8 +150,7 @@ public class GDALProductWriter extends AbstractProductWriter {
         }
 
         if (this.writerDriver.getDriverName().contentEquals("COG")) {//when the writer attempts to write COG
-            this.gdalDriver = GDAL.getDriverByName("GTiff");//use 'GTiff' driver to write the temporary outputFile because the COG driver not allows creating datasets using 'driver.create()' as 'https://gdal.org/drivers/raster/cog.html' says
-            outputFile = outputFile.getParent().resolve("temp_" + new Date().getTime() + ".tif");// use random file name for temporary file
+            this.gdalDriver = GDAL.getDriverByName("MEM");//use 'GTiff' driver to write the temporary outputFile because the COG driver not allows creating datasets using 'driver.create()' as 'https://gdal.org/drivers/raster/cog.html' says
         } else {
             this.gdalDriver = GDAL.getDriverByName(this.writerDriver.getDriverName());
         }
@@ -163,7 +163,28 @@ public class GDALProductWriter extends AbstractProductWriter {
         }
 
         String gdalWriteOptions = Config.instance().preferences().get("snap.dataio.gdal.creationoptions", "TILED=YES");
-        if (gdalWriteOptions.contains("COMPRESS") && !gdalWriteOptions.contains("PREDICTOR")) {
+        if (!gdalWriteOptions.contains("BLOCK")) {
+            final Dimension size = sourceProduct.getPreferredTileSize();
+            gdalWriteOptions += ";BLOCKXSIZE=" + size.width + ";BLOCKYSIZE=" + size.height;
+            gdalWriteOptions += ";INTERLEAVE=BAND;PROFILE=GeoTIFF";
+        }
+        if (gdalWriteOptions.contains("COMPRESS")) {
+            if (!gdalWriteOptions.contains("PREDICTOR")) {
+                if (gdalDataType == GDALConstConstants.gdtByte() ||
+                        gdalDataType == GDALConstConstants.gdtUint16() ||
+                        gdalDataType == GDALConstConstants.gdtInt16() ||
+                        gdalDataType == GDALConstConstants.gdtUint32() ||
+                        gdalDataType == GDALConstConstants.gdtInt32() ||
+                        gdalDataType == GDALConstConstants.gdtCInt16() ||
+                        gdalDataType == GDALConstConstants.gdtCInt32()) {
+                    gdalWriteOptions += ";PREDICTOR=2";
+
+                } else {
+                    gdalWriteOptions += ";PREDICTOR=3";
+                }
+            }
+        }/* else {
+            gdalWriteOptions += ";COMPRESS=DEFLATE;";
             if (gdalDataType == GDALConstConstants.gdtByte() ||
                     gdalDataType == GDALConstConstants.gdtUint16() ||
                     gdalDataType == GDALConstConstants.gdtInt16() ||
@@ -176,12 +197,16 @@ public class GDALProductWriter extends AbstractProductWriter {
             } else {
                 gdalWriteOptions += "PREDICTOR=3";
             }
-        }
-        writeOptions = StringUtils.stringToArray(gdalWriteOptions, ";");
+        }*/
+        this.writeOptions = StringUtils.stringToArray(gdalWriteOptions, ";");
+        GDAL.setCacheMax(256*1024*1024);
         this.gdalDataset = this.gdalDriver.create(outputFile.toString(), imageWidth, imageHeight, bandCount, gdalDataType, writeOptions);
         if (this.gdalDataset == null) {
             throw new NullPointerException("Failed creating the file to export the product for driver '" + this.gdalDriver.getLongName() + "'.");
         }
+        /*for (int i = 1; i < bandCount; i++) {
+            this.gdalDataset.addBand(gdalDataType);
+        }*/
 
         GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
         if (geoCoding == null) {
@@ -223,36 +248,44 @@ public class GDALProductWriter extends AbstractProductWriter {
             }
             int result;
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+            gdalBand.setScale(Double.compare(sourceBand.getScalingFactor(), 0.0) == 0 ? 1.0 : sourceBand.getScalingFactor());
+            gdalBand.setOffset(sourceBand.getScalingOffset());
+            if (this.gdalDataType == GDALConstConstants.gdtFloat32()) {
+                gdalBand.setNoDataValue(Float.NaN);
+            } else {
+                gdalBand.setNoDataValue(sourceBand.getNoDataValue());
+            }
+            gdalBand.setUnitType(sourceBand.getUnit());
+            gdalBand.setDescription(sourceBand.getName());
             final int dataType = sourceBand.getDataType();
+            final int gdalDataType = gdalTypeMap.get(dataType);
+            final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(sourceWidth * sourceHeight * (GDAL.getDataTypeSize(gdalDataType) >> 3));
+            byteBuffer.order(ByteOrder.nativeOrder());
             try {
                 switch (dataType) {
                     case ProductData.TYPE_UINT8:
                     case ProductData.TYPE_INT8:
-                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                                      gdalTypeMap.get(dataType), (byte[]) sourceBuffer.getElems());
+                        byteBuffer.put((byte[]) sourceBuffer.getElems());
                         break;
                     case ProductData.TYPE_INT16:
                     case ProductData.TYPE_UINT16:
-                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                                      gdalTypeMap.get(dataType), (short[]) sourceBuffer.getElems());
+                        byteBuffer.asShortBuffer().put((short[]) sourceBuffer.getElems());
                         break;
                     case ProductData.TYPE_INT32:
                     case ProductData.TYPE_UINT32:
-                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                                      gdalTypeMap.get(dataType), (int[]) sourceBuffer.getElems());
+                        byteBuffer.asIntBuffer().put((int[]) sourceBuffer.getElems());
                         break;
                     case ProductData.TYPE_FLOAT32:
-                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                                      gdalTypeMap.get(dataType), (float[]) sourceBuffer.getElems());
+                        byteBuffer.asFloatBuffer().put((float[]) sourceBuffer.getElems());
                         break;
                     case ProductData.TYPE_FLOAT64:
-                        result = gdalBand.writeRaster(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                                      gdalTypeMap.get(dataType), (double[]) sourceBuffer.getElems());
+                        byteBuffer.asDoubleBuffer().put((double[]) sourceBuffer.getElems());
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown GDAL data type " + dataType + ".");
                 }
-
+                result = gdalBand.writeRasterDirect(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, gdalDataType, byteBuffer);
+                byteBuffer.clear();
                 if (result != GDALConst.ceNone()) {
                     throw new IllegalArgumentException("Failed to write the data for band name '" + sourceBand.getName() + "' and driver '" + this.gdalDriver.getLongName() + "'.");
                 }
@@ -260,7 +293,7 @@ public class GDALProductWriter extends AbstractProductWriter {
             } finally {
                 pm.done();
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             throw new NullPointerException("Failed creating the band with index " + bandIndex + " to export the product for driver '" + this.gdalDriver.getLongName() + "'. Reason: " + e.getMessage());
         }
     }
@@ -273,21 +306,18 @@ public class GDALProductWriter extends AbstractProductWriter {
     @Override
     public void close() {
         if (this.gdalDataset != null) {
-            if (this.writerDriver.getDriverName().contentEquals("COG")) {//when the writer attempts to write COG
+            if (this.writerDriver.getDriverName().contains("COG")) {
                 Driver cogDriver = GDAL.getDriverByName(this.writerDriver.getDriverName());//use the COG driver
                 String outputFile = getFileInput(getOutput()).toString();//use the real output file name
                 Dataset tempDataset = this.gdalDataset;
-                if (writeOptions == null) {
-                    this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, new String[0]);//create the final output dataset file (the COG product) from temporary dataset file without options for write
-                }else{
-                    this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, writeOptions);//create the final output dataset file (the COG product) from temporary dataset file with options for write
-                }
-                Vector fileList = tempDataset.getFileList();//fetch the temporary dataset file path
+                //create the final output dataset file (the COG product) from temporary dataset file without options for write
+                this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, Objects.requireNonNullElseGet(writeOptions, () -> new String[0]));//create the final output dataset file (the COG product) from temporary dataset file with options for write
+                //Vector fileList = tempDataset.getFileList();//fetch the temporary dataset file path
                 tempDataset.delete();//close the temporary dataset file
-                for (Object datasetFileO : fileList) {
+                /*for (Object datasetFileO : fileList) {
                     String datasetFile = (String) datasetFileO;
                     cogDriver.delete(datasetFile);//physically delete the temporary dataset file
-                }
+                }*/
             }
             this.gdalDataset.delete();
             this.gdalDataset = null;
