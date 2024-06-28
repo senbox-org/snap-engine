@@ -36,6 +36,7 @@ public class Dataset extends GDALBase implements Closeable {
     private final MethodHandle getGCPCountHandle;
     private final MethodHandle setProjectionHandle;
     private final MethodHandle setGeoTransformHandle;
+    private final MethodHandle addBandHandle;
 
     static {
         datasetClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
@@ -69,6 +70,7 @@ public class Dataset extends GDALBase implements Closeable {
             getGCPCountHandle = createHandle(datasetClass, "GetGCPCount", int.class);
             setProjectionHandle = createHandle(datasetClass, "SetProjection", int.class, String.class);
             setGeoTransformHandle = createHandle(datasetClass, "SetGeoTransform", int.class, double[].class);
+            addBandHandle = createHandle(datasetClass, "AddBand", int.class, int.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -223,6 +225,10 @@ public class Dataset extends GDALBase implements Closeable {
      */
     public Integer setGeoTransform(double[] gdalGeoTransform) {
         return (Integer) invoke(setGeoTransformHandle, this.jniDatasetInstance, (Object) gdalGeoTransform);
+    }
+
+    public Integer addBand(int dataType) {
+        return (Integer) invoke(addBandHandle, this.jniDatasetInstance, dataType);
     }
 
     @Override

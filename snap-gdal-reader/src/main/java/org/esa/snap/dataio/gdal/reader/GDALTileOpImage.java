@@ -53,7 +53,7 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
     }
 
     @Override
-    protected synchronized void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
+    protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
         Rectangle normalBoundsIntersection = computeIntersectionOnNormalBounds(levelDestinationRectangle);
         if (!normalBoundsIntersection.isEmpty()) {
             final int level = getLevel();
@@ -108,7 +108,7 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                 try (Dataset dataset = openDataset();
                      Band band = openBand(dataset)) {
                     final int gdalBufferDataType = band.getDataType();
-                    final int bufferSize = pixels * GDAL.getDataTypeSize(gdalBufferDataType);
+                    final int bufferSize = pixels * (GDAL.getDataTypeSize(gdalBufferDataType) >> 3);
                     final ByteBuffer data = ByteBuffer.allocateDirect(bufferSize);
                     data.order(ByteOrder.nativeOrder());
 
