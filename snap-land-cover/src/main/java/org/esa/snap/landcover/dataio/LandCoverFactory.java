@@ -35,7 +35,7 @@ public class LandCoverFactory {
 
     static {
         for (int i = 0; i < descriptors.length; i++) {
-            nameList[i] = appendAutoDownload(descriptors[i].getName());
+            nameList[i] = descriptors[i].getName();
         }
     }
 
@@ -64,10 +64,6 @@ public class LandCoverFactory {
             throw new OperatorException("The land cover '" + name + "' has not been installed.");
         }
         return landcover;
-    }
-
-    public static String appendAutoDownload(String name) {
-        return name;
     }
 
     /**

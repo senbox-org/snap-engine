@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
+AutoUpdate-Show-In-Client: false
+AutoUpdate-Essential-Module: true
+OpenIDE-Module-Java-Dependencies: Java > 11
+OpenIDE-Module-Display-Category: SNAP Core
+OpenIDE-Module-Long-Description: <p>SNAP STAC</p><p><b>Vendor:</b> SkyWatch Space Applications Inc</p><p>
+                                                                    <b>Contact</b> https://www.skywatch.com</p><p><b>Copyright:</b> (C) 2024 by SkyWatch Space Applications Inc</p><p><b>
+                                                                    Vendor:</b> SkyWatch Space Applications Inc</p><p><b>License:</b> http://www.gnu.org/licenses/gpl.html</p>
+
