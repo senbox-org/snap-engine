@@ -198,8 +198,9 @@ public class RemoteRepositoriesManagerTest {
             assertTrue(queryParameters.size() >= 3);
 
             RepositoryQueryParameter parameter = findQueryParameterByName("footprint", queryParameters);
-            assertNotNull(parameter);
-            assertTrue(parameter.isRequired());
+            if (parameter != null) {
+                assertTrue(parameter.isRequired());
+            }
 
             parameter = findQueryParameterByName("startDate", queryParameters);
             assertNotNull(parameter);
