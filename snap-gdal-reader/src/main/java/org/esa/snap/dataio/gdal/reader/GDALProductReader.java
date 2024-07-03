@@ -310,9 +310,8 @@ public class GDALProductReader extends AbstractProductReader {
             Product product = new Product(localFile.getFileName().toString(), this.getReaderPlugIn().getDescription(Locale.getDefault()),
                                           productBounds.width, productBounds.height, this);
 
-            //Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();
             Dimension readTileSize = new Dimension(gdalDataset.getRasterBand(1).getBlockXSize(),
-                                                             gdalDataset.getRasterBand(1).getBlockYSize());
+                                                   gdalDataset.getRasterBand(1).getBlockYSize());
             product.setPreferredTileSize(readTileSize);
 
             MetadataElement metadataElement = null;
@@ -341,7 +340,10 @@ public class GDALProductReader extends AbstractProductReader {
                 try (org.esa.snap.dataio.gdal.drivers.Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1)) {
                     String bandName = computeBandName(gdalBand, bandIndex);
 
-                    /*if (gdalBand.getOverviewCount() == 0) {
+                    /* Building overviews when reading the product it's not a good idea,
+                       especially when the product resides in a read-only storage.
+
+                        if (gdalBand.getOverviewCount() == 0) {
                         gdalDataset.buildOverviews("NEAREST", new int[]{2, 4, 8, 16, 32, 64, 128});
                     }*/
 
@@ -418,7 +420,10 @@ public class GDALProductReader extends AbstractProductReader {
                             noDataValue = pass1[0];
                             productBand.setNoDataValue(noDataValue);
                             productBand.setNoDataValueUsed(true);
-                            //productBand.setValidPixelExpression(String.format("fneq(%s.raw,%f)", bandName, noDataValue));
+                        } else if (GDALConstConstants.gdtFloat32().equals(gdalDataType)){
+                            // If NoData not present in the metadata, for float type assume it's NaN
+                            productBand.setNoDataValue(Float.NaN);
+                            productBand.setNoDataValueUsed(true);
                         }
 
                         GDALMultiLevelSource multiLevelSource = new GDALMultiLevelSource(dataBufferType.dataBufferType, productBounds, tileSize, bandIndex,
@@ -436,7 +441,7 @@ public class GDALProductReader extends AbstractProductReader {
                         String maskName = computeMaskName(gdalBand, bandName);
                         if (maskName != null && (subsetDef == null || subsetDef.isNodeAccepted(maskName))) {
                             String expression = maskName.startsWith("nodata_")
-                                                ? String.format("%s.raw == %f", bandName, product.getBand(bandName).getNoDataValue())
+                                                ? String.format("feq(%s.raw,%f)", bandName, product.getBand(bandName).getNoDataValue())
                                                 : bandName;
                             Mask mask = Mask.BandMathsType.create(maskName, maskName, productBounds.width, productBounds.height,
                                                                   expression, Color.white, 0.5);

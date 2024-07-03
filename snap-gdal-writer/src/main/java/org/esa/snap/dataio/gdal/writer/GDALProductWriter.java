@@ -36,6 +36,7 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
+import javax.media.jai.JAI;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,9 @@ public class GDALProductWriter extends AbstractProductWriter {
 
     private static final Logger logger = Logger.getLogger(GDALProductWriter.class.getName());
     private static final Map<Integer, Integer> gdalTypeMap;
+    private static final Set<Integer> gdalUIntTypes;
+    private static final Set<Integer> gdalIntTypes;
+    private static final Set<Integer> gdalFloatTypes;
     private final GDALDriverInfo writerDriver;
     private Dataset gdalDataset;
     private String[] writeOptions;
@@ -74,6 +78,15 @@ public class GDALProductWriter extends AbstractProductWriter {
         gdalTypeMap.put(ProductData.TYPE_UINT32, GDALConstConstants.gdtUint32());
         gdalTypeMap.put(ProductData.TYPE_FLOAT32, GDALConstConstants.gdtFloat32());
         gdalTypeMap.put(ProductData.TYPE_FLOAT64, GDALConstConstants.gdtFloat64());
+        gdalUIntTypes = new HashSet<>() {{
+           add(GDALConstConstants.gdtByte()); add(GDALConstConstants.gdtUint16()); add(GDALConstConstants.gdtUint32());
+        }};
+        gdalIntTypes = new HashSet<>() {{
+           add(GDALConstConstants.gdtInt16()); add(GDALConstConstants.gdtInt32());
+        }};
+        gdalFloatTypes = new HashSet<>() {{
+           add(GDALConstConstants.gdtFloat32()); add(GDALConstConstants.gdtFloat64());
+        }};
     }
 
     public GDALProductWriter(ProductWriterPlugIn writerPlugIn, GDALDriverInfo writerDriver) {
@@ -131,8 +144,10 @@ public class GDALProductWriter extends AbstractProductWriter {
         for (int i = 1; i < bandCount; i++) {
             sourceBand = sourceProduct.getBandAt(i);
             if (gdalDataType != GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType())) {
-                gdalDataType = GDALConstConstants.gdtFloat32();
-                break;
+                // If source bands have different data types, get the most permissive type
+                gdalDataType = getMostPermissiveDataType(gdalDataType,
+                                                         GDALLoader.getInstance().getGDALDataType(sourceBand.getDataType()));
+                //break;
                 //throw new IllegalArgumentException("GDAL Geotiff writer cannot write a product containing bands with different data types (the data type of band index " + i + " is " + sourceBand.getDataType() + ", different from band index 0).");
             }
         }
@@ -149,7 +164,8 @@ public class GDALProductWriter extends AbstractProductWriter {
             throw new IllegalArgumentException(message);
         }
 
-        if (this.writerDriver.getDriverName().contentEquals("COG")) {//when the writer attempts to write COG
+        final boolean isCOG = this.writerDriver.getDriverName().contentEquals("COG");
+        if (isCOG) {//when the writer attempts to write COG
             this.gdalDriver = GDAL.getDriverByName("MEM");//use 'GTiff' driver to write the temporary outputFile because the COG driver not allows creating datasets using 'driver.create()' as 'https://gdal.org/drivers/raster/cog.html' says
         } else {
             this.gdalDriver = GDAL.getDriverByName(this.writerDriver.getDriverName());
@@ -162,51 +178,44 @@ public class GDALProductWriter extends AbstractProductWriter {
             logger.log(Level.FINE, "Using the GDAL driver '" + this.gdalDriver.getLongName() + "' (" + this.gdalDriver.getShortName() + ") to save the product.");
         }
 
-        String gdalWriteOptions = Config.instance().preferences().get("snap.dataio.gdal.creationoptions", "TILED=YES");
+        // COG driver doesn't support TILED
+        String gdalWriteOptions = isCOG ? "" : Config.instance().preferences().get("snap.dataio.gdal.creationoptions", "TILED=YES");
         if (!gdalWriteOptions.contains("BLOCK")) {
-            final Dimension size = sourceProduct.getPreferredTileSize();
-            gdalWriteOptions += ";BLOCKXSIZE=" + size.width + ";BLOCKYSIZE=" + size.height;
-            gdalWriteOptions += ";INTERLEAVE=BAND;PROFILE=GeoTIFF";
+            Dimension size = sourceProduct.getPreferredTileSize();
+            if (size == null) {
+                size = JAI.getDefaultTileSize() != null ? JAI.getDefaultTileSize() : new Dimension(1024, 1024);
+            }
+            gdalWriteOptions += isCOG
+                                ? ";BLOCKSIZE=" + size.width
+                                : ";BLOCKXSIZE=" + size.width + ";BLOCKYSIZE=" + size.height;
+            if (!isCOG) {
+                // COG driver doesn't support INTERLEAVE and PROFILE
+                gdalWriteOptions += ";INTERLEAVE=BAND;PROFILE=GeoTIFF";
+            }
         }
         if (gdalWriteOptions.contains("COMPRESS")) {
             if (!gdalWriteOptions.contains("PREDICTOR")) {
-                if (gdalDataType == GDALConstConstants.gdtByte() ||
-                        gdalDataType == GDALConstConstants.gdtUint16() ||
-                        gdalDataType == GDALConstConstants.gdtInt16() ||
-                        gdalDataType == GDALConstConstants.gdtUint32() ||
-                        gdalDataType == GDALConstConstants.gdtInt32() ||
-                        gdalDataType == GDALConstConstants.gdtCInt16() ||
-                        gdalDataType == GDALConstConstants.gdtCInt32()) {
-                    gdalWriteOptions += ";PREDICTOR=2";
-
-                } else {
+                if (gdalFloatTypes.contains(gdalDataType)) {
                     gdalWriteOptions += ";PREDICTOR=3";
+                } else {
+                    gdalWriteOptions += ";PREDICTOR=2";
                 }
             }
-        }/* else {
-            gdalWriteOptions += ";COMPRESS=DEFLATE;";
-            if (gdalDataType == GDALConstConstants.gdtByte() ||
-                    gdalDataType == GDALConstConstants.gdtUint16() ||
-                    gdalDataType == GDALConstConstants.gdtInt16() ||
-                    gdalDataType == GDALConstConstants.gdtUint32() ||
-                    gdalDataType == GDALConstConstants.gdtInt32() ||
-                    gdalDataType == GDALConstConstants.gdtCInt16() ||
-                    gdalDataType == GDALConstConstants.gdtCInt32()) {
-                gdalWriteOptions += "PREDICTOR=2";
-
-            } else {
-                gdalWriteOptions += "PREDICTOR=3";
-            }
-        }*/
+        }
         this.writeOptions = StringUtils.stringToArray(gdalWriteOptions, ";");
-        GDAL.setCacheMax(256*1024*1024);
+        // By default, GDAL will use 5% of the installed memory for cache.
+        // Writing will happen when flushing from memory, hence a long delay at the end of writing.
+        final String strCacheMax = Config.instance().preferences().get("snap.dataio.gdal.cachemax", "268435456");
+        final long cacheMax = Long.parseLong(strCacheMax);
+        if (cacheMax < 0 || cacheMax > Integer.MAX_VALUE) {
+            GDAL.setCacheMax(256 * 1024 * 1024);
+        } else {
+            GDAL.setCacheMax((int) cacheMax);
+        }
         this.gdalDataset = this.gdalDriver.create(outputFile.toString(), imageWidth, imageHeight, bandCount, gdalDataType, writeOptions);
         if (this.gdalDataset == null) {
             throw new NullPointerException("Failed creating the file to export the product for driver '" + this.gdalDriver.getLongName() + "'.");
         }
-        /*for (int i = 1; i < bandCount; i++) {
-            this.gdalDataset.addBand(gdalDataType);
-        }*/
 
         GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
         if (geoCoding == null) {
@@ -220,7 +229,6 @@ public class GDALProductWriter extends AbstractProductWriter {
                 gdalGeoTransform[3] = transform.getTranslateY();
                 gdalGeoTransform[1] = transform.getScaleX();
                 gdalGeoTransform[5] = transform.getScaleY();
-
                 this.gdalDataset.setGeoTransform(gdalGeoTransform);
             }
         }
@@ -312,12 +320,7 @@ public class GDALProductWriter extends AbstractProductWriter {
                 Dataset tempDataset = this.gdalDataset;
                 //create the final output dataset file (the COG product) from temporary dataset file without options for write
                 this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, Objects.requireNonNullElseGet(writeOptions, () -> new String[0]));//create the final output dataset file (the COG product) from temporary dataset file with options for write
-                //Vector fileList = tempDataset.getFileList();//fetch the temporary dataset file path
                 tempDataset.delete();//close the temporary dataset file
-                /*for (Object datasetFileO : fileList) {
-                    String datasetFile = (String) datasetFileO;
-                    cogDriver.delete(datasetFile);//physically delete the temporary dataset file
-                }*/
             }
             this.gdalDataset.delete();
             this.gdalDataset = null;
@@ -327,5 +330,22 @@ public class GDALProductWriter extends AbstractProductWriter {
     @Override
     public void deleteOutput() {
         //nothing to do
+    }
+
+    private int getMostPermissiveDataType(int referenceType, int currentType) {
+        if (gdalFloatTypes.contains(currentType)) {
+            if (gdalFloatTypes.contains(referenceType)) {
+                return Math.max(referenceType, currentType);
+            } else {
+                return currentType;
+            }
+        } else {
+            if (gdalFloatTypes.contains(referenceType)) {
+                return referenceType;
+            } else {
+                int masked = currentType & referenceType;
+                return masked <= 4 ? masked << 1 : masked;
+            }
+        }
     }
 }
