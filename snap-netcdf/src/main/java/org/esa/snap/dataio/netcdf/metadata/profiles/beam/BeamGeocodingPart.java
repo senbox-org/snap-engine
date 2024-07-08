@@ -170,7 +170,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
         }
     }
 
-    private void addWktAsVariable(NFileWriteable ncFile, GeoCoding geoCoding) throws IOException {
+    protected void addWktAsVariable(NFileWriteable ncFile, GeoCoding geoCoding) throws IOException {
         final CoordinateReferenceSystem crs = geoCoding.getMapCRS();
         final double[] matrix = new double[6];
         final MathTransform transform = geoCoding.getImageToMapTransform();

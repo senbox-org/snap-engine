@@ -271,7 +271,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         lon.addAttribute(Constants.VALID_MAX_ATT_NAME, br.getLon());
     }
 
-    private void addMetricCoordinateVariables(NFileWriteable ncFile,
+    protected void addMetricCoordinateVariables(NFileWriteable ncFile,
                                               CrsGeoCoding geoCoding,
                                               int width, int height,
                                               String xVarName, String yVarName)
