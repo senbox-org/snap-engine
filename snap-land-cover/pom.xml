@@ -36,6 +36,12 @@
             <artifactId>snap-engine-utilities</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-stac</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>uk.me.jstott</groupId>
             <artifactId>jcoord</artifactId>
             <version>1.0</version>

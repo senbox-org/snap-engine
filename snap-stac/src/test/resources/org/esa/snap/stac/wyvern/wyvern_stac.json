@@ -1,0 +1,360 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0-beta.2",
+  "id": "WYVERN_DS_20210517T162735_1KhCotz",
+  "properties": {
+    "license": "proprietary",
+    "datetime": "2021-05-17T16:27:35.357540Z",
+    "start_datetime": "2021-05-17 16:27:30.357540",
+    "end_datetime": "2021-05-17 16:27:40.357540",
+    "providers": [
+      {
+        "name": "Wyvern Space",
+        "roles": [
+          "producer",
+          "licensor"
+        ],
+        "url": "https://www.wyvern.space/"
+      }
+    ],
+    "platform": "Dragonette-Sim",
+    "constellation": "imagineDragonette",
+    "instruments": [
+      "Hyperspectral-imager"
+    ],
+    "sensor_mode": "strip",
+    "sensor_type": "optical",
+    "product_type": "hyperspectral",
+    "created": "2021-05-04T00:00:01Z",
+    "updated": "2021-05-05T00:30:55Z",
+    "gsd": 5.0,
+    "proj:epsg": 32613,
+    "proj:shape": [
+      1000,
+      1000
+    ],
+    "sat:orbit_state": "descending",
+    "sat:relative_orbit": 9999,
+    "view:sun_azimuth": -9999,
+    "view:sun_elevation": -9999,
+    "view:off_nadir": -9999,
+    "view:incidence_angle": -9999,
+    "view:azimuth": -9999,
+    "eo:cloud_cover": -9999,
+    "eo:bands": [
+      {
+        "name": "Band_001",
+        "common_name": "green1",
+        "center_wavelength": 0.505,
+        "full_width_half_max": 0.021
+      },
+      {
+        "name": "Band_002",
+        "common_name": "green2",
+        "center_wavelength": 0.526,
+        "full_width_half_max": 0.018
+      },
+      {
+        "name": "Band_003",
+        "common_name": "green3",
+        "center_wavelength": 0.544,
+        "full_width_half_max": 0.021
+      },
+      {
+        "name": "Band_004",
+        "common_name": "green4",
+        "center_wavelength": 0.565,
+        "full_width_half_max": 0.021
+      },
+      {
+        "name": "Band_005",
+        "common_name": "yellow",
+        "center_wavelength": 0.586,
+        "full_width_half_max": 0.02
+      },
+      {
+        "name": "Band_006",
+        "common_name": "red1",
+        "center_wavelength": 0.606,
+        "full_width_half_max": 0.02
+      },
+      {
+        "name": "Band_007",
+        "common_name": "red2",
+        "center_wavelength": 0.626,
+        "full_width_half_max": 0.02
+      },
+      {
+        "name": "Band_008",
+        "common_name": "red3",
+        "center_wavelength": 0.646,
+        "full_width_half_max": 0.019
+      },
+      {
+        "name": "Band_009",
+        "common_name": "red4",
+        "center_wavelength": 0.665,
+        "full_width_half_max": 0.017
+      },
+      {
+        "name": "Band_010",
+        "common_name": "red5",
+        "center_wavelength": 0.682,
+        "full_width_half_max": 0.017
+      },
+      {
+        "name": "Band_011",
+        "common_name": "red6",
+        "center_wavelength": 0.699,
+        "full_width_half_max": 0.016
+      },
+      {
+        "name": "Band_012",
+        "common_name": "rededge1",
+        "center_wavelength": 0.715,
+        "full_width_half_max": 0.015
+      },
+      {
+        "name": "Band_013",
+        "common_name": "rededge2",
+        "center_wavelength": 0.73,
+        "full_width_half_max": 0.015
+      },
+      {
+        "name": "Band_014",
+        "common_name": "rededge3",
+        "center_wavelength": 0.745,
+        "full_width_half_max": 0.017
+      },
+      {
+        "name": "Band_015",
+        "common_name": "nir1",
+        "center_wavelength": 0.762,
+        "full_width_half_max": 0.017
+      },
+      {
+        "name": "Band_016",
+        "common_name": "nir2",
+        "center_wavelength": 0.779,
+        "full_width_half_max": 0.008
+      },
+      {
+        "name": "Band_017",
+        "common_name": "nir3",
+        "center_wavelength": 0.787,
+        "full_width_half_max": 0.017
+      },
+      {
+        "name": "Band_018",
+        "common_name": "nir4",
+        "center_wavelength": 0.804,
+        "full_width_half_max": 0.017
+      }
+    ]
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -105.48165974621406,
+          40.18137892682935
+        ],
+        [
+          -105.48165974621406,
+          40.19043640067074
+        ],
+        [
+          -105.46985016301836,
+          40.19043640067074
+        ],
+        [
+          -105.46985016301836,
+          40.18137892682935
+        ],
+        [
+          -105.48165974621406,
+          40.18137892682935
+        ]
+      ]
+    ]
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "..\\catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "..\\catalog.json",
+      "type": "application/json"
+    }
+  ],
+  "assets": {
+    "Band_001": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_001.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "green1",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_002": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_002.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "green2",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_003": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_003.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "green3",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_004": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_004.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "green4",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_005": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_005.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "yellow",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_006": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_006.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red1",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_007": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_007.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red2",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_008": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_008.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red3",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_009": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_009.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red4",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_010": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_010.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red5",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_011": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_011.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "red6",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_012": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_012.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "rededge1",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_013": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_013.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "rededge2",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_014": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_014.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "rededge3",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_015": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_015.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "nir1",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_016": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_016.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "nir2",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_017": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_017.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "nir3",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "Band_018": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_band_018.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "nir4",
+      "roles": [
+        "reflectance"
+      ]
+    },
+    "WYVERN_DS_20210517T162735_1KhCotz_preview": {
+      "href": "WYVERN_DS_20210517T162735_1KhCotz_preview",
+      "type": "image/png",
+      "title": "Preview",
+      "roles": [
+        "overview"
+      ]
+    }
+  },
+  "bbox": [
+    -105.48165974621406,
+    40.18137892682935,
+    -105.46985016301836,
+    40.19043640067074
+  ],
+  "stac_extensions": [
+    "eo",
+    "view",
+    "sat",
+    "proj"
+  ]
+}
