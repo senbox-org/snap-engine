@@ -39,5 +39,4 @@ public class BandGroupingPath {
     String[] getInputPath() {
         return groups;
     }
-
 }

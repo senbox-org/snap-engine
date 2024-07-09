@@ -190,4 +190,32 @@ public class BandGroupImplTest {
         assertEquals("M08_rho_toa", names[0]);
         assertEquals("lambda0_c02", names[1]);
     }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testCreateWithBandNames() {
+        final String[] bandNames = {"radiance_1", "radiance_2", "radiance_5"};
+
+        final BandGroupImpl bandGroup = new BandGroupImpl("my_radiances", bandNames);
+        assertEquals("my_radiances", bandGroup.getName());
+
+        final String[] returnedNames = bandGroup.get(0);
+        assertArrayEquals(bandNames, returnedNames);
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testCreateWithBandNames_getMatchingBandNames() {
+        final String[] bandNames = {"reflec_03", "reflec_04", "reflec_08"};
+
+        final BandGroupImpl bandGroup = new BandGroupImpl("important_reflec", bandNames);
+
+        final Product product = new Product("testy", "test_type");
+        for (int i = 1; i < 10; i++){
+            product.addBand(new Band("reflec_0" + i, ProductData.TYPE_INT16, 5, 6));
+        }
+
+        final String[] names = bandGroup.getMatchingBandNames(product);
+        assertArrayEquals(bandNames, names);
+    }
 }

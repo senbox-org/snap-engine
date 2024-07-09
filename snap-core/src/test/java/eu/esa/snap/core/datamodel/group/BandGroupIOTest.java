@@ -240,4 +240,15 @@ public class BandGroupIOTest {
         assertEquals("{\"bandGroups\":[{\"paths\":[[\"the\",\"duck\"]],\"name\":\"Tick\"},{\"paths\":[[\"another\",\"duck\"],[\"Faehnlein\",\"Fieselschweif\"]],\"name\":\"Trick\"},{\"paths\":[[\"young\",\"duck\"],[\"living\",\"Entenhausen\"]],\"name\":\"Track\"}]}",
                 outStream.toString());
     }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testWrite_bandNamesType() throws IOException {
+        final BandGroupImpl bandGroup = new BandGroupImpl("hannimoon", new String[]{"OGVI", "OTCI", "FAPAR"});
+
+        final ByteArrayOutputStream jsonStream = new ByteArrayOutputStream();
+        BandGroupIO.write(new BandGroup[] {bandGroup}, jsonStream);
+
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"OGVI\",\"OTCI\",\"FAPAR\"]],\"name\":\"hannimoon\"}]}", jsonStream.toString());
+    }
 }

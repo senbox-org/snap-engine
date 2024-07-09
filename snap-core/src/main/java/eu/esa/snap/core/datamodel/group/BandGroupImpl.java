@@ -20,6 +20,14 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
 
     private String name;
 
+    public BandGroupImpl(String groupName, String[] bandNames) {
+        name = groupName;
+        autoGroupingPaths = new BandGroupingPath[1];
+        autoGroupingPaths[0] = new BandGroupingPath(bandNames);
+        indexes = new Index[1];
+        indexes[0] = new Index(autoGroupingPaths[0], 0);
+    }
+
     @Override
     public String[] getMatchingBandNames(Product product) {
         final ArrayList<String> bandNamesList = new ArrayList<>();
@@ -66,28 +74,28 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
     }
 
     public static BandGroup parse(String text) {
-        List<String[]> pathLists = new ArrayList<>();
-        if (StringUtils.isNotNullAndNotEmpty(text)) {
-            String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
-            for (String pathText : pathTexts) {
-                final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
-                final ArrayList<String> subPathsList = new ArrayList<>();
-                for (String subPath : subPaths) {
-                    if (StringUtils.isNotNullAndNotEmpty(subPath)) {
-                        subPathsList.add(subPath);
-                    }
-                }
-                if (!subPathsList.isEmpty()) {
-                    pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
-                }
-            }
-            if (pathLists.isEmpty()) {
-                return null;
-            }
-            return new BandGroupImpl(pathLists.toArray(new String[pathLists.size()][]));
-        } else {
+        if (StringUtils.isNullOrEmpty(text)) {
             return null;
         }
+
+        final List<String[]> pathLists = new ArrayList<>();
+        final String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
+        for (String pathText : pathTexts) {
+            final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
+            final ArrayList<String> subPathsList = new ArrayList<>();
+            for (String subPath : subPaths) {
+                if (StringUtils.isNotNullAndNotEmpty(subPath)) {
+                    subPathsList.add(subPath);
+                }
+            }
+            if (!subPathsList.isEmpty()) {
+                pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
+            }
+        }
+        if (pathLists.isEmpty()) {
+            return null;
+        }
+        return new BandGroupImpl(pathLists.toArray(new String[pathLists.size()][]));
     }
 
     @Override
