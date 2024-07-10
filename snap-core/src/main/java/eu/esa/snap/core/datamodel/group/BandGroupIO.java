@@ -17,13 +17,13 @@ import java.util.Collections;
 public class BandGroupIO {
 
     @SuppressWarnings("unchecked")
-    public static BandGrouping[] read(InputStream stream) throws IOException, ParseException {
+    public static BandGroup[] read(InputStream stream) throws IOException, ParseException {
         final JSONParser jsonParser = new JSONParser();
         final JSONObject jsonObject = (JSONObject) jsonParser.parse(new InputStreamReader(stream, StandardCharsets.UTF_8));
         final JSONArray bandGroups = (JSONArray) jsonObject.get("bandGroups");
 
         final int numBandGroups = bandGroups.size();
-        final BandGrouping[] bandGroupings = new BandGrouping[numBandGroups];
+        final BandGroup[] bandGroupings = new BandGroup[numBandGroups];
 
         for (int i = 0; i < numBandGroups; i++) {
             final JSONObject bandGroupObject = (JSONObject) bandGroups.get(i);
@@ -36,7 +36,7 @@ public class BandGroupIO {
                 inputPaths[k] = (String[]) pathList.toArray(new String[0]);
             }
 
-            final BandGroupingImpl bandGrouping = new BandGroupingImpl(inputPaths);
+            final BandGroupImpl bandGrouping = new BandGroupImpl(inputPaths);
 
             final String name = (String) bandGroupObject.get("name");
             if (StringUtils.isNotNullAndNotEmpty(name)) {
@@ -49,13 +49,13 @@ public class BandGroupIO {
         return bandGroupings;
     }
 
-    public static void write(BandGrouping[] bandGroupings, OutputStream jsonStream) throws IOException {
+    public static void write(BandGroup[] bandGroupings, OutputStream jsonStream) throws IOException {
         final JSONObject jsonDoc = new JSONObject();
         final JSONArray bandGroups = new JSONArray();
 
         jsonDoc.put("bandGroups", bandGroups);
 
-        for (final BandGrouping grouping : bandGroupings) {
+        for (final BandGroup grouping : bandGroupings) {
             final String groupingName = grouping.getName();
             final JSONObject jsonGrouping = new JSONObject();
             jsonGrouping.put("name", groupingName);

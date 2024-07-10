@@ -1,5 +1,7 @@
 package eu.esa.snap.core.datamodel.group;
 
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ObjectUtils;
 import org.esa.snap.core.util.StringUtils;
 
@@ -8,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BandGroupingImpl extends AbstractList<String[]> implements BandGrouping {
+public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
 
     private static final String GROUP_SEPARATOR = "/";
     private static final String PATH_SEPARATOR = ":";
@@ -18,7 +20,30 @@ public class BandGroupingImpl extends AbstractList<String[]> implements BandGrou
 
     private String name;
 
-    protected BandGroupingImpl(String[][] inputPaths) {
+    public BandGroupImpl(String groupName, String[] bandNames) {
+        name = groupName;
+        autoGroupingPaths = new BandGroupingPath[1];
+        autoGroupingPaths[0] = new BandGroupingPath(bandNames);
+        indexes = new Index[1];
+        indexes[0] = new Index(autoGroupingPaths[0], 0);
+    }
+
+    @Override
+    public String[] getMatchingBandNames(Product product) {
+        final ArrayList<String> bandNamesList = new ArrayList<>();
+        final Band[] bands = product.getBands();
+        for (final Band band : bands) {
+            final String bandName = band.getName();
+            for (final Index idx : indexes) {
+                if (idx.path.matchesGrouping(bandName)) {
+                    bandNamesList.add(bandName);
+                }
+            }
+        }
+        return bandNamesList.toArray(new String[0]);
+    }
+
+    protected BandGroupImpl(String[][] inputPaths) {
         autoGroupingPaths = new BandGroupingPath[inputPaths.length];
         indexes = new Index[inputPaths.length];
         for (int i = 0; i < inputPaths.length; i++) {
@@ -48,29 +73,29 @@ public class BandGroupingImpl extends AbstractList<String[]> implements BandGrou
         name = "";
     }
 
-    public static BandGrouping parse(String text) {
-        List<String[]> pathLists = new ArrayList<>();
-        if (StringUtils.isNotNullAndNotEmpty(text)) {
-            String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
-            for (String pathText : pathTexts) {
-                final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
-                final ArrayList<String> subPathsList = new ArrayList<>();
-                for (String subPath : subPaths) {
-                    if (StringUtils.isNotNullAndNotEmpty(subPath)) {
-                        subPathsList.add(subPath);
-                    }
-                }
-                if (!subPathsList.isEmpty()) {
-                    pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
-                }
-            }
-            if (pathLists.isEmpty()) {
-                return null;
-            }
-            return new BandGroupingImpl(pathLists.toArray(new String[pathLists.size()][]));
-        } else {
+    public static BandGroup parse(String text) {
+        if (StringUtils.isNullOrEmpty(text)) {
             return null;
         }
+
+        final List<String[]> pathLists = new ArrayList<>();
+        final String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
+        for (String pathText : pathTexts) {
+            final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
+            final ArrayList<String> subPathsList = new ArrayList<>();
+            for (String subPath : subPaths) {
+                if (StringUtils.isNotNullAndNotEmpty(subPath)) {
+                    subPathsList.add(subPath);
+                }
+            }
+            if (!subPathsList.isEmpty()) {
+                pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
+            }
+        }
+        if (pathLists.isEmpty()) {
+            return null;
+        }
+        return new BandGroupImpl(pathLists.toArray(new String[pathLists.size()][]));
     }
 
     @Override
@@ -134,8 +159,8 @@ public class BandGroupingImpl extends AbstractList<String[]> implements BandGrou
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        } else if (o instanceof BandGrouping) {
-            BandGrouping other = (BandGrouping) o;
+        } else if (o instanceof BandGroup) {
+            BandGroup other = (BandGroup) o;
             if (other.size() != size()) {
                 return false;
             }
