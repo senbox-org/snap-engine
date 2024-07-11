@@ -1,12 +1,14 @@
 package eu.esa.snap.core.datamodel.group;
 
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.SystemUtils;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -22,6 +24,14 @@ public class BandGroupsManager {
 
     public static BandGroupsManager getInstance() throws IOException {
         if (instance == null) {
+            if (groupsConfigFile == null) {
+                // @todo 2 tb/tb move this to engine initialisation 2024-07-11
+                final File appDataDir = SystemUtils.getApplicationDataDir();
+                final Path appDataPath = Paths.get(appDataDir.getAbsolutePath());
+                final Path configDir = appDataPath.resolve("config");
+                initialize(configDir);
+            }
+
             instance = new BandGroupsManager();
             instance.load(groupsConfigFile);
         }
@@ -30,6 +40,7 @@ public class BandGroupsManager {
 
     public static void releaseInstance() {
         instance = null;
+        groupsConfigFile = null;
     }
 
     public static void initialize(Path groupsDir) throws IOException {
@@ -71,7 +82,7 @@ public class BandGroupsManager {
         }
     }
 
-    BandGroup[] get() {
+    public BandGroup[] get() {
         final BandGroup[] userGroupsArray = userGroups.toArray(new BandGroup[0]);
         if (productGroup == null) {
             return userGroupsArray;
@@ -84,7 +95,7 @@ public class BandGroupsManager {
         return allGroups;
     }
 
-    BandGroup[] getMatchingProduct(Product product) {
+    public BandGroup[] getMatchingProduct(Product product) {
         final ArrayList<BandGroup> resultList = new ArrayList<>();
         for (final BandGroup group : userGroups) {
             String[] names = group.getMatchingBandNames(product);
