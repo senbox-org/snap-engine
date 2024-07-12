@@ -14,7 +14,7 @@ import java.util.Collections;
 
 public class BandGroupsManager {
 
-    static String CONFIG_FILE_NAME = "user_band_groups.json";
+    static final String CONFIG_FILE_NAME = "user_band_groups.json";
 
     private static BandGroupsManager instance;
     private static Path groupsConfigFile;
@@ -22,7 +22,7 @@ public class BandGroupsManager {
     private final ArrayList<BandGroup> userGroups;
     private BandGroup productGroup;
 
-    public static BandGroupsManager getInstance() throws IOException {
+    public static synchronized BandGroupsManager getInstance() throws IOException {
         if (instance == null) {
             if (groupsConfigFile == null) {
                 // @todo 2 tb/tb move this to engine initialisation 2024-07-11
@@ -52,16 +52,15 @@ public class BandGroupsManager {
 
     static Path createEmptyConfigFile(Path configFile) throws IOException {
         Files.createFile(configFile);
-        FileWriter fileWriter = new FileWriter(configFile.toFile(), StandardCharsets.UTF_8);
-
-        fileWriter.write("{\"bandGroups\" : []}");
-        fileWriter.flush();
-        fileWriter.close();
+        try (FileWriter fileWriter = new FileWriter(configFile.toFile(), StandardCharsets.UTF_8)) {
+            fileWriter.write("{\"bandGroups\" : []}");
+            fileWriter.flush();
+        }
 
         return configFile;
     }
 
-    protected BandGroupsManager() {
+    public BandGroupsManager() {
         userGroups = new ArrayList<>();
         productGroup = null;
     }
@@ -117,6 +116,7 @@ public class BandGroupsManager {
 
     public void addGroupsOfProduct(Product product) {
         productGroup = product.getAutoGrouping();
+        productGroup.setEditable(false);
     }
 
     public void removeGroupsOfProduct() {
@@ -137,6 +137,4 @@ public class BandGroupsManager {
             userGroups.remove(index);
         }
     }
-
-
 }
