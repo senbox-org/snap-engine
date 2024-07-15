@@ -26,28 +26,38 @@ public class GDALDriverInfoTest {
 
     @Test
     public void testGetDriverDisplayName() {
+        System.out.println("[GDAL-DIT debug]: testGetDriverDisplayName start");
         assertEquals(DRIVER_DISPLAY_NAME, mockDriverInfo.getDriverDisplayName());
+        System.out.println("[GDAL-DIT debug]: testGetDriverDisplayName end");
     }
 
     @Test
     public void testGetExtensionName() {
+        System.out.println("[GDAL-DIT debug]: testGetExtensionName start");
         assertEquals(EXTENSION_NAME, mockDriverInfo.getExtensionName());
+        System.out.println("[GDAL-DIT debug]: testGetExtensionName end");
     }
 
     @Test
     public void testGetDriverName() {
+        System.out.println("[GDAL-DIT debug]: testGetDriverName start");
         assertEquals(DRIVER_NAME, mockDriverInfo.getDriverName());
+        System.out.println("[GDAL-DIT debug]: testGetDriverName end");
     }
 
     @Test
     public void testGetCreationDataTypes() {
+        System.out.println("[GDAL-DIT debug]: testGetCreationDataTypes start");
         assertEquals(CREATION_DATA_TYPES, mockDriverInfo.getCreationDataTypes());
+        System.out.println("[GDAL-DIT debug]: testGetCreationDataTypes end");
     }
 
     @Test
     public void testCanExportProduct() {
+        System.out.println("[GDAL-DIT debug]: testCanExportProduct start");
         assertNotNull(TEST_GDAL_LOADER);
         GDALLoader.ensureGDALInitialised();
+        System.out.println("[GDAL-DIT debug]: testCanExportProduct ensureGDALInitialised");
         assertTrue(mockDriverInfo.canExportProduct(1));
         assertTrue(mockDriverInfo.canExportProduct(2));
         assertTrue(mockDriverInfo.canExportProduct(3));
@@ -59,11 +69,14 @@ public class GDALDriverInfoTest {
         assertTrue(mockDriverInfo.canExportProduct(9));
         assertTrue(mockDriverInfo.canExportProduct(10));
         assertFalse(mockDriverInfo.canExportProduct(11));
+        System.out.println("[GDAL-DIT debug]: testCanExportProduct end");
     }
 
     @Test
     public void testGetWriterPluginFormatName() {
+        System.out.println("[GDAL-DIT debug]: testGetWriterPluginFormatName start");
         assertEquals(WRITER_PLUGIN_FORMAT_NAME, mockDriverInfo.getWriterPluginFormatName());
+        System.out.println("[GDAL-DIT debug]: testGetWriterPluginFormatName end");
     }
 
 }

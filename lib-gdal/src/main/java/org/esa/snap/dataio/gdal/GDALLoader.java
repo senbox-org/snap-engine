@@ -89,18 +89,25 @@ public final class GDALLoader {
      * Initializes GDAL native libraries to be used by SNAP.
      */
     private void initGDAL() {
+        System.out.println("[GDAL-DIT debug]: initGDAL");
         if (isNotInitialised()) {
             try {
                 this.gdalVersion = GDALVersion.getGDALVersion();
+                System.out.println("[GDAL-DIT debug]: gdalDirectoryLocker setup");
                 DirectoryLocker gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
                 while (!gdalDirectoryLocker.tryLockDirectory());
+                System.out.println("[GDAL-DIT debug]: GDALDistributionInstaller.setupDistribution");
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
                 this.gdalVersionLoader = new GDALLoaderClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
+                System.out.println("[GDAL-DIT debug]: loadGDALNativeLibrary");
                 loadGDALNativeLibrary();
                 GDALInstallInfo.INSTANCE.setLocations(this.gdalVersion.getLocationPath());
+                System.out.println("[GDAL-DIT debug]: initDrivers");
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
+                System.out.println("[GDAL-DIT debug]: postGDALInit");
                 postGDALInit();
+                System.out.println("[GDAL-DIT debug]: gdalDirectoryLocker.unlockDirectory");
                 gdalDirectoryLocker.unlockDirectory();
                 logger.log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
             } catch (Throwable t) {
@@ -232,6 +239,7 @@ public final class GDALLoader {
         private final Path lockFilePath;
 
         public DirectoryLocker(Path directoryPath) throws IOException {
+            System.out.println("[GDAL-DIT debug]: DirectoryLocker directoryPath: "+directoryPath);
             // Ensure the directory
             FileIOUtils.ensureExists(directoryPath.getParent());
 
@@ -240,13 +248,16 @@ public final class GDALLoader {
         }
 
         public synchronized boolean tryLockDirectory() throws IOException {
+            System.out.println("[GDAL-DIT debug]: tryLockDirectory lockFilePath: "+lockFilePath);
             if(Files.exists(lockFilePath))
                 return false;
-
-            return Files.createFile(this.lockFilePath) != null;
+            System.out.println("[GDAL-DIT debug]: tryLockDirectory Files.createFile");
+            Files.createFile(this.lockFilePath);
+            return true;
         }
 
-        public synchronized void unlockDirectory() {
+        public synchronized void unlockDirectory() throws IOException {
+            System.out.println("[GDAL-DIT debug]: unlockDirectory lockFilePath: "+lockFilePath);
             if(lockFilePath != null && Files.exists(lockFilePath)) {
                 this.lockFilePath.toFile().delete();
             }
