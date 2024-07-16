@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class BandGroupingPathTest {
+public class BandGroupPathTest {
 
     @Test
     @STTM("SNAP-3702")
@@ -48,5 +48,15 @@ public class BandGroupingPathTest {
         strings = new String[]{"foo/**"};
         bandGroupingPath = new BandGroupingPath(strings);
         assertTrue(bandGroupingPath.contains("foo/bar/doz/test.txt"));
+    }
+
+    @Test
+    @STTM("SNAP-3702")
+    public void testMatchesGrouping() {
+        final String[] strings = {"test"};
+
+        final BandGroupingPath bandGroupingPath = new BandGroupingPath(strings);
+        assertTrue(bandGroupingPath.matchesGrouping("test_refl_03"));
+        assertFalse(bandGroupingPath.matchesGrouping("longitude"));
     }
 }

@@ -98,7 +98,7 @@ macos:
     TESTDATA_ROOT: "/Users/otb/testData"
   needs: []
   script:
-    - mvn -q clean package
+    - mvn clean package
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:

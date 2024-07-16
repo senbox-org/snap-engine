@@ -15,7 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
-import eu.esa.snap.core.datamodel.group.BandGrouping;
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
 import org.esa.snap.core.dataio.persistence.Item;
@@ -1037,7 +1037,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     protected void writeDatasetUse(int indent) {
         final String description = product.getDescription();
-        final BandGrouping autoGrouping = product.getAutoGrouping();
+        final BandGroup autoGrouping = product.getAutoGrouping();
         if ((description != null && description.length() > 0) || autoGrouping != null) {
             final String[] idTags = createTags(indent, DimapProductConstants.TAG_DATASET_USE);
             println(idTags[0]);
