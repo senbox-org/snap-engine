@@ -26,14 +26,16 @@ public class HdfActivator implements Activator {
             }
 
             final Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("hdf_natives").resolve(version);
+            System.out.println("[HDF-AT debug]: HdfActivator.activate auxdataDirectory:"+auxdataDirectory);
             final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
 
             try {
                 SystemUtils.LOG.fine("installing HDF resources from " + sourceDirPath + " into " + auxdataDirectory);
                 resourceInstaller.install(".*", ProgressMonitor.NULL);
             } catch (IOException e) {
+                System.out.println("[HDF-AT debug]: Native libraries for HDF could not be extracted to:"+auxdataDirectory+" Reason: "+e.getMessage());
                 SystemUtils.LOG.severe("Native libraries for HDF could not be extracted to " + auxdataDirectory);
-                return;
+                throw new IllegalStateException(e);
             }
 
             String arch = System.getProperty("os.arch").toLowerCase();
@@ -42,6 +44,7 @@ public class HdfActivator implements Activator {
             if (javaLibPath == null || !javaLibPath.contains(jna_path)) {
                 NativeLibraryUtils.registerNativePaths(jna_path);
             }
+            System.out.println("[HDF-AT debug]: hdf_jna_path:"+jna_path);
             SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
         }
     }

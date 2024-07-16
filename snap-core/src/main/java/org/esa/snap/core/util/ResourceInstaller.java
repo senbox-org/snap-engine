@@ -73,6 +73,7 @@ public class ResourceInstaller {
      * @see FileSystem#getPathMatcher(String)
      */
     public void install(String patternString, ProgressMonitor pm) throws IOException {
+        System.out.println("[HDF-AT debug]: install start");
         if (!patternString.startsWith("glob:") && !patternString.startsWith("regex:")) {
             patternString = "regex:" + patternString;
         }
@@ -80,6 +81,10 @@ public class ResourceInstaller {
         pm.beginTask("Installing resources...", 100);
         try {
             Collection<Path> resources = collectResources(patternString);
+            System.out.println("[HDF-AT debug]: testActivate resources:");
+            for(Path resource:resources){
+                System.out.println("[HDF-AT debug]: resource: "+resource);
+            }
             pm.worked(20);
             copyResources(resources, new SubProgressMonitor(pm, 80));
         } finally {
@@ -98,8 +103,12 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
+                    System.out.println("[HDF-AT debug]: copyResources resource:"+resource);
+                    System.out.println("[HDF-AT debug]: copyResources targetFile:"+targetFile);
                     if (mustInstallResource(targetFile, resource)) {
+                        System.out.println("[HDF-AT debug]: copyResources in mustInstallResource start");
                         Path parentPath = targetFile.getParent();
+                        System.out.println("[HDF-AT debug]: copyResources parentPath:"+parentPath);
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
                         }
@@ -109,6 +118,7 @@ public class ResourceInstaller {
                         if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
                             Files.setPosixFilePermissions(targetFile, rwxr_xr_x);
                         }
+                        System.out.println("[HDF-AT debug]: copyResources in mustInstallResource end");
                     }
                     pm.worked(1);
                 }
@@ -120,14 +130,19 @@ public class ResourceInstaller {
 
     boolean mustInstallResource(Path targetFile, Path resource) throws IOException {
         if (!Files.exists(targetFile)) {
+            System.out.println("[HDF-AT debug]: mustInstallResource !Files.exists: "+targetFile);
             return true;
         }
+        System.out.println("[HDF-AT debug]: mustInstallResource Files.exists: "+targetFile);
         final Path realTargetFile = targetFile.toRealPath();
         final Path realResource = resource.toRealPath();
         final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource) && Files.size(realResource) != 0;
         final FileTime existingFileModifiedTime = Files.getLastModifiedTime(realTargetFile);
         final FileTime newFileModifiedTime = Files.getLastModifiedTime(realResource);
         final boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0 && Files.size(realResource) != 0;  // access to attributes of files in jars is restricted
+        System.out.println("[HDF-AT debug]: mustInstallResource newFileIsNewer: "+newFileIsNewer);
+        System.out.println("[HDF-AT debug]: mustInstallResource sizeIsDifferent: "+newFileIsNewer);
+        System.out.println("[HDF-AT debug]: mustInstallResource Files.isRegularFile: "+Files.isRegularFile(resource));
         return (newFileIsNewer || sizeIsDifferent) && Files.isRegularFile(resource);
     }
 
