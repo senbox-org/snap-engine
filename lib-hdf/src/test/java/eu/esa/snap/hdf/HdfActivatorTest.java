@@ -7,15 +7,54 @@ import ncsa.hdf.hdflib.HDFLibrary;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.fail;
 
 public class HdfActivatorTest {
+
+    private static void execCmd(String... cmd) {
+        System.out.println("[HDF-AT debug]: execCmd:" + Arrays.toString(cmd));
+        try {
+            final ProcessBuilder builder = new ProcessBuilder(cmd);
+            builder.redirectErrorStream(true);
+            final Process p = builder.start();
+            final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while (true) {
+                final String line = r.readLine();
+                if (line == null) {
+                    break;
+                }
+                System.out.println("[HDF-AT debug]: execCmd output:" + line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("[HDF-AT debug]: execCmd end");
+    }
+
+    private static void delete(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (Stream<Path> ps = Files.list(path)) {
+                for (Path pi : ps.collect(Collectors.toSet()).toArray(new Path[0])) {
+                    delete(pi);
+                }
+            }
+        }
+        System.out.println("[HDF-AT debug]: delete:" + path);
+        try {
+            Files.delete(path);
+        } catch (Exception e) {
+            System.out.println("[HDF-AT debug]: fail to delete:" + path + " Reason: " + e);
+        }
+    }
 
     @Test
     @STTM("SNAP-3553")
@@ -30,6 +69,14 @@ public class HdfActivatorTest {
         }
 
         Path p = SystemUtils.getAuxDataPath();
+        if (arch.equalsIgnoreCase("x86_64")) {//only Mac x86_64
+            execCmd("rm", "-rf", "" + p.getParent());
+        }
+        try {
+            delete(p.getParent());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (Files.exists(p)) {
             System.out.println("HdfActivatorTest: testActivate Files.exists: " + p);
         } else {
@@ -40,19 +87,6 @@ public class HdfActivatorTest {
             System.out.println("HdfActivatorTest: testActivate Files.exists: " + p);
         } else {
             System.out.println("HdfActivatorTest: testActivate !Files.exists: " + p);
-        }
-        try (Stream<Path> ps = Files.list(p)) {
-            boolean empty = true;
-            for (Path pi : ps.collect(Collectors.toSet()).toArray(new Path[0])) {
-                empty = false;
-                System.out.println("HdfActivatorTest: testActivate pi: " + pi);
-            }
-            if (empty) {
-                System.out.println("HdfActivatorTest: testActivate Files.delete: " + p);
-                Files.delete(p);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         HdfActivator.activate();
