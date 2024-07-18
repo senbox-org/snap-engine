@@ -75,7 +75,7 @@ public class BandGroupsManager {
     }
 
     public void save() throws IOException {
-        final BandGroup[] bandGroups = get();
+        final BandGroup[] bandGroups = userGroups.toArray(new BandGroup[0]);
         try (FileOutputStream fileOutputStream = new FileOutputStream(groupsConfigFile.toFile())) {
             BandGroupIO.write(bandGroups, fileOutputStream);
         }
@@ -141,6 +141,4 @@ public class BandGroupsManager {
             userGroups.remove(index);
         }
     }
-
-
 }
