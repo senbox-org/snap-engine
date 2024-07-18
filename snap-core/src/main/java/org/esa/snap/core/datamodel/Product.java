@@ -180,7 +180,7 @@ public class Product extends ProductNode implements Closeable {
     private PointingFactory pointingFactory;
     private String quicklookBandName;
     private Dimension preferredTileSize;
-    private BandGrouping autoGrouping;
+    private BandGroup autoGrouping;
     private Map<String, WeakReference<MultiLevelImage>> maskCache;
     /**
      * The maximum number of resolution levels common to all band images.
@@ -2459,7 +2459,7 @@ public class Product extends ProductNode implements Closeable {
      * @return The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public BandGrouping getAutoGrouping() {
+    public BandGroup getAutoGrouping() {
         return autoGrouping;
     }
 
@@ -2482,7 +2482,7 @@ public class Product extends ProductNode implements Closeable {
      */
     public void setAutoGrouping(String pattern) {
         Assert.notNull(pattern, "text");
-        setAutoGrouping(BandGroupingImpl.parse(pattern));
+        setAutoGrouping(BandGroupImpl.parse(pattern));
     }
 
     /**
@@ -2491,8 +2491,8 @@ public class Product extends ProductNode implements Closeable {
      * @param autoGrouping The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public void setAutoGrouping(BandGrouping autoGrouping) {
-        BandGrouping old = this.autoGrouping;
+    public void setAutoGrouping(BandGroup autoGrouping) {
+        BandGroup old = this.autoGrouping;
         if (!ObjectUtils.equalObjects(old, autoGrouping)) {
             this.autoGrouping = autoGrouping;
             fireProductNodeChanged("autoGrouping", old, this.autoGrouping);

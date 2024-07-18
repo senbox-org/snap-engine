@@ -1,0 +1,72 @@
+{
+  "stac_version": "1.0.0-beta.2",
+  "id": "catalogs",
+  "title": "STAC demo catalog",
+  "description": "STAC v1.0.0-rc2 implementation by [SnapPlanet](https://snapplanet.io)",
+  "capabilities": ["resto-core", "tag", "auth", "cart", "gazetteer", "hashtag", "heatmap", "measurement", "mvt", "shapefileuploader", "sosa", "stacplus", "view"],
+  "planet": "earth",
+  "links": [{
+    "rel": "self",
+    "type": "application/json",
+    "title": "STAC demo catalog",
+    "href": "https://tamn.snapplanet.io"
+  }, {
+    "rel": "service-desc",
+    "type": "application/json",
+    "title": "OpenAPI 3.0 definition endpoint",
+    "href": "https://tamn.snapplanet.io/api"
+  }, {
+    "rel": "service-doc",
+    "type": "text/html",
+    "title": "OpenAPI 3.0 definition endpoint documentation",
+    "href": "https://tamn.snapplanet.io/api.html"
+  }, {
+    "rel": "conformance",
+    "type": "application/json",
+    "title": "Conformance declaration",
+    "href": "https://tamn.snapplanet.io/conformance"
+  }, {
+    "rel": "data",
+    "type": "application/json",
+    "title": "Collections",
+    "href": "https://tamn.snapplanet.io/collections"
+  }, {
+    "rel": "root",
+    "type": "application/json",
+    "title": "STAC demo catalog",
+    "href": "https://tamn.snapplanet.io"
+  }, {
+    "rel": "search",
+    "type": "application/json",
+    "title": "STAC search endpoint",
+    "href": "https://tamn.snapplanet.io/search"
+  }, {
+    "rel": "child",
+    "title": "Classifications",
+    "type": "application/json",
+    "href": "https://tamn.snapplanet.io/catalogs/classifications"
+  }, {
+    "rel": "child",
+    "title": "Hashtags",
+    "type": "application/json",
+    "href": "https://tamn.snapplanet.io/catalogs/hashtags"
+  }, {
+    "rel": "child",
+    "title": "Themes",
+    "type": "application/json",
+    "href": "https://tamn.snapplanet.io/catalogs/themes"
+  }, {
+    "rel": "child",
+    "title": "Views",
+    "matched": 13,
+    "href": "https://tamn.snapplanet.io/catalogs/views",
+    "type": "application/json",
+    "roles": ["resto-views"]
+  }, {
+    "rel": "child",
+    "title": "Concepts",
+    "type": "application/json",
+    "href": "https://tamn.snapplanet.io/catalogs/concepts"
+  }
+  ]
+}

@@ -43,7 +43,6 @@ public class Copernicus90mFile extends ElevationFile {
             subsetOp.setSourceProduct(resampled);
             subsetOp.setRegion(new Rectangle(1, 1, 1200, 1200));
             Product subsetProd = subsetOp.getTargetProduct();
-            ProductIO.writeProduct(subsetProd, localFile.getAbsolutePath(), "GeoTIFF");
 
             tile = new CopernicusElevationTile(demModel, subsetProd);
 
