@@ -20,7 +20,7 @@ public class BandGroupsManager {
     private static Path groupsConfigFile;
 
     private final ArrayList<BandGroup> userGroups;
-    private BandGroup productGroup;
+    private BandGroupImpl productGroup;
 
     public static synchronized BandGroupsManager getInstance() throws IOException {
         if (instance == null) {
@@ -115,12 +115,16 @@ public class BandGroupsManager {
     }
 
     public void addGroupsOfProduct(Product product) {
-        productGroup = product.getAutoGrouping();
+        productGroup = (BandGroupImpl) product.getAutoGrouping();
         productGroup.setEditable(false);
     }
 
     public void removeGroupsOfProduct() {
         productGroup = null;
+    }
+
+    public BandGroupImpl getGroupsOfProduct() {
+        return productGroup;
     }
 
     public void remove(String bandGroupName) {
@@ -137,4 +141,6 @@ public class BandGroupsManager {
             userGroups.remove(index);
         }
     }
+
+
 }

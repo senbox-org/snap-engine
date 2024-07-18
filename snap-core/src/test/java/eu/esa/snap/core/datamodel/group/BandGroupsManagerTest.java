@@ -306,6 +306,24 @@ public class BandGroupsManagerTest {
     }
 
     @Test
+    @STTM("SNAP-3709")
+    public void testGetGroupsOfProduct() throws IOException {
+        initialize();
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+
+        assertNull(bandGroupsManager.getGroupsOfProduct());
+
+        final Product product = new Product("test", "testType", 3, 4);
+        product.setAutoGrouping("Oa*_radiance:Oa*_radiance_unc:Oa*_radiance_err");
+
+        bandGroupsManager.addGroupsOfProduct(product);
+
+        final BandGroupImpl groupsOfProduct = bandGroupsManager.getGroupsOfProduct();
+        assertNotNull(groupsOfProduct);
+    }
+
+    @Test
     @STTM("SNAP-3702")
     public void testSave_empty() throws IOException {
         final File targetDir = initialize();
