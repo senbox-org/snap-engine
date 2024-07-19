@@ -115,6 +115,9 @@ public class BandGroupsManager {
     }
 
     public void addGroupsOfProduct(Product product) {
+        if (product == null) {
+            return;
+        }
         productGroup = (BandGroupImpl) product.getAutoGrouping();
         productGroup.setEditable(false);
     }
