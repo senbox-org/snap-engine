@@ -48,4 +48,16 @@ public interface BandGroup extends List<String[]> {
      * @return the resulting band names
      */
     String[] getMatchingBandNames(Product product);
+
+    /**
+     * Retrieves if the group can be edited or not.
+     * @return editable or not
+     */
+    boolean isEditable();
+
+    /**
+     * Sets whether the group is editable or not
+     * @param editable is editable or not
+     */
+    void setEditable(boolean editable);
 }

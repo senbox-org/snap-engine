@@ -62,7 +62,7 @@ public class BandGroupsManagerTest {
         final BandGroupsManager secondManager = BandGroupsManager.getInstance();
         assertSame(bandGroupsManager, secondManager);
 
-        BandGroup[] groups = bandGroupsManager.get();
+        final BandGroup[] groups = bandGroupsManager.get();
         assertEquals(0, groups.length);
     }
 
@@ -75,7 +75,7 @@ public class BandGroupsManagerTest {
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
         assertNotNull(bandGroupsManager);
 
-        BandGroup[] groups = bandGroupsManager.get();
+        final BandGroup[] groups = bandGroupsManager.get();
         assertEquals(1, groups.length);
 
         final BandGroup group = groups[0];
@@ -84,7 +84,7 @@ public class BandGroupsManagerTest {
     }
 
     @Test
-    @STTM("SNAP-3702")
+    @STTM("SNAP-3702,SNAP-3709")
     public void testAddGroupAndGet() throws IOException {
         initialize();
 
@@ -104,6 +104,8 @@ public class BandGroupsManagerTest {
         final BandGroup group = bandGroups[0];
         assertEquals("refl_to_use", group.getName());
         assertArrayEquals(expectedBandNames, group.get(0));
+
+        assertTrue(bandGroups[0].isEditable());
     }
 
     @Test
@@ -154,7 +156,7 @@ public class BandGroupsManagerTest {
 
         bandGroupsManager.remove("not_existent");
 
-        BandGroup[] bandGroups = bandGroupsManager.get();
+        final BandGroup[] bandGroups = bandGroupsManager.get();
         assertEquals(1, bandGroups.length);
     }
 
@@ -232,7 +234,7 @@ public class BandGroupsManagerTest {
     }
 
     @Test
-    @STTM("SNAP-3702")
+    @STTM("SNAP-3702,SNAP-3709")
     public void testAddGroupsOfProduct() throws IOException {
         initialize();
 
@@ -249,6 +251,8 @@ public class BandGroupsManagerTest {
         String[] bandNames = bandGroups[0].get(0);
         assertEquals(1, bandNames.length);
         assertEquals("Oa*_radiance", bandNames[0]);
+
+        assertFalse(bandGroups[0].isEditable());
     }
 
     @Test
@@ -302,9 +306,27 @@ public class BandGroupsManagerTest {
     }
 
     @Test
+    @STTM("SNAP-3709")
+    public void testGetGroupsOfProduct() throws IOException {
+        initialize();
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+
+        assertNull(bandGroupsManager.getGroupsOfProduct());
+
+        final Product product = new Product("test", "testType", 3, 4);
+        product.setAutoGrouping("Oa*_radiance:Oa*_radiance_unc:Oa*_radiance_err");
+
+        bandGroupsManager.addGroupsOfProduct(product);
+
+        final BandGroupImpl groupsOfProduct = bandGroupsManager.getGroupsOfProduct();
+        assertNotNull(groupsOfProduct);
+    }
+
+    @Test
     @STTM("SNAP-3702")
     public void testSave_empty() throws IOException {
-        File targetDir = initialize();
+        final File targetDir = initialize();
 
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
 
@@ -320,7 +342,7 @@ public class BandGroupsManagerTest {
     @Test
     @STTM("SNAP-3702")
     public void testSave_twoBandGroups() throws IOException {
-        File targetDir = initialize();
+        final File targetDir = initialize();
 
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
 
