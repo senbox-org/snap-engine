@@ -31,16 +31,19 @@ import static org.junit.Assert.assertEquals;
 public class TestElevations {
 
     private static final GeoPos toronto = new GeoPos(43.6532, -79.3832);
+    private static final GeoPos north60 = new GeoPos(59.9999, 10);
 
     private static final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
     private static final ElevationModelDescriptor ace30Descriptor = elevationModelRegistry.getDescriptor("ACE30");
     private static final ElevationModelDescriptor srtm3Descriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec");
     private static final ElevationModelDescriptor srtm1Descriptor = elevationModelRegistry.getDescriptor("SRTM 1Sec HGT");
     private static final ElevationModelDescriptor cdemDescriptor = elevationModelRegistry.getDescriptor("CDEM");
+    private static final ElevationModelDescriptor copernicus90mDescriptor = elevationModelRegistry.getDescriptor("Copernicus 90m Global DEM");
     private static final ElevationModel ace30Dem = ace30Descriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
     private static final ElevationModel srtm3Dem = srtm3Descriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
     private static final ElevationModel srtm1Dem = srtm1Descriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
     private static final ElevationModel cdemDem = cdemDescriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
+    private static final ElevationModel copernicus90mDem = copernicus90mDescriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BICUBIC_INTERPOLATION_NAME));
 
     @Test
     public void testGetElevationAce30() throws Exception {
@@ -72,6 +75,14 @@ public class TestElevations {
         double cdem = cdemDem.getElevation(toronto);
         SystemUtils.LOG.info("CDEM = " + cdem);
         assertEquals(52.68920413692533, cdem, 0.0001);
+    }
+
+    @Test
+    public void testGetElevationCopernicus90m() throws Exception {
+
+        double altitude = copernicus90mDem.getElevation(north60);
+        SystemUtils.LOG.info("Copernicus 90m DEM = " + altitude);
+        assertEquals(183.7947235107422, altitude, 0.0001);
     }
 }
 

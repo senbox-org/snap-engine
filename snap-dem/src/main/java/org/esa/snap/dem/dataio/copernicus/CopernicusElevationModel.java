@@ -66,11 +66,26 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
             return NO_DATA_VALUE;
         }
 
-        final double elevation;
+        // check whether we are close to a resolution step of the DEM
+        final int pixelDistToEquator = Math.abs(((int) (pixelY+0.5)) - 90 * NUM_PIXELS_PER_TILE_Y);
+        final boolean closeTo50 = Math.abs(pixelDistToEquator - 50 * NUM_PIXELS_PER_TILE_Y) <= 2;
+        final boolean closeTo60 = Math.abs(pixelDistToEquator - 60 * NUM_PIXELS_PER_TILE_Y) <= 2;
+        final boolean closeTo70 = Math.abs(pixelDistToEquator - 70 * NUM_PIXELS_PER_TILE_Y) <= 2;
+        final boolean closeTo75 = Math.abs(pixelDistToEquator - 75 * NUM_PIXELS_PER_TILE_Y) <= 2;
+        final boolean closeTo80 = Math.abs(pixelDistToEquator - 80 * NUM_PIXELS_PER_TILE_Y) <= 2;
+        final boolean closeTo85 = Math.abs(pixelDistToEquator - 85 * NUM_PIXELS_PER_TILE_Y) <= 2;
 
-        Resampling.Index newIndex = resampling.createIndex();
-        resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
-        elevation = resampling.resample(resamplingRaster, newIndex);
+        final double elevation;
+        // use nearest resampling if we are close to a resolution step
+        if (closeTo50 || closeTo60 || closeTo70 || closeTo75 || closeTo80 || closeTo85) {
+            final Resampling.Index newIndex = Resampling.NEAREST_NEIGHBOUR.createIndex();
+            Resampling.NEAREST_NEIGHBOUR.computeIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
+            elevation = Resampling.NEAREST_NEIGHBOUR.resample(resamplingRaster, newIndex);
+        } else {
+            Resampling.Index newIndex = resampling.createIndex();
+            resampling.computeCornerBasedIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
+            elevation = resampling.resample(resamplingRaster, newIndex);
+        }
 
         return Double.isNaN(elevation) ? NO_DATA_VALUE : elevation;
     }
