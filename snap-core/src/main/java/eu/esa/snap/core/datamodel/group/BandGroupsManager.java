@@ -44,6 +44,10 @@ public class BandGroupsManager {
     }
 
     public static void initialize(Path groupsDir) throws IOException {
+        if (!Files.isDirectory(groupsDir)) {
+            Files.createDirectories(groupsDir);
+        }
+
         groupsConfigFile = groupsDir.resolve(CONFIG_FILE_NAME);
         if (!Files.exists(groupsConfigFile)) {
             groupsConfigFile = createEmptyConfigFile(groupsConfigFile);

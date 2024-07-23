@@ -38,6 +38,17 @@ public class BandGroupsManagerTest {
 
     @Test
     @STTM("SNAP-3702")
+    public void testInitialize_createsDir() throws IOException {
+        final File groupsDir = tempDir.newFolder("bandGroups");
+        final File subDir = new File(groupsDir, "sub_directory");
+
+        BandGroupsManager.initialize(Paths.get(subDir.getAbsolutePath()));
+
+        assertTrue(new File(subDir, CONFIG_FILE_NAME).isFile());
+    }
+
+    @Test
+    @STTM("SNAP-3702")
     public void testCreateEmptyConfigFile() throws IOException {
         final File configFile = new File(tempDir.getRoot(), "test.json");
         assertFalse(configFile.isFile());
