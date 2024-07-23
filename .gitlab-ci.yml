@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.9.1"
+    ref: "3.11.1"
     file: "templates/gitlab-ci-maven.yml"
 
 # secret variables
@@ -33,18 +33,6 @@ variables:
     -Djava.awt.headless=true
     -Dnetbeans.verify.integrity=false
     -Denable.long.tests=true
-# your pipeline stages
-stages:
-  - build
-  - test
-  - package-build
-  - package-test
-  - infra
-  - deploy
-  - acceptance
-  - publish
-  - infra-prod
-  - production
 
 mvn-build:
   artifacts:
