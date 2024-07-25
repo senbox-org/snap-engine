@@ -186,8 +186,8 @@ public class GDALProductWriter extends AbstractProductWriter {
                 size = JAI.getDefaultTileSize() != null ? JAI.getDefaultTileSize() : new Dimension(1024, 1024);
             }
             gdalWriteOptions += isCOG
-                                ? ";BLOCKSIZE=" + size.width
-                                : ";BLOCKXSIZE=" + size.width + ";BLOCKYSIZE=" + size.height;
+                    ? ";BLOCKSIZE=" + (size.width - size.width % 16)
+                    : ";BLOCKXSIZE=" + (size.width - size.width % 16) + ";BLOCKYSIZE=" + (size.height - size.height % 16);
             if (!isCOG) {
                 // COG driver doesn't support INTERLEAVE and PROFILE
                 gdalWriteOptions += ";INTERLEAVE=BAND;PROFILE=GeoTIFF";
