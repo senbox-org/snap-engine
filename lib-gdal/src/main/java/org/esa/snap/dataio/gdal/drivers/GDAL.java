@@ -44,7 +44,6 @@ public class GDAL extends GDALBase {
      * Creates new instance for this driver
      */
     private GDAL() throws NoSuchMethodException, IllegalAccessException {
-        EnvironmentVariables.setEnvironmentVariable("GDAL_DATA");
         getDataTypeNameHandle = createStaticHandle(gdalClass, "GetDataTypeName", String.class, int.class);
         getDataTypeByNameHandle = createStaticHandle(gdalClass, "GetDataTypeByName", int.class, String.class);
         final Class<?> gdalDatasetClass = GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME);
