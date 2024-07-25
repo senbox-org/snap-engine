@@ -19,6 +19,7 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
     private final Index[] indexes;
 
     private String name;
+    private boolean editable;
 
     public BandGroupImpl(String groupName, String[] bandNames) {
         name = groupName;
@@ -26,6 +27,7 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
         autoGroupingPaths[0] = new BandGroupingPath(bandNames);
         indexes = new Index[1];
         indexes[0] = new Index(autoGroupingPaths[0], 0);
+        editable = true;
     }
 
     @Override
@@ -71,6 +73,7 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
         });
 
         name = "";
+        editable = true;
     }
 
     public static BandGroup parse(String text) {
@@ -89,7 +92,7 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
                 }
             }
             if (!subPathsList.isEmpty()) {
-                pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
+                pathLists.add(subPathsList.toArray(new String[0]));
             }
         }
         if (pathLists.isEmpty()) {
@@ -127,6 +130,15 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
     @Override
     public int size() {
         return autoGroupingPaths.length;
+    }
+
+    @Override
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 
     public String format() {

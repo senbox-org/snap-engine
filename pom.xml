@@ -55,7 +55,6 @@
             ${project.basedir}/snap-engine-coverage/target/site/
             jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
     </properties>
 
     <modules>
@@ -310,12 +309,6 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>eu.esa.snap</groupId>
-                <artifactId>esa-snappy</artifactId>
-                <version>${esa-snappy.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required

@@ -16,7 +16,7 @@ public class BandGroupImplTest {
         final BandGroupingPath bandGroupingPath = new BandGroupingPath(new String[]{"whatever"});
         final int idx = 27;
 
-        BandGroupImpl.Index index = new BandGroupImpl.Index(bandGroupingPath, idx);
+        final BandGroupImpl.Index index = new BandGroupImpl.Index(bandGroupingPath, idx);
         assertEquals(idx, index.index);
         assertEquals(bandGroupingPath, index.path);
     }
@@ -131,7 +131,7 @@ public class BandGroupImplTest {
     @Test
     @STTM("SNAP-3702")
     public void testParse() {
-        BandGroup bandGroup = BandGroupImpl.parse("L_1:L_1/err:L_2:L_2/err:L_10:L_10/err:L_11:L_11/err:L_21:L_21/err");
+        final BandGroup bandGroup = BandGroupImpl.parse("L_1:L_1/err:L_2:L_2/err:L_10:L_10/err:L_11:L_11/err:L_21:L_21/err");
         assertEquals(10, bandGroup.size());
 
         assertNull(BandGroupImpl.parse(""));
@@ -217,5 +217,18 @@ public class BandGroupImplTest {
 
         final String[] names = bandGroup.getMatchingBandNames(product);
         assertArrayEquals(bandNames, names);
+    }
+
+    @Test
+    @STTM("SNAP-3709")
+    public void testSetIsEditable() {
+       final  BandGroupImpl bandGroup_1 = new BandGroupImpl("test", new String[]{"all_of_me"});
+        assertTrue(bandGroup_1.isEditable());
+
+        final BandGroup bandGroup_2 = BandGroup.parse("sight_*");
+        assertTrue(bandGroup_2.isEditable());
+
+        bandGroup_1.setEditable(false);
+        assertFalse(bandGroup_1.isEditable());
     }
 }
