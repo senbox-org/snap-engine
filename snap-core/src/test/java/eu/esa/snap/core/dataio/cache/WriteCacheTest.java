@@ -1,5 +1,7 @@
-package org.esa.snap.core.dataio.cache;
+package eu.esa.snap.core.dataio.cache;
 
+import eu.esa.snap.core.dataio.cache.VariableCache;
+import eu.esa.snap.core.dataio.cache.WriteCache;
 import org.esa.snap.core.datamodel.Band;
 import org.junit.Test;
 

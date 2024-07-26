@@ -1,5 +1,6 @@
-package org.esa.snap.core.dataio.cache;
+package eu.esa.snap.core.dataio.cache;
 
+import eu.esa.snap.core.dataio.cache.VariableCache;
 import org.esa.snap.core.datamodel.Band;
 
 import javax.imageio.stream.ImageOutputStream;

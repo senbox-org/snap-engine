@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio.cache;
+package eu.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.ProductData;
 

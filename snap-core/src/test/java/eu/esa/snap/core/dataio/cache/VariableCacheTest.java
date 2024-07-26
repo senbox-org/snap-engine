@@ -1,12 +1,14 @@
-package org.esa.snap.core.dataio.cache;
+package eu.esa.snap.core.dataio.cache;
 
+import eu.esa.snap.core.dataio.cache.CacheBlock;
+import eu.esa.snap.core.dataio.cache.VariableCache;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import java.awt.Dimension;
 
-import static org.esa.snap.core.dataio.cache.VariableCache.getStreamOutputPos;
+import static eu.esa.snap.core.dataio.cache.VariableCache.getStreamOutputPos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
