@@ -340,7 +340,6 @@ public class CommandLineTool implements GraphProcessingObserver {
         if (additionalReadParams.size() > 1) {
             throw new IOException("Parameters " + String.join(" and ", additionalReadParameters) + " should not be simultaneously set");
         }
-        additionalReadParams.keySet().forEach(templateVariables::remove);
         Map<String, String> sourceNodeIdMap = getSourceNodeIdMap();
         templateVariables.putAll(sourceNodeIdMap);
         // todo - use Velocity and the current Velocity context for reading the graph XML! (nf, 20120610)

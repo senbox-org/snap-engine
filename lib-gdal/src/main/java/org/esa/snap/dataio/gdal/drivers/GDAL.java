@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import org.esa.snap.jni.EnvironmentVariables;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
