@@ -298,11 +298,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>eu.esa.snap</groupId>
-            <artifactId>esa-snappy</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

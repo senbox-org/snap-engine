@@ -58,14 +58,11 @@ public class GraphContext {
         this(graph, null);
     }
 
+    public GraphContext(Graph graph, boolean init) throws GraphException {
+        this(graph, null, init);
+    }
 
-    /**
-     * Creates a GraphContext for the given {@code graph} and a {@code logger}.
-     *
-     * @param graph the {@link Graph} to create the context for
-     * @throws GraphException if the graph context could not be created
-     */
-    public GraphContext(Graph graph, Operator graphOp) throws GraphException {
+    public GraphContext(Graph graph, Operator graphOp, boolean init) throws GraphException {
         if (graph.getNodeCount() == 0) {
             throw new GraphException("Empty graph.");
         }
@@ -82,6 +79,22 @@ public class GraphContext {
 
         initNodeContextDeque = new ArrayDeque<>(graph.getNodeCount());
         initNodeDependencies();
+        if (init) {
+            init(graphOp);
+        }
+    }
+
+    /**
+     * Creates a GraphContext for the given {@code graph} and a {@code logger}.
+     *
+     * @param graph the {@link Graph} to create the context for
+     * @throws GraphException if the graph context could not be created
+     */
+    public GraphContext(Graph graph, Operator graphOp) throws GraphException {
+        this(graph, graphOp, true);
+    }
+
+    public void init(Operator graphOp) throws GraphException {
         initOutput(graphOp);
     }
 
@@ -192,6 +205,7 @@ public class GraphContext {
             nodeContext.addSourceProduct(source.getName(), sourceProduct);
         }
         Node node = nodeContext.getNode();
+        node.updateGraphNode(nodeContext);
         DomElement configuration = node.getConfiguration();
         OperatorConfiguration opConfiguration = this.createOperatorConfiguration(configuration,
                 new HashMap<String, Object>());

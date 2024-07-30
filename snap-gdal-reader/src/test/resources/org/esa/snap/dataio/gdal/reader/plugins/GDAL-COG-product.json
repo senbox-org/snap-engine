@@ -77,10 +77,6 @@
         "value": "12931x8360, 6465x4180, 3232x2090, 1616x1045, 808x522, 404x261"
       },
       {
-        "path": "Image info/Component/block size",
-        "value": "25862x16721"
-      },
-      {
         "path": "Image info/Component/data type",
         "value": "UInt16"
       },

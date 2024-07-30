@@ -1,8 +1,13 @@
 package org.esa.lib.gdal.activator;
 
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.gdal.GDALLoader;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +18,7 @@ public class GDALDriverInfoTest {
     private static final String DRIVER_DISPLAY_NAME = "MOCK Driver";
     private static final String CREATION_DATA_TYPES = "Byte UInt16 Int16 UInt32 Int32 Float32 Float64 CInt16 CInt32 CFloat32";
     private static final String WRITER_PLUGIN_FORMAT_NAME = "GDAL-" + DRIVER_NAME + "-WRITER";
+    private static final String LOCK_FILE_NAME = "gdal.lock";
 
 
     private static final GDALLoader TEST_GDAL_LOADER = GDALLoader.getInstance();
@@ -22,6 +28,14 @@ public class GDALDriverInfoTest {
     @Before
     public void setUp() {
         mockDriverInfo = new GDALDriverInfo(EXTENSION_NAME, DRIVER_NAME, DRIVER_DISPLAY_NAME, CREATION_DATA_TYPES);
+        final Path lockFile = SystemUtils.getAuxDataPath().resolve(LOCK_FILE_NAME);
+        try {
+            if (Files.exists(lockFile)) {
+                Files.delete(lockFile);
+            }
+        } catch (IOException e) {
+            fail("fail to delete lockfile: " + lockFile);
+        }
     }
 
     @Test

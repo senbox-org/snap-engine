@@ -47,4 +47,9 @@ public class ACGEO2016CropSMAPVEXModelDescriptor extends AbstractLandCoverModelD
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
         return new FileLandCoverModel(this, new File[]{file}, resampling);
     }
+
+    @Override
+    public String getGrouping() {
+        return "AAFC Crop Index";
+    }
 }

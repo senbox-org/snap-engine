@@ -396,11 +396,15 @@ public class RemoteRepositoriesManager {
         RemoteMission remoteMission = new RemoteMission(mission, dataSourceName);
         List<RepositoryProduct> productList;
         if (totalProductCount == 0) {
-            downloaderListener.notifyProductCount(totalProductCount);
+            if (downloaderListener != null) {
+                downloaderListener.notifyProductCount(totalProductCount);
+            }
 
             productList = Collections.emptyList();
         } else if (totalProductCount > 0) {
-            downloaderListener.notifyProductCount(totalProductCount);
+            if (downloaderListener != null) {
+                downloaderListener.notifyProductCount(totalProductCount);
+            }
 
             long totalPageNumber = totalProductCount / pageSize;
             if (totalProductCount % pageSize != 0) {
@@ -428,7 +432,9 @@ public class RemoteRepositoriesManager {
 
                 ThreadStatus.checkCancelled(thread);
 
-                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, productList.size());
+                if (downloaderListener != null) {
+                    downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, productList.size());
+                }
             }
         } else {
             List<EOProduct> pageResults = query.execute();
