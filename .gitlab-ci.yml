@@ -47,13 +47,16 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
+  variables:
+    MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   allow_failure: true
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
 
 # Used to publish release on Github (only manual action & non blocking)
 mvn-release:
+  variables:
+    MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   rules:
     - when: manual
       allow_failure: true
