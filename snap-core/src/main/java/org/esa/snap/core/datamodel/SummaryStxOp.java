@@ -19,6 +19,8 @@ package org.esa.snap.core.datamodel;
 import org.esa.snap.core.util.math.DoubleList;
 
 import javax.media.jai.UnpackedImageData;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.lang.Double.*;
 
@@ -37,6 +39,9 @@ final public class SummaryStxOp extends StxOp {
     private double maximum;
     private double mean;
     private double meanSqr;
+    private ArrayList<Double> sampleData;
+    private boolean calculateMedian = false;
+
     private long sampleCount;
 
     private double valueSum;
@@ -47,10 +52,12 @@ final public class SummaryStxOp extends StxOp {
         super("Summary");
         this.minimum = POSITIVE_INFINITY;
         this.maximum = NEGATIVE_INFINITY;
-        this.sampleCount = 0;
-        this.valueSum = 0;
-        this.sqrSum = 0;
-        this.power4Sum = 0;
+    }
+
+    public SummaryStxOp(boolean calculateMedian) {
+        this();
+        this.calculateMedian = calculateMedian;
+        sampleData = new ArrayList<Double>();
     }
 
     public double getMinimum() {
@@ -65,6 +72,30 @@ final public class SummaryStxOp extends StxOp {
 
     public double getMean() {
         return sampleCount > 0 ? mean : NaN;
+    }
+
+    public double getMedian() {
+        if (sampleCount > 0 && sampleData != null && calculateMedian) {
+            double[] sampleArray = new double[sampleData.size()];
+            for (int i = 0; i < sampleData.size(); i++) {
+                sampleArray[i] = (double) sampleData.get(i);
+            }
+
+            Arrays.sort(sampleArray);
+            double median;
+            if (sampleArray.length % 2 == 0)
+
+                median = ((double) sampleArray[sampleArray.length / 2] + (double) sampleArray[sampleArray.length / 2 - 1]) / 2;
+            else
+
+                median = (double) sampleArray[sampleArray.length / 2];
+
+            return median;
+
+        } else {
+            return NaN;
+        }
+
     }
 
     public double getStandardDeviation() {
@@ -149,21 +180,24 @@ final public class SummaryStxOp extends StxOp {
                     value = values.getDouble(dataPixelOffset);
                     if(!Double.isInfinite(value) && !Double.isNaN(value)) {
 
-                    tileSampleCount++;
-                    if (value < tileMinimum) {
-                        tileMinimum = value;
-                    }
-                    if (value > tileMaximum) {
-                        tileMaximum = value;
-                    }
-                    delta = value - tileMean;
-                    tileMean += delta / tileSampleCount;
-                    tileMeanSqr += delta * (value - tileMean);
+                        tileSampleCount++;
+                        if (value < tileMinimum) {
+                            tileMinimum = value;
+                        }
+                        if (value > tileMaximum) {
+                            tileMaximum = value;
+                        }
+                        delta = value - tileMean;
+                        tileMean += delta / tileSampleCount;
+                        tileMeanSqr += delta * (value - tileMean);
 
-                    tmpValueSum += value;
-                    final double value2 = value * value;
-                    tmpSqrSum += value2;
-                    tmpPower4Sum += value2*value2;
+                        tmpValueSum += value;
+                        final double value2 = value * value;
+                        tmpSqrSum += value2;
+                        tmpPower4Sum += value2*value2;
+                        if (calculateMedian && sampleData != null) {
+                            sampleData.add(value);
+                        }
                     }
                 }
                 dataPixelOffset += dataPixelStride;
