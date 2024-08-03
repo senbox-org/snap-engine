@@ -19,14 +19,7 @@ package org.esa.snap.statistics;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.core.ProgressMonitor;
-import java.util.Calendar;
-import java.util.Collection;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.HistogramStxOp;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.QualitativeStxOp;
-import org.esa.snap.core.datamodel.SummaryStxOp;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -36,34 +29,16 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.WildcardMatcher;
-import org.esa.snap.statistics.output.BandNameCreator;
-import org.esa.snap.statistics.output.CsvStatisticsWriter;
-import org.esa.snap.statistics.output.FeatureStatisticsWriter;
-import org.esa.snap.statistics.output.MetadataWriter;
-import org.esa.snap.statistics.output.StatisticsOutputContext;
-import org.esa.snap.statistics.output.StatisticsOutputter;
-import org.esa.snap.statistics.output.Util;
+import org.esa.snap.statistics.output.*;
+import org.esa.snap.statistics.tools.TimeInterval;
 
 import javax.media.jai.Histogram;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
-import org.esa.snap.statistics.tools.TimeInterval;
 
 /**
  * An operator that is used to compute statistics for any number of source products, restricted to time intervals and
@@ -96,17 +71,26 @@ public class StatisticsOp extends Operator {
     public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String MAJORITY_CLASS = "majority_class";
     public static final String SECOND_MAJORITY_CLASS = "second_majority_class";
-    public static final String MAXIMUM = "maximum";
-    public static final String MINIMUM = "minimum";
-    public static final String MEDIAN = "median";
-    public static final String AVERAGE = "average";
-    public static final String SIGMA = "sigma";
-    public static final String MAX_ERROR = "max_error";
-    public static final String TOTAL = "total";
-    public static final String PERCENTILE_PREFIX = "p";
-    public static final String PERCENTILE_SUFFIX = "_threshold";
-    public static final String DEFAULT_PERCENTILES = "90,95";
-    public static final int[] DEFAULT_PERCENTILES_INTS = new int[]{90, 95};
+    public static final String TOTAL = "SampleSize(Pixels)";
+    public static final String MAXIMUM = "Maximum";
+    public static final String MINIMUM = "Minimum";
+    public static final String MEDIAN_OLD_50P = "50%ThresholdHistogram"; // was "Median".  This variable no longer used.
+    public static final String MEDIAN = "Median";
+    public static final String MEAN = "Mean";
+    public static final String SIGMA = "StandardDeviation";
+    public static final String VARIANCE = "Variance";
+    public static final String COEF_VARIATION = "CoefficientOfVariation";
+    public static final String TOTAL_BINS = "TotalBins";
+    public static final String BIN_WIDTH = "BinWidth";
+    public static final String MAX_ERROR = "max_error"; // This variable no longer used.
+
+    public static final String PERCENTILE_PREFIX = "";
+    public static final String PERCENTILE_SUFFIX = "%Threshold";
+    public static final String DEFAULT_PERCENTILES = "50,80,85,90,95,98";
+    public static final int[] DEFAULT_PERCENTILES_INTS = new int[]{50,80,85,90,95,98};
+
+    public boolean calculateMedian = true;
+
 
     private static final double FILL_VALUE = -999.0;
     static final int ALL_MEASURES = 0;
@@ -163,10 +147,15 @@ public class StatisticsOp extends Operator {
             notNull = false, defaultValue = DEFAULT_PERCENTILES)
     int[] percentiles;
 
-    @Parameter(description = "The degree of accuracy used for statistics computation. Higher numbers " +
-            "indicate higher accuracy but may lead to a considerably longer computation time.",
-            defaultValue = "3")
-    int accuracy;
+//    @Parameter(description = "The degree of accuracy used for statistics computation. Higher numbers " +
+//            "indicate higher accuracy but may lead to a considerably longer computation time.",
+//               defaultValue = "3")
+//    int accuracy;
+
+    @Parameter(description = "The number of bins to use in the histogram statistics",
+            defaultValue = "1000")
+    int numBins;
+
 
     @Parameter(description = "If set, the StatisticsOp will divide the time between start and end time into time intervals" +
             "defined by this parameter. All measures will be aggregated from products within these intervals. " +
@@ -199,9 +188,9 @@ public class StatisticsOp extends Operator {
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         TimeInterval[] timeIntervals = getTimeIntervals(interval, startDate, endDate);
 
-        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations,
-                Util.computeBinCount(accuracy), timeIntervals, featureId, getLogger());
-
+//        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations,
+//                Util.computeBinCount(accuracy), timeIntervals, featureId, getLogger());
+        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations, numBins, timeIntervals, featureId, getLogger(), calculateMedian);
         final ProductValidator productValidator = new ProductValidator(Arrays.asList(bandConfigurations), startDate, endDate, getLogger());
         final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, pm, getLogger());
         productLoop.loop(sourceProducts, getProductsToLoad());
@@ -259,7 +248,7 @@ public class StatisticsOp extends Operator {
     }
 
     private void processStatisticsPerTimeInterval(Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps,
-                                               TimeInterval timeInterval) {
+                                                  TimeInterval timeInterval) {
         for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
             final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
             final String bandName;
@@ -297,27 +286,41 @@ public class StatisticsOp extends Operator {
                 final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
                 final Histogram histogram = histogramMap.get(regionName).getHistogram();
                 if (histogram.getTotals()[0] == 0) {
+                    stxMap.put(TOTAL, 0);
                     stxMap.put(MINIMUM, FILL_VALUE);
                     stxMap.put(MAXIMUM, FILL_VALUE);
-                    stxMap.put(AVERAGE, FILL_VALUE);
-                    stxMap.put(SIGMA, FILL_VALUE);
-                    stxMap.put(TOTAL, 0);
+                    stxMap.put(MEAN, FILL_VALUE);
                     stxMap.put(MEDIAN, FILL_VALUE);
+                    stxMap.put(SIGMA, FILL_VALUE);
+                    stxMap.put(VARIANCE, FILL_VALUE);
+                    stxMap.put(COEF_VARIATION, FILL_VALUE);
+                    stxMap.put(TOTAL_BINS, FILL_VALUE);
+                    stxMap.put(BIN_WIDTH, FILL_VALUE);
+
                     for (int percentile : percentiles) {
                         stxMap.put(getPercentileName(percentile), FILL_VALUE);
                     }
                 } else {
+                    double median = summaryStxOp.getMedian();
+                    double stdDev = summaryStxOp.getStandardDeviation();
+                    double mean = summaryStxOp.getMean();
+
+                    stxMap.put(TOTAL, histogram.getTotals()[0]);
                     stxMap.put(MINIMUM, summaryStxOp.getMinimum());
                     stxMap.put(MAXIMUM, summaryStxOp.getMaximum());
-                    stxMap.put(AVERAGE, summaryStxOp.getMean());
-                    stxMap.put(SIGMA, summaryStxOp.getStandardDeviation());
-                    stxMap.put(TOTAL, histogram.getTotals()[0]);
-                    stxMap.put(MEDIAN, histogram.getPTileThreshold(0.5)[0]);
+                    stxMap.put(MEAN, summaryStxOp.getMean());
+                    stxMap.put(MEDIAN, median);
+                    stxMap.put(SIGMA, stdDev);
+                    stxMap.put(VARIANCE, summaryStxOp.getVariance());
+                    stxMap.put(COEF_VARIATION, Util.getCoefficientOfVariation(stdDev, mean));
+                    stxMap.put(TOTAL_BINS, histogram.getNumBins()[0]);
+                    stxMap.put(BIN_WIDTH, Util.getBinWidth(histogram));
+
                     for (int percentile : percentiles) {
                         stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
                     }
                 }
-                stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
+//                stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
                 for (StatisticsOutputter statisticsOutputter : quantitativeStatisticsOutputters) {
                     if (timeInterval != null) {
                         statisticsOutputter.addToOutput(bandName, timeInterval, regionName, stxMap);
@@ -401,7 +404,6 @@ public class StatisticsOp extends Operator {
                             measures.add(MINIMUM);
                             measures.add(MAXIMUM);
                             measures.add(MEDIAN);
-                            measures.add(AVERAGE);
                             measures.add(SIGMA);
                             for (int percentile : percentiles) {
                                 measures.add(getPercentileName(percentile));
@@ -438,6 +440,34 @@ public class StatisticsOp extends Operator {
         }
         return measures.toArray(new String[0]);
     }
+
+    @Deprecated
+    /*
+     * will receive no replacement (@since 6.0.3)
+     */
+    public static String[] getAlgorithmNames(int[] percentiles) {
+        final LinkedHashSet<String> fieldNamesLhs = new LinkedHashSet<String>();
+        fieldNamesLhs.add(TOTAL);
+        fieldNamesLhs.add(MINIMUM);
+        fieldNamesLhs.add(MAXIMUM);
+        fieldNamesLhs.add(MEAN);
+        fieldNamesLhs.add(MEDIAN);
+        fieldNamesLhs.add(SIGMA);
+        fieldNamesLhs.add(VARIANCE);
+        fieldNamesLhs.add(COEF_VARIATION);
+        fieldNamesLhs.add(TOTAL_BINS);
+        fieldNamesLhs.add(BIN_WIDTH);
+        for (int percentile : percentiles) {
+            fieldNamesLhs.add(getPercentileName(percentile));
+        }
+
+        String[] fieldNamesArray = new String[fieldNamesLhs.size()];
+        fieldNamesLhs.toArray(fieldNamesArray);
+
+        return fieldNamesArray;
+    }
+
+
 
     private static String getPercentileName(int percentile) {
         return PERCENTILE_PREFIX + percentile + PERCENTILE_SUFFIX;
@@ -592,11 +622,17 @@ public class StatisticsOp extends Operator {
         if (startDate != null && endDate != null && endDate.getAsDate().before(startDate.getAsDate())) {
             throw new OperatorException("End date '" + this.endDate + "' before start date '" + this.startDate + "'");
         }
-        if (accuracy < 0) {
-            throw new OperatorException("Parameter 'accuracy' must be greater than or equal to " + 0);
+//        if (accuracy < 0) {
+//            throw new OperatorException("Parameter 'accuracy' must be greater than or equal to " + 0);
+//        }
+//        if (accuracy > Util.MAX_ACCURACY) {
+//            throw new OperatorException("Parameter 'accuracy' must be less than or equal to " + Util.MAX_ACCURACY);
+//        }
+        if (numBins < Util.MIN_NUMBINS) {
+            throw new OperatorException("Parameter 'numBins' must be greater than or equal to " + Util.MIN_NUMBINS);
         }
-        if (accuracy > Util.MAX_ACCURACY) {
-            throw new OperatorException("Parameter 'accuracy' must be less than or equal to " + Util.MAX_ACCURACY);
+        if (numBins > Util.MAX_NUMBINS) {
+            throw new OperatorException("Parameter 'numBins' must be less than or equal to " + Util.MAX_NUMBINS);
         }
         if ((sourceProducts == null || sourceProducts.length == 0) &&
                 (sourceProductPaths == null || sourceProductPaths.length == 0)) {
