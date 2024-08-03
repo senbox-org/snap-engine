@@ -221,11 +221,11 @@ public class PerformanceParameters {
         actualParameters.setCachePath(SystemUtils.getCacheDir().toPath());
 
         final int defaultNbThreads = JavaSystemInfos.getInstance().getNbCPUs();
-        actualParameters.setNbThreads(preferences.getInt(SystemUtils.SNAP_PARALLELISM_PROPERTY_NAME, defaultNbThreads));
-        actualParameters.setDefaultTileSize(preferences.getInt(PROPERTY_DEFAULT_TILE_SIZE, 0));
-        actualParameters.setTileWidth(preferences.get(SYSPROP_READER_TILE_WIDTH, null));
-        actualParameters.setTileHeight(preferences.get(SYSPROP_READER_TILE_HEIGHT, null));
-        actualParameters.setCacheSize(preferences.getInt(PROPERTY_JAI_CACHE_SIZE, 1024));
+        actualParameters.setNbThreads(Config.instance().preferences().getInt(SystemUtils.SNAP_PARALLELISM_PROPERTY_NAME, defaultNbThreads));
+        actualParameters.setDefaultTileSize(Config.instance().preferences().getInt(PROPERTY_DEFAULT_TILE_SIZE, 1024));
+        actualParameters.setTileWidth(Config.instance().preferences().get(SYSPROP_READER_TILE_WIDTH, null));
+        actualParameters.setTileHeight(Config.instance().preferences().get(SYSPROP_READER_TILE_HEIGHT, null));
+        actualParameters.setCacheSize(Config.instance().preferences().getInt(PROPERTY_JAI_CACHE_SIZE, 1024));
 
         return actualParameters;
     }
