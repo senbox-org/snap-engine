@@ -50,6 +50,7 @@ public class ResourceInstaller {
 
     private final Path sourceBasePath;
     private final Path targetDirPath;
+    private final boolean replaceExistingResource;
 
     /**
      * Creates an instance with a given source to a given target.
@@ -60,7 +61,23 @@ public class ResourceInstaller {
     public ResourceInstaller(Path sourceDirPath, Path targetDirPath) {
         this.sourceBasePath = sourceDirPath;
         this.targetDirPath = targetDirPath;
+        this.replaceExistingResource = true;
     }
+
+
+    /**
+     * Creates an instance with a given source to a given target.
+     *
+     * @param sourceDirPath the source directory path
+     * @param targetDirPath the target directory
+     * @param replaceExistingResource the target directory
+     */
+    public ResourceInstaller(Path sourceDirPath, Path targetDirPath, boolean replaceExistingResource) {
+        this.sourceBasePath = sourceDirPath;
+        this.targetDirPath = targetDirPath;
+        this.replaceExistingResource = replaceExistingResource;
+    }
+
 
     /**
      * Installs all resources found, matching the given pattern. Existing resources are left as-is
@@ -119,9 +136,16 @@ public class ResourceInstaller {
     }
 
     boolean mustInstallResource(Path targetFile, Path resource) throws IOException {
-        if (!Files.exists(targetFile)) {
+
+        if (Files.exists(targetFile)) {
+            if (!replaceExistingResource) {
+                return false;
+            }
+        } else {
             return true;
         }
+
+
         final Path realTargetFile = targetFile.toRealPath();
         final Path realResource = resource.toRealPath();
         final boolean sizeIsDifferent = Files.size(realTargetFile) != Files.size(realResource) && Files.size(realResource) != 0;
@@ -174,5 +198,4 @@ public class ResourceInstaller {
             throw new RuntimeException("Failed to detect the module's code base path", e);
         }
     }
-
 }
