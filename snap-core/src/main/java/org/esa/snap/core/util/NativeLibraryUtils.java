@@ -56,15 +56,18 @@ public class NativeLibraryUtils {
         propertyValue = builder.toString();
         System.setProperty(JAVA_LIB_PATH, propertyValue);
 
-        boolean initialized = true;
-        try {
-            // try to re-trigger library path loading - JDK 11 approach
-            Method initLibraryPaths = ClassLoader.class.getDeclaredMethod("initLibraryPaths");
-            initLibraryPaths.setAccessible(true);
-            initLibraryPaths.invoke(null);
-        } catch (Exception e) {
-            initialized = false;
-        }
+//        boolean initialized = true;
+//        try {
+//            // try to re-trigger library path loading - JDK 11 approach
+//            Method initLibraryPaths = ClassLoader.class.getDeclaredMethod("initLibraryPaths");
+//            initLibraryPaths.setAccessible(true);
+//            initLibraryPaths.invoke(null);
+//        } catch (Exception e) {
+//            initialized = false;
+//        }
+
+        boolean initialized = false;
+
 
         if (!initialized) {
             try {
