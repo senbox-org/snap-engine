@@ -168,7 +168,7 @@ public class GenAUCatalog {
     private void processModule(Path path, ArrayList<Node> moduleList, HashMap<String, Node> licenseMap) {
         try {
             log("Processing file: " + path.getFileName());
-            final FileSystem nbmFileSystem = FileSystems.newFileSystem(path, null);
+            final FileSystem nbmFileSystem = FileSystems.newFileSystem(path, (ClassLoader) null);
             final Path infoFile = nbmFileSystem.getPath(PATH_INFO_XML);
             DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
             // This disables resolving the DTD given in the info.xml file.

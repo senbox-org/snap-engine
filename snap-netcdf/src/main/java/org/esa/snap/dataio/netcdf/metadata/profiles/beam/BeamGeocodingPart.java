@@ -34,6 +34,7 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.geotools.referencing.CRS;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -127,6 +128,15 @@ public class BeamGeocodingPart extends CfGeocodingPart {
             if (wktAtt != null && i2mAtt != null) {
                 return createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue());
             }
+            // band = p.addBand(variable.getFullName(), rasterDataType);
+            // final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
+            final Variable xVar = netcdfFile.getRootGroup().findVariable("x");
+            final Variable yVar = netcdfFile.getRootGroup().findVariable("y");
+            if (xVar != null && yVar != null) {
+                final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
+                band = p.addBand(xVar.getFullName(), rasterDataType);
+            }
+
         }
         return null;
     }
