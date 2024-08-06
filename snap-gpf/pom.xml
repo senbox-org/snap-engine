@@ -30,10 +30,6 @@
     <name>SNAP Graph Processing Framework (GPF)</name>
     <description>The basic framework for processing using Operators and the GPT.</description>
 
-    <properties>
-        <jdkToolsPath>${java.home}/../lib/tools.jar</jdkToolsPath>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -80,6 +76,12 @@
             <type>test-jar</type>
         </dependency>
     </dependencies>
+
+    <properties>
+        <jdkToolsPath>${java.home}/../lib/tools.jar</jdkToolsPath>
+        <!-- <jdkToolsPath>/opt/java/zulu8.78.0.19-ca-jdk8.0.412-linux_x64/lib/tools.jar</jdkToolsPath>  -->
+
+    </properties>
     <profiles>
         <profile>
             <id>jdk-tools</id>
