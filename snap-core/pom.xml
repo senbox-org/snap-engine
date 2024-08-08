@@ -131,6 +131,14 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jvm.version}</source>
+                    <target>${jvm.version}</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -187,7 +195,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
+            <version>1.13</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
@@ -202,6 +210,11 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-coverage</artifactId>
             <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>it.geosolutions.jaiext.scheduler</groupId>
+            <artifactId>jt-scheduler</artifactId>
+            <version>1.0.7</version>
         </dependency>
 
         <dependency>

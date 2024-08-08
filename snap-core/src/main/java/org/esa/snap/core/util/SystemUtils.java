@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.util;
 
+import it.geosolutions.jaiext.scheduler.JAIExtTileScheduler;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.util.factory.GeoTools;
@@ -444,11 +445,13 @@ public class SystemUtils {
         }
         int parallelism = Config.instance().preferences().getInt(SNAP_PARALLELISM_PROPERTY_NAME,
                                                                  Runtime.getRuntime().availableProcessors());
+        JAI.getDefaultInstance().setTileScheduler(new JAIExtTileScheduler());
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
         tileScheduler.setParallelism(parallelism);
         LOG.fine(MessageFormat.format("JAI tile scheduler parallelism set to {0}", parallelism));
-        tileScheduler.setPrefetchParallelism(parallelism);
-        LOG.fine(MessageFormat.format("JAI tile scheduler prefetch parallelism set to {0}", parallelism));
+        int prefetchParallelism = parallelism > 2 ? parallelism >> 1 : 1;
+        tileScheduler.setPrefetchParallelism(prefetchParallelism);
+        LOG.fine(MessageFormat.format("JAI tile scheduler prefetch parallelism set to {0}", prefetchParallelism));
 
         long OneMiB = 1024L * 1024L;
 

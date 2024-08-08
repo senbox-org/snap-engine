@@ -168,16 +168,16 @@ public class ServiceFinder {
     }
 
     private void scanDirectory(Path directory, List<Module> modules) {
-        try {
+        try (Stream<Path> list = Files.list(directory)) {
             LOG.fine("Searching for SPIs " + servicesPath + " in " + directory);
-            Files.list(directory).forEach(entry -> {
+            list.forEach(entry -> {
                 if (Files.isDirectory(entry)) {
                     parseServiceRegistry(entry.resolve(servicesPath), modules);
                 } else if (useZipFiles) {
                     String extension = FileUtils.getExtension(entry.toString());
                     if (".jar".compareToIgnoreCase(extension) == 0 || ".zip".compareToIgnoreCase(extension) == 0) {
                         try {
-                            try (FileSystem fs = FileSystems.newFileSystem(entry, null)) {
+                            try (FileSystem fs = FileSystems.newFileSystem(entry, (Map<String,?>)null)) {
                                 parseServiceRegistry(fs.getPath(servicesPath), modules);
                             }
                         } catch (IOException e) {
