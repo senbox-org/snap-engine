@@ -90,6 +90,8 @@ macos:
   needs: []
   script:
     - mvn clean package
+  # should be removed once macos pipeline will run on more recent version (actual is 10.14 an gdal-3-7-2)
+  allow_failure: true
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:
