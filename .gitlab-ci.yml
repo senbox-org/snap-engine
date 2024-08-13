@@ -5,10 +5,12 @@ include:
 variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-eclipse-temurin-8"
 
-# Only Java 11 is available
 windows:
+  variables:
+    JAVA_HOME: "C:\Program Files\Eclipse Adoptium\jdk-8.0.402.6-hotspot"
   when: manual
 
-# Only Java 11 is available
 macos:
+  variables:
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home
   when: manual
