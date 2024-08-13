@@ -138,6 +138,26 @@ public class BandGroupImplTest {
     }
 
     @Test
+    @STTM("SNAP-3728")
+    public void testParse_bandNames() {
+        final BandGroup bandGroup = BandGroupImpl.parse("L_1:TOA#acdom_443,bbp_443,kd_490,bbp_slope:L_2/err");
+        assertEquals(3, bandGroup.size());
+
+        String[] patternList = bandGroup.get(0);
+        assertEquals(1, patternList.length);
+        assertEquals("L_1", patternList[0]);
+
+        patternList = bandGroup.get(1);
+        assertEquals(1, patternList.length);
+        assertEquals("TOA", patternList[0]);
+
+        patternList = bandGroup.get(2);
+        assertEquals(2, patternList.length);
+        assertEquals("L_2", patternList[0]);
+        assertEquals("err", patternList[1]);
+    }
+
+    @Test
     @STTM("SNAP-3702")
     public void testSetGetName() {
         final BandGroupImpl bandGrouping = new BandGroupImpl(new String[0][]);
