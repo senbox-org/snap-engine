@@ -130,12 +130,12 @@ public class BeamGeocodingPart extends CfGeocodingPart {
             }
             // band = p.addBand(variable.getFullName(), rasterDataType);
             // final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
-            final Variable xVar = netcdfFile.getRootGroup().findVariable("x");
-            final Variable yVar = netcdfFile.getRootGroup().findVariable("y");
-            if (xVar != null && yVar != null) {
-                final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
-                band = p.addBand(xVar.getFullName(), rasterDataType);
-            }
+            //final Variable xVar = netcdfFile.getRootGroup().findVariable("x");
+            //final Variable yVar = netcdfFile.getRootGroup().findVariable("y");
+            //if (xVar != null && yVar != null) {
+                //final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
+                //band = p.addBand(xVar.getFullName(), rasterDataType);
+            //}
 
         }
         return null;
