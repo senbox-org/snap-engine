@@ -7,7 +7,7 @@ variables:
 
 windows:
   variables:
-    JAVA_HOME: "C:\Program Files\Eclipse Adoptium\jdk-8.0.402.6-hotspot"
+    JAVA_HOME: "C:\\Program Files\\Eclipse Adoptium\\jdk-8.0.402.6-hotspot"
   when: manual
 
 macos:
