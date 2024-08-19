@@ -45,7 +45,7 @@ public class BandGroupImpl extends AbstractList<String[]> implements BandGroup {
         return bandNamesList.toArray(new String[0]);
     }
 
-    protected BandGroupImpl(String[][] inputPaths) {
+    public BandGroupImpl(String[][] inputPaths) {
         autoGroupingPaths = new BandGroupingPath[inputPaths.length];
         indexes = new Index[inputPaths.length];
         for (int i = 0; i < inputPaths.length; i++) {
