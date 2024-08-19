@@ -29,6 +29,9 @@ public abstract class BasePropertyMapTest {
 
     protected abstract PropertyMap createPropertyMap();
 
+    /** Synchronization lock */
+    private static final Object LOCK = new Object();
+    
     /**
      * Tests the functionality of set and getPropertyBool
      */
@@ -200,7 +203,9 @@ public abstract class BasePropertyMapTest {
 
     // Give PropertyMap impl. time to propagate change events
     private void sleep() throws InterruptedException {
-        Thread.sleep(150);
+    	synchronized (LOCK) {
+    		LOCK.wait(500);
+		}
     }
 
     private static class MyPropertyChangeListener implements PropertyChangeListener {
@@ -208,6 +213,9 @@ public abstract class BasePropertyMapTest {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             trace += evt.getPropertyName() + ";";
+            synchronized (LOCK) {
+				LOCK.notifyAll();
+			}
         }
     }
 }
