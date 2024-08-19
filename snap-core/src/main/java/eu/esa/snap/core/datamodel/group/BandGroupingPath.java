@@ -1,5 +1,7 @@
 package eu.esa.snap.core.datamodel.group;
 
+import org.esa.snap.core.util.StringUtils;
+
 public class BandGroupingPath {
 
     private final String[] groups;
@@ -9,10 +11,16 @@ public class BandGroupingPath {
         this.groups = groups;
         entries = new Entry[groups.length];
         for (int i = 0; i < groups.length; i++) {
-            if (groups[i].contains("*") || groups[i].contains("?")) {
-                entries[i] = new WildCardEntry(groups[i]);
+            final String groupPattern = groups[i];
+            if (groupPattern.contains("*") || groupPattern.contains("?")) {
+                entries[i] = new WildCardEntry(groupPattern);
+            } else if (groupPattern.contains("#")) {
+                final String[] split = StringUtils.split(groupPattern, new char[]{'#'}, true);
+                final String groupName = split[0];
+                this.groups[i] = groupName;
+                entries[i] = new BandNamesEntry(groupName, split[1]);
             } else {
-                entries[i] = new EntryImpl(groups[i]);
+                entries[i] = new EntryImpl(groupPattern);
             }
         }
     }
