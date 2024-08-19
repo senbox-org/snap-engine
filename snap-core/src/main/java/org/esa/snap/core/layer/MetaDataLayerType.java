@@ -213,7 +213,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_LABEL = "PROPERTIES Show All";
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_TOOLTIP = "Display all info keys";
     public static final String PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "ShowAllInfo";
-    public static final boolean PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_DEFAULT = false;
+    public static final boolean PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_DEFAULT = true;
     public static final Class PROPERTY_MARGIN_INFO_KEYS_SHOW_ALL_TYPE = Boolean.class;
 
 
