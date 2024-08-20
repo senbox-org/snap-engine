@@ -353,7 +353,7 @@ public class GraticuleLayerType extends LayerType {
 
     public static final String PROPERTY_NUM_GRID_LINES_NAME = PROPERTY_ROOT + ".num.grid.lines";
     public static final int PROPERTY_NUM_GRID_LINES_DEFAULT = 4;
-    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "Number of Gridlines (auto-generate)";
+    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "Number of Gridlines (auto-spacing)";
     public static final String PROPERTY_NUM_GRID_LINES_TOOLTIP = "<html>Number of gridlines (approximate due to rounding) <br>to auto-generate if lat or lon spacing = 0</html>";
     public static final String PROPERTY_NUM_GRID_LINES_ALIAS = PROPERTY_ROOT + "numGridLines";
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
