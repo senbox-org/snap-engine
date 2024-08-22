@@ -61,7 +61,7 @@ class WarpFromSourceCoordinates extends Warp {
         int xIDNew = opImage.XToTileX(xmin);
         int yIDNew = opImage.YToTileY(ymin);
         Raster tile = opImage.getTile(xIDNew, yIDNew);
-        if (!tile.getBounds().contains(bounds)) {
+        if (tile == null || !tile.getBounds().contains(bounds)) {
             // Dont'n know why, but JAI can call with "width" or "height" == 0
             return destRect;
         }

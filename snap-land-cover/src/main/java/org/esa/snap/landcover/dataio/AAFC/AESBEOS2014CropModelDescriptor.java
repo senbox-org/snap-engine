@@ -67,4 +67,9 @@ public class AESBEOS2014CropModelDescriptor extends AbstractLandCoverModelDescri
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
         return new FileLandCoverProvincialModel(this, fileList, resampling);
     }
+
+    @Override
+    public String getGrouping() {
+        return "AAFC Crop Index";
+    }
 }

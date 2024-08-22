@@ -4,6 +4,9 @@ import com.bc.ceres.annotation.STTM;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ThreadExecutor;
+import org.esa.snap.core.util.ThreadRunnable;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConst;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
@@ -94,13 +97,53 @@ public class GDALLoaderTest extends AbstractGDALTest {
     public void testInitGDAL() {
         try {
             assertNotNull(TEST_GDAL_LOADER);
-            GDALLoader.ensureGDALInitialised();
-            assertTrue(Files.exists(getExpectedNativeLibrariesRootFolderPath()));
-            assertTrue(GDALInstallInfo.INSTANCE.isPresent());
-            assertNotNull(GDAL.open(testFilePath.toString(), GDALConst.gaReadonly()));
+            checkGDALInitialised();
         } catch (Exception e) {
             fail("Error on testInitGDAL(): " + e.getMessage());
         }
+    }
+
+    @Test
+    @STTM("SNAP-3637")
+    public void testSyncGDALInitialisation(){
+        assertNotNull(TEST_GDAL_LOADER);
+        try {
+            Path gdalRootFolderPath = getExpectedNativeLibrariesRootFolderPath();
+            //remove gdal folder
+            if(Files.exists(gdalRootFolderPath)){
+                FileUtils.deleteTree(gdalRootFolderPath.toFile());
+            }
+
+            final ThreadExecutor executor = new ThreadExecutor();
+
+            final ThreadRunnable runnable1 = new ThreadRunnable() {
+                @Override
+                public void process() {
+                    checkGDALInitialised();
+                }
+            };
+
+            final ThreadRunnable runnable2 = new ThreadRunnable() {
+                @Override
+                public void process() {
+                    checkGDALInitialised();
+                }
+            };
+
+            executor.execute(runnable1);
+            executor.execute(runnable2);
+            executor.complete();
+        }catch(Exception ex){
+            fail("Error on testSyncGDALInitialisation(): " + ex.getMessage());
+        }
+    }
+
+    private void checkGDALInitialised() {
+        GDALLoader.ensureGDALInitialised();
+        assertTrue(Files.exists(getExpectedNativeLibrariesRootFolderPath()));
+        assertTrue(GDALInstallInfo.INSTANCE.isPresent());
+        assertNotNull(GDAL.open(testFilePath.toString(), GDALConst.gaReadonly()));
+
     }
 
     @Test

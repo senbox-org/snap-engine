@@ -8,12 +8,13 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>11.0.0-SNAPSHOT</version>
+        <version>12.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-runtime</artifactId>
     <!-- packaging must be "jar", not "nbm" -->
     <packaging>jar</packaging>
+
     <name>SNAP Runtime</name>
 
     <dependencies>
@@ -28,12 +29,11 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
                 <configuration>
-                    <finalName>${project.artifactId}</finalName>
                     <archive>
                         <manifest>
                             <mainClass>org.esa.snap.runtime.Launcher</mainClass>

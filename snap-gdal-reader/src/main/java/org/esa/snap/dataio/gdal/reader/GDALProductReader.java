@@ -2,6 +2,7 @@ package org.esa.snap.dataio.gdal.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.engine_utilities.commons.VirtualFile;
 import org.esa.snap.dataio.gdal.drivers.Dataset;
 import org.esa.snap.dataio.gdal.drivers.Driver;
@@ -43,11 +44,7 @@ import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Generic reader for products using the GDAL library.
@@ -111,7 +108,8 @@ public class GDALProductReader extends AbstractProductReader {
     }
 
     private static Dimension computeBandTileSize(org.esa.snap.dataio.gdal.drivers.Band gdalBand, int productWidth, int productHeight) {
-        Dimension tileSize = new Dimension(gdalBand.getXSize(), gdalBand.getYSize());
+        //Dimension tileSize = new Dimension(gdalBand.getXSize(), gdalBand.getYSize());
+        Dimension tileSize = new Dimension(gdalBand.getBlockXSize(), gdalBand.getBlockYSize());
         if (tileSize.width <= 1 || tileSize.width > productWidth) {
             tileSize.width = productWidth;
         }
@@ -282,7 +280,7 @@ public class GDALProductReader extends AbstractProductReader {
         if (!AbstractFile.isLocalPath(localFile)) {
             throw new IllegalArgumentException("The file '" + localFile + "' is not a local file.");
         }
-
+        GDAL.setCacheMax(1024*1024*1024);
         try (Dataset gdalDataset = openGDALDataset(localFile)) {
             int defaultProductWidth = gdalDataset.getRasterXSize();
             int defaultProductHeight = gdalDataset.getRasterYSize();
@@ -309,10 +307,12 @@ public class GDALProductReader extends AbstractProductReader {
                 throw new IllegalArgumentException("The coordinates are out of bounds: productBounds.y=" + productBounds.y + ", productBounds.height=" + productBounds.height + ", default product height=" + defaultProductHeight);
             }
 
-            Product product = new Product(localFile.getFileName().toString(), "GDAL", productBounds.width, productBounds.height, this);
+            Product product = new Product(localFile.getFileName().toString(), this.getReaderPlugIn().getDescription(Locale.getDefault()),
+                                          productBounds.width, productBounds.height, this);
 
-            Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();
-            product.setPreferredTileSize(defaultJAIReadTileSize);
+            Dimension readTileSize = new Dimension(gdalDataset.getRasterBand(1).getBlockXSize(),
+                                                   gdalDataset.getRasterBand(1).getBlockYSize());
+            product.setPreferredTileSize(readTileSize);
 
             MetadataElement metadataElement = null;
 
@@ -340,9 +340,12 @@ public class GDALProductReader extends AbstractProductReader {
                 try (org.esa.snap.dataio.gdal.drivers.Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1)) {
                     String bandName = computeBandName(gdalBand, bandIndex);
 
-                    if (gdalBand.getOverviewCount() == 0) {
+                    /* Building overviews when reading the product it's not a good idea,
+                       especially when the product resides in a read-only storage.
+
+                        if (gdalBand.getOverviewCount() == 0) {
                         gdalDataset.buildOverviews("NEAREST", new int[]{2, 4, 8, 16, 32, 64, 128});
-                    }
+                    }*/
 
                     if (subsetDef == null || subsetDef.isNodeAccepted(bandName)) {
                         int gdalDataType = gdalBand.getDataType();
@@ -393,31 +396,38 @@ public class GDALProductReader extends AbstractProductReader {
                         if (pass1[0] != null && pass1[0] != 0) {
                             bandMetadataElement.setAttributeDouble("offset", pass1[0]);
                             productBand.setScalingOffset(pass1[0]);
+                            pass1[0] = null;
                         }
 
                         gdalBand.getScale(pass1);
                         if (pass1[0] != null && pass1[0] != 1) {
                             bandMetadataElement.setAttributeDouble("scale", pass1[0]);
                             productBand.setScalingFactor(pass1[0]);
+                            pass1[0] = null;
+                        } else {
+                            productBand.setScalingFactor(1.0);
                         }
 
                         String unitType = gdalBand.getUnitType();
-                        if (unitType != null && unitType.length() > 0) {
+                        if (unitType != null && !unitType.isEmpty()) {
                             bandMetadataElement.setAttributeString("unit type", unitType);
                             productBand.setUnit(unitType);
                         }
 
                         Double noDataValue = null;
-                        Double[] noData = new Double[1];
-                        gdalBand.getNoDataValue(noData);
-                        if (noData[0] != null) {
-                            noDataValue = noData[0];
+                        gdalBand.getNoDataValue(pass1);
+                        if (pass1[0] != null) {
+                            noDataValue = pass1[0];
                             productBand.setNoDataValue(noDataValue);
+                            productBand.setNoDataValueUsed(true);
+                        } else if (GDALConstConstants.gdtFloat32().equals(gdalDataType)){
+                            // If NoData not present in the metadata, for float type assume it's NaN
+                            productBand.setNoDataValue(Float.NaN);
                             productBand.setNoDataValueUsed(true);
                         }
 
                         GDALMultiLevelSource multiLevelSource = new GDALMultiLevelSource(dataBufferType.dataBufferType, productBounds, tileSize, bandIndex,
-                                levelCount, geoCoding, noDataValue, defaultJAIReadTileSize, localFile);
+                                levelCount, geoCoding, noDataValue, readTileSize, localFile);
                         // compute the tile size of the image layout object based on the tile size from the tileOpImage used to read the data
                         ImageLayout imageLayout = multiLevelSource.buildMultiLevelImageLayout();
                         productBand.setSourceImage(new DefaultMultiLevelImage(multiLevelSource, imageLayout));
@@ -427,13 +437,17 @@ public class GDALProductReader extends AbstractProductReader {
                         }
 
                         product.addBand(productBand);
-                    }
-
-                    // add the mask
-                    String maskName = computeMaskName(gdalBand, bandName);
-                    if (maskName != null && (subsetDef == null || subsetDef.isNodeAccepted(maskName))) {
-                        Mask mask = Mask.BandMathsType.create(maskName, null, productBounds.width, productBounds.height, "'" + bandName + "'", Color.white, 0.5);
-                        product.addMask(mask);
+                        // add the mask
+                        String maskName = computeMaskName(gdalBand, bandName);
+                        if (maskName != null && (subsetDef == null || subsetDef.isNodeAccepted(maskName))) {
+                            String expression = maskName.startsWith("nodata_")
+                                                ? String.format("feq(%s.raw,%f)", bandName, product.getBand(bandName).getNoDataValue())
+                                                : bandName;
+                            Mask mask = Mask.BandMathsType.create(maskName, maskName, productBounds.width, productBounds.height,
+                                                                  expression, Color.white, 0.5);
+                            ProductUtils.copyGeoCoding(productBand, mask);
+                            product.addMask(mask);
+                        }
                     }
                 }
             }

@@ -856,6 +856,29 @@ public class ProductUtilsTest {
         assertEquals(150, newVB.getRasterHeight());
     }
 
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testCopySpectralBandProperties() {
+        final Band source = new Band("source", ProductData.TYPE_INT8, 2, 3);
+        final Band target = new Band("target", ProductData.TYPE_INT8, 2, 3);
+
+        source.setSpectralBandIndex(3);
+        source.setSpectralWavelength(4.f);
+        source.setSpectralBandwidth(5.f);
+        source.setAngularValue(6.f);
+        source.setAngularBandIndex(7);
+        source.setSolarFlux(8.f);
+
+        ProductUtils.copySpectralBandProperties(source, target);
+
+        assertEquals(3, target.getSpectralBandIndex());
+        assertEquals(4.f, target.getSpectralWavelength(), 1e-8);
+        assertEquals(5.f, target.getSpectralBandwidth(), 1e-8);
+        assertEquals(6.f, target.getAngularValue(), 1e-8);
+        assertEquals(7, target.getAngularBandIndex());
+        assertEquals(8.f, target.getSolarFlux(), 1e-8);
+    }
+
     private Band createTestBand(int dataType, Object data) {
         if (data.getClass().isArray()) {
             int length = Array.getLength(data);

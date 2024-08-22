@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.GlobalTestConfig;
@@ -219,7 +220,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
         final float feps = 1e-6F;
         final double deps = 1e-12;
 
-        float[] testDataFloat = new float[]{
+        float[] testDataFloat = {
                 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                 11, 21, 31, 41, 51, 61, 71, 81, 91, 101,
                 12, 22, 32, 42, 52, 62, 72, 82, 92, 102,
@@ -237,7 +238,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
             assertEquals(testDataFloat[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
         }
 
-        int[] testDataInt = new int[]{
+        int[] testDataInt = {
                 15, 25, 35, 45, 55, 65, 75, 85, 95, 105,
                 16, 26, 36, 46, 56, 66, 76, 86, 96, 106,
                 17, 27, 37, 47, 57, 67, 77, 87, 97, 107,
@@ -249,7 +250,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
             int x = i % 10;
             int y = i / 10;
             assertEquals(testDataInt[i], _rsBandZippFloat1005.getPixelInt(x, y));
-            assertEquals((float) testDataInt[i], _rsBandZippFloat1005.getPixelFloat(x, y), feps);
+            assertEquals(testDataInt[i], _rsBandZippFloat1005.getPixelFloat(x, y), feps);
             assertEquals(testDataInt[i], _rsBandZippFloat1005.getPixelDouble(x, y), deps);
         }
     }
@@ -273,6 +274,38 @@ public class BandTest extends AbstractRasterDataNodeTest {
         assertEquals(0.0F, _rsBand.getSpectralBandwidth(), 1e-6F);
         _rsBand.setSpectralBandwidth(1.3F);
         assertEquals(1.3F, _rsBand.getSpectralBandwidth(), 1e-6F);
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testAngularBandIndex() {
+        assertEquals(-1, _rsBand.getAngularBandIndex());
+        _rsBand.setAngularBandIndex(3);
+        assertEquals(3, _rsBand.getAngularBandIndex());
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testAngularValue() {
+        assertEquals(-999.F, _rsBand.getAngularValue(), 1e-6F);
+        _rsBand.setAngularValue(16.5F);
+        assertEquals(16.5F, _rsBand.getAngularValue(), 1e-6F);
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testDateBandIndex() {
+        assertEquals(-1, _rsBand.getDateBandIndex());
+        _rsBand.setDateBandIndex(4);
+        assertEquals(4, _rsBand.getDateBandIndex());
+    }
+
+    @Test
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testDateValue() {
+        assertNull(_rsBand.getDate());
+        _rsBand.setDate("tomorrow");
+        assertEquals("tomorrow", _rsBand.getDate());
     }
 
     @Test
@@ -489,14 +522,14 @@ public class BandTest extends AbstractRasterDataNodeTest {
 
     @Test
     public final void testReadAndWritePixels() throws IOException {
-        final int[] testInt8s = new int[]{3, -6, 9, -12, 15, -18};
-        final int[] testInt16s = new int[]{11, -22, 33, -44, 55, -66};
-        final int[] testInt32s = new int[]{111, -222, 333, -444, 555, -666};
-        final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
-        final int[] testUInt16s = new int[]{1001, 2002, 3003, 4004, 5005, 6006};
-        final int[] testUInt32s = new int[]{1111, 2222, 3333, 4444, 5555, 6666};
-        final float[] testFloat32s = new float[]{1.001f, 2.002f, 3.003f, 4.004f, 5.005f, 6.006f};
-        final double[] testFloat64s = new double[]{-15d, 200d, -30000d, 4440d, -5550d, -600000d};
+        final int[] testInt8s = {3, -6, 9, -12, 15, -18};
+        final int[] testInt16s = {11, -22, 33, -44, 55, -66};
+        final int[] testInt32s = {111, -222, 333, -444, 555, -666};
+        final int[] testUInt8s = {1, 2, 3, 4, 5, 6};
+        final int[] testUInt16s = {1001, 2002, 3003, 4004, 5005, 6006};
+        final int[] testUInt32s = {1111, 2222, 3333, 4444, 5555, 6666};
+        final float[] testFloat32s = {1.001f, 2.002f, 3.003f, 4.004f, 5.005f, 6.006f};
+        final double[] testFloat64s = {-15d, 200d, -30000d, 4440d, -5550d, -600000d};
 
         int[] trueInts = new int[6];
         float[] trueFloats = new float[6];
@@ -716,7 +749,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
 
         bandFloat32.setScalingFactor(0.2);
         bandFloat32.setScalingOffset(3);
-        final float[] testFloats = new float[]{3.5f, 4.5f, 5.5f, 6.5f, 7.5f, 8.5f};
+        final float[] testFloats = {3.5f, 4.5f, 5.5f, 6.5f, 7.5f, 8.5f};
         bandFloat32.writePixels(0, 0, 3, 2, testFloats, ProgressMonitor.NULL);
         bandFloat32.setScalingFactor(1);
         bandFloat32.setScalingOffset(0);
@@ -740,7 +773,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
 
         bandFloat64.setScalingFactor(0.2);
         bandFloat64.setScalingOffset(3);
-        final double[] testDoubles = new double[]{3.5, 4.5, 5.5, 6.5, 7.5, 8.5};
+        final double[] testDoubles = {3.5, 4.5, 5.5, 6.5, 7.5, 8.5};
         bandFloat64.writePixels(0, 0, 3, 2, testDoubles, ProgressMonitor.NULL);
         bandFloat64.setScalingFactor(1);
         bandFloat64.setScalingOffset(0);

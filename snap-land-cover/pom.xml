@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>11.0.0-SNAPSHOT</version>
+        <version>12.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-land-cover</artifactId>
@@ -35,6 +35,12 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-stac</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>uk.me.jstott</groupId>
             <artifactId>jcoord</artifactId>

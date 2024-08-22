@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
   ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>11.0.0-SNAPSHOT</version>
+    <version>12.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -51,7 +51,10 @@
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
-        <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/snap-engine-coverage/target/site/
+            jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <modules>
@@ -116,7 +119,17 @@
         <module>lib-gdal</module>
         <module>snap-test-utils</module>
         <module>snap-stac</module>
+        <module>snap-engine-coverage</module>
     </modules>
+
+    <profiles>
+        <profile>
+        <id>exclude-from-build</id>
+        <modules>
+            <module>snap-engine-coverage</module>
+        </modules>
+        </profile>
+    </profiles>
 
     <organization>
         <name>European Space Agency (ESA)</name>
@@ -296,12 +309,6 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>eu.esa.snap</groupId>
-                <artifactId>esa-snappy</artifactId>
-                <version>${esa-snappy.version}</version>
             </dependency>
 
             <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
@@ -608,18 +615,27 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.15.1</version>
+                <version>2.17.2</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.15.1</version>
+                <version>2.17.2</version>
             </dependency>
+
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.15.1</version>
+                <version>2.17.2</version>
+            </dependency>
+
+
+            <!-- JSON helper ############################################# -->
+            <dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>1.1.1</version>
             </dependency>
 
             <!-- Test Libraries ############################################# -->
@@ -851,13 +867,15 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.7.1</version>
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -869,13 +887,14 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.1</version>
                     <executions>
                         <execution>
                             <phase>verify</phase>
                             <goals>
-                                <goal>jar</goal>
+                                <goal>jar-no-fork</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -887,7 +906,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.2.5</version>
                     <configuration>
                         <!--
                              If enabled some assertions in GeoTools fail.
@@ -988,13 +1007,14 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>3.3.2</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.6.1</version>
                 </plugin>
 
                 <plugin>
@@ -1051,7 +1071,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.5.0</version>
                     <executions>
                         <execution>
                             <id>create-nbmSpecVersion</id>
@@ -1142,7 +1162,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
@@ -1165,7 +1185,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.3</version>
+                <version>0.8.12</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -1202,7 +1222,6 @@
         </plugins>
     </build>
 
-
     <reporting>
         <plugins>
             <plugin>
@@ -1235,7 +1254,6 @@
             <email>marco.peters@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
-                <role>Project Manager</role>
                 <role>Java Developer</role>
             </roles>
         </developer>
@@ -1272,6 +1290,7 @@
             <email>thomas.block@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
+                <role>Project Manager</role>
                 <role>Java Developer</role>
             </roles>
         </developer>

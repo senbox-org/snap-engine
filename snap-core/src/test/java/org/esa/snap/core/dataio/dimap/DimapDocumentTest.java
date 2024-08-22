@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.*;
@@ -57,7 +58,7 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCreateProduct_with_MapGeoCoding() {
+    public void testCreateProduct_with_MapGeoCoding() throws IOException {
         // preparation
         int geocodingType = MAP_GEOCODING;
         Product product = createProduct(geocodingType);
@@ -71,7 +72,7 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCreateProduct_with_TiePointGeoCoding() throws ParseException {
+    public void testCreateProduct_with_TiePointGeoCoding() throws ParseException, IOException {
         // preparation
         int geocodingType = TIE_POINT_GEOCODING;
         Product product = createProduct(geocodingType);
@@ -85,7 +86,8 @@ public class DimapDocumentTest {
     }
 
     @Test
-    public void testCanReadOldUtcFormat() {
+    @STTM("SNAP-3683,SNAP-3684")
+    public void testCanReadOldUtcFormat() throws IOException {
         // preparation
         int geocodingType = TIE_POINT_GEOCODING;
         final boolean oldUtcFormat = true;
@@ -181,7 +183,7 @@ public class DimapDocumentTest {
         }
     }
 
-    private Product createProductFromXML(String code) {
+    private Product createProductFromXML(String code) throws IOException {
         final Document dom = createDom(code);
         Product product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null);
         GeoCoding[] geocodings = DimapProductHelpers.createGeoCoding(dom, product);
@@ -806,6 +808,7 @@ public class DimapDocumentTest {
         pw.println("            <SOLAR_FLUX>" + 0.12f + "</SOLAR_FLUX>");
         pw.println("            <SPECTRAL_BAND_INDEX>0</SPECTRAL_BAND_INDEX>");
         pw.println("            <BAND_WAVELEN>" + 23.45f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
         pw.println("            <SCALING_OFFSET>0.0</SCALING_OFFSET>");
@@ -826,6 +829,7 @@ public class DimapDocumentTest {
         pw.println("            <SOLAR_FLUX>" + 0.23f + "</SOLAR_FLUX>");
         pw.println("            <SPECTRAL_BAND_INDEX>3</SPECTRAL_BAND_INDEX>");
         pw.println("            <BAND_WAVELEN>" + 243.56f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
         pw.println("            <SCALING_OFFSET>0.0</SCALING_OFFSET>");
@@ -843,6 +847,7 @@ public class DimapDocumentTest {
         pw.println("            <DATA_TYPE>int8</DATA_TYPE>");
         pw.println("            <SOLAR_FLUX>" + 0.0f + "</SOLAR_FLUX>");
         pw.println("            <BAND_WAVELEN>" + 0.0f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <FLAG_CODING_NAME>FlagCoding1</FLAG_CODING_NAME>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
@@ -861,6 +866,7 @@ public class DimapDocumentTest {
         pw.println("            <DATA_TYPE>int8</DATA_TYPE>");
         pw.println("            <SOLAR_FLUX>" + 0.0f + "</SOLAR_FLUX>");
         pw.println("            <BAND_WAVELEN>" + 0.0f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <FLAG_CODING_NAME>FlagCoding2</FLAG_CODING_NAME>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
@@ -879,6 +885,7 @@ public class DimapDocumentTest {
         pw.println("            <DATA_TYPE>uint16</DATA_TYPE>");
         pw.println("            <SOLAR_FLUX>" + 0.0f + "</SOLAR_FLUX>");
         pw.println("            <BAND_WAVELEN>" + 0.0f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <INDEX_CODING_NAME>IndexCoding</INDEX_CODING_NAME>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
@@ -897,6 +904,7 @@ public class DimapDocumentTest {
         pw.println("            <DATA_TYPE>float32</DATA_TYPE>");
         pw.println("            <SOLAR_FLUX>" + 0.0f + "</SOLAR_FLUX>");
         pw.println("            <BAND_WAVELEN>" + 0.0f + "</BAND_WAVELEN>");
+        pw.println("            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>");
         pw.println("            <BANDWIDTH>0.0</BANDWIDTH>");
         pw.println("            <SCALING_FACTOR>1.0</SCALING_FACTOR>");
         pw.println("            <SCALING_OFFSET>0.0</SCALING_OFFSET>");
