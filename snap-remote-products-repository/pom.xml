@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>11.0.0-SNAPSHOT</version>
+        <version>12.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-remote-products-repository</artifactId>
@@ -104,6 +104,22 @@
                     <groupId>commons-lang</groupId>
                     <artifactId>commons-lang</artifactId>
                 </exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-dataformat</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
             </exclusions>
         </dependency>
         <dependency>

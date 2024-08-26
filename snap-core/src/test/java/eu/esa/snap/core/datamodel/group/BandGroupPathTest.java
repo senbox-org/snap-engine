@@ -28,6 +28,19 @@ public class BandGroupPathTest {
     }
 
     @Test
+    @STTM("SNAP-3728")
+    public void testConstruction_bandNames() {
+        final String[] strings = {"TOA#acdom_443,bbp_443,kd_490,bbp_slope"};
+        final BandGroupingPath bandGroupingPath = new BandGroupingPath(strings);
+
+        assertTrue(bandGroupingPath.matchesGrouping("bbp_slope"));
+        assertTrue(bandGroupingPath.matchesGrouping("acdom_443"));
+
+        assertFalse(bandGroupingPath.matchesGrouping("Oa10_reflectance"));
+        assertFalse(bandGroupingPath.matchesGrouping("latitude"));
+    }
+
+    @Test
     @STTM("SNAP-3702")
     public void testContains() {
         final String[] strings = {"test"};
