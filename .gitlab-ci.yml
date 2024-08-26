@@ -83,7 +83,7 @@ macos:
   variables:
     # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
     JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
-    TESTDATA_ROOT: "/Users/otb/testData"
+    TESTDATA_ROOT: "/Users/csro/testData"
   needs: []
   script:
     - mvn clean package
