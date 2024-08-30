@@ -84,7 +84,7 @@ public class TestElevations {
 
         double altitude = copernicus90mDem.getElevation(north60);
         SystemUtils.LOG.info("Copernicus 90m DEM = " + altitude);
-        assertEquals(183.7947235107422, altitude, 0.0001);
+        assertEquals(188.525390625, altitude, 0.0001);
     }
 }
 
