@@ -456,7 +456,7 @@ public class ColorSchemeManager {
                             validEntry = false;
                         }
                     } else {
-                        validEntry = false;
+                        validEntry = true;
                     }
                 }
 
@@ -467,7 +467,7 @@ public class ColorSchemeManager {
                             validEntry = false;
                         }
                     } else {
-                        validEntry = false;
+                        validEntry = true;
                     }
                 }
 
