@@ -35,6 +35,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
@@ -50,6 +51,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
+import ucar.ma2.MAMath;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -451,8 +453,15 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
     }
 
-    static double[] readVarAsDoubleArray(Variable lonVar) throws IOException {
-        final Array lonArray = lonVar.read();
+    static double[] readVarAsDoubleArray(Variable variable) throws IOException {
+        Array lonArray = variable.read();
+
+        final double scaleFactor = ReaderUtils.getScalingFactor(variable);
+        final double offset = ReaderUtils.getAddOffset(variable);
+        if (ReaderUtils.mustScale(scaleFactor, offset)) {
+            final MAMath.ScaleOffset scaleOffset = new MAMath.ScaleOffset(scaleFactor, offset);
+            lonArray = MAMath.convert2Unpacked(lonArray, scaleOffset);
+        }
         return (double[]) lonArray.get1DJavaArray(DataType.DOUBLE);
     }
 }
