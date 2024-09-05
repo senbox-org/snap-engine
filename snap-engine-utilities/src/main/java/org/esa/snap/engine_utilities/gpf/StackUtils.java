@@ -139,7 +139,24 @@ public final class StackUtils {
             value.append(name);
             value.append(' ');
         }
-        elem.setAttributeString(AbstractMetadata.SLAVE_BANDS, value.toString().trim());
+
+        String slaveBands = value.toString().trim();
+        if (elem.containsAttribute(AbstractMetadata.SLAVE_BANDS)) {
+            final String savedSlaveBands = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS);
+            final String[] savedSlaveBandArray = savedSlaveBands.split(" ");
+            boolean allValid = true;
+            for (String slvBandName : savedSlaveBandArray) {
+                if (targetProduct.getBand(slvBandName) == null || slaveBands.contains(slvBandName)) {
+                    allValid = false;
+                    break;
+                }
+            }
+
+            if (allValid) {
+                slaveBands = savedSlaveBands + " " + slaveBands;
+            }
+        }
+        elem.setAttributeString(AbstractMetadata.SLAVE_BANDS, slaveBands);
     }
 
     public static String findOriginalSlaveProductName(final Product sourceProduct, final Band slvBand) {
