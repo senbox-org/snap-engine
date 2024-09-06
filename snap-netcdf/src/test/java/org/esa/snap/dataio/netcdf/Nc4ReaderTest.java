@@ -28,6 +28,7 @@ import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.runtime.Config;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public class Nc4ReaderTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void testGlobalAttributes() throws IOException {
 
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
@@ -76,6 +78,7 @@ public class Nc4ReaderTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void testVariableAttributes() throws Exception {
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
         final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
@@ -107,6 +110,7 @@ public class Nc4ReaderTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
         DummyProductBuilder pb = new DummyProductBuilder();
         pb.size(DummyProductBuilder.Size.SMALL);

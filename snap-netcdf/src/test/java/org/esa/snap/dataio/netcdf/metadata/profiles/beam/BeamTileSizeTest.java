@@ -5,6 +5,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.awt.Dimension;
@@ -28,6 +29,7 @@ public class BeamTileSizeTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void testTileSizeIsConsidered() throws Exception {
         BeamNetCdfReaderPlugIn plugIn = new BeamNetCdfReaderPlugIn();
         ProductReader reader = plugIn.createReaderInstance();

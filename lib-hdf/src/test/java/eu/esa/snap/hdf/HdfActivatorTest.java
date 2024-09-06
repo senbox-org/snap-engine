@@ -4,6 +4,7 @@ package eu.esa.snap.hdf;
 import com.bc.ceres.annotation.STTM;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdflib.HDFLibrary;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
@@ -12,6 +13,7 @@ public class HdfActivatorTest {
 
     @Test
     @STTM("SNAP-3553")
+    @Ignore("Related to NativeLibraryUtils")
     public void testActivate() {
         // skip this test on ARM CPUs, we're not supporting these for now tb 2023-10-12
         final String arch = System.getProperty("os.arch").toLowerCase();

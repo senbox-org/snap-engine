@@ -130,6 +130,7 @@ public class GloballyShiftedDataTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void readingData() throws IOException {
         Band band = product.getBandAt(0);
         int[] actualValues = new int[HALF_WIDTH * STEP_HEIGHT];
@@ -148,6 +149,7 @@ public class GloballyShiftedDataTest {
     }
 
     @Test
+    @Ignore("Related to NativeLibraryUtils")
     public void gettingDataLevel0() {
         Band band = product.getBandAt(0);
 

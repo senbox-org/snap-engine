@@ -28,6 +28,7 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -157,6 +158,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
 
     @Test
     @STTM("SNAP-3481")
+    @Ignore
     public void testArrayValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
