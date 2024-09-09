@@ -907,7 +907,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.5.0</version>
                     <configuration>
                         <!--
                              If enabled some assertions in GeoTools fail.
@@ -930,6 +930,10 @@
                         </systemPropertyVariables>
                         <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
+                        <argLine>--add-exports java.desktop/sun.awt.image=ALL-UNNAMED</argLine>
+                        <argLine>--add-exports java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED</argLine>
+                        <!--<argLine>&#45;&#45;add-opens java.base/java.net=ALL-UNNAMED</argLine>
+                        <argLine>&#45;&#45;add-opens java.base/java.security=ALL-UNNAMED</argLine>-->
                     </configuration>
                 </plugin>
 
@@ -1048,6 +1052,11 @@
                             <groupId>javax.help</groupId>
                             <artifactId>javahelp</artifactId>
                             <version>${javahelp.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>9.5</version>
                         </dependency>
                     </dependencies>
                     <configuration>

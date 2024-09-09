@@ -177,7 +177,9 @@ public class ServiceFinder {
                     String extension = FileUtils.getExtension(entry.toString());
                     if (".jar".compareToIgnoreCase(extension) == 0 || ".zip".compareToIgnoreCase(extension) == 0) {
                         try {
-                            try (FileSystem fs = FileSystems.newFileSystem(entry, (Map<String,?>)null)) {
+                            Map<String, String> env = new HashMap<>();
+                            env.put("create", "false");
+                            try (FileSystem fs = FileSystems.newFileSystem(entry, env)) {
                                 parseServiceRegistry(fs.getPath(servicesPath), modules);
                             }
                         } catch (IOException e) {
