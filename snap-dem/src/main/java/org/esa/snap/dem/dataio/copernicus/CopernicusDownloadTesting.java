@@ -1,5 +1,6 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
@@ -48,10 +49,12 @@ public class CopernicusDownloadTesting {
         CopernicusDownloader d = new CopernicusDownloader(folder);
 
         for (double[] coordinate : coordinates) {
-            long startTime = System.currentTimeMillis();
+
+            StopWatch watch = new StopWatch();
             d.downloadTiles(coordinate[0], coordinate[1], resolution);
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
+            watch.stop();
+
+            long duration = watch.getTimeDiff();
             downloadTimes.add(duration);
         }
 

@@ -1,7 +1,9 @@
 package org.esa.snap.dataio.getasse30;
 
 import org.esa.snap.core.dataop.dem.ElevationFile;
+import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.dataop.resamp.Resampling;
+import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
@@ -41,29 +43,30 @@ public class Getasse30DownloadTesting {
     public List<Long> getDownloadTimes(ArrayList<double[]> coordinates) throws Exception {
         List<Long> downloadTimes = new ArrayList<>();
 
-        // Der Descriptor und das Resampling müssen entsprechend deiner Anforderungen angepasst werden
         GETASSE30ElevationModelDescriptor descriptor = new GETASSE30ElevationModelDescriptor();
-        Resampling resampling = Resampling.BILINEAR_INTERPOLATION;  // Beispiel Resampling-Methode
+        Resampling resampling = Resampling.BILINEAR_INTERPOLATION;
 
         GETASSE30ElevationModel elevationModel = new GETASSE30ElevationModel(descriptor, resampling);
+
+        ElevationFile[][] elevationFiles = new ElevationFile[descriptor.getNumXTiles()][descriptor.getNumYTiles()];
 
         for (double[] coordinate : coordinates) {
             File folder = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
 
-            // Hier erstellst du die Kacheln für die jeweilige Koordinate
-            int x = (int) Math.floor((coordinate[0] + 180.0) / descriptor.getTileWidth());
-            int y = (int) Math.floor((coordinate[1] + 90.0) / descriptor.getTileHeight());
+            int x = (int) Math.floor((coordinate[0] + 180.0) / 360 * descriptor.getNumXTiles());
+            int y = (int) Math.floor((coordinate[1] + 90.0) / 360 * descriptor.getNumYTiles());
 
-            long startTime = System.currentTimeMillis();
-            System.out.println("\n\nStart: " + startTime);
-
-            // Die Methode createElevationFile wird verwendet, um die Datei herunterzuladen und zu speichern
-            ElevationFile[][] elevationFiles = new ElevationFile[descriptor.getNumXTiles()][descriptor.getNumYTiles()];
             elevationModel.createElevationFile(elevationFiles, x, y, folder);
 
-            long endTime = System.currentTimeMillis();
-            System.out.println("\n\nEnd: " + endTime);
-            long duration = endTime - startTime;
+            StopWatch watch = new StopWatch();
+            System.out.println("\n\nStart: " + watch.getStartTime());
+
+            // download will be triggered when fetching ElevationTile
+            ElevationTile tile = elevationFiles[x][descriptor.getNumYTiles() - 1 - y].getTile();
+            watch.stop();
+
+            System.out.println("\n\nEnd: " + watch.getEndTime());
+            long duration = watch.getTimeDiff();
             downloadTimes.add(duration);
             FileUtils.deleteTree(folder);
         }
