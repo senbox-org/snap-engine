@@ -45,7 +45,7 @@ public final class GDALLoader {
 
     private static final GDALLoader INSTANCE = new GDALLoader();
 
-    private static final String GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME = "org.esa.snap.NativeLibraryLoader";
+    public static final String GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME = "org.esa.snap.NativeLibraryLoader";
 
     private static final Logger logger = Logger.getLogger(GDALLoader.class.getName());
 
@@ -205,7 +205,7 @@ public final class GDALLoader {
      *
      * @throws IOException When IO error occurs
      */
-    private static void copyLoaderLibrary() throws IOException {
+    public static void copyLoaderLibrary() throws IOException {
         final Path loaderFilePath = GDALVersion.getLoaderLibraryFilePath();
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Copy the loader library file.");

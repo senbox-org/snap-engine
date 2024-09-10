@@ -28,7 +28,6 @@ public class CfTileSizeTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testTileSizeIsConsidered() throws Exception {
         CfNetCdfReaderPlugIn plugIn = new CfNetCdfReaderPlugIn();
         ProductReader reader = plugIn.createReaderInstance();

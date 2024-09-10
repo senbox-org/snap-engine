@@ -786,6 +786,17 @@
                 <version>1.2.25</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>21.0.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-fxml</artifactId>
+                <version>21.0.4</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -935,8 +946,6 @@
                             --add-opens java.desktop/javax.swing=ALL-UNNAMED
                             --add-opens java.base/java.security=ALL-UNNAMED
                             --add-exports java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED
-                            --module-path "C:\Program Files\Java\javafx-sdk-21.0.4\lib"
-                            --add-modules javafx.controls
                         </argLine>
                     </configuration>
                 </plugin>

@@ -29,7 +29,6 @@ public class BeamTileSizeTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testTileSizeIsConsidered() throws Exception {
         BeamNetCdfReaderPlugIn plugIn = new BeamNetCdfReaderPlugIn();
         ProductReader reader = plugIn.createReaderInstance();

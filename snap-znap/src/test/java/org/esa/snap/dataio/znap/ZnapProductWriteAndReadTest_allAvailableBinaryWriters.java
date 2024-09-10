@@ -92,7 +92,6 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testWriteAndRead_withBinaryWriter_ENVI() throws IOException {
         //preparation
         final Properties properties = new Properties();
@@ -137,7 +136,6 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testWriteAndRead_withBinaryWriter_GeoTIFF() throws IOException {
         //preparation
         final Properties properties = new Properties();
@@ -179,7 +177,6 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testWriteAndRead_withBinaryWriter_GeoTIFF_BigTIFF() throws IOException {
         //preparation
         final Properties properties = new Properties();
@@ -221,7 +218,6 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testWriteAndRead_withBinaryWriter_NetCDF4_CF() throws IOException {
         //preparation
         final Properties properties = new Properties();
