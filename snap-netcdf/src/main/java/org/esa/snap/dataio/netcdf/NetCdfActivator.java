@@ -2,17 +2,14 @@ package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.ModuleMetadata;
-import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.gdal.GDALLoader;
 import org.esa.snap.dataio.gdal.GDALLoaderClassLoader;
 import org.esa.snap.dataio.gdal.GDALVersion;
-import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.runtime.Activator;
 import ucar.nc2.jni.netcdf.Nc4Iosp;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,7 +25,7 @@ public class NetCdfActivator implements Activator {
 
     public static void activate() {
         if (!activated.getAndSet(true)) {
-            final Path auxdataDirectory = installResourceFIles();
+            final Path auxdataDirectory = installResourceFiles();
             if (auxdataDirectory == null){
                 // @todo 1 tb throw? Log! 2024-09-10
                 return;
@@ -54,7 +51,6 @@ public class NetCdfActivator implements Activator {
                 loaderMethod.invoke(null, jna_path.resolve("hdf5.dll"));
                 loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
                 loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
-                //loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
             } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                      IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -67,7 +63,7 @@ public class NetCdfActivator implements Activator {
         }
     }
 
-    private static Path installResourceFIles() {
+    private static Path installResourceFiles() {
         final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(NetCdfActivator.class).resolve("lib");
         final ModuleMetadata moduleMetadata = SystemUtils.loadModuleMetadata(NetCdfActivator.class);
 
