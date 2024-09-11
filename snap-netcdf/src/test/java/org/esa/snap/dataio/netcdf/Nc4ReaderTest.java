@@ -54,7 +54,6 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testGlobalAttributes() throws IOException {
 
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
@@ -78,7 +77,6 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testVariableAttributes() throws Exception {
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
         final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
@@ -110,7 +108,6 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
         DummyProductBuilder pb = new DummyProductBuilder();
         pb.size(DummyProductBuilder.Size.SMALL);

@@ -48,26 +48,22 @@ public class MaxStringAttributeLengthTest {
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testMaxStringGlobalAttributeLengthNC4() throws IOException {
         nc4Writable.addGlobalAttribute("longGlobalAttributeValue", createLongString(TOO_LONG));
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testMaxStringGlobalAttributeLengthNC3() throws IOException {
         nc3Writable.addGlobalAttribute("longGlobalAttributeValue", createLongString(TOO_LONG));
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testMaxStringVariableAttributeLengthNC4() throws IOException {
         NVariable variable = nc4Writable.addScalarVariable("metadataVariable", DataType.BYTE);
         variable.addAttribute("longVariableAttributeValue", createLongString(TOO_LONG));
     }
 
     @Test
-    @Ignore("Related to NativeLibraryUtils")
     public void testMaxStringVariableAttributeLengthNC3() throws IOException {
         Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
         NFileWriteable ncFile = NWritableFactory.create(tempFile.toString(),"netcdf3");
