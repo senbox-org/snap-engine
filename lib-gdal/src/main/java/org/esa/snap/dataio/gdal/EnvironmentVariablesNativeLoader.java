@@ -1,6 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
-import org.esa.snap.engine_utilities.file.FileHelper;
+import eu.esa.snap.core.lib.FileHelper;
 
 import java.io.File;
 import java.io.IOException;

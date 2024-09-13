@@ -17,11 +17,11 @@
  */
 package org.esa.snap.dataio.gdal;
 
+import eu.esa.snap.core.lib.FileHelper;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
-import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
 
 import java.io.IOException;

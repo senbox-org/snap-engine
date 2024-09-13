@@ -17,9 +17,9 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.core.runtime.Version;
+import eu.esa.snap.core.lib.FileHelper;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.runtime.Config;
 
 import java.io.File;
