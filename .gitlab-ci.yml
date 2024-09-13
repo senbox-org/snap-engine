@@ -45,7 +45,7 @@ variables:
     -Djava.awt.headless=true
     -Dnetbeans.verify.integrity=false
     -Denable.long.tests=true
-  RELEASE_REF: "/^v?[0-9]+\.[0-9]+\.[0-9]+(-RC[0-9]+)?$/"
+  RELEASE_REF: '/^v?[0-9]+\.[0-9]+\.[0-9]+(-RC[0-9]+)?$/'
 mvn-build:
   artifacts:
     paths:
