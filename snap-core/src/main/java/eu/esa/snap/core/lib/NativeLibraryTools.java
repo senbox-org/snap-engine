@@ -16,6 +16,7 @@ public class NativeLibraryTools {
 
     public static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
     public static final String NETCDF_NATIVE_LIBRARIES_ROOT = "netcdf_natives";
+    public static final String HDF_NATIVE_LIBRARIES_ROOT = "hdf_natives";
 
     static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
 
