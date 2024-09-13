@@ -38,52 +38,54 @@ public class NetCdfActivator implements Activator {
 
                 final URL loaderLibraryUrl = NativeLibraryTools.getLoaderLibraryFilePath(nativeLibraryRoot).toUri().toURL();
 
-                final NativeLibraryClassLoader nativeLibraryClassLoader = new NativeLibraryClassLoader(new URL[]{loaderLibraryUrl}, new Path[]{jna_path});
-                final Method loaderMethod = nativeLibraryClassLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);
+                try( NativeLibraryClassLoader nativeLibraryClassLoader = new NativeLibraryClassLoader(new URL[]{loaderLibraryUrl}, new Path[]{jna_path})) {
+                    final Method loaderMethod = nativeLibraryClassLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);
 
-                if (arch.equals("amd64")) {
-                    String sysName = System.getProperty("os.name").toLowerCase();
+                    switch (arch) {
+                        case "amd64" -> {
+                            String sysName = System.getProperty("os.name").toLowerCase();
 
-                    if (sysName.contains("windows")) {
-                        // the order of loading is important! tb 2024-09-10
-                        loaderMethod.invoke(null, jna_path.resolve("libcurl.dll"));
-                        loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
-                        loaderMethod.invoke(null, jna_path.resolve("hdf5.dll"));
-                        loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
-                        loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
+                            if (sysName.contains("windows")) {
+                                // windows
+                                // the order of loading is important! tb 2024-09-10
+                                loaderMethod.invoke(null, jna_path.resolve("libcurl.dll"));
+                                loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
+                                loaderMethod.invoke(null, jna_path.resolve("hdf5.dll"));
+                                loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
+                                loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
 
-                    } else {
-                        // linux
-                        // the order of loading is important! tb 2024-09-10
-                        loaderMethod.invoke(null, jna_path.resolve("libcurl.so.4"));
-                        loaderMethod.invoke(null, jna_path.resolve("libz.so.1"));
-                        loaderMethod.invoke(null, jna_path.resolve("libhdf5.so.9.0.0"));
-                        loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.so.9.0.0"));
-                        loaderMethod.invoke(null, jna_path.resolve("libnetcdf.so"));
+                            } else {
+                                // linux
+                                // the order of loading is important! tb 2024-09-10
+                                loaderMethod.invoke(null, jna_path.resolve("libcurl.so.4"));
+                                loaderMethod.invoke(null, jna_path.resolve("libz.so.1"));
+                                loaderMethod.invoke(null, jna_path.resolve("libhdf5.so.9.0.0"));
+                                loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.so.9.0.0"));
+                                loaderMethod.invoke(null, jna_path.resolve("libnetcdf.so"));
+                            }
+                        }
+                        case "x86_64" -> {
+                            // mac intel
+                            // the order of loading is important! tb 2024-09-10
+                            loaderMethod.invoke(null, jna_path.resolve("libapple_nghttp2.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libcurl.4.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libz.1.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5.200.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.200.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
+                        }
+                        case "aarch64" -> {
+                            // mac arm
+                            // the order of loading is important! tb 2024-09-10
+                            loaderMethod.invoke(null, jna_path.resolve("libzstd.1.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5.310.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.310.dylib"));
+                            loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
+                        }
+                        default -> throw new IllegalAccessException("Not known system!!");
                     }
-
-                } else if (arch.equals("x86_64")) {
-                    // mac intel
-                    // the order of loading is important! tb 2024-09-10
-                    loaderMethod.invoke(null, jna_path.resolve("libapple_nghttp2.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libcurl.4.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libz.1.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libhdf5.200.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.200.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
-
-                } else if (arch.equals("aarch64")) {
-                    // mac arm
-                    // the order of loading is important! tb 2024-09-10
-                    loaderMethod.invoke(null, jna_path.resolve("libzstd.1.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libhdf5.310.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.310.dylib"));
-                    loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
-
-                } else {
-                    throw new IllegalAccessException("Not known system!!");
                 }
             } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                      IllegalAccessException e) {

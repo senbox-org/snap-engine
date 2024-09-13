@@ -30,10 +30,21 @@ public class NetCdfActivatorTest {
 
     @Test
     @STTM("SNAP-3729")
-    public void testActivateForAmd64Windows() {
+    public void testActivateNativeLibraries() {
 
-        if (!this.osName.toLowerCase().contains("windows")) return;
-        String nativeLibrary = "netcdf.dll";
+        String nativeLibrary;
+        String lowercaseOSName = this.osName.toLowerCase();
+
+        if (lowercaseOSName.contains("windows")) {
+            nativeLibrary = "netcdf.dll";
+        } else if (lowercaseOSName.contains("linux")) {
+            nativeLibrary = "libnetcdf.so";
+        } else if (lowercaseOSName.contains("mac")) {
+            nativeLibrary = "libnetcdf.dylib";
+        } else {
+            fail("OS is not supported!");
+            return;
+        }
 
         try {
             // check if files are copied to install directory
@@ -41,7 +52,7 @@ public class NetCdfActivatorTest {
             NetCdfActivator.activate();
             assertTrue(Files.exists(expectedLib));
         } catch (Exception e) {
-            fail("Native libraries could not be copied to auxdata directory for AMD64 on Windows: " + e.getMessage());
+            fail("Native libraries could not be copied to auxdata directory: " + e.getMessage());
         }
 
         try {
@@ -51,79 +62,6 @@ public class NetCdfActivatorTest {
             fail("Native Library " + nativeLibrary + " could not be loaded: " + e.getMessage());
         }
     }
-
-    @Test
-    @STTM("SNAP-3729")
-    public void testActivateForAmd64Linux() {
-
-        if (!this.osName.toLowerCase().contains("linux")) return;
-        String nativeLibrary = "libcurl.so.4";
-
-        try {
-            // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
-            NetCdfActivator.activate();
-            assertTrue(Files.exists(expectedLib));
-        } catch (Exception e) {
-            fail("Native libraries could not be copied to auxdata directory for AMD64 on Windows: " + e.getMessage());
-        }
-
-        try {
-            // check native functionality
-            checkNativeFunctionality();
-        } catch (IOException e) {
-            fail("Native Library " + nativeLibrary + " could not be loaded: " + e.getMessage());
-        }
-    }
-
-    @Test
-    @STTM("SNAP-3729")
-    public void testActivateForAarch64MacOs() {
-
-        if (!this.osName.toLowerCase().contains("mac") && !this.arch.contains("aarch64")) return;
-        String nativeLibrary = "libzstd.1.dylib";
-
-        try {
-            // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
-            NetCdfActivator.activate();
-            assertTrue(Files.exists(expectedLib));
-        } catch (Exception e) {
-            fail("Native libraries could not be copied to auxdata directory for AMD64 on Windows: " + e.getMessage());
-        }
-
-        try {
-            // check native functionality
-            checkNativeFunctionality();
-        } catch (IOException e) {
-            fail("Native Library " + nativeLibrary + " could not be loaded: " + e.getMessage());
-        }
-    }
-
-    @Test
-    @STTM("SNAP-3729")
-    public void testActivateForX86_64MacOs() {
-
-        if (!this.osName.toLowerCase().contains("mac") && !this.arch.contains("x86_64")) return;
-        String nativeLibrary = "libzstd.1.dylib";
-
-        try {
-            // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
-            NetCdfActivator.activate();
-            assertTrue(Files.exists(expectedLib));
-        } catch (Exception e) {
-            fail("Native libraries could not be copied to auxdata directory for AMD64 on Windows: " + e.getMessage());
-        }
-
-        try {
-            // check native functionality
-            checkNativeFunctionality();
-        } catch (IOException e) {
-            fail("Native Library " + nativeLibrary + " could not be loaded: " + e.getMessage());
-        }
-    }
-
 
 
     public Path getExectedLibraryPath(String arch, String nativeLibrary) {
