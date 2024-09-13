@@ -3,14 +3,8 @@ package eu.esa.snap.hdf;
 
 import com.bc.ceres.annotation.STTM;
 import ncsa.hdf.hdf5lib.H5;
-import ncsa.hdf.hdflib.HDFException;
 import ncsa.hdf.hdflib.HDFLibrary;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import static org.junit.Assert.fail;
 

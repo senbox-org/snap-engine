@@ -3,7 +3,6 @@ package org.esa.snap.dataio.netcdf;
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.util.ModuleMetadata;
 import org.esa.snap.core.util.SystemUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
