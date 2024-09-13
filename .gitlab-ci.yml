@@ -5,6 +5,18 @@ include:
     ref: "3.11.1"
     file: "templates/gitlab-ci-maven.yml"
 
+stages:
+  - build
+  - test
+  - package-build
+  - package-test
+  - infra
+  - deploy
+  - acceptance
+  - publish
+  - infra-prod
+  - production
+
 # secret variables
 # (define the variables below in your GitLab group/project variables)
 # SONAR_TOKEN: SonarQube authentication [token](https://docs.sonarqube.org/latest/user-guide/user-token/) (depends on your authentication method)
