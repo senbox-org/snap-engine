@@ -33,9 +33,10 @@ public class NetCdfActivator implements Activator {
             final Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
 
             try {
-                NativeLibraryTools.copyLoaderLibrary(NativeLibraryTools.NETCDF_NATIVE_LIBRARIES_ROOT);
+                String nativeLibraryRoot = NativeLibraryTools.NETCDF_NATIVE_LIBRARIES_ROOT;
+                NativeLibraryTools.copyLoaderLibrary(nativeLibraryRoot);
 
-                final URL loaderLibraryUrl = NativeLibraryTools.getLoaderLibraryFilePath(NativeLibraryTools.NETCDF_NATIVE_LIBRARIES_ROOT) .toUri().toURL();
+                final URL loaderLibraryUrl = NativeLibraryTools.getLoaderLibraryFilePath(nativeLibraryRoot).toUri().toURL();
 
                 final NativeLibraryClassLoader nativeLibraryClassLoader = new NativeLibraryClassLoader(new URL[]{loaderLibraryUrl}, new Path[]{jna_path});
                 final Method loaderMethod = nativeLibraryClassLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);

@@ -15,34 +15,25 @@ import static org.junit.Assert.*;
 
 public class NetCdfActivatorTest {
 
-    String originalArch = System.getProperty("os.arch");
-    String originalOsName = System.getProperty("os.name");
+    String arch = System.getProperty("os.arch");
+    String osName = System.getProperty("os.name");
 
     @Before
     public void setUp() {
         NetCdfActivator.activated.set(false);
     }
 
-    @After
-    public void tearDown() {
-        System.setProperty("os.arch", originalArch);
-        System.setProperty("os.name", originalOsName);
-    }
-
     @Test
     @STTM("SNAP-3729")
     public void testActivateForAmd64Windows() {
 
-        if (!originalOsName.toLowerCase().contains("windows")) return;
+        if (!this.osName.toLowerCase().contains("windows")) return;
 
         String nativeLibrary = "netcdf.dll";
-        String arch = "amd64";
-        System.setProperty("os.arch", arch);
-        System.setProperty("os.name", "Windows");
 
         try {
             // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(arch, nativeLibrary);
+            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
             NetCdfActivator.activate();
             assertTrue(Files.exists(expectedLib));
 
@@ -57,16 +48,13 @@ public class NetCdfActivatorTest {
     @STTM("SNAP-3729")
     public void testActivateForAmd64Linux() {
 
-        if (!originalOsName.toLowerCase().contains("linux")) return;
+        if (!this.osName.toLowerCase().contains("linux")) return;
 
         String nativeLibrary = "libcurl.so.4";
-        String arch = "amd64";
-        System.setProperty("os.arch", arch);
-        System.setProperty("os.name", "Linux");
 
         try {
             // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(arch, nativeLibrary);
+            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
             assertTrue(Files.exists(expectedLib));
 
             // TODO belu: test if systen.load was successful
@@ -80,15 +68,13 @@ public class NetCdfActivatorTest {
     @STTM("SNAP-3729")
     public void testActivateForAarch64MacOs() {
 
-        if (!originalOsName.toLowerCase().contains("mac") && !originalArch.contains("aarch64")) return;
+        if (!this.osName.toLowerCase().contains("mac") && !this.arch.contains("aarch64")) return;
 
         String nativeLibrary = "libzstd.1.dylib";
-        String arch = "aarch64";
-        System.setProperty("os.arch", arch);
 
         try {
             // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(arch, nativeLibrary);
+            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
             assertTrue(Files.exists(expectedLib));
 
         // TODO belu: test if systen.load was successful
@@ -102,15 +88,13 @@ public class NetCdfActivatorTest {
     @STTM("SNAP-3729")
     public void testActivateForX86_64MacOs() {
 
-        if (!originalOsName.toLowerCase().contains("mac") && !originalArch.contains("x86_64")) return;
+        if (!this.osName.toLowerCase().contains("mac") && !this.arch.contains("x86_64")) return;
 
         String nativeLibrary = "libzstd.1.dylib";
-        String arch = "aarch64";
-        System.setProperty("os.arch", arch);
 
         try {
             // check if files are copied to install directory
-            Path expectedLib = getExectedLibraryPath(arch, nativeLibrary);
+            Path expectedLib = getExectedLibraryPath(this.arch, nativeLibrary);
             assertTrue(Files.exists(expectedLib));
 
             // TODO belu: test if systen.load was successful
