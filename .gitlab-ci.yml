@@ -1,133 +1,14 @@
 # included templates
 include:
-  # Maven template
-  - project: "to-be-continuous/maven"
-    ref: "3.11.1"
-    file: "templates/gitlab-ci-maven.yml"
+  - 'https://gitlab.com/senbox-org/snap-engine/raw/master/.gitlab-ci.yml'
 
-# secret variables
-# (define the variables below in your GitLab group/project variables)
-# SONAR_TOKEN: SonarQube authentication [token](https://docs.sonarqube.org/latest/user-guide/user-token/) (depends on your authentication method)
-# SONAR_LOGIN: SonarQube login (depends on your authentication method)
-# SONAR_PASSWORD: SonarQube password (depends on your authentication method)
-# MVN_SETTINGS_FILE: File variable at Group level. It is the Maven settings.xml file
-
-# variables
 variables:
   MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
-  MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
-  MAVEN_DEPLOY_SNAPSHOT_WITH_SLUG_ENABLED: "false"
-  BUILD_FOR_INSTALLER: "false"
-  MAVEN_DEPLOY_ENABLED: "true"
-  MAVEN_DEPLOY_ARGS: "deploy"
-  MVN_SEMREL_RELEASE_DISABLED: "true"
-  MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
-  SONAR_BASE_ARGS: |
-    sonar:sonar -Dsonar.projectKey=${CI_PROJECT_NAME}
-    -Dsonar.exclusions=${CI_PROJECT_NAME}-coverage
-    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
-  MAVEN_OPTS: >-
-    -Dhttps.protocols=TLSv1.2
-    -Dmaven.repo.local=${MAVEN_CFG_DIR}/repository
-    -Dorg.slf4j.simpleLogger.showDateTime=true
-    -Djava.awt.headless=true
-    -Dnetbeans.verify.integrity=false
-    -Denable.long.tests=true
-
-mvn-build:
-  artifacts:
-    paths:
-      - "${MAVEN_PROJECT_DIR}/**/target/*.jar"
-      - "${MAVEN_PROJECT_DIR}/**/target/classes"
-      - "${MAVEN_PROJECT_DIR}/**/target/*.nbm"
-      #- "${MAVEN_PROJECT_DIR}/**/target/site/jacoco/jacoco.csv"
-      - "${MAVEN_PROJECT_DIR}/**/target/site"
-      - "${MAVEN_PROJECT_DIR}/**/target/surefire-reports"
-      - "${MAVEN_PROJECT_DIR}/etc"
-      - "${MAVEN_PROJECT_DIR}/LICENSE.html"
-
-mvn-sonar:
-  variables:
-    MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
-  allow_failure: true
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-
-# Used to publish release on Github (only manual action & non blocking)
-mvn-release:
-  variables:
-    MAVEN_IMAGE: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
-  rules:
-    - when: manual
-      allow_failure: true
 
 windows:
-  stage: test
-  tags: [windows]
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    GIT_STRATEGY: clone
-    FF_ENABLE_JOB_CLEANUP: 'true'
-    FF_USE_WINDOWS_LEGACY_PROCESS_STRATEGY: 'false'
-    MAVEN_CFG_DIR: C:\\Windows\\System32\\config\\systemprofile\\.m2
     JAVA_HOME: C:\\Program Files\\Zulu\\zulu-11
-  allow_failure: false
-  needs: []
-  script:
-    - mvn clean package
 
 macos:
-  stage: test
-  tags: [mac]
-  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
-    # JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/liberica-jdk-11-full.jdk/Contents/Home 
-    TESTDATA_ROOT: "/Users/csro/testData"
-  needs: []
-  script:
-    - mvn clean package
-  # should be removed once macos pipeline will run on more recent version (actual is 10.14 an gdal-3-7-2)
-  allow_failure: true
-
-# Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
-.report-status:
-  image: curlimages/curl
-  variables:
-    URL: "https://api.github.com/repos/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/statuses/${CI_COMMIT_SHA}"
-    STATUS_NAME: snap-ci
-  script:
-    # For complete details on the GitHub API please see:
-    # https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
-    - |-
-      curl -X POST $URL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"state": "'$CI_JOB_NAME'", "context": "'$STATUS_NAME'", "target_url": "'$CI_PIPELINE_URL'", "description": "The build status"}'
-  environment:
-    name: reporting-github
-  dependencies: []
-
-pending:
-  stage: .pre
-  extends:
-    - .report-status
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-
-success:
-  stage: .post
-  extends:
-    - .report-status
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-  when: on_success
-
-failure:
-  stage: .post
-  extends:
-    - .report-status
-  rules:
-    - if: '$BUILD_FOR_INSTALLER == "false"'
-  when: on_failure
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/liberica-jdk-11-full.jdk/Contents/Home
