@@ -55,6 +55,7 @@
             ${project.basedir}/snap-engine-coverage/target/site/
             jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
+        <mockito.version>5.3.1</mockito.version>
     </properties>
 
     <modules>
@@ -643,7 +644,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.3.1</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
