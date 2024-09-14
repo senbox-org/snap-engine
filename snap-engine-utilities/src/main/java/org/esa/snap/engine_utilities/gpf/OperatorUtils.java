@@ -571,6 +571,11 @@ public final class OperatorUtils {
                 }
             }
 
+            double ratioW = sourceProduct.getSceneRasterWidth() / (double) targetProduct.getSceneRasterWidth();
+            double ratioH = sourceProduct.getSceneRasterHeight() / (double) targetProduct.getSceneRasterHeight();
+            int targetWidth = srcBand.getRasterWidth() / (int) ratioW;
+            int targetHeight = srcBand.getRasterHeight() / (int) ratioH;
+
             if (targetProduct.getBand(targetBandName) == null) {
                 int dataType = srcBand.getDataType();
                 if (outputFloat)
@@ -580,10 +585,7 @@ public final class OperatorUtils {
                 if (outputIntensity && (dataType == ProductData.TYPE_UINT8 || dataType == ProductData.TYPE_UINT16))
                     dataType = ProductData.TYPE_UINT32;
 
-                final Band targetBand = new Band(targetBandName,
-                        dataType,
-                        targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight());
+                final Band targetBand = new Band(targetBandName, dataType, targetWidth, targetHeight);
 
                 targetBand.setUnit(targetUnit);
                 targetBand.setDescription(srcBand.getDescription());
@@ -591,6 +593,11 @@ public final class OperatorUtils {
                 targetBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
 
                 targetProduct.addBand(targetBand);
+
+                if(srcBand.getGeoCoding() != null) {
+                    // copy band geocoding after target band added to target product
+                    ProductUtils.copyGeoCoding(srcBand, targetBand);
+                }
             }
         }
 
