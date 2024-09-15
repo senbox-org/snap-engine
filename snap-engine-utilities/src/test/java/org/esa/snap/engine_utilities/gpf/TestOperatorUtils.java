@@ -12,6 +12,7 @@ import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Test;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -125,5 +126,30 @@ public class TestOperatorUtils {
         when(sourceProduct.getSceneGeoCoding()).thenReturn(null);
 
         OperatorUtils.computeImageGeoBoundary(sourceProduct);
+    }
+
+    @Test
+    public void testGetTargetDimensions() {
+        Dimension dim;
+        dim = OperatorUtils.getTargetDimensions(
+                100, 100,
+                100, 100,
+                100, 100);
+        assertEquals(100, dim.width);
+        assertEquals(100, dim.height);
+
+        dim = OperatorUtils.getTargetDimensions(
+                100, 100,
+                200, 200,
+                100, 100);
+        assertEquals(200, dim.width);
+        assertEquals(200, dim.height);
+
+        dim = OperatorUtils.getTargetDimensions(
+                200, 200,
+                100, 100,
+                100, 100);
+        assertEquals(50, dim.width);
+        assertEquals(50, dim.height);
     }
 }
