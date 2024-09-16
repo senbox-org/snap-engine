@@ -92,8 +92,6 @@ public final class TerrainMaskOp extends Operator {
 
     private ElevationModel dem = null;
     private FilterWindow window;
-    private int sourceImageWidth = 0;
-    private int sourceImageHeight = 0;
     private boolean isElevationModelAvailable = false;
     private double demNoDataValue = 0; // no data value for DEM
 
@@ -116,8 +114,6 @@ public final class TerrainMaskOp extends Operator {
 
         try {
             window = new FilterWindow(windowSizeStr);
-            sourceImageWidth = sourceProduct.getSceneRasterWidth();
-            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
             createTargetProduct();
 
@@ -169,7 +165,8 @@ public final class TerrainMaskOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(),
                 sourceProduct.getProductType(),
-                sourceImageWidth, sourceImageHeight);
+                sourceProduct.getSceneRasterWidth(),
+                sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
 
@@ -203,7 +200,8 @@ public final class TerrainMaskOp extends Operator {
         }
 
         final Band targetBand = new Band(TERRAIN_MASK_NAME, ProductData.TYPE_INT8,
-                                         sourceImageWidth, sourceImageHeight);
+                                         sourceProduct.getSceneRasterWidth(),
+                                         sourceProduct.getSceneRasterHeight());
         targetBand.setUnit(Unit.CLASS);
         targetProduct.addBand(targetBand);
     }
@@ -266,10 +264,12 @@ public final class TerrainMaskOp extends Operator {
         try {
             final int windowSize = window.getWindowSize();
             final double[][] localDEM = new double[h + windowSize + 2][w + windowSize + 2];
-            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w + windowSize, h + windowSize);
+            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetBand.getGeoCoding(),
+                    x0, y0, w + windowSize, h + windowSize);
 
             final boolean valid = DEMFactory.getLocalDEM(
-                    dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, w + windowSize, h + windowSize, sourceProduct, true, localDEM);
+                    dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0,
+                    w + windowSize, h + windowSize, sourceProduct, true, localDEM);
 
             if (!valid) {
                 return;

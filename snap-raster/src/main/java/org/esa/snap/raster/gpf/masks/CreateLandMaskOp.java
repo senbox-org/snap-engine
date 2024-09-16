@@ -42,8 +42,6 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The CreateLandMask operator.
@@ -98,13 +96,6 @@ public class CreateLandMaskOp extends Operator {
             if (shorelineExtension == null) {
                 shorelineExtension = 0;
             }
-            boolean isMultiSizeProducts = sourceProduct.isMultiSize();
-            if(isMultiSizeProducts) {
-                throw new OperatorException("The multi-size source product is not supported."
-                +"Please, use resampling processor before. Or use the default graph 'Raster/Land Sea Mask For Multi-size Source.xml'"
-                +"in the graph builder.");
-            }
-
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -128,7 +119,7 @@ public class CreateLandMaskOp extends Operator {
                     bandNameList.add(band.getName());
                 }
             }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+            sourceBandNames = bandNameList.toArray(new String[0]);
         }
 
         final List<Band> sourceBandList = new ArrayList<>(sourceBandNames.length);
@@ -138,66 +129,82 @@ public class CreateLandMaskOp extends Operator {
                 sourceBandList.add(sourceBand);
             }
         }
-        final Band[] sourceBands = sourceBandList.toArray(new Band[sourceBandList.size()]);
-
+        final Band[] sourceBands = sourceBandList.toArray(new Band[0]);
 
         for (Band srcBand : sourceBands) {
 
             if (srcBand instanceof VirtualBand && copyVirtualBands) {
-                ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) srcBand, srcBand.getName());
+                Band trgBand = ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) srcBand, srcBand.getName());
+                if(srcBand.hasGeoCoding()) {
+                    ProductUtils.copyGeoCoding(srcBand, trgBand);
+                }
             } else if (geometry != null && !geometry.isEmpty()) {
                 String expression = "'" + geometry + "' ? '" + srcBand.getName() + ".raw' : " + srcBand.getNoDataValue();
                 if (invertGeometry) {
                     expression = '!' + expression;
                 }
-                Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
+                Band trgBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
 
                 VirtualBandOpImage.Builder builder = VirtualBandOpImage.builder(expression, sourceProduct)
                         .dataType(srcBand.getDataType())
                         .sourceSize(new Dimension(srcBand.getRasterWidth(), srcBand.getRasterHeight()));
                 VirtualBandOpImage virtualBandImage = builder.create();
 
-                targetBand.setSourceImage(virtualBandImage);
+                trgBand.setSourceImage(virtualBandImage);
+                if(srcBand.hasGeoCoding()) {
+                    ProductUtils.copyGeoCoding(srcBand, trgBand);
+                }
             } else {
-                ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
+                Band trgBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
+                if(srcBand.hasGeoCoding()) {
+                    ProductUtils.copyGeoCoding(srcBand, trgBand);
+                }
             }
         }
     }
 
     /**
-     * Called by the framework in order to compute the stack of tiles for the given target bands.
+     * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetTiles     The current tiles to be computed for each target band.
-     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in {@code targetRasters}).
-     * @param pm              A progress monitor which should be used to determine computation cancellation requests.
-     * @throws OperatorException if an error occurs during computation of the target rasters.
+     * @param targetBand The target band.
+     * @param targetTile The current tile associated with the target band to be computed.
+     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException If an error occurs during computation of the target raster.
      */
     @Override
-    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
         try {
             if (dem == null) {
                 createDEM();
             }
 
-            final TileData[] trgTiles = getTargetTiles(targetTiles, targetRectangle, sourceProduct);
-            final Tile targetTile = trgTiles[0].targetTile;
+            final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+            final Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle());
 
+            final Rectangle targetRectangle = targetTile.getRectangle();
             final int minX = targetRectangle.x;
             final int minY = targetRectangle.y;
             final int maxX = targetRectangle.x + targetRectangle.width;
             final int maxY = targetRectangle.y + targetRectangle.height;
             boolean valid;
 
-            final TileIndex srcTileIndex = new TileIndex(trgTiles[0].srcTile);
-            final TileIndex trgTileIndex = new TileIndex(trgTiles[0].targetTile);
-            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, minX, minY, maxX - minX, maxY - minY);
+            final TileIndex srcTileIndex = new TileIndex(srcTile);
+            final TileIndex trgTileIndex = new TileIndex(targetTile);
+            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetBand.getGeoCoding(),
+                    minX, minY, maxX - minX, maxY - minY);
+
+            ProductData tileDataBuffer = targetTile.getDataBuffer();
+            ProductData srcDataBuffer = srcTile.getDataBuffer();
+            double noDataValue = targetBand.getNoDataValue();
+            boolean isInt = tileDataBuffer instanceof ProductData.Int;
 
             final double demNoDataValue = dem.getDescriptor().getNoDataValue();
             final double[][] localDEM = new double[maxY - minY + 2][maxX - minX + 2];
             DEMFactory.getLocalDEM(
-                    dem, demNoDataValue, null, tileGeoRef, minX, minY, maxX - minX, maxY - minY, null, true, localDEM);
+                    dem, demNoDataValue, null, tileGeoRef, minX, minY, maxX - minX,
+                    maxY - minY, null, true, localDEM);
 
             for (int y = minY; y < maxY; ++y) {
                 srcTileIndex.calculateStride(y);
@@ -225,13 +232,10 @@ public class CreateLandMaskOp extends Operator {
 
                     if (valid) {
                         final int srcIndex = srcTileIndex.getIndex(x);
-                        for (TileData tileData : trgTiles) {
-                            if (tileData.isInt) {
-                                tileData.tileDataBuffer.setElemIntAt(trgIndex, tileData.srcDataBuffer.getElemIntAt(srcIndex));
-                            } else {
-                                tileData.tileDataBuffer.setElemDoubleAt(trgIndex,
-                                                                        tileData.srcDataBuffer.getElemDoubleAt(srcIndex));
-                            }
+                        if (isInt) {
+                            tileDataBuffer.setElemIntAt(trgIndex, srcDataBuffer.getElemIntAt(srcIndex));
+                        } else {
+                            tileDataBuffer.setElemDoubleAt(trgIndex, srcDataBuffer.getElemDoubleAt(srcIndex));
                         }
                     } else {
                         if (shorelineExtension > 0) {
@@ -241,21 +245,17 @@ public class CreateLandMaskOp extends Operator {
                             for (int ey = eMinY; ey < eMaxY; ++ey) {
                                 for (int ex = eMinX; ex < eMaxX; ++ex) {
                                     int eIndex = targetTile.getDataBufferIndex(ex, ey);
-                                    if (trgTiles[0].tileDataBuffer.getElemDoubleAt(eIndex) != trgTiles[0].noDataValue) {
-                                        for (TileData tileData : trgTiles) {
-                                            if (tileData.isInt) {
-                                                tileData.tileDataBuffer.setElemIntAt(eIndex, (int) tileData.noDataValue);
-                                            } else {
-                                                tileData.tileDataBuffer.setElemDoubleAt(eIndex, tileData.noDataValue);
-                                            }
+                                    if (tileDataBuffer.getElemDoubleAt(eIndex) != noDataValue) {
+                                        if (isInt) {
+                                            tileDataBuffer.setElemIntAt(eIndex, (int) noDataValue);
+                                        } else {
+                                            tileDataBuffer.setElemDoubleAt(eIndex, noDataValue);
                                         }
                                     }
                                 }
                             }
                         } else {
-                            for (TileData tileData : trgTiles) {
-                                tileData.tileDataBuffer.setElemDoubleAt(trgIndex, tileData.noDataValue);
-                            }
+                            tileDataBuffer.setElemDoubleAt(trgIndex, noDataValue);
                         }
                     }
                 }
@@ -275,38 +275,6 @@ public class CreateLandMaskOp extends Operator {
             dem = DEMFactory.createElevationModel("SRTM 3Sec", ResamplingFactory.NEAREST_NEIGHBOUR_NAME);
         } else {
             dem = DEMFactory.createElevationModel("ACE2_5Min", ResamplingFactory.NEAREST_NEIGHBOUR_NAME);
-        }
-    }
-
-    private TileData[] getTargetTiles(final Map<Band, Tile> targetTiles, final Rectangle targetRectangle,
-                                      final Product srcProduct) {
-        final List<TileData> trgTileList = new ArrayList<>();
-        final Set<Band> keySet = targetTiles.keySet();
-        for (Band targetBand : keySet) {
-
-            trgTileList.add(new TileData(targetBand,
-                                         targetTiles.get(targetBand),
-                                         getSourceTile(srcProduct.getBand(targetBand.getName()), targetRectangle)));
-        }
-        return trgTileList.toArray(new TileData[trgTileList.size()]);
-    }
-
-    private static class TileData {
-
-        final Tile targetTile;
-        final Tile srcTile;
-        final ProductData tileDataBuffer;
-        final ProductData srcDataBuffer;
-        final double noDataValue;
-        final boolean isInt;
-
-        TileData(final Band targetBand, final Tile targetTile, final Tile srcTile) {
-            this.targetTile = targetTile;
-            this.srcTile = srcTile;
-            tileDataBuffer = targetTile.getDataBuffer();
-            srcDataBuffer = srcTile.getDataBuffer();
-            noDataValue = targetBand.getNoDataValue();
-            isInt = tileDataBuffer instanceof ProductData.Int;
         }
     }
 
