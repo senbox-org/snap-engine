@@ -593,7 +593,7 @@ public final class OperatorUtils {
 
                 targetProduct.addBand(targetBand);
 
-                if(srcBand.getGeoCoding() != null) {
+                if(srcBand.hasGeoCoding()) {
                     // copy band geocoding after target band added to target product
                     ProductUtils.copyGeoCoding(srcBand, targetBand);
                 }
