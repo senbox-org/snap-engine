@@ -393,6 +393,15 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     }
 
     /**
+     * Check if raster has its own geocoding.
+     *
+     * @return true if raster has its own geocoding.
+     */
+    public boolean hasGeoCoding() {
+        return geoCoding != null;
+    }
+
+    /**
      * Returns the geo-coding of this {@link RasterDataNode}.
      *
      * @return the geo-coding, or {@code null} if not available.
