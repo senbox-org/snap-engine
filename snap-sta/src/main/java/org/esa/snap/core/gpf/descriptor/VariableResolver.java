@@ -18,7 +18,7 @@ public abstract class VariableResolver {
     VariableResolver nextResolver;
     protected ToolAdapterOperatorDescriptor descriptor;
 
-    static VariableResolver newInstance(ToolAdapterOperatorDescriptor descriptor) {
+    public static VariableResolver newInstance(ToolAdapterOperatorDescriptor descriptor) {
         if (!resolverMap.containsKey(descriptor)) {
             VariableResolver simpleResolver = new SimpleVariableResolver(descriptor);
             VariableResolver systemPathResolver = new SystemPathVariableResolver(descriptor);
