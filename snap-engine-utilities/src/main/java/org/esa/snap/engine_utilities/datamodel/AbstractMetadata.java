@@ -397,7 +397,7 @@ public final class AbstractMetadata {
                 bandMetadataList.add(child);
             }
         }
-        return bandMetadataList.toArray(new MetadataElement[bandMetadataList.size()]);
+        return bandMetadataList.toArray(new MetadataElement[0]);
     }
 
     /**
@@ -563,7 +563,7 @@ public final class AbstractMetadata {
             try {
                 final int dotPos = timeStr.lastIndexOf(".");
                 if (dotPos > 0) {
-                    String fractionString = timeStr.substring(dotPos + 1, timeStr.length());
+                    String fractionString = timeStr.substring(dotPos + 1);
                     //fix some ERS times
                     fractionString = fractionString.replaceAll("-", "");
                     String newTimeStr = timeStr.substring(0, dotPos) + fractionString;
@@ -584,13 +584,12 @@ public final class AbstractMetadata {
                 try {
                     return ProductData.UTC.parse(newTimeStr, format);
                 } catch (Throwable e) {
-                    ProductData.UTC time = ProductData.UTC.parse(newTimeStr, format);
-                    return time;
+                    return ProductData.UTC.parse(newTimeStr, format);
                 }
             }
             return ProductData.UTC.parse(timeStr, format);
         } catch (Throwable e) {
-            System.out.println("UTC parse error:"+ timeStr +":"+ e.toString());
+            System.out.println("UTC parse error:"+ timeStr +":"+ e);
             return NO_METADATA_UTC;
         }
     }
@@ -710,36 +709,6 @@ public final class AbstractMetadata {
             targetRoot.addElement(targetSlaveMetadataRoot);
         }
         return targetSlaveMetadataRoot;
-    }
-
-    /**
-     * Band metadata element within AbstractedMetadata
-     *
-     * @param root     abstracted metadata root
-     * @param bandName the name of the band
-     * @param create   if null
-     * @return MetadataElement of band
-     */
-    @Deprecated
-    public static MetadataElement getBandAbsMetadata(final MetadataElement root, final String bandName,
-                                                     final boolean create) {
-        final String bandElemName = "Band_" + bandName;
-        MetadataElement bandElem = root.getElement(bandElemName);
-        if (bandElem == null) {
-            // check real band
-            if (bandName.startsWith("Intensity")) {
-                String realBandName = bandName.replace("Intensity_", "i_");
-                bandElem = root.getElement("Band_" + realBandName);
-            } else if (bandName.startsWith("Phase")) {
-                String realBandName = bandName.replace("Phase_", "i_");
-                bandElem = root.getElement("Band_" + realBandName);
-            }
-            if (bandElem == null && create) {
-                bandElem = new MetadataElement(bandElemName);
-                root.addElement(bandElem);
-            }
-        }
-        return bandElem;
     }
 
     /**
