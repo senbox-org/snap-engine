@@ -12,13 +12,11 @@ import java.util.logging.Logger;
 public class NativeLibraryTools {
 
     public static final String NATIVE_LOADER_LIBRARY_JAR = "eu.esa.snap.core.lib.NativeLibraryLoader";
-    private static final String LOADER_LIBRARY_FILE = "NativeLibraryLoader.jar";
+    public static final String LOADER_LIBRARY_FILE = "NativeLibraryLoader.jar";
 
     public static final String GDAL_NATIVE_LIBRARIES_ROOT = "gdal";
     public static final String NETCDF_NATIVE_LIBRARIES_ROOT = "netcdf_natives";
     public static final String HDF_NATIVE_LIBRARIES_ROOT = "hdf_natives";
-
-    static final String GDAL_NATIVE_LIBRARIES_SRC = "auxdata/gdal";
 
     private static final Logger logger = Logger.getLogger(NativeLibraryTools.class.getName());
 

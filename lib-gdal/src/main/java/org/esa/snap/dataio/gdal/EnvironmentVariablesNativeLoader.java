@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import eu.esa.snap.core.lib.FileHelper;
+import eu.esa.snap.core.lib.NativeLibraryTools;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,8 @@ public class EnvironmentVariablesNativeLoader {
      * @return the environment variables native library root directory path for install this version
      */
     public static Path getEnvironmentVariablesFilePath() {
-        return GDALVersion.getNativeLibrariesRootFolderPath().resolve(OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName());
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        return NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot).resolve(OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName());
     }
 
     /**

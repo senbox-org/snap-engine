@@ -28,7 +28,7 @@ public class NativeLibraryClassLoader extends URLClassLoader {
      * @param libname The native library name
      * @return the absolute path for native library
      */
-    protected String findLibrary(String libname) {
+    public String findLibrary(String libname) {
         for (Path nativeLibraryPath : nativeLibraryPaths) {
             if (nativeLibraryPath.getFileName().toString().equals(System.mapLibraryName(libname))) {
                 return nativeLibraryPath.toAbsolutePath().toString();

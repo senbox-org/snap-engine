@@ -18,6 +18,7 @@ package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.core.runtime.Version;
 import eu.esa.snap.core.lib.FileHelper;
+import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
@@ -328,7 +329,8 @@ class GDALInstaller {
      * @throws IOException When IO error occurs
      */
     static void copyDistribution(GDALVersion gdalVersion) throws IOException {
-        final Path gdalNativeLibrariesFolderPath = GDALVersion.getNativeLibrariesRootFolderPath();
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        final Path gdalNativeLibrariesFolderPath = NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot);
         logger.log(Level.FINE, "Copy the GDAL distribution to folder '" + gdalNativeLibrariesFolderPath + "'.");
         final String moduleVersion = fetchCurrentModuleSpecificationVersion();
 

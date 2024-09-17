@@ -25,7 +25,7 @@ public class NetCdfActivator implements Activator {
         if (!activated.getAndSet(true)) {
             final Path auxdataDirectory = installResourceFiles();
             if (auxdataDirectory == null){
-                // @todo 1 tb throw? Log! 2024-09-10
+                SystemUtils.LOG.severe("NetCDF configuration error: failed to retrieve auxdata path");
                 return;
             }
 
