@@ -61,9 +61,6 @@ public class HdfActivator implements Activator {
             SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
             System.setProperty(HDFLibrary.HDFPATH_PROPERTY_KEY, jna_path.resolve(hdf4Library).toString());
             System.setProperty(H5.H5PATH_PROPERTY_KEY, jna_path.resolve(hdf5Library).toString());
-
-            HDFLibrary.loadH4Lib();
-            H5.loadH5Lib();
         }
     }
 
