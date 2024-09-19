@@ -23,6 +23,7 @@ import org.apache.velocity.runtime.parser.ParseException;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.esa.snap.core.gpf.descriptor.SystemVariable;
 import org.esa.snap.core.gpf.descriptor.ToolAdapterOperatorDescriptor;
+import org.esa.snap.core.gpf.descriptor.VariableResolver;
 import org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
@@ -250,6 +251,7 @@ public abstract class TemplateEngine<C> {
                     if (variableValue == null) {
                         variableValue = "";
                     }
+                    variableValue = VariableResolver.newInstance(operatorDescriptor).resolveString(variableValue);
                     veloEngine.addProperty(variable.getKey(), variableValue);
                     veloContext.put(variable.getKey(), variableValue);
                 }
