@@ -90,9 +90,10 @@ public final class GDALLoader {
      */
     private void initGDAL() {
         if (isNotInitialised()) {
+            DirectoryLocker gdalDirectoryLocker = null;
             try {
                 this.gdalVersion = GDALVersion.getGDALVersion();
-                DirectoryLocker gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
+                gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
                 while (!gdalDirectoryLocker.tryLockDirectory());
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
                 this.gdalVersionLoader = new GDALLoaderClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
@@ -101,10 +102,13 @@ public final class GDALLoader {
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
                 postGDALInit();
-                gdalDirectoryLocker.unlockDirectory();
                 logger.log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "Failed to initialize GDAL native drivers. GDAL readers and writers were disabled." + t.getMessage());
+            }finally {
+                if(gdalDirectoryLocker != null) {
+                    gdalDirectoryLocker.unlockDirectory();
+                }
             }
         }
     }
