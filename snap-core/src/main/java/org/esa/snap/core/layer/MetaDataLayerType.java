@@ -221,7 +221,7 @@ public class MetaDataLayerType extends LayerType {
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_LABEL = "FILE_META Show All *";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_TOOLTIP = "Display all metadata keys (does NOT include all processing control params)";
     public static final String PROPERTY_MARGIN_METADATA_SHOW_ALL_ALIAS = PROPERTY_MARGIN_ROOT_ALIAS + "MetadataShowAll";
-    public static final boolean PROPERTY_MARGIN_METADATA_SHOW_ALL_DEFAULT = false;
+    public static final boolean PROPERTY_MARGIN_METADATA_SHOW_ALL_DEFAULT = true;
     public static final Class PROPERTY_MARGIN_METADATA_SHOW_ALL_TYPE = Boolean.class;
 
     public static final String PROPERTY_MARGIN_METADATA_PROCESS_CONTROL_SHOW_ALL_KEY = PROPERTY_MARGIN_ROOT_KEY + ".metadata.process.control.show.all";
