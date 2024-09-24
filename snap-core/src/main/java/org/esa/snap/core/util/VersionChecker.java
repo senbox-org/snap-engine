@@ -76,6 +76,10 @@ public class VersionChecker {
         return CHECK.valueOf(intervalName);
     }
 
+    public String getCheckIntervalString() {
+        return  preferences.get(VersionChecker.PK_CHECK_INTERVAL, CHECK.WEEKLY.name());
+    }
+
     public LocalDateTime getDateTimeOfLastCheck() {
         String dateText = preferences.get(VersionChecker.PK_LAST_DATE, null);
         return dateText != null ? LocalDateTime.parse(dateText, DATE_FORMATTER) : null;
