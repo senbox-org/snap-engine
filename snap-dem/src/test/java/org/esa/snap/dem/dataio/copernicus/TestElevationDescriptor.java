@@ -3,7 +3,8 @@ package org.esa.snap.dem.dataio.copernicus;
 import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModelDescriptor;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
 import org.junit.Test;
-import org.locationtech.jts.util.Assert;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class TestElevationDescriptor {
@@ -13,7 +14,7 @@ public class TestElevationDescriptor {
 
         Copernicus90mElevationModelDescriptor descriptor = new Copernicus90mElevationModelDescriptor();
 
-        Assert.equals(descriptor.getName(), "Copernicus 90m Global DEM");
+        assertEquals(descriptor.getName(), "Copernicus 90m Global DEM");
 
         assert descriptor.getNoDataValue() == 0;
         assert descriptor.getRasterWidth() == 1200;
@@ -31,7 +32,7 @@ public class TestElevationDescriptor {
 
         Copernicus30mElevationModelDescriptor descriptor = new Copernicus30mElevationModelDescriptor();
 
-        Assert.equals(descriptor.getName(), "Copernicus 30m Global DEM");
+        assertEquals(descriptor.getName(), "Copernicus 30m Global DEM");
 
         assert descriptor.getNoDataValue() == 0;
         assert descriptor.getRasterWidth() == 3600;
