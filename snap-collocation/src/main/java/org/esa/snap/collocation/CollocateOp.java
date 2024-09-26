@@ -367,6 +367,7 @@ public class CollocateOp extends Operator {
         copyMasks(referenceProduct, renameReferenceComponents, referenceComponentPattern, originalMasterNames, masterRasters);
 
         String[] collocationFlagsBandNames = new String[secondaryProducts.length];
+        String[] collocationFlagsBandDescription = new String[secondaryProducts.length];
         collocationFlagBands = new Band[secondaryProducts.length];
         if (secondaryProducts.length == 1) {
             int collocationCount = 0;
@@ -375,13 +376,16 @@ public class CollocateOp extends Operator {
                 ++collocationCount;
                 collocationFlagsBandNames[0] = "collocationFlags" + collocationCount;
             }
+            collocationFlagsBandDescription[0] =  collocationFlagsBandNames[0];
         } else {
             for (int i = 0; i < secondaryProducts.length; i++) {
                 int collocationCount = 0;
-                collocationFlagsBandNames[i] = String.format("collocationFlags_%s", secondaryProducts[i].getName());
+                 collocationFlagsBandNames[i] = secondaryComponentPattern.replace(SOURCE_NAME_REFERENCE, "collocationFlags").replace(SECONDARY_NUMBER_ID_REFERENCE, String.valueOf(i));
+                collocationFlagsBandDescription[i] = String.format("collocationFlags_%s", secondaryProducts[i].getName());
                 while (targetProduct.containsBand(collocationFlagsBandNames[i])) {
                     ++collocationCount;
-                    collocationFlagsBandNames[i] = String.format("collocationFlags_%s", secondaryProducts[i].getName()) + collocationCount;
+                    collocationFlagsBandNames[i] = secondaryComponentPattern.replace(SOURCE_NAME_REFERENCE, "collocationFlags").replace(SECONDARY_NUMBER_ID_REFERENCE, i + "_" + collocationCount);
+                    collocationFlagsBandDescription[i] = String.format("collocationFlags_%s", secondaryProducts[i].getName()) + collocationCount;
                 }
             }
         }
@@ -417,12 +421,14 @@ public class CollocateOp extends Operator {
             //add PRESENT flag
             if (secondaryProducts.length == 1) {
                 collocationFlagBands[i] = targetProduct.addBand(collocationFlagsBandNames[i], ProductData.TYPE_INT8);
+                collocationFlagBands[i].setDescription(collocationFlagsBandDescription[i]);
                 FlagCoding collocationFlagCoding = new FlagCoding(collocationFlagsBandNames[i]);
                 collocationFlagCoding.addFlag("SECONDARY_PRESENT", 1, "Data for the secondary is present.");
                 collocationFlagBands[i].setSampleCoding(collocationFlagCoding);
                 targetProduct.getFlagCodingGroup().add(collocationFlagCoding);
             } else {
                 collocationFlagBands[i] = targetProduct.addBand(collocationFlagsBandNames[i], ProductData.TYPE_INT8);
+                collocationFlagBands[i].setDescription(collocationFlagsBandDescription[i]);
                 FlagCoding collocationFlagCoding = new FlagCoding(collocationFlagsBandNames[i]);
                 collocationFlagCoding.addFlag(String.format("SECONDARY_%d_PRESENT", i), 1, "Data for the secondary is present.");
                 collocationFlagBands[i].setSampleCoding(collocationFlagCoding);
