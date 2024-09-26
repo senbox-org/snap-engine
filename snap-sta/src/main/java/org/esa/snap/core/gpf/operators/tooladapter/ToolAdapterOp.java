@@ -180,34 +180,45 @@ public class ToolAdapterOp extends Operator {
     }
 
     /**
-     * Initialise and run the defined tool.
-     * <p>
-     * This method will block until the tool finishes its execution.
-     * </p>
+     * Initialise the defined tool.
      *
-     * @throws OperatorException
+     * @throws OperatorException when validation error occurs
      */
     @Override
     public void initialize() throws OperatorException {
+        if (descriptor == null) {
+            descriptor = ((ToolAdapterOperatorDescriptor) getSpi().getOperatorDescriptor());
+        }
+        if (errorMessages != null) {
+            errorMessages.clear();
+        }
+        validateDescriptor();
+        if (!isStopped) {
+            beforeExecute();
+        }
+        setTargetProduct(new Product("STA empty product", "unknown", 0, 0));
+        isInitialised = true;
+    }
+
+    /**
+     * Executes the operator.
+     *
+     * @param pm A progress monitor to be notified for long-running tasks.
+     * @throws OperatorException If an error occurs during computation of the target raster.
+     */
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        if (this.progressMonitor == null) {
+            this.progressMonitor = SubProgressMonitor.create(pm, 1);
+        }
+        if (this.consumer == null) {
+            this.consumer = new DefaultOutputConsumer(descriptor.getProgressPattern(), descriptor.getErrorPattern(), descriptor.getStepPattern(), this.progressMonitor);
+            this.consumer.setLogger(getLogger());
+        }
         Date currentTime = new Date();
         int ret = -1;
         try {
-            if (descriptor == null) {
-                descriptor = ((ToolAdapterOperatorDescriptor) getSpi().getOperatorDescriptor());
-            }
             if (this.progressMonitor != null) {
                 this.progressMonitor.beginTask("Executing " + this.descriptor.getName(), 100);
-            }
-            if (this.consumer == null) {
-                this.consumer = new DefaultOutputConsumer(descriptor.getProgressPattern(), descriptor.getErrorPattern(), descriptor.getStepPattern(), this.progressMonitor);
-                this.consumer.setLogger(getLogger());
-            }
-            if (errorMessages != null) {
-                errorMessages.clear();
-            }
-            validateDescriptor();
-            if (!isStopped) {
-                beforeExecute();
             }
             if (!isStopped) {
                 if ((ret = execute()) != 0) {
@@ -221,9 +232,8 @@ public class ToolAdapterOp extends Operator {
         } finally {
             try {
                 if (!wasCancelled) {
-                    isInitialised = (postExecute() == 0);
-                } else {
-                    isInitialised = true;
+                    ret = postExecute();
+                    this.consumer.consumeOutput(String.format("Load the result of the tool's execution exited with value %d", ret));
                 }
             } finally {
                 if (this.progressMonitor != null) {
@@ -239,7 +249,6 @@ public class ToolAdapterOp extends Operator {
             }
         }
     }
-
     public List<String> getExecutionOutput() {
         return this.consumer.getProcessOutput();
     }
