@@ -28,8 +28,8 @@ public class HdfActivator implements Activator {
             final String arch = System.getProperty("os.arch").toLowerCase();
             final Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
 
-            String hdf4Library;
-            String hdf5Library;
+            String hdf4Library = null;
+            String hdf5Library = null;
 
             try {
                 String nativeLibraryRoot = NativeLibraryTools.HDF_NATIVE_LIBRARIES_ROOT;
@@ -50,17 +50,17 @@ public class HdfActivator implements Activator {
                     // mac intel
                     hdf4Library = "libjhdf.jnilib";
                     hdf5Library = "libjhdf5.jnilib";
-                } else {
-                    throw new IllegalAccessException("Not known system!!");
                 }
 
-            } catch (IOException | IllegalAccessException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
-            System.setProperty(HDFLibrary.HDFPATH_PROPERTY_KEY, jna_path.resolve(hdf4Library).toString());
-            System.setProperty(H5.H5PATH_PROPERTY_KEY, jna_path.resolve(hdf5Library).toString());
+            if (hdf4Library != null || hdf5Library != null) {
+                SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
+                System.setProperty(HDFLibrary.HDFPATH_PROPERTY_KEY, jna_path.resolve(hdf4Library).toString());
+                System.setProperty(H5.H5PATH_PROPERTY_KEY, jna_path.resolve(hdf5Library).toString());
+            }
         }
     }
 
