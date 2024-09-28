@@ -349,8 +349,7 @@ public class RemoteRepositoriesManager {
             }
             boolean required = param.isRequired();
             if (!required) {
-                if (param.getName().equals(CommonParameterNames.PLATFORM) || param.getName().equals(CommonParameterNames.START_DATE)
-                        || param.getName().equals(CommonParameterNames.END_DATE) || param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+                if (param.getName().equals(CommonParameterNames.PLATFORM)) {
 
                     required = true;
                 }
