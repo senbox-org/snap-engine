@@ -26,11 +26,11 @@ import java.util.Set;
  */
 public final class RepositoriesCredentialsPersistence {
 
-    public static final byte VISIBLE_PRODUCTS_PER_PAGE = 20;
+    public static final byte VISIBLE_PRODUCTS_PER_PAGE = 10;
 
     public static final boolean UNCOMPRESSED_DOWNLOADED_PRODUCTS = false;
 
-    public static final boolean DOWNLOAD_ALL_PAGES = true;
+    public static final boolean DOWNLOAD_ALL_PAGES = false;
 
     /**
      * The pattern for remote repository.
