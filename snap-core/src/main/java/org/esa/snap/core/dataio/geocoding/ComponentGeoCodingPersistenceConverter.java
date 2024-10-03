@@ -24,11 +24,7 @@ import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.dataio.persistence.Container;
-import org.esa.snap.core.dataio.persistence.HistoricalDecoder;
-import org.esa.snap.core.dataio.persistence.Item;
-import org.esa.snap.core.dataio.persistence.PersistenceConverter;
-import org.esa.snap.core.dataio.persistence.Property;
+import org.esa.snap.core.dataio.persistence.*;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -86,6 +82,10 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
         final String lonVarName = container.getProperty(NAME_LON_VARIABLE_NAME).getValueString();
         final String latVarName = container.getProperty(NAME_LAT_VARIABLE_NAME).getValueString();
         final String resolutionKmStr = container.getProperty(NAME_RASTER_RESOLUTION_KM).getValueString();
+        final String offsetXStr = container.getProperty(NAME_OFFSET_X).getValueString();
+        final String offsetYStr = container.getProperty(NAME_OFFSET_Y).getValueString();
+        final String subsamplingXStr = container.getProperty(NAME_SUBSAMPLING_X).getValueString();
+        final String subsamplingYStr = container.getProperty(NAME_SUBSAMPLING_Y).getValueString();
 
         final boolean forwardInvalid = forwardKey == null;
         final boolean inverseInvalid = inverseKey == null;
@@ -94,6 +94,10 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
         final boolean lonVarNameInvalid = lonVarName == null;
         final boolean latVarNameInvalid = latVarName == null;
         final boolean resolutionKmInvalid = resolutionKmStr == null;
+        final boolean offsetXInvalid = offsetXStr == null;
+        final boolean offsetYInvalid = offsetYStr == null;
+        final boolean subsamplingXInvalid = subsamplingXStr == null;
+        final boolean subsamplingYInvalid = subsamplingYStr == null;
 
         if (forwardInvalid) {
             SystemUtils.LOG.warning("Property with name '" + NAME_FORWARD_CODING_KEY + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
@@ -116,14 +120,24 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
         if (resolutionKmInvalid) {
             SystemUtils.LOG.warning("Property with name '" + NAME_RASTER_RESOLUTION_KM + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
-
-        Double resolutionInKm = null;
-        try {
-            resolutionInKm = Double.parseDouble(resolutionKmStr);
-        } catch (NumberFormatException e) {
-            SystemUtils.LOG.warning(e.getMessage());
-            SystemUtils.LOG.warning("The value '" + resolutionKmStr + "' of property '" + NAME_RASTER_RESOLUTION_KM + "' cannot be parsed to double.");
+        if (offsetXInvalid) {
+            SystemUtils.LOG.warning("Property with name '" + NAME_OFFSET_X + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
         }
+        if (offsetYInvalid) {
+            SystemUtils.LOG.warning("Property with name '" + NAME_OFFSET_Y + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
+        }
+        if (subsamplingXInvalid) {
+            SystemUtils.LOG.warning("Property with name '" + NAME_SUBSAMPLING_X + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
+        }
+        if (subsamplingYInvalid) {
+            SystemUtils.LOG.warning("Property with name '" + NAME_SUBSAMPLING_Y + "' expected in container item '" + NAME_COMPONENT_GEO_CODING + "'.");
+        }
+
+        Double resolutionInKm = parseToDouble(resolutionKmStr, NAME_RASTER_RESOLUTION_KM);
+        Double offsetX = parseToDouble(offsetXStr, NAME_OFFSET_X);
+        Double offsetY = parseToDouble(offsetYStr, NAME_OFFSET_Y);
+        Double subsamplingX = parseToDouble(subsamplingXStr, NAME_SUBSAMPLING_X);
+        Double subsamplingY = parseToDouble(subsamplingYStr, NAME_SUBSAMPLING_Y);
 
         boolean invalidValueGeoChecks = false;
         try {
@@ -145,15 +159,19 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
         final String msg_unable_to_create = "Unable to create " + NAME_COMPONENT_GEO_CODING + ".";
 
         if (forwardInvalid
-            || inverseInvalid
-            || geoChecksInvalid
-            || lonVarNameInvalid
-            || latVarNameInvalid
-            || resolutionKmInvalid
-            || resolutionInKm == null
-            || geoChecksName == null
-            || invalidValueGeoChecks
-            || geoCRS == null) {
+                || inverseInvalid
+                || geoChecksInvalid
+                || lonVarNameInvalid
+                || latVarNameInvalid
+                || resolutionKmInvalid
+                || resolutionInKm == null
+                || subsamplingX == null
+                || subsamplingY == null
+                || offsetX == null
+                || offsetY == null
+                || geoChecksName == null
+                || invalidValueGeoChecks
+                || geoCRS == null) {
             SystemUtils.LOG.warning(msg_unable_to_create);
             return null;
         }
@@ -198,14 +216,9 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
                 dataMap.put(latRaster, latitudes);
             }
 
-            final double offsetX = lonTPG.getOffsetX();
-            final double offsetY = lonTPG.getOffsetY();
-            final double subsamplingX = lonTPG.getSubSamplingX();
-            final double subsamplingY = lonTPG.getSubSamplingY();
-
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, gridWidth, gridHeight,
-                                      sceneWidth, sceneHeight, resolutionInKm,
-                                      offsetX, offsetY, subsamplingX, subsamplingY);
+                    sceneWidth, sceneHeight, resolutionInKm,
+                    offsetX, offsetY, subsamplingX, subsamplingY);
         } else {
             final int rasterWidth = lonRaster.getRasterWidth();
             final int rasterHeight = lonRaster.getRasterHeight();
@@ -229,7 +242,7 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
             }
 
             geoRaster = new GeoRaster(longitudes, latitudes, lonVarName, latVarName, rasterWidth, rasterHeight,
-                                      resolutionInKm);
+                    resolutionInKm);
         }
 
         final Preferences snapPreferences = Config.instance("snap").preferences();
@@ -249,6 +262,16 @@ public class ComponentGeoCodingPersistenceConverter extends PersistenceConverter
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+    private static Double parseToDouble(String properyValueString, String propertyName) {
+        try {
+            return Double.parseDouble(properyValueString);
+        } catch (NumberFormatException e) {
+            SystemUtils.LOG.warning(e.getMessage());
+            SystemUtils.LOG.warning("The value '" + properyValueString + "' of property '" + propertyName + "' cannot be parsed to double.");
+        }
+        return null;
     }
 
     @Override

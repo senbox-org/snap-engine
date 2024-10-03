@@ -112,7 +112,7 @@ public class ComponentGeoCodingPersistableTest {
     public void testToAndFromXML_withTiePointGrids() {
         final boolean bilinear = true;
         final boolean antimeridian = true;
-        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian);
+        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian, 0.5, 0.5, 5, 5);
         assertThat(initialGeocoding.isCrossingMeridianAt180(), is(true));
 
         final Element xmlFromObject = persistable.createXmlFromObject(initialGeocoding);
