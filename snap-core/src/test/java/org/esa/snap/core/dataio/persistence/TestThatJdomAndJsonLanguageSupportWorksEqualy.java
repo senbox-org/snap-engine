@@ -28,7 +28,6 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -158,7 +157,6 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
 
     @Test
     @STTM("SNAP-3481")
-    @Ignore
     public void testArrayValueProperties() throws JsonProcessingException {
         //preparation
         final List<Item> items1 = Arrays.asList(
@@ -184,7 +182,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
                 "<pStrings>\"A\", \"[\", \",\", \"b\"</pStrings>",
                 "<pNumArr>16.2, -2.478344E-15, null, Infinity, -Infinity, NaN, 1234567890123456</pNumArr>",
                 "<pDoubles>16.2, -2.478344E-15, null, Infinity, -Infinity, NaN, 1.234567890123456E15</pDoubles>",
-                "<pFloats>6.2, -4.78344E-16, null, Infinity, -Infinity, NaN, 1.23456795E15</pFloats>",
+                "<pFloats>6.2, -4.78344E-16, null, Infinity, -Infinity, NaN, 1.234568E15</pFloats>",
                 "<pLongs>9223372036854775807, null, 1, 2, 3, 4</pLongs>",
                 "<pInts>2147483647, null, 1, 2, 3, 4</pInts>",
                 "<pShorts>32767, null, 1, 2, 3, 4</pShorts>",
@@ -196,7 +194,7 @@ public class TestThatJdomAndJsonLanguageSupportWorksEqualy {
                 "\"pStrings\" : [ \"A\", \"[\", \",\", \"b\" ]",
                 "\"pNumArr\" : [ 16.2, -2.478344E-15, null, \"Infinity\", \"-Infinity\", \"NaN\", 1234567890123456 ]",
                 "\"pDoubles\" : [ 16.2, -2.478344E-15, null, \"Infinity\", \"-Infinity\", \"NaN\", 1.234567890123456E15 ]",
-                "\"pFloats\" : [ 6.2, -4.78344E-16, null, \"Infinity\", \"-Infinity\", \"NaN\", 1.23456795E15 ]",
+                "\"pFloats\" : [ 6.2, -4.78344E-16, null, \"Infinity\", \"-Infinity\", \"NaN\", 1.234568E15 ]",
                 "\"pLongs\" : [ 9223372036854775807, null, 1, 2, 3, 4 ]",
                 "\"pInts\" : [ 2147483647, null, 1, 2, 3, 4 ]",
                 "\"pShorts\" : [ 32767, null, 1, 2, 3, 4 ]",
