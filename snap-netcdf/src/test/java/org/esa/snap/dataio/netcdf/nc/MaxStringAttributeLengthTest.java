@@ -23,6 +23,13 @@ public class MaxStringAttributeLengthTest {
         NetCdfActivator.activate();
     }
 
+    @AfterClass
+    public static void afterClass() {
+        // This ensures that the classloader is garbage collected and thus the
+        // netcdf native libs are unloaded again tb 2024-10-28
+        System.gc();
+    }
+
     private static final int TOO_LONG = N4Variable.MAX_ATTRIBUTE_LENGTH + 10;
     private NFileWriteable nc4Writable;
     private NFileWriteable nc3Writable;
