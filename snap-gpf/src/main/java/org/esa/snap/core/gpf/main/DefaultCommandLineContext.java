@@ -16,11 +16,11 @@
 
 package org.esa.snap.core.gpf.main;
 
+import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
-import com.bc.ceres.core.PrintWriterProgressMonitor;
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
@@ -29,7 +29,12 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.GraphProcessingObserver;
 import org.esa.snap.core.gpf.graph.GraphProcessor;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.GeometrySubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.converters.JtsGeometryConverter;
+import org.esa.snap.core.util.converters.RectangleConverter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,15 +53,39 @@ class DefaultCommandLineContext implements CommandLineContext {
 
     @Override
     public Product readProduct(String productFilepath) throws IOException {
-        final File input = new File(productFilepath);
+        return readProduct(productFilepath, null);
+    }
+
+    @Override
+    public Product readProduct(String productFilePath, Map<String, String> readParams) throws IOException {
+        final File input = new File(productFilePath);
         if (!input.exists()) {
-            throw new OperatorException("'" + productFilepath + "' file didn't exist");
+            throw new OperatorException("'" + productFilePath + "' file didn't exist");
         }
         final ProductReader productReader = ProductIO.getProductReaderForInput(input);
         if (productReader == null) {
-            throw new OperatorException("No product reader found for '" + productFilepath + "'");
+            throw new OperatorException("No product reader found for '" + productFilePath + "'");
         }
-        Product product = productReader.readProductNodes(input, null);
+        ProductSubsetDef subsetDef = null;
+        if (readParams != null && (readParams.containsKey("pixelRegion") || readParams.containsKey("geometryRegion"))) {
+            subsetDef = new ProductSubsetDef();
+            AbstractSubsetRegion subsetRegion = null;
+            if (readParams.containsKey("geometryRegion")) {
+                try {
+                    subsetRegion = new GeometrySubsetRegion(new JtsGeometryConverter().parse(readParams.get("geometryRegion")), 0);
+                } catch (ConversionException e) {
+                    throw new IOException(e);
+                }
+            } else if (readParams.containsKey("pixelRegion")) {
+                try {
+                    subsetRegion = new PixelSubsetRegion(new RectangleConverter().parse(readParams.get("pixelRegion")), 0);
+                } catch (ConversionException e) {
+                    throw new IOException(e);
+                }
+            }
+            subsetDef.setSubsetRegion(subsetRegion);
+        }
+        Product product = productReader.readProductNodes(input, subsetDef);
         if (product.getProductReader() == null) {
             product.setProductReader(productReader);
         }

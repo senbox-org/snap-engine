@@ -1,0 +1,205 @@
+{
+  "stac_version": "1.0.0",
+  "keywords": ["earth observation", "satellite", "optical"],
+  "bbox": [2.412227351503804, 49.06489181518555, 2.4015735946881747, 49.05774186786852],
+  "description": "K3_20210211121924_46627_01051368_L1G",
+  "type": "Feature",
+  "title": "SKYWATCH_K3_MS_20210211T1219_TC_Tile_2_1_PrGfBz",
+  "assets": {},
+  "links": [],
+  "geometry": {
+    "coordinates": [[[2.4015735946881747, 49.06489181518555], [2.412132788552852, 49.0649451862682], [2.4122176710028698, 49.05774815755598], [2.4016603982716194, 49.05769478647333], [2.4015735946881747, 49.06489181518555]]],
+    "type": "Polygon"
+  },
+  "id": "SKYWATCH_K3_MS_20210211T1219_TC_Tile_2_1_PrGfBz",
+  "stac_extensions": ["eo", "view", "sat", "proj"],
+  "properties": {
+    "datetime": "2021-02-11T12:19:33.448931Z",
+    "mission": "Kompsat-3",
+    "metadata": {
+    },
+    "proj:shape": [1100, 1142],
+    "start_datetime": "2021-02-11T12:19:33.448931Z",
+    "end_datetime": "2021-02-11T12:19:34.310066Z",
+    "sat:orbit_state": "ascending",
+    "eo:bands": [{
+      "full_width_half_max": 0.0,
+      "center_wavelength": 0.0,
+      "name": "blue",
+      "data_type": "uint16",
+      "nodata": 0.0,
+      "common_name": "blue"
+    }, {
+      "full_width_half_max": 0.0,
+      "center_wavelength": 0.0,
+      "name": "green",
+      "data_type": "uint16",
+      "nodata": 0.0,
+      "common_name": "green"
+    }, {
+      "full_width_half_max": 0.0,
+      "center_wavelength": 0.0,
+      "name": "red",
+      "data_type": "uint16",
+      "nodata": 0.0,
+      "common_name": "red"
+    }, {
+      "full_width_half_max": 0.0,
+      "center_wavelength": 0.0,
+      "name": "near-infrared",
+      "data_type": "uint16",
+      "nodata": 0.0,
+      "common_name": "nir"
+    }, {
+      "full_width_half_max": 0.0,
+      "center_wavelength": 0.0,
+      "name": "panchromatic",
+      "data_type": "uint16",
+      "nodata": 0.0,
+      "common_name": "pan"
+    }
+    ],
+    "snap:product_type": "MS",
+    "instrument_mode": "Strip",
+    "snap": {
+      "snap:geocoding": {
+        "horizontal_datum_name": "WGS-84",
+        "tpg_lat_name": "latitude",
+        "tpg_lon_name": "longitude",
+        "snap:geocoding_class": "TiePointGeoCoding",
+        "ellipsoid": {
+          "ellipsoid_maj_axis": 6378137.0,
+          "ellipsoid_min_axis": 6356752.3,
+          "ellipsoid_name": "WGS-84"
+        }
+      },
+      "snap:tie_point_grids": [{
+        "nrows": 2,
+        "data": [72.91766, 72.91766, 72.91766, 72.91766, 72.91766, 72.91766],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "view_azimuth",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [59.638317, 59.638317, 59.638317, 59.638317, 59.638317, 59.638317],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "view_elevation",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [30.361683, 30.361683, 30.361683, 30.361683, 30.361683, 30.361683],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "view_zenith",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [27.132128, 27.132128, 27.132128, 27.132128, 27.132128, 27.132128],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "off_nadir",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [189.34581, 189.34581, 189.34581, 189.34581, 189.34581, 189.34581],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "sun_azimuth",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [25.757168, 25.757168, 25.757168, 25.757168, 25.757168, 25.757168],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "sun_elevation",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 2,
+        "data": [64.242836, 64.242836, 64.242836, 64.242836, 64.242836, 64.242836],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 1546.0,
+        "step_x": 1502.0,
+        "tie_point_grid_name": "sun_zenith",
+        "offset_x": -950.0,
+        "ncols": 3,
+        "offset_y": -404.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 11,
+        "data": [49.06489, 49.064896, 49.064903, 49.06491, 49.064915, 49.06492, 49.064926, 49.06493, 49.064934, 49.06494, 49.064945, 49.06417, 49.06418, 49.064182, 49.06419, 49.064198, 49.0642, 49.064205, 49.064213, 49.064217, 49.06422, 49.064228, 49.063454, 49.063457, 49.063465, 49.063473, 49.063477, 49.06348, 49.063488, 49.06349, 49.063496, 49.063503, 49.063507, 49.062733, 49.06274, 49.062748, 49.06275, 49.06276, 49.062763, 49.062767, 49.062775, 49.06278, 49.062782, 49.06279, 49.062016, 49.06202, 49.062027, 49.062035, 49.06204, 49.062046, 49.06205, 49.062054, 49.06206, 49.062065, 49.06207, 49.0613, 49.061302, 49.061306, 49.061314, 49.06132, 49.061325, 49.06133, 49.061337, 49.06134, 49.061344, 49.06135, 49.060577, 49.06058, 49.06059, 49.060593, 49.0606, 49.060604, 49.06061, 49.060616, 49.060623, 49.060627, 49.06063, 49.05986, 49.059864, 49.059868, 49.059875, 49.05988, 49.059887, 49.05989, 49.0599, 49.059902, 49.05991, 49.059914, 49.05914, 49.059143, 49.05915, 49.059155, 49.059162, 49.059166, 49.059174, 49.059177, 49.059185, 49.05919, 49.059193, 49.058422, 49.058426, 49.05843, 49.058437, 49.05844, 49.05845, 49.058453, 49.05846, 49.058464, 49.05847, 49.058475, 49.0577, 49.05771, 49.057713, 49.057716, 49.057724, 49.057728, 49.057735, 49.057743, 49.057747, 49.05775, 49.057755],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 114.0,
+        "step_x": 110.0,
+        "tie_point_grid_name": "latitude",
+        "offset_x": 0.0,
+        "ncols": 11,
+        "offset_y": 0.0,
+        "discontinuity": 0,
+        "physical_unit": "deg"
+      }, {
+        "nrows": 11,
+        "data": [2.4015737, 2.4026306, 2.4036872, 2.4047441, 2.405801, 2.406858, 2.4079149, 2.4089718, 2.4100287, 2.4110856, 2.4121423, 2.4015822, 2.4026392, 2.403696, 2.4047527, 2.4058096, 2.4068666, 2.4079235, 2.4089804, 2.4100373, 2.4110942, 2.4121509, 2.401591, 2.4026477, 2.4037046, 2.4047613, 2.4058182, 2.4068751, 2.407932, 2.4089887, 2.4100456, 2.4111025, 2.4121594, 2.4015996, 2.4026563, 2.4037132, 2.40477, 2.4058268, 2.4068837, 2.4079404, 2.4089973, 2.4100542, 2.4111109, 2.4121678, 2.4016082, 2.4026651, 2.4037218, 2.4047785, 2.4058354, 2.406892, 2.407949, 2.4090059, 2.4100626, 2.4111195, 2.4121761, 2.4016168, 2.4026737, 2.4037304, 2.404787, 2.405844, 2.4069006, 2.4079576, 2.4090142, 2.4100711, 2.411128, 2.4121847, 2.4016254, 2.4026823, 2.403739, 2.404796, 2.4058526, 2.4069092, 2.4079661, 2.4090228, 2.4100797, 2.4111364, 2.4121933, 2.401634, 2.402691, 2.4037476, 2.4048045, 2.4058611, 2.406918, 2.4079747, 2.4090314, 2.4100883, 2.411145, 2.4122016, 2.4016428, 2.4026995, 2.4037561, 2.404813, 2.4058697, 2.4069264, 2.4079833, 2.40904, 2.4100966, 2.4111536, 2.4122102, 2.4016514, 2.402708, 2.403765, 2.4048216, 2.4058783, 2.406935, 2.4079916, 2.4090486, 2.4101052, 2.411162, 2.4122186, 2.4016602, 2.4027169, 2.4037735, 2.4048302, 2.405887, 2.4069436, 2.4080002, 2.409057, 2.4101138, 2.4111705, 2.4122272],
+        "tie_point_description": null,
+        "data_type": "float32",
+        "step_y": 114.0,
+        "step_x": 110.0,
+        "tie_point_grid_name": "longitude",
+        "offset_x": 0.0,
+        "ncols": 11,
+        "offset_y": 0.0,
+        "discontinuity": 180,
+        "physical_unit": "deg"
+      }
+      ],
+      "snap:masks": []
+    },
+    "metadata_version": "2.0.0"
+  },
+  "providers": [{
+    "role": "processor",
+    "name": "SkyWatch",
+    "url": "https://www.skywatch.com"
+  }
+  ]
+}

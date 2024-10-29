@@ -571,6 +571,10 @@ public final class OperatorUtils {
                 }
             }
 
+            Dimension targetDim = getTargetDimensions(sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(),
+                    targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight(),
+                    srcBand.getRasterWidth(), srcBand.getRasterHeight());
+
             if (targetProduct.getBand(targetBandName) == null) {
                 int dataType = srcBand.getDataType();
                 if (outputFloat)
@@ -580,10 +584,7 @@ public final class OperatorUtils {
                 if (outputIntensity && (dataType == ProductData.TYPE_UINT8 || dataType == ProductData.TYPE_UINT16))
                     dataType = ProductData.TYPE_UINT32;
 
-                final Band targetBand = new Band(targetBandName,
-                        dataType,
-                        targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight());
+                final Band targetBand = new Band(targetBandName, dataType, targetDim.width, targetDim.height);
 
                 targetBand.setUnit(targetUnit);
                 targetBand.setDescription(srcBand.getDescription());
@@ -591,12 +592,27 @@ public final class OperatorUtils {
                 targetBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
 
                 targetProduct.addBand(targetBand);
+
+                if(srcBand.hasGeoCoding()) {
+                    // copy band geocoding after target band added to target product
+                    ProductUtils.copyGeoCoding(srcBand, targetBand);
+                }
             }
         }
 
         if(targetProduct.getNumBands() == 0) {
             throw new OperatorException("Target product has no bands");
         }
+    }
+
+    static Dimension getTargetDimensions(int srcProductWidth, int srcProductHeight,
+                                                int trgProductWidth, int trgProductHeight,
+                                                int srcBandWidth, int srcBandHeight) {
+        double ratioW = srcProductWidth / (double) trgProductWidth;
+        double ratioH = srcProductHeight / (double) trgProductHeight;
+        int targetWidth = (int) (srcBandWidth / ratioW);
+        int targetHeight = (int) (srcBandHeight / ratioH);
+        return new Dimension(targetWidth, targetHeight);
     }
 
     /**

@@ -64,15 +64,25 @@ public class Band extends AbstractBand {
     public static final String PROPERTY_NAME_SPECTRAL_BAND_INDEX = "spectralBandIndex";
     public static final String PROPERTY_NAME_SPECTRAL_BANDWIDTH = "spectralBandwidth";
     public static final String PROPERTY_NAME_SPECTRAL_WAVELENGTH = "spectralWavelength";
+    public static final String PROPERTY_NAME_DATE_BAND_INDEX = "dateBandIndex";
+    public static final String PROPERTY_NAME_DATE = "date";
+    public static final String PROPERTY_NAME_ANGULAR_BAND_INDEX = "angularBandIndex";
+    public static final String PROPERTY_NAME_ANGULAR_VALUE = "angularValue";
+    public static final float ANGULAR_VIEW_NULL_VALUE = -999;
 
     /**
      * If this band contains flag data, this is the flag coding.
      */
     private SampleCoding sampleCoding;
 
+    private int angularBandIndex;
+    private float angularValue;
     private int spectralBandIndex;
     private float spectralWavelength;
     private float spectralBandwidth;
+    private int dateBandIndex;
+    private String date;
+    //    private float spectralBandwidth;
     private float solarFlux;
 
     /**
@@ -88,7 +98,10 @@ public class Band extends AbstractBand {
         super(name, dataType, width, height);
         // By default a band is not a spectral band,
         // so spectral band index must be -1
+        setAngularBandIndex(-1);
+        setAngularValue((float)(ANGULAR_VIEW_NULL_VALUE));
         setSpectralBandIndex(-1);
+        setDateBandIndex(-1);
         setModified(false);
     }
 
@@ -156,6 +169,30 @@ public class Band extends AbstractBand {
         }
     }
 
+    public float getAngularValue() {
+        return angularValue;
+    }
+
+    public void setAngularValue(float angularValue) {
+        if (this.angularValue != angularValue) {
+            this.angularValue = angularValue;
+            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_VALUE);
+            setModified(true);
+        }
+    }
+
+    public int getAngularBandIndex() {
+        return angularBandIndex;
+    }
+
+    public void setAngularBandIndex(int angularBandIndex) {
+        if (this.angularBandIndex != angularBandIndex) {
+            this.angularBandIndex = angularBandIndex;
+            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_BAND_INDEX);
+            setModified(true);
+        }
+    }
+
     /**
      * Gets the (zero-based) spectral band index.
      *
@@ -198,6 +235,52 @@ public class Band extends AbstractBand {
         if (this.spectralWavelength != spectralWavelength) {
             this.spectralWavelength = spectralWavelength;
             fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_WAVELENGTH);
+            setModified(true);
+        }
+    }
+
+    /**
+     * Gets the (zero-based) date band index.
+     *
+     * @return the (zero-based) date band index or <code>-1</code> if it is unknown
+     */
+    public int getDateBandIndex() {
+        return dateBandIndex;
+    }
+
+    /**
+     * Sets the (zero-based) date band index.
+     *
+     * @param dateBandIndex the (zero-based) spectral band index or <code>-1</code> if it is unknown
+     */
+    public void setDateBandIndex(int dateBandIndex) {
+        if (this.dateBandIndex != dateBandIndex) {
+            this.dateBandIndex = dateBandIndex;
+            fireProductNodeChanged(PROPERTY_NAME_DATE_BAND_INDEX);
+            setModified(true);
+        }
+    }
+
+    /**
+     * Gets the date.
+     *
+     * @return the date for this band, or zero if this is not a date band or the date is
+     *         not known.
+     */
+    public String getDate() {
+        return date;
+    }
+
+    /**
+     * Sets the date.
+     *
+     * @param date YYYY-MM-DD of this band, or 1601-01-01 if this is not a date band or
+     *                           the date is not known.
+     */
+    public void setDate(String date) {
+        if (this.date != date) {
+            this.date = date;
+            fireProductNodeChanged(PROPERTY_NAME_DATE);
             setModified(true);
         }
     }
@@ -454,6 +537,8 @@ public class Band extends AbstractBand {
                 + ProductData.getTypeString(getDataType()) + "," +
                 +getRasterWidth() + "," +
                 +getRasterHeight() + "," +
+                +getAngularBandIndex() + "," +
+                +getAngularValue() + "," +
                 +getSpectralBandIndex() + "," +
                 +getSpectralWavelength() + "," +
                 +getSpectralBandwidth() + "," +

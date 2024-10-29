@@ -341,6 +341,9 @@ public class SubsetOp extends Operator {
                 continue;
             }
             Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true,false);
+            if (rect.isEmpty()){
+                continue;
+            }
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();

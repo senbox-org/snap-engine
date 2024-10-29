@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common;
 
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.util.GeoUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -35,8 +36,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.graph.GraphException;
-import org.esa.snap.core.subset.AbstractSubsetRegion;
-import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -254,7 +253,7 @@ public class SubsetOpTest {
 
         Product tp = op.getTargetProduct();
         assertEquals(2, tp.getNumBands());
-        Product.AutoGrouping autoGrouping = tp.getAutoGrouping();
+        BandGroup autoGrouping = tp.getAutoGrouping();
         assertNotNull(autoGrouping);
         assertEquals(1, autoGrouping.size());
         assertArrayEquals(new String[]{"radiance"}, autoGrouping.get(0));

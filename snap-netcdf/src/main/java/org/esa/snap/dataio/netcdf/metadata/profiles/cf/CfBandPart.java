@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DataNode;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -31,12 +32,7 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.DimKey;
-import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.ReaderUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
+import org.esa.snap.dataio.netcdf.util.*;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -55,6 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.esa.snap.dataio.netcdf.util.ReaderUtils.*;
 
 public class CfBandPart extends ProfilePartIO {
 
@@ -201,7 +199,7 @@ public class CfBandPart extends ProfilePartIO {
             if (lowerBand.getDescription() != null) {
                 lowerBand.setDescription(lowerBand.getDescription() + "(least significant bytes)");
             }
-            lowerBand.setSourceImage(new NetcdfMultiLevelImage(lowerBand, variable, origin, ctx));
+            lowerBand.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(lowerBand, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, lowerBand, variable, variable.getFullName() + "_lsb", false);
 
             final Band upperBand = p.addBand(bandBasename + "_msb", rasterDataType);
@@ -209,7 +207,7 @@ public class CfBandPart extends ProfilePartIO {
             if (upperBand.getDescription() != null) {
                 upperBand.setDescription(upperBand.getDescription() + "(most significant bytes)");
             }
-            upperBand.setSourceImage(new NetcdfMultiLevelImage(upperBand, variable, origin, ctx));
+            upperBand.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(upperBand, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, upperBand, variable, variable.getFullName() + "_msb", true);
         } else {
             final Band band;
@@ -219,36 +217,15 @@ public class CfBandPart extends ProfilePartIO {
                 band = p.addBand(bandBasename, rasterDataType);
             }
             readCfBandAttributes(variable, band);
-            band.setSourceImage(new NetcdfMultiLevelImage(band, variable, origin, ctx));
+            band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, band, variable, variable.getFullName(), false);
         }
     }
 
 
-    private static double getScalingFactor(Variable variable) {
-        Attribute attribute = variable.findAttribute(Constants.SCALE_FACTOR_ATT_NAME);
-        if (attribute == null) {
-            attribute = variable.findAttribute(Constants.SLOPE_ATT_NAME);
-        }
-        if (attribute == null) {
-            attribute = variable.findAttribute("scaling_factor");
-        }
-        if (attribute != null) {
-            return getAttributeValue(attribute).doubleValue();
-        }
-        return 1.0;
-    }
 
-    private static double getAddOffset(Variable variable) {
-        Attribute attribute = variable.findAttribute(Constants.ADD_OFFSET_ATT_NAME);
-        if (attribute == null) {
-            attribute = variable.findAttribute(Constants.INTERCEPT_ATT_NAME);
-        }
-        if (attribute != null) {
-            return getAttributeValue(attribute).doubleValue();
-        }
-        return 0.0;
-    }
+
+
 
     static float getSpectralWavelength(Variable variable) {
         Attribute attribute = variable.findAttribute(Constants.RADIATION_WAVELENGTH);
@@ -294,22 +271,7 @@ public class CfBandPart extends ProfilePartIO {
         return null;
     }
 
-    private static Number getAttributeValue(Attribute attribute) {
-        if (attribute.isString()) {
-            String stringValue = attribute.getStringValue();
-            if (stringValue.endsWith("b")) {
-                // Special management for bytes; Can occur in e.g. ASCAT files from EUMETSAT
-                return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
-            } else if (!stringValue.isEmpty()) {
-                return Double.parseDouble(stringValue);
-            } else {
-                return 0;
-            }
-        } else {
-            return attribute.getNumericValue();
-        }
 
-    }
 
     private static int getRasterDataType(Variable variable, DataTypeWorkarounds workarounds) {
         if (workarounds != null && workarounds.hasWorkaround(variable.getFullName(), variable.getDataType())) {
