@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.LevelImageSupport;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StopWatch;
@@ -612,21 +613,10 @@ public class ProductIO {
                 band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
             } finally {
                 rasterData.dispose();
-                removeCachedTile(sourceImage, tileIndex);
+                ImageManager.removeCachedTile(sourceImage, tileIndex);
             }
         }
     }
-
-    private static void removeCachedTile(PlanarImage sourceImage, Point tileIndex) {
-        if (sourceImage instanceof OpImage) {
-            OpImage opImage = (OpImage) sourceImage;
-            TileCache tileCache = opImage.getTileCache();
-            if (tileCache != null) {
-                tileCache.remove(sourceImage, tileIndex.x, tileIndex.y);
-            }
-        }
-    }
-
 
     /**
      * This method is not part of the official API and might change in the future.
@@ -634,7 +624,7 @@ public class ProductIO {
      * The method directly delegates to {@link AbstractProductReader#readProductNodesImpl()} which is not
      * publicly available.
      * <p>
-     * This overcomes a short coming in the current API. A reader can be used with a SubsetDef but this can not be
+     * This overcomes a shortcoming in the current API. A reader can be used with a SubsetDef but this can not be
      * changed dynamically.
      *
      * @param reader     the reader to read from
