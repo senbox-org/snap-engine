@@ -452,12 +452,12 @@ public class SystemUtils {
         LOG.fine(MessageFormat.format("JAI tile scheduler prefetch parallelism set to {0}", parallelism));
 
         JAI.enableDefaultTileCache();
+        long MB = 1024 * 1024;
+        long GB = 1024 * MB;
         TileCache tileCache = JAI.getDefaultInstance().getTileCache();
-        long runtimeMemory = Runtime.getRuntime().maxMemory();
-        long confCacheSize = Config.instance().preferences()
-                .getLong("snap.jai.tileCacheSize", (long) (runtimeMemory * 0.25));
-        tileCache.setMemoryCapacity(confCacheSize);
-        long GB = 1024 * 1024 * 1024;
+        long dynamicMemory = (long) (Runtime.getRuntime().maxMemory() * 0.25) / MB;
+        long confCacheSize = Config.instance().preferences().getLong("snap.jai.tileCacheSize", dynamicMemory);
+        tileCache.setMemoryCapacity(confCacheSize * MB);
         LOG.fine(String.format("JAI tile cache size is %.2f GB", (double) tileCache.getMemoryCapacity() / GB));
 
         final int tileSize = Config.instance().preferences().getInt("snap.jai.defaultTileSize", 512);
