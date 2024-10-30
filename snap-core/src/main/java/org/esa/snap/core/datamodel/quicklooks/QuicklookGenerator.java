@@ -124,11 +124,11 @@ public class QuicklookGenerator {
                 if (productSubset.getBand(band.getName()) != null) {
                     bandList.add(productSubset.getBand(band.getName()));
                 } else if (band instanceof VirtualBand) {
-                    ProductUtils.copyVirtualBand(productSubset, (VirtualBand) band, band.getName());
+                    ProductUtils.copyVirtualBand(productSubset, (VirtualBand) band, band.getName(), true);
                     bandList.add(productSubset.getBand(band.getName()));
                 }
             }
-            quicklookBands = bandList.toArray(new Band[bandList.size()]);
+            quicklookBands = bandList.toArray(new Band[0]);
         }
 
         final BufferedImage image;

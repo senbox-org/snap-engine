@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
 import org.esa.snap.core.dataio.persistence.Item;
@@ -219,7 +220,12 @@ public final class DimapHeaderWriter extends XmlWriter {
                         printLine(indent + 2, DimapProductConstants.TAG_SPECTRAL_BAND_INDEX,
                                   band.getSpectralBandIndex());
                     }
+                    if (band.getAngularBandIndex() > -1) {
+                        printLine(indent + 2, DimapProductConstants.TAG_ANGULAR_BAND_INDEX,
+                                band.getAngularBandIndex());
+                    }
                     printLine(indent + 2, DimapProductConstants.TAG_BAND_WAVELEN, band.getSpectralWavelength());
+                    printLine(indent + 2, DimapProductConstants.TAG_BAND_ANGULAR_VALUE, band.getAngularValue());
                     printLine(indent + 2, DimapProductConstants.TAG_BANDWIDTH, band.getSpectralBandwidth());
                     final FlagCoding flagCoding = band.getFlagCoding();
                     if (flagCoding != null) {
@@ -1031,7 +1037,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     protected void writeDatasetUse(int indent) {
         final String description = product.getDescription();
-        final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+        final BandGroup autoGrouping = product.getAutoGrouping();
         if ((description != null && description.length() > 0) || autoGrouping != null) {
             final String[] idTags = createTags(indent, DimapProductConstants.TAG_DATASET_USE);
             println(idTags[0]);

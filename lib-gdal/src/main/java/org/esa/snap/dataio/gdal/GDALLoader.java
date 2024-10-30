@@ -22,12 +22,14 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
 import org.esa.snap.engine_utilities.file.FileHelper;
+import org.esa.snap.engine_utilities.util.FileIOUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,6 +53,7 @@ public final class GDALLoader {
     private GDALLoaderClassLoader gdalVersionLoader;
 
     private Map<Integer, Integer> bandToGDALDataTypes;
+    private static Boolean GDALDistributionInitializedOnce = false;
 
     private GDALLoader() {
 
@@ -70,9 +73,14 @@ public final class GDALLoader {
      */
     public static void ensureGDALInitialised(){
         if (INSTANCE.isNotInitialised()) {
-            getInstance().initGDAL();
-            if (INSTANCE.isNotInitialised()) {
-                throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
+            synchronized (GDALDistributionInitializedOnce) {
+                if (!GDALDistributionInitializedOnce) {
+                    getInstance().initGDAL();
+                    if (INSTANCE.isNotInitialised()) {
+                        throw new IllegalStateException("GDAL NOT initialised! Check log for details.");
+                    }
+                    GDALDistributionInitializedOnce = true;
+                }
             }
         }
     }
@@ -82,8 +90,11 @@ public final class GDALLoader {
      */
     private void initGDAL() {
         if (isNotInitialised()) {
+            DirectoryLocker gdalDirectoryLocker = null;
             try {
                 this.gdalVersion = GDALVersion.getGDALVersion();
+                gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
+                while (!gdalDirectoryLocker.tryLockDirectory());
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
                 this.gdalVersionLoader = new GDALLoaderClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
                 loadGDALNativeLibrary();
@@ -94,6 +105,10 @@ public final class GDALLoader {
                 logger.log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "Failed to initialize GDAL native drivers. GDAL readers and writers were disabled." + t.getMessage());
+            }finally {
+                if(gdalDirectoryLocker != null) {
+                    gdalDirectoryLocker.unlockDirectory();
+                }
             }
         }
     }
@@ -214,6 +229,32 @@ public final class GDALLoader {
 
     public boolean isNotInitialised(){
         return this.gdalVersionLoader == null || this.gdalVersionLoader.findLibrary("gdalalljni") == null;
+    }
+
+    private class DirectoryLocker{
+        private static final String LOCK_FILE_NAME = ".lock";
+        private final Path lockFilePath;
+
+        public DirectoryLocker(Path directoryPath) throws IOException {
+            // Ensure the directory
+            FileIOUtils.ensureExists(directoryPath.getParent());
+
+            // Create the lock file within the directory
+            this.lockFilePath = directoryPath.getParent().resolve(directoryPath.getFileName() +  LOCK_FILE_NAME);
+        }
+
+        public synchronized boolean tryLockDirectory() throws IOException {
+            if(Files.exists(lockFilePath))
+                return false;
+
+            return Files.createFile(this.lockFilePath) != null;
+        }
+
+        public synchronized void unlockDirectory() {
+            if(lockFilePath != null && Files.exists(lockFilePath)) {
+                this.lockFilePath.toFile().delete();
+            }
+        }
     }
 
 }

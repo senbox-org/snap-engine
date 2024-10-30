@@ -20,6 +20,8 @@ public class CommonReaders {
     private final static ProductReaderPlugIn TSXReadPlugIn = getReaderPlugIn("TerraSarX");
     private final static ProductReaderPlugIn RS2ReadPlugIn = getReaderPlugIn("RADARSAT-2");
     private final static ProductReaderPlugIn S1ReadPlugIn = getReaderPlugIn("SENTINEL-1");
+    private final static ProductReaderPlugIn S1COGReadPlugIn = getReaderPlugIn("SENTINEL-1 COG");
+    private final static ProductReaderPlugIn S1ETADReadPlugIn = getReaderPlugIn("SENTINEL-1 ETAD");
     private final static ProductReaderPlugIn GeoTiffReadPlugIn = getReaderPlugIn("GeoTIFF");
     private final static ProductReaderPlugIn ImageIOReadPlugIn = getReaderPlugIn("PNG");
 
@@ -63,6 +65,11 @@ public class CommonReaders {
             if (filename.startsWith("asa")) {
                 return read(file, envisatReadPlugIn);
             } else if (filename.startsWith("s1")) {
+                //if(filename.contains("_grd")) {
+                //    return read(file, S1COGReadPlugIn);
+                if(filename.contains("_eta_")) {
+                    return read(file, S1ETADReadPlugIn);
+                }
                 return read(file, S1ReadPlugIn);
             } else if (filename.startsWith("rs2")) {
                 return read(file, RS2ReadPlugIn);
@@ -102,6 +109,11 @@ public class CommonReaders {
             if (filename.startsWith("asa")) {
                 return "ENVISAT";
             } else if (filename.startsWith("s1")) {
+                //if(filename.contains("_grd")) {
+                //    return "SENTINEL-1 COG";
+                if(filename.contains("_eta_")) {
+                    return "SENTINEL-1 ETAD";
+                }
                 return "SENTINEL-1";
             } else if (filename.startsWith("rs2")) {
                 return "RADARSAT-2";

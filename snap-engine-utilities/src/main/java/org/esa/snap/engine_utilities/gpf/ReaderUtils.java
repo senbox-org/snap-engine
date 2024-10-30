@@ -140,7 +140,7 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>Path</code> if the given input is a <code>String</code> or <code>File</code>,
+     * Returns a <code>Path</code> if the given input is a <code>String</code>,a <code>File</code> or <code>Path</code>,
      * otherwise it returns null;
      *
      * @param input an input object of unknown type

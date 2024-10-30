@@ -292,8 +292,13 @@ public class PropertyContainer implements PropertySet {
 
     @Override
     public void setValue(String name, Object value) throws IllegalArgumentException {
+        Property property = getProperty(name);
+        if (property == null) {
+            throw new IllegalArgumentException("Unknown property name: " + name);
+        }
+
         try {
-            getProperty(name).setValue(value);
+            property.setValue(value);
         } catch (ValidationException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }

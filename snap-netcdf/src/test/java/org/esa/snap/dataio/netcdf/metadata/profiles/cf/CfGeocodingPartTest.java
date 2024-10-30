@@ -38,7 +38,7 @@ public class CfGeocodingPartTest {
     }
 
     @Test
-    @STTM("SNAP-3584")
+    @STTM("SNAP-3584,SNAP-3825")
     public void testReadVarAsDoubleArray() throws IOException {
         final Variable variable = mock(Variable.class);
         final Array array = mock(Array.class);
@@ -51,6 +51,7 @@ public class CfGeocodingPartTest {
         assertArrayEquals(data, dataRead, 1e-8);
 
         verify(variable, times(1)).read();
+        verify(variable, times(5)).findAttribute(anyString());
         verify(array, times(1)).get1DJavaArray(DataType.DOUBLE);
         verifyNoMoreInteractions(variable, array);
     }

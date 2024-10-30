@@ -62,15 +62,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * The common command-line tool for the GPF.
@@ -83,6 +80,9 @@ public class CommandLineTool implements GraphProcessingObserver {
     private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat(DATETIME_PATTERN, Locale.ENGLISH);
     private static final String READ_OP_ID_PREFIX = "ReadOp@";
     private static final String WRITE_OP_ID_PREFIX = "WriteOp@";
+    private static final Set<String> additionalReadParameters = new HashSet<>() {{
+       add("pixelRegion"); add("geometryRegion");
+    }};
 
     private final CommandLineContext commandLineContext;
     //    private final VelocityContext velocityContext;
@@ -292,7 +292,7 @@ public class CommandLineTool implements GraphProcessingObserver {
     private void runOperator() throws Exception {
         Map<String, String> parameterMap = getRawParameterMap();
         String operatorName = commandLineArgs.getOperatorName();
-        Map<String, Product> sourceProducts = getSourceProductMap();
+        Map<String, Product> sourceProducts = getSourceProductMap(parameterMap);
         Map<String, Object> parameters = convertParameterMap(operatorName, parameterMap, sourceProducts);
 
         OperatorSpiRegistry operatorSpiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
@@ -332,7 +332,14 @@ public class CommandLineTool implements GraphProcessingObserver {
         final OperatorSpiRegistry operatorSpiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
 
         Map<String, String> templateVariables = getRawParameterMap();
-
+        // Check if (and extract) advanced read parameters are set
+        Map<String, String> additionalReadParams = templateVariables.entrySet()
+                                                                    .stream()
+                                                                    .filter(e -> additionalReadParameters.contains(e.getKey()))
+                                                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (additionalReadParams.size() > 1) {
+            throw new IOException("Parameters " + String.join(" and ", additionalReadParameters) + " should not be simultaneously set");
+        }
         Map<String, String> sourceNodeIdMap = getSourceNodeIdMap();
         templateVariables.putAll(sourceNodeIdMap);
         // todo - use Velocity and the current Velocity context for reading the graph XML! (nf, 20120610)
@@ -350,7 +357,11 @@ public class CommandLineTool implements GraphProcessingObserver {
 
                 DomElement configuration = new DefaultDomElement("parameters");
                 configuration.createChild("file").setValue(sourceFilePath);
-
+                if (!additionalReadParams.isEmpty()) {
+                    // pixelRegion or geometryRegion are considered by ReadOp only if useAdvancedOptions = true
+                    configuration.createChild("useAdvancedOptions").setValue("true");
+                    additionalReadParams.forEach((k, v) -> configuration.createChild(k).setValue(v));
+                }
                 Node sourceNode = new Node(sourceNodeId, readOperatorAlias);
                 sourceNode.setConfiguration(configuration);
 
@@ -457,26 +468,41 @@ public class CommandLineTool implements GraphProcessingObserver {
         return new XppDomElement(xppDom);
     }
 
-    private Map<String, Product> getSourceProductMap() throws IOException {
+    private Map<String, Product> getSourceProductMap(Map<String, String> rawParametersMap) throws IOException {
         SortedMap<File, Product> fileToProductMap = new TreeMap<>();
         SortedMap<String, Product> productMap = new TreeMap<>();
         SortedMap<String, String> sourceFilePathsMap = commandLineArgs.getSourceFilePathMap();
+        // Check if (and extract) advanced read parameters are set
+        Map<String, String> subsetParams = null;
+        final List<String> additionalParams = rawParametersMap.keySet().stream().filter(additionalReadParameters::contains).collect(Collectors.toList());
+        if (additionalParams.size() > 1) {
+            throw new IOException("Parameters " + String.join(" and ", additionalParams) + " should not be simultaneously set");
+        }
+        if (!additionalParams.isEmpty() && (rawParametersMap.keySet().stream().anyMatch(additionalReadParameters::contains))) {
+            subsetParams = new HashMap<>();
+            for (String param : additionalParams) {
+                if (rawParametersMap.containsKey(param)) {
+                    subsetParams.put(param, rawParametersMap.get(param));
+                    rawParametersMap.remove(param);
+                }
+            }
+        }
         for (Entry<String, String> entry : sourceFilePathsMap.entrySet()) {
             String sourceId = entry.getKey();
             String sourceFilePath = entry.getValue();
-            Product product = addProduct(sourceFilePath, fileToProductMap);
+            Product product = addProduct(sourceFilePath, fileToProductMap, subsetParams);
             productMap.put(sourceId, product);
         }
         return productMap;
     }
 
 
-    private Product addProduct(String sourceFilepath, Map<File, Product> fileToProductMap) throws IOException {
+    private Product addProduct(String sourceFilepath, Map<File, Product> fileToProductMap, Map<String, String> readParams) throws IOException {
         File sourceFile = new File(sourceFilepath).getCanonicalFile();
         Product product = fileToProductMap.get(sourceFile);
         if (product == null) {
             String s = sourceFile.getPath();
-            product = readProduct(s);
+            product = readProduct(s, readParams);
             if (product == null) {
                 throw new IOException("No appropriate product reader found for " + sourceFile);
             }
@@ -530,8 +556,8 @@ public class CommandLineTool implements GraphProcessingObserver {
         return fileToNodeId.computeIfAbsent(sourceFile, k -> READ_OP_ID_PREFIX + sourceId);
     }
 
-    Product readProduct(String filePath) throws IOException {
-        return commandLineContext.readProduct(filePath);
+    Product readProduct(String filePath, Map<String, String> readParams) throws IOException {
+        return commandLineContext.readProduct(filePath, readParams);
     }
 
     void writeProduct(Product targetProduct, String filePath, String formatName,

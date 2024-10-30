@@ -22,6 +22,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import eu.esa.snap.core.datamodel.group.*;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -64,17 +65,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -91,7 +86,7 @@ import java.util.stream.Stream;
  *
  * @author Norman Fomferra
  */
-public class Product extends ProductNode {
+public class Product extends ProductNode implements Closeable {
 
     public static final String METADATA_ROOT_NAME = "metadata";
     public static final String HISTORY_ROOT_NAME = "history";
@@ -185,7 +180,7 @@ public class Product extends ProductNode {
     private PointingFactory pointingFactory;
     private String quicklookBandName;
     private Dimension preferredTileSize;
-    private AutoGrouping autoGrouping;
+    private BandGroup autoGrouping;
     private Map<String, WeakReference<MultiLevelImage>> maskCache;
     /**
      * The maximum number of resolution levels common to all band images.
@@ -252,19 +247,19 @@ public class Product extends ProductNode {
                     ProductReader reader) {
         super(name);
         Guardian.assertNotNullOrEmpty("type", type);
-        this.productType = type;
+        productType = type;
         this.reader = reader;
         this.sceneRasterSize = sceneRasterSize;
-        this.metadataRoot = new MetadataElement(METADATA_ROOT_NAME);
-        this.metadataRoot.setOwner(this);
+        metadataRoot = new MetadataElement(METADATA_ROOT_NAME);
+        metadataRoot.setOwner(this);
 
-        this.bandGroup = new ProductNodeGroup<>(this, "bands", true);
-        this.tiePointGridGroup = new ProductNodeGroup<>(this, "tie_point_grids", true);
-        this.vectorDataGroup = new VectorDataNodeProductNodeGroup();
-        this.indexCodingGroup = new ProductNodeGroup<>(this, "index_codings", true);
-        this.flagCodingGroup = new ProductNodeGroup<>(this, "flag_codings", true);
-        this.maskGroup = new ProductNodeGroup<>(this, "masks", true);
-        this.quicklookGroup = new ProductNodeGroup<>(this, "quicklooks", true);
+        bandGroup = new ProductNodeGroup<>(this, "bands", true);
+        tiePointGridGroup = new ProductNodeGroup<>(this, "tie_point_grids", true);
+        vectorDataGroup = new VectorDataNodeProductNodeGroup();
+        indexCodingGroup = new ProductNodeGroup<>(this, "index_codings", true);
+        flagCodingGroup = new ProductNodeGroup<>(this, "flag_codings", true);
+        maskGroup = new ProductNodeGroup<>(this, "masks", true);
+        quicklookGroup = new ProductNodeGroup<>(this, "quicklooks", true);
 
         pinGroup = createPinGroup();
         gcpGroup = createGcpGroup();
@@ -381,15 +376,17 @@ public class Product extends ProductNode {
             }
             return geoCoding.getImageCRS();
         } else {
-            return Product.DEFAULT_IMAGE_CRS;
+            return DEFAULT_IMAGE_CRS;
         }
     }
 
-    private static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
+    // package access for testing only tb 2024-05-15
+    static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
         return equalsOrNaN(pos1.lat, pos2.lat, eps) && equalsOrNaN(pos1.lon, pos2.lon, eps);
     }
 
-    private static boolean equalsOrNaN(double v1, double v2, float eps) {
+    // package access for testing only tb 2024-05-15
+    static boolean equalsOrNaN(double v1, double v2, float eps) {
         return MathUtils.equalValues(v1, v2, eps) || (Double.isNaN(v1) && Double.isNaN(v2));
     }
 
@@ -756,6 +753,11 @@ public class Product extends ProductNode {
         }
 
         fileLocation = null;
+    }
+
+    @Override
+    public void close() throws IOException {
+        dispose();
     }
 
     /**
@@ -2457,8 +2459,8 @@ public class Product extends ProductNode {
      * @return The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public AutoGrouping getAutoGrouping() {
-        return this.autoGrouping;
+    public BandGroup getAutoGrouping() {
+        return autoGrouping;
     }
 
     /**
@@ -2480,7 +2482,7 @@ public class Product extends ProductNode {
      */
     public void setAutoGrouping(String pattern) {
         Assert.notNull(pattern, "text");
-        setAutoGrouping(AutoGroupingImpl.parse(pattern));
+        setAutoGrouping(BandGroupImpl.parse(pattern));
     }
 
     /**
@@ -2489,8 +2491,8 @@ public class Product extends ProductNode {
      * @param autoGrouping The auto-grouping or {@code null}.
      * @since BEAM 4.8
      */
-    public void setAutoGrouping(AutoGrouping autoGrouping) {
-        AutoGrouping old = this.autoGrouping;
+    public void setAutoGrouping(BandGroup autoGrouping) {
+        BandGroup old = this.autoGrouping;
         if (!ObjectUtils.equalObjects(old, autoGrouping)) {
             this.autoGrouping = autoGrouping;
             fireProductNodeChanged("autoGrouping", old, this.autoGrouping);
@@ -2866,13 +2868,28 @@ public class Product extends ProductNode {
         };
         acceptVisitor(productVisitorAdapter);
     }
+    
 
     /**
+     * Sets this product's name. 
+     * 
+     * <p> The name can be identical to a band name.
+     *
+     * @param name The name.
+     */
+    @Override
+    public void setName(final String name) {
+        Guardian.assertNotNull("name", name);
+        setNodeName(name.trim(), false, true);
+    }
+
+	/**
      * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
      * as a tree of product nodes.
      *
      * @since BEAM 4.8
      */
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGrouping
     public interface AutoGrouping extends List<String[]> {
 
         static AutoGrouping parse(String text) {
@@ -2888,12 +2905,14 @@ public class Product extends ProductNode {
         int indexOf(String name);
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.Entry
     interface Entry {
 
         boolean matches(String name);
 
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingImpl
     private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
 
         private static final String GROUP_SEPARATOR = "/";
@@ -3047,6 +3066,7 @@ public class Product extends ProductNode {
         }
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingPath
     private static class AutoGroupingPath {
 
         private final String[] groups;
@@ -3079,6 +3099,7 @@ public class Product extends ProductNode {
 
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.EntryImpl
     private static class EntryImpl implements Entry {
 
         private final String group;
@@ -3094,6 +3115,7 @@ public class Product extends ProductNode {
         }
     }
 
+    @Deprecated // use eu.esa.snap.core.datamodel.group.WildCardEntry
     private static class WildCardEntry implements Entry {
 
         private final WildcardMatcher wildcardMatcher;

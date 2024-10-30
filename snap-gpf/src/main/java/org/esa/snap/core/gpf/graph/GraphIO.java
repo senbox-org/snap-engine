@@ -149,6 +149,7 @@ public class GraphIO {
         // since version 1.4.20 or maybe earlier we need to configure permission for security reasons
         xStream.allowTypesByWildcard(new String[]{"com.bc.ceres.**", "org.esa.snap.core.gpf.**"});
 
+        xStream.autodetectAnnotations(true);
         return xStream;
     }
 

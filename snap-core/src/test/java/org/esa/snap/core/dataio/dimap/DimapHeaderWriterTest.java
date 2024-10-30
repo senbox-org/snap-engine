@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.*;
@@ -86,6 +87,7 @@ public class DimapHeaderWriterTest {
                     "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
                     "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                     "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                    "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                     "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                     "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                     "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -102,6 +104,7 @@ public class DimapHeaderWriterTest {
                     "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
                     "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                     "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                    "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                     "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                     "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                     "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -118,6 +121,7 @@ public class DimapHeaderWriterTest {
                     "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
                     "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                     "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                    "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                     "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                     "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                     "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -200,6 +204,7 @@ public class DimapHeaderWriterTest {
     }
 
     @Test
+    @STTM("SNAP-3683,SNAP-3684")
     public void testWriteCrsGeoCodingPerBand() throws Exception {
         final String expected = setCrsGeoCodingPerBandAndGetExpected();
 
@@ -209,6 +214,7 @@ public class DimapHeaderWriterTest {
     }
 
     @Test
+    @STTM("SNAP-3683,SNAP-3684")
     public void testWriteAncillaryInformation() {
         final String expected = addAncillaryBandsAndGetExpected();
 
@@ -219,6 +225,7 @@ public class DimapHeaderWriterTest {
 
 
     @Test
+    @STTM("SNAP-3683,SNAP-3684")
     public void testWriteImageToModelTransform() {
         final String expected = addBandWithTransformAndGetExpected();
 
@@ -248,6 +255,7 @@ public class DimapHeaderWriterTest {
                 "            <DATA_TYPE>float32</DATA_TYPE>" + LS +
                 "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                 "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                 "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                 "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                 "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -283,6 +291,7 @@ public class DimapHeaderWriterTest {
                 "            <DATA_TYPE>float32</DATA_TYPE>" + LS +
                 "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                 "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                 "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                 "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                 "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -302,6 +311,7 @@ public class DimapHeaderWriterTest {
                 "            <DATA_TYPE>float32</DATA_TYPE>" + LS +
                 "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                 "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                 "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                 "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                 "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -1121,6 +1131,7 @@ public class DimapHeaderWriterTest {
                 "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
                 "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                 "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                 "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                 "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                 "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
@@ -1137,6 +1148,7 @@ public class DimapHeaderWriterTest {
                 "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
                 "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
                 "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BAND_ANGULAR_VALUE>-999.0</BAND_ANGULAR_VALUE>" + LS +
                 "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
                 "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
                 "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +

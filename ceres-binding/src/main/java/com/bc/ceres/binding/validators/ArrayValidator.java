@@ -31,7 +31,7 @@ public class ArrayValidator implements Validator {
 
     @Override
     public void validateValue(Property property, Object value) throws ValidationException {
-        final int length = Array.getLength(value);
+        final int length = value == null ? 0 : Array.getLength(value);
         for (int i = 0; i < length; i++) {
             Object singleValue = Array.get(value, i);
             validator.validateValue(property, singleValue);
