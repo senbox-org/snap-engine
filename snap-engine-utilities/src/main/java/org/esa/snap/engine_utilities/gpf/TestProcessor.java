@@ -35,7 +35,6 @@ import org.esa.snap.engine_utilities.util.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Utilities for Operator unit tests
@@ -129,50 +128,6 @@ public class TestProcessor {
         return Math.max(0, Math.min(val, max));
     }
 
-    public static void recurseFindReadableProducts(final File origFolder, final ArrayList<File> productList, int maxCount) throws Exception {
-
-        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
-        if(folderList != null) {
-            for (File folder : folderList) {
-                if (!folder.getName().contains(TestUtils.SKIPTEST)) {
-                    recurseFindReadableProducts(folder, productList, maxCount);
-                }
-            }
-        }
-
-        final File[] fileList = origFolder.listFiles(new ProductFunctions.ValidProductFileFilter());
-        if(fileList != null) {
-            for (File file : fileList) {
-                if (maxCount > 0 && productList.size() >= maxCount)
-                    return;
-
-                try {
-                    final ProductReader reader = ProductIO.getProductReaderForInput(file);
-                    if (reader != null) {
-                        productList.add(file);
-                    } else {
-                        SystemUtils.LOG.warning(file.getAbsolutePath() + " is non valid");
-                    }
-                } catch (Exception e) {
-                    boolean ok = false;
-               /* if(exceptionExemptions != null) {
-                    for(String exemption : exceptionExemptions) {
-                        if(e.getMessage().contains(exemption)) {
-                            ok = true;
-                            SystemUtils.LOG("Exemption for "+e.getMessage());
-                            break;
-                        }
-                    }
-                }    */
-                    if (!ok) {
-                        SystemUtils.LOG.severe("Failed to process " + file.toString());
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-
     private int recurseProcessFolder(final OperatorSpi spi, final File origFolder,
                                             final String format, int iterations,
                                             final String[] productTypeExemptions,
@@ -211,19 +166,21 @@ public class TestProcessor {
                             reader = ProductIO.getProductReaderForInput(file);
                     }
                     if (reader != null) {
-                        final Product sourceProduct = reader.readProductNodes(file, null);
-                        if (productTypeExemptions != null && containsProductType(productTypeExemptions, sourceProduct.getProductType()))
-                            continue;
+                        try(final Product sourceProduct = reader.readProductNodes(file, null)) {
+                            if (productTypeExemptions != null && containsProductType(productTypeExemptions, sourceProduct.getProductType()))
+                                continue;
 
-                        TestUtils.verifyProduct(sourceProduct, true, true, false);
+                            TestUtils.verifyProduct(sourceProduct, true, true, false);
 
-                        final Product subsetProduct = createSubsetProduct(sourceProduct);
+                            try(final Product subsetProduct = createSubsetProduct(sourceProduct)) {
 
-                        final Operator op = spi.createOperator();
-                        op.setSourceProduct(subsetProduct);
+                                final Operator op = spi.createOperator();
+                                op.setSourceProduct(subsetProduct);
 
-                        SystemUtils.LOG.info(spi.getOperatorAlias() + " Processing [" + iterations + "] " + file.toString());
-                        executeOperator(op);
+                                SystemUtils.LOG.info(spi.getOperatorAlias() + " Processing [" + iterations + "] " + file.toString());
+                                executeOperator(op);
+                            }
+                        }
 
                         SystemUtils.freeAllMemory();
 
@@ -351,10 +308,11 @@ public class TestProcessor {
                         if(reader == null) {
                             reader = readerPlugin.createReaderInstance();
                         }
-                        final Product product = reader.readProductNodes(file, null);
-                        if (productTypeExemptions != null && containsProductType(productTypeExemptions, product.getProductType()))
-                            continue;
-                        TestUtils.verifyProduct(product, true, true, false);
+                        try(final Product product = reader.readProductNodes(file, null)) {
+                            if (containsProductType(productTypeExemptions, product.getProductType()))
+                                continue;
+                            TestUtils.verifyProduct(product, true, true, false);
+                        }
                         ++iterations;
 
                         if (maxIteration > 0 && iterations >= maxIteration)

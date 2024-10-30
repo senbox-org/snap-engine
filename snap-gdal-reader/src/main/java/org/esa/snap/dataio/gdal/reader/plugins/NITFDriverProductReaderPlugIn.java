@@ -8,6 +8,6 @@ package org.esa.snap.dataio.gdal.reader.plugins;
 public class NITFDriverProductReaderPlugIn extends AbstractDriverProductReaderPlugIn {
 
     public NITFDriverProductReaderPlugIn() {
-        super(".ntf", "NITF", "National Imagery Transmission Format");
+        super(".ntf", "NITF", "National Imagery Transmission Format (GDAL)");
     }
 }

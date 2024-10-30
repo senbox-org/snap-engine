@@ -44,6 +44,18 @@ public class PropertyContainerTest {
     }
 
     @Test
+    public void testSetValueThrowsExceptionIfPropertyIsUnknown() throws ValidationException {
+        PropertyContainer pc = PropertyContainer.createValueBacked(Pojo.class);
+
+        try {
+            pc.setValue("unknown", "value");
+            fail("IllegalArgumentException expected; property with name 'unknown' is unknown");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().toLowerCase().contains("unknown"));
+        }
+    }
+
+    @Test
     public void testMapBackedValueContainer() throws ValidationException {
         final HashMap<String, Object> map = new HashMap<>();
         PropertyContainer pc = PropertyContainer.createMapBacked(map, Pojo.class);

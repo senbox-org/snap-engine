@@ -2,8 +2,20 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.9.1"
+    ref: "3.11.1"
     file: "templates/gitlab-ci-maven.yml"
+
+stages:
+  - build
+  - test
+  - package-build
+  - package-test
+  - infra
+  - deploy
+  - acceptance
+  - publish
+  - infra-prod
+  - production
 
 # secret variables
 # (define the variables below in your GitLab group/project variables)
@@ -22,7 +34,10 @@ variables:
   MAVEN_DEPLOY_ARGS: "deploy"
   MVN_SEMREL_RELEASE_DISABLED: "true"
   MAVEN_SETTINGS_FILE: $MVN_SETTINGS_FILE
-  SONAR_BASE_ARGS: sonar:sonar -Dsonar.projectKey=$CI_PROJECT_NAME
+  SONAR_BASE_ARGS: |
+    sonar:sonar -Dsonar.projectKey=${CI_PROJECT_NAME}
+    -Dsonar.exclusions=${CI_PROJECT_NAME}-coverage
+    -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_NAME}-coverage/target/site/jacoco-aggregate/jacoco.xml
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=${MAVEN_CFG_DIR}/repository
@@ -30,19 +45,7 @@ variables:
     -Djava.awt.headless=true
     -Dnetbeans.verify.integrity=false
     -Denable.long.tests=true
-# your pipeline stages
-stages:
-  - build
-  - test
-  - package-build
-  - package-test
-  - infra
-  - deploy
-  - acceptance
-  - publish
-  - infra-prod
-  - production
-
+  RELEASE_REF: '/^v?[0-9]+\.[0-9]+\.[0-9]+(-RC[0-9]+)?$/'
 mvn-build:
   artifacts:
     paths:
@@ -86,15 +89,17 @@ windows:
 macos:
   stage: test
   tags: [mac]
+  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
-    TESTDATA_ROOT: "/Users/otb/testData"
-  allow_failure: true
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/liberica-jdk-11-full.jdk/Contents/Home
+    TESTDATA_ROOT: "/Users/csro/testData"
   needs: []
   script:
-    - mvn -q clean package
+    - mvn clean package
 
 # Report on Github cf https://ecp-ci.gitlab.io/docs/guides/build-status-gitlab.html
 .report-status:

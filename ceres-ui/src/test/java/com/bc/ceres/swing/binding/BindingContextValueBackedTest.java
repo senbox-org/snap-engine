@@ -16,36 +16,16 @@
 
 package com.bc.ceres.swing.binding;
 
-import com.bc.ceres.binding.Property;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueSet;
+import com.bc.ceres.binding.*;
 import com.bc.ceres.swing.binding.internal.TextComponentAdapter;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BindingContextValueBackedTest {
 
@@ -83,11 +63,10 @@ public class BindingContextValueBackedTest {
         assertEquals("intValue", spinner.getName());
 
         spinner.setValue(3);
-        assertEquals(3, (int)propertyContainerVB.getValue("intValue"));
+        assertEquals(3, (int) propertyContainerVB.getValue("intValue"));
 
         propertyContainerVB.setValue("intValue", 76);
         assertEquals(76, spinner.getValue());
-
     }
 
     @Test
@@ -388,7 +367,6 @@ public class BindingContextValueBackedTest {
         assertNull(component);
     }
 
-
     static JComponent getPrimaryComponent(Binding binding) {
         return binding.getComponents()[0];
     }
@@ -404,7 +382,7 @@ public class BindingContextValueBackedTest {
 
         @SuppressWarnings("UnusedDeclaration")
         int valueSetBoundIntValue;
-        static Integer[] intValueSet = new Integer[]{101, 102, 103};
+        static Integer[] intValueSet = {101, 102, 103};
     }
 
     private static class MyChangeListener implements BindingProblemListener, PropertyChangeListener {
@@ -428,13 +406,13 @@ public class BindingContextValueBackedTest {
 
     private class MyBindingProblemListener implements BindingProblemListener {
         @Override
-            public void problemReported(BindingProblem newProblem, BindingProblem oldProblem) {
+        public void problemReported(BindingProblem newProblem, BindingProblem oldProblem) {
             error = newProblem.getCause();
             component = newProblem.getBinding().getComponents()[0];
         }
 
         @Override
-            public void problemCleared(BindingProblem oldProblem) {
+        public void problemCleared(BindingProblem oldProblem) {
             error = null;
             component = null;
         }

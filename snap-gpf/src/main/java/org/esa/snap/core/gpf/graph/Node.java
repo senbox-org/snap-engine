@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.graph;
 
 
 import com.bc.ceres.binding.dom.DomElement;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 
@@ -43,6 +44,8 @@ public class Node {
     private String operatorName;
     private SourceList sourceList;
     private DomElement configuration;
+    @XStreamOmitField
+    private GraphNodeUpdater graphNodeUpdater;
 
     /**
      * Constructs a new <code>Node</code> instance.
@@ -54,6 +57,16 @@ public class Node {
         this.id = id;
         this.operatorName = operatorName;
         init();
+    }
+
+    public void attachGraphNodeUpdater(GraphNodeUpdater graphNodeUpdater){
+        this.graphNodeUpdater = graphNodeUpdater;
+    }
+
+    public void updateGraphNode(NodeContext nodeContext) throws GraphException {
+        if (this.graphNodeUpdater != null) {
+            this.graphNodeUpdater.doUpdate(nodeContext);
+        }
     }
 
     /**

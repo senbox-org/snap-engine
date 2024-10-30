@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
 import org.esa.snap.core.datamodel.*;
@@ -234,7 +235,7 @@ public class BeamBandPart extends ProfilePartIO {
             CfBandPart.writeCfBandAttributes(band, variable);
             writeBeamBandAttributes(band, variable);
         }
-        Product.AutoGrouping autoGrouping = p.getAutoGrouping();
+        BandGroup autoGrouping = p.getAutoGrouping();
         if (autoGrouping != null) {
             ncFile.addGlobalAttribute(AUTO_GROUPING, autoGrouping.toString());
         }

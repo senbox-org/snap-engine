@@ -42,10 +42,12 @@
                     </file>
                 </folder>
                 <folder name="Optical Sensors">
-                    <file name="org-esa-snap-dataio-hico-ImportHicoProduct.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/org-esa-snap-dataio-hico-ImportHicoProduct.instance"/>
-                    </file>
+                    <folder name="Hico">
+                        <file name="org-esa-snap-dataio-hico-ImportHicoProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-snap-dataio-hico-ImportHicoProduct.instance"/>
+                        </file>
+                    </folder>
                 </folder>
             </folder>
             <folder name="Export">

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/senbox-org/snap-engine.svg?branch=master)](https://travis-ci.org/senbox-org/snap-engine)
 [![Coverity Scan Status](https://scan.coverity.com/projects/7219/badge.svg)](https://scan.coverity.com/projects/senbox-org-snap-engine)
-[![Quality Gate Status](https://sonarqube.snap-ci.ovh/api/project_badges/measure?project=org.esa.snap%3Asnap-engine&metric=alert_status&token=sqb_44a03974834fcdd28a2ecc27d8c906722fbc5148)](https://sonarqube.snap-ci.ovh/dashboard?id=org.esa.snap%3Asnap-engine)
+[![Quality Gate Status](https://sonarqube.snap-ci.ovh/api/project_badges/measure?project=snap-engine&metric=alert_status&token=sqb_44a03974834fcdd28a2ecc27d8c906722fbc5148)](https://sonarqube.snap-ci.ovh/dashboard?id=org.esa.snap%3Asnap-engine)
 
 SNAP is the common software platform for the three Sentinel Toolboxes which are developed
 by the [European Space Agency (ESA)](https://www.esa.int) for the scientific exploitation

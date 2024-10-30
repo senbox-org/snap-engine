@@ -235,7 +235,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         if (tileImages == null) {
             throw new NullPointerException("The tile images list is null.");
         }
-        if (tileImages.size() == 0) {
+        if (tileImages.isEmpty()) {
             throw new IllegalStateException("No tiles found.");
         }
 
@@ -243,7 +243,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
 
         RenderingHints hints = (imageLayout == null) ? null : new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
 
-        RenderedImage[] sources = tileImages.toArray(new RenderedImage[tileImages.size()]);
+        RenderedImage[] sources = tileImages.toArray(new RenderedImage[0]);
 
         ROI[] sourceRois = null;
         if (canCreateSourceROI) {
@@ -284,7 +284,8 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
     }
 
     protected double[][] getMosaicOpSourceThreshold() {
-        return null;
+        // returning null causes side effects for sub-unitary values
+        return new double[][] {{ 0.0000000001 }};
     }
 
     private static void validateTileImageSize(int level, PlanarImage tileOpImage, int levelImageTileWidth, int levelImageTileHeight) {

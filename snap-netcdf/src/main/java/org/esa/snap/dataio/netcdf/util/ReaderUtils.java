@@ -91,5 +91,54 @@ public class ReaderUtils {
         return name;
     }
 
+    public static double getScalingFactor(Variable variable) {
+        Attribute attribute = variable.findAttribute(Constants.SCALE_FACTOR_ATT_NAME);
+        if (attribute == null) {
+            attribute = variable.findAttribute(Constants.SLOPE_ATT_NAME);
+        }
+        if (attribute == null) {
+            attribute = variable.findAttribute("scaling_factor");
+        }
+        if (attribute != null) {
+            return getAttributeValue(attribute).doubleValue();
+        }
+        return 1.0;
+    }
+
+    public static double getAddOffset(Variable variable) {
+        Attribute attribute = variable.findAttribute(Constants.ADD_OFFSET_ATT_NAME);
+        if (attribute == null) {
+            attribute = variable.findAttribute(Constants.INTERCEPT_ATT_NAME);
+        }
+        if (attribute != null) {
+            return getAttributeValue(attribute).doubleValue();
+        }
+        return 0.0;
+    }
+
+    public static Number getAttributeValue(Attribute attribute) {
+        if (attribute.isString()) {
+            String stringValue = attribute.getStringValue();
+            if (stringValue.endsWith("b")) {
+                // Special management for bytes; Can occur in e.g. ASCAT files from EUMETSAT
+                return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
+            } else if (!stringValue.isEmpty()) {
+                return Double.parseDouble(stringValue);
+            } else {
+                return 0;
+            }
+        } else {
+            return attribute.getNumericValue();
+        }
+
+    }
+
+    public static boolean mustScale(double scalefactor, double offset) {
+        if (scalefactor != 1.0) {
+            return true;
+        }
+
+        return offset != 0.0;
+    }
 }
 
