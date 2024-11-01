@@ -201,7 +201,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(1, bandGroups.length);
 
         assertEquals("new_data", bandGroups[0].getName());
@@ -223,7 +223,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(0, bandGroups.length);
     }
 
@@ -240,7 +240,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(0, bandGroups.length);
     }
 
