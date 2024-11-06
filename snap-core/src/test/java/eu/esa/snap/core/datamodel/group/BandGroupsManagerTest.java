@@ -1,6 +1,7 @@
 package eu.esa.snap.core.datamodel.group;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.After;
@@ -372,6 +373,48 @@ public class BandGroupsManagerTest {
         }
     }
 
+    @Test
+    @STTM("SNAP-3764")
+    public void testGetMatchinBandGroups_callEquals() throws IOException {
+        initialize();
+
+        Product product = createProductWithBands(new String[] {"radiance_1","radiance_2","radiance_3","radiance_4","radiance_5","radiance_11", "radiance_12"});
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+        final BandGroupImpl bandGroup = new BandGroupImpl("group", new String[] {"radiance_1#radiance_1", "radiance_5#radiance_5"});
+
+        bandGroupsManager.add(bandGroup);
+        BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
+
+        String[] bandNames = bandGroups[0].getMatchingBandNames(product);
+        assertEquals(2, bandNames.length);
+        assertEquals("group", bandGroups[0].getName());
+        assertTrue(String.join(",", bandNames).contains("radiance_1"));
+        assertTrue(String.join(",", bandNames).contains("radiance_5"));
+        assertFalse(String.join(",", bandNames).contains("radiance_11"));
+    }
+
+    @Test
+    @STTM("SNAP-3764")
+    public void testGetMatchinBandGroups_wildcard() throws IOException {
+        initialize();
+
+        Product product = createProductWithBands(new String[] {"radiance_1","radiance_2","radiance_3","radiance_4","radiance_5","radiance_11", "radiance_12"});
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+        final BandGroupImpl bandGroup = new BandGroupImpl("wildcards", new String[] {"radiance_1*", "radiance_5#radiance_5"});
+
+        bandGroupsManager.add(bandGroup);
+        BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
+
+        String[] bandNames2 = bandGroups[0].getMatchingBandNames(product);
+        assertEquals(4, bandNames2.length);
+        assertEquals("wildcards", bandGroups[0].getName());
+        assertTrue(String.join(",", bandNames2).contains("radiance_1"));
+        assertTrue(String.join(",", bandNames2).contains("radiance_5"));
+        assertTrue(String.join(",", bandNames2).contains("radiance_11"));
+    }
+
     private File initialize() throws IOException {
         final File groupsDir = tempDir.newFolder("bandGroups");
 
@@ -396,5 +439,13 @@ public class BandGroupsManagerTest {
         fileWriter.write(outData);
         fileWriter.flush();
         fileWriter.close();
+    }
+
+    private Product createProductWithBands(String[] bandNames) {
+        Product product = new Product("testProduct", "TestProduct");
+        for (String bandName : bandNames) {
+            product.addBand(new Band(bandName, ProductData.TYPE_INT32, 0, 0));
+        }
+        return product;
     }
 }
