@@ -849,6 +849,25 @@ public class ImageManager {
         return new Color(red, green, blue, alpha);
     }
 
+    public static void removeCachedTile(PlanarImage sourceImage, Point tileIndex) {
+        if (sourceImage instanceof MultiLevelImage) {
+            RenderedImage l0Image = ((MultiLevelImage) sourceImage).getImage(0);
+            if (l0Image instanceof OpImage) {
+                removeCachedTile((OpImage) l0Image, tileIndex);
+            }
+        }
+    }
+
+    public static void removeCachedTile(OpImage opImage, Point tileIndex) {
+       if (opImage != null) {
+           TileCache tileCache = opImage.getTileCache();
+           if (tileCache != null) {
+               tileCache.remove(opImage, tileIndex.x, tileIndex.y);
+               tileCache.memoryControl();
+           }
+       }
+   }
+
     public PlanarImage getSourceImage(RasterDataNode rasterDataNode, int level) {
         return getLevelImage(rasterDataNode.getSourceImage(), level);
     }

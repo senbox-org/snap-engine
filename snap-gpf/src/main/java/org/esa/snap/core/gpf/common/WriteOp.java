@@ -17,6 +17,7 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.EncodeQualification;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductWriter;
@@ -34,14 +35,14 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.gpf.internal.OperatorExecutor.ExecutionOrder;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -338,20 +339,21 @@ public class WriteOp extends Operator {
                 Row row = new Row(targetBand, tileY);
                 Tile[] tileRowToWrite = updateTileRow(row, tileX, targetTile, tileCountX);
                 if (tileRowToWrite != null) {
-                    writeTileRow(targetBand, tileRowToWrite);
+                    writeTileRow(targetBand, tileRowToWrite, clearCacheAfterRowWrite);
                 }
                 markTileAsHandled(targetBand, tileX, tileY);
                 if (clearCacheAfterRowWrite && tileRowToWrite != null && isRowWrittenCompletely(tileY)) {
-                    TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+                    TileCache tileCache = JAI.getDefaultInstance().getTileCache(); // better use targetBand.getSourceImage().getTileCache()
                     if (tileCache != null) {
-                        tileCache.flush();
+                        tileCache.memoryControl();
                     }
                 }
             } else {
                 final ProductData rawSamples = targetTile.getRawSamples();
                 synchronized (productWriter) {
-                    productWriter.writeBandRasterData(targetBand, rect.x, rect.y, rect.width, rect.height, rawSamples,
-                            pm);
+                    productWriter.writeBandRasterData(targetBand, rect.x, rect.y,
+                            rect.width, rect.height, rawSamples, pm);
+                    removeFromCache(targetBand, targetTile);
                 }
                 markTileAsHandled(targetBand, tileX, tileY);
             }
@@ -408,7 +410,7 @@ public class WriteOp extends Operator {
         }
     }
 
-    private void writeTileRow(Band band, Tile[] cacheLine) throws IOException {
+    private void writeTileRow(Band band, Tile[] cacheLine, boolean clearCacheAfterRowWrite) throws IOException {
         int lineWidth = 0;
         for (Tile tile : cacheLine) {
             lineWidth += tile.getWidth();
@@ -425,9 +427,24 @@ public class WriteOp extends Operator {
                 int destPos = minX + line * lineWidth;
                 System.arraycopy(tileBuffer, srcPos, writeBuffer, destPos, tileWidth);
             }
+            if (clearCacheAfterRowWrite) {
+                removeFromCache(band, tile);
+            }
         }
 
         productWriter.writeBandRasterData(band, 0, cacheLine[0].getMinY(), lineWidth, cacheLine[0].getHeight(), productData, ProgressMonitor.NULL);
+    }
+
+    private static void removeFromCache(Band band, Tile tile) {
+        MultiLevelImage sourceImage = band.getSourceImage();
+        Rectangle dataTileRect = tile.getRectangle();
+        Point[] tileIndices = sourceImage.getTileIndices(dataTileRect);
+        for (Point tileIndex : tileIndices) {
+            Rectangle imageTileRect = sourceImage.getTileRect(tileIndex.x, tileIndex.x);
+            if(dataTileRect.intersects(imageTileRect)) {
+                ImageManager.removeCachedTile(sourceImage, tileIndex);
+            }
+        }
     }
 
     private void markTileAsHandled(Band targetBand, int tileX, int tileY) {
