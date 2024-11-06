@@ -410,6 +410,14 @@ public class WriteOp extends Operator {
         }
     }
 
+    /**
+     * Writes a row of tiles to a specified band. Optionally clears the cache for each tile row after writing.
+     *
+     * @param band                     The band to which the tile row is written.
+     * @param cacheLine                The array of tiles representing a row to be written.
+     * @param clearCacheAfterRowWrite  If true, clears the cache for each tile after the row is written.
+     * @throws IOException             If an I/O error occurs during writing.
+     */
     private void writeTileRow(Band band, Tile[] cacheLine, boolean clearCacheAfterRowWrite) throws IOException {
         int lineWidth = 0;
         for (Tile tile : cacheLine) {

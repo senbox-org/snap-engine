@@ -460,8 +460,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitDoExecuteSetsJAIImageOperatorWorksWithWriteAndRead() throws IOException {
-        Product product = writeAndReadProduct(new Operators.InitDoExecuteSetsJAIImageOperator(),
-                "InitDoExecuteSetsJAIImage");
+        Product product = writeAndReadProduct(new Operators.InitDoExecuteSetsJAIImageOperator(), "InitDoExecuteSetsJAIImage");
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
