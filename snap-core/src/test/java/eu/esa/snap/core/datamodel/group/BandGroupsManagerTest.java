@@ -368,7 +368,7 @@ public class BandGroupsManagerTest {
         final File configFile = new File(targetDir, CONFIG_FILE_NAME);
         try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
             final byte[] bytes = fileInputStream.readAllBytes();
-            assertEquals("{\"bandGroups\":[{\"paths\":[[\"FAPAR\",\"LAI\"]],\"name\":\"veggie\"},{\"paths\":[[\"Oa*_radiance\"],[\"Oa*_radiance_unc\"],[\"Oa*_radiance_err\"]],\"name\":\"\"}]}", new String(bytes, StandardCharsets.UTF_8));
+            assertEquals("{\"bandGroups\":[{\"paths\":[[\"FAPAR#FAPAR\",\"LAI#LAI\"]],\"name\":\"veggie\"},{\"paths\":[[\"Oa*_radiance\"],[\"Oa*_radiance_unc\"],[\"Oa*_radiance_err\"]],\"name\":\"\"}]}", new String(bytes, StandardCharsets.UTF_8));
         }
     }
 
