@@ -21,10 +21,7 @@ import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The <code>ProductSubsetDef</code> class describes a subset or portion of a remote sensing data product.
@@ -427,5 +424,26 @@ public class ProductSubsetDef {
 
     public void setSubsetRegion(AbstractSubsetRegion subsetRegion) {
         this.subsetRegion = subsetRegion;
+    }
+
+    /**
+     * Remove regions from non overlapping bands for multi-size products
+     */
+    public void setValidSubsetRegionMaps() {
+        if (this.regionMap == null || this.nodeNameList == null) {
+            return;
+        }
+
+        Iterator<Map.Entry<String, Rectangle>> iterator = this.regionMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Rectangle> entry = iterator.next();
+            String nodeName = entry.getKey();
+            Rectangle rect = entry.getValue();
+
+            if (rect.height == 0 || rect.width == 0) {
+                iterator.remove();
+                this.nodeNameList.remove(nodeName);
+            }
+        }
     }
 }
