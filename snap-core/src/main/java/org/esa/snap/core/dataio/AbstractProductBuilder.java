@@ -75,6 +75,9 @@ public abstract class AbstractProductBuilder extends AbstractProductReader {
         Guardian.assertNotNull("sourceProduct", sourceProduct);
         setNewProductName(name != null ? name : sourceProduct.getName());
         setNewProductDesc(desc != null ? desc : sourceProduct.getDescription());
+        if (subsetDef != null) {
+            subsetDef.setValidSubsetRegionMaps();
+        }
         final Product product = readProductNodes(sourceProduct, subsetDef);
         product.setModified(true);
         return product;

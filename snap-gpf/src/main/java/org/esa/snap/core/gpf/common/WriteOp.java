@@ -343,7 +343,7 @@ public class WriteOp extends Operator {
                 }
                 markTileAsHandled(targetBand, tileX, tileY);
                 if (clearCacheAfterRowWrite && tileRowToWrite != null && isRowWrittenCompletely(tileY)) {
-                    TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+                    TileCache tileCache = JAI.getDefaultInstance().getTileCache(); // better use targetBand.getSourceImage().getTileCache()
                     if (tileCache != null) {
                         tileCache.memoryControl();
                     }
