@@ -1495,7 +1495,7 @@ public class Product extends ProductNode implements Closeable {
     // Visitor-Pattern support
 
     /**
-     * Checks whether or not the given product is compatible with this product.
+     * Checks whether the given product is compatible with this product.
      *
      * @param product the product to compare with
      * @param eps     the maximum lat/lon error in degree
@@ -1507,20 +1507,20 @@ public class Product extends ProductNode implements Closeable {
             return true;
         }
         if (getSceneRasterWidth() != product.getSceneRasterWidth()) {
-            SystemUtils.LOG.info("raster width " + product.getSceneRasterWidth() + " not equal to " + getSceneRasterWidth());
+            SystemUtils.LOG.fine("raster width " + product.getSceneRasterWidth() + " not equal to " + getSceneRasterWidth());
             return false;
         }
         if (getSceneRasterHeight() != product.getSceneRasterHeight()) {
-            SystemUtils.LOG.info("raster height " + product.getSceneRasterHeight() + " not equal to " + getSceneRasterHeight());
+            SystemUtils.LOG.fine("raster height " + product.getSceneRasterHeight() + " not equal to " + getSceneRasterHeight());
             return false;
         }
         if (getSceneGeoCoding() == null && product.getSceneGeoCoding() != null) {
-            SystemUtils.LOG.info("no geocoding in master but in source");
+            SystemUtils.LOG.fine("no geocoding in master but in source");
             return false;
         }
         if (getSceneGeoCoding() != null) {
             if (product.getSceneGeoCoding() == null) {
-                SystemUtils.LOG.info("no geocoding in source but in master");
+                SystemUtils.LOG.fine("no geocoding in source but in master");
                 return false;
             }
 
@@ -1533,7 +1533,7 @@ public class Product extends ProductNode implements Closeable {
             getSceneGeoCoding().getGeoPos(pixelPos, geoPos1);
             product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos2);
             if (!equalsLatLon(geoPos1, geoPos2, eps)) {
-                SystemUtils.LOG.info("first scan line left corner " + geoPos2 + " not equal to " + geoPos1);
+                SystemUtils.LOG.fine("first scan line left corner " + geoPos2 + " not equal to " + geoPos1);
                 return false;
             }
 
@@ -1542,7 +1542,7 @@ public class Product extends ProductNode implements Closeable {
             getSceneGeoCoding().getGeoPos(pixelPos, geoPos1);
             product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos2);
             if (!equalsLatLon(geoPos1, geoPos2, eps)) {
-                SystemUtils.LOG.info("first scan line right corner " + geoPos2 + " not equal to " + geoPos1);
+                SystemUtils.LOG.fine("first scan line right corner " + geoPos2 + " not equal to " + geoPos1);
                 return false;
             }
 
@@ -1551,7 +1551,7 @@ public class Product extends ProductNode implements Closeable {
             getSceneGeoCoding().getGeoPos(pixelPos, geoPos1);
             product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos2);
             if (!equalsLatLon(geoPos1, geoPos2, eps)) {
-                SystemUtils.LOG.info("last scan line left corner " + geoPos2 + " not equal to " + geoPos1);
+                SystemUtils.LOG.fine("last scan line left corner " + geoPos2 + " not equal to " + geoPos1);
                 return false;
             }
 
@@ -1560,7 +1560,7 @@ public class Product extends ProductNode implements Closeable {
             getSceneGeoCoding().getGeoPos(pixelPos, geoPos1);
             product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos2);
             if (!equalsLatLon(geoPos1, geoPos2, eps)) {
-                SystemUtils.LOG.info("last scan line right corner " + geoPos2 + " not equal to " + geoPos1);
+                SystemUtils.LOG.fine("last scan line right corner " + geoPos2 + " not equal to " + geoPos1);
                 return false;
             }
         }
