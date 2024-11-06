@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.snap.core.util.SystemUtils;
 
 import java.io.File;
@@ -184,7 +185,8 @@ public enum GDALVersion {
      * @return the directory path for install this version
      */
     public Path getNativeLibrariesFolderPath() {
-        return getNativeLibrariesRootFolderPath().resolve(getDirName());
+        String librayRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        return NativeLibraryTools.getNativeLibrariesRootFolderPath(librayRoot).resolve(getDirName());
     }
 
     /**
@@ -200,7 +202,9 @@ public enum GDALVersion {
      * Gets the root directory path for install this version.
      *
      * @return the root directory path for install this version
+     * @deprecated
      */
+    @Deprecated
     public static Path getNativeLibrariesRootFolderPath() {
         return SystemUtils.getAuxDataPath().resolve(GDAL_NATIVE_LIBRARIES_ROOT);
     }
@@ -218,7 +222,9 @@ public enum GDALVersion {
      * Gets the loader library URL from SNAP distribution packages for this version.
      *
      * @return the loader library URL from SNAP distribution packages for this version
+     * @deprecated
      */
+    @Deprecated
     public static URL getLoaderFilePathFromSources() {
         final String loaderFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + GDAL_LOADER_LIBRARY_FILE;
         try {
@@ -249,9 +255,12 @@ public enum GDALVersion {
      * Gets the path for Loader of this version.
      *
      * @return the path for Loader of this version
+     * @deprecated
      */
+    @Deprecated
     public static Path getLoaderLibraryFilePath() {
-        return getNativeLibrariesRootFolderPath().resolve(GDAL_LOADER_LIBRARY_FILE);
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        return NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot).resolve(NativeLibraryTools.LOADER_LIBRARY_FILE);
     }
 }
 

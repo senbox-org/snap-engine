@@ -17,6 +17,7 @@
 
 package org.esa.snap.engine_utilities.dataio.readers;
 
+import eu.esa.snap.core.lib.FileHelper;
 import org.esa.snap.engine_utilities.dataio.VirtualDirEx;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
@@ -25,7 +26,6 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
-import org.esa.snap.engine_utilities.file.FileHelper;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,9 +1,9 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.core.VirtualDir;
+import eu.esa.snap.core.lib.FileHelper;
+import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.engine_utilities.file.AbstractFile;
-import org.esa.snap.engine_utilities.util.NotRegularFileException;
-import org.esa.snap.engine_utilities.file.FileHelper;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;

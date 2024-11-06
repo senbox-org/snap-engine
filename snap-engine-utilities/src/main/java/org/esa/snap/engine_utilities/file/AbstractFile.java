@@ -1,6 +1,6 @@
 package org.esa.snap.engine_utilities.file;
 
-import org.esa.snap.engine_utilities.util.NotRegularFileException;
+import eu.esa.snap.core.lib.NotRegularFileException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
