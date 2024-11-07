@@ -1,12 +1,18 @@
 package org.esa.snap.dataio.gdal.reader;
 
-import org.esa.snap.core.image.AbstractSubsetTileOpImage;
-import org.esa.snap.core.image.ImageReadBoundsSupport;
-import org.esa.snap.dataio.gdal.drivers.*;
-
-import javax.media.jai.PlanarImage;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferDouble;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferShort;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,6 +20,15 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import javax.media.jai.PlanarImage;
+import org.esa.snap.core.image.AbstractSubsetTileOpImage;
+import org.esa.snap.core.image.ImageReadBoundsSupport;
+import org.esa.snap.dataio.gdal.drivers.Band;
+import org.esa.snap.dataio.gdal.drivers.BuildVRTOptions;
+import org.esa.snap.dataio.gdal.drivers.Dataset;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDALConst;
+import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
 
 /**
  * A JAI operator for handling the tiles of the products imported with the GDAL library.
@@ -22,12 +37,15 @@ import java.util.stream.Collectors;
  * @author Adrian Draghici
  */
 class GDALTileOpImage extends AbstractSubsetTileOpImage {
+
     private ImageReader imageReader;
 
-    GDALTileOpImage(GDALBandSource bandSource, int dataBufferType, int tileWidth, int tileHeight, int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
+    GDALTileOpImage(GDALBandSource bandSource, int dataBufferType, int tileWidth, int tileHeight,
+                    int tileOffsetFromReadBoundsX, int tileOffsetFromReadBoundsY,
                     ImageReadBoundsSupport imageReadBoundsSupport, Dimension defaultJAIReadTileSize) {
 
-        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY, imageReadBoundsSupport, defaultJAIReadTileSize);
+        super(dataBufferType, tileWidth, tileHeight, tileOffsetFromReadBoundsX, tileOffsetFromReadBoundsY,
+                imageReadBoundsSupport, defaultJAIReadTileSize);
 
         this.imageReader = new ImageReader(bandSource) {
             @Override
@@ -53,7 +71,8 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
     }
 
     @Override
-    protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) {
+    protected void computeRect(PlanarImage[] sources, WritableRaster levelDestinationRaster,
+                               Rectangle levelDestinationRectangle) {
         Rectangle normalBoundsIntersection = computeIntersectionOnNormalBounds(levelDestinationRectangle);
         if (!normalBoundsIntersection.isEmpty()) {
             final int level = getLevel();
@@ -62,18 +81,22 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
             int levelDestinationWidth = normalBoundsIntersection.width >> level;
             int levelDestinationHeight = normalBoundsIntersection.height >> level;
             try {
-                Raster imageRaster = this.imageReader.read(levelDestinationX, levelDestinationY, levelDestinationWidth, levelDestinationHeight);
-                levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(), imageRaster);
+                Raster imageRaster = this.imageReader.read(levelDestinationX, levelDestinationY, levelDestinationWidth,
+                        levelDestinationHeight);
+                levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(),
+                        imageRaster);
             } catch (IOException ex) {
-                throw new IllegalStateException("Failed to read the data for level " + level + " and rectangle " + levelDestinationRectangle + ".", ex);
+                throw new IllegalStateException(
+                        "Failed to read the data for level " + level + " and rectangle " + levelDestinationRectangle + ".", ex);
             }
         }
     }
 
     private abstract static class ImageReader {
+
         private final Path[] paths;
         private final int bandIndex;
-        final int[] index = new int[] { 0 };
+        final int[] index = new int[]{0};
 
         private ImageReader(GDALBandSource bandSource) {
             this.paths = bandSource.getSourceLocalFiles();
@@ -90,41 +113,40 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
 
         Raster read(int areaX, int areaY, int areaWidth, int areaHeight) throws IOException {
             final int pixels = areaWidth * areaHeight;
-            final ByteBuffer data = readRasterFromDataset(areaX, areaY, areaWidth, areaHeight, pixels);
+            final ByteBuffer data = readRasterFromDataset(areaX, areaY, areaWidth, areaHeight, pixels, true);
             final int dataBufferType = getDataBufferType();
             final DataBuffer imageDataBuffer = buildImageDataBuffer(data, dataBufferType, pixels);
             return buildWritableRaster(imageDataBuffer, areaWidth, areaHeight);
         }
 
-        ByteBuffer readRasterFromDataset(int areaX, int areaY, int areaWidth, int areaHeight, int pixels) throws IOException {
-            for (int retry = 0; ; retry++) {
-                if (retry > 0) {
+        ByteBuffer readRasterFromDataset(int areaX, int areaY, int areaWidth, int areaHeight, int pixels, boolean retry)
+                throws IOException {
+            try (Dataset dataset = openDataset(); Band band = openBand(dataset)) {
+                final int gdalBufferDataType = band.getDataType();
+                final int bufferSize = pixels * (GDAL.getDataTypeSize(gdalBufferDataType) >> 3);
+                final ByteBuffer data = ByteBuffer.allocateDirect(bufferSize);
+                data.order(ByteOrder.nativeOrder());
+
+                final int bandWidth = band.getXSize();
+                final int bandHeight = band.getYSize();
+                final int xSizeToRead = Math.min(areaWidth, bandWidth - areaX);
+                final int ySizeToRead = Math.min(areaHeight, bandHeight - areaY);
+                int returnVal = band.readRasterDirect(areaX, areaY, xSizeToRead, ySizeToRead, areaWidth, areaHeight,
+                        gdalBufferDataType, data);
+                if (returnVal == GDALConstConstants.cpleFileIO() && retry) {
                     try {
-                        Thread.currentThread().wait(1000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        Thread.sleep(1000);
+                        return readRasterFromDataset(areaX, areaY, areaWidth, areaHeight, pixels, false);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-                try (Dataset dataset = openDataset();
-                     Band band = openBand(dataset)) {
-                    final int gdalBufferDataType = band.getDataType();
-                    final int bufferSize = pixels * (GDAL.getDataTypeSize(gdalBufferDataType) >> 3);
-                    final ByteBuffer data = ByteBuffer.allocateDirect(bufferSize);
-                    data.order(ByteOrder.nativeOrder());
-
-                    final int bandWidth = band.getXSize();
-                    final int bandHeight = band.getYSize();
-                    final int xSizeToRead = Math.min(areaWidth, bandWidth - areaX);
-                    final int ySizeToRead = Math.min(areaHeight, bandHeight - areaY);
-                    int returnVal = band.readRasterDirect(areaX, areaY, xSizeToRead, ySizeToRead, areaWidth, areaHeight, gdalBufferDataType, data);
-                    if (returnVal == GDALConstConstants.cpleFileIO() && retry < 1) {
-                        continue;
-                    }
-                    if (returnVal == GDALConstConstants.ceNone()) {
-                        return data;
-                    } else {
-                        throw new IOException("Failed to read the product band data: rectangle=[" + areaX + ", " + areaY + ", " + areaWidth + ", " + areaHeight + "]" + " returnVal=" + returnVal + ".");
-                    }
+                if (returnVal == GDALConstConstants.ceNone()) {
+                    return data;
+                } else {
+                    throw new IOException(
+                            "Failed to read the product band data: rectangle=[" + areaX + ", " + areaY + ", " + areaWidth
+                                    + ", " + areaHeight + "]" + " returnVal=" + returnVal + ".");
                 }
             }
         }
@@ -174,7 +196,8 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
 
         Raster buildWritableRaster(DataBuffer imageDataBuffer, int areaWidth, int areaHeight) {
             final int imageDataBufferType = imageDataBuffer.getDataType();
-            final SampleModel sampleModel = new ComponentSampleModel(imageDataBufferType, areaWidth, areaHeight, 1, areaWidth, index);
+            final SampleModel sampleModel = new ComponentSampleModel(imageDataBufferType, areaWidth, areaHeight, 1, areaWidth,
+                    index);
             return Raster.createWritableRaster(sampleModel, imageDataBuffer, null);
         }
 
@@ -187,7 +210,7 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                     datasets[i] = GDAL.open(this.paths[i].toString(), GDALConst.gaReadonly());
                 }
                 final Dataset vrtDataset = GDAL.buildVRT("/vsimem/" + System.currentTimeMillis() + ".vrt",
-                                                         datasets, new BuildVRTOptions(new Vector<>()));
+                        datasets, new BuildVRTOptions(new Vector<>()));
                 return new VRTDataset(vrtDataset, datasets);
             }
         }
@@ -195,13 +218,15 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
         private Band openBand(Dataset dataset) {
             if (dataset == null) {
                 throw new IllegalStateException(String.format("Failed to open the GDAL dataset for file%s '%s'.",
-                                                              this.paths.length > 1 ? "s" : "",
-                                                              Arrays.stream(this.paths).map(Path::toString).collect(Collectors.joining(","))));
+                        this.paths.length > 1 ? "s" : "",
+                        Arrays.stream(this.paths)
+                                .map(Path::toString)
+                                .collect(Collectors.joining(","))));
             }
             final Band band;
             Band gdalRasterBand = (dataset instanceof VRTDataset
-                                   ? ((VRTDataset) dataset).getDataset()
-                                   : dataset).getRasterBand(this.bandIndex);
+                    ? ((VRTDataset) dataset).getDataset()
+                    : dataset).getRasterBand(this.bandIndex);
             int level = getLevel();
             if (level > 0 && gdalRasterBand.getOverviewCount() > 0) {
                 band = gdalRasterBand.getOverview(level - 1);
@@ -214,6 +239,7 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
     }
 
     private static class VRTDataset extends Dataset {
+
         private final Dataset vrtDataset;
         private final Dataset[] sourceDatasets;
 
