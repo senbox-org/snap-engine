@@ -61,6 +61,21 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+    /**
+     * Creates a new image layout for the specified level.
+     *
+     * @param image    the image to create an image layout for
+     * @param level    the level for which the image layout is created
+     * @param tileSize the default JAI tile size
+     * @return the image layout
+     */
+    public static ImageLayout buildImageLayout(RenderedImage image, int level, Dimension tileSize) {
+        ImageLayout layout = buildImageLayout(image.getSampleModel().getDataType(), image.getWidth(), image.getHeight(),
+                level, tileSize, tileSize.width, tileSize.height);
+        layout.setColorModel(image.getColorModel());
+        layout.setSampleModel(image.getSampleModel());
+        return layout;
+    }
 
     /**
      * Creates a new image layout for the specified level.
@@ -84,12 +99,12 @@ public class ImageUtils {
      * @param imageWidth the width of the image
      * @param imageHeight the height of the image
      * @param level the level for which the image layout is created
-     * @param defaultJAIReadTileSize the default JAI tile size
+     * @param tileSize the default JAI tile size
      * @param topLeftTileWidth the tile width from the left top corner of the final image
      * @param topLeftTileHeight the tile height from the left top corner of the final image
      * @return the image layout
      */
-    public static ImageLayout buildImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize,
+    public static ImageLayout buildImageLayout(Integer dataBufferType, int imageWidth, int imageHeight, int level, Dimension tileSize,
                                                int topLeftTileWidth, int topLeftTileHeight) {
         if (imageWidth < 0) {
             throw new IllegalArgumentException("imageWidth");
@@ -101,15 +116,15 @@ public class ImageUtils {
         int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
         int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
 
-        int levelTileWidth;// = Math.min(defaultJAIReadTileSize.width, topLeftTileWidth);
-        int levelTileHeight;// = Math.min(defaultJAIReadTileSize.height, topLeftTileHeight);
-        if (defaultJAIReadTileSize == null) {
+        int levelTileWidth;// = Math.min(tileSize.width, topLeftTileWidth);
+        int levelTileHeight;// = Math.min(tileSize.height, topLeftTileHeight);
+        if (tileSize == null) {
             levelTileWidth = JAIUtils.computePreferredTileSize(levelImageWidth, 1);
             levelTileHeight = JAIUtils.computePreferredTileSize(levelImageHeight, 1);
         } else {
             // do not compute the tile size using the level
-            levelTileWidth = defaultJAIReadTileSize.width;
-            levelTileHeight = defaultJAIReadTileSize.height;
+            levelTileWidth = tileSize.width;
+            levelTileHeight = tileSize.height;
         }
         if (levelTileWidth > topLeftTileWidth) {
             levelTileWidth = topLeftTileWidth;
@@ -125,41 +140,15 @@ public class ImageUtils {
      * Creates the image layout of a tile image for the specified level. The level tile size is smaller than the level image size.
      *
      * @param dataBufferType the buffer type of the sample model
-     * @param imageWidth the width of the image
-     * @param imageHeight the height of the image
+     * @param width the width of the image
+     * @param height the height of the image
      * @param level the level for which the image layout is created
-     * @param defaultJAIReadTileSize the default JAI tile size
+     * @param tileSize the default JAI tile size
      * @return the image layout
      */
-    public static ImageLayout buildTileImageLayout(int dataBufferType, int imageWidth, int imageHeight, int level, Dimension defaultJAIReadTileSize) {
-        if (imageWidth < 0) {
-            throw new IllegalArgumentException("imageWidth");
-        }
-        if (imageHeight < 0) {
-            throw new IllegalArgumentException("imageHeight");
-        }
-
-        int levelImageWidth = ImageUtils.computeLevelSize(imageWidth, level);
-        int levelImageHeight = ImageUtils.computeLevelSize(imageHeight, level);
-
-        int levelTileWidth;// = ImageUtils.computeLevelSize(defaultJAIReadTileSize.width, level);
-        int levelTileHeight;// = ImageUtils.computeLevelSize(defaultJAIReadTileSize.height, level);
-        if (defaultJAIReadTileSize == null) {
-            levelTileWidth = JAIUtils.computePreferredTileSize(levelImageWidth, 1);
-            levelTileHeight = JAIUtils.computePreferredTileSize(levelImageHeight, 1);
-        } else {
-            // do not compute the tile size using the level
-            levelTileWidth = defaultJAIReadTileSize.width;
-            levelTileHeight = defaultJAIReadTileSize.height;
-        }
-        if (levelTileWidth > levelImageWidth) {
-            levelTileWidth = levelImageWidth;
-        }
-        if (levelTileHeight > levelImageHeight) {
-            levelTileHeight = levelImageHeight;
-        }
-
-        return buildImageLayout(dataBufferType, levelImageWidth, levelImageHeight, levelTileWidth, levelTileHeight);
+    public static ImageLayout buildTileImageLayout(Integer dataBufferType, int width, int height, int level, Dimension tileSize) {
+        return buildImageLayout(dataBufferType, width, height, level, tileSize,
+                ImageUtils.computeLevelSize(width, level), ImageUtils.computeLevelSize(height, level));
     }
 
     private static ImageLayout buildImageLayout(Integer dataBufferType, int levelImageWidth, int levelImageHeight, int levelTileWidth, int levelTileHeight) {
