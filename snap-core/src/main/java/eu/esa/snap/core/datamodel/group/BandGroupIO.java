@@ -64,8 +64,16 @@ public class BandGroupIO {
             final int numPaths = grouping.size();
             for (int i = 0; i < numPaths; i++) {
                 final String[] paths = grouping.get(i);
+                String[] modifiedPaths = new String[paths.length];
+                for (int j = 0; j < paths.length; j++) {
+                    if (paths[j].contains("#") || paths[j].contains("*")) {
+                        modifiedPaths[j] = paths[j];
+                    } else {
+                        modifiedPaths[j] = paths[j] + "#" + paths[j];
+                    }
+                }
                 JSONArray path = new JSONArray();
-                Collections.addAll(path, paths);
+                Collections.addAll(path, modifiedPaths);
                 pathsArray.add(path);
             }
 
