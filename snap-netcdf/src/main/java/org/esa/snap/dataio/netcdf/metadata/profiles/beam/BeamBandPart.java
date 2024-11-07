@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
@@ -98,7 +99,7 @@ public class BeamBandPart extends ProfilePartIO {
             }
             CfBandPart.readCfBandAttributes(variable, band);
             readBeamBandAttributes(variable, band);
-            band.setSourceImage(new NetcdfMultiLevelImage(band, variable, ctx));
+            band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, ctx)));
         }
         // Work around for a bug in version 1.0.101
         // The solar flux and spectral band index were not preserved.

@@ -25,19 +25,19 @@ import java.awt.image.RenderedImage;
 
 import static org.junit.Assert.*;
 
-public class AbstractNetcdfMultiLevelImageTest {
+public class LazyMultiLevelSourceTest {
 
     @Test
     public void testCreatedImageHasSampleModel() {
         final Product product = new Product("product", "type", 101, 101);
         final Band rasterDataNode = product.addBand("name", ProductData.TYPE_INT32);
-        final AbstractNetcdfMultiLevelImage multiLevelImage = new AbstractNetcdfMultiLevelImage(rasterDataNode) {
+        final LazyMultiLevelSource multiLevelSource = new LazyMultiLevelSource(rasterDataNode) {
             @Override
             protected RenderedImage createImage(int level) {
                 return null;
             }
         };
-        assertNotNull("SampleModel is null", multiLevelImage.getSampleModel());
+        assertNotNull("SampleModel is null", multiLevelSource.getSampleModel());
     }
 
 }

@@ -26,6 +26,7 @@ import org.geotools.util.logging.Logging;
 
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
+import javax.media.jai.TileCache;
 import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
 import java.awt.Dimension;
@@ -450,14 +451,14 @@ public class SystemUtils {
         tileScheduler.setPrefetchParallelism(parallelism);
         LOG.fine(MessageFormat.format("JAI tile scheduler prefetch parallelism set to {0}", parallelism));
 
-        long OneMiB = 1024L * 1024L;
-
         JAI.enableDefaultTileCache();
-        long size = Config.instance().preferences().getLong("snap.jai.tileCacheSize", 1024L) * OneMiB;
-        JAI.getDefaultInstance().getTileCache().setMemoryCapacity(size);
-
-        final long tileCacheSize = JAI.getDefaultInstance().getTileCache().getMemoryCapacity() / OneMiB;
-        LOG.fine(MessageFormat.format("JAI tile cache size is {0} MiB", tileCacheSize));
+        long MB = 1024 * 1024;
+        long GB = 1024 * MB;
+        TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+        long dynamicMemory = (long) (Runtime.getRuntime().maxMemory() * 0.25) / MB;
+        long confCacheSize = Config.instance().preferences().getLong("snap.jai.tileCacheSize", dynamicMemory);
+        tileCache.setMemoryCapacity(confCacheSize * MB);
+        LOG.fine(String.format("JAI tile cache size is %.2f GB", (double) tileCache.getMemoryCapacity() / GB));
 
         final int tileSize = Config.instance().preferences().getInt("snap.jai.defaultTileSize", 512);
         JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));

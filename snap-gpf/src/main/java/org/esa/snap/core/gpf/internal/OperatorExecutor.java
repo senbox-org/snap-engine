@@ -26,15 +26,9 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
+import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -51,7 +45,7 @@ import java.util.concurrent.Semaphore;
  */
 public class OperatorExecutor {
 
-    private ImagesProvider imagesProvider;
+    private final ImagesProvider imagesProvider;
 
     public static OperatorExecutor create(Operator op) {
         return new OperatorExecutor(op);
@@ -115,7 +109,7 @@ public class OperatorExecutor {
         try {
             imagesProvider.init(SubProgressMonitor.create(pm, 1));
             scheduleBandsComputation(executionOrder, executionMessage, imagesProvider,
-                                     SubProgressMonitor.create(pm, 4));
+                    SubProgressMonitor.create(pm, 4));
         } finally {
             pm.done();
         }
@@ -202,14 +196,14 @@ public class OperatorExecutor {
     }
 
     private void scheduleRowColumnBand(PlanarImage[] images, int tileCountX, int tileCountY, Semaphore semaphore, ProgressMonitor pm) {
-        //better handle stack operators, should equal well work for normal operators
         if (images.length >= 1) {
-            final TileComputationListener tcl = new OperatorTileComputationListenerStack(semaphore, images,
-                    tileCountX, tileCountY, pm);
+            final TileComputationListener tcl = new OperatorTileComputationListener(semaphore, pm);
             final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
             for (int tileY = 0; tileY < tileCountY; tileY++) {
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    scheduleTile(images[0], tileX, tileY, tileCountX, tileCountY, semaphore, listeners, pm);
+                    for (final PlanarImage image : images) {
+                        scheduleTile(image, tileX, tileY, tileCountX, tileCountY, semaphore, listeners, pm);
+                    }
                 }
                 if (scheduleRowsSeparate) {
                     // wait until all threads / tiles are finished
@@ -224,7 +218,7 @@ public class OperatorExecutor {
                               TileComputationListener[] listeners, ProgressMonitor pm) {
 
         SystemUtils.LOG.finest(String.format("Scheduling tile x=%d/%d y=%d/%d for %s",
-                                             tileX + 1, tileCountX, tileY + 1, tileCountY, image));
+                tileX + 1, tileCountX, tileY + 1, tileCountY, image));
 
         checkForCancellation(pm);
         acquirePermits(semaphore, 1);
@@ -285,55 +279,6 @@ public class OperatorExecutor {
                     pm.worked(1);
                 }
             }
-        }
-    }
-
-    private class OperatorTileComputationListenerStack implements TileComputationListener {
-
-        private final Semaphore semaphore;
-        private final PlanarImage[] images;
-        private final ProgressMonitor pm;
-        private final int tileCountX;
-        private final int tileCountY;
-
-        OperatorTileComputationListenerStack(Semaphore semaphore, PlanarImage[] images, int tileCountX, int tileCountY,
-                                             ProgressMonitor pm) {
-            this.semaphore = semaphore;
-            this.images = images;
-            this.tileCountX = tileCountX;
-            this.tileCountY = tileCountY;
-            this.pm = pm;
-        }
-
-        @Override
-        public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX, int tileY,
-                                 Raster raster) {
-            for (PlanarImage planarImage : images) {
-                if (image != planarImage) {
-                    SystemUtils.LOG.finest(String.format("Scheduling tile x=%d/%d y=%d/%d for %s",
-                                                         tileX + 1, tileCountX, tileY + 1, tileCountY, planarImage));
-                    planarImage.getTile(tileX, tileY);
-                }
-                pm.worked(1);
-            }
-            semaphore.release();
-        }
-
-        @Override
-        public void tileCancelled(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX, int tileY) {
-            if (error == null) {
-                error = new OperatorException("Operation cancelled.");
-            }
-            semaphore.release(parallelism);
-        }
-
-        @Override
-        public void tileComputationFailure(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
-                                           int tileY, Throwable situation) {
-            if (error == null) {
-                error = new OperatorException("Operation failed.", situation);
-            }
-            semaphore.release(parallelism);
         }
     }
 

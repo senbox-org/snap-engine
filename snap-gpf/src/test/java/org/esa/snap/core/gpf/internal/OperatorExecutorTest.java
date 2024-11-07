@@ -21,33 +21,27 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.media.jai.JAI;
-import javax.media.jai.OpImage;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
-import java.awt.Point;
+import javax.media.jai.*;
+import java.awt.*;
 import java.awt.image.Raster;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class OperatorExecutorTest {
 
-    private class RecordingTileScheduler implements TileScheduler {
+    private static class RecordingTileScheduler implements TileScheduler {
 
         TileScheduler delegate;
-        List<String> recordedCalls = Collections.synchronizedList(new ArrayList<String>());
-        List<Point> requestedTileIndices = Collections.synchronizedList(new ArrayList<Point>());
+        List<String> recordedCalls = Collections.synchronizedList(new ArrayList<>());
+        List<Point> requestedTileIndices = Collections.synchronizedList(new ArrayList<>());
 
         RecordingTileScheduler(TileScheduler delegate) {
             this.delegate = delegate;
@@ -55,55 +49,49 @@ public class OperatorExecutorTest {
 
         @Override
         public void cancelTiles(TileRequest request, Point[] tileIndices) {
-            recordedCalls.add("cancelTiles");
             delegate.cancelTiles(request, tileIndices);
         }
 
         @Override
         public int getParallelism() {
-            recordedCalls.add("getParallelism");
             return delegate.getParallelism();
         }
 
         @Override
         public int getPrefetchParallelism() {
-            recordedCalls.add("getPrefetchParallelism");
             return delegate.getPrefetchParallelism();
         }
 
         @Override
         public int getPrefetchPriority() {
-            recordedCalls.add("getPrefetchPriority");
             return delegate.getPrefetchPriority();
         }
 
         @Override
         public int getPriority() {
-            recordedCalls.add("getPriority");
             return delegate.getPriority();
         }
 
         @Override
         public void prefetchTiles(PlanarImage target, Point[] tileIndices) {
-            recordedCalls.add("prefetchTiles");
             delegate.prefetchTiles(target, tileIndices);
         }
 
         @Override
         public Raster scheduleTile(OpImage target, int tileX, int tileY) {
-            recordedCalls.add("scheduleTile");
             return delegate.scheduleTile(target, tileX, tileY);
         }
 
         @Override
         public Raster[] scheduleTiles(OpImage target, Point[] tileIndices) {
-            recordedCalls.add("scheduleTiles");
             return delegate.scheduleTiles(target, tileIndices);
         }
 
         @Override
         public TileRequest scheduleTiles(PlanarImage target, Point[] tileIndices,
                                          TileComputationListener[] tileListeners) {
+            // this is the only method we invoke, thus the only method we need to record,
+            // everything else is out of our control
             recordedCalls.add("scheduleTiles");
             requestedTileIndices.addAll(Arrays.asList(tileIndices));
             return delegate.scheduleTiles(target, tileIndices, tileListeners);
@@ -111,30 +99,26 @@ public class OperatorExecutorTest {
 
         @Override
         public void setParallelism(int parallelism) {
-            recordedCalls.add("setParallelism");
             delegate.setParallelism(parallelism);
         }
 
         @Override
         public void setPrefetchParallelism(int parallelism) {
-            recordedCalls.add("setPrefetchParallelism");
             delegate.setPrefetchParallelism(parallelism);
         }
 
         @Override
         public void setPrefetchPriority(int priority) {
-            recordedCalls.add("setPrefetchPriority");
             delegate.setPrefetchPriority(priority);
         }
 
         @Override
         public void setPriority(int priority) {
-            recordedCalls.add("setPriority");
             delegate.setPriority(priority);
         }
     }
 
-    private class TestOP extends Operator {
+    private static class TestOP extends Operator {
 
         @SourceProduct
         Product source;
@@ -154,6 +138,39 @@ public class OperatorExecutorTest {
             setTargetProduct(targetProduct);
         }
 
+    }
+
+    private static class TestStackOP extends Operator {
+
+        @SourceProduct
+        Product source;
+
+        public TestStackOP(Product source) {
+            this.source = source;
+        }
+
+        @Override
+        public void initialize() throws OperatorException {
+            Product targetProduct = new Product("target", "target", 100, 100);
+            for (Band srcBand : source.getBands()) {
+                targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
+            }
+            setTargetProduct(targetProduct);
+        }
+
+        @Override
+        public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+            for (Map.Entry<Band, Tile> bandTileEntry : targetTiles.entrySet()) {
+                Band targetBand = bandTileEntry.getKey();
+                Band sourceBand = source.getBand(targetBand.getName());
+                Raster sourceData = sourceBand.getSourceImage().getData(targetRectangle);
+                Tile tile = bandTileEntry.getValue();
+                for (Tile.Pos pos : tile) {
+                    tile.setSample(pos.x, pos.y, sourceData.getSample(pos.x, pos.y, 0) + 1 );
+                }
+
+            }
+        }
     }
 
     private TileScheduler defaultTileScheduler;
@@ -178,10 +195,8 @@ public class OperatorExecutorTest {
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
 
-        assertEquals(3, recordingTileScheduler.recordedCalls.size());
-        assertEquals("getParallelism", recordingTileScheduler.recordedCalls.get(0));
-        assertEquals("scheduleTiles", recordingTileScheduler.recordedCalls.get(1));
-        assertEquals("scheduleTile", recordingTileScheduler.recordedCalls.get(2));
+        assertEquals(1, recordingTileScheduler.recordedCalls.size());
+        assertEquals("scheduleTiles", recordingTileScheduler.recordedCalls.get(0));
 
         assertEquals(1, recordingTileScheduler.requestedTileIndices.size());
         assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.get(0));
@@ -196,7 +211,7 @@ public class OperatorExecutorTest {
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
 
-        assertEquals(9, recordingTileScheduler.recordedCalls.size());
+        assertEquals(4, recordingTileScheduler.recordedCalls.size());
 
         assertEquals(4, recordingTileScheduler.requestedTileIndices.size());
         assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.get(0));
@@ -216,7 +231,7 @@ public class OperatorExecutorTest {
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
 
-        assertEquals(17, recordingTileScheduler.recordedCalls.size());
+        assertEquals(8, recordingTileScheduler.recordedCalls.size());
 
         assertEquals(8, recordingTileScheduler.requestedTileIndices.size());
         assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.get(0));
@@ -240,13 +255,41 @@ public class OperatorExecutorTest {
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(OperatorExecutor.ExecutionOrder.SCHEDULE_ROW_COLUMN_BAND, ProgressMonitor.NULL);
 
-        assertEquals(13, recordingTileScheduler.recordedCalls.size());
+        // 4 tiles * 2 bands = 8
+        assertEquals(8, recordingTileScheduler.requestedTileIndices.size());
+        // each tiles must be scheduled 2 times. One time for each band
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(0, 0).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(1, 0).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(0, 1).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(1, 1).equals(point)).count());
 
-        assertEquals(4, recordingTileScheduler.requestedTileIndices.size());
-        assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.get(0));
-        assertEquals(new Point(1, 0), recordingTileScheduler.requestedTileIndices.get(1));
-        assertEquals(new Point(0, 1), recordingTileScheduler.requestedTileIndices.get(2));
-        assertEquals(new Point(1, 1), recordingTileScheduler.requestedTileIndices.get(3));
+        // 8x scheduleTiles
+        assertEquals(8, recordingTileScheduler.recordedCalls.size());
+
+    }
+
+    @Test
+    public void testManyTilesTwoBands_withTileStackOp() {
+        Product sourceProduct = createSourceProduct();
+        Band bandB = sourceProduct.addBand("b", ProductData.TYPE_INT8);
+        bandB.setRasterData(createDataFor(bandB));
+        bandB.setSynthetic(true);
+        sourceProduct.setPreferredTileSize(50, 50);
+        Operator op = new TestStackOP(sourceProduct);
+        OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
+        operatorExecutor.execute(ProgressMonitor.NULL);
+
+        // 4 tiles * 2 bands = 8
+        assertEquals(8, recordingTileScheduler.requestedTileIndices.size());
+        // each tiles must be scheduled 2 times. One time for each band
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(0, 0).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(1, 0).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(0, 1).equals(point)).count());
+        assertEquals(2, recordingTileScheduler.requestedTileIndices.stream().filter(point -> new Point(1, 1).equals(point)).count());
+
+        // 8x scheduleTiles
+        assertEquals(8, recordingTileScheduler.recordedCalls.size());
+
     }
 
     private Product createSourceProduct() {
