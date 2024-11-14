@@ -8,7 +8,6 @@ import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.core.util.ModuleMetadata;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,10 +23,6 @@ public class NetCdfActivatorTest {
     String arch = System.getProperty("os.arch");
     String osName = System.getProperty("os.name");
 
-    @Before
-    public void setUp() {
-        NetCdfActivator.activated.set(false);
-    }
 
     @AfterClass
     public static void afterClass() {
