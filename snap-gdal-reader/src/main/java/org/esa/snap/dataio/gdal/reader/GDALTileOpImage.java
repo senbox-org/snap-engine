@@ -78,8 +78,8 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
             final int level = getLevel();
             int levelDestinationX = normalBoundsIntersection.x >> level;
             int levelDestinationY = normalBoundsIntersection.y >> level;
-            int levelDestinationWidth = normalBoundsIntersection.width >> level;
-            int levelDestinationHeight = normalBoundsIntersection.height >> level;
+            int levelDestinationWidth = Math.max(1, normalBoundsIntersection.width >> level);
+            int levelDestinationHeight = Math.max(1, normalBoundsIntersection.height >> level);
             try {
                 Raster imageRaster = this.imageReader.read(levelDestinationX, levelDestinationY, levelDestinationWidth,
                         levelDestinationHeight);
