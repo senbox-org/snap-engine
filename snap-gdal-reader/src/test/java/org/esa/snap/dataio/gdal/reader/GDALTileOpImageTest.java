@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal.reader;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import static org.junit.Assert.*;
 public class GDALTileOpImageTest {
 
     @Test
+    @STTM("SNAP-3885")
     public void ensureMinimunDimensionTest() {
         GDALTileOpImage tileOpImage = new GDALTileOpImage(new GDALBandSource() {
             @Override
