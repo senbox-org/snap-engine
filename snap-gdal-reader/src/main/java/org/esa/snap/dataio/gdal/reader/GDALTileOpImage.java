@@ -78,8 +78,8 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
             final int level = getLevel();
             int levelDestinationX = normalBoundsIntersection.x >> level;
             int levelDestinationY = normalBoundsIntersection.y >> level;
-            int levelDestinationWidth = Math.max(1, normalBoundsIntersection.width >> level);
-            int levelDestinationHeight = Math.max(1, normalBoundsIntersection.height >> level);
+            int levelDestinationWidth = ensureMinimunDimension(normalBoundsIntersection.width, level);
+            int levelDestinationHeight = ensureMinimunDimension(normalBoundsIntersection.height, level);
             try {
                 Raster imageRaster = this.imageReader.read(levelDestinationX, levelDestinationY, levelDestinationWidth,
                         levelDestinationHeight);
@@ -90,6 +90,10 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                         "Failed to read the data for level " + level + " and rectangle " + levelDestinationRectangle + ".", ex);
             }
         }
+    }
+
+    public int ensureMinimunDimension(int value, int level) {
+        return Math.max(1, value >> level);
     }
 
     private abstract static class ImageReader {
