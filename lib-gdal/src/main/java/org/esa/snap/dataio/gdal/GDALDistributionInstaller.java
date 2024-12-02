@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal;
 
+import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 
@@ -127,4 +128,15 @@ class GDALDistributionInstaller {
         OSR.setPROJSearchPath(projPath.toString());
     }
 
+    /**
+     * Setups the GDAL_DATA and GDAL_DRIVER_PATH path to correctly load the auxiliary components from internal distribution
+     *
+     * @param gdalVersion the GDAL version to be setup
+     */
+    static void setupGDAL(GDALVersion gdalVersion) {
+        final Path gdalDataPath = gdalVersion.getNativeLibrariesFolderPath().resolve("gdal-data");
+        GDAL.setConfigOption("GDAL_DATA", gdalDataPath.toString());
+        final Path gdalDriverPath = gdalVersion.getNativeLibrariesFolderPath().resolve("gdalplugins");
+        GDAL.setConfigOption("GDAL_DRIVER_PATH", gdalDriverPath.toString());
+    }
 }

@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.awt.*;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -293,5 +294,38 @@ public class ProductSubsetDefTest {
         assertTrue(subsetInfo.isIgnoreMetadata());
         subsetInfo.setIgnoreMetadata(false);
         assertFalse(subsetInfo.isIgnoreMetadata());
+    }
+
+    @Test
+    public void testSetValidSubsetRegionMaps() {
+        ProductSubsetDef subsetDef = new ProductSubsetDef();
+        HashMap<String, Rectangle> map = new HashMap<>();
+        Rectangle validRectangle = new Rectangle(0,0,4,23);
+        Rectangle invalidRectangle1 = new Rectangle(0,0,0,0);
+        Rectangle invalidRectangle2 = new Rectangle(0,0,4,0);
+        Rectangle invalidRectangle3 = new Rectangle(0,0,0,23);
+
+        map.put("valid_rectangle", validRectangle);
+        map.put("invalid_rectangle1", invalidRectangle1);
+        map.put("invalid_rectangle2", invalidRectangle2);
+        map.put("invalid_rectangle3", invalidRectangle3);
+
+        subsetDef.setRegionMap(map);
+        subsetDef.setNodeNames(new String[] {"valid_rectangle", "invalid_rectangle1", "invalid_rectangle2", "invalid_rectangle3"});
+        HashMap<String, Rectangle> updatedMap = subsetDef.getRegionMap();
+        String[] nodeNames = subsetDef.getNodeNames();
+
+        assertEquals(4, updatedMap.size());
+        assertEquals(4, nodeNames.length);
+
+        subsetDef.setValidSubsetRegionMaps();
+
+        assertEquals(1, updatedMap.size());
+        assertTrue(updatedMap.containsKey("valid_rectangle"));
+        assertEquals(validRectangle, updatedMap.get("valid_rectangle"));
+
+        nodeNames = subsetDef.getNodeNames();
+        assertEquals(1, nodeNames.length);
+        assertEquals("valid_rectangle", nodeNames[0]);
     }
 }

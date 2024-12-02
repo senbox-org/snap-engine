@@ -138,7 +138,7 @@ public class BandGroupIOTest {
         BandGroupIO.write(new BandGroupImpl[]{bandGrouping}, jsonStream);
 
         final String jsonContent = jsonStream.toString();
-        assertEquals("{\"bandGroups\":[{\"paths\":[[\"L1B\"],[\"dim\",\"rad\"]],\"name\":\"Argonaut\"}]}", jsonContent);
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"L1B#L1B\"],[\"dim#dim\",\"rad#rad\"]],\"name\":\"Argonaut\"}]}", jsonContent);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class BandGroupIOTest {
         BandGroupIO.write(new BandGroupImpl[]{grouping_1, grouping_2, grouping_3}, jsonStream);
 
         final String jsonContent = jsonStream.toString();
-        assertEquals("{\"bandGroups\":[{\"paths\":[[\"L1B\"],[\"dim\",\"rad\"]],\"name\":\"Anna\"},{\"paths\":[[\"_err\",\"_unc\"],[\"geo_\",\"in-situ_\"]],\"name\":\"Bert\"},{\"paths\":[[\"sensor_sync\"]],\"name\":\"Christa\"}]}",
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"L1B#L1B\"],[\"dim#dim\",\"rad#rad\"]],\"name\":\"Anna\"},{\"paths\":[[\"_err#_err\",\"_unc#_unc\"],[\"geo_#geo_\",\"in-situ_#in-situ_\"]],\"name\":\"Bert\"},{\"paths\":[[\"sensor_sync#sensor_sync\"]],\"name\":\"Christa\"}]}",
                 jsonContent);
     }
 
@@ -237,7 +237,7 @@ public class BandGroupIOTest {
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         BandGroupIO.write(bandGroups, outStream);
 
-        assertEquals("{\"bandGroups\":[{\"paths\":[[\"the\",\"duck\"]],\"name\":\"Tick\"},{\"paths\":[[\"another\",\"duck\"],[\"Faehnlein\",\"Fieselschweif\"]],\"name\":\"Trick\"},{\"paths\":[[\"young\",\"duck\"],[\"living\",\"Entenhausen\"]],\"name\":\"Track\"}]}",
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"the#the\",\"duck#duck\"]],\"name\":\"Tick\"},{\"paths\":[[\"another#another\",\"duck#duck\"],[\"Faehnlein#Faehnlein\",\"Fieselschweif#Fieselschweif\"]],\"name\":\"Trick\"},{\"paths\":[[\"young#young\",\"duck#duck\"],[\"living#living\",\"Entenhausen#Entenhausen\"]],\"name\":\"Track\"}]}",
                 outStream.toString());
     }
 
@@ -249,6 +249,6 @@ public class BandGroupIOTest {
         final ByteArrayOutputStream jsonStream = new ByteArrayOutputStream();
         BandGroupIO.write(new BandGroup[] {bandGroup}, jsonStream);
 
-        assertEquals("{\"bandGroups\":[{\"paths\":[[\"OGVI\",\"OTCI\",\"FAPAR\"]],\"name\":\"hannimoon\"}]}", jsonStream.toString());
+        assertEquals("{\"bandGroups\":[{\"paths\":[[\"OGVI#OGVI\",\"OTCI#OTCI\",\"FAPAR#FAPAR\"]],\"name\":\"hannimoon\"}]}", jsonStream.toString());
     }
 }
