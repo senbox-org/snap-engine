@@ -134,11 +134,13 @@ public final class ComputeSlopeAspectOp extends Operator {
     private void getPixelSpacings() throws Exception {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-        rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
-        azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
+        if (absRoot != null) {
+            rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
+            azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
+        }
 
         if (rangeSpacing == AbstractMetadata.NO_METADATA || azimuthSpacing == AbstractMetadata.NO_METADATA ||
-                rangeSpacing == 0 || azimuthSpacing == 0) {
+                rangeSpacing == 0.0 || azimuthSpacing == 0.0) {
             rangeSpacing = getResolutionXAtCentre(sourceProduct);
             azimuthSpacing = getResolutionYAtCentre(sourceProduct);
         }
