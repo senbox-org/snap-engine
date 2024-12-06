@@ -18,9 +18,12 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.IOException;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -644,5 +647,60 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         assertEquals(3.4f, dataClone[2], 1e-8);
         assertEquals(4.5f, dataClone[3], 1e-8);
         assertNotSame(grid.getData().getElems(), dataClone);
+    }
+
+    @Test
+    @STTM("SNAP-3674")
+    public void testCreationOfSmallTiePointGrids() {
+        TiePointGrid tpg = new TiePointGrid("abc",
+                4,
+                4,
+                0.0,
+                0.0,
+                64.0,
+                64.0,
+                new float[]{11.0f, 12.0f, 13.0f, 14.0f,
+                            21.0f, 22.0f, 23.0f, 24.0f,
+                            31.0f, 32.0f, 33.0f, 34.0f,
+                            41.0f, 42.0f, 43.0f, 44.0f,}
+        );
+
+        float[] expectedTiePoints = {
+                33.0f, 34.0f,
+                43.0f, 44.0f
+        };
+
+        ProductSubsetDef subsetDef = new ProductSubsetDef();
+        HashMap<String, Rectangle> subsetRegion = new HashMap<>();
+        subsetRegion.put(tpg.getName(), new Rectangle(194,195,28,27));
+        subsetDef.setRegionMap(subsetRegion);
+
+        TiePointGrid subsetGrid = TiePointGrid.createSubset(tpg, subsetDef);
+
+        assertEquals(2, subsetGrid.getGridWidth());
+        assertEquals(2, subsetGrid.getGridHeight());
+        assertEquals(-2.0, subsetGrid.getOffsetX(), 1e-6);
+        assertEquals(-3.0, subsetGrid.getOffsetY(), 1e-6);
+        assertEquals(64.0, subsetGrid.getSubSamplingX(), 1e-6);
+        assertEquals(64.0, subsetGrid.getSubSamplingY(), 1e-6);
+
+        assertArrayEquals(expectedTiePoints, subsetGrid.getTiePoints(), 1e-6f);
+
+
+        ProductSubsetDef subsetDef2 = new ProductSubsetDef();
+        HashMap<String, Rectangle> subsetRegion2 = new HashMap<>();
+        subsetRegion2.put(tpg.getName(), new Rectangle(187,177,14,120));
+        subsetDef2.setRegionMap(subsetRegion2);
+
+        TiePointGrid subsetGrid2 = TiePointGrid.createSubset(tpg, subsetDef2);
+
+        assertEquals(2, subsetGrid2.getGridWidth());
+        assertEquals(2, subsetGrid2.getGridHeight());
+        assertEquals(-59.0, subsetGrid2.getOffsetX(), 1e-6);
+        assertEquals(-49.0, subsetGrid2.getOffsetY(), 1e-6);
+        assertEquals(64.0, subsetGrid2.getSubSamplingX(), 1e-6);
+        assertEquals(64.0, subsetGrid2.getSubSamplingY(), 1e-6);
+
+        assertArrayEquals(expectedTiePoints, subsetGrid2.getTiePoints(), 1e-6f);
     }
 }
