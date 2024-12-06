@@ -4,6 +4,7 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,7 +25,13 @@ public class BeamTileSizeTest {
     public static void beforeClass() {
         SystemUtils.init3rdPartyLibs(Object.class);
         NetCdfActivator.activate();
+    }
 
+    @AfterClass
+    public static void afterClass() {
+        // This ensures that the classloader is garbage collected and thus the
+        // netcdf native libs are unloaded again tb 2024-10-28
+        System.gc();
     }
 
     @Test

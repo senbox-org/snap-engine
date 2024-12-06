@@ -1,11 +1,10 @@
-package org.esa.snap.engine_utilities.util;
+package eu.esa.snap.core.lib;
 
 import java.nio.file.FileSystemException;
 
 /**
  * Created by jcoravu on 16/4/2019.
  */
-@Deprecated
 public class NotRegularFileException extends FileSystemException {
 
     public NotRegularFileException(String file) {

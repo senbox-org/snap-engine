@@ -17,11 +17,13 @@
  */
 package org.esa.snap.dataio.gdal;
 
+import eu.esa.snap.core.lib.FileHelper;
+import eu.esa.snap.core.lib.NativeLibraryClassLoader;
+import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
-import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
 
 import java.io.IOException;
@@ -45,12 +47,10 @@ public final class GDALLoader {
 
     private static final GDALLoader INSTANCE = new GDALLoader();
 
-    private static final String GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME = "org.esa.snap.NativeLibraryLoader";
-
     private static final Logger logger = Logger.getLogger(GDALLoader.class.getName());
 
     private GDALVersion gdalVersion;
-    private GDALLoaderClassLoader gdalVersionLoader;
+    private NativeLibraryClassLoader gdalVersionLoader;
 
     private Map<Integer, Integer> bandToGDALDataTypes;
     private static Boolean GDALDistributionInitializedOnce = false;
@@ -96,7 +96,8 @@ public final class GDALLoader {
                 gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
                 while (!gdalDirectoryLocker.tryLockDirectory());
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
-                this.gdalVersionLoader = new GDALLoaderClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
+                String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+                this.gdalVersionLoader = new NativeLibraryClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), NativeLibraryTools.getLoaderLibraryFilePath(libraryRoot).toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
                 loadGDALNativeLibrary();
                 GDALInstallInfo.INSTANCE.setLocations(this.gdalVersion.getLocationPath());
                 initDrivers();
@@ -193,8 +194,9 @@ public final class GDALLoader {
      */
     private void loadGDALNativeLibrary() {
         try {
-            copyLoaderLibrary();
-            final Method loaderMethod = this.gdalVersionLoader.loadClass(GDAL_NATIVE_LIBRARY_LOADER_CLASS_NAME).getMethod("loadNativeLibrary", Path.class);
+            String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+            NativeLibraryTools.copyLoaderLibrary(libraryRoot);
+            final Method loaderMethod = this.gdalVersionLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);
             for (Path nativeLibraryFilePath : this.gdalVersion.getGDALNativeLibraryFilesPath()) {
                 loaderMethod.invoke(null, nativeLibraryFilePath);
                 if (logger.isLoggable(Level.FINE)) {
@@ -210,14 +212,17 @@ public final class GDALLoader {
      * Copies the loader library used for load GDAL native library.
      *
      * @throws IOException When IO error occurs
+     * @deprecated
      */
-    private static void copyLoaderLibrary() throws IOException {
-        final Path loaderFilePath = GDALVersion.getLoaderLibraryFilePath();
+    @Deprecated
+    public static void copyLoaderLibrary() throws IOException {
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        final Path loaderFilePath = NativeLibraryTools.getLoaderLibraryFilePath(libraryRoot);
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Copy the loader library file.");
         }
 
-        final URL libraryFileURLFromSources = GDALVersion.getLoaderFilePathFromSources();
+        final URL libraryFileURLFromSources = NativeLibraryTools.getLoaderFilePathFromSources();
         if (libraryFileURLFromSources != null) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("The loader library file path on the local disk is '" + loaderFilePath + "' and the library file name from sources is '" + libraryFileURLFromSources + "'.");

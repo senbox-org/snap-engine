@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
@@ -35,7 +36,8 @@ public class GDALLoaderTest extends AbstractGDALTest {
     private Path testFilePath;
 
     private static URLClassLoader getExpectedGDALVersionLoader() throws Exception {
-        return new URLClassLoader(new URL[]{TEST_GDAL_VERSION.getJNILibraryFilePath().toUri().toURL(), GDALVersion.getLoaderLibraryFilePath().toUri().toURL()}, GDALLoader.class.getClassLoader());
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        return new URLClassLoader(new URL[]{TEST_GDAL_VERSION.getJNILibraryFilePath().toUri().toURL(), NativeLibraryTools.getLoaderLibraryFilePath(libraryRoot).toUri().toURL()}, GDALLoader.class.getClassLoader());
     }
 
     private static int getExpectedGDALDataType(int bandDataType) {
