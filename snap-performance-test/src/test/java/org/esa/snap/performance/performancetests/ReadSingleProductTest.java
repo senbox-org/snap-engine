@@ -3,65 +3,56 @@ package org.esa.snap.performance.performancetests;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.StopWatch;
-import org.esa.snap.performance.util.TestResult;
-import org.esa.snap.performance.util.Parameters;
-import org.esa.snap.performance.util.TestUtils;
-import org.esa.snap.performance.util.Unit;
+import org.esa.snap.performance.util.*;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ReadSingleProductTest extends AbstractPerformanceTest {
 
-    public ReadSingleProductTest(Parameters params) {
-        super("read-single-product", params, Unit.MS);
+    public ReadSingleProductTest(String testName, Parameters params) {
+        super(testName, params);
     }
 
     @Override
-    public void execute() throws IOException {
-        System.out.println("Executing " + getTestName() + " test for product: " + getProductName());
-
+    public CalculationContainer executeTest(String format) throws IOException {
         int numExecutions = getNumExecutionsForAverageOperations();
         if (isDiscardingFirstMeasure()) {
             numExecutions++;
         }
-        long[] timesDiMap = new long[numExecutions];
-        long[] timesZNAP = new long[numExecutions];
+        long[] times = new long[numExecutions];
+        long maxMemoryConsumption = 0;
 
-        File productFileDimap = TestUtils.buildProductPath(getTestDataDir(), getProductName() + ".dim");
-        File productFileZNAP = TestUtils.buildProductPath(getTestDataDir(), getProductName() + ".znap");
+        String fullFilePath = TestUtils.buildProductPathString(getTestDataDir(), getProductName());
+        File productFile;
+        File dataFile;
 
-        for (int ii = 0; ii < numExecutions; ii++) {
-            timesDiMap[ii] = executeTest(productFileDimap);
-            timesZNAP[ii] = executeTest(productFileZNAP);
+        if (format.equals(TestUtils.FORMAT_DIMAP)) {
+            productFile = new File(fullFilePath + TestUtils.EXTENSION_DIMAP);
+            dataFile = new File(fullFilePath + TestUtils.EXTENSION_DIMAP_DATA);
+        } else {
+            productFile = new File(fullFilePath + TestUtils.EXTENSION_ZNAP_UNZIPPED);
+            dataFile = productFile;
         }
 
-        timesDiMap = TestUtils.reduceResultArray(isDiscardingFirstMeasure(), timesDiMap);
-        timesZNAP = TestUtils.reduceResultArray(isDiscardingFirstMeasure(), timesZNAP);
-        double resultDiMap = TestUtils.calculateArithmeticMean(timesDiMap);
-        double resultZNAP = TestUtils.calculateArithmeticMean(timesZNAP);
+        for (int ii = 0; ii < numExecutions; ii++) {
+            long memoryBefore = TestUtils.getUsedMemory();
+            StopWatch watch = new StopWatch();
 
-        setResult(new TestResult(
-                getTestName(),
-                getProductName(),
-                getThreading(),
-                getUnit(),
-                resultDiMap,
-                resultZNAP
-        ));
+            watch.start();
+            Product product = ProductIO.readProduct(productFile);
+            watch.stop();
 
-        System.out.println("Test completed");
-    }
+            long memoryAfter = TestUtils.getUsedMemory();
+            long memoryConsumption = memoryAfter - memoryBefore;
+            if (memoryConsumption > maxMemoryConsumption) {
+                maxMemoryConsumption = memoryConsumption;
+            }
 
-    private long executeTest(File productFile) throws IOException {
+            product.dispose();
+            times[ii] = watch.getTimeDiff();
+        }
 
-        // TODO implement threading!!!
-        // this is single threaded!!!
-        StopWatch watch = new StopWatch();
-        watch.start();
-        Product product = ProductIO.readProduct(productFile);
-        watch.stop();
-        product.dispose();
-        return watch.getTimeDiff();
+        return new CalculationContainer(times, new File[] {dataFile}, maxMemoryConsumption / (1024.0 * 1024.0));
     }
 }

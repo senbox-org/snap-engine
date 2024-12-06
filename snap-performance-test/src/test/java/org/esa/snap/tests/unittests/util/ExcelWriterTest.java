@@ -21,19 +21,31 @@ public class ExcelWriterTest {
         Path resultsDir = tempDir.resolve(TestUtils.RESULTS_DIR);
         Files.createDirectory(resultsDir);
 
-        TestResult result = new TestResult(
+        IndividualTestResult individualResult1 = new IndividualTestResult(
                 "xy",
                 "My Product",
-                Threading.MULTI,
-                Unit.MB_S,
+                Unit.MB_PER_S,
                 24.3,
                 12.7
         );
 
-        List<TestResult> results = new ArrayList<>();
-        results.add(result);
+        IndividualTestResult individualResult2 = new IndividualTestResult(
+                "yz",
+                "My Product",
+                Unit.MS,
+                12.3,
+                10.7
+        );
 
-        ExcelWriter.writeExcelFile(outputDir, results);
+        TestResult singleTestResults = new TestResult("ABC", "My Product");
+        singleTestResults.addIndividualResult(individualResult1);
+        singleTestResults.addIndividualResult(individualResult2);
+
+
+        List<TestResult> allResults = new ArrayList<>();
+        allResults.add(singleTestResults);
+
+        ExcelWriter.writeExcelFile(outputDir, allResults);
 
         assertTrue("Results directory should exist", Files.exists(resultsDir));
         assertTrue("Results directory should be a directory", Files.isDirectory(resultsDir));

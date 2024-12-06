@@ -28,9 +28,10 @@ public class TestInitialisationOperationsTest {
         assertTrue("Results directory should exist", Files.exists(resultsDir));
         assertTrue("Results directory should be a directory", Files.isDirectory(resultsDir));
 
-        assertEquals("Two tests should be initialized", 2, tests.size());
+        assertEquals("Two tests should be initialized", 3, tests.size());
         assertEquals("read-single-product", tests.get(0).getTestName());
-        assertEquals("write-single-product", tests.get(1).getTestName());
+        assertEquals("write-single-product-from-reader", tests.get(1).getTestName());
+        assertEquals("write-single-product-from-memory", tests.get(2).getTestName());
 
         deleteDirectory(tempDir);
     }
@@ -53,13 +54,16 @@ public class TestInitialisationOperationsTest {
 
             {
                 properties.setProperty("outputDir", outputDir);
-                properties.setProperty("testNames", "read-single-product-test1,write-single-product-test2");
+                properties.setProperty("testNames", "read-single-product-test1,write-single-product-test2,write-single-product-test3");
                 properties.setProperty("read-single-product-test1.testImplementation", "read-single-product");
                 properties.setProperty("read-single-product-test1.productName", "testProduct1");
                 properties.setProperty("read-single-product-test1.threading", "SINGLE");
-                properties.setProperty("write-single-product-test2.testImplementation", "write-single-product");
+                properties.setProperty("write-single-product-test2.testImplementation", "write-single-product-from-reader");
                 properties.setProperty("write-single-product-test2.productName", "testProduct2");
                 properties.setProperty("write-single-product-test2.threading", "SINGLE");
+                properties.setProperty("write-single-product-test3.testImplementation", "write-single-product-from-memory");
+                properties.setProperty("write-single-product-test3.productName", "testProduct3");
+                properties.setProperty("write-single-product-test3.threading", "SINGLE");
                 properties.setProperty("testDataDir", "/test/data");
                 properties.setProperty("discardFirstMeasure", "true");
                 properties.setProperty("numExecutionsForAverageOperations", "5");

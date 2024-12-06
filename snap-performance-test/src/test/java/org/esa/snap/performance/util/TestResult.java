@@ -1,21 +1,18 @@
 package org.esa.snap.performance.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestResult {
 
     private final String testName;
     private final String productName;
-    private final Threading threading;
-    private final Unit unit;
-    private final double resultDiMap;
-    private final double resultZNAP;
+    private final List<IndividualTestResult> results;
 
-    public TestResult(String testName, String productName, Threading threading, Unit unit, double resultDiMap, double resultZNAP) {
+    public TestResult(String testName, String productName) {
         this.testName = testName;
         this.productName = productName;
-        this.threading = threading;
-        this.unit = unit;
-        this.resultDiMap = resultDiMap;
-        this.resultZNAP = resultZNAP;
+        this.results = new ArrayList<>();
     }
 
     public String getTestName() {
@@ -26,19 +23,11 @@ public class TestResult {
         return productName;
     }
 
-    public Threading getThreading() {
-        return threading;
+    public List<IndividualTestResult> getResults() {
+        return results;
     }
 
-    public Unit getUnit() {
-        return unit;
-    }
-
-    public double getResultDiMap() {
-        return resultDiMap;
-    }
-
-    public double getResultZNAP() {
-        return resultZNAP;
+    public void addIndividualResult(IndividualTestResult individualTestResult) {
+        this.results.add(individualTestResult);
     }
 }

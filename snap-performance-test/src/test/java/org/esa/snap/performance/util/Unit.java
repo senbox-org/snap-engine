@@ -2,7 +2,8 @@ package org.esa.snap.performance.util;
 
 public enum Unit {
     MS("ms"),
-    MB_S("Mb/s");
+    MB_PER_S("MB/s"),
+    MB("MB");
 
     private final String name;
 

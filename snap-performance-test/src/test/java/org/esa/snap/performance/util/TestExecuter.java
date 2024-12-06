@@ -21,7 +21,7 @@ public class TestExecuter {
     public static List<TestResult> fetchAllTestResults(List<AbstractPerformanceTest> tests) {
         List<TestResult> results = new ArrayList<>();
         for (AbstractPerformanceTest test : tests) {
-            results.add(test.getResult());
+            results.add(test.getTestResult());
         }
         return  results;
     }

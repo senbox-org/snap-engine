@@ -4,41 +4,22 @@ import org.esa.snap.performance.util.Parameters;
 
 public class PerformanceTestFactory {
 
+    public static final String READ_SINGLE_PRODUCT_TEST = "read-single-product";
+    public static final String WRITE_SINGLE_PRODUCT_FROM_READER = "write-single-product-from-reader";
+    public static final String WRITE_SINGLE_PRODUCT_FROM_MEMORY = "write-single-product-from-memory";
+
     public static AbstractPerformanceTest createPerformanceTest(Parameters params) {
         String name = params.getTestName().toLowerCase();
 
-        for (TestName test : TestName.values()) {
-            if (name.equals(test.getName())) {
-                return test.createTest(params);
-            }
+        switch (name) {
+            case READ_SINGLE_PRODUCT_TEST:
+                return new ReadSingleProductTest(name, params);
+            case WRITE_SINGLE_PRODUCT_FROM_READER:
+                return new WriteProductFromReaderTest(name, params);
+            case WRITE_SINGLE_PRODUCT_FROM_MEMORY:
+                return new WriteProductFromMemoryTest(name, params);
+            default:
+                throw new IllegalArgumentException("Unknown test name: " + name);
         }
-        throw new IllegalArgumentException("Unknown test name: " + name);
-    }
-
-    private enum TestName {
-        READ_SINGLE_PRODUCT("read-single-product") {
-            @Override
-            public AbstractPerformanceTest createTest(Parameters params) {
-                return new ReadSingleProductTest(params);
-            }
-        },
-        WRITE_SINGLE_PRODUCT("write-single-product") {
-            @Override
-            public AbstractPerformanceTest createTest(Parameters params) {
-                return new WriteSingleProductTest(params);
-            }
-        };
-
-        private final String name;
-
-        TestName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public abstract AbstractPerformanceTest createTest(Parameters params);
     }
 }

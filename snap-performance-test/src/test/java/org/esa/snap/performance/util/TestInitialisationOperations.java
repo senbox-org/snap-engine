@@ -13,7 +13,7 @@ import java.util.List;
 public class TestInitialisationOperations {
 
     public static List<AbstractPerformanceTest> initialize(ConfigLoader config) throws IOException {
-        initializeOutputDirectory(config);
+        initializeOutputDirectory(config.get("outputDir"));
         List<Parameters> parametersList = initializeParams(config);
 
         return initializeTests(parametersList);
@@ -39,6 +39,7 @@ public class TestInitialisationOperations {
                     config.get(testName + ".testImplementation"),
                     config.get(testName + ".productName"),
                     config.get("testDataDir"),
+                    config.get("outputDir"),
                     Boolean.parseBoolean(config.get("discardFirstMeasure")),
                     Threading.matchStringToEnum(config.get(testName + ".threading")),
                     Integer.parseInt(config.get("numExecutionsForAverageOperations"))
@@ -48,8 +49,7 @@ public class TestInitialisationOperations {
         return parameterList;
     }
 
-    private static void initializeOutputDirectory(ConfigLoader config) throws IOException {
-        String outputDirPath = config.get("outputDir");
+    private static void initializeOutputDirectory(String outputDirPath) throws IOException {
         if (outputDirPath == null) {
             throw new IllegalArgumentException("Output directory path is not defined in configuration ('outputDir'). Please check your configuration file.");
         }

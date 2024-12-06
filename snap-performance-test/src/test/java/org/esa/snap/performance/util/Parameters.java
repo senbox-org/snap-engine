@@ -5,14 +5,16 @@ public class Parameters {
     private final String testName;
     private final String productName;
     private final String testDirectory;
+    private final String outputDir;
     private final Threading threading;
     private final boolean discardFirstMeasure;
     private final int numExecutionsForAverageOperations;
 
-    public Parameters(String testName, String productName, String testDirectory, boolean discardFirstMeasure, Threading threading, int numExecutionsForAverageOperations) {
+    public Parameters(String testName, String productName, String testDirectory, String outputDir,boolean discardFirstMeasure, Threading threading, int numExecutionsForAverageOperations) {
         this.testName = testName;
         this.productName = productName;
         this.testDirectory = testDirectory;
+        this.outputDir = outputDir;
         this.threading = threading;
         this.discardFirstMeasure = discardFirstMeasure;
         this.numExecutionsForAverageOperations = numExecutionsForAverageOperations;
@@ -28,6 +30,10 @@ public class Parameters {
 
     public String getTestDirectory() {
         return this.testDirectory;
+    }
+
+    public String getOutputDir() {
+        return outputDir;
     }
 
     public Threading getThreading() {

@@ -15,7 +15,7 @@ public class ExcelWriter {
     private final static String[] headerTitles = {
             "Test Name",
             "Product Name",
-            "Threading",
+            "Individual Test Measure",
             "Result DiMap",
             "Result ZNAP",
             "Unit",
@@ -52,23 +52,35 @@ public class ExcelWriter {
             Row row = sheet.createRow(rowIndex++);
             row.createCell(0).setCellValue(result.getTestName());
             row.createCell(1).setCellValue(result.getProductName());
-            row.createCell(2).setCellValue(result.getThreading().getName());
 
-            double resultDiMap = result.getResultDiMap();
-            double resultZNAP = result.getResultZNAP();
-            row.createCell(3).setCellValue(resultDiMap);
-            row.createCell(4).setCellValue(resultZNAP);
-            row.createCell(5).setCellValue(result.getUnit().getName());
+            boolean isFirstIteration = true;
+            for (IndividualTestResult individualTestResult : result.getResults()) {
+                if (!isFirstIteration) {
+                    row = sheet.createRow(rowIndex++);
+                }
+                row.createCell(2).setCellValue(individualTestResult.getTestName());
 
-            CellStyle style = workbook.createCellStyle();
-            style.setFillForegroundColor(
-                    resultZNAP < resultDiMap
-                    ? IndexedColors.GREEN.getIndex()
-                    : IndexedColors.RED.getIndex()
-            );
-            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            Cell indicatorCell = row.createCell(6);
-            indicatorCell.setCellStyle(style);
+                double resultDiMap = individualTestResult.getResultDiMap();
+                double resultZNAP = individualTestResult.getResultZNAP();
+                row.createCell(3).setCellValue(resultDiMap);
+                row.createCell(4).setCellValue(resultZNAP);
+                row.createCell(5).setCellValue(individualTestResult.getUnit().getName());
+
+                CellStyle style = workbook.createCellStyle();
+                style.setFillForegroundColor(
+                        resultZNAP < resultDiMap
+                                ? IndexedColors.GREEN.getIndex()
+                                : resultZNAP == resultDiMap
+                                ? IndexedColors.GREY_40_PERCENT.getIndex()
+                                : IndexedColors.RED.getIndex()
+                );
+                style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                Cell indicatorCell = row.createCell(6);
+                indicatorCell.setCellStyle(style);
+
+                isFirstIteration = false;
+            }
+            rowIndex++;
         }
 
         setCoulumWidths(sheet);
@@ -95,7 +107,7 @@ public class ExcelWriter {
     }
 
     private static void setCoulumWidths(Sheet sheet) {
-        int[] columnWidths = {20 * 256, 80 * 256, 20 * 256, 20 * 256, 20 * 256, 20 * 256, 40 * 256};
+        int[] columnWidths = {25 * 256, 80 * 256, 25 * 256, 20 * 256, 20 * 256, 10 * 256, 40 * 256};
         for (int ii = 0; ii < columnWidths.length; ii++) {
             sheet.setColumnWidth(ii, columnWidths[ii]);
         }
