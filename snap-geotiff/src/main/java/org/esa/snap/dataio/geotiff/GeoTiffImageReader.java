@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.geotiff;
 
+import eu.esa.snap.core.lib.NotRegularFileException;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
@@ -8,7 +9,6 @@ import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
-import org.esa.snap.engine_utilities.util.NotRegularFileException;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;

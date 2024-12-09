@@ -4,6 +4,7 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +27,13 @@ public class CfTileSizeTest {
         NetCdfActivator.activate();
     }
 
+    @AfterClass
+    public static void afterClass() {
+        // This ensures that the classloader is garbage collected and thus the
+        // netcdf native libs are unloaded again tb 2024-10-28
+        System.gc();
+    }
+
     @Test
     public void testTileSizeIsConsidered() throws Exception {
         CfNetCdfReaderPlugIn plugIn = new CfNetCdfReaderPlugIn();
@@ -39,5 +47,4 @@ public class CfTileSizeTest {
         URL url = CfTileSizeTest.class.getResource("tileSizeTest_nc4CF.nc");
         return new File(url.toURI());
     }
-
 }

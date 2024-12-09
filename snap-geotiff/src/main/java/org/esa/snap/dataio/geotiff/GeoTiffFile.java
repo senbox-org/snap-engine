@@ -1,9 +1,9 @@
 package org.esa.snap.dataio.geotiff;
 
+import eu.esa.snap.core.lib.FileHelper;
+import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.engine_utilities.file.AbstractFile;
-import org.esa.snap.engine_utilities.file.FileHelper;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
-import org.esa.snap.engine_utilities.util.NotRegularFileException;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 
 import java.io.Closeable;

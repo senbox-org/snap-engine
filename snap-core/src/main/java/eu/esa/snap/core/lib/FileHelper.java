@@ -15,9 +15,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.snap.engine_utilities.file;
-
-import org.esa.snap.engine_utilities.util.NotRegularFileException;
+package eu.esa.snap.core.lib;
 
 import java.io.*;
 import java.net.URL;
@@ -41,7 +39,6 @@ import java.util.zip.ZipFile;
 /**
  * Created by kraftek on 2/20/2015.
  */
-@Deprecated
 public class FileHelper {
 
     private FileHelper() {
@@ -125,7 +122,7 @@ public class FileHelper {
      * @param basePath  The parent folder
      * @param pathFragments Additional subfolders that should end with the file name
      * @return  The File object
-     * @throws java.io.IOException
+     * @throws IOException
      */
     public static File getFile(String basePath, String...pathFragments) throws IOException {
         File file = new File(basePath);

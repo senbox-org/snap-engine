@@ -1,10 +1,7 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import ucar.ma2.DataType;
 
 import java.io.IOException;
@@ -24,6 +21,13 @@ public class MaxStringAttributeLengthTest {
     @BeforeClass
     public static void setupTestClass() {
         NetCdfActivator.activate();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        // This ensures that the classloader is garbage collected and thus the
+        // netcdf native libs are unloaded again tb 2024-10-28
+        System.gc();
     }
 
     private static final int TOO_LONG = N4Variable.MAX_ATTRIBUTE_LENGTH + 10;

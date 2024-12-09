@@ -41,6 +41,13 @@ public class GloballyShiftedDataTest {
     private static final int HALF_WIDTH = WIDTH / 2;
     private Product product;
 
+    @AfterClass
+    public static void afterClass() {
+        // This ensures that the classloader is garbage collected and thus the
+        // netcdf native libs are unloaded again tb 2024-10-28
+        System.gc();
+    }
+
     // This generates data which mimics the LCCCI data for the Climate Data Store, just with a lower resolution
     // This test relates to https://senbox.atlassian.net/browse/SNAP-950
     @BeforeClass
