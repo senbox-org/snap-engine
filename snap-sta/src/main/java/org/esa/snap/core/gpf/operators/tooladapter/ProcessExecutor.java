@@ -53,7 +53,7 @@ public class ProcessExecutor {
     }
 
     public int execute(List<String> arguments, Map<String, String> envVars) throws IOException {
-        return execute(arguments, envVars, null);
+        return execute(arguments, envVars, this.workingDirectory);
     }
 
     public int execute(List<String> arguments, Map<String, String> envVars, File workingDirectory) throws IOException {
