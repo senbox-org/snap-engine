@@ -148,56 +148,20 @@ public abstract class VirtualDir {
             return null;
         }
     }
-    /*
-     The replacement for usage with the NIO implementation has been disabled,
-     because some Sentinel 1 product result in problems in the zipfs code.
-     This maybe lrelates to BigZIP but not all zip files bigger 2 GB have problems
 
-    public static VirtualDir create(File file) {
-        String basePath = file.getPath();
-        boolean isZip;
-        URI vdURI;
+    public static VirtualDir create(Path inputPath) {
+        if (Files.isDirectory(inputPath)) {
+            // @todo 2 tb/tb create constructor using Path as input 2024-12-09
+            return new Dir(inputPath.toFile());
+        }
+
         try {
-            URI uri = file.toURI();
-            if (file.isDirectory()) {
-                isZip = false;
-                vdURI = uri;
-            } else if (file.getName().toLowerCase().endsWith(".zip")) {
-                vdURI = ensureZipURI(uri);
-                isZip = true;
-            } else {
-                return null;
-            }
-            Path virtualDirPath = getPathFromURI(vdURI);
-            return new NIO(virtualDirPath, basePath, isZip, isZip, isZip);
-        } catch (IOException e) {
-            e.printStackTrace();
+            // @todo 2 tb/tb create constructor using Path as input 2024-12-09
+            return new Zip(new ZipFile(inputPath.toFile()));
+        } catch (IOException ignored) {
             return null;
         }
     }
-
-    static URI ensureZipURI(URI uri) throws IOException {
-        Path basePath = getPathFromURI(uri);
-        String baseUri = uri.toString();
-        if (baseUri.startsWith("file:") && basePath.toFile().isFile()) {
-            uri = URI.create("jar:" + baseUri + "!/");
-        }
-        return uri;
-    }
-
-    static Path getPathFromURI(URI uri) throws IOException {
-        // Must synchronize, because otherwise FS could have been created by concurrent thread
-        synchronized (VirtualDir.class) {
-            try {
-                return Paths.get(uri);
-            } catch (FileSystemNotFoundException exp) {
-                Map<String, String> env = Collections.emptyMap();
-                FileSystems.newFileSystem(uri, env, null);
-                return Paths.get(uri);
-            }
-        }
-    }
-    */
 
     public abstract boolean isCompressed();
 
