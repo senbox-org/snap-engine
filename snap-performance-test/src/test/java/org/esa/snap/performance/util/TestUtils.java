@@ -1,6 +1,13 @@
 package org.esa.snap.performance.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class TestUtils {
 
@@ -38,7 +45,7 @@ public class TestUtils {
         return sum / numbers.length;
     }
 
-    public static double calculateThroughput(long[] times, File[] files) {
+    public static double calculateThroughput(long[] times, File[] files) throws IOException {
 
         double[] fileSizeInMB = new double[files.length];
         double[] throughputs = new double[times.length];
@@ -47,9 +54,14 @@ public class TestUtils {
             File file = files[ii];
             if (file.isDirectory()) {
                 fileSizeInMB[ii] = TestUtils.getFolderSize(file);
+            } else if (file.getName().endsWith(".zip")) {
+                File tempDir = unzipToTemp(file);
+                fileSizeInMB[ii] = TestUtils.getFolderSize(tempDir);
+                deleteDirectory(tempDir);
             } else {
                 long fileSizeInBytes = file.length();
                 fileSizeInMB[ii] = fileSizeInBytes / (1024.0 * 1024.0);
+
             }
         }
 
@@ -93,12 +105,17 @@ public class TestUtils {
             throw new IllegalArgumentException("File name cannot be null or empty");
         }
 
-        int firstDotIndex = fileName.indexOf('.');
-        if (firstDotIndex == -1) {
+        if (fileName.endsWith(".znap.zip")) {
+            return fileName.substring(0, fileName.length() - ".znap.zip".length());
+        }
+
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            // no extension present
             return fileName;
         }
 
-        return fileName.substring(0, firstDotIndex);
+        return fileName.substring(0, lastDotIndex);
     }
 
     public static long getFolderSize(File folder) {
@@ -120,5 +137,52 @@ public class TestUtils {
     public static long getUsedMemory() {
         Runtime runtime = Runtime.getRuntime();
         return runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    public static void deleteDirectory(Path directory) throws IOException {
+        Files.walk(directory)
+                .sorted((a,b) -> b.compareTo(a))
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete directory: " + path, e);
+                    }
+                });
+    }
+
+    private static void deleteDirectory(File directory) throws IOException {
+        if (directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                deleteDirectory(file);
+            }
+        }
+        if (!directory.delete()) {
+            throw new IOException("Failed to delete file or directory: " + directory.getAbsolutePath());
+        }
+    }
+
+    private static File unzipToTemp(File zipFile) throws IOException {
+        File tempDir = Files.createTempDirectory("unzip_temp").toFile();
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                File newFile = new File(tempDir, entry.getName());
+                if (entry.isDirectory()) {
+                    newFile.mkdirs();
+                } else {
+                    new File(newFile.getParent()).mkdirs();
+                    try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
+                }
+                zis.closeEntry();
+            }
+        }
+        return tempDir;
     }
 }

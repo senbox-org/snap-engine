@@ -5,8 +5,6 @@ import org.esa.snap.performance.performancetests.PerformanceTestFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +61,7 @@ public class TestInitialisationOperations {
                     continue;
                 }
                 if (file.isDirectory()) {
-                    deleteDirectory(file.toPath());
+                    TestUtils.deleteDirectory(file.toPath());
                 } else {
                     file.delete();
                 }
@@ -77,17 +75,5 @@ public class TestInitialisationOperations {
         if (!resultsDir.exists() && !resultsDir.mkdirs()) {
             throw new IOException("Failed to create results directory: " + resultsDir.getAbsolutePath());
         }
-    }
-
-    private static void deleteDirectory(Path directory) throws IOException {
-        Files.walk(directory)
-            .sorted((a,b) -> b.compareTo(a))
-            .forEach(path -> {
-                try {
-                    Files.delete(path);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to delete directory: " + path, e);
-                }
-            });
     }
 }

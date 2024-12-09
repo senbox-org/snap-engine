@@ -35,7 +35,8 @@ public class WriteProductFromMemoryTest extends WriteSingleProductTest {
                 Band targetBand = ProductUtils.copyBand(sourceBand.getName(), sourceProduct, inMemoryProduct, true);
                 targetBand.readRasterDataFully();
             } else {
-                inMemoryProduct.getBand(sourceBand.getName()).readRasterDataFully();
+                Band targetBand = inMemoryProduct.getBand(sourceBand.getName());
+                targetBand.readRasterDataFully();
             }
         }
 
