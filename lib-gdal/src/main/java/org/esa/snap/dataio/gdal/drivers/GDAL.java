@@ -30,6 +30,7 @@ public class GDAL extends GDALBase {
     private final MethodHandle getLastErrorHandle;
     private final MethodHandle setCacheMaxHandle;
     private final MethodHandle getCacheMaxHandle;
+    private final MethodHandle setConfigOptionHandle;
 
     static {
         gdalClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
@@ -60,6 +61,7 @@ public class GDAL extends GDALBase {
         getLastErrorHandle = createStaticHandle(gdalClass, "GetLastErrorMsg", String.class);
         setCacheMaxHandle = createStaticHandle(gdalClass, "SetCacheMax", void.class, int.class);
         getCacheMaxHandle = createStaticHandle(gdalClass, "GetCacheMax", int.class);
+        setConfigOptionHandle = createStaticHandle(gdalClass, "SetConfigOption", void.class, String.class, String.class);
     }
 
     /**
@@ -167,5 +169,9 @@ public class GDAL extends GDALBase {
 
     public static void setCacheMax(int nBytes) {
         invokeStatic(instance.setCacheMaxHandle, nBytes);
+    }
+
+    public static void setConfigOption(String pszKey, String pszValue) {
+        invokeStatic(instance.setConfigOptionHandle, pszKey, pszValue);
     }
 }
