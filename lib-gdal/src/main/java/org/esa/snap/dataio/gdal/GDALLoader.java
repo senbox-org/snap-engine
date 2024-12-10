@@ -101,6 +101,7 @@ public final class GDALLoader {
                 GDALInstallInfo.INSTANCE.setLocations(this.gdalVersion.getLocationPath());
                 initDrivers();
                 GDALDistributionInstaller.setupProj(gdalVersion);
+                GDALDistributionInstaller.setupGDAL(gdalVersion);
                 postGDALInit();
                 logger.log(Level.FINE, () -> "GDAL initialised SUCCESSFULLY!");
             } catch (Throwable t) {
@@ -110,6 +111,7 @@ public final class GDALLoader {
                     gdalDirectoryLocker.unlockDirectory();
                 }
             }
+
         }
     }
 
