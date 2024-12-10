@@ -28,10 +28,7 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdf4WriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
