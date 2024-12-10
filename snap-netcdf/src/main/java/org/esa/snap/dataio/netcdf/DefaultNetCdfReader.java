@@ -95,10 +95,10 @@ class DefaultNetCdfReader extends AbstractProductReader {
     private void configureProfile(AbstractNetCdfReaderPlugIn plugIn, NetCdfReadProfile profile) {
         profile.setInitialisationPartReader(plugIn.createInitialisationPartReader());
         profile.addProfilePartReader(plugIn.createMetadataPartReader());
+        profile.addProfilePartReader(plugIn.createGeoCodingPartReader());
         profile.addProfilePartReader(plugIn.createBandPartReader());
         profile.addProfilePartReader(plugIn.createTiePointGridPartReader());
         profile.addProfilePartReader(plugIn.createFlagCodingPartReader());
-        profile.addProfilePartReader(plugIn.createGeoCodingPartReader());
         profile.addProfilePartReader(plugIn.createImageInfoPartReader());
         profile.addProfilePartReader(plugIn.createIndexCodingPartReader());
         profile.addProfilePartReader(plugIn.createMaskPartReader());
