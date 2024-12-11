@@ -1,16 +1,16 @@
-package org.esa.snap.performance.performancetests;
+package org.esa.snap.oldImpl.performance.performancetests;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.performance.util.Parameters;
-import org.esa.snap.performance.util.TestUtils;
+import org.esa.snap.oldImpl.performance.util.MyParameters;
+import org.esa.snap.oldImpl.performance.util.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class WriteProductFromReaderTest extends WriteSingleProductTest{
 
-    public WriteProductFromReaderTest(String testName, Parameters params) {
+    public WriteProductFromReaderTest(String testName, MyParameters params) {
         super(testName, params);
     }
 

@@ -1,6 +1,6 @@
-package org.esa.snap.tests.unittests.util;
+package org.esa.snap.oldImpl.tests.unittests.util;
 
-import org.esa.snap.performance.util.TestUtils;
+import org.esa.snap.oldImpl.performance.util.TestUtils;
 import org.junit.Test;
 
 import java.io.File;

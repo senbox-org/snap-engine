@@ -1,16 +1,25 @@
-package org.esa.snap.performance.performancetests;
+package org.esa.snap.oldImpl.performance.performancetests;
 
+import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.dimap.DimapProductReader;
+import org.esa.snap.core.dataio.dimap.DimapProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.StopWatch;
-import org.esa.snap.performance.util.*;
+import org.esa.snap.dataio.znap.ZnapProductReader;
+import org.esa.snap.dataio.znap.ZnapProductReaderPlugIn;
+import org.esa.snap.oldImpl.performance.util.CalculationContainer;
+import org.esa.snap.oldImpl.performance.util.MyParameters;
+import org.esa.snap.oldImpl.performance.util.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ReadSingleProductTest extends AbstractPerformanceTest {
 
-    public ReadSingleProductTest(String testName, Parameters params) {
+    public ReadSingleProductTest(String testName, MyParameters params) {
         super(testName, params);
     }
 
@@ -31,7 +40,7 @@ public class ReadSingleProductTest extends AbstractPerformanceTest {
             productFile = new File(fullFilePath + TestUtils.EXTENSION_DIMAP);
             dataFile = new File(fullFilePath + TestUtils.EXTENSION_DIMAP_DATA);
         } else {
-            productFile = new File(fullFilePath + TestUtils.EXTENSION_ZNAP_UNZIPPED);
+            productFile = new File(fullFilePath + TestUtils.EXTENSION_ZNAP);
             dataFile = productFile;
         }
 
@@ -41,6 +50,10 @@ public class ReadSingleProductTest extends AbstractPerformanceTest {
 
             watch.start();
             Product product = ProductIO.readProduct(productFile);
+
+            for (Band band : product.getBands()) {
+                    band.readRasterDataFully();
+            }
             watch.stop();
 
             long memoryAfter = TestUtils.getUsedMemory();

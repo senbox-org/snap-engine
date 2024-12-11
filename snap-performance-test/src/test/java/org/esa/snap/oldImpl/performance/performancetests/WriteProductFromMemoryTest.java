@@ -1,17 +1,17 @@
-package org.esa.snap.performance.performancetests;
+package org.esa.snap.oldImpl.performance.performancetests;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.performance.util.Parameters;
-import org.esa.snap.performance.util.TestUtils;
+import org.esa.snap.oldImpl.performance.util.MyParameters;
+import org.esa.snap.oldImpl.performance.util.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class WriteProductFromMemoryTest extends WriteSingleProductTest {
 
-    public WriteProductFromMemoryTest(String testName, Parameters params) {
+    public WriteProductFromMemoryTest(String testName, MyParameters params) {
         super(testName, params);
     }
 

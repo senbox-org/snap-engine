@@ -1,4 +1,4 @@
-package org.esa.snap.performance.util;
+package org.esa.snap.oldImpl.performance.util;
 
 import java.util.ArrayList;
 import java.util.List;

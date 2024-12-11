@@ -1,6 +1,6 @@
-package org.esa.snap.performance.util;
+package org.esa.snap.oldImpl.performance.util;
 
-import org.esa.snap.performance.performancetests.AbstractPerformanceTest;
+import org.esa.snap.oldImpl.performance.performancetests.AbstractPerformanceTest;
 
 import java.io.IOException;
 import java.util.ArrayList;

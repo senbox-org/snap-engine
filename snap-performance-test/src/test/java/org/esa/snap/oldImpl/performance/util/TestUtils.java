@@ -1,4 +1,4 @@
-package org.esa.snap.performance.util;
+package org.esa.snap.oldImpl.performance.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,10 +54,11 @@ public class TestUtils {
             File file = files[ii];
             if (file.isDirectory()) {
                 fileSizeInMB[ii] = TestUtils.getFolderSize(file);
-            } else if (file.getName().endsWith(".zip")) {
-                File tempDir = unzipToTemp(file);
-                fileSizeInMB[ii] = TestUtils.getFolderSize(tempDir);
-                deleteDirectory(tempDir);
+//            }
+//            else if (file.getName().endsWith(".zip")) {
+//                File tempDir = unzipToTemp(file);
+//                fileSizeInMB[ii] = TestUtils.getFolderSize(tempDir);
+//                deleteDirectory(tempDir);
             } else {
                 long fileSizeInBytes = file.length();
                 fileSizeInMB[ii] = fileSizeInBytes / (1024.0 * 1024.0);
@@ -184,5 +185,9 @@ public class TestUtils {
             }
         }
         return tempDir;
+    }
+
+    public static void configureTileScheduler(int maxThreads) {
+
     }
 }

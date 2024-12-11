@@ -1,6 +1,6 @@
-package org.esa.snap.tests.unittests.util;
+package org.esa.snap.oldImpl.tests.unittests.util;
 
-import org.esa.snap.performance.util.Threading;
+import org.esa.snap.oldImpl.performance.util.Threading;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

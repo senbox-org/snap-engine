@@ -1,4 +1,4 @@
-package org.esa.snap.tests.integrationtests.util;
+package org.esa.snap.oldImpl.tests.integrationtests.util;
 
 import org.junit.Test;
 

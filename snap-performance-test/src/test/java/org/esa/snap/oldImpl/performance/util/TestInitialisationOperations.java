@@ -1,7 +1,7 @@
-package org.esa.snap.performance.util;
+package org.esa.snap.oldImpl.performance.util;
 
-import org.esa.snap.performance.performancetests.AbstractPerformanceTest;
-import org.esa.snap.performance.performancetests.PerformanceTestFactory;
+import org.esa.snap.oldImpl.performance.performancetests.AbstractPerformanceTest;
+import org.esa.snap.oldImpl.performance.performancetests.PerformanceTestFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,28 +12,28 @@ public class TestInitialisationOperations {
 
     public static List<AbstractPerformanceTest> initialize(ConfigLoader config) throws IOException {
         initializeOutputDirectory(config.get("outputDir"));
-        List<Parameters> parametersList = initializeParams(config);
+        List<MyParameters> parametersList = initializeParams(config);
 
         return initializeTests(parametersList);
     }
 
-    private static List<AbstractPerformanceTest> initializeTests(List<Parameters> parameterList) {
+    private static List<AbstractPerformanceTest> initializeTests(List<MyParameters> parameterList) {
         List<AbstractPerformanceTest> tests = new ArrayList<>();
-        for (Parameters params : parameterList) {
+        for (MyParameters params : parameterList) {
             AbstractPerformanceTest test = PerformanceTestFactory.createPerformanceTest(params);
             tests.add(test);
         }
         return tests;
     }
 
-    private static List<Parameters> initializeParams(ConfigLoader config) {
-        List<Parameters> parameterList = new ArrayList<>();
+    private static List<MyParameters> initializeParams(ConfigLoader config) {
+        List<MyParameters> parameterList = new ArrayList<>();
         String[] testNames = config.get("testNames").split(",");
 
         for (String name : testNames) {
             String testName = name.trim();
 
-            Parameters params = new Parameters(
+            MyParameters params = new MyParameters(
                     config.get(testName + ".testImplementation"),
                     config.get(testName + ".productName"),
                     config.get("testDataDir"),

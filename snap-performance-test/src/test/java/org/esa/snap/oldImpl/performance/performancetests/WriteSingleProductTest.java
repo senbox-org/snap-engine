@@ -1,16 +1,21 @@
-package org.esa.snap.performance.performancetests;
+package org.esa.snap.oldImpl.performance.performancetests;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.StopWatch;
-import org.esa.snap.performance.util.*;
+import org.esa.snap.oldImpl.performance.util.CalculationContainer;
+import org.esa.snap.oldImpl.performance.util.MyParameters;
+import org.esa.snap.oldImpl.performance.util.TestUtils;
+import org.esa.snap.oldImpl.performance.util.Threading;
 
 import java.io.File;
 import java.io.IOException;
 
 public abstract class WriteSingleProductTest extends AbstractPerformanceTest {
 
-    public WriteSingleProductTest(String testName, Parameters params) {
+    public WriteSingleProductTest(String testName, MyParameters params) {
         super(testName, params);
     }
 
@@ -39,7 +44,16 @@ public abstract class WriteSingleProductTest extends AbstractPerformanceTest {
 
             watch.start();
 
-            ProductIO.writeProduct(sourceProduct, fullFilePath, format);
+            if (getThreading() == Threading.MULTI) {
+                // TODO: configure TileScheduler (and TileCache?) for multithreading
+//                JAI defaultInstance = new JAI();
+//                TileScheduler tileScheduler = defaultInstance.getTileScheduler();
+//                TileCache tileCache = defaultInstance.getTileCache();
+
+                GPF.writeProduct(sourceProduct, new File(fullFilePath), format, false, ProgressMonitor.NULL);
+            } else {
+                ProductIO.writeProduct(sourceProduct, fullFilePath, format);
+            }
 
             watch.stop();
 

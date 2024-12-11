@@ -1,6 +1,6 @@
-package org.esa.snap.tests.unittests.util;
+package org.esa.snap.oldImpl.tests.unittests.util;
 
-import org.esa.snap.performance.util.*;
+import org.esa.snap.oldImpl.performance.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class ExcelWriterTest {
         List<TestResult> allResults = new ArrayList<>();
         allResults.add(singleTestResults);
 
-        ExcelWriter.writeExcelFile(outputDir, allResults);
+        MyExcelWriter.writeExcelFile(outputDir, allResults);
 
         assertTrue("Results directory should exist", Files.exists(resultsDir));
         assertTrue("Results directory should be a directory", Files.isDirectory(resultsDir));

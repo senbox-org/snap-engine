@@ -1,8 +1,8 @@
-package org.esa.snap.tests.unittests.util;
+package org.esa.snap.oldImpl.tests.unittests.util;
 
-import org.esa.snap.performance.performancetests.AbstractPerformanceTest;
-import org.esa.snap.performance.util.ConfigLoader;
-import org.esa.snap.performance.util.TestInitialisationOperations;
+import org.esa.snap.oldImpl.performance.performancetests.AbstractPerformanceTest;
+import org.esa.snap.oldImpl.performance.util.ConfigLoader;
+import org.esa.snap.oldImpl.performance.util.TestInitialisationOperations;
 import org.junit.Test;
 
 import java.io.IOException;

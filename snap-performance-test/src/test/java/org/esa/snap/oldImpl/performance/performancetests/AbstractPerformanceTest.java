@@ -1,16 +1,16 @@
-package org.esa.snap.performance.performancetests;
+package org.esa.snap.oldImpl.performance.performancetests;
 
-import org.esa.snap.performance.util.*;
+import org.esa.snap.oldImpl.performance.util.*;
 
 import java.io.IOException;
 
 public abstract class AbstractPerformanceTest {
 
     private final String testName;
-    private final Parameters params;
+    private final MyParameters params;
     private TestResult testResult;
 
-    public AbstractPerformanceTest(String testName, Parameters params) {
+    public AbstractPerformanceTest(String testName, MyParameters params) {
         this.testName = testName;
         this.params = params;
     }

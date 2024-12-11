@@ -1,7 +1,7 @@
-package org.esa.snap.performance;
+package org.esa.snap.oldImpl.performance;
 
-import org.esa.snap.performance.performancetests.AbstractPerformanceTest;
-import org.esa.snap.performance.util.*;
+import org.esa.snap.oldImpl.performance.performancetests.AbstractPerformanceTest;
+import org.esa.snap.oldImpl.performance.util.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +23,6 @@ public class PerformanceTestMain {
         TestExecuter.executeTests(tests);
         List<TestResult> results = TestExecuter.fetchAllTestResults(tests);
 
-        ExcelWriter.writeExcelFile(config.get("outputDir"), results);
+        MyExcelWriter.writeExcelFile(config.get("outputDir"), results);
     }
 }
