@@ -36,7 +36,7 @@ public class RMFDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(3, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Raster Matrix Format", finalProduct.getProductType());
             assertEquals(768, finalProduct.getSceneRasterWidth());
             assertEquals(512, finalProduct.getSceneRasterHeight());
 
@@ -68,7 +68,7 @@ public class RMFDriverProductReaderTest extends AbstractTestDriverProductReader 
 
             Rectangle subsetRegion = new Rectangle(200, 100, 500, 400);
             ProductSubsetDef subsetDef = new ProductSubsetDef();
-            subsetDef.setNodeNames(new String[] { "band_1", "band_3", "nodata_band_2"} );
+            subsetDef.setNodeNames(new String[] { "band_1", "band_3", "nodata_band_3"} );
             subsetDef.setSubsetRegion(new PixelSubsetRegion(subsetRegion, 0));
             subsetDef.setSubSampling(1, 1);
 
@@ -80,11 +80,11 @@ public class RMFDriverProductReaderTest extends AbstractTestDriverProductReader 
 
             assertEquals(1,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(2, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Raster Matrix Format", finalProduct.getProductType());
             assertEquals(500, finalProduct.getSceneRasterWidth());
             assertEquals(400, finalProduct.getSceneRasterHeight());
 
-            Mask mask = finalProduct.getMaskGroup().get("nodata_band_2");
+            Mask mask = finalProduct.getMaskGroup().get("nodata_band_3");
             assertEquals(20, mask.getDataType());
             assertEquals(200000, mask.getNumDataElems());
 
