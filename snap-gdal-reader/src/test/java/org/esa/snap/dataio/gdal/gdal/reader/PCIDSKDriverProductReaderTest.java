@@ -35,7 +35,7 @@ public class PCIDSKDriverProductReaderTest extends AbstractTestDriverProductRead
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("PCIDSK Database File", finalProduct.getProductType());
             assertEquals(1024, finalProduct.getSceneRasterWidth());
             assertEquals(1024, finalProduct.getSceneRasterHeight());
 
@@ -80,7 +80,7 @@ public class PCIDSKDriverProductReaderTest extends AbstractTestDriverProductRead
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("PCIDSK Database File", finalProduct.getProductType());
             assertEquals(500, finalProduct.getSceneRasterWidth());
             assertEquals(400, finalProduct.getSceneRasterHeight());
 

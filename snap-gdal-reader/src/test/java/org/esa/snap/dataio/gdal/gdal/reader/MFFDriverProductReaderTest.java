@@ -35,7 +35,7 @@ public class MFFDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Vexcel MFF Raster", finalProduct.getProductType());
             assertEquals(64, finalProduct.getSceneRasterWidth());
             assertEquals(64, finalProduct.getSceneRasterHeight());
 
@@ -80,7 +80,7 @@ public class MFFDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Vexcel MFF Raster", finalProduct.getProductType());
             assertEquals(50, finalProduct.getSceneRasterWidth());
             assertEquals(40, finalProduct.getSceneRasterHeight());
 

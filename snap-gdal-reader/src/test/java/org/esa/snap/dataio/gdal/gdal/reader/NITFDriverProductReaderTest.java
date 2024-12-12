@@ -36,7 +36,7 @@ public class NITFDriverProductReaderTest extends AbstractTestDriverProductReader
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("National Imagery Transmission Format (GDAL)", finalProduct.getProductType());
             assertEquals(64, finalProduct.getSceneRasterWidth());
             assertEquals(64, finalProduct.getSceneRasterHeight());
 
@@ -81,7 +81,7 @@ public class NITFDriverProductReaderTest extends AbstractTestDriverProductReader
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(1,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("National Imagery Transmission Format (GDAL)", finalProduct.getProductType());
             assertEquals(40, finalProduct.getSceneRasterWidth());
             assertEquals(50, finalProduct.getSceneRasterHeight());
 
