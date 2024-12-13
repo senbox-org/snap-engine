@@ -29,6 +29,7 @@
 
     <properties>
         <snap.version>11.0.1</snap.version>
+        <hdf.version>2.7</hdf.version>
     </properties>
 
 
@@ -50,12 +51,22 @@
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf</artifactId>
-            <version>2.7</version>
+            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf5</artifactId>
-            <version>2.7</version>
+            <version>${hdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>jhdfobj</artifactId>
+            <version>${hdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>jhdf5obj</artifactId>
+            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
