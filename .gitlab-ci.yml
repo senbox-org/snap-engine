@@ -2,7 +2,7 @@
 include:
   # Maven template
   - project: "to-be-continuous/maven"
-    ref: "3.11.1"
+    ref: "3.11.4"
     file: "templates/gitlab-ci-maven.yml"
 
 stages:
@@ -26,7 +26,7 @@ stages:
 
 # variables
 variables:
-  MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.2-azulzulu-11"
+  MAVEN_IMAGE: "ghcr.io/carlossg/maven:3.9.9-azulzulu-21"
   MVN_FORBID_SNAPSHOT_DEPENDENCIES_DISABLED: "true"
   MAVEN_DEPLOY_SNAPSHOT_WITH_SLUG_ENABLED: "false"
   BUILD_FOR_INSTALLER: "false"
@@ -59,7 +59,7 @@ mvn-build:
       - "${MAVEN_PROJECT_DIR}/LICENSE.html"
 
 mvn-sonar:
-  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
+  image: "registry.hub.docker.com/library/maven:3.9.9-eclipse-temurin-21"
   allow_failure: true
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
@@ -80,7 +80,7 @@ windows:
     FF_ENABLE_JOB_CLEANUP: 'true'
     FF_USE_WINDOWS_LEGACY_PROCESS_STRATEGY: 'false'
     MAVEN_CFG_DIR: C:\\Windows\\System32\\config\\systemprofile\\.m2
-    JAVA_HOME: C:\\Program Files\\Zulu\\zulu-11
+    JAVA_HOME: C:\\Program Files\\Zulu\\zulu-21
   allow_failure: false
   needs: []
   script:
@@ -89,13 +89,13 @@ windows:
 macos:
   stage: test
   tags: [mac]
-  image: "registry.hub.docker.com/library/maven:3.9.1-eclipse-temurin-11"
+  image: "registry.hub.docker.com/library/maven:3.9.9-eclipse-temurin-21"
   rules:
     - if: '$BUILD_FOR_INSTALLER == "false"'
   variables:
-    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
-    # JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/liberica-jdk-11-full.jdk/Contents/Home
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home
+    # JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/liberica-jdk-21-full.jdk/Contents/Home
     TESTDATA_ROOT: "/Users/csro/testData"
   needs: []
   script:
