@@ -153,10 +153,10 @@ public class ComponentGeoCodingPersistenceConverterTest {
     }
 
     @Test
-    public void testToAndFromXML_withTiePointGrids() {
+    public void testToAndFromXML_withTiePointGrids_withSameOffsetAndSubsampling() {
         final boolean bilinear = true;
         final boolean antimeridian = true;
-        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian);
+        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian, 0.5, 0.5, 5, 5);
         assertThat(initialGeocoding.isCrossingMeridianAt180(), is(true));
 
         final Item itemFromObject = converter.encode(initialGeocoding);
@@ -193,6 +193,93 @@ public class ComponentGeoCodingPersistenceConverterTest {
         assertThat(container.getProperty(NAME_OFFSET_Y).getValueString(), is("0.5"));
         assertThat(container.getProperty(NAME_SUBSAMPLING_X).getValueString(), is("5.0"));
         assertThat(container.getProperty(NAME_SUBSAMPLING_Y).getValueString(), is("5.0"));
+
+        assertThat(product.getSceneGeoCoding(), isNotNull());
+        product.setSceneGeoCoding(null);
+        assertThat(product.getSceneGeoCoding(), isNull());
+
+        // remove ID ... make container a historical version
+        container.removeProperty(KEY_PERSISTENCE_ID);
+        assertThat(container.getProperty(KEY_PERSISTENCE_ID), isNull());
+        final HistoricalDecoder preHistoricalDecoder = converter.getHistoricalDecoders()[0];
+        assertThat(preHistoricalDecoder.canDecode(container), is(true));
+        container = preHistoricalDecoder.decode(container, null).asContainer();
+        final Property<?> persistenceIdProp = container.getProperty(KEY_PERSISTENCE_ID);
+        assertThat(persistenceIdProp, isNotNull());
+        assertThat(persistenceIdProp.getValueString(), is(converter.getID()));
+
+        // continue with item decoded by historical decoder
+        final ComponentGeoCoding newGeoCoding = converter.decode(container, product);
+
+        assertThat(newGeoCoding, is(instanceOf(ComponentGeoCoding.class)));
+        assertNotSame(newGeoCoding, initialGeocoding);
+        assertThat(newGeoCoding.getForwardCoding().getKey(), is(equalTo(initialGeocoding.getForwardCoding().getKey())));
+        assertThat(newGeoCoding.getInverseCoding().getKey(), is(equalTo(initialGeocoding.getInverseCoding().getKey())));
+        assertThat(newGeoCoding.getGeoChecks().name(), is(equalTo(initialGeocoding.getGeoChecks().name())));
+        assertThat(newGeoCoding.getGeoCRS().toWKT(), is(equalTo(initialGeocoding.getGeoCRS().toWKT())));
+        assertThat(newGeoCoding.isCrossingMeridianAt180(), is(true));
+
+        final GeoRaster initialGeoRaster = initialGeocoding.getGeoRaster();
+        final GeoRaster newGeoRaster = newGeoCoding.getGeoRaster();
+        assertThat(newGeoRaster.getRasterWidth(), is(equalTo(initialGeoRaster.getRasterWidth())));
+        assertThat(newGeoRaster.getRasterHeight(), is(equalTo(initialGeoRaster.getRasterHeight())));
+        assertThat(newGeoRaster.getRasterResolutionInKm(), is(equalTo(initialGeoRaster.getRasterResolutionInKm())));
+        assertThat(newGeoRaster.getLonVariableName(), is(equalTo(initialGeoRaster.getLonVariableName())));
+        assertThat(newGeoRaster.getLatVariableName(), is(equalTo(initialGeoRaster.getLatVariableName())));
+        assertThat(newGeoRaster.getSceneWidth(), is(equalTo(initialGeoRaster.getSceneWidth())));
+        assertThat(newGeoRaster.getSceneHeight(), is(equalTo(initialGeoRaster.getSceneHeight())));
+        assertThat(newGeoRaster.getSubsamplingX(), is(equalTo(initialGeoRaster.getSubsamplingX())));
+        assertThat(newGeoRaster.getSubsamplingY(), is(equalTo(initialGeoRaster.getSubsamplingY())));
+        assertThat(newGeoRaster.getOffsetX(), is(equalTo(initialGeoRaster.getOffsetX())));
+        assertThat(newGeoRaster.getOffsetY(), is(equalTo(initialGeoRaster.getOffsetY())));
+        assertNotSame(newGeoRaster.getLongitudes(), initialGeoRaster.getLongitudes());
+        assertArrayEquals(newGeoRaster.getLongitudes(), initialGeoRaster.getLongitudes(), Double.MIN_VALUE);
+        assertNotSame(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes());
+        assertArrayEquals(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes(), Double.MIN_VALUE);
+    }
+
+    @Test
+    public void testToAndFromXML_withTiePointGrids_withSameDifferentOffsetAndSubsampling() {
+        final boolean bilinear = true;
+        final boolean antimeridian = true;
+        // for a band 3 times bigger, than the actual band of the product.
+        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian, 1.5, 1.5, 15, 15);
+        assertThat(initialGeocoding.isCrossingMeridianAt180(), is(true));
+
+        final Item itemFromObject = converter.encode(initialGeocoding);
+
+        assertThat(itemFromObject, isNotNull());
+        assertThat(itemFromObject.getName(), is(equalTo(NAME_COMPONENT_GEO_CODING)));
+        assertThat(itemFromObject.isContainer(), is(true));
+        Container container = itemFromObject.asContainer();
+        assertThat(container.getAttributes().length, is(0));
+        assertThat(container.getProperties().length, is(12));
+
+        assertThat(container.getProperty(KEY_PERSISTENCE_ID), isNotNull());
+        assertThat(container.getProperty(NAME_FORWARD_CODING_KEY), isNotNull());
+        assertThat(container.getProperty(NAME_INVERSE_CODING_KEY), isNotNull());
+        assertThat(container.getProperty(NAME_GEO_CHECKS), isNotNull());
+        assertThat(container.getProperty(NAME_GEO_CRS), isNotNull());
+        assertThat(container.getProperty(NAME_LON_VARIABLE_NAME), isNotNull());
+        assertThat(container.getProperty(NAME_LAT_VARIABLE_NAME), isNotNull());
+        assertThat(container.getProperty(NAME_RASTER_RESOLUTION_KM), isNotNull());
+        assertThat(container.getProperty(NAME_OFFSET_X), isNotNull());
+        assertThat(container.getProperty(NAME_OFFSET_Y), isNotNull());
+        assertThat(container.getProperty(NAME_SUBSAMPLING_X), isNotNull());
+        assertThat(container.getProperty(NAME_SUBSAMPLING_Y), isNotNull());
+
+        assertThat(container.getProperty(KEY_PERSISTENCE_ID).getValueString(), is(converter.getID()));
+        assertThat(container.getProperty(NAME_FORWARD_CODING_KEY).getValueString(), is("FWD_TIE_POINT_BILINEAR"));
+        assertThat(container.getProperty(NAME_INVERSE_CODING_KEY).getValueString(), is("INV_TIE_POINT"));
+        assertThat(container.getProperty(NAME_GEO_CHECKS).getValueString(), is("ANTIMERIDIAN"));
+        assertThat(container.getProperty(NAME_GEO_CRS).getValueString(), is(EXPECTED_GEO_CRS));
+        assertThat(container.getProperty(NAME_LON_VARIABLE_NAME).getValueString(), is("tpLon"));
+        assertThat(container.getProperty(NAME_LAT_VARIABLE_NAME).getValueString(), is("tpLat"));
+        assertThat(container.getProperty(NAME_RASTER_RESOLUTION_KM).getValueString(), is("300.0"));
+        assertThat(container.getProperty(NAME_OFFSET_X).getValueString(), is("1.5"));
+        assertThat(container.getProperty(NAME_OFFSET_Y).getValueString(), is("1.5"));
+        assertThat(container.getProperty(NAME_SUBSAMPLING_X).getValueString(), is("15.0"));
+        assertThat(container.getProperty(NAME_SUBSAMPLING_Y).getValueString(), is("15.0"));
 
         assertThat(product.getSceneGeoCoding(), isNotNull());
         product.setSceneGeoCoding(null);
