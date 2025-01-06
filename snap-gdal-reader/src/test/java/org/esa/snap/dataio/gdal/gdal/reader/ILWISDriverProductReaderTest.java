@@ -35,7 +35,7 @@ public class ILWISDriverProductReaderTest extends AbstractTestDriverProductReade
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("ILWIS Raster Map", finalProduct.getProductType());
             assertEquals(768, finalProduct.getSceneRasterWidth());
             assertEquals(512, finalProduct.getSceneRasterHeight());
 
@@ -80,7 +80,7 @@ public class ILWISDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("ILWIS Raster Map", finalProduct.getProductType());
             assertEquals(500, finalProduct.getSceneRasterWidth());
             assertEquals(400, finalProduct.getSceneRasterHeight());
 
