@@ -31,6 +31,24 @@
             <artifactId>snap-netcdf</artifactId>
         </dependency>
         <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io</artifactId>
+            <version>12.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-reader</artifactId>
+            <version>12.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>lib-openjpeg</artifactId>
+            <version>12.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.3</version>
@@ -38,6 +56,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.5.0</version>
         </dependency>
     </dependencies>
 </project>
