@@ -3,6 +3,7 @@ package org.esa.snap.tests;
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.performance.testImplementation.ReadPerformanceTest;
 import org.esa.snap.performance.testImplementation.WriteFromMemoryPerformanceTest;
+import org.esa.snap.performance.testImplementation.WriteFromReaderPerformanceTest;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.testImplementation.PerformanceTest;
 import org.esa.snap.performance.util.PerformanceTestDefinition;
@@ -39,13 +40,22 @@ public class PerformanceTestFactoryTest {
                 new Parameters(List.of("product3.nc"), "/testDir", "/output", "multi", true,false, 5, List.of("ZNAP", "BEAM-DIMAP"), false, true, false)
         );
 
+        PerformanceTestDefinition writeTestDefinition2 = new PerformanceTestDefinition(
+                "test4",
+                "write-from-reader-test",
+                new Parameters(List.of("product4.nc"), "/testDir", "/output", "multi", true,false, 5, List.of("ZNAP", "BEAM-DIMAP"), false, true, false)
+        );
+
         testDefinitions.add(readTestDefinition);
         testDefinitions.add(readTestDefinition2);
+        testDefinitions.add(writeTestDefinition);
+        testDefinitions.add(writeTestDefinition2);
 
         List<PerformanceTest> performanceTests = PerformanceTestFactory.createPerformanceTests(testDefinitions);
 
-        assertEquals(2, performanceTests.size());
+        assertEquals(3, performanceTests.size());
         assertTrue(performanceTests.get(0) instanceof ReadPerformanceTest);
         assertTrue(performanceTests.get(1) instanceof WriteFromMemoryPerformanceTest);
+        assertTrue(performanceTests.get(2) instanceof WriteFromReaderPerformanceTest);
     }
 }

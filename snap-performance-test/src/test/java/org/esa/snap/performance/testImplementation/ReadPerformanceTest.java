@@ -25,8 +25,6 @@ public class ReadPerformanceTest extends PerformanceTest {
         Action baseAction1 = new ReadProductFullyAction(productName1, testDir);
         Action baseAction2 = new ReadProductFullyAction(productName2, testDir);
 
-//        Action multipleExecutions1 = TestUtils.constructActionPipeline(baseAction1, getParameters());
-//        Action multipleExecutions2 = TestUtils.constructActionPipeline(baseAction2, getParameters());
         Action measurementActions1 = TestUtils.constructMeasurementActionsPipeline(baseAction1, getParameters());
         Action measurementActions2 = TestUtils.constructMeasurementActionsPipeline(baseAction2, getParameters());
 

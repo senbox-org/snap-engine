@@ -1,19 +1,11 @@
 package org.esa.snap.performance.testImplementation;
 
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 import org.esa.snap.performance.actions.*;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.TestUtils;
-import org.esa.snap.runtime.Config;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
-import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.DEFAULT_USE_ZIP_ARCHIVE;
-import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 
 public class WriteFromReaderPerformanceTest extends PerformanceTest {
 
@@ -60,31 +52,4 @@ public class WriteFromReaderPerformanceTest extends PerformanceTest {
         System.out.println("Execution of " + getTestName() + " finished :)");
     }
 
-    /*private void setFlavour(boolean useZip) {
-        System.out.println(useZip);
-
-        Preferences preferences = Config.instance("snap").load().preferences();
-
-        // TODO use static variables from ZNAPPreferencesConstants
-        if (!useZip) {
-            preferences.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, String.valueOf(false));
-            preferences.put(ZnapPreferencesConstants.PROPERTY_NAME_COMPRESSOR_ID, "zlib");
-//            System.setProperty("znap.use.zip.archive", "false");
-//            System.setProperty("znap.compressor.id", "zlib");
-        } else {
-            preferences.remove(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE);
-            preferences.remove(ZnapPreferencesConstants.PROPERTY_NAME_COMPRESSOR_ID);
-//            System.clearProperty("znap.use.zip.archive");
-//            System.clearProperty("znap.compressor.id");
-        }
-
-        try {
-            preferences.flush();
-        } catch (BackingStoreException e) {
-            System.out.println("Config preferences for Flavour could not be stored.");
-        }
-
-
-
-    }*/
 }

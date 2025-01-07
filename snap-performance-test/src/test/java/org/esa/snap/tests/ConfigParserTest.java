@@ -47,6 +47,7 @@ public class ConfigParserTest {
         assertEquals("productC.nc", params2.getProducts().get(0));
         assertEquals("multi", params2.getThreading());
         assertTrue(params2.isDiscardFirstMeasure());
+        assertTrue(params2.isUseZip());
         assertEquals(3, params2.getNumExecutionsForAverageOperations());
         assertTrue(params2.isUseTimeAverage());
         assertFalse(params2.isUseMaxMemoryConsumption());

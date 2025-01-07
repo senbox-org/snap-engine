@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface Action {
+
     void execute() throws IOException;
     void cleanUp();
     List<Result> fetchResults();

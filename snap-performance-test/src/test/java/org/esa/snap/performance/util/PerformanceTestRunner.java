@@ -32,15 +32,4 @@ public class PerformanceTestRunner {
         return this.results;
     }
 
-//    public void printAllResults() {
-//        for (PerformanceTestResult result : this.results) {
-//            System.out.println(result.getTestName());
-//            System.out.println("description: " + result.getDescriptions());
-//            System.out.println("product1 " + result.getProduct1());
-//            System.out.println("product2 " + result.getProduct2());
-//            System.out.println("results1 " + result.getResult1());
-//            System.out.println("results2 " + result.getResult2());
-//            System.out.println("units " + result.getUnits());
-//        }
-//    }
 }

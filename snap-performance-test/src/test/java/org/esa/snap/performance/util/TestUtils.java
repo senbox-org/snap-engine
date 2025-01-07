@@ -208,8 +208,5 @@ public class TestUtils {
         } catch (BackingStoreException e) {
             System.out.println("Config preferences for Flavour could not be stored.");
         }
-
-
-
     }
 }

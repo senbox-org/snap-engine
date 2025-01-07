@@ -8,6 +8,8 @@ import java.util.List;
 public class PerformanceTestFactory {
 
     public static List<PerformanceTest> createPerformanceTests(List<PerformanceTestDefinition> testDefinitions) {
+        System.out.println("Initializing tests...");
+
         List<PerformanceTest> performanceTestList = new ArrayList<>();
 
         for (PerformanceTestDefinition testDef : testDefinitions) {

@@ -26,17 +26,8 @@ public class Result {
         return this.value;
     }
 
-
     public String getUnit() {
         return this.unit;
     }
 
-    @Override
-    public String toString() {
-        return "Result{" +
-                "name='" + this.name + '\'' +
-                ", value=" + this.value +
-                ", unit='" + this.unit + '\'' +
-                '}';
-    }
 }

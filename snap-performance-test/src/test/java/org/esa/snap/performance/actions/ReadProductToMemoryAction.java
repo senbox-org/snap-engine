@@ -22,7 +22,6 @@ public class ReadProductToMemoryAction implements Action {
     public ReadProductToMemoryAction(String productName, String testDataDir) {
         this.productName = productName;
         this.testDataDir = testDataDir;
-//        this.allResults = new ArrayList<>();
     }
 
     @Override
@@ -65,13 +64,10 @@ public class ReadProductToMemoryAction implements Action {
     @Override
     public void cleanUp() {
         this.result.dispose();
-//        this.allResults = new ArrayList<>();
     }
 
     @Override
     public List<Result> fetchResults() {
-//        Result result = new Result("Product", false, this.result, "");
-//        this.allResults.add(result);
         return this.allResults;
     }
 }

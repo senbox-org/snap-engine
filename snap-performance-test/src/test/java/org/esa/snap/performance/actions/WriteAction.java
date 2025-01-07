@@ -2,18 +2,12 @@ package org.esa.snap.performance.actions;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
-import org.esa.snap.dataio.znap.ZnapProductWriter;
-import org.esa.snap.dataio.znap.ZnapProductWriterPlugIn;
 import org.esa.snap.performance.util.Result;
 import org.esa.snap.performance.util.TestUtils;
 import org.esa.snap.performance.util.Threading;
 
-import javax.media.jai.JAI;
-import javax.media.jai.TileCache;
-import javax.media.jai.TileScheduler;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -44,18 +38,17 @@ public class WriteAction implements Action {
         String fullfileName = this.outputDir + timestamp;
 
         if (this.threading.equals(Threading.MULTI.getName())) {
-            // TODO: configure TileScheduler (and TileCache?) for multithreading
 
+            // TODO: configure TileScheduler (and TileCache?) for multithreading
 //                JAI defaultInstance = new JAI();
 //                TileScheduler tileScheduler = defaultInstance.getTileScheduler();
-//                tileScheduler.setParallelism();
-//                tileScheduler.setPrefetchParallelism();
-//                tileScheduler.setPriority();
-//                tileScheduler.setPrefetchPriority();
-//
+//                tileScheduler.setParallelism(..);
+//                tileScheduler.setPrefetchParallelism(..);
+//                tileScheduler.setPriority(..);
+//                tileScheduler.setPrefetchPriority(..);//
 //                TileCache tileCache = defaultInstance.getTileCache();
-//                tileCache.setMemoryCapacity();
-//                tileCache.setMemoryThreshold();
+//                tileCache.setMemoryCapacity(..);
+//                tileCache.setMemoryThreshold(..);
 
             GPF.writeProduct(this.product, new File(fullfileName), this.outputFormat, false, ProgressMonitor.NULL);
         } else {

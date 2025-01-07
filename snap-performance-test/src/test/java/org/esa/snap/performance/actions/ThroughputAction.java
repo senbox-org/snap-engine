@@ -1,7 +1,6 @@
 package org.esa.snap.performance.actions;
 
 import org.esa.snap.core.util.StopWatch;
-import org.esa.snap.oldImpl.performance.util.TestUtils;
 import org.esa.snap.performance.util.Result;
 
 import java.io.File;
@@ -12,7 +11,6 @@ import java.util.List;
 public class ThroughputAction implements Action, NestedAction {
 
     private final Action nestedAction;
-//    private Double result;
     private List<Result> allResults;
 
     public ThroughputAction(Action nestedAction) {
@@ -37,7 +35,6 @@ public class ThroughputAction implements Action, NestedAction {
 
         results.add(new Result(ActionName.THROUGHPUT.getName(), true, throughput, "kB/s"));
         this.allResults = results;
-//        nestedAction.cleanUp();
     }
 
     @Override
@@ -47,8 +44,6 @@ public class ThroughputAction implements Action, NestedAction {
 
     @Override
     public List<Result> fetchResults() {
-//        List<Result> results = this.nestedAction.fetchResults();
-//        results.add(new Result(ActionName.THROUGHPUT.getName(), true, this.result, "MB/s"));
         return this.allResults;
     }
 

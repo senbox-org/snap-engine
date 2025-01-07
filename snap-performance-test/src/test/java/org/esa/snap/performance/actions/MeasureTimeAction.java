@@ -11,7 +11,6 @@ public class MeasureTimeAction implements Action, NestedAction {
 
     private final String UNIT = "ms";
     private final Action nestedAction;
-//    private Double result;
     private List<Result> allResults;
 
     public MeasureTimeAction(Action nestedAction) {
@@ -22,6 +21,7 @@ public class MeasureTimeAction implements Action, NestedAction {
     public void execute() throws IOException {
         this.allResults = new ArrayList<>();
         StopWatch watch = new StopWatch();
+
         watch.start();
         this.nestedAction.execute();
         watch.stop();

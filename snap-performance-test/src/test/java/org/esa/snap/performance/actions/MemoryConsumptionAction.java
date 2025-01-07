@@ -12,7 +12,6 @@ import java.util.List;
 public class MemoryConsumptionAction implements Action, NestedAction {
 
     private final Action nestedAction;
-//    private Double result;
     private List<Result> allResults;
 
     public MemoryConsumptionAction(Action nestedAction) {
@@ -22,16 +21,10 @@ public class MemoryConsumptionAction implements Action, NestedAction {
     @Override
     public void execute() throws IOException {
         this.allResults = new ArrayList<>();
-//        long memoryBefore = getUsedMemory();
+
         resetMemoryPeaks();
-//        System.out.println("BEFORE: " + memoryBefore);
         nestedAction.execute();
-//        long memoryAfter = getUsedMemory();
         long memoryConsumption = getPeakMemoryUsage();
-//        System.out.println("AFTER: " + memoryAfter);
-//        System.out.println("AFTER: " + memoryConsumption);
-//        long memoryConsumption = memoryAfter - memoryBefore;
-//        this.result = memoryConsumption / (1024.0 * 1024.0);
 
         List<Result> results = this.nestedAction.fetchResults();
         results.add(new Result(ActionName.MEMORY.getName(), true, memoryConsumption / (1024.0 * 1024.0), "MB"));
@@ -45,15 +38,8 @@ public class MemoryConsumptionAction implements Action, NestedAction {
 
     @Override
     public List<Result> fetchResults() {
-//        List<Result> results = this.nestedAction.fetchResults();
-//        results.add(new Result(ActionName.MEMORY.getName(), true, this.result, "MB"));
         return this.allResults;
     }
-
-//    private long getUsedMemory() {
-//        Runtime runtime = Runtime.getRuntime();
-//        return runtime.totalMemory() - runtime.freeMemory();
-//    }
 
     private void resetMemoryPeaks() {
         for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
