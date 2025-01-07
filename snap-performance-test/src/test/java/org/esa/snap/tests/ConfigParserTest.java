@@ -16,7 +16,7 @@ public class ConfigParserTest {
     @Test
     @STTM("SNAP-3712")
     public void testParse() throws IOException {
-        ConfigParser configParser = new ConfigParser("TESTconfig.properties");
+        ConfigParser configParser = new ConfigParser(new String[] {"TESTconfig.properties"});
         List<PerformanceTestDefinition> testDefinitions = configParser.parse();
 
         assertEquals(2, testDefinitions.size());

@@ -3,6 +3,7 @@ package org.esa.snap.performance.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,8 +13,12 @@ public class ConfigParser {
     private String outputDirectory;
     private boolean deleteOutput = false;
 
-    public ConfigParser(String propertiesFileName) {
-        this.propertiesFileName = propertiesFileName;
+    public ConfigParser(String[] propertiesFileNames) {
+        if (propertiesFileNames.length == 0) {
+            this.propertiesFileName = "config.properties";
+        } else {
+            this.propertiesFileName = propertiesFileNames[0];
+        }
     }
 
     public List<PerformanceTestDefinition> parse() throws IOException {

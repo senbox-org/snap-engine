@@ -13,7 +13,7 @@ public class Main {
             System.out.println("Initializing tests");
 
             // step 1: parse configuration and load test definitions
-            ConfigParser configParser = new ConfigParser("config.properties");
+            ConfigParser configParser = new ConfigParser(args);
             List<PerformanceTestDefinition> testDefinitions = configParser.parse();
 
             // step 2: initialize outputDirectory
