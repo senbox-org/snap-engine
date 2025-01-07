@@ -21,6 +21,9 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Validates input products using commonly used verifications
  */
@@ -290,6 +293,35 @@ public class InputProductValidator {
         for(Product srcProduct : sourceProducts) {
             if(!product.isCompatibleProduct(srcProduct, geographicError)) {
                 throw new OperatorException(SHOULD_BE_COMPATIBLE);
+            }
+        }
+    }
+
+    public void checkIfSourceBandsMatch() {
+        final String mission = absRoot != null ? absRoot.getAttributeString(AbstractMetadata.MISSION, "") : "";
+        if (!mission.startsWith("SENTINEL-1")) {
+            throw new OperatorException(SHOULD_BE_S1);
+        }
+
+        final List<String> bandNameList = new ArrayList<>(5);
+        for(MetadataElement elem : absRoot.getElements()) {
+            if(elem.getName().startsWith(AbstractMetadata.BAND_PREFIX)) {
+                final String bandNames = elem.getAttributeString("band_names");
+                if (bandNames != null) {
+                    final String[] bandNameArray = bandNames.split(" ");
+                    for (String bandName : bandNameArray) {
+                        if (!bandNameList.contains(bandName)) {
+                            bandNameList.add(bandName);
+                        }
+                    }
+                }
+            }
+        }
+
+        final String[] bandNames = product.getBandNames();
+        for (final String bandName : bandNameList) {
+            if (!contains(bandNames, bandName)) {
+                throw new OperatorException("The selected source bands do not match the source bands in the metadata.");
             }
         }
     }
