@@ -3,7 +3,6 @@ package org.esa.snap.performance.actions;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.performance.util.Result;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class MeasureTimeAction implements Action, NestedAction {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         this.allResults = new ArrayList<>();
         StopWatch watch = new StopWatch();
 

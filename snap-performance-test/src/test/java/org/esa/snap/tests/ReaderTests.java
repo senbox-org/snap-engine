@@ -15,7 +15,8 @@ import static org.junit.Assert.*;
 @Ignore
 public class ReaderTests {
 
-    String testDataDir = "T:/SNAP/Performance_Test_DiMap_ZNAP/";
+//    String testDataDir = "T:/SNAP/Performance_Test_DiMap_ZNAP/";
+    String testDataDir = "/mnt/EOdata/SNAP/Performance_Test_DiMap_ZNAP/";
     Product product;
 
     @After

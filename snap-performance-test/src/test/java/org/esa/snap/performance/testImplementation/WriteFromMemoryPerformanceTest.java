@@ -8,7 +8,6 @@ import org.esa.snap.performance.actions.WriteAction;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.TestUtils;
 
-import java.io.IOException;
 import java.util.List;
 
 public class WriteFromMemoryPerformanceTest extends PerformanceTest {
@@ -18,7 +17,7 @@ public class WriteFromMemoryPerformanceTest extends PerformanceTest {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         System.out.println("Execution of " + getTestName() + " started....");
 
         String productName = getParameters().getProducts().get(0);

@@ -5,7 +5,6 @@ import org.esa.snap.performance.util.PerformanceTestResult;
 import org.esa.snap.performance.util.Result;
 import org.esa.snap.performance.util.TestUtils;
 
-import java.io.IOException;
 import java.util.List;
 
 public abstract class PerformanceTest {
@@ -21,7 +20,7 @@ public abstract class PerformanceTest {
         this.parameters = parameters;
     }
 
-    public abstract void execute() throws IOException;
+    public abstract void execute() throws Throwable;
 
     public PerformanceTestResult fetchResults() {
         return TestUtils.combineResults(this.result1, this.result2, this.parameters, this.testName);

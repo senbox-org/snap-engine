@@ -3,7 +3,6 @@ package org.esa.snap.performance.actions;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.performance.util.Result;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class ReadBeforeExecutionAction implements Action, NestedAction {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         this.allResults = new ArrayList<>();
         Action readProduct = new SimpleReadProductAction(this.productName, this.testDataDir);
         readProduct.execute();

@@ -8,7 +8,6 @@ import org.esa.snap.performance.util.Result;
 import org.esa.snap.performance.util.TestUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class ReadProductToMemoryAction implements Action {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         this.allResults = new ArrayList<>();
         String fullFilePath = TestUtils.buildProductPathString(this.testDataDir, this.productName);
         Product sourceProduct = ProductIO.readProduct(new File(fullFilePath));

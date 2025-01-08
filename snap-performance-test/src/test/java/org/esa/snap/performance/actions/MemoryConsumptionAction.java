@@ -2,7 +2,6 @@ package org.esa.snap.performance.actions;
 
 import org.esa.snap.performance.util.Result;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
@@ -19,7 +18,7 @@ public class MemoryConsumptionAction implements Action, NestedAction {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         this.allResults = new ArrayList<>();
 
         resetMemoryPeaks();

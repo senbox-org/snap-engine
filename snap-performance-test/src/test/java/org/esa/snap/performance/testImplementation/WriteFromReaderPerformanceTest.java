@@ -4,7 +4,6 @@ import org.esa.snap.performance.actions.*;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.TestUtils;
 
-import java.io.IOException;
 import java.util.List;
 
 public class WriteFromReaderPerformanceTest extends PerformanceTest {
@@ -14,7 +13,7 @@ public class WriteFromReaderPerformanceTest extends PerformanceTest {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         System.out.println("Execution of " + getTestName() + " started....");
 
         String productName = getParameters().getProducts().get(0);

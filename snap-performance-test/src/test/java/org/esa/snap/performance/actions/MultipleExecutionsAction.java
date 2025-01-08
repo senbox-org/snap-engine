@@ -3,7 +3,6 @@ package org.esa.snap.performance.actions;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.Result;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class MultipleExecutionsAction implements Action, NestedAction {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         boolean discardFirstMeasure = this.params.isDiscardFirstMeasure();
         int numExecutions = this.params.getNumExecutionsForAverageOperations();
         if (discardFirstMeasure) {

@@ -96,11 +96,11 @@ public class ExcelWriter {
                 row = sheet.createRow(rowIndex++);
             }
             if (ii == 0) {
-                String[] splitProduct = result.getProduct1().split("\\\\");
+                String[] splitProduct = result.getProduct1().split("/");
                 row.createCell(1).setCellValue(splitProduct[splitProduct.length - 1]);
             }
             if (ii == 1) {
-                String[] splitProduct = result.getProduct2().split("\\\\");
+                String[] splitProduct = result.getProduct2().split("/");
                 row.createCell(1).setCellValue(splitProduct[splitProduct.length - 1]);
             }
 

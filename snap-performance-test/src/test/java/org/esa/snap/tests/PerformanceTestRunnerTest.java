@@ -24,7 +24,7 @@ public class PerformanceTestRunnerTest {
 
     @Test
     @STTM("SNAP-3712")
-    public void testRunTestsCollectsResults() throws IOException {
+    public void testRunTestsCollectsResults() throws Throwable {
 
         PerformanceTest mockTest1 = mock(PerformanceTest.class);
         PerformanceTest mockTest2 = mock(PerformanceTest.class);
@@ -53,7 +53,7 @@ public class PerformanceTestRunnerTest {
 
     @Test
     @STTM("SNAP-3712")
-    public void testRunTestsHandlesEmptyList() throws IOException {
+    public void testRunTestsHandlesEmptyList() throws Throwable {
         runner.runTests(List.of());
 
         List<PerformanceTestResult> results = runner.collectResults();
@@ -62,7 +62,7 @@ public class PerformanceTestRunnerTest {
 
     @Test
     @STTM("SNAP-3712")
-    public void testRunTestsHandlesFailureAndSkips() throws IOException {
+    public void testRunTestsHandlesFailureAndSkips() throws Throwable {
         PerformanceTest mockTest1 = mock(PerformanceTest.class);
         PerformanceTest mockTest2 = mock(PerformanceTest.class);
 

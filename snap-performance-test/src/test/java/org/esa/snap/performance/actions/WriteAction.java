@@ -9,7 +9,6 @@ import org.esa.snap.performance.util.TestUtils;
 import org.esa.snap.performance.util.Threading;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class WriteAction implements Action {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() throws Throwable {
         this.allResults = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         String timestamp = LocalDateTime.now().format(formatter);
