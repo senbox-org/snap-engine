@@ -5,10 +5,8 @@ import org.esa.snap.performance.actions.*;
 import org.esa.snap.runtime.Config;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -207,6 +205,38 @@ public class TestUtils {
             preferences.flush();
         } catch (BackingStoreException e) {
             System.out.println("Config preferences for Flavour could not be stored.");
+        }
+    }
+
+    public static void deleteDirectory(File directory) throws IOException {
+        if (directory.isDirectory()) {
+            for (File file : Objects.requireNonNull(directory.listFiles())) {
+                deleteDirectory(file);
+            }
+        }
+        if (!directory.delete()) {
+            throw new IOException("Failed to delete file or directory: " + directory.getAbsolutePath());
+        }
+    }
+
+    public static void deleteTestOutputs(String outputDirectory) throws IOException {
+        if (outputDirectory == null || outputDirectory.isEmpty()) {
+            throw new IllegalArgumentException("Output directory path is not defined in configuration ('outputDir'). Please check your configuration file.");
+        }
+
+        File outputDir = new File(outputDirectory);
+
+        if (outputDir.exists()) {
+            for (File file : Objects.requireNonNull(outputDir.listFiles())) {
+                if (file.isDirectory() && file.getName().equals(RESULTS_DIR)) {
+                    continue;
+                }
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
         }
     }
 }

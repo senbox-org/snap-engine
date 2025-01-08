@@ -15,13 +15,6 @@ import static org.junit.Assert.*;
 
 public class PerformanceTestRunnerTest {
 
-    private PerformanceTestRunner runner;
-
-    @Before
-    public void setUp() {
-        runner = new PerformanceTestRunner();
-    }
-
     @Test
     @STTM("SNAP-3712")
     public void testRunTestsCollectsResults() throws Throwable {
@@ -37,7 +30,8 @@ public class PerformanceTestRunnerTest {
         when(mockTest1.fetchResults()).thenReturn(mockResult1);
         when(mockTest2.fetchResults()).thenReturn(mockResult2);
 
-        runner.runTests(List.of(mockTest1, mockTest2));
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS");
+        runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();
         assertEquals(2, results.size());
@@ -54,7 +48,8 @@ public class PerformanceTestRunnerTest {
     @Test
     @STTM("SNAP-3712")
     public void testRunTestsHandlesEmptyList() throws Throwable {
-        runner.runTests(List.of());
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(),"OUTPUTS");
+        runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();
         assertTrue(results.isEmpty());
@@ -74,7 +69,8 @@ public class PerformanceTestRunnerTest {
         // Simulate failure for test2
         doThrow(new IOException("Simulated failure in test2")).when(mockTest2).execute();
 
-        runner.runTests(List.of(mockTest1, mockTest2));
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS");
+        runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();
 

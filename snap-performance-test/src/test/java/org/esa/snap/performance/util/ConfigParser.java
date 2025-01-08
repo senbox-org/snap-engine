@@ -12,12 +12,8 @@ public class ConfigParser {
     private String outputDirectory;
     private boolean deleteOutput = false;
 
-    public ConfigParser(String[] propertiesFileNames) {
-        if (propertiesFileNames.length == 0) {
-            this.propertiesFileName = "config.properties";
-        } else {
-            this.propertiesFileName = propertiesFileNames[0];
-        }
+    public ConfigParser(String propertiesFileName) {
+            this.propertiesFileName = propertiesFileName;
     }
 
     public List<PerformanceTestDefinition> parse() throws IOException {

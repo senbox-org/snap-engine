@@ -23,7 +23,7 @@ public class OutputDirectoryInitializer {
                     continue;
                 }
                 if (file.isDirectory()) {
-                    deleteDirectory(file);
+                    TestUtils.deleteDirectory(file);
                 } else {
                     file.delete();
                 }
