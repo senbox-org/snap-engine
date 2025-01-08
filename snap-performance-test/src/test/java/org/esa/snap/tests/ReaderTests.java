@@ -43,7 +43,7 @@ public class ReaderTests {
     @Test
     @STTM("SNAP-3712")
     public void testSentinel_3_olci() throws IOException {
-        this.product = readProduct("Sentinel-3/olci/S3A_OL_2_WFR____20070425T152940_20070425T153025_20140610T112151_0045_000_000______MAR_D_NR____.SEN3");
+        this.product = readProduct("Sentinel-3/olci/S3A_OL_2_WFR____20180707T081143_20180707T081443_20180708T142606_0179_033_135_2520_MAR_O_NT_002.SEN3");
         assertNotNull(product);
     }
 
