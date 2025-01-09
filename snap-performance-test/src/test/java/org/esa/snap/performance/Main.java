@@ -22,9 +22,7 @@ public class Main {
             List<PerformanceTestDefinition> testDefinitions = new ArrayList<>();
 
             try {
-                // step 1: parse configuration and load test definitions
                 configParser.parse(testDefinitions);
-                // step 2: initialize outputDirectory
                 OutputDirectoryInitializer.initialize(configParser.getOutputDirectory());
 
             } catch (Exception e) {
@@ -32,17 +30,16 @@ public class Main {
                 continue;
             }
 
-            // step 3: create performance tests from definitions
             List<PerformanceTest> tests = PerformanceTestFactory.createPerformanceTests(testDefinitions);
+            String outputDir = configParser.getOutputDirectory();
+            boolean deleteOutput = configParser.isDeleteOutput();
 
-            // step 4: execute all tests and collect results
-            PerformanceTestRunner testRunner = new PerformanceTestRunner(tests, configParser.getOutputDirectory());
+            PerformanceTestRunner testRunner = new PerformanceTestRunner(tests, outputDir, deleteOutput);
             testRunner.runTests();
             List<PerformanceTestResult> allResults = testRunner.collectResults();
 
-            // step 5: write results to an Excel file
             ExcelWriter excelWriter = new ExcelWriter();
-            excelWriter.writeResults(configParser.getOutputDirectory(), allResults);
+            excelWriter.writeResults(outputDir, allResults);
         }
         logger.log(Level.INFO, "All tests finished.");
     }

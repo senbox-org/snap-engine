@@ -30,7 +30,7 @@ public class PerformanceTestRunnerTest {
         when(mockTest1.fetchResults()).thenReturn(mockResult1);
         when(mockTest2.fetchResults()).thenReturn(mockResult2);
 
-        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS");
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS", false);
         runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();
@@ -48,7 +48,7 @@ public class PerformanceTestRunnerTest {
     @Test
     @STTM("SNAP-3712")
     public void testRunTestsHandlesEmptyList() throws Throwable {
-        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(),"OUTPUTS");
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(),"OUTPUTS", false);
         runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();
@@ -69,7 +69,7 @@ public class PerformanceTestRunnerTest {
         // Simulate failure for test2
         doThrow(new IOException("Simulated failure in test2")).when(mockTest2).execute();
 
-        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS");
+        PerformanceTestRunner runner = new PerformanceTestRunner(List.of(mockTest1, mockTest2),"OUTPUTS", false);
         runner.runTests();
 
         List<PerformanceTestResult> results = runner.collectResults();

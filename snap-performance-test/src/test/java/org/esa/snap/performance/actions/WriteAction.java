@@ -37,18 +37,6 @@ public class WriteAction implements Action {
         String fullfileName = this.outputDir + timestamp;
 
         if (this.threading.equals(Threading.MULTI.getName())) {
-
-            // TODO: configure TileScheduler (and TileCache?) for multithreading
-//                JAI defaultInstance = new JAI();
-//                TileScheduler tileScheduler = defaultInstance.getTileScheduler();
-//                tileScheduler.setParallelism(..);
-//                tileScheduler.setPrefetchParallelism(..);
-//                tileScheduler.setPriority(..);
-//                tileScheduler.setPrefetchPriority(..);//
-//                TileCache tileCache = defaultInstance.getTileCache();
-//                tileCache.setMemoryCapacity(..);
-//                tileCache.setMemoryThreshold(..);
-
             GPF.writeProduct(this.product, new File(fullfileName), this.outputFormat, false, ProgressMonitor.NULL);
         } else {
             ProductIO.writeProduct(this.product, fullfileName, this.outputFormat);
