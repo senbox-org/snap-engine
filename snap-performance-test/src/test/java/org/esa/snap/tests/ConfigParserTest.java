@@ -7,6 +7,7 @@ import org.esa.snap.performance.util.PerformanceTestDefinition;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -17,7 +18,8 @@ public class ConfigParserTest {
     @STTM("SNAP-3712")
     public void testParse() throws IOException {
         ConfigParser configParser = new ConfigParser("TESTconfig.properties");
-        List<PerformanceTestDefinition> testDefinitions = configParser.parse();
+        List<PerformanceTestDefinition> testDefinitions = new ArrayList<>();
+        configParser.parse(testDefinitions);
 
         assertEquals(2, testDefinitions.size());
 

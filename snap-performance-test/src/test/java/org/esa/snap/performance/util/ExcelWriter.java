@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ExcelWriter {
 
@@ -22,6 +23,7 @@ public class ExcelWriter {
             "Unit",
             "Performance Indicator (Result 2 > Result 1)"
     };
+    private final static Logger logger = Logger.getLogger(ExcelWriter.class.getName());
 
     public void writeResults(String outputDir, List<PerformanceTestResult> allResults) {
         File outputFile = new File(outputDir + "/" + TestUtils.RESULTS_DIR);
@@ -42,7 +44,7 @@ public class ExcelWriter {
             throw new RuntimeException("Result file could not be written: " + e.getMessage(), e);
         }
 
-        System.out.println("Excel file written to: " + outputFile.getAbsolutePath());
+        logger.info("Excel file written to: " + outputFile.getAbsolutePath());
     }
 
     private static void populateSheet(Workbook workbook, List<PerformanceTestResult> results) {

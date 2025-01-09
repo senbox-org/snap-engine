@@ -6,7 +6,11 @@ import org.esa.snap.performance.actions.ReadProductFullyAction;
 import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.TestUtils;
 
+import java.util.logging.Logger;
+
 public class ReadPerformanceTest extends PerformanceTest {
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     public ReadPerformanceTest(String testName, Parameters params) {
         super(testName, params);
@@ -14,7 +18,7 @@ public class ReadPerformanceTest extends PerformanceTest {
 
     @Override
     public void execute() throws Throwable {
-        System.out.println("Execution of " + getTestName() + " started....");
+        logger.info("Execution of " + getTestName() + " started....");
 
         String productName1 = getParameters().getProducts().get(0);
         String productName2 = getParameters().getProducts().get(1);
@@ -35,6 +39,6 @@ public class ReadPerformanceTest extends PerformanceTest {
         setResult1(multipleExecutions1.fetchResults());
         setResult2(multipleExecutions2.fetchResults());
 
-        System.out.println("Execution of " + getTestName() + " finished :)");
+        logger.info("Execution of " + getTestName() + " finished :)");
     }
 }

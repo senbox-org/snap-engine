@@ -9,8 +9,11 @@ import org.esa.snap.performance.util.Parameters;
 import org.esa.snap.performance.util.TestUtils;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class WriteFromMemoryPerformanceTest extends PerformanceTest {
+
+    private final Logger logger = Logger.getLogger(WriteFromMemoryPerformanceTest.class.getName());
 
     public WriteFromMemoryPerformanceTest(String testName, Parameters parameters) {
         super(testName, parameters);
@@ -18,7 +21,7 @@ public class WriteFromMemoryPerformanceTest extends PerformanceTest {
 
     @Override
     public void execute() throws Throwable {
-        System.out.println("Execution of " + getTestName() + " started....");
+        logger.info("Execution of " + getTestName() + " started....");
 
         String productName = getParameters().getProducts().get(0);
         String testDataDir = getParameters().getTestDir();
@@ -53,6 +56,6 @@ public class WriteFromMemoryPerformanceTest extends PerformanceTest {
         setResult1(multipleExecutions1.fetchResults());
         setResult2(multipleExecutions2.fetchResults());
 
-        System.out.println("Execution of " + getTestName() + " finished :)");
+        logger.info("Execution of " + getTestName() + " finished :)");
     }
 }

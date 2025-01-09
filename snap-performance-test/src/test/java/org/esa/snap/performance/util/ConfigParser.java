@@ -2,7 +2,6 @@ package org.esa.snap.performance.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,8 +15,7 @@ public class ConfigParser {
             this.propertiesFileName = propertiesFileName;
     }
 
-    public List<PerformanceTestDefinition> parse() throws IOException {
-        ArrayList<PerformanceTestDefinition> testDefinitions = new ArrayList<>();
+    public void parse(List<PerformanceTestDefinition> testDefinitions) throws IOException, IllegalArgumentException {
 
         try (InputStream input = getClass().getClassLoader().getResourceAsStream(this.propertiesFileName)) {
             if (input == null) {
@@ -60,11 +58,7 @@ public class ConfigParser {
                 PerformanceTestDefinition testDefinition = new PerformanceTestDefinition(testName, testImplementation, params);
                 testDefinitions.add(testDefinition);
             }
-
-        } catch (IOException e) {
-            throw new IOException("Failed to load configuration: " + e.getMessage(), e);
         }
-        return testDefinitions;
     }
 
     public String getOutputDirectory() {

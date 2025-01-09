@@ -3,43 +3,53 @@ package org.esa.snap.performance;
 import org.esa.snap.performance.testImplementation.PerformanceTest;
 import org.esa.snap.performance.util.*;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
 
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
 
-        String[] configs = args.length == 0
-                ? new String[] {"config.properties"}
-                : args;
+        String[] configs = getConfigs(args);
 
-        try {
-            for (String config : configs) {
+        for (String config : configs) {
 
+            ConfigParser configParser = new ConfigParser(config);
+            List<PerformanceTestDefinition> testDefinitions = new ArrayList<>();
+
+            try {
                 // step 1: parse configuration and load test definitions
-                ConfigParser configParser = new ConfigParser(config);
-                List<PerformanceTestDefinition> testDefinitions = configParser.parse();
-
+                configParser.parse(testDefinitions);
                 // step 2: initialize outputDirectory
-                String outputDirectory = configParser.getOutputDirectory();
-                OutputDirectoryInitializer.initialize(outputDirectory);
+                OutputDirectoryInitializer.initialize(configParser.getOutputDirectory());
 
-                // step 3: create performance tests from definitions
-                List<PerformanceTest> tests = PerformanceTestFactory.createPerformanceTests(testDefinitions);
-
-                // step 4: execute all tests and collect results
-                PerformanceTestRunner testRunner = new PerformanceTestRunner(tests, outputDirectory);
-                testRunner.runTests();
-                List<PerformanceTestResult> allResults = testRunner.collectResults();
-
-                // step 5: write results to an Excel file
-                ExcelWriter excelWriter = new ExcelWriter();
-                excelWriter.writeResults(configParser.getOutputDirectory(), allResults);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "IO Error during initialization: " + e.getMessage(), e);
+                continue;
             }
 
-        } catch (IOException e) {
-                System.err.println("Error during execution: " + e.getMessage());
+            // step 3: create performance tests from definitions
+            List<PerformanceTest> tests = PerformanceTestFactory.createPerformanceTests(testDefinitions);
+
+            // step 4: execute all tests and collect results
+            PerformanceTestRunner testRunner = new PerformanceTestRunner(tests, configParser.getOutputDirectory());
+            testRunner.runTests();
+            List<PerformanceTestResult> allResults = testRunner.collectResults();
+
+            // step 5: write results to an Excel file
+            ExcelWriter excelWriter = new ExcelWriter();
+            excelWriter.writeResults(configParser.getOutputDirectory(), allResults);
         }
+        logger.log(Level.INFO, "All tests finished.");
+    }
+
+    private static String[] getConfigs(String[] args) {
+        return args.length == 0
+                ? new String[] {"config.properties"}
+                : args;
     }
 }

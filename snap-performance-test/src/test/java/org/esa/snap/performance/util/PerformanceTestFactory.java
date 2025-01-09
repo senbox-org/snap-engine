@@ -4,11 +4,15 @@ import org.esa.snap.performance.testImplementation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PerformanceTestFactory {
 
+    private static final Logger logger = Logger.getLogger(PerformanceTestFactory.class.getName());
+
     public static List<PerformanceTest> createPerformanceTests(List<PerformanceTestDefinition> testDefinitions) {
-        System.out.println("Initializing tests...");
+        logger.log(Level.INFO, "Initializing tests...");
 
         List<PerformanceTest> performanceTestList = new ArrayList<>();
 

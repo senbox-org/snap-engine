@@ -9,7 +9,7 @@ public class OutputDirectoryInitializer {
     private static final String RESULTS_DIR = "Results";
 
 
-    public static void initialize(String outputDirectory) throws IOException {
+    public static void initialize(String outputDirectory) throws IOException, IllegalArgumentException {
         if (outputDirectory == null) {
             throw new IllegalArgumentException("Output directory path is not defined in configuration ('outputDir'). Please check your configuration file.");
         }

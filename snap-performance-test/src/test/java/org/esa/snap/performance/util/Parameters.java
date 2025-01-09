@@ -32,7 +32,7 @@ public class Parameters {
         this.useThroughput = useThroughput;
     }
 
-    public static Parameters parseParameters(String testName, String outputDir, Properties props) {
+    public static Parameters parseParameters(String testName, String outputDir, Properties props) throws IllegalArgumentException {
         String products = props.getProperty(testName + ".products");
         List<String> productsList;
         if (products == null) {
