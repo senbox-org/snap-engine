@@ -193,8 +193,8 @@ public class TestUtils {
     public static void setFlavour(boolean useZip) {
         Preferences preferences = Config.instance("snap").load().preferences();
 
-        if (!useZip) {
-            preferences.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, String.valueOf(false));
+        if (useZip) {
+            preferences.put(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE, String.valueOf(true));
             preferences.put(ZnapPreferencesConstants.PROPERTY_NAME_COMPRESSOR_ID, "zlib");
         } else {
             preferences.remove(ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE);
