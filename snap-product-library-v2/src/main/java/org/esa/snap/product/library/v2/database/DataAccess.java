@@ -63,6 +63,12 @@ public class DataAccess {
         add(".png"); add(".bmp"); add(".gif");
     }};
 
+    private static final String[] DIRECTORY_BASED_PRODUCTS_EXTENSIONS = new String[]{
+            ".xml",
+            ".dim",
+            ".safe"
+    };
+
     public static boolean databaseInitialised = false;
 
     private static H2DatabaseParameters dbParams;
@@ -565,7 +571,7 @@ public class DataAccess {
                 Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
 
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
-                long sizeInBytes = computeFileSize(localProductToSave, productPath);
+                long sizeInBytes = computeFileSize(productPath);
                 productId = getProductId(localRepositoryFolder.getId(), relativePath);
                 if (productId == null) {
                     productId = insertProduct(localProductToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
@@ -1172,14 +1178,13 @@ public class DataAccess {
         }
     }
 
-    private static long computeFileSize(Product product, Path productPath) throws IOException {
+    private static long computeFileSize(Path productPath) throws IOException {
         final Path computedPath;
         final String extension = FileUtils.getExtension(productPath.toString());
         if (ZipUtils.isZipped(productPath) || (extension != null && SIMPLE_PRODUCT_EXTENSIONS.contains(extension.toLowerCase()))) {
             computedPath = productPath;
         } else {
-            final String[] formatNames = product.getProductReader().getReaderPlugIn().getFormatNames();
-            if (Arrays.stream(formatNames).anyMatch(f -> f.startsWith("GeoTIFF"))) {
+            if (Arrays.stream(DIRECTORY_BASED_PRODUCTS_EXTENSIONS).noneMatch(f -> f.toLowerCase().endsWith(extension))) {
                 computedPath = productPath;
             } else {
                 computedPath = productPath.getParent();
