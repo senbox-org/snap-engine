@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -25,13 +26,7 @@ import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
-import org.esa.snap.dataio.netcdf.util.AbstractNetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.NetcdfOpImage;
-import org.esa.snap.dataio.netcdf.util.RasterDigest;
-import org.esa.snap.dataio.netcdf.util.ScaledVariable;
+import org.esa.snap.dataio.netcdf.util.*;
 import ucar.ma2.DataType;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -53,7 +48,7 @@ public class HdfEosBandPart extends ProfilePartIO {
             final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
             final Band band = p.addBand(variable.getShortName(), rasterDataType);
             CfBandPart.readCfBandAttributes(variable, band);
-            band.setSourceImage(new NetcdfMultiLevelImage(band, variable, ctx));
+            band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, ctx)));
         }
         ScaledVariable[] scaledVariables = rasterDigest.getScaledVariables();
         for (ScaledVariable scaledVariable : scaledVariables) {
@@ -61,7 +56,7 @@ public class HdfEosBandPart extends ProfilePartIO {
             final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
             final Band band = p.addBand(variable.getShortName(), rasterDataType);
             CfBandPart.readCfBandAttributes(variable, band);
-            band.setSourceImage(new ScaledMultiLevelImage(band, scaledVariable, ctx));
+            band.setSourceImage(new DefaultMultiLevelImage(new ScaledMultiLevelSource(band, scaledVariable, ctx)));
         }
     }
 
@@ -70,14 +65,14 @@ public class HdfEosBandPart extends ProfilePartIO {
         throw new IllegalStateException();
     }
 
-    private static class ScaledMultiLevelImage extends AbstractNetcdfMultiLevelImage {
+    private static class ScaledMultiLevelSource extends LazyMultiLevelSource {
 
         private final Variable variable;
         private final float scaleFactor;
         private final int[] imageOrigin;
         private final ProfileReadContext ctx;
 
-        public ScaledMultiLevelImage(RasterDataNode rdn, ScaledVariable scaledVariable, ProfileReadContext ctx) {
+        public ScaledMultiLevelSource(RasterDataNode rdn, ScaledVariable scaledVariable, ProfileReadContext ctx) {
             super(rdn);
             this.variable = scaledVariable.getVariable();
             this.scaleFactor = scaledVariable.getScaleFactor();
@@ -95,7 +90,7 @@ public class HdfEosBandPart extends ProfilePartIO {
             int sourceWidth = (int) (rdn.getRasterWidth() / scaleFactor);
             int sourceHeight = (int) (rdn.getRasterHeight() / scaleFactor);
             ResolutionLevel resolutionLevel = ResolutionLevel.create(getModel(), level);
-            Dimension imageTileSize = new Dimension(getTileWidth(), getTileHeight());
+            Dimension imageTileSize = getImageTileSize();
 
             RenderedImage netcdfImg;
             if (variable.getDataType() == DataType.LONG) {

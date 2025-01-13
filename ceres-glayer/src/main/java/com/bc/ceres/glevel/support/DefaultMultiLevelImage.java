@@ -25,9 +25,8 @@ import java.awt.Shape;
 import java.awt.image.RenderedImage;
 
 /**
- * Adapts a JAI {@link javax.media.jai.PlanarImage PlanarImage} to the
- * {@link com.bc.ceres.glevel.MultiLevelSource} interface.
- * The image data provided by this {@code PlanarImage} corresponds to the level zero image of the given
+ * Adapts a JAI {@link javax.media.jai.PlanarImage PlanarImage} to the {@link com.bc.ceres.glevel.MultiLevelSource}
+ * interface. The image data provided by this {@code PlanarImage} corresponds to the level zero image of the given
  * {@code MultiLevelSource}.
  *
  * @author Norman Fomferra
@@ -42,7 +41,7 @@ public class DefaultMultiLevelImage extends MultiLevelImage {
      * @param source The multi-level image source.
      */
     public DefaultMultiLevelImage(MultiLevelSource source) {
-        this(source,new ImageLayout(source.getImage(0)));
+        this(source, new ImageLayout(source.getImage(0)));
     }
 
     /**
@@ -52,7 +51,7 @@ public class DefaultMultiLevelImage extends MultiLevelImage {
      * @param layout The image layout.
      */
     public DefaultMultiLevelImage(MultiLevelSource source, ImageLayout layout) {
-        super(layout, null, null);
+        super(layout, source, null);
         this.source = source;
     }
 

@@ -36,7 +36,7 @@ public class GS7BGDriverProductReaderTest extends AbstractTestDriverProductReade
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Golden Software 7 Binary Grid", finalProduct.getProductType());
             assertEquals(768, finalProduct.getSceneRasterWidth());
             assertEquals(512, finalProduct.getSceneRasterHeight());
 
@@ -81,7 +81,7 @@ public class GS7BGDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(1,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Golden Software 7 Binary Grid", finalProduct.getProductType());
             assertEquals(500, finalProduct.getSceneRasterWidth());
             assertEquals(300, finalProduct.getSceneRasterHeight());
 
