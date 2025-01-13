@@ -40,10 +40,9 @@ public class ReadProductToMemoryAction implements Action {
         inMemoryProduct.setPreferredTileSize(sourceProduct.getPreferredTileSize());
 
         for (Band sourceBand : sourceProduct.getBands()) {
-            Band targetBand;
-            if (sourceBand.isFlagBand()) {
-                targetBand = inMemoryProduct.getBand(sourceBand.getName());
-            } else {
+            Band targetBand = inMemoryProduct.getBand(sourceBand.getName());
+
+            if (targetBand == null) {
                 targetBand = ProductUtils.copyBand(sourceBand.getName(), sourceProduct, inMemoryProduct, true);
             }
 

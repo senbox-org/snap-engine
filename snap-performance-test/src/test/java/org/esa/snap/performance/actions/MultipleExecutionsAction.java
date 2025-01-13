@@ -30,11 +30,14 @@ public class MultipleExecutionsAction implements Action, NestedAction {
             this.nestedAction.execute();
             if (ii == 0 && discardFirstMeasure) {
                 this.nestedAction.cleanUp();
+                System.gc();
                 continue;
             }
             List<Result> iterationResults = new ArrayList<>(this.nestedAction.fetchResults());
             this.results.addAll(iterationResults);
+
             nestedAction.cleanUp();
+            System.gc();
         }
     }
 
