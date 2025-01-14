@@ -252,7 +252,8 @@ public class ZnapProductWriter extends AbstractProductWriter {
         final String stripedFilename = getFilenameWithoutExtension();
         if (useZipArchive) {
             outputRoot = parentDir.resolve(stripedFilename + ZNAP_ZIP_CONTAINER_EXTENSION);
-            zarrStore = new ZipStore(outputRoot);
+            zarrStore = new ZnapZipStore(outputRoot);
+//            zarrStore = new ZipStore(outputRoot);
         } else {
             outputRoot = parentDir.resolve(stripedFilename + ZNAP_CONTAINER_EXTENSION);
             zarrStore = new FileSystemStore(outputRoot);
