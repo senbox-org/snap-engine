@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>11.0.0</version>
+    <version>11.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -684,7 +684,7 @@
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.20</version>
+                <version>1.4.21</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>

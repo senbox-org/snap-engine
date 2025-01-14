@@ -35,7 +35,7 @@ public class BTDriverProductReaderTest extends AbstractTestDriverProductReader {
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("VTP .bt (Binary Terrain) 1.3 Format", finalProduct.getProductType());
             assertEquals(768, finalProduct.getSceneRasterWidth());
             assertEquals(512, finalProduct.getSceneRasterHeight());
 
@@ -83,7 +83,7 @@ public class BTDriverProductReaderTest extends AbstractTestDriverProductReader {
             assertEquals(1, finalProduct.getBands().length);
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("VTP .bt (Binary Terrain) 1.3 Format", finalProduct.getProductType());
             assertEquals(400, finalProduct.getSceneRasterWidth());
             assertEquals(300, finalProduct.getSceneRasterHeight());
 

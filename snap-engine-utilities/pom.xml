@@ -5,7 +5,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>11.0.0</version>
+        <version>11.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-engine-utilities</artifactId>
@@ -31,15 +31,21 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

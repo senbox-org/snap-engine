@@ -38,6 +38,7 @@ import org.esa.snap.engine_utilities.eo.Constants;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
+import org.esa.snap.engine_utilities.eo.GeoUtils;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -133,16 +134,44 @@ public final class ComputeSlopeAspectOp extends Operator {
     private void getPixelSpacings() throws Exception {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
-        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-        if (rangeSpacing <= 0.0) {
-            throw new OperatorException("Invalid range pixel spacing: " + rangeSpacing);
+        if (absRoot != null) {
+            rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
+            azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
         }
 
-        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacing <= 0.0) {
-            throw new OperatorException("Invalid azimuth pixel spacing: " + azimuthSpacing);
+        if (rangeSpacing == AbstractMetadata.NO_METADATA || azimuthSpacing == AbstractMetadata.NO_METADATA ||
+                rangeSpacing == 0.0 || azimuthSpacing == 0.0) {
+            rangeSpacing = getResolutionXAtCentre(sourceProduct);
+            azimuthSpacing = getResolutionYAtCentre(sourceProduct);
         }
+    }
+
+    public static double getResolutionXAtCentre(final Product product) {
+        final int numPixelsX = Math.min(400, product.getSceneRasterWidth());
+        final int halfX = numPixelsX / 2;
+        final int centreX = product.getSceneRasterWidth() / 2;
+        final int centreY = product.getSceneRasterHeight() / 2;
+
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        final GeoPos geoPosX1 = geoCoding.getGeoPos(new PixelPos(centreX - halfX, centreY), null);
+        final GeoPos geoPosX2 = geoCoding.getGeoPos(new PixelPos(centreX + halfX, centreY), null);
+        final GeoUtils.DistanceHeading distX = GeoUtils.vincenty_inverse(geoPosX1, geoPosX2);
+
+        return distX.distance / numPixelsX;
+    }
+
+    public static double getResolutionYAtCentre(final Product product) {
+        final int numPixelsY = Math.min(400, product.getSceneRasterHeight());
+        final int halfY = numPixelsY / 2;
+        final int centreX = product.getSceneRasterWidth() / 2;
+        final int centreY = product.getSceneRasterHeight() / 2;
+
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        final GeoPos geoPosY1 = geoCoding.getGeoPos(new PixelPos(centreX, centreY - halfY), null);
+        final GeoPos geoPosY2 = geoCoding.getGeoPos(new PixelPos(centreX, centreY + halfY), null);
+        final GeoUtils.DistanceHeading distY = GeoUtils.vincenty_inverse(geoPosY1, geoPosY2);
+
+        return distY.distance / numPixelsY;
     }
 
     private void checkDEM() throws Exception {
