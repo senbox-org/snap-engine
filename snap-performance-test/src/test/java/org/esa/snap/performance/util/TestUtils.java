@@ -56,11 +56,11 @@ public class TestUtils {
         }
 
         if (memory && groupedResults.containsKey(ActionName.MEMORY.getName())) {
-            double averageMemory = groupedResults.get(ActionName.MEMORY.getName()).stream()
-                    .mapToDouble(result -> ((Number) result.getValue()).doubleValue())
-                    .average()
-                    .orElse(0.0);
-            averages.put(ActionName.MEMORY.getName(), averageMemory);
+//            double averageMemory = groupedResults.get(ActionName.MEMORY.getName()).stream()
+//                    .mapToDouble(result -> ((Number) result.getValue()).doubleValue())
+//                    .average()
+//                    .orElse(0.0);
+//            averages.put(ActionName.MEMORY.getName(), averageMemory);
 
             double maxMemory = groupedResults.get(ActionName.MEMORY.getName()).stream()
                     .mapToDouble(result -> ((Number) result.getValue()).doubleValue())
@@ -113,11 +113,11 @@ public class TestUtils {
             run2Results.add(orderedResults2.get(key));
 
             if (key.contains(ActionName.THROUGHPUT.getName())) {
-                units.add("kB/s");
+                units.add("MB/s");
             } else if (key.contains(ActionName.MEMORY.getName())) {
                 units.add("MB");
             } else if (key.contains(ActionName.MEASURE_TIME.getName())) {
-                units.add("ms");
+                units.add("s");
             } else {
                 units.add("");
             }

@@ -45,8 +45,17 @@ public class Main {
     }
 
     private static String[] getConfigs(String[] args) {
-        return args.length == 0
-                ? new String[] {"config.properties"}
-                : args;
+        List<String> configs = new ArrayList<>();
+        for (String arg : args) {
+            if (arg.endsWith(".properties")) {
+                configs.add(arg);
+            }
+        }
+
+        if (configs.isEmpty()) {
+            return new String[] {"config.properties"};
+        } else {
+            return configs.toArray(new String[0]);
+        }
     }
 }

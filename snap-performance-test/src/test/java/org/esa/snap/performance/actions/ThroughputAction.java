@@ -32,7 +32,7 @@ public class ThroughputAction implements Action, NestedAction {
         double fileSizeInMB = getFileSizeInKB(filePath);
         double throughput = fileSizeInMB / timeInSeconds;
 
-        results.add(new Result(ActionName.THROUGHPUT.getName(), true, throughput, "kB/s"));
+        results.add(new Result(ActionName.THROUGHPUT.getName(), true, throughput, "MB/s"));
         this.allResults = results;
     }
 

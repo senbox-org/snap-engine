@@ -27,7 +27,9 @@ public class MultipleExecutionsAction implements Action, NestedAction {
         }
 
         for (int ii = 0; ii < numExecutions; ii++) {
+            System.out.println("EXECUTION " + ii);
             this.nestedAction.execute();
+
             if (ii == 0 && discardFirstMeasure) {
                 this.nestedAction.cleanUp();
                 System.gc();

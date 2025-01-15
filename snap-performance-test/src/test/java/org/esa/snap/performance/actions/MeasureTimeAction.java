@@ -8,7 +8,7 @@ import java.util.List;
 
 public class MeasureTimeAction implements Action, NestedAction {
 
-    private final String UNIT = "ms";
+    private final String UNIT = "s";
     private final Action nestedAction;
     private List<Result> allResults;
 
@@ -25,9 +25,13 @@ public class MeasureTimeAction implements Action, NestedAction {
         this.nestedAction.execute();
         watch.stop();
 
+        double timeInSeconds = watch.getTimeDiff() / 1000.0;
+
         List<Result> results = this.nestedAction.fetchResults();
-        results.add(new Result(ActionName.MEASURE_TIME.getName(), true, watch.getTimeDiff(), this.UNIT));
+        results.add(new Result(ActionName.MEASURE_TIME.getName(), true, timeInSeconds, this.UNIT));
         this.allResults = results;
+
+        System.out.println("TIME: " + timeInSeconds + "s");
     }
 
     @Override
