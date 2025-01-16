@@ -84,7 +84,7 @@ public final class SceneFactory {
                     auxiliarSubsetDef = subsetDef;
                 } else {
                     auxiliarSubsetDef = new ProductSubsetDef();
-                    auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetDef.getRegionMap().get(sourceRaster.getName()), 0));
+                    auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetDef.getRegionMap().get(sourceRaster.getName()).getSubsetExtent(), 0));
                     auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(),subsetDef.getSubSamplingY());
                 }
 

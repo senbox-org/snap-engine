@@ -17,7 +17,9 @@ package org.esa.snap.core.dataio;
 
 import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.Guardian;
+import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -44,6 +46,11 @@ public class ProductSubsetDef {
     private AbstractSubsetRegion subsetRegion;
 
     /**
+     * The subset polygon
+     */
+    private Polygon subsetPolygon;
+
+    /**
      * The optional name of the subset
      */
     private String subsetName = null;
@@ -51,7 +58,7 @@ public class ProductSubsetDef {
     /**
      * The spatial subset for each RasterDataNode
      */
-    private HashMap<String,Rectangle> regionMap = null;
+    private HashMap<String, SubsetRegionInfo> regionMap = null;
 
     /**
      * Subsampling in X direction.
@@ -246,7 +253,7 @@ public class ProductSubsetDef {
         return null;
     }
 
-    public HashMap<String,Rectangle> getRegionMap() {
+    public HashMap<String,SubsetRegionInfo> getRegionMap() {
         return regionMap;
     }
     /**
@@ -268,7 +275,7 @@ public class ProductSubsetDef {
         }
     }
 
-    public void setRegionMap(HashMap<String,Rectangle> regionMap) {
+    public void setRegionMap(HashMap<String,SubsetRegionInfo> regionMap) {
         this.regionMap = regionMap;
     }
 
@@ -427,5 +434,13 @@ public class ProductSubsetDef {
 
     public void setSubsetRegion(AbstractSubsetRegion subsetRegion) {
         this.subsetRegion = subsetRegion;
+    }
+
+    public Polygon getSubsetPolygon() {
+        return subsetPolygon;
+    }
+
+    public void setSubsetPolygon(Polygon subsetPolygon) {
+        this.subsetPolygon = subsetPolygon;
     }
 }

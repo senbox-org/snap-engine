@@ -265,8 +265,8 @@ public abstract class AbstractProductReader implements ProductReader {
             sourceStepX = getSubsetDef().getSubSamplingX();
             sourceStepY = getSubsetDef().getSubSamplingY();
             if (getSubsetDef().getRegionMap() != null && getSubsetDef().getRegionMap().containsKey(destBand.getName())) {
-                sourceOffsetX = getSubsetDef().getRegionMap().get(destBand.getName()).x;
-                sourceOffsetY = getSubsetDef().getRegionMap().get(destBand.getName()).y;
+                sourceOffsetX = getSubsetDef().getRegionMap().get(destBand.getName()).getSubsetExtent().x;
+                sourceOffsetY = getSubsetDef().getRegionMap().get(destBand.getName()).getSubsetExtent().y;
             } else if (getSubsetDef().getRegion() != null) {
                 sourceOffsetX = getSubsetDef().getRegion().x;
                 sourceOffsetY = getSubsetDef().getRegion().y;

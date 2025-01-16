@@ -39,7 +39,7 @@ public class SparseDataBand extends Band {
             if (subsetDef != null) {
                 final String nodeName = getName();
                 if (subsetDef.getRegionMap() != null && subsetDef.getRegionMap().containsKey(nodeName)) {
-                    final Rectangle rectangle = subsetDef.getRegionMap().get(nodeName);
+                    final Rectangle rectangle = subsetDef.getRegionMap().get(nodeName).getSubsetExtent();
                     rasterWidth = rectangle.width;
                     rasterHeight = rectangle.height;
                 } else {

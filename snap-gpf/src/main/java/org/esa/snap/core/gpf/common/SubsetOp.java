@@ -39,6 +39,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
@@ -232,13 +233,14 @@ public class SubsetOp extends Operator {
         }
 
         if (region == null && geoRegion == null && subsetDef.getNodeNames() != null) {
-            HashMap<String, Rectangle> regionMap = new HashMap<>();
+            HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
             for (String nodeName : subsetDef.getNodeNames()) {
                 RasterDataNode rdn = sourceProduct.getRasterDataNode(nodeName);
                 if (rdn == null || rdn.getRasterWidth() == 0 || rdn.getRasterHeight() == 0) {
                     continue;
                 }
-                regionMap.put(nodeName, new Rectangle(rdn.getRasterWidth(), rdn.getRasterHeight()));
+                final Rectangle rectangle = new Rectangle(rdn.getRasterWidth(), rdn.getRasterHeight());
+                regionMap.put(nodeName, new SubsetRegionInfo(rectangle, null));
             }
             if (regionMap.size() > 0) {
                 subsetDef.setRegionMap(regionMap);
@@ -313,7 +315,7 @@ public class SubsetOp extends Operator {
         return GeoUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false,false);
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -324,7 +326,7 @@ public class SubsetOp extends Operator {
 
         HashMap<String, Rectangle> regionMap = new HashMap<>();
         HashMap<String, Geometry> geometryMap = new HashMap<>();
-        HashMap<String, Rectangle> finalRegionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> finalRegionMap = new HashMap<>();
 
         GeoCoding productGeoCoding = product.getSceneGeoCoding();
         int productWidth = product.getSceneRasterWidth();
@@ -362,13 +364,13 @@ public class SubsetOp extends Operator {
                 continue;
             }
             Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true,false);
-            finalRegionMap.put(rasterDataNode.getName(), rect);
+            finalRegionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rect, null));
         }
 
         return finalRegionMap;
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -396,7 +398,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
             if (rasterDataNode.getGeoCoding().equals(referenceNode.getGeoCoding())) {
-                regionMap.put(rasterDataNode.getName(), region);
+                regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(region, null));
                 continue;
             }
             boolean usePixelCenter = true;
@@ -406,13 +408,13 @@ public class SubsetOp extends Operator {
                 usePixelCenter = false;
             }
             Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, usePixelCenter, multiSize);
-            regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
+            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rasterPixelRegion, null));
         }
 
         return regionMap;
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Geometry geoRegion, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Geometry geoRegion, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -421,7 +423,7 @@ public class SubsetOp extends Operator {
             }
         }
 
-        HashMap<String, Rectangle> regionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
 
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
@@ -430,7 +432,7 @@ public class SubsetOp extends Operator {
             }
 
             Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true, false);
-            regionMap.put(rasterDataNode.getName(), rect);
+            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rect, null));
         }
 
         return regionMap;
