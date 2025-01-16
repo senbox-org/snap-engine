@@ -283,7 +283,7 @@ public class ProductSubsetDefTest {
         assertEquals(new Dimension(50, 5), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
-        assertEquals(new Dimension(55, 6), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(50, 6), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubSampling(3, 3);
 
@@ -297,13 +297,13 @@ public class ProductSubsetDefTest {
         assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
-        assertEquals(new Dimension(37, 4), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 120, 12), 0));
-        assertEquals(new Dimension(40, 4), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 130, 13), 0));
-        assertEquals(new Dimension(44, 5), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 5), _subset.getSceneRasterSize(100, 100));
     }
 
     @Test

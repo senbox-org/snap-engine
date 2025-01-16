@@ -352,20 +352,23 @@ public class ProductSubsetDef {
 //        }
         if (this.subsetRegion != null && this.subsetRegion instanceof PixelSubsetRegion) {
             PixelSubsetRegion pixelSubsetRegion = (PixelSubsetRegion)this.subsetRegion;
-            width = pixelSubsetRegion.getPixelRegion().width;
-            height = pixelSubsetRegion.getPixelRegion().height;
+            width = Math.min(pixelSubsetRegion.getPixelRegion().width, maxWidth);
+            height = Math.min(pixelSubsetRegion.getPixelRegion().height, maxHeight);
         }
 
         if(bandName != null && regionMap != null && regionMap.containsKey(bandName)) {
-            width = regionMap.get(bandName).width;
-            height = regionMap.get(bandName).height;
+            width = Math.min(regionMap.get(bandName).getSubsetExtent().width, maxWidth);
+            height = Math.min(regionMap.get(bandName).getSubsetExtent().height, maxHeight);
         } else if (regionMap != null) {
             int auxWidth = -1;
             int auxHeight = -1;
 
             for (Object nodeName : nodeNameList) {
                 String nodeNameString = nodeName.toString();
-                Rectangle rec = regionMap.get(nodeNameString);
+                if (!regionMap.containsKey(nodeNameString)) {
+                    continue;
+                }
+                Rectangle rec = regionMap.get(nodeNameString).getSubsetExtent();
                 if(rec == null) {
                     continue;
                 }
@@ -376,8 +379,8 @@ public class ProductSubsetDef {
             }
 
             if(auxHeight != -1 && auxWidth != -1) {
-                width = auxWidth;
-                height = auxHeight;
+                width = Math.min(auxWidth, maxWidth);
+                height = Math.min(auxHeight, maxHeight);
             }
         }
         return new Dimension((width - 1) / subSamplingX + 1,
