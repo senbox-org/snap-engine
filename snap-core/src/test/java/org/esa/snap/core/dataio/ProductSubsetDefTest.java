@@ -16,9 +16,13 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.*;
 
@@ -200,6 +204,24 @@ public class ProductSubsetDefTest {
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testGetAndSetPolygon() {
+        assertNull("initially, getSubsetPolygon() should return null", _subset.getSubsetPolygon());
+
+        final Coordinate[] productPolygonCoordinates = new Coordinate[]{
+                new Coordinate(0, 0),
+                new Coordinate(0, 10),
+                new Coordinate(10, 0),
+                new Coordinate(0, 0),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon subsetPolygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(productPolygonCoordinates), new LinearRing[0]);
+        _subset.setSubsetPolygon(subsetPolygon);
+        assertNotNull(_subset.getSubsetPolygon());
+        assertEquals("POLYGON ((0 0, 0 10, 10 0, 0 0))", _subset.getSubsetPolygon().toText());
     }
 
     @Test
