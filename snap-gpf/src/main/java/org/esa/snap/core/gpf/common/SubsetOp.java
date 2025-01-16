@@ -371,6 +371,10 @@ public class SubsetOp extends Operator {
     }
 
     public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
+        return computeRegionMap(region, null, referenceBandName, product, rasterNames);
+    }
+
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, Polygon regionPolygon, String referenceBandName, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -379,7 +383,7 @@ public class SubsetOp extends Operator {
             }
         }
 
-        HashMap<String, Rectangle> regionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
         RasterDataNode referenceNode = product.getBand(referenceBandName);
 
         GeoCoding referenceRasterGeoCoding = referenceNode.getGeoCoding();
@@ -398,7 +402,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
             if (rasterDataNode.getGeoCoding().equals(referenceNode.getGeoCoding())) {
-                regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(region, null));
+                regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(region, regionPolygon));
                 continue;
             }
             boolean usePixelCenter = true;
@@ -408,7 +412,8 @@ public class SubsetOp extends Operator {
                 usePixelCenter = false;
             }
             Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, usePixelCenter, multiSize);
-            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rasterPixelRegion, null));
+            final Polygon rasterRegionPolygon = GeoUtils.projectPolygonToGeocoding(regionPolygon, referenceRasterGeoCoding, rasterDataNode.getGeoCoding());
+            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rasterPixelRegion, rasterRegionPolygon));
         }
 
         return regionMap;
