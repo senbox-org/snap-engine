@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelModel;
@@ -33,7 +17,6 @@ import java.io.File;
  * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
-@Deprecated
 public class FileMultiLevelSource extends AbstractMultiLevelSource {
     private final File location;
     private final String basename;
@@ -71,7 +54,7 @@ public class FileMultiLevelSource extends AbstractMultiLevelSource {
     }
 
     public static FileMultiLevelSource create(File location, String extension, AffineTransform imageToModelTransform, int levelCount) {
-        final DefaultMultiLevelModel defaultMultiLevelModel = new DefaultMultiLevelModel(levelCount, imageToModelTransform, null);
+        final com.bc.ceres.glevel.support.DefaultMultiLevelModel defaultMultiLevelModel = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(levelCount, imageToModelTransform, null);
         final FileMultiLevelSource levelImageSource = new FileMultiLevelSource(location, location.getName(), extension, defaultMultiLevelModel);
         Rectangle2D modelBounds = DefaultMultiLevelModel.getModelBounds(imageToModelTransform, levelImageSource.getImage(0));
         defaultMultiLevelModel.setModelBounds(modelBounds);

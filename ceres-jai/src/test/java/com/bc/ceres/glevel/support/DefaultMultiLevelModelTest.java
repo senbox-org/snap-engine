@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package com.bc.ceres.glevel.support;
 
 import org.junit.Test;
@@ -24,7 +8,6 @@ import java.awt.geom.Rectangle2D;
 
 import static org.junit.Assert.assertEquals;
 
-@Deprecated
 public class DefaultMultiLevelModelTest {
 
     final double TX0 = -50;
@@ -41,7 +24,7 @@ public class DefaultMultiLevelModelTest {
         i2m0.translate(TX0, TY0);
         i2m0.scale(S0, S0);
 
-        DefaultMultiLevelModel model = new DefaultMultiLevelModel(4, i2m0, W, H);
+        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(4, i2m0, W, H);
         assertEquals(4, model.getLevelCount());
         assertEquals(new Rectangle2D.Double(TX0, TY0, S0 * W, S0 * H), model.getModelBounds());
         assertEquals(i2m0, model.getImageToModelTransform(0));

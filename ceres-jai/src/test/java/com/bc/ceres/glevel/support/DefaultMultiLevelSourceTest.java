@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelSource;
@@ -32,14 +16,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 
-@Deprecated
 public class DefaultMultiLevelSourceTest {
 
     @Test
     public void testScaledImageSizes1() throws Exception {
         int W = 4096;
-        DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
-        DefaultMultiLevelSource source = new DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
+        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
+        com.bc.ceres.glevel.support.DefaultMultiLevelSource source = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
 
         // Sentinel-2 MSI 10m and 20m Tile
         testScaledImageSizes(4096, 0, source);
@@ -53,8 +36,8 @@ public class DefaultMultiLevelSourceTest {
     @Test
     public void testScaledImageSizes2() throws Exception {
         int W = 1826;
-        DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
-        DefaultMultiLevelSource source = new DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
+        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
+        com.bc.ceres.glevel.support.DefaultMultiLevelSource source = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
 
         // Sentinel-2 MSI 60m Tile
         testScaledImageSizes(1826, 0, source);
@@ -65,11 +48,11 @@ public class DefaultMultiLevelSourceTest {
         testScaledImageSizes(58, 5, source);
     }
 
-    private void testScaledImageSizes(int expectedSize, int level, DefaultMultiLevelSource source) {
+    private void testScaledImageSizes(int expectedSize, int level, com.bc.ceres.glevel.support.DefaultMultiLevelSource source) {
         Rectangle expectedRect = new Rectangle(0, 0, expectedSize, expectedSize);
         Rectangle sourceRect = new Rectangle(0, 0, source.getSourceImage().getWidth(), source.getSourceImage().getHeight());
 
-        Rectangle j2kLevelRect = DefaultMultiLevelSource.getLevelImageBounds(sourceRect, source.getModel().getScale(level));
+        Rectangle j2kLevelRect = com.bc.ceres.glevel.support.DefaultMultiLevelSource.getLevelImageBounds(sourceRect, source.getModel().getScale(level));
         assertEquals("at resolution level " + level + ":", expectedRect, j2kLevelRect);
 
         RenderedImage levelImage = source.getImage(level);
@@ -80,7 +63,7 @@ public class DefaultMultiLevelSourceTest {
 
     @Test
     public void testNull() {
-        final MultiLevelSource mls = DefaultMultiLevelSource.NULL;
+        final MultiLevelSource mls = com.bc.ceres.glevel.support.DefaultMultiLevelSource.NULL;
         assertEquals(1, mls.getModel().getLevelCount());
         assertNull(mls.getModel().getModelBounds());
     }
@@ -89,7 +72,7 @@ public class DefaultMultiLevelSourceTest {
     public void testLevelImages() {
         final PlanarImage src = createSourceImage(256, 128);
 
-        DefaultMultiLevelSource mls = new DefaultMultiLevelSource(src, 5);
+        com.bc.ceres.glevel.support.DefaultMultiLevelSource mls = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(src, 5);
         assertEquals(5, mls.getModel().getLevelCount());
 
         assertSame(src, mls.getSourceImage());

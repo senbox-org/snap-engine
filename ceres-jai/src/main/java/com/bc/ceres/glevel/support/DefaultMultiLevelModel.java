@@ -18,7 +18,7 @@ package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelModel;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
@@ -27,7 +27,6 @@ import java.awt.image.RenderedImage;
 /**
  * A default implementation for a the {@link MultiLevelModel} interface.
  */
-@Deprecated
 public class DefaultMultiLevelModel implements MultiLevelModel {
 
     public final static int DEFAULT_MAX_LEVEL_PIXEL_COUNT = 256 * 256;
@@ -40,7 +39,7 @@ public class DefaultMultiLevelModel implements MultiLevelModel {
     /**
      * Constructs a a new model for a multi level source.
      * The number of levels is computed by {@link #getLevelCount(int, int)}.
-     * The image bounds are computed by {@link #getModelBounds(java.awt.geom.AffineTransform, int, int)}.
+     * The image bounds are computed by {@link #getModelBounds(AffineTransform, int, int)}.
      *
      * @param imageToModelTransform The affine transformation from image to model coordinates.
      * @param width                 The width of the image in pixels at level zero.
@@ -53,7 +52,7 @@ public class DefaultMultiLevelModel implements MultiLevelModel {
 
     /**
      * Constructs a a new model for a multi level source.
-     * The image bounds are computed by {@link #getModelBounds(java.awt.geom.AffineTransform, int, int)}.
+     * The image bounds are computed by {@link #getModelBounds(AffineTransform, int, int)}.
      *
      * @param levelCount            The number of levels.
      * @param imageToModelTransform The affine transformation from image to model coordinates.

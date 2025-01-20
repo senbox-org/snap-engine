@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelSource;
@@ -29,7 +13,6 @@ import java.beans.PropertyChangeListener;
 
 import static org.junit.Assert.*;
 
-@Deprecated
 public class DefaultMultiLevelImageTest {
 
     static PlanarImage createSingleBandedByteImage(int w, int h) {
@@ -44,7 +27,7 @@ public class DefaultMultiLevelImageTest {
     @Test
     public void testSamplesAreProvidedFromSource() {
         PlanarImage sourceImage = createSingleBandedByteImage(2, 2);
-        DefaultMultiLevelSource mls = new DefaultMultiLevelSource(sourceImage, 1);
+        com.bc.ceres.glevel.support.DefaultMultiLevelSource mls = new DefaultMultiLevelSource(sourceImage, 1);
         DefaultMultiLevelImage mli = new DefaultMultiLevelImage(mls);
 
         assertSame(mls, mli.getSource());
@@ -108,7 +91,7 @@ public class DefaultMultiLevelImageTest {
     }
 
     private DefaultMultiLevelImage createSomeDefaultMultiLevelImage() {
-        DefaultMultiLevelModel model = new DefaultMultiLevelModel(2, new AffineTransform(), 256, 256);
+        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(2, new AffineTransform(), 256, 256);
         MultiLevelSource mls = new TestMultiLevelSource(model);
         return new DefaultMultiLevelImage(mls);
     }

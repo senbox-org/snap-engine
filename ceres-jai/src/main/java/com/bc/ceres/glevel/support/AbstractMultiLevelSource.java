@@ -28,7 +28,6 @@ import java.awt.image.RenderedImage;
  * Level images are cached unless {@link #reset()} is called.
  * Subclasses are asked to implement {@link #createImage(int)}.
  */
-@Deprecated
 public abstract class AbstractMultiLevelSource implements MultiLevelSource {
 
     private final MultiLevelModel multiLevelModel;
@@ -86,7 +85,7 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
 
     /**
      * Removes all cached level images and also disposes
-     * any {@link javax.media.jai.PlanarImage PlanarImage}s among them.
+     * any {@link PlanarImage PlanarImage}s among them.
      * <p>Overrides should always call {@code super.reset()}.<p>
      */
     @Override

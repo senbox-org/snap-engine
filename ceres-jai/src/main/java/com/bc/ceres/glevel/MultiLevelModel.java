@@ -31,7 +31,6 @@ import java.awt.geom.Rectangle2D;
  * @author Norman Fomferra
  * @author Marco Zuehlke
  */
-@Deprecated
 public interface MultiLevelModel {
     /**
      * Gets the number of resolution levels, which is always greater than zero.

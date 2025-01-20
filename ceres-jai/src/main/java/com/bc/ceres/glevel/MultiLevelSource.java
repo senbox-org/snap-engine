@@ -18,7 +18,7 @@ package com.bc.ceres.glevel;
 
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 
 /**
@@ -30,7 +30,6 @@ import java.awt.image.RenderedImage;
  * @author Marco Zühlke
  * @version $revision$ $date$
  */
-@Deprecated
 public interface MultiLevelSource {
     MultiLevelSource NULL = DefaultMultiLevelSource.NULL;
 

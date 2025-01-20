@@ -24,7 +24,7 @@ import javax.media.jai.OpImage;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TileCache;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -32,7 +32,6 @@ import java.awt.image.RenderedImage;
 /**
  * A default implementation for the {@link MultiLevelSource} interface.
  */
-@Deprecated
 public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
 
     /**
