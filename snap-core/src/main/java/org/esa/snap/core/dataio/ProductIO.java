@@ -17,11 +17,13 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.LevelImageSupport;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StopWatch;
@@ -41,9 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,6 +73,7 @@ public class ProductIO {
     public static final String SYSTEM_PROPERTY_CONCURRENT = "snap.productio.concurrent";
     public static final boolean DEFAULT_WRITE_RASTER_CONCURRENT = true;
 
+    private static final int SHUTDOWN_TIMEOUT_MINUTES = 15;
 
     /**
      * Gets a product reader for the given format name.
@@ -503,35 +504,112 @@ public class ProductIO {
     }
 
     private static void writeBandsConcurrent(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
-        final int numBands = bandsToWrite.size();
-        final CountDownLatch bandsCountDown = new CountDownLatch(numBands);
-
-        final int numThreads = Config.instance().load().preferences().getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
-        final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        List<IOException> ioExceptionCollector = new ArrayList<>();
-        for (Band band : bandsToWrite) {
+        try {
+            writeBandsWithRasterData(pm, bandsToWrite);
             if (pm.isCanceled()) {
-                bandsCountDown.countDown();
+                return;
+            }
+            writeBandsWithImages(pm, bandsToWrite);
+        } finally {
+            pm.done();
+        }
+    }
+
+    private static void writeBandsWithImages(ProgressMonitor pm, ArrayList<Band> bandsToWrite)
+            throws IOException {
+        final int numThreads = Config.instance().load().preferences()
+                .getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
+        final ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+        // Start thread one after the other, otherwise the shutdown from ExecutorService can expire.
+        // So the last thread is only started shortly before the shutdown process starts
+        Semaphore semaphore = new Semaphore(numThreads + 5); // Already have 5 more in the queue
+        try {
+            Rectangle minMaxTileIndices = calculateMinMaxTileIndices(bandsToWrite);
+            for (int y = minMaxTileIndices.y; y <= minMaxTileIndices.height; y++) {
+                for (int x = minMaxTileIndices.x; x <= minMaxTileIndices.width; x++) {
+                    for (Band band : bandsToWrite) {
+                        if (pm.isCanceled()) {
+                            break;
+                        }
+                        int finalX = x;
+                        int finalY = y;
+                        semaphore.acquireUninterruptibly();
+                        executorService.submit(() -> {
+                            try {
+                                processTileForBand(band, finalX, finalY);
+                                semaphore.release();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    }
+                }
+            }
+        } finally {
+            shutdownExecutor(executorService);
+            pm.worked(bandsToWrite.size());
+        }
+    }
+
+    private static Rectangle calculateMinMaxTileIndices(ArrayList<Band> bandsToWrite) throws IOException {
+        // todo maybe this can be better implemented
+        Rectangle minMaxTileIndices = new Rectangle();
+        for (Band band : bandsToWrite) {
+            if (band.hasRasterData()) {
+                throw new IOException(String.format("Band '%s' should have been written before", band.getName()));
+            }
+
+            final PlanarImage sourceImage = band.getSourceImage();
+            Point[] tileIndices = sourceImage.getTileIndices(
+                    new Rectangle(0, 0, sourceImage.getWidth(), sourceImage.getHeight()));
+            if (tileIndices == null) {
+                continue;
+            }
+            minMaxTileIndices.add(tileIndices[0].x, tileIndices[0].y);
+            minMaxTileIndices.add(tileIndices[tileIndices.length - 1].x, tileIndices[tileIndices.length - 1].y);
+        }
+        return minMaxTileIndices;
+    }
+
+    private static void processTileForBand(Band band, int x, int y) throws IOException {
+        MultiLevelImage sourceImage = band.getSourceImage();
+        Point tileIndex = new Point(x, y);
+        if (isTileWithinBounds(sourceImage, tileIndex)) {
+            writeTile(sourceImage, tileIndex, band);
+        }
+    }
+
+    private static boolean isTileWithinBounds(MultiLevelImage sourceImage, Point tileIndex) {
+        return tileIndex.x >= sourceImage.getMinTileX() && tileIndex.x <= sourceImage.getMaxTileX() &&
+                tileIndex.y >= sourceImage.getMinTileY() && tileIndex.y <= sourceImage.getMaxTileY();
+    }
+
+    private static void shutdownExecutor(ExecutorService executorService) throws IOException {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_MINUTES, TimeUnit.MINUTES)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            throw new IOException("Writing of band tile data took too long", e);
+        }
+    }
+
+
+    private static void writeBandsWithRasterData(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
+        Iterator<Band> iterator = bandsToWrite.iterator();
+        while (iterator.hasNext()) {
+            if (pm.isCanceled()) {
                 break;
             }
-            pm.setSubTaskName("Writing band '" + band.getName() + "'");
-            ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
-            writeRasterDataFully(subPM, band, executor, bandsCountDown, ioExceptionCollector);
-        }
-        while (bandsCountDown.getCount() > 0) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                EngineConfig.instance().logger().log(Level.WARNING,
-                                                     "Method ProductIO.writeAllBands(...)' unexpected termination", e);
+            Band band = iterator.next();
+            if (band.hasRasterData()) {
+                band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+                band.removeCachedImageData();
+                iterator.remove();
+                pm.worked(1);
             }
-        }
-        executor.shutdown();
-        for (IOException e : ioExceptionCollector) {
-            SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
-        }
-        if (ioExceptionCollector.size() > 0) {
-            throw ioExceptionCollector.get(0);
         }
     }
 
@@ -612,21 +690,10 @@ public class ProductIO {
                 band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
             } finally {
                 rasterData.dispose();
-                removeCachedTile(sourceImage, tileIndex);
+                ImageManager.removeCachedTile(sourceImage, tileIndex);
             }
         }
     }
-
-    private static void removeCachedTile(PlanarImage sourceImage, Point tileIndex) {
-        if (sourceImage instanceof OpImage) {
-            OpImage opImage = (OpImage) sourceImage;
-            TileCache tileCache = opImage.getTileCache();
-            if (tileCache != null) {
-                tileCache.remove(sourceImage, tileIndex.x, tileIndex.y);
-            }
-        }
-    }
-
 
     /**
      * This method is not part of the official API and might change in the future.
@@ -634,7 +701,7 @@ public class ProductIO {
      * The method directly delegates to {@link AbstractProductReader#readProductNodesImpl()} which is not
      * publicly available.
      * <p>
-     * This overcomes a short coming in the current API. A reader can be used with a SubsetDef but this can not be
+     * This overcomes a shortcoming in the current API. A reader can be used with a SubsetDef but this can not be
      * changed dynamically.
      *
      * @param reader     the reader to read from

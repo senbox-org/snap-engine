@@ -41,6 +41,7 @@ import java.util.zip.ZipFile;
 /**
  * Created by kraftek on 2/20/2015.
  */
+@Deprecated
 public class FileHelper {
 
     private FileHelper() {

@@ -427,6 +427,9 @@ public class SubsetOp extends Operator {
 
         HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
         RasterDataNode referenceNode = product.getBand(referenceBandName);
+        if (referenceNode == null) {
+            referenceNode = product.getBandAt(0);
+        }
 
         GeoCoding referenceRasterGeoCoding = referenceNode.getGeoCoding();
         int referenceRasterWidth = referenceNode.getRasterWidth();

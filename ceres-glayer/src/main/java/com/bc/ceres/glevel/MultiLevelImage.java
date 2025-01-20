@@ -17,33 +17,30 @@
 package com.bc.ceres.glevel;
 
 import javax.media.jai.ImageLayout;
-import javax.media.jai.PlanarImage;
-import java.awt.Rectangle;
+import javax.media.jai.SourcelessOpImage;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.Map;
-import java.util.Vector;
 
 /**
- * A {@link javax.media.jai.PlanarImage PlanarImage} which can act as a {@link MultiLevelSource}.
- * The image data provided by this image corresponds to the level zero image of the
- * {@code MultiLevelSource}.
+ * A {@link javax.media.jai.PlanarImage PlanarImage} which can act as a {@link MultiLevelSource}. The image data
+ * provided by this image corresponds to the level zero image of the {@code MultiLevelSource}.
  *
  * @author Norman Fomferra
- * @version $revision$ $date$
  */
-public abstract class MultiLevelImage extends PlanarImage implements MultiLevelSource {
+public abstract class MultiLevelImage extends SourcelessOpImage implements MultiLevelSource {
 
     /**
      * Constructs a new {@code MultiLevelImage}.
-     * Calls the
      *
-     * @param layout     The layout of this image or null.
-     * @param sources    The immediate sources of this image or null.
-     * @param properties A Map containing the properties of this image or null.
+     * @param layout      The layout of this image or null.
+     * @param levelSource The level source of this image.
+     * @param properties  A Map containing the properties of this image or null.
      */
-    protected MultiLevelImage(ImageLayout layout, Vector sources, Map properties) {
-        super(layout, sources, properties);
+    protected MultiLevelImage(ImageLayout layout, MultiLevelSource levelSource, Map properties) {
+        super(layout, properties, levelSource.getImage(0).getSampleModel(), levelSource.getImage(0).getMinX(),
+                levelSource.getImage(0).getMinY(), levelSource.getImage(0).getWidth(), levelSource.getImage(0).getHeight());
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -70,12 +67,10 @@ public abstract class MultiLevelImage extends PlanarImage implements MultiLevelS
     }
 
     /**
-     * Provides a hint that an image will no longer be accessed from a
-     * reference in user space.  The results are equivalent to those
-     * that occur when the program loses its last reference to this
-     * image, the garbage collector discovers this, and finalize is
-     * called.  This can be used as a hint in situations where waiting
-     * for garbage collection would be overly conservative.
+     * Provides a hint that an image will no longer be accessed from a reference in user space.  The results are
+     * equivalent to those that occur when the program loses its last reference to this image, the garbage collector
+     * discovers this, and finalize is called.  This can be used as a hint in situations where waiting for garbage
+     * collection would be overly conservative.
      * <p> The results of referencing an image after a call to
      * <code>dispose()</code> are undefined.
      * <p>Overrides shall call {@code super.dispose()} in a final step.

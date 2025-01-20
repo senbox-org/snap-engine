@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DataNode;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -31,12 +32,7 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.DimKey;
-import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.ReaderUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
+import org.esa.snap.dataio.netcdf.util.*;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -203,7 +199,7 @@ public class CfBandPart extends ProfilePartIO {
             if (lowerBand.getDescription() != null) {
                 lowerBand.setDescription(lowerBand.getDescription() + "(least significant bytes)");
             }
-            lowerBand.setSourceImage(new NetcdfMultiLevelImage(lowerBand, variable, origin, ctx));
+            lowerBand.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(lowerBand, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, lowerBand, variable, variable.getFullName() + "_lsb", false);
 
             final Band upperBand = p.addBand(bandBasename + "_msb", rasterDataType);
@@ -211,7 +207,7 @@ public class CfBandPart extends ProfilePartIO {
             if (upperBand.getDescription() != null) {
                 upperBand.setDescription(upperBand.getDescription() + "(most significant bytes)");
             }
-            upperBand.setSourceImage(new NetcdfMultiLevelImage(upperBand, variable, origin, ctx));
+            upperBand.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(upperBand, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, upperBand, variable, variable.getFullName() + "_msb", true);
         } else {
             final Band band;
@@ -221,7 +217,7 @@ public class CfBandPart extends ProfilePartIO {
                 band = p.addBand(bandBasename, rasterDataType);
             }
             readCfBandAttributes(variable, band);
-            band.setSourceImage(new NetcdfMultiLevelImage(band, variable, origin, ctx));
+            band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, origin, ctx)));
             addSampleCodingOrMasksIfApplicable(p, band, variable, variable.getFullName(), false);
         }
     }
