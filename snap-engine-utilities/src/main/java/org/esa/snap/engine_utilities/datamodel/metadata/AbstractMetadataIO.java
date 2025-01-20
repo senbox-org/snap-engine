@@ -117,6 +117,31 @@ public final class AbstractMetadataIO {
         return true;
     }
 
+    public static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile,
+                               final String elementName) throws IOException {
+
+        Document doc;
+        try {
+            doc = XMLSupport.LoadXML(metadataFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+
+        final Element root = doc.getRootElement();
+        final List elements = root.getContent();
+        for (Object o : elements) {
+            if (o instanceof Element) {
+                final Element elem = (Element) o;
+                if (elem.getName().equals(elementName))
+                    findAbstractedMetadata(elem.getContent(), metadataElem);
+                else if (elem.getName().equals(TPG))
+                    parseTiePointGrids(product, elem);
+            }
+        }
+        return true;
+    }
+
     private static void findAbstractedMetadata(final List domChildren, final MetadataElement metadataElem) {
         for (Object aChild : domChildren) {
             if (aChild instanceof Element) {
