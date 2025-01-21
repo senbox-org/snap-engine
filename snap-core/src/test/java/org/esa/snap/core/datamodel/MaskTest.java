@@ -17,9 +17,9 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelSource;
 import org.junit.Test;
 
 import java.awt.Color;

@@ -74,6 +74,7 @@
                         <publicPackage>com.sun.image.codec.jpeg.*</publicPackage>
                         <publicPackage>com.sun.medialib.codec.*</publicPackage>
                         <publicPackage>com.bc.ceres.compiler</publicPackage>
+                        <publicPackage>com.bc.ceres.multilevel.*</publicPackage>
                         <publicPackage>com.bc.ceres.jai.*</publicPackage>
                         <publicPackage>it.geosolutions.imageio.plugins.tiff</publicPackage>
                         <publicPackage>it.geosolutions.imageioimpl.plugins.tiff</publicPackage>

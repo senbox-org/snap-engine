@@ -16,7 +16,7 @@
 
 package org.esa.snap.core.dataio.dimap.spi;
 
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Mask;
 import org.jdom2.Element;

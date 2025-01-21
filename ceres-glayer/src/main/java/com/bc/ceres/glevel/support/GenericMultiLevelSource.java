@@ -28,6 +28,7 @@ import java.awt.image.RenderedImage;
  * @author Norman Fomferra
  * @version $revision$ $date$
  */
+@Deprecated
 public abstract class GenericMultiLevelSource extends AbstractMultiLevelSource {
     private final MultiLevelSource[] multiLevelSources;
 

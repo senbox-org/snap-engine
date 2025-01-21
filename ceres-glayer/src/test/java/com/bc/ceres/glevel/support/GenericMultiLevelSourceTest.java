@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 
+@Deprecated
 public class GenericMultiLevelSourceTest {
     final double GEOPHYS_SCALING = 2.5;
     final int GEOPHYS_DATATYPE = DataBuffer.TYPE_DOUBLE;

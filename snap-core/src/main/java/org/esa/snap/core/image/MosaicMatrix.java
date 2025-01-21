@@ -1,6 +1,6 @@
 package org.esa.snap.core.image;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
 
 /**
  * Created by jcoravu on 12/12/2019.

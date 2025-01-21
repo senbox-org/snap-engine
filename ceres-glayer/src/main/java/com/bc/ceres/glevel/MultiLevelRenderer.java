@@ -17,6 +17,7 @@
 package com.bc.ceres.glevel;
 
 import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.multilevel.MultiLevelSource;
 
 /**
  * An {@code MultiLevelRenderer} is used to render images provided

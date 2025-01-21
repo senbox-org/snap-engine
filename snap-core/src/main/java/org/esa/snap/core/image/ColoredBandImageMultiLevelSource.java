@@ -17,8 +17,8 @@
 package org.esa.snap.core.image;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
 import org.esa.snap.core.datamodel.ImageInfo;
 import org.esa.snap.core.datamodel.RasterDataNode;
 

@@ -15,7 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DataNode;
 import org.esa.snap.core.datamodel.FlagCoding;
