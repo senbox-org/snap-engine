@@ -18,12 +18,12 @@ package org.esa.snap.core.datamodel;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
-import com.bc.ceres.glevel.support.GenericMultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelSource;
+import com.bc.ceres.multilevel.support.GenericMultiLevelSource;
 import com.bc.ceres.jai.operator.InterpretationType;
 import com.bc.ceres.jai.operator.ReinterpretDescriptor;
 import com.bc.ceres.jai.operator.ScalingType;
@@ -2150,7 +2150,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
      * @return whether the source image is set.
      * @see #getSourceImage()
      * @see #setSourceImage(java.awt.image.RenderedImage)
-     * @see #setSourceImage(com.bc.ceres.glevel.MultiLevelImage)
+     * @see #setSourceImage(MultiLevelImage)
      * @see #createSourceImage()
      * @since BEAM 4.5
      */

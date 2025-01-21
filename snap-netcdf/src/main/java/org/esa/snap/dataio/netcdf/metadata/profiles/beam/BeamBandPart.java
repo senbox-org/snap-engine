@@ -15,7 +15,7 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;

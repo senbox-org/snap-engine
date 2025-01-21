@@ -14,10 +14,10 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelSource;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;

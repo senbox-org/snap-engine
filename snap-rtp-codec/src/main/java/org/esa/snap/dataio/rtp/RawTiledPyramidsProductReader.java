@@ -17,7 +17,7 @@
 package org.esa.snap.dataio.rtp;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import org.esa.snap.core.dataio.AbstractProductReader;

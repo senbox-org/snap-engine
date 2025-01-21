@@ -1,6 +1,6 @@
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
 import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
@@ -27,7 +27,7 @@ public class DefaultMultiLevelImageTest {
     @Test
     public void testSamplesAreProvidedFromSource() {
         PlanarImage sourceImage = createSingleBandedByteImage(2, 2);
-        com.bc.ceres.glevel.support.DefaultMultiLevelSource mls = new DefaultMultiLevelSource(sourceImage, 1);
+        DefaultMultiLevelSource mls = new DefaultMultiLevelSource(sourceImage, 1);
         DefaultMultiLevelImage mli = new DefaultMultiLevelImage(mls);
 
         assertSame(mls, mli.getSource());
@@ -91,7 +91,7 @@ public class DefaultMultiLevelImageTest {
     }
 
     private DefaultMultiLevelImage createSomeDefaultMultiLevelImage() {
-        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(2, new AffineTransform(), 256, 256);
+        DefaultMultiLevelModel model = new DefaultMultiLevelModel(2, new AffineTransform(), 256, 256);
         MultiLevelSource mls = new TestMultiLevelSource(model);
         return new DefaultMultiLevelImage(mls);
     }

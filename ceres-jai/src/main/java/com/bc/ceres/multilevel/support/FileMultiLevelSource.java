@@ -1,6 +1,6 @@
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
-import com.bc.ceres.glevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelModel;
 
 import javax.media.jai.operator.FileLoadDescriptor;
 import java.awt.geom.AffineTransform;
@@ -54,7 +54,7 @@ public class FileMultiLevelSource extends AbstractMultiLevelSource {
     }
 
     public static FileMultiLevelSource create(File location, String extension, AffineTransform imageToModelTransform, int levelCount) {
-        final com.bc.ceres.glevel.support.DefaultMultiLevelModel defaultMultiLevelModel = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(levelCount, imageToModelTransform, null);
+        final DefaultMultiLevelModel defaultMultiLevelModel = new DefaultMultiLevelModel(levelCount, imageToModelTransform, null);
         final FileMultiLevelSource levelImageSource = new FileMultiLevelSource(location, location.getName(), extension, defaultMultiLevelModel);
         Rectangle2D modelBounds = DefaultMultiLevelModel.getModelBounds(imageToModelTransform, levelImageSource.getImage(0));
         defaultMultiLevelModel.setModelBounds(modelBounds);

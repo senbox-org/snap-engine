@@ -1,6 +1,6 @@
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
 import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
@@ -21,8 +21,8 @@ public class DefaultMultiLevelSourceTest {
     @Test
     public void testScaledImageSizes1() throws Exception {
         int W = 4096;
-        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
-        com.bc.ceres.glevel.support.DefaultMultiLevelSource source = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
+        DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
+        DefaultMultiLevelSource source = new DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
 
         // Sentinel-2 MSI 10m and 20m Tile
         testScaledImageSizes(4096, 0, source);
@@ -36,8 +36,8 @@ public class DefaultMultiLevelSourceTest {
     @Test
     public void testScaledImageSizes2() throws Exception {
         int W = 1826;
-        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
-        com.bc.ceres.glevel.support.DefaultMultiLevelSource source = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
+        DefaultMultiLevelModel model = new DefaultMultiLevelModel(6, new AffineTransform(), new Rectangle2D.Double(0, 0, W, W));
+        DefaultMultiLevelSource source = new DefaultMultiLevelSource(ConstantDescriptor.create((float) W, (float) W, new Byte[]{0}, null), model);
 
         // Sentinel-2 MSI 60m Tile
         testScaledImageSizes(1826, 0, source);
@@ -48,11 +48,11 @@ public class DefaultMultiLevelSourceTest {
         testScaledImageSizes(58, 5, source);
     }
 
-    private void testScaledImageSizes(int expectedSize, int level, com.bc.ceres.glevel.support.DefaultMultiLevelSource source) {
+    private void testScaledImageSizes(int expectedSize, int level, DefaultMultiLevelSource source) {
         Rectangle expectedRect = new Rectangle(0, 0, expectedSize, expectedSize);
         Rectangle sourceRect = new Rectangle(0, 0, source.getSourceImage().getWidth(), source.getSourceImage().getHeight());
 
-        Rectangle j2kLevelRect = com.bc.ceres.glevel.support.DefaultMultiLevelSource.getLevelImageBounds(sourceRect, source.getModel().getScale(level));
+        Rectangle j2kLevelRect = DefaultMultiLevelSource.getLevelImageBounds(sourceRect, source.getModel().getScale(level));
         assertEquals("at resolution level " + level + ":", expectedRect, j2kLevelRect);
 
         RenderedImage levelImage = source.getImage(level);
@@ -63,7 +63,7 @@ public class DefaultMultiLevelSourceTest {
 
     @Test
     public void testNull() {
-        final MultiLevelSource mls = com.bc.ceres.glevel.support.DefaultMultiLevelSource.NULL;
+        final MultiLevelSource mls = DefaultMultiLevelSource.NULL;
         assertEquals(1, mls.getModel().getLevelCount());
         assertNull(mls.getModel().getModelBounds());
     }
@@ -72,7 +72,7 @@ public class DefaultMultiLevelSourceTest {
     public void testLevelImages() {
         final PlanarImage src = createSourceImage(256, 128);
 
-        com.bc.ceres.glevel.support.DefaultMultiLevelSource mls = new com.bc.ceres.glevel.support.DefaultMultiLevelSource(src, 5);
+        DefaultMultiLevelSource mls = new DefaultMultiLevelSource(src, 5);
         assertEquals(5, mls.getModel().getLevelCount());
 
         assertSame(src, mls.getSourceImage());

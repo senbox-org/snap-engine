@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package com.bc.ceres.glevel;
+package com.bc.ceres.multilevel;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.SourcelessOpImage;

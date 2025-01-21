@@ -1,4 +1,4 @@
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
 import org.junit.Test;
 
@@ -24,7 +24,7 @@ public class DefaultMultiLevelModelTest {
         i2m0.translate(TX0, TY0);
         i2m0.scale(S0, S0);
 
-        com.bc.ceres.glevel.support.DefaultMultiLevelModel model = new com.bc.ceres.glevel.support.DefaultMultiLevelModel(4, i2m0, W, H);
+        DefaultMultiLevelModel model = new DefaultMultiLevelModel(4, i2m0, W, H);
         assertEquals(4, model.getLevelCount());
         assertEquals(new Rectangle2D.Double(TX0, TY0, S0 * W, S0 * H), model.getModelBounds());
         assertEquals(i2m0, model.getImageToModelTransform(0));

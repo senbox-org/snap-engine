@@ -1,6 +1,6 @@
-package com.bc.ceres.glevel.support;
+package com.bc.ceres.multilevel.support;
 
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
 import org.junit.Test;
 
 import javax.media.jai.PlanarImage;

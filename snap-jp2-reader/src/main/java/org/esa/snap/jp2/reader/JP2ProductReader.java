@@ -18,8 +18,7 @@
 package org.esa.snap.jp2.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -28,7 +27,6 @@ import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
 import org.esa.snap.core.util.ImageUtils;
-import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.jp2.reader.internal.JP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.CodeStreamInfo;
@@ -53,7 +51,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.esa.snap.lib.openjpeg.utils.OpenJpegUtils.getTileLayoutWithInputStream;
 import static org.esa.snap.lib.openjpeg.utils.OpenJpegUtils.validateOpenJpegExecutables;
 
 /**

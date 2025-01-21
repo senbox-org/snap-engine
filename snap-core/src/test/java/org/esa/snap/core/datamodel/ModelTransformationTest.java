@@ -1,6 +1,6 @@
 package org.esa.snap.core.datamodel;
 
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.junit.Test;
 import org.opengis.referencing.operation.MathTransform;

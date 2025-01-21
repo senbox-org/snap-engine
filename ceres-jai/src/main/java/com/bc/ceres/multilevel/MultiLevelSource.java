@@ -14,9 +14,9 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package com.bc.ceres.glevel;
+package com.bc.ceres.multilevel;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelSource;
 
 import java.awt.*;
 import java.awt.image.RenderedImage;

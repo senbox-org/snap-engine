@@ -17,7 +17,7 @@
 package com.bc.ceres.glayer.support;
 
 import com.bc.ceres.glayer.Assert2D;
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
