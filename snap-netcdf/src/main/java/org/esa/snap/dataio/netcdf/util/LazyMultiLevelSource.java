@@ -16,9 +16,9 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.MultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.image.ImageManager;
@@ -32,7 +32,7 @@ import java.awt.image.SampleModel;
 
 // todo - could be moved to com.bc.ceres.glevel
 /**
- * This class adapts  {@link RasterDataNode RasterDataNode} to the {@link com.bc.ceres.glevel.MultiLevelSource}
+ * This class adapts  {@link RasterDataNode RasterDataNode} to the {@link MultiLevelSource}
  * interface.
  * <p>
  * The difference to implementations of {@code AbstractMultiLevelSource} the computation of the

@@ -18,9 +18,9 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.image.ResolutionLevel;
@@ -1013,13 +1013,13 @@ public class TiePointGrid extends RasterDataNode {
         final double newOffsetY = newTPGOffsetY % newTPGSubSamplingY;
         final double diffX = newOffsetX - newTPGOffsetX;
         final double diffY = newOffsetY - newTPGOffsetY;
-        final int dataOffsetX;
+        int dataOffsetX;
         if (diffX < 0.0f) {
             dataOffsetX = 0;
         } else {
             dataOffsetX = (int) Math.round(diffX / newTPGSubSamplingX);
         }
-        final int dataOffsetY;
+        int dataOffsetY;
         if (diffY < 0.0f) {
             dataOffsetY = 0;
         } else {
@@ -1028,11 +1028,23 @@ public class TiePointGrid extends RasterDataNode {
 
         int newTPGWidth = (int) Math.ceil(subsetWidth / srcTPGSubSamplingX) + 2;
         if (dataOffsetX + newTPGWidth > srcTPGWidth) {
-            newTPGWidth = srcTPGWidth - dataOffsetX;
+            int calculatedWidth = srcTPGWidth - dataOffsetX;
+            if (calculatedWidth < 2) {
+                newTPGWidth = 2;
+                dataOffsetX--;
+            } else {
+                newTPGWidth = calculatedWidth;
+            }
         }
         int newTPGHeight = (int) Math.ceil(subsetHeight / srcTPGSubSamplingY) + 2;
         if (dataOffsetY + newTPGHeight > srcTPGHeight) {
-            newTPGHeight = srcTPGHeight - dataOffsetY;
+             int calculatedHeight = srcTPGHeight - dataOffsetY;
+             if (calculatedHeight < 2) {
+                newTPGHeight = 2;
+                dataOffsetY--;
+             } else {
+                 newTPGHeight = calculatedHeight;
+             }
         }
 
         final float[] tiePoints = sourceTiePointGrid.getTiePoints(dataOffsetX, dataOffsetY, newTPGWidth, newTPGHeight);

@@ -121,6 +121,7 @@
         <module>snap-test-utils</module>
         <module>snap-stac</module>
         <module>snap-engine-coverage</module>
+        <module>snap-performance-test</module>
     </modules>
 
     <profiles>
@@ -701,7 +702,7 @@
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.20</version>
+                <version>1.4.21</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>
@@ -780,6 +781,17 @@
                 <version>1.2.25</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>21.0.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-fxml</artifactId>
+                <version>21.0.4</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -850,8 +862,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <source>11</source>
-                        <target>11</target>
+                        <source>21</source>
+                        <target>21</target>
                         <debug>true</debug>
                         <encoding>UTF-8</encoding>
                         <excludes>
@@ -921,8 +933,15 @@
                             <jna.debug_load>true</jna.debug_load>
                             <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
-                        <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
-                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
+                        <argLine>
+                            -Xmx1024M -Dfile.encoding=UTF-8
+                            --add-exports java.desktop/sun.awt=ALL-UNNAMED
+                            --add-exports java.desktop/sun.awt.image=ALL-UNNAMED
+                            --add-opens java.base/java.net=ALL-UNNAMED
+                            --add-opens java.desktop/javax.swing=ALL-UNNAMED
+                            --add-opens java.base/java.security=ALL-UNNAMED
+                            --add-exports java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED
+                        </argLine>
                     </configuration>
                 </plugin>
 
@@ -1034,7 +1053,7 @@
                 <plugin>
                     <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.4</version>
+                    <version>14.0</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -1150,7 +1169,7 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>4.4</version>
+                <version>14.0</version>
             </plugin>
 
             <plugin>
@@ -1169,7 +1188,7 @@
                                     <version>[3.2.5,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>11</version>
+                                    <version>21</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>

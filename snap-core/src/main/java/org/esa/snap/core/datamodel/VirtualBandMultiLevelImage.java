@@ -17,9 +17,9 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.Assert;
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.Term;
 

@@ -42,7 +42,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNotNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Idrisi Raster A.1", finalProduct.getProductType());
             assertEquals(20, finalProduct.getSceneRasterWidth());
             assertEquals(30, finalProduct.getSceneRasterHeight());
 
@@ -90,7 +90,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Idrisi Raster A.1", finalProduct.getProductType());
             assertEquals(15, finalProduct.getSceneRasterWidth());
             assertEquals(10, finalProduct.getSceneRasterHeight());
 
@@ -152,7 +152,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
                assertNotNull(finalProduct.getMaskGroup());
                assertEquals(0, finalProduct.getMaskGroup().getNodeNames().length);
                assertEquals(1, finalProduct.getBands().length);
-               assertEquals("GDAL", finalProduct.getProductType());
+               assertEquals("Idrisi Raster A.1", finalProduct.getProductType());
                assertEquals(16, finalProduct.getSceneRasterWidth());
                assertEquals(11, finalProduct.getSceneRasterHeight());
 

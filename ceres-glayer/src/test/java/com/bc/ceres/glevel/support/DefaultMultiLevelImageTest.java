@@ -29,6 +29,7 @@ import java.beans.PropertyChangeListener;
 
 import static org.junit.Assert.*;
 
+@Deprecated
 public class DefaultMultiLevelImageTest {
 
     static PlanarImage createSingleBandedByteImage(int w, int h) {

@@ -19,7 +19,7 @@
 package org.esa.snap.dataio.znap;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import com.bc.zarr.ArrayParams;
 import com.bc.zarr.Compressor;
 import com.bc.zarr.CompressorFactory;
@@ -28,7 +28,6 @@ import com.bc.zarr.ZarrArray;
 import com.bc.zarr.ZarrGroup;
 import com.bc.zarr.storage.FileSystemStore;
 import com.bc.zarr.storage.Store;
-import com.bc.zarr.storage.ZipStore;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
@@ -252,7 +251,8 @@ public class ZnapProductWriter extends AbstractProductWriter {
         final String stripedFilename = getFilenameWithoutExtension();
         if (useZipArchive) {
             outputRoot = parentDir.resolve(stripedFilename + ZNAP_ZIP_CONTAINER_EXTENSION);
-            zarrStore = new ZipStore(outputRoot);
+            zarrStore = new ZnapZipStore(outputRoot);
+//            zarrStore = new ZipStore(outputRoot);
         } else {
             outputRoot = parentDir.resolve(stripedFilename + ZNAP_CONTAINER_EXTENSION);
             zarrStore = new FileSystemStore(outputRoot);

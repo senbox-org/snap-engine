@@ -17,11 +17,13 @@
 package org.esa.snap.core.image;
 
 
+import com.bc.ceres.multilevel.MultiLevelSource;
+
 import java.awt.Rectangle;
 
 /**
  * Supports the development of images, which are returned by implementations of the
- * {@link com.bc.ceres.glevel.MultiLevelSource MultiLevelSource} interface.
+ * {@link MultiLevelSource MultiLevelSource} interface.
  */
 public class LevelImageSupport {
 

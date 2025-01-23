@@ -98,7 +98,7 @@ public class BandGroupsManager {
         return allGroups;
     }
 
-    public BandGroup[] getMatchingProduct(Product product) {
+    public BandGroup[] getGroupsMatchingProduct(Product product) {
         final ArrayList<BandGroup> resultList = new ArrayList<>();
         for (final BandGroup group : userGroups) {
             String[] names = group.getMatchingBandNames(product);
@@ -123,6 +123,10 @@ public class BandGroupsManager {
             return;
         }
         productGroup = (BandGroupImpl) product.getAutoGrouping();
+
+        if (productGroup == null) {
+            return;
+        }
         productGroup.setEditable(false);
     }
 

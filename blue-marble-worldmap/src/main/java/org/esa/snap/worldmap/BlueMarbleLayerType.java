@@ -22,7 +22,7 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
 import com.bc.ceres.glayer.support.ImageLayer;
-import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
 import org.esa.snap.core.image.TiledFileMultiLevelSource;
 import org.esa.snap.core.layer.WorldMapLayerType;
 import org.esa.snap.core.util.io.FileUtils;

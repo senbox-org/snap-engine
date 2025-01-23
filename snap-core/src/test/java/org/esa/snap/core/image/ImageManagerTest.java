@@ -17,8 +17,7 @@
 package org.esa.snap.core.image;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.ImageInfo;

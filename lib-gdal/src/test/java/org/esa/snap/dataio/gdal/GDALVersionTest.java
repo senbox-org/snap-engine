@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.junit.Test;
 
@@ -112,7 +113,8 @@ public class GDALVersionTest {
     @Test
     @STTM("SNAP-3523")
     public void testGetNativeLibrariesRootFolderPath() {
-        assertEquals(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath(), GDALVersion.getNativeLibrariesRootFolderPath());
+        String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
+        assertEquals(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath(), NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot));
     }
 
     @Test

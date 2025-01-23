@@ -1,7 +1,7 @@
 package org.esa.snap.core.gpf.common.resample;
 
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.ceres.jai.GeneralFilterFunction;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Kernel;

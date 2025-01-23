@@ -17,11 +17,11 @@
 package org.esa.snap.core.gpf.pointop;
 
 import com.bc.ceres.core.Assert;
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.MultiLevelSource;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelSource;
+import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
 import org.esa.snap.core.datamodel.GeneralFilterBand;

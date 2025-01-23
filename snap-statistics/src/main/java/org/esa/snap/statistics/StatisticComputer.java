@@ -2,7 +2,7 @@ package org.esa.snap.statistics;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import java.util.Date;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.HistogramStxOp;

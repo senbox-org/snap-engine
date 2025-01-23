@@ -32,6 +32,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 
+@Deprecated
 public class DefaultMultiLevelSourceTest {
 
     @Test

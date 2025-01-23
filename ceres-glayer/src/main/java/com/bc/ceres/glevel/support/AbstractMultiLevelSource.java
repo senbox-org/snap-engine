@@ -28,6 +28,7 @@ import java.awt.image.RenderedImage;
  * Level images are cached unless {@link #reset()} is called.
  * Subclasses are asked to implement {@link #createImage(int)}.
  */
+@Deprecated
 public abstract class AbstractMultiLevelSource implements MultiLevelSource {
 
     private final MultiLevelModel multiLevelModel;

@@ -1,6 +1,7 @@
 package eu.esa.snap.core.datamodel.group;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.After;
@@ -201,7 +202,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(1, bandGroups.length);
 
         assertEquals("new_data", bandGroups[0].getName());
@@ -223,7 +224,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(0, bandGroups.length);
     }
 
@@ -240,7 +241,7 @@ public class BandGroupsManagerTest {
         product.addBand("dat_03", ProductData.TYPE_UINT8);
         product.addBand("dat_04", ProductData.TYPE_UINT8);
 
-        final BandGroup[] bandGroups = bandGroupsManager.getMatchingProduct(product);
+        final BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
         assertEquals(0, bandGroups.length);
     }
 
@@ -293,6 +294,22 @@ public class BandGroupsManagerTest {
         bandNames = bandGroups[2].get(0);
         assertEquals(1, bandNames.length);
         assertEquals("Oa*_radiance", bandNames[0]);
+    }
+
+    @Test
+    @STTM("SNAP-3869")
+    public void testAddGroupsOfProduct_nullOrNoAutogrouping() throws IOException {
+        initialize();
+        BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+
+        bandGroupsManager.addGroupsOfProduct(null);
+        BandGroup[] bandGroups = bandGroupsManager.get();
+        assertEquals(0, bandGroups.length);
+
+        Product product = new Product("test", "testType", 3, 4);
+        bandGroupsManager.addGroupsOfProduct(product);
+        bandGroups = bandGroupsManager.get();
+        assertEquals(0, bandGroups.length);
     }
 
     @Test
@@ -368,8 +385,50 @@ public class BandGroupsManagerTest {
         final File configFile = new File(targetDir, CONFIG_FILE_NAME);
         try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
             final byte[] bytes = fileInputStream.readAllBytes();
-            assertEquals("{\"bandGroups\":[{\"paths\":[[\"FAPAR\",\"LAI\"]],\"name\":\"veggie\"},{\"paths\":[[\"Oa*_radiance\"],[\"Oa*_radiance_unc\"],[\"Oa*_radiance_err\"]],\"name\":\"\"}]}", new String(bytes, StandardCharsets.UTF_8));
+            assertEquals("{\"bandGroups\":[{\"paths\":[[\"FAPAR#FAPAR\",\"LAI#LAI\"]],\"name\":\"veggie\"},{\"paths\":[[\"Oa*_radiance\"],[\"Oa*_radiance_unc\"],[\"Oa*_radiance_err\"]],\"name\":\"\"}]}", new String(bytes, StandardCharsets.UTF_8));
         }
+    }
+
+    @Test
+    @STTM("SNAP-3764")
+    public void testGetMatchinBandGroups_callEquals() throws IOException {
+        initialize();
+
+        Product product = createProductWithBands(new String[] {"radiance_1","radiance_2","radiance_3","radiance_4","radiance_5","radiance_11", "radiance_12"});
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+        final BandGroupImpl bandGroup = new BandGroupImpl("group", new String[] {"radiance_1#radiance_1", "radiance_5#radiance_5"});
+
+        bandGroupsManager.add(bandGroup);
+        BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
+
+        String[] bandNames = bandGroups[0].getMatchingBandNames(product);
+        assertEquals(2, bandNames.length);
+        assertEquals("group", bandGroups[0].getName());
+        assertTrue(String.join(",", bandNames).contains("radiance_1"));
+        assertTrue(String.join(",", bandNames).contains("radiance_5"));
+        assertFalse(String.join(",", bandNames).contains("radiance_11"));
+    }
+
+    @Test
+    @STTM("SNAP-3764")
+    public void testGetMatchinBandGroups_wildcard() throws IOException {
+        initialize();
+
+        Product product = createProductWithBands(new String[] {"radiance_1","radiance_2","radiance_3","radiance_4","radiance_5","radiance_11", "radiance_12"});
+
+        final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+        final BandGroupImpl bandGroup = new BandGroupImpl("wildcards", new String[] {"radiance_1*", "radiance_5#radiance_5"});
+
+        bandGroupsManager.add(bandGroup);
+        BandGroup[] bandGroups = bandGroupsManager.getGroupsMatchingProduct(product);
+
+        String[] bandNames2 = bandGroups[0].getMatchingBandNames(product);
+        assertEquals(4, bandNames2.length);
+        assertEquals("wildcards", bandGroups[0].getName());
+        assertTrue(String.join(",", bandNames2).contains("radiance_1"));
+        assertTrue(String.join(",", bandNames2).contains("radiance_5"));
+        assertTrue(String.join(",", bandNames2).contains("radiance_11"));
     }
 
     private File initialize() throws IOException {
@@ -396,5 +455,13 @@ public class BandGroupsManagerTest {
         fileWriter.write(outData);
         fileWriter.flush();
         fileWriter.close();
+    }
+
+    private Product createProductWithBands(String[] bandNames) {
+        Product product = new Product("testProduct", "TestProduct");
+        for (String bandName : bandNames) {
+            product.addBand(new Band(bandName, ProductData.TYPE_INT32, 0, 0));
+        }
+        return product;
     }
 }

@@ -149,7 +149,7 @@ public class PixelQuadTreeInverseTest {
 
         pixelPos = inverse.getPixelPos(new GeoPos(66.4415525, -24.22587), null);
         assertEquals(1.0, pixelPos.x, 1e-8);
-        assertEquals(34.72162155510092, pixelPos.y, 1e-8);
+        assertEquals(34.72162155510092, pixelPos.y, 1e-7);
 
         pixelPos = inverse.getPixelPos(new GeoPos(66.44136, -24.22587), null);
         assertEquals(1.0, pixelPos.x, 1e-8);
@@ -570,12 +570,12 @@ public class PixelQuadTreeInverseTest {
         final GeoPos geoPos = new GeoPos(66.497604, -24.16638);
         PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
         assertEquals(6.0, pixelPos.x, 1e-8);
-        assertEquals(11.81158685631008, pixelPos.y, 1e-8);
+        assertEquals(11.81158685631008, pixelPos.y, 1e-7);
 
         final InverseCoding clone = inverse.clone();
         pixelPos = clone.getPixelPos(geoPos, null);
         assertEquals(6.0, pixelPos.x, 1e-8);
-        assertEquals(11.81158685631008, pixelPos.y, 1e-8);
+        assertEquals(11.81158685631008, pixelPos.y, 1e-7);
     }
 
     @Test

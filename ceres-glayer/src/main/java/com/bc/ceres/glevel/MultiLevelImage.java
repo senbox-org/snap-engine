@@ -29,6 +29,7 @@ import java.util.Map;
  *
  * @author Norman Fomferra
  */
+@Deprecated
 public abstract class MultiLevelImage extends SourcelessOpImage implements MultiLevelSource {
 
     /**
