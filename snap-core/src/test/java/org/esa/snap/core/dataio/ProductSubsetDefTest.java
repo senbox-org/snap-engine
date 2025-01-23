@@ -18,6 +18,7 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -321,20 +322,20 @@ public class ProductSubsetDefTest {
     @Test
     public void testSetValidSubsetRegionMaps() {
         ProductSubsetDef subsetDef = new ProductSubsetDef();
-        HashMap<String, Rectangle> map = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> map = new HashMap<>();
         Rectangle validRectangle = new Rectangle(0,0,4,23);
         Rectangle invalidRectangle1 = new Rectangle(0,0,0,0);
         Rectangle invalidRectangle2 = new Rectangle(0,0,4,0);
         Rectangle invalidRectangle3 = new Rectangle(0,0,0,23);
 
-        map.put("valid_rectangle", validRectangle);
-        map.put("invalid_rectangle1", invalidRectangle1);
-        map.put("invalid_rectangle2", invalidRectangle2);
-        map.put("invalid_rectangle3", invalidRectangle3);
+        map.put("valid_rectangle", new SubsetRegionInfo(validRectangle, null));
+        map.put("invalid_rectangle1", new SubsetRegionInfo(invalidRectangle1, null));
+        map.put("invalid_rectangle2", new SubsetRegionInfo(invalidRectangle2, null));
+        map.put("invalid_rectangle3", new SubsetRegionInfo(invalidRectangle3, null));
 
         subsetDef.setRegionMap(map);
         subsetDef.setNodeNames(new String[] {"valid_rectangle", "invalid_rectangle1", "invalid_rectangle2", "invalid_rectangle3"});
-        HashMap<String, Rectangle> updatedMap = subsetDef.getRegionMap();
+        HashMap<String, SubsetRegionInfo> updatedMap = subsetDef.getRegionMap();
         String[] nodeNames = subsetDef.getNodeNames();
 
         assertEquals(4, updatedMap.size());
@@ -344,7 +345,7 @@ public class ProductSubsetDefTest {
 
         assertEquals(1, updatedMap.size());
         assertTrue(updatedMap.containsKey("valid_rectangle"));
-        assertEquals(validRectangle, updatedMap.get("valid_rectangle"));
+        assertEquals(validRectangle, updatedMap.get("valid_rectangle").getSubsetExtent());
 
         nodeNames = subsetDef.getNodeNames();
         assertEquals(1, nodeNames.length);
