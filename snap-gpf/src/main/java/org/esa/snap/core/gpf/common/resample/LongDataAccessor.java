@@ -35,7 +35,10 @@ public abstract class LongDataAccessor implements DataAccessor {
 
         @Override
         long getSrcData(int index) {
-            return srcArray[index];
+            // interpretation as unsigned byte, relevant for MEAN of rgb bands in resampling
+            // matches implementation of setter below that cuts off negative values anyway
+            // MB, 20250124
+            return srcArray[index] & 0xff;
         }
 
         @Override
