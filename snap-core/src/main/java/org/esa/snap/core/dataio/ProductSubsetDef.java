@@ -17,7 +17,9 @@ package org.esa.snap.core.dataio;
 
 import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.Guardian;
+import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -41,6 +43,11 @@ public class ProductSubsetDef {
     private AbstractSubsetRegion subsetRegion;
 
     /**
+     * The subset polygon
+     */
+    private Polygon subsetPolygon;
+
+    /**
      * The optional name of the subset
      */
     private String subsetName = null;
@@ -48,7 +55,7 @@ public class ProductSubsetDef {
     /**
      * The spatial subset for each RasterDataNode
      */
-    private HashMap<String,Rectangle> regionMap = null;
+    private HashMap<String, SubsetRegionInfo> regionMap = null;
 
     /**
      * Subsampling in X direction.
@@ -243,7 +250,7 @@ public class ProductSubsetDef {
         return null;
     }
 
-    public HashMap<String,Rectangle> getRegionMap() {
+    public HashMap<String,SubsetRegionInfo> getRegionMap() {
         return regionMap;
     }
     /**
@@ -265,7 +272,7 @@ public class ProductSubsetDef {
         }
     }
 
-    public void setRegionMap(HashMap<String,Rectangle> regionMap) {
+    public void setRegionMap(HashMap<String,SubsetRegionInfo> regionMap) {
         this.regionMap = regionMap;
     }
 
@@ -342,20 +349,23 @@ public class ProductSubsetDef {
 //        }
         if (this.subsetRegion != null && this.subsetRegion instanceof PixelSubsetRegion) {
             PixelSubsetRegion pixelSubsetRegion = (PixelSubsetRegion)this.subsetRegion;
-            width = pixelSubsetRegion.getPixelRegion().width;
-            height = pixelSubsetRegion.getPixelRegion().height;
+            width = Math.min(pixelSubsetRegion.getPixelRegion().width, maxWidth);
+            height = Math.min(pixelSubsetRegion.getPixelRegion().height, maxHeight);
         }
 
         if(bandName != null && regionMap != null && regionMap.containsKey(bandName)) {
-            width = regionMap.get(bandName).width;
-            height = regionMap.get(bandName).height;
+            width = Math.min(regionMap.get(bandName).getSubsetExtent().width, maxWidth);
+            height = Math.min(regionMap.get(bandName).getSubsetExtent().height, maxHeight);
         } else if (regionMap != null) {
             int auxWidth = -1;
             int auxHeight = -1;
 
             for (Object nodeName : nodeNameList) {
                 String nodeNameString = nodeName.toString();
-                Rectangle rec = regionMap.get(nodeNameString);
+                if (!regionMap.containsKey(nodeNameString)) {
+                    continue;
+                }
+                Rectangle rec = regionMap.get(nodeNameString).getSubsetExtent();
                 if(rec == null) {
                     continue;
                 }
@@ -366,8 +376,8 @@ public class ProductSubsetDef {
             }
 
             if(auxHeight != -1 && auxWidth != -1) {
-                width = auxWidth;
-                height = auxHeight;
+                width = Math.min(auxWidth, maxWidth);
+                height = Math.min(auxHeight, maxHeight);
             }
         }
         return new Dimension((width - 1) / subSamplingX + 1,
@@ -434,16 +444,24 @@ public class ProductSubsetDef {
             return;
         }
 
-        Iterator<Map.Entry<String, Rectangle>> iterator = this.regionMap.entrySet().iterator();
+        Iterator<Map.Entry<String, SubsetRegionInfo>> iterator = this.regionMap.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String, Rectangle> entry = iterator.next();
+            Map.Entry<String, SubsetRegionInfo> entry = iterator.next();
             String nodeName = entry.getKey();
-            Rectangle rect = entry.getValue();
+            Rectangle rect = entry.getValue().getSubsetExtent();
 
             if (rect.height == 0 || rect.width == 0) {
                 iterator.remove();
                 this.nodeNameList.remove(nodeName);
             }
         }
+    }
+
+    public Polygon getSubsetPolygon() {
+        return subsetPolygon;
+    }
+
+    public void setSubsetPolygon(Polygon subsetPolygon) {
+        this.subsetPolygon = subsetPolygon;
     }
 }

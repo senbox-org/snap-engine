@@ -16,14 +16,19 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DummyImageInputStream;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.TreeNode;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.*;
 import java.io.File;
@@ -119,6 +124,30 @@ public class AbstractProductReaderTest {
 
         TreeNode<File> productComponents = reader.getProductComponents();
         assertNull(productComponents);
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testReadProductNodes_subsetByPolygon() throws IOException {
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(0, 0, 2, 4, 0));
+        final Product product = reader.readProductNodes(new Object(), subsetDef);
+        assertEquals(AbstractProductReaderTest.TestProductReader.class, product.getProductReader().getClass());
+        assertEquals(3,product.getSceneRasterWidth());
+        assertEquals(5, product.getSceneRasterHeight());
+        final Coordinate[] productPolygonCoordinates = new Coordinate[]{
+                new Coordinate(1, 1),
+                new Coordinate(1, 3),
+                new Coordinate(2, 1),
+                new Coordinate(1, 1),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon subsetPolygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(productPolygonCoordinates), new LinearRing[0]);
+        subsetDef.setSubsetPolygon(subsetPolygon);
+        final Product productSub = reader.readProductNodes(new Object(), subsetDef);
+        assertEquals(ProductSubsetBuilder.class, productSub.getProductReader().getClass());
+        assertEquals(2,productSub.getSceneRasterWidth());
+        assertEquals(4, productSub.getSceneRasterHeight());
     }
 
     @Before

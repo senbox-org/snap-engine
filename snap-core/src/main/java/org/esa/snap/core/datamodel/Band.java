@@ -491,8 +491,8 @@ public class Band extends AbstractBand {
                 long width = getRasterWidth();
                 long height = getRasterHeight();
                 if(subsetDef.getRegionMap() != null && subsetDef.getRegionMap().containsKey(this.getName())) {
-                    width = subsetDef.getRegionMap().get(this.getName()).width;
-                    height = subsetDef.getRegionMap().get(this.getName()).height;
+                    width = subsetDef.getRegionMap().get(this.getName()).getSubsetExtent().width;
+                    height = subsetDef.getRegionMap().get(this.getName()).getSubsetExtent().height;
                 } else if (subsetDef.getRegion() != null) {
                     Rectangle region = subsetDef.getRegion();
                     width = region.width;

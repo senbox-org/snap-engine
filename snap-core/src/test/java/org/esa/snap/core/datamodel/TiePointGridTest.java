@@ -19,6 +19,7 @@ package org.esa.snap.core.datamodel;
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.junit.Test;
 
 import java.awt.*;
@@ -671,8 +672,8 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
         };
 
         ProductSubsetDef subsetDef = new ProductSubsetDef();
-        HashMap<String, Rectangle> subsetRegion = new HashMap<>();
-        subsetRegion.put(tpg.getName(), new Rectangle(194,195,28,27));
+        HashMap<String, SubsetRegionInfo> subsetRegion = new HashMap<>();
+        subsetRegion.put(tpg.getName(), new SubsetRegionInfo(new Rectangle(194, 195, 28, 27), null));
         subsetDef.setRegionMap(subsetRegion);
 
         TiePointGrid subsetGrid = TiePointGrid.createSubset(tpg, subsetDef);
@@ -688,8 +689,8 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
 
 
         ProductSubsetDef subsetDef2 = new ProductSubsetDef();
-        HashMap<String, Rectangle> subsetRegion2 = new HashMap<>();
-        subsetRegion2.put(tpg.getName(), new Rectangle(187,177,14,120));
+        HashMap<String, SubsetRegionInfo> subsetRegion2 = new HashMap<>();
+        subsetRegion2.put(tpg.getName(), new SubsetRegionInfo(new Rectangle(187, 177, 14, 120), null));
         subsetDef2.setRegionMap(subsetRegion2);
 
         TiePointGrid subsetGrid2 = TiePointGrid.createSubset(tpg, subsetDef2);

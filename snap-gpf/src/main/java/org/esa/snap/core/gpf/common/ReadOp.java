@@ -19,6 +19,7 @@ package org.esa.snap.core.gpf.common;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductSubsetByPolygon;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
@@ -32,6 +33,7 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.GeometrySubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
@@ -39,6 +41,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -97,6 +100,15 @@ public class ReadOp extends Operator {
                     "If not given, the entire scene is used.")
     private Geometry geometryRegion;
 
+    @Parameter(description = "The file from which the polygon is read.")
+    private File vectorFile;
+
+    @Parameter(converter = JtsGeometryConverter.class,
+            description = "The subset region in pixel coordinates using WKT-format,\n" +
+                    "e.g. POLYGON(({x} {y}, {x1} {y1}, ..., {x} {y}))\n" +
+                    "If not given, the geometryRegion or pixelRegion is used.")
+    private Polygon polygonRegion;
+
     /**
      * The default value for use the advanced options is false, to not use them if the flag is not specified.
      */
@@ -112,6 +124,8 @@ public class ReadOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+    private final ProductSubsetByPolygon productSubsetByPolygon = new ProductSubsetByPolygon();
+
     @Override
     public void initialize() throws OperatorException {
         if (this.file == null) {
@@ -126,7 +140,7 @@ public class ReadOp extends Operator {
         boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
         boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
         ProductSubsetDef subsetDef = null;
-        if (useAdvancedOptions && (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata)) {
+        if (useAdvancedOptions && (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata || this.vectorFile != null || this.polygonRegion != null)) {
             subsetDef = new ProductSubsetDef();
             subsetDef.setIgnoreMetadata(!this.copyMetadata);
             AbstractSubsetRegion subsetRegion = null;
@@ -177,6 +191,33 @@ public class ReadOp extends Operator {
                         throw new OperatorException("No product reader found for file '" + this.file.getAbsolutePath() + "'.");
                     }
                 }
+                if ((this.vectorFile != null || this.polygonRegion != null || (this.geometryRegion != null && !this.geometryRegion.isRectangle())) && subsetDef != null) {
+                    final MetadataInspector metadataInspector = productReader.getReaderPlugIn().getMetadataInspector();
+                    final MetadataInspector.Metadata productMetadata;
+                    if (metadataInspector != null) {
+                        productMetadata = metadataInspector.getMetadata(this.file.toPath());
+                    } else {
+                        if (openedProduct == null){
+                            openedProduct = productReader.readProductNodes(this.file, null);
+                        }
+                        productMetadata = new MetadataInspector.Metadata(openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
+                        productMetadata.setGeoCoding(openedProduct.getSceneGeoCoding());
+                    }
+                    if (productMetadata != null) {
+                        if (this.polygonRegion != null) {
+                            this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), true, productMetadata, ProgressMonitor.NULL);
+                        } else if (this.vectorFile != null) {
+                            this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
+                        } else {
+                            this.productSubsetByPolygon.loadPolygonFromWKTString(this.geometryRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
+                        }
+                        this.polygonRegion = this.productSubsetByPolygon.getSubsetPolygon();
+                        this.pixelRegion = this.productSubsetByPolygon.getExtentOfPolygon();
+                        this.geometryRegion = null;
+                        subsetDef.setSubsetPolygon(this.polygonRegion);
+                        subsetDef.setSubsetRegion(new PixelSubsetRegion(this.pixelRegion, 0));
+                    }
+                }
                 this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
                 if (subsetDef != null) {
                     if (this.bandNames != null && this.bandNames.length > 0) {
@@ -202,7 +243,7 @@ public class ReadOp extends Operator {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new OperatorException(e);
         }
     }
