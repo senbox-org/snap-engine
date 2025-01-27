@@ -37,7 +37,7 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
     public static final String HDF5_FORMAT_NAME = "HDF5";
     public static final String HDF5_FILE_EXTENSION = ".h5";
 
-    private static final String H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
+    private static final String H5_CLASS_NAME = "libjhdf5.jnilib";
 
     private static final boolean hdf5LibAvailable;
 
