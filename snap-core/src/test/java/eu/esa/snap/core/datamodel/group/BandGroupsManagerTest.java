@@ -297,6 +297,22 @@ public class BandGroupsManagerTest {
     }
 
     @Test
+    @STTM("SNAP-3869")
+    public void testAddGroupsOfProduct_nullOrNoAutogrouping() throws IOException {
+        initialize();
+        BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
+
+        bandGroupsManager.addGroupsOfProduct(null);
+        BandGroup[] bandGroups = bandGroupsManager.get();
+        assertEquals(0, bandGroups.length);
+
+        Product product = new Product("test", "testType", 3, 4);
+        bandGroupsManager.addGroupsOfProduct(product);
+        bandGroups = bandGroupsManager.get();
+        assertEquals(0, bandGroups.length);
+    }
+
+    @Test
     @STTM("SNAP-3702")
     public void testAddAndRemoveGroupsOfProduct() throws IOException {
         initialize();

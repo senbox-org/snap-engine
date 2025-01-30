@@ -19,8 +19,8 @@ package com.bc.ceres.glayer.tools;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glayer.swing.LayerCanvas;
-import com.bc.ceres.glevel.MultiLevelSource;
-import com.bc.ceres.glevel.support.FileMultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelSource;
+import com.bc.ceres.multilevel.support.FileMultiLevelSource;
 import com.sun.media.jai.codec.TIFFEncodeParam;
 
 import javax.media.jai.ImageLayout;

@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.gdal.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.engine_utilities.commons.VirtualFile;
 import org.esa.snap.dataio.gdal.drivers.Dataset;
@@ -37,7 +37,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.ImageLayout;
-import javax.media.jai.JAI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;

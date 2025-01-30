@@ -16,7 +16,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;

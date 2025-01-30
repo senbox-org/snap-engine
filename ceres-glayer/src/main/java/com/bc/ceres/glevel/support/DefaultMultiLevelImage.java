@@ -25,12 +25,13 @@ import java.awt.Shape;
 import java.awt.image.RenderedImage;
 
 /**
- * Adapts a JAI {@link javax.media.jai.PlanarImage PlanarImage} to the {@link com.bc.ceres.glevel.MultiLevelSource}
+ * Adapts a JAI {@link javax.media.jai.PlanarImage PlanarImage} to the {@link MultiLevelSource}
  * interface. The image data provided by this {@code PlanarImage} corresponds to the level zero image of the given
  * {@code MultiLevelSource}.
  *
  * @author Norman Fomferra
  */
+@Deprecated
 public class DefaultMultiLevelImage extends MultiLevelImage {
 
     private final MultiLevelSource source;

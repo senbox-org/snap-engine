@@ -17,10 +17,10 @@
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelRenderer;
-import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.grender.InteractiveRendering;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.multilevel.MultiLevelSource;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;

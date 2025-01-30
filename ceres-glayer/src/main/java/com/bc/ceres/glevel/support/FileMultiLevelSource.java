@@ -33,6 +33,7 @@ import java.io.File;
  * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
+@Deprecated
 public class FileMultiLevelSource extends AbstractMultiLevelSource {
     private final File location;
     private final String basename;

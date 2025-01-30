@@ -1,0 +1,75 @@
+package com.bc.ceres.multilevel.support;
+
+import com.bc.ceres.multilevel.MultiLevelSource;
+import org.junit.Test;
+
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.FormatDescriptor;
+import javax.media.jai.operator.MultiplyConstDescriptor;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.RenderedImage;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
+
+public class GenericMultiLevelSourceTest {
+    final double GEOPHYS_SCALING = 2.5;
+    final int GEOPHYS_DATATYPE = DataBuffer.TYPE_DOUBLE;
+
+    static PlanarImage createSourceImage(int w, int h) {
+        final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+        bi.getRaster().setSample(0, 0, 0, 0);
+        bi.getRaster().setSample(1, 0, 0, 1);
+        bi.getRaster().setSample(0, 1, 0, 2);
+        bi.getRaster().setSample(1, 1, 0, 3);
+        return PlanarImage.wrapRenderedImage(bi);
+    }
+
+    @Test
+    public void testIt() {
+        final PlanarImage src = createSourceImage(256, 128);
+
+        GenericMultiLevelSource mls = createGeophysicalSourceImage(src, 5);
+        assertEquals(5, mls.getModel().getLevelCount());
+
+        assertEquals(GEOPHYS_SCALING * 0, mls.getImage(0).getData().getSampleDouble(0, 0, 0), 1e-10);
+        assertEquals(GEOPHYS_SCALING * 1, mls.getImage(0).getData().getSampleDouble(1, 0, 0), 1e-10);
+        assertEquals(GEOPHYS_SCALING * 2, mls.getImage(0).getData().getSampleDouble(0, 1, 0), 1e-10);
+        assertEquals(GEOPHYS_SCALING * 3, mls.getImage(0).getData().getSampleDouble(1, 1, 0), 1e-10);
+
+        testLevelImage(mls, 0, 256, 128);
+        testLevelImage(mls, 1, 128, 64);
+        testLevelImage(mls, 2, 64, 32);
+        testLevelImage(mls, 3, 32, 16);
+        testLevelImage(mls, 4, 16, 8);
+    }
+
+    private void testLevelImage(MultiLevelSource mls, int level, int ew, int eh) {
+        final RenderedImage image = mls.getImage(level);
+        assertSame(image, mls.getImage(level));
+        assertEquals(GEOPHYS_DATATYPE, image.getSampleModel().getDataType());
+        assertEquals(1, image.getSampleModel().getNumBands());
+        assertEquals(ew, image.getWidth());
+        assertEquals(eh, image.getHeight());
+    }
+
+    private GenericMultiLevelSource createGeophysicalSourceImage(PlanarImage src, int levelCount) {
+        return new GeophysicalMultiLevelSource(src, levelCount);
+    }
+
+    private class GeophysicalMultiLevelSource extends GenericMultiLevelSource {
+
+        public GeophysicalMultiLevelSource(PlanarImage src, int levelCount) {
+            super(new DefaultMultiLevelSource(src, levelCount));
+        }
+
+        @Override
+        protected RenderedImage createImage(RenderedImage[] sourceImages, int level) {
+            final RenderedOp op = FormatDescriptor.create(PlanarImage.wrapRenderedImage(sourceImages[0]), GEOPHYS_DATATYPE, null);
+            return MultiplyConstDescriptor.create(op, new double[]{GEOPHYS_SCALING}, null);
+        }
+    }
+}

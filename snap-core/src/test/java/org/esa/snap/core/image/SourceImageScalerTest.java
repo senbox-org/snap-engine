@@ -1,9 +1,9 @@
 package org.esa.snap.core.image;
 
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelSource;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;

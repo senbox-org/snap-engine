@@ -16,8 +16,7 @@
 
 package org.esa.snap.core.datamodel;
 
-import com.bc.ceres.glevel.MultiLevelModel;
-import org.junit.Assert;
+import com.bc.ceres.multilevel.MultiLevelModel;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;

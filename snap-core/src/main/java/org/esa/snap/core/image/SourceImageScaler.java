@@ -16,10 +16,10 @@ package org.esa.snap.core.image;
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
+import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import org.apache.commons.math3.util.Precision;
 
 import javax.media.jai.BorderExtender;

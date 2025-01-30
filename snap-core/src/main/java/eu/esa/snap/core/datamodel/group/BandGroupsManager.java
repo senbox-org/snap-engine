@@ -123,6 +123,10 @@ public class BandGroupsManager {
             return;
         }
         productGroup = (BandGroupImpl) product.getAutoGrouping();
+
+        if (productGroup == null) {
+            return;
+        }
         productGroup.setEditable(false);
     }
 
