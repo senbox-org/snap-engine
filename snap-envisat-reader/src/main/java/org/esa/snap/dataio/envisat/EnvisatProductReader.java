@@ -16,6 +16,9 @@
 package org.esa.snap.dataio.envisat;
 
 import com.bc.ceres.core.ProgressMonitor;
+import eu.esa.snap.core.dataio.cache.CacheTile;
+import eu.esa.snap.core.dataio.cache.CachedProductReader;
+import eu.esa.snap.core.dataio.cache.StorageDimensions;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.geocoding.*;
@@ -55,7 +58,7 @@ import static org.esa.snap.core.dataio.geocoding.InverseCoding.KEY_SUFFIX_INTERP
  * @version $Revision$ $Date$
  * @see org.esa.snap.dataio.envisat.EnvisatProductReaderPlugIn
  */
-public class EnvisatProductReader extends AbstractProductReader {
+public class EnvisatProductReader extends AbstractProductReader implements CachedProductReader {
 
     /**
      * @since BEAM 4.9
@@ -222,7 +225,29 @@ public class EnvisatProductReader extends AbstractProductReader {
         } finally {
             pm.done();
         }
+    }
 
+    @Override
+    public CacheTile readCacheTile(Band band, int xOffset, int yOffset, int width, int height) {
+        throw new RuntimeException("not implemented");
+    }
+
+    @Override
+    public StorageDimensions getStorageDimensions(Band band) {
+        final BandLineReader bandLineReader = bandlineReaderMap.get(band);
+        final StorageDimensions storageDimensions = new StorageDimensions();
+
+        if (bandLineReader.isTiePointBased()) {
+            return storageDimensions;
+        }
+
+        final int rasterWidth = bandLineReader.getRasterWidth();
+        final int rasterHeight = bandLineReader.getRasterHeight();
+        storageDimensions.setRasterWidth(rasterWidth);
+        storageDimensions.setRasterHeight(rasterHeight);
+        storageDimensions.setTileHeight(1);
+        storageDimensions.setTileWidth(rasterWidth);
+        return storageDimensions;
     }
 
     private Product createProduct() throws IOException {
