@@ -32,6 +32,9 @@ import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.apache.velocity.VelocityContext;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -64,7 +67,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -118,6 +120,14 @@ public class CommandLineTool implements GraphProcessingObserver {
                 printDiagnostics();
                 return;
             }
+            if (commandLineArgs.isOutputFormatsRequested()) {
+                printOutputFormats();
+                return;
+            }
+            if (commandLineArgs.isInputFormatsRequested()) {
+                printInputFormats();
+                return;
+            }
             run();
         } catch (Error | RuntimeException e) {
             e.printStackTrace(System.err);
@@ -167,6 +177,30 @@ public class CommandLineTool implements GraphProcessingObserver {
         commandLineContext.print("Edit snap/bin/gpt.vmoptions\n");
         commandLineContext.print("\nTo configure your gpt cache size and parallelism:\n");
         commandLineContext.print("Edit .snap/etc/snap.properties or gpt -c ${cachesize-in-GB}G -q ${parallelism} \n");
+    }
+
+    private void printInputFormats() {
+        ProductIOPlugInManager manager = ProductIOPlugInManager.getInstance();
+        Iterator<ProductReaderPlugIn> plugins = manager.getAllReaderPlugIns();
+        commandLineContext.print("Input formats: \n");
+        while(plugins.hasNext()) {
+            ProductReaderPlugIn plugIn = plugins.next();
+            String[] formatNames = plugIn.getFormatNames();
+            String[] defaultExtensions =  plugIn.getDefaultFileExtensions() ;
+            commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+        }
+    }
+
+    private void printOutputFormats() {
+        ProductIOPlugInManager manager = ProductIOPlugInManager.getInstance();
+        Iterator<ProductWriterPlugIn> plugins = manager.getAllWriterPlugIns();
+        commandLineContext.print("Output formats: \n");
+        while(plugins.hasNext()) {
+            ProductWriterPlugIn plugIn = plugins.next();
+            String[] formatNames = plugIn.getFormatNames();
+            String[] defaultExtensions =  plugIn.getDefaultFileExtensions() ;
+            commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+        }
     }
 
     static String fromBytes(long bytes) {
