@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.gpf.main;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -273,6 +274,32 @@ public class CommandLineArgsTest {
         assertEquals("input.dim", sourceMap.get("sourceProduct.3"));
         assertEquals("input.dim", sourceMap.get("sourceProduct3")); // test for backward compatibility
         assertEquals("./inp/NDVI.dim", sourceMap.get("ndvi"));
+    }
+
+    @Test
+    @STTM("SNAP-180")
+    public void testInputFormatOption() throws Exception {
+        CommandLineArgs lineArgs = parseArgs("-iformat");
+        assertFalse(lineArgs.isHelpRequested());
+        assertTrue(lineArgs.isInputFormatsRequested());
+        assertEquals(CommandLineArgs.DEFAULT_TARGET_FILEPATH, lineArgs.getTargetFilePath());
+        assertEquals(CommandLineArgs.DEFAULT_FORMAT_NAME, lineArgs.getTargetFormatName());
+        SortedMap<String, String> map = lineArgs.getSourceFilePathMap();
+        assertNotNull(map);
+        assertEquals(0, map.size());
+    }
+
+    @Test
+    @STTM("SNAP-180")
+    public void testOuputFormatOption() throws Exception {
+        CommandLineArgs lineArgs = parseArgs("-oformat");
+        assertFalse(lineArgs.isHelpRequested());
+        assertTrue(lineArgs.isOutputFormatsRequested());
+        assertEquals(CommandLineArgs.DEFAULT_TARGET_FILEPATH, lineArgs.getTargetFilePath());
+        assertEquals(CommandLineArgs.DEFAULT_FORMAT_NAME, lineArgs.getTargetFormatName());
+        SortedMap<String, String> map = lineArgs.getSourceFilePathMap();
+        assertNotNull(map);
+        assertEquals(0, map.size());
     }
 
     @Test
