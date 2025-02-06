@@ -72,7 +72,7 @@ public class MetadataElement extends ProductNode {
             return;
         }
         if (elements == null) {
-            elements = new ProductNodeGroup<MetadataElement>(this, "elements", true);
+            elements = new ProductNodeGroup<>(this, "elements", true);
         }
         elements.add(element);
     }
@@ -88,7 +88,7 @@ public class MetadataElement extends ProductNode {
             return;
         }
         if (elements == null) {
-            elements = new ProductNodeGroup<MetadataElement>(this, "elements", true);
+            elements = new ProductNodeGroup<>(this, "elements", true);
         }
         elements.add(index, element);
     }
