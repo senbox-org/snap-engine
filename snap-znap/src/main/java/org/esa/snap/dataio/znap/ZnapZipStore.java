@@ -30,7 +30,7 @@ public class ZnapZipStore implements Store {
             zipParams.put("create", "true");
             zipParams.put("noCompression", "true");
         }
-        final URI uri = URI.create("jar:file:" + zipFilePath.toUri().getPath());
+        final URI uri = URI.create("jar:" + zipFilePath.toUri());
         zfs = getFileSystem(zipParams, uri);
         internalRoot = zfs.getRootDirectories().iterator().next();
     }
