@@ -8,14 +8,20 @@ public class RasterExtract {
     private int height;
     private int stepX;
     private int stepY;
+    private int layerIdx;
 
     public RasterExtract(int xOffset, int yOffset, int width, int height, int stepX, int stepY) {
+        this(xOffset, yOffset, width, height, stepX, stepY, -1);
+    }
+
+    public RasterExtract(int xOffset, int yOffset, int width, int height, int stepX, int stepY, int layerIdx) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.width = width;
         this.height = height;
         this.stepX = stepX;
         this.stepY = stepY;
+        this.layerIdx = layerIdx;
     }
 
     public int getXOffset() {
@@ -40,5 +46,9 @@ public class RasterExtract {
 
     public int getStepY() {
         return stepY;
+    }
+
+    public int getLayerIdx() {
+        return layerIdx;
     }
 }
