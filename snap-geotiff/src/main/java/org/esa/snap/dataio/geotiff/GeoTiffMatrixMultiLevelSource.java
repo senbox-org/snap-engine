@@ -1,6 +1,6 @@
 package org.esa.snap.dataio.geotiff;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.image.AbstractMatrixMosaicSubsetMultiLevelSource;

@@ -24,6 +24,7 @@ import java.awt.geom.Rectangle2D;
 
 import static org.junit.Assert.assertEquals;
 
+@Deprecated
 public class DefaultMultiLevelModelTest {
 
     final double TX0 = -50;

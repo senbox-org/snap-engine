@@ -16,6 +16,8 @@
 
 package org.esa.snap.core.image;
 
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -37,7 +39,7 @@ import java.io.IOException;
  * @author Norman Fomferra
  * @see RasterDataNode#getSourceImage()
  * @see RasterDataNode#getGeophysicalImage()
- * @see RasterDataNode#setSourceImage(com.bc.ceres.glevel.MultiLevelImage)
+ * @see RasterDataNode#setSourceImage(MultiLevelImage)
  */
 public abstract class RasterDataNodeOpImage extends SingleBandedOpImage {
     private final RasterDataNode rasterDataNode;
@@ -55,7 +57,7 @@ public abstract class RasterDataNodeOpImage extends SingleBandedOpImage {
      *
      * @param rasterDataNode The target raster data node.
      * @param level The resolution level.
-     * @see ResolutionLevel#create(com.bc.ceres.glevel.MultiLevelModel, int)
+     * @see ResolutionLevel#create(MultiLevelModel, int)
      */
     protected RasterDataNodeOpImage(RasterDataNode rasterDataNode, ResolutionLevel level) {
         super(ImageManager.getDataBufferType(rasterDataNode.getDataType()),

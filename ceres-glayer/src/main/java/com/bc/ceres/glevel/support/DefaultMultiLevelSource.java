@@ -32,6 +32,7 @@ import java.awt.image.RenderedImage;
 /**
  * A default implementation for the {@link MultiLevelSource} interface.
  */
+@Deprecated
 public class DefaultMultiLevelSource extends AbstractMultiLevelSource {
 
     /**

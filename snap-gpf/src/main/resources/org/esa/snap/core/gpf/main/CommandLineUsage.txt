@@ -18,6 +18,8 @@ Arguments:
 Options:
   -h                 Displays command usage. If <op> is given, the specific
                      operator usage is displayed.
+  -iformat           Displays the available input formats.
+  -oformat           Displays the available output formats.
   -e                 Displays more detailed error messages. Displays a stack
                      trace, if an exception occurs.
   -t <file>          The target file. Default value is ''{1}''.

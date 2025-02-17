@@ -17,7 +17,7 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
@@ -31,9 +31,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
-import javax.media.jai.OpImage;
 import javax.media.jai.PlanarImage;
-import javax.media.jai.TileCache;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;

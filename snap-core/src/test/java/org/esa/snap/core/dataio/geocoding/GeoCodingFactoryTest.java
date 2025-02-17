@@ -1,7 +1,7 @@
 package org.esa.snap.core.dataio.geocoding;
 
 import com.bc.ceres.annotation.STTM;
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.datamodel.Band;

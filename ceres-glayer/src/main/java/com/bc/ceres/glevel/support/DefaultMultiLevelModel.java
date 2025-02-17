@@ -27,6 +27,7 @@ import java.awt.image.RenderedImage;
 /**
  * A default implementation for a the {@link MultiLevelModel} interface.
  */
+@Deprecated
 public class DefaultMultiLevelModel implements MultiLevelModel {
 
     public final static int DEFAULT_MAX_LEVEL_PIXEL_COUNT = 256 * 256;
