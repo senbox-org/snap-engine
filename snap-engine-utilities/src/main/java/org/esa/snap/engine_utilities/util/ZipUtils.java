@@ -56,11 +56,26 @@ public class ZipUtils {
     }
 
     public static boolean isZip(final File inputFile) {
-        return inputFile.getName().toLowerCase().endsWith(".zip");
+        /*
+        TODO: 13.02.2025 SE/?? -- I think we should add
+            inputFile != null && inputFile.isFile()
+         as the first part of the expression?
+         */
+        return inputFile != null
+               && inputFile.isFile()
+               && inputFile.getName().toLowerCase().endsWith(".zip");
     }
 
     public static boolean isZip(final Path inputPath) {
-        return inputPath.getFileName() != null && inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
+        /*
+        TODO: 13.02.2025 SE/?? -- I think we should add
+            inputPath != null && Files.isRegularFile(inputPath)
+         as the first part of the expression?
+         */
+        return inputPath != null
+               && Files.isRegularFile(inputPath)
+               && inputPath.getFileName() != null
+               && inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
     }
 
     @Deprecated
@@ -78,8 +93,8 @@ public class ZipUtils {
                     .filter(ze -> ze.getName().toLowerCase().startsWith(prefix.toLowerCase()))
                     .filter(ze -> ze.getName().toLowerCase().contains(contains.toLowerCase()))
                     .findFirst();
-            if(result.isPresent()) {
-                return (ZipEntry)result.get();
+            if (result.isPresent()) {
+                return (ZipEntry) result.get();
             }
         } catch (Exception e) {
             SystemUtils.LOG.warning("unable to read zip file " + file + ": " + e.getMessage());
@@ -155,8 +170,10 @@ public class ZipUtils {
                         Files.createDirectories(filePath);
                     } else {
                         try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                            try (BufferedOutputStream bos = new BufferedOutputStream(
-                                    new FileOutputStream(keepFolderStructure ? filePath.toFile() : strippedFilePath.toFile()))) {
+                            try (
+                                    BufferedOutputStream bos = new BufferedOutputStream(
+                                            new FileOutputStream(keepFolderStructure ? filePath.toFile() : strippedFilePath.toFile()))
+                            ) {
                                 buffer = new byte[4096];
                                 int read;
                                 while ((read = inputStream.read(buffer)) > 0) {
