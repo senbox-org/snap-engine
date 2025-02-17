@@ -24,7 +24,6 @@ import com.bc.zarr.ZarrArray;
 import com.bc.zarr.ZarrGroup;
 import com.bc.zarr.storage.FileSystemStore;
 import com.bc.zarr.storage.Store;
-import com.bc.zarr.storage.ZipStore;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
@@ -204,7 +203,7 @@ public class ZnapProductReader extends AbstractProductReader {
         }
         assert rootPath != null;
         if (Files.isRegularFile(rootPath)) {
-            store = new ZipStore(rootPath);
+            store = new ZnapZipStore(rootPath);
         } else {
             store = new FileSystemStore(rootPath);
         }
