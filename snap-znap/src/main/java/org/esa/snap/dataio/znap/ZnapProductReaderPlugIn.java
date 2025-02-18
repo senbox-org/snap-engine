@@ -21,7 +21,6 @@ package org.esa.snap.dataio.znap;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.*;
 import static com.bc.zarr.ZarrConstants.*;
 
-import com.bc.zarr.storage.ZipStore;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -77,7 +76,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
         }
         final boolean isValidZnapZipArchiveName = productRootName != null && productRootName.toString().toLowerCase().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
         if (isValidZnapZipArchiveName) {
-            try (ZipStore zipStore = new ZipStore(productRoot)) {
+            try (ZnapZipStore zipStore = new ZnapZipStore(productRoot)) {
                 final InputStream productHeaderStream = zipStore.getInputStream(FILENAME_DOT_ZGROUP);
                 final boolean productHeaderExist = productHeaderStream != null;
                 if (productHeaderExist) {
