@@ -29,11 +29,14 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+
+import static org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamGeocodingPart.*;
 
 public class BeamTiePointGridPart extends ProfilePartIO {
 
@@ -41,6 +44,23 @@ public class BeamTiePointGridPart extends ProfilePartIO {
     public final String OFFSET_Y = "offset_y";
     public final String SUBSAMPLING_X = "subsampling_x";
     public final String SUBSAMPLING_Y = "subsampling_y";
+
+    @Override
+    public void preDecode(ProfileReadContext ctx, Product p) throws IOException {
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final Attribute tpCoordinatesAtt = netcdfFile.findGlobalAttribute(TIEPOINT_COORDINATES);
+        if (tpCoordinatesAtt != null) {
+            final String[] tpGridNames = tpCoordinatesAtt.getStringValue().split(" ");
+            final String lonGridName = tpGridNames[LON_INDEX];
+            final String latGridname = tpGridNames[LAT_INDEX];
+            if (tpGridNames.length == 2) {
+                final Variable lonVariable = netcdfFile.findVariable(lonGridName);
+                addTiePointGridToProduct(p, lonVariable, lonGridName);
+                Variable latVariable = netcdfFile.findVariable(latGridname);
+                addTiePointGridToProduct(p, latVariable, latGridname);
+            }
+        }
+    }
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
@@ -59,34 +79,43 @@ public class BeamTiePointGridPart extends ProfilePartIO {
                 if (p.containsBand(tpName)) {
                     continue;
                 }
-                final Attribute offsetX = variable.findAttributeIgnoreCase(OFFSET_X);
-                final Attribute offsetY = variable.findAttributeIgnoreCase(OFFSET_Y);
-                final Attribute subSamplingX = variable.findAttributeIgnoreCase(SUBSAMPLING_X);
-                final Attribute subSamplingY = variable.findAttributeIgnoreCase(SUBSAMPLING_Y);
-                if (offsetX != null && offsetY != null &&
-                        subSamplingX != null && subSamplingY != null) {
-                    final Array array = variable.read();
-                    final float[] data = new float[(int) array.getSize()];
-                    for (int i = 0; i < data.length; i++) {
-                        data[i] = array.getFloat(i);
-                    }
-                    final boolean containsAngles = Constants.LON_VAR_NAME.equalsIgnoreCase(tpName) ||
-                            Constants.LAT_VAR_NAME.equalsIgnoreCase(tpName) ||
-                            Constants.LONGITUDE_VAR_NAME.equalsIgnoreCase(tpName) ||
-                            Constants.LATITUDE_VAR_NAME.equalsIgnoreCase(tpName);
-                    final TiePointGrid grid = new TiePointGrid(tpName,
-                                                               dimensionX.getLength(),
-                                                               dimensionY.getLength(),
-                                                               offsetX.getNumericValue().floatValue(),
-                                                               offsetY.getNumericValue().floatValue(),
-                                                               subSamplingX.getNumericValue().floatValue(),
-                                                               subSamplingY.getNumericValue().floatValue(),
-                                                               data,
-                                                               containsAngles);
-                    CfBandPart.readCfBandAttributes(variable, grid);
-                    p.addTiePointGrid(grid);
-                }
+                addTiePointGridToProduct(p, variable, tpName);
             }
+        }
+    }
+
+    private void addTiePointGridToProduct(Product p, Variable variable, String tpName) throws IOException {
+        if(p.containsTiePointGrid(tpName)) {
+            return;
+        }
+        final Attribute offsetX = variable.findAttributeIgnoreCase(OFFSET_X);
+        final Attribute offsetY = variable.findAttributeIgnoreCase(OFFSET_Y);
+        final Attribute subSamplingX = variable.findAttributeIgnoreCase(SUBSAMPLING_X);
+        final Attribute subSamplingY = variable.findAttributeIgnoreCase(SUBSAMPLING_Y);
+        if (offsetX != null && offsetY != null &&
+                subSamplingX != null && subSamplingY != null) {
+            final Array array = variable.read();
+            final float[] data = new float[(int) array.getSize()];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = array.getFloat(i);
+            }
+            final boolean containsAngles = Constants.LON_VAR_NAME.equalsIgnoreCase(tpName) ||
+                    Constants.LAT_VAR_NAME.equalsIgnoreCase(tpName) ||
+                    Constants.LONGITUDE_VAR_NAME.equalsIgnoreCase(tpName) ||
+                    Constants.LATITUDE_VAR_NAME.equalsIgnoreCase(tpName);
+
+            final List<Dimension> dimensions = variable.getDimensions();
+            final TiePointGrid grid = new TiePointGrid(tpName,
+                    dimensions.get(1).getLength(),
+                    dimensions.get(0).getLength(),
+                    offsetX.getNumericValue().floatValue(),
+                    offsetY.getNumericValue().floatValue(),
+                    subSamplingX.getNumericValue().floatValue(),
+                    subSamplingY.getNumericValue().floatValue(),
+                    data,
+                    containsAngles);
+            CfBandPart.readCfBandAttributes(variable, grid);
+            p.addTiePointGrid(grid);
         }
     }
 
@@ -96,7 +125,7 @@ public class BeamTiePointGridPart extends ProfilePartIO {
         final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
 
         for (TiePointGrid tiePointGrid : p.getTiePointGrids()) {
-            final String key = "" + tiePointGrid.getGridHeight() + " " + tiePointGrid.getGridWidth();
+            final String key = tiePointGrid.getGridHeight() + " " + tiePointGrid.getGridWidth();
             String dimString = dimMap.get(key);
             if (dimString == null) {
                 final int size = dimMap.size();
@@ -120,7 +149,7 @@ public class BeamTiePointGridPart extends ProfilePartIO {
         for (TiePointGrid tiePointGrid : p.getTiePointGrids()) {
             final int y = tiePointGrid.getGridHeight();
             final int x = tiePointGrid.getGridWidth();
-            final int[] shape = new int[]{y, x};
+            final int[] shape = {y, x};
             final Array values = Array.factory(DataType.FLOAT, shape, tiePointGrid.getGridData().getElems());
             String variableName = ReaderUtils.getVariableName(tiePointGrid);
             ctx.getNetcdfFileWriteable().findVariable(variableName).writeFully(values);

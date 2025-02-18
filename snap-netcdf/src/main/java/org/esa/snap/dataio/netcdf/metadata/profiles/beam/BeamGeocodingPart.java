@@ -50,8 +50,8 @@ public class BeamGeocodingPart extends CfGeocodingPart {
 
     public static final String TIEPOINT_COORDINATES = "tiepoint_coordinates";
 
-    private static final int LON_INDEX = 0;
-    private static final int LAT_INDEX = 1;
+    public static final int LON_INDEX = 0;
+    public static final int LAT_INDEX = 1;
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {

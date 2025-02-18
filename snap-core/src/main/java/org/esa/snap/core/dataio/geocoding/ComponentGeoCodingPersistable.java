@@ -159,10 +159,9 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         }
 
         final GeoRaster geoRaster;
-        if (lonRaster instanceof TiePointGrid) {
+        if (lonRaster instanceof TiePointGrid lonTPG) {
             final int sceneWidth = product.getSceneRasterWidth();
             final int sceneHeight = product.getSceneRasterHeight();
-            final TiePointGrid lonTPG = (TiePointGrid) lonRaster;
             final TiePointGrid latTPG = (TiePointGrid) latRaster;
 
             final int gridWidth = lonTPG.getGridWidth();
@@ -221,10 +220,9 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
 
     @Override
     public Element createXmlFromObject(Object object) {
-        if (!(object instanceof ComponentGeoCoding)) {
+        if (!(object instanceof ComponentGeoCoding geoCoding)) {
             return null;
         }
-        final ComponentGeoCoding geoCoding = (ComponentGeoCoding) object;
         final String forwardKey = geoCoding.getForwardCoding().getKey();
         final String inverseKey = geoCoding.getInverseCoding().getKey();
         final GeoChecks geoChecks = geoCoding.getGeoChecks();
@@ -276,6 +274,13 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         subsamplingYElem.setText(String.valueOf(subsamplingY));
 
         return codingMain;
+    }
+
+    public String[] getGeoVariableNames(Element element) {
+        final String lonVarName = element.getChildTextTrim(TAG_LON_VARIABLE_NAME);
+        final String latVarName = element.getChildTextTrim(TAG_LAT_VARIABLE_NAME);
+
+        return new String[]{lonVarName, latVarName};
     }
 }
 
