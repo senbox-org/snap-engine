@@ -992,10 +992,10 @@ public class TiePointGrid extends RasterDataNode {
             subsetStepX = subsetDef.getSubSamplingX();
             subsetStepY = subsetDef.getSubSamplingY();
             if(subsetDef.getRegionMap() != null && subsetDef.getRegionMap().containsKey(sourceTiePointGrid.getName())){
-                subsetOffsetX = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).x;
-                subsetOffsetY = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).y;
-                subsetWidth = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).width;
-                subsetHeight = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).height;
+                subsetOffsetX = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).getSubsetExtent().x;
+                subsetOffsetY = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).getSubsetExtent().y;
+                subsetWidth = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).getSubsetExtent().width;
+                subsetHeight = subsetDef.getRegionMap().get(sourceTiePointGrid.getName()).getSubsetExtent().height;
             } else if (subsetDef.getRegion() != null) {
                 subsetOffsetX = subsetDef.getRegion().x;
                 subsetOffsetY = subsetDef.getRegion().y;

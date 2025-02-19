@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common;
 
+import com.bc.ceres.annotation.STTM;
 import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.util.GeoUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -43,6 +44,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -138,6 +140,47 @@ public class SubsetOpTest {
     }
 
     @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testSetPolygonForSubset1() throws Exception {
+        final Product sp = createTestProduct(100, 100);
+
+        SubsetOp op = new SubsetOp();
+        op.setParameterDefaultValues();
+        op.setSourceProduct(sp);
+        op.setParameter("vectorFile", Paths.get(SubsetOpTest.class.getResource("polygonForSubset.wkt").toURI()).toFile());
+
+        Product targetProduct = op.getTargetProduct();
+        assertNotNull(targetProduct);
+        assertEquals(85, targetProduct.getSceneRasterWidth());
+        assertEquals(80, targetProduct.getSceneRasterHeight());
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testSetPolygonForSubset2() throws Exception {
+        final Product sp = createTestProduct(100, 100);
+        GeometryFactory gf = new GeometryFactory();
+        Polygon polygon = gf.createPolygon(gf.createLinearRing(new Coordinate[]{
+                new Coordinate(10, 10),
+                new Coordinate(10, 90),
+                new Coordinate(90, 90),
+                new Coordinate(95, 45),
+                new Coordinate(90, 10),
+                new Coordinate(10, 10),
+        }), null);
+
+        SubsetOp op = new SubsetOp();
+        op.setParameterDefaultValues();
+        op.setSourceProduct(sp);
+        op.setParameter("polygonRegion", polygon.toText());
+
+        Product targetProduct = op.getTargetProduct();
+        assertNotNull(targetProduct);
+        assertEquals(85, targetProduct.getSceneRasterWidth());
+        assertEquals(80, targetProduct.getSceneRasterHeight());
+    }
+
+    @Test
     public void testInstantiationWithGPF() throws GraphException {
         GeometryFactory gf = new GeometryFactory();
         Polygon polygon = gf.createPolygon(gf.createLinearRing(new Coordinate[]{
@@ -160,6 +203,52 @@ public class SubsetOpTest {
         assertNotNull(tp);
         assertEquals(100, tp.getSceneRasterWidth());
         assertEquals(50, tp.getSceneRasterHeight());
+        assertEquals(1, tp.getNumBands());
+        assertNotNull(tp.getBand(expectedBandName));
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testInstantiationWithGPFForPolygonSubset1() throws Exception {
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("vectorFile", Paths.get(SubsetOpTest.class.getResource("polygonForSubset.wkt").toURI()).toFile());
+        final String expectedBandName = "radiance_3";
+        parameters.put("sourceBands", new String[]{expectedBandName});
+        final Product sp = createTestProduct(100, 100);
+        assertNotNull(sp.getSceneGeoCoding());
+
+        Product tp = GPF.createProduct("Subset", parameters, sp);
+        assertNotNull(tp);
+        assertEquals(85, tp.getSceneRasterWidth());
+        assertEquals(80, tp.getSceneRasterHeight());
+        assertEquals(1, tp.getNumBands());
+        assertNotNull(tp.getBand(expectedBandName));
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testInstantiationWithGPFForPolygonSubset2() throws GraphException {
+        GeometryFactory gf = new GeometryFactory();
+        Polygon polygon = gf.createPolygon(gf.createLinearRing(new Coordinate[]{
+                new Coordinate(10, 10),
+                new Coordinate(10, 90),
+                new Coordinate(90, 90),
+                new Coordinate(95, 45),
+                new Coordinate(90, 10),
+                new Coordinate(10, 10),
+        }), null);
+
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("polygonRegion", polygon.toText());
+        final String expectedBandName = "radiance_3";
+        parameters.put("sourceBands", new String[]{expectedBandName});
+        final Product sp = createTestProduct(100, 100);
+        assertNotNull(sp.getSceneGeoCoding());
+
+        Product tp = GPF.createProduct("Subset", parameters, sp);
+        assertNotNull(tp);
+        assertEquals(85, tp.getSceneRasterWidth());
+        assertEquals(80, tp.getSceneRasterHeight());
         assertEquals(1, tp.getNumBands());
         assertNotNull(tp.getBand(expectedBandName));
     }

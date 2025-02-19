@@ -4,6 +4,7 @@ import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.junit.Test;
 
 import java.awt.*;
@@ -87,8 +88,8 @@ public class SparseDataBandTest {
         // with regionMap
         subsetDef = new ProductSubsetDef();
         subsetDef.setNodeNames(new String[]{"test"});
-        final HashMap<String, Rectangle> regionmap = new HashMap<>();
-        regionmap.put("test", new Rectangle(0, 0, 2, 3));
+        final HashMap<String, SubsetRegionInfo> regionmap = new HashMap<>();
+        regionmap.put("test", new SubsetRegionInfo(new Rectangle(0, 0, 2, 3), null));
         subsetDef.setRegionMap(regionmap);
         band = new SparseDataBand("test", ProductData.TYPE_UINT8, 6, 8, new NoDataProvider());
         storageSize = band.getRawStorageSize(subsetDef);

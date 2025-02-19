@@ -35,6 +35,9 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -252,6 +255,34 @@ public class ProductSubsetBuilderTest {
         assertEquals(7.f, subsetBand.getNoDataValue(), 1e-8);
         assertEquals(8.f, subsetBand.getSolarFlux(), 1e-8);
 
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testBandValuesArePreservedOnPolygonSubset() throws IOException {
+        final Band band = new Band("test_me2", ProductData.TYPE_INT32, 10, 10);
+        band.setData(new ProductData.Int(100));
+        band.setNoDataValueUsed(true);
+        band.setNoDataValue(-1.f);
+        product.addBand(band);
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+        final Coordinate[] productPolygonCoordinates = new Coordinate[]{
+                new Coordinate(1.9, 1.9),
+                new Coordinate(1.9, 7),
+                new Coordinate(7.1, 2),
+                new Coordinate(1.9, 1.9),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon subsetPolygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(productPolygonCoordinates), new LinearRing[0]);
+        subsetDef.setSubsetPolygon(subsetPolygon);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(0, 0, 10, 10, 0));
+        final Product subsetByPolygon = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subsetByPolygon", "");
+        final Band subsetBand = subsetByPolygon.getBand("test_me2");
+        assertNotNull(subsetBand);
+        subsetBand.readRasterDataFully();
+        assertEquals(-1, subsetBand.getPixelInt(1, 1)); // outside polygon
+        assertEquals(0, subsetBand.getPixelInt(2, 2)); // edge of polygon
+        assertEquals(0, subsetBand.getPixelInt(3, 3)); // inside polygon
     }
 
     private void attachIndexCodedBand() {
