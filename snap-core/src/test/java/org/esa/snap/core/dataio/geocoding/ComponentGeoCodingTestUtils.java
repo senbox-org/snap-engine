@@ -59,7 +59,7 @@ public class ComponentGeoCodingTestUtils {
         return geoCoding;
     }
 
-    public static ComponentGeoCoding initializeWithTiePoints(Product srcProduct, boolean bilinear, boolean antimeridian) {
+    public static ComponentGeoCoding initializeWithTiePoints(Product srcProduct, boolean bilinear, boolean antimeridian, double offsetX, double offsetY, int subsamplingX, int subsamplingY) {
         float[][] tiePointFloats = createTiePointFloats(antimeridian);
         float[] lons = tiePointFloats[0];
         float[] lats = tiePointFloats[1];
@@ -67,7 +67,7 @@ public class ComponentGeoCodingTestUtils {
         srcProduct.getTiePointGrid("tpLat").setData(ProductData.createInstance(lats));
         final GeoRaster geoRaster = new GeoRaster(toD(lons), toD(lats), "tpLon", "tpLat",
                                                   TP_WIDTH, TP_HEIGHT, SCENE_WIDTH, SCENE_HEIGHT,
-                                                  300.0, 0.5, 0.5, 5, 5);
+                                                  300.0, offsetX, offsetY, subsamplingX, subsamplingY);
         final ForwardCoding forwardCoding;
         if (bilinear) {
             forwardCoding = ComponentFactory.getForward(TiePointBilinearForward.KEY);
