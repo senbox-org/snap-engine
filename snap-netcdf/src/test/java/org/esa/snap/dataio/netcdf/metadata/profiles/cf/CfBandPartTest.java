@@ -18,6 +18,8 @@ import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -115,5 +117,27 @@ public class CfBandPartTest {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH_UNIT, "~m"));
 
         assertThat(CfBandPart.getSpectralWavelength(variable), is(0.0f));
+    }
+
+    @Test
+    @STTM("SNAP-3886")
+    public void testIsLogitudeVariablename() {
+        assertTrue(CfBandPart.isLongitudeVarName("lon_intern"));
+        assertTrue(CfBandPart.isLongitudeVarName("longitude"));
+        assertTrue(CfBandPart.isLongitudeVarName("lon"));
+
+        assertFalse(CfBandPart.isLongitudeVarName("lon_corr"));
+        assertFalse(CfBandPart.isLongitudeVarName("FHWM"));
+    }
+
+    @Test
+    @STTM("SNAP-3886")
+    public void testIsLatitudeVariablename() {
+        assertTrue(CfBandPart.isLatitudeVarName("lat_intern"));
+        assertTrue(CfBandPart.isLatitudeVarName("latitude"));
+        assertTrue(CfBandPart.isLatitudeVarName("lat"));
+
+        assertFalse(CfBandPart.isLatitudeVarName("latitude_on_dem"));
+        assertFalse(CfBandPart.isLatitudeVarName("sea_level_pressure"));
     }
 }

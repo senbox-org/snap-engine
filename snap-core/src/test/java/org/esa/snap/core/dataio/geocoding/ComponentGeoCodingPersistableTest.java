@@ -1,5 +1,6 @@
 package org.esa.snap.core.dataio.geocoding;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.datamodel.Product;
 import org.jdom2.Element;
@@ -10,8 +11,7 @@ import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.*;
 
 public class ComponentGeoCodingPersistableTest {
 
@@ -181,5 +181,36 @@ public class ComponentGeoCodingPersistableTest {
         assertArrayEquals(newGeoRaster.getLongitudes(), initialGeoRaster.getLongitudes(), Double.MIN_VALUE);
         assertNotSame(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes());
         assertArrayEquals(newGeoRaster.getLatitudes(), initialGeoRaster.getLatitudes(), Double.MIN_VALUE);
+    }
+
+    @Test
+    @STTM("SNAP-3886")
+    public void testGetGeoVariableNames_Bands()  {
+        final boolean interpolating = false;
+        final boolean quadTree = false;
+        final boolean antimeridian = true;
+        final ComponentGeoCoding initialGeocoding = initializeWithBands(product, interpolating, quadTree, antimeridian);
+        final Element xmlFromObject = persistable.createXmlFromObject(initialGeocoding);
+
+        final ComponentGeoCodingPersistable componentGeoCodingPersistable = new ComponentGeoCodingPersistable();
+        final String[] geoVariableNames = componentGeoCodingPersistable.getGeoVariableNames(xmlFromObject);
+        assertEquals(2, geoVariableNames.length);
+        assertEquals("Lon", geoVariableNames[0]);
+        assertEquals("Lat", geoVariableNames[1]);
+    }
+
+    @Test
+    @STTM("SNAP-3886")
+    public void testGetGeoVariableNames_TiePoints()  {
+        final boolean bilinear = false;
+        final boolean antimeridian = true;
+        final ComponentGeoCoding initialGeocoding = initializeWithTiePoints(product, bilinear, antimeridian);
+        final Element xmlFromObject = persistable.createXmlFromObject(initialGeocoding);
+
+        final ComponentGeoCodingPersistable componentGeoCodingPersistable = new ComponentGeoCodingPersistable();
+        final String[] geoVariableNames = componentGeoCodingPersistable.getGeoVariableNames(xmlFromObject);
+        assertEquals(2, geoVariableNames.length);
+        assertEquals("tpLon", geoVariableNames[0]);
+        assertEquals("tpLat", geoVariableNames[1]);
     }
 }

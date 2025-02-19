@@ -55,6 +55,7 @@ import java.util.List;
 
 import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
+import static org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamGeocodingPart.TIEPOINT_COORDINATES;
 
 public class BeamBandPart extends ProfilePartIO {
 
@@ -69,9 +70,36 @@ public class BeamBandPart extends ProfilePartIO {
     private static final int LON_INDEX = 0;
     private static final int LAT_INDEX = 1;
 
+
+    @Override
+    public void preDecode(ProfileReadContext ctx, Product p) throws IOException {
+        NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final Attribute geoCodingAtt = netcdfFile.findGlobalAttribute(GEOCODING);
+        if(geoCodingAtt != null) {
+            final String xml = geoCodingAtt.getStringValue();
+            if (xml.contains(TAG_COMPONENT_GEO_CODING)) {
+                try {
+                    final SAXBuilder saxBuilder = new SAXBuilder();
+                    final String stripped = xml.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
+                    final org.jdom2.Document build = saxBuilder.build(new StringReader(stripped));
+                    final Element rootElement = build.getRootElement();
+
+                    final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
+                    final String[] geoVariableNames = pers.getGeoVariableNames(rootElement);
+                    final Variable lonVariable = netcdfFile.findVariable(geoVariableNames[0]);
+                    addBandToProduct(ctx, p, lonVariable);
+                    final Variable latVariable = netcdfFile.findVariable(geoVariableNames[1]);
+                    addBandToProduct(ctx, p, latVariable);
+                } catch (JDOMException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
-        NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final List<Variable> variables = netcdfFile.getVariables();
         for (Variable variable : variables) {
             UnsignedChecker.setUnsignedType(variable);
@@ -79,27 +107,7 @@ public class BeamBandPart extends ProfilePartIO {
             if (dimensions.size() != 2) {
                 continue;
             }
-            final int yDimIndex = 0;
-            final int xDimIndex = 1;
-            final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
-            final int width = dimensions.get(xDimIndex).getLength();
-            final int height = dimensions.get(yDimIndex).getLength();
-            Band band;
-            if (height == p.getSceneRasterHeight()
-                    && width == p.getSceneRasterWidth()) {
-                band = p.addBand(variable.getFullName(), rasterDataType);
-            } else {
-                if (dimensions.get(xDimIndex).getFullName().startsWith("tp_") ||
-                        dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
-                    continue;
-                }
-                band = new Band(variable.getFullName(), rasterDataType, width, height);
-                setGeoCoding(ctx, p, variable, band);
-                p.addBand(band);
-            }
-            CfBandPart.readCfBandAttributes(variable, band);
-            readBeamBandAttributes(variable, band);
-            band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, ctx)));
+            addBandToProduct(ctx, p, variable);
         }
         // Work around for a bug in version 1.0.101
         // The solar flux and spectral band index were not preserved.
@@ -121,6 +129,31 @@ public class BeamBandPart extends ProfilePartIO {
                 p.setQuicklookBandName(quicklookBandName);
             }
         }
+    }
+
+    private void addBandToProduct(ProfileReadContext ctx, Product p, Variable variable) throws IOException {
+        final int yDimIndex = 0;
+        final int xDimIndex = 1;
+        final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
+        List<Dimension> dimensions = variable.getDimensions();
+        final int width = dimensions.get(xDimIndex).getLength();
+        final int height = dimensions.get(yDimIndex).getLength();
+        Band band;
+        if (height == p.getSceneRasterHeight()
+                && width == p.getSceneRasterWidth()) {
+            band = p.addBand(variable.getFullName(), rasterDataType);
+        } else {
+            if (dimensions.get(xDimIndex).getFullName().startsWith("tp_") ||
+                    dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
+                return;
+            }
+            band = new Band(variable.getFullName(), rasterDataType, width, height);
+            setGeoCoding(ctx, p, variable, band);
+            p.addBand(band);
+        }
+        CfBandPart.readCfBandAttributes(variable, band);
+        readBeamBandAttributes(variable, band);
+        band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, ctx)));
     }
 
     /**
