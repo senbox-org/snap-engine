@@ -15,6 +15,7 @@
  */
 package org.esa.snap.engine_utilities.gpf;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
@@ -183,6 +184,25 @@ public class TestStackUtils {
 
         String[] bandNames = StackUtils.bandsToStringArray(product.getBands());
         assertArrayEquals(new String[] {"band_mst1_01Jan21", "band_slv2_01Feb21", "band_slv3_01Feb21"}, bandNames);
+    }
+
+    @Test
+    @STTM("SNAP-3651")
+    public void testSaveSlaveProductBandNames_appendNames() throws Exception {
+        final Product product = createStackProduct(4);
+
+        String[] bandNames = new String[] {"band1","band2"};
+        StackUtils.saveSlaveProductBandNames(product, "product2_01Feb21", bandNames);
+
+        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
+        assertNotNull(targetSlaveMetadataRoot);
+        final String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
+        assertEquals("band_mst1_01Jan21", masterBands);
+
+        final MetadataElement slaveProductElem = targetSlaveMetadataRoot.getElement("product2_01Feb21");
+        assertNotNull(slaveProductElem);
+        final String slaveBands = slaveProductElem.getAttributeString(AbstractMetadata.SLAVE_BANDS);
+        assertEquals("band_slv2_01Feb21 band_slv3_01Feb21 band1 band2", slaveBands);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

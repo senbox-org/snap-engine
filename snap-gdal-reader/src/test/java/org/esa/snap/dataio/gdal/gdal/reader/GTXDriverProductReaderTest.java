@@ -41,7 +41,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNotNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("NOAA Vertical Datum .GTX", finalProduct.getProductType());
             assertEquals(20, finalProduct.getSceneRasterWidth());
             assertEquals(30, finalProduct.getSceneRasterHeight());
 
@@ -89,7 +89,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("NOAA Vertical Datum .GTX", finalProduct.getProductType());
             assertEquals(10, finalProduct.getSceneRasterWidth());
             assertEquals(20, finalProduct.getSceneRasterHeight());
             assertEquals(0,finalProduct.getTiePointGridGroup().getNodeNames().length);
@@ -164,7 +164,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("NOAA Vertical Datum .GTX", finalProduct.getProductType());
             assertEquals(11, finalProduct.getSceneRasterWidth());
             assertEquals(21, finalProduct.getSceneRasterHeight());
             assertEquals(0,finalProduct.getTiePointGridGroup().getNodeNames().length);

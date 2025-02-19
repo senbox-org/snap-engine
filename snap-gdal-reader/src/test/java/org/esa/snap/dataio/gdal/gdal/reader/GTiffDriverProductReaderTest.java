@@ -40,7 +40,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(product.getPreferredTileSize());
             assertNotNull(product.getProductReader());
             assertEquals(product.getProductReader(), reader);
-            assertEquals("GDAL", product.getProductType());
+            assertEquals("GeoTIFF (GDAL)", product.getProductType());
             assertEquals(25862, product.getSceneRasterWidth());
             assertEquals(16721, product.getSceneRasterHeight());
 
@@ -93,7 +93,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(product.getPreferredTileSize());
             assertNotNull(product.getProductReader());
             assertEquals(product.getProductReader(), reader);
-            assertEquals("GDAL", product.getProductType());
+            assertEquals("GeoTIFF (GDAL)", product.getProductType());
             assertEquals(210, product.getSceneRasterWidth());
             assertEquals(200, product.getSceneRasterHeight());
 

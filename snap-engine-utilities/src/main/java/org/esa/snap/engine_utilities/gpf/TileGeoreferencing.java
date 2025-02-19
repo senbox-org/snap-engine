@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.SystemUtils;
 
@@ -39,24 +40,28 @@ public final class TileGeoreferencing {
     private final boolean isCrossingMeridian;
 
     public TileGeoreferencing(final Product product, final int x1, final int y1, final int w, final int h) {
-        geocoding = product.getSceneGeoCoding();
+        this(product.getSceneGeoCoding(), x1, y1, w, h);
+    }
+
+    public TileGeoreferencing(final GeoCoding geocoding, final int x1, final int y1, final int w, final int h) {
+        this.geocoding = geocoding;
         isCrossingMeridian = geocoding.isCrossingMeridianAt180();
-        final TiePointGrid latTPG = OperatorUtils.getLatitude(product);
-        final TiePointGrid lonTPG = OperatorUtils.getLongitude(product);
+
         this.x1 = x1;
         this.y1 = y1;
         width = w;
         size = w * h;
 
-        final boolean isCrsGeoCoding = geocoding instanceof CrsGeoCoding;
-        isCached = !(latTPG == null || lonTPG == null) || isCrsGeoCoding;
-
         try {
-            if (isCrsGeoCoding) {
+            if (geocoding instanceof CrsGeoCoding) {
                 latPixels = new double[size];
                 lonPixels = new double[size];
                 ((CrsGeoCoding) geocoding).getPixels(x1, y1, w, h, latPixels, lonPixels);
-            } else {
+                isCached = true;
+            } else if(geocoding instanceof TiePointGeoCoding) {
+                TiePointGeoCoding tiePointGeoCoding = (TiePointGeoCoding) geocoding;
+                final TiePointGrid latTPG = tiePointGeoCoding.getLatGrid();
+                final TiePointGrid lonTPG = tiePointGeoCoding.getLonGrid();
                 if (latTPG != null) {
                     latPixels = new double[size];
                     latTPG.getPixels(x1, y1, w, h, latPixels, ProgressMonitor.NULL);
@@ -66,11 +71,16 @@ public final class TileGeoreferencing {
                     lonPixels = new double[size];
                     lonTPG.getPixels(x1, y1, w, h, lonPixels, ProgressMonitor.NULL);
                 }
+                isCached = true;
             }
         } catch (Exception e) {
             SystemUtils.LOG.severe("TileGeoreferencing tiepoint error " + e.getMessage());
             isCached = false;
         }
+    }
+
+    public boolean isCached() {
+        return isCached;
     }
 
     public void getGeoPos(final int x, final int y, final GeoPos geo) {

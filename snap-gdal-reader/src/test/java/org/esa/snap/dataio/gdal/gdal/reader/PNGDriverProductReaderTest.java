@@ -35,7 +35,7 @@ public class PNGDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(4, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Portable Network Graphics", finalProduct.getProductType());
             assertEquals(1920, finalProduct.getSceneRasterWidth());
             assertEquals(1200, finalProduct.getSceneRasterHeight());
 
@@ -80,7 +80,7 @@ public class PNGDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(3, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("Portable Network Graphics", finalProduct.getProductType());
             assertEquals(1165, finalProduct.getSceneRasterWidth());
             assertEquals(1056, finalProduct.getSceneRasterHeight());
 

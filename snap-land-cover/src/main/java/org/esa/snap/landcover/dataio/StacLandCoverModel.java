@@ -110,7 +110,7 @@ public class StacLandCoverModel implements LandCoverModel {
     }
 
     @Override
-    public synchronized double getLandCover(final GeoPos geoPos) throws Exception {
+    public double getLandCover(final GeoPos geoPos) throws Exception {
         try {
             if (tileList == null) {
                 search(aoiGeoJSON);
@@ -139,6 +139,9 @@ public class StacLandCoverModel implements LandCoverModel {
     }
 
     private synchronized void search(final JSONObject aoi) throws Exception {
+        if (tileList != null) {
+            return;
+        }
         StacItem[] results = client.search(
                 new String[]{descriptor.getCollectionId()},
                 aoi,

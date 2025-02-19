@@ -35,7 +35,7 @@ public class BMPDriverProductReaderTest extends AbstractTestDriverProductReader 
             Product finalProduct = reader.readProductNodes(file, null);
             assertNull(finalProduct.getSceneGeoCoding());
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("MS Windows Device Independent Bitmap", finalProduct.getProductType());
             assertEquals(20, finalProduct.getSceneRasterWidth());
             assertEquals(30, finalProduct.getSceneRasterHeight());
 
@@ -81,7 +81,7 @@ public class BMPDriverProductReaderTest extends AbstractTestDriverProductReader 
             assertNotNull(finalProduct.getMaskGroup());
             assertEquals(0,finalProduct.getMaskGroup().getNodeNames().length);
             assertEquals(1, finalProduct.getBands().length);
-            assertEquals("GDAL", finalProduct.getProductType());
+            assertEquals("MS Windows Device Independent Bitmap", finalProduct.getProductType());
             assertEquals(5, finalProduct.getSceneRasterWidth());
             assertEquals(16, finalProduct.getSceneRasterHeight());
 

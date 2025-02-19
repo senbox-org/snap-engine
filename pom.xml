@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>11.0.0-SNAPSHOT</version>
+    <version>11.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -55,6 +55,7 @@
             ${project.basedir}/snap-engine-coverage/target/site/
             jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
+        <mockito.version>5.3.1</mockito.version>
     </properties>
 
     <modules>
@@ -67,7 +68,6 @@
         <module>ceres-metadata</module>
 
         <!-- SNAP System Modules -->
-
         <module>snap-runtime</module>
         <module>snap-core</module>
         <!--<module>snap-config</module>-->
@@ -76,7 +76,6 @@
         <module>snap-gpf</module>
 
         <!-- SNAP Extension Modules -->
-
         <module>snap-arcbingrid-reader</module>
         <module>snap-bigtiff</module>
         <module>snap-binning</module>
@@ -155,7 +154,6 @@
         <dependencies>
 
             <!-- Ceres System Level Modules -->
-
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>ceres-core</artifactId>
@@ -206,7 +204,6 @@
             </dependency>
 
             <!-- SNAP Engine System Level Modules -->
-
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-runtime</artifactId>
@@ -241,7 +238,6 @@
             </dependency>
 
             <!-- SNAP Extension Modules -->
-
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-csv-dataio</artifactId>
@@ -270,8 +266,8 @@
                 <artifactId>snap-help-system</artifactId>
                 <version>${snap-help-system.version}</version>
             </dependency>
-            <!-- Miscellaneous 3rd party libraries ############################################# -->
 
+            <!-- Miscellaneous 3rd party libraries ############################################# -->
             <dependency>
                 <groupId>javax.help</groupId>
                 <artifactId>javahelp</artifactId>
@@ -311,16 +307,6 @@
                 <version>${snap.version}</version>
             </dependency>
 
-            <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
-
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>1.7.30</version>
-            </dependency>
-            -->
-
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -331,6 +317,7 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.htmlparser</groupId>
                 <artifactId>htmlparser</artifactId>
@@ -346,7 +333,6 @@
             </dependency>
 
             <!-- JDOM Library ############################################# -->
-
             <dependency>
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom2</artifactId>
@@ -370,7 +356,6 @@
             </dependency>
 
             <!-- Apache ############################################# -->
-
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -438,7 +423,6 @@
             </dependency>
 
             <!-- ImageioIO-Ext ############################################# -->
-
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
@@ -595,7 +579,6 @@
 
 
             <!-- BC Neural Network Library ############################################# -->
-
             <dependency>
                 <groupId>com.bc.jnn</groupId>
                 <artifactId>jnn</artifactId>
@@ -603,7 +586,6 @@
             </dependency>
 
             <!-- Jama Matrix Algebra Library ############################################# -->
-
             <dependency>
                 <groupId>Jama</groupId>
                 <artifactId>Jama</artifactId>
@@ -611,7 +593,6 @@
             </dependency>
 
             <!-- XML helper ############################################# -->
-
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
@@ -639,7 +620,6 @@
             </dependency>
 
             <!-- Test Libraries ############################################# -->
-
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -664,12 +644,11 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.3.1</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <!-- Jimfs - Ram Disk File System ############################################# -->
-
             <dependency>
                 <groupId>com.google.jimfs</groupId>
                 <artifactId>jimfs</artifactId>
@@ -686,7 +665,6 @@
             </dependency>
 
             <!-- JIDE Swing Libraries ############################################# -->
-
             <dependency>
                 <!-- jidesoft is not providing releases anymore. So we take a recent (Jun 2021) version build by someone else -->
                 <!--<groupId>com.jidesoft</groupId>-->
@@ -703,11 +681,10 @@
             </dependency>
 
             <!-- XStream Libraries ############################################# -->
-
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.20</version>
+                <version>1.4.21</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>
@@ -716,7 +693,6 @@
             </dependency>
 
             <!-- JFreeChart Libraries ############################################# -->
-
             <dependency>
                 <groupId>org.jfree</groupId>
                 <artifactId>jfreechart</artifactId>
@@ -739,7 +715,6 @@
             </dependency>
 
             <!-- Smart configurator support ######################################## -->
-
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-smart-configurator</artifactId>
@@ -747,7 +722,6 @@
             </dependency>
 
             <!-- JSoup -->
-
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
@@ -1307,6 +1281,15 @@
             <id>tonio</id>
             <name>Tonio Fincke</name>
             <email>tonio.fincke@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>benny</id>
+            <name>Benjamin Lutz</name>
+            <email>benjamin.lutz@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>
