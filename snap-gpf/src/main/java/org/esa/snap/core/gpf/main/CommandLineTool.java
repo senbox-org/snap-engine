@@ -187,7 +187,9 @@ public class CommandLineTool implements GraphProcessingObserver {
             ProductReaderPlugIn plugIn = plugins.next();
             String[] formatNames = plugIn.getFormatNames();
             String[] defaultExtensions =  plugIn.getDefaultFileExtensions() ;
-            commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+            if (formatNames.length > 0 || defaultExtensions.length > 0 ) {
+                commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+            }
         }
     }
 
@@ -199,7 +201,9 @@ public class CommandLineTool implements GraphProcessingObserver {
             ProductWriterPlugIn plugIn = plugins.next();
             String[] formatNames = plugIn.getFormatNames();
             String[] defaultExtensions =  plugIn.getDefaultFileExtensions() ;
-            commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+            if (formatNames.length > 0 || defaultExtensions.length > 0 ) {
+                commandLineContext.print(String.join(",", formatNames) + " (" + String.join(",", defaultExtensions) + ")" + "\n");
+            }
         }
     }
 
