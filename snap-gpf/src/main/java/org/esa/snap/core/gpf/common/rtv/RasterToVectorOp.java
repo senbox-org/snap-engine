@@ -30,6 +30,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.geotools.feature.DefaultFeatureCollection;
@@ -53,6 +54,7 @@ import com.bc.ceres.core.ProgressMonitor;
         version = "1.0",
         copyright = "(c) 2024 by CS GROUP ROMANIA")
 public class RasterToVectorOp extends Operator {
+	private final String TARGET_BAND_NAME ="vectors_band";
 
 	@SourceProduct(alias = "source", description = "The product which contains the raster.")
     private Product sourceProduct;
@@ -90,57 +92,74 @@ public class RasterToVectorOp extends Operator {
 				throw new OperatorException("The source product has no bands");
 			} else {
 				Optional<Band> band = Arrays.asList(bands).stream().filter(b -> b.getDataType() < ProductData.TYPE_FLOAT32).findFirst();
-				if (band.isPresent()) {
-					bandToConvert = band.get();
-					bandName = bandToConvert.getName();
-					getLogger().log(Level.INFO, "No band name specified. Using the first integer type band from the source product (" + bandToConvert.getName() + ")");
-				} else {
+				if  (!band.isPresent()) {
 					throw new OperatorException("The source product has no integer type bands");
+				}else{
+					throw new OperatorException("Please select the source band.");
 				}
 			}
 		}
-		
-		final Dimension tileSize = sourceProduct.getPreferredTileSize();
-		
+
         this.targetProduct = new Product(sourceProduct.getName()+"_rtv", sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-        this.targetProduct.setPreferredTileSize(tileSize);
-        this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
-        this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
-        
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        
-        Band newBand = new Band("vectors_band", ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
-        newBand.setGeoCoding(bandToConvert.getGeoCoding());
-        this.targetProduct.addBand(newBand);
-        
-    	SimpleFeatureType vectors = PlainFeatureFactory.createPlainFeatureType("vectors", Polygon.class, this.sourceProduct.getSceneCRS());
-    	
-    	VectorDataNode vdn = new VectorDataNode("shapes", vectors);
-    	
-    	this.targetProduct.getVectorDataGroup().add(vdn);
-        
-        // Count the number of tiles
-    	int w = MathUtils.ceilInt((double)bandToConvert.getRasterWidth() / tileSize.getWidth());
-    	int h = MathUtils.ceilInt((double)bandToConvert.getRasterHeight() / tileSize.getHeight());
-        this.numberOfTiles =  w * h;
-        
-    	final AffineTransform transf =  bandToConvert.getImageToModelTransform();
-        this.jtsTransformation =
-                new AffineTransformation(
-                		transf.getScaleX(),
-                		transf.getShearX(),
-                		transf.getTranslateX(),
-                		transf.getShearY(),
-                		transf.getScaleY(),
-                		transf.getTranslateY());
+
+		Band newBand = new Band(TARGET_BAND_NAME, ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
+		this.targetProduct.addBand(newBand);
 	}
-	
+
+	@Override
+	public void doExecute(ProgressMonitor pm) throws OperatorException {
+		pm.beginTask("Raster To Vector", 1);
+		try {
+			executeOp();
+		} catch (Throwable e) {
+			throw new OperatorException(e);
+		} finally {
+			pm.done();
+		}
+	}
+
+	private void executeOp(){
+		if (this.bandToConvert == null ) {
+			throw new OperatorException("Please select the source band.");
+		}
+
+		final Dimension tileSize = ImageManager.getPreferredTileSize(sourceProduct);
+		this.targetProduct.setPreferredTileSize(tileSize);
+		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
+		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
+
+		ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+
+		Band targetBand = this.targetProduct.getBand(TARGET_BAND_NAME);
+		targetBand.setGeoCoding(bandToConvert.getGeoCoding());
+
+		SimpleFeatureType vectors = PlainFeatureFactory.createPlainFeatureType("vectors", Polygon.class, this.sourceProduct.getSceneCRS());
+
+		VectorDataNode vdn = new VectorDataNode("shapes", vectors);
+
+		this.targetProduct.getVectorDataGroup().add(vdn);
+
+		// Count the number of tiles
+		int w = MathUtils.ceilInt((double)bandToConvert.getRasterWidth() / tileSize.getWidth());
+		int h = MathUtils.ceilInt((double)bandToConvert.getRasterHeight() / tileSize.getHeight());
+		this.numberOfTiles =  w * h;
+
+		final AffineTransform transf =  bandToConvert.getImageToModelTransform();
+		this.jtsTransformation =
+				new AffineTransformation(
+						transf.getScaleX(),
+						transf.getShearX(),
+						transf.getTranslateX(),
+						transf.getShearY(),
+						transf.getScaleY(),
+						transf.getTranslateY());
+	}
+
 	@Override
 	public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         int computedTiles = this.processedTiles.addAndGet(1);
         if (computedTiles == numberOfTiles) {
-        	
             // perform jai operation
             ParameterBlockJAI pb = new ParameterBlockJAI("Vectorize");
             pb.setSource("source0", bandToConvert.getSourceImage());

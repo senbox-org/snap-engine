@@ -31,7 +31,7 @@ import com.bc.ceres.binding.Converter;
 import com.bc.ceres.core.ProgressMonitor;
 
 /**
- * The raster to vector operator converts a raster to a vector.
+ * The Quantization operator
  *
  * @author Lucian Barbulescu
  */
@@ -42,6 +42,8 @@ import com.bc.ceres.core.ProgressMonitor;
         version = "1.0",
         copyright = "(c) 2024 by CS GROUP ROMANIA")
 public class QuantizationOp extends Operator {
+
+	private final String TARGET_BAND_NAME ="converted_band";
 
 	@SourceProduct(alias = "source", description = "The product which contains the raster.")
     private Product sourceProduct;
@@ -58,7 +60,7 @@ public class QuantizationOp extends Operator {
 	private Map<Integer, Range> intervalsMap = new HashMap<>();
 	
     private Band bandToConvert;
-    
+
 	@Override
 	public void initialize() throws OperatorException {
 		if (sourceProduct == null) {
@@ -70,33 +72,51 @@ public class QuantizationOp extends Operator {
 			if (bandToConvert == null) {
 				throw new OperatorException("The band " + bandName + " is not present in the source product");
 			}
-			
 		} else {
 			final Band[] bands = sourceProduct.getBands();
 			if (bands.length == 0) {
 				throw new OperatorException("The source product has no bands");
 			} else {
-				bandToConvert = bands[0];
-				bandName = bandToConvert.getName();
+				throw new OperatorException("Please select the source band.");
 			}
 		}
-		
-		final Dimension tileSize = sourceProduct.getPreferredTileSize();
-		
+
         this.targetProduct = new Product(sourceProduct.getName()+"_rl", sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-        this.targetProduct.setPreferredTileSize(tileSize);
-        this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
-        this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
-        
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        
-        Band newBand = new Band("converted_band", ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
-        newBand.setGeoCoding(bandToConvert.getGeoCoding());
-        
-        this.targetProduct.addBand(newBand);
+
+		Band newBand = new Band(TARGET_BAND_NAME, ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
+		this.targetProduct.addBand(newBand);
+
 	}
-	
+
+	@Override
+	public void doExecute(ProgressMonitor pm) throws OperatorException {
+		pm.beginTask("Quantization", 1);
+		try {
+			executeOp();
+		} catch (Throwable e) {
+			throw new OperatorException(e);
+		} finally {
+			pm.done();
+		}
+	}
+
+	private void executeOp(){
+		if (bandToConvert == null  ){
+			throw new OperatorException("Please select the source band.");
+		}
+
+		final Dimension tileSize = sourceProduct.getPreferredTileSize();
+		this.targetProduct.setPreferredTileSize(tileSize);
+		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
+		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
+
+		ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+
+		Band targetBand = this.targetProduct.getBand(TARGET_BAND_NAME);
+		targetBand.setGeoCoding(bandToConvert.getGeoCoding());
+	}
+
 	@Override
 	public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
@@ -143,8 +163,6 @@ public class QuantizationOp extends Operator {
 	public void setIntervalsMap(Map<Integer, Range> intervalsMap) {
 		this.intervalsMap = intervalsMap;
 	}
-
-
 
 	public static class Spi extends OperatorSpi {
 
