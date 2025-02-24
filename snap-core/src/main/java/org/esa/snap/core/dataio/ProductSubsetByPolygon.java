@@ -153,6 +153,18 @@ public class ProductSubsetByPolygon {
     }
 
     /**
+     * Provides the loaded polygon (in geographic coordinates)
+     *
+     * @return the loaded polygon (in geographic coordinates)
+     */
+    public Polygon getSubsetGeoPolygon() {
+        if (polygonGeocoding != null) {
+            return convertPixelPolygonToGeoPolygon(subsetPolygon, polygonGeocoding);
+        }
+        return subsetPolygon;
+    }
+
+    /**
      * Provides the loaded polygon (in pixel coordinates) projected to the specified geocoding
      *
      * @param geoCoding the target geocoding to which the coordinates of the polygon will be projected
@@ -399,6 +411,20 @@ public class ProductSubsetByPolygon {
         final Coordinate[] productPolygonCoordinates = new Coordinate[]{new Coordinate(0, 0), new Coordinate(0, productDimension.getHeight() - 1), new Coordinate(productDimension.getWidth() - 1, productDimension.getHeight() - 1), new Coordinate(productDimension.getWidth() - 1, 0), new Coordinate(0, 0),};
         final GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPolygon(geometryFactory.createLinearRing(productPolygonCoordinates), new LinearRing[0]);
+    }
+
+    private static Polygon convertPixelPolygonToGeoPolygon(Polygon pixelPolygon, GeoCoding geoCoding){
+        final List<Coordinate> geoCoordinates = new ArrayList<>();
+        for (Coordinate pixelCoordinate : pixelPolygon.getCoordinates()) {
+            final PixelPos pixelPos = new PixelPos(pixelCoordinate.getX(), pixelCoordinate.getY());
+            if (!pixelPos.isValid()) {
+                throw new IllegalArgumentException("Coordinate: " + pixelPos.getX() + "," + pixelPos.getY() + " is not a valid Pixel coordinate (X,Y).");
+            }
+            final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
+            geoCoordinates.add(new Coordinate(geoPos.getLon(), geoPos.getLat()));
+        }
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPolygon(geometryFactory.createLinearRing(geoCoordinates.toArray(new Coordinate[0])), new LinearRing[0]);
     }
 
     private static class SupportedVectorFilesFormat {
