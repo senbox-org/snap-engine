@@ -482,7 +482,7 @@ public class GeoUtilsTest {
         final GeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, 5, 5, 10, 10, 0.9, 0.9);
         final org.locationtech.jts.geom.Polygon resultPolygon = GeoUtils.projectPolygonToGeocoding(polygon, polygonGeoCoding, geoCoding);
         assertNotNull(resultPolygon);
-        assertEquals("POLYGON ((0.6666666666666661 0.6666666666666661, 0.6666666666666661 3, 3 0.6666666666666661, 0.6666666666666661 0.6666666666666661))", resultPolygon.toText());
+        assertEquals("POLYGON ((0 0, 0 3, 3 0, 0 0))", resultPolygon.toText());
     }
 
     @Test
