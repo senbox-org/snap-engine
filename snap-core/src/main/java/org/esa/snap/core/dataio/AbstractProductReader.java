@@ -206,11 +206,11 @@ public abstract class AbstractProductReader implements ProductReader {
             final ProductSubsetDef polygonSubset = new ProductSubsetDef();
             final PixelSubsetRegion currentRegion = (PixelSubsetRegion) this.subsetDef.getSubsetRegion();
             if (product.getSceneRasterSize().equals(currentRegion.getPixelRegion().getSize())) {
-                final double xOff = currentRegion.getPixelRegion().getX();
-                final double yOff = currentRegion.getPixelRegion().getY();
+                final int xOff = currentRegion.getPixelRegion().x;
+                final int yOff = currentRegion.getPixelRegion().y;
                 for (Coordinate coordinate : this.subsetDef.getSubsetPolygon().getCoordinates()) {
-                    final double x = coordinate.getX() - xOff;
-                    final double y = coordinate.getY() - yOff;
+                    final int x = (int) (coordinate.x - xOff);
+                    final int y = (int) (coordinate.y - yOff);
                     if (x >= 0 && y >= 0) {
                         coordinate.setX(x);
                         coordinate.setY(y);

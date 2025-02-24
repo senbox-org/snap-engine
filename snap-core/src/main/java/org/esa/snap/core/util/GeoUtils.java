@@ -833,6 +833,9 @@ public class GeoUtils {
             }
             final DirectPosition2D pos = new DirectPosition2D(coordinate.getX(), coordinate.getY());
             modelToImage.transform(pos, pos);
+            if (!toMap) {
+                return new Coordinate(Math.max(0, (int) pos.getX()), Math.max(0, (int) pos.getY())); // convert to int and avoid negative values, for pixel coordinates
+            }
             return new Coordinate(pos.getX(), pos.getY());
         } catch (Exception e) {
             throw new IllegalStateException(e);

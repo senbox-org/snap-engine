@@ -365,7 +365,7 @@ public class ProductSubsetByPolygon {
                 throw new IllegalArgumentException("Coordinate: " + geoPos.getLonString() + "," + geoPos.getLatString() + " is not a valid Geo coordinate (Lat,Lon).");
             }
             final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
-            pixelCoordinates.add(new Coordinate(pixelPos.getX(), pixelPos.getY()));
+            pixelCoordinates.add(new Coordinate((int) pixelPos.getX(), (int) pixelPos.getY()));
         }
         if (!geoCoordinates[0].equals(geoCoordinates[geoCoordinates.length - 1])) {
             pixelCoordinates.add(pixelCoordinates.get(0));
