@@ -31,7 +31,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = true;
         boolean antimeridian = false;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = null;
 
@@ -66,7 +66,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = true;
         boolean antimeridian = false;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.addNodeName("dummy");
@@ -102,7 +102,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = true;
         boolean antimeridian = false;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         final int subSampling = 3;
@@ -140,7 +140,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = true;
         boolean antimeridian = true;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.addNodeName("dummy");
@@ -176,7 +176,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = false; // = SPLINE instead
         boolean antimeridian = false;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.addNodeName("dummy");
@@ -212,7 +212,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = false; // = SPLINE instead
         boolean antimeridian = false;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         final int subSampling = 4;
@@ -250,7 +250,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         //preparation
         final boolean bilinear = false; // = SPLINE instead
         boolean antimeridian = true;
-        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian);
+        final ComponentGeoCoding geoCoding = initializeWithTiePoints(srcProduct, bilinear, antimeridian, 0.5, 0.5, 5, 5);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.addNodeName("dummy");

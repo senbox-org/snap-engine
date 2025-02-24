@@ -15,15 +15,8 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.DataNode;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.SampleCoding;
+import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ForLoop;
 import org.esa.snap.core.util.StringUtils;
@@ -37,14 +30,7 @@ import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
-import ucar.units.ConversionException;
-import ucar.units.PrefixDBException;
-import ucar.units.SpecificationException;
-import ucar.units.Unit;
-import ucar.units.UnitDBException;
-import ucar.units.UnitFormat;
-import ucar.units.UnitFormatManager;
-import ucar.units.UnitSystemException;
+import ucar.units.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,7 +45,7 @@ public class CfBandPart extends ProfilePartIO {
     private static final DataTypeWorkarounds dataTypeWorkarounds = new DataTypeWorkarounds();
 
     private static final String NANO_METER = "nm";
-    private static UnitFormat unitFormatManager = UnitFormatManager.instance();
+    private static final UnitFormat unitFormatManager = UnitFormatManager.instance();
 
     public static void readCfBandAttributes(Variable variable, RasterDataNode rasterDataNode) {
         rasterDataNode.setDescription(variable.getDescription());
@@ -73,8 +59,7 @@ public class CfBandPart extends ProfilePartIO {
             rasterDataNode.setNoDataValue(noDataValue.doubleValue());
             rasterDataNode.setNoDataValueUsed(true);
         }
-        if (rasterDataNode instanceof Band) {
-            final Band band = (Band) rasterDataNode;
+        if (rasterDataNode instanceof Band band) {
             band.setSpectralWavelength(getSpectralWavelength(variable));
         }
     }
@@ -112,8 +97,7 @@ public class CfBandPart extends ProfilePartIO {
             variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue, variable.getDataType().isUnsigned());
         }
         variable.addAttribute("coordinates", "lat lon");
-        if (rasterDataNode instanceof Band) {
-            final Band band = (Band) rasterDataNode;
+        if (rasterDataNode instanceof Band band) {
             final float spectralWavelength = band.getSpectralWavelength();
             if (spectralWavelength > 0) {
                 variable.addAttribute(Constants.RADIATION_WAVELENGTH, spectralWavelength);
@@ -126,7 +110,7 @@ public class CfBandPart extends ProfilePartIO {
         final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
         final String dimensions = ncFile.getDimensions();
         for (RasterDataNode rasterDataNode : rasterDataNodes) {
-            String variableName = ReaderUtils.getVariableName(rasterDataNode);
+            String variableName = getVariableName(rasterDataNode);
 
             int dataType;
             if (rasterDataNode.isLog10Scaled()) {
@@ -141,53 +125,16 @@ public class CfBandPart extends ProfilePartIO {
         }
     }
 
-    @Override
-    public void decode(final ProfileReadContext ctx, final Product p) throws IOException {
-        for (final Variable variable : ctx.getRasterDigest().getRasterVariables()) {
-            UnsignedChecker.setUnsignedType(variable);
-            final List<Dimension> dimensions = variable.getDimensions();
-            final int rank = dimensions.size();
-            final String bandBasename = variable.getShortName();
-
-            if (rank == 2) {
-                addBand(ctx, p, variable, new int[]{}, bandBasename);
-            } else {
-                final int[] sizeArray = new int[rank - 2];
-                final int startIndexToCopy = DimKey.findStartIndexOfBandVariables(dimensions);
-                System.arraycopy(variable.getShape(), startIndexToCopy, sizeArray, 0, sizeArray.length);
-                ForLoop.execute(sizeArray, (indexes, sizes) -> {
-                    final StringBuilder bandNameBuilder = new StringBuilder(bandBasename);
-                    for (int i = 0; i < sizes.length; i++) {
-                        final Dimension zDim = dimensions.get(i + startIndexToCopy);
-                        String zName = zDim.getShortName();
-                        final String skipPrefix = "n_";
-                        if (zName != null
-                                && zName.toLowerCase().startsWith(skipPrefix)
-                                && zName.length() > skipPrefix.length()) {
-                            zName = zName.substring(skipPrefix.length());
-                        }
-                        if (zDim.getLength() > 1) {
-                            if (zName != null) {
-                                bandNameBuilder.append(String.format("_%s%d", zName, (indexes[i] + 1)));
-                            } else {
-                                bandNameBuilder.append(String.format("_%d", (indexes[i] + 1)));
-                            }
-                        }
-
-                    }
-                    addBand(ctx, p, variable, indexes, bandNameBuilder.toString());
-                });
-            }
-        }
-        p.setAutoGrouping(getAutoGrouping(ctx));
+    static boolean isLatitudeVarName(String variableName) {
+        return variableName.equalsIgnoreCase(Constants.LAT_INTERN_VAR_NAME) ||
+                variableName.equalsIgnoreCase(Constants.LAT_VAR_NAME) ||
+                variableName.equalsIgnoreCase(Constants.LATITUDE_VAR_NAME);
     }
 
-    @Override
-    public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
-        // In order to inform the writer that it shall write the geophysical values of log scaled bands
-        // we set this property here.
-        ctx.setProperty(Constants.CONVERT_LOGSCALED_BANDS_PROPERTY, true);
-        defineRasterDataNodes(ctx, p.getBands());
+    static boolean isLongitudeVarName(String variableName) {
+        return variableName.equalsIgnoreCase(Constants.LON_INTERN_VAR_NAME) ||
+                variableName.equalsIgnoreCase(Constants.LON_VAR_NAME) ||
+                variableName.equalsIgnoreCase(Constants.LONGITUDE_VAR_NAME);
     }
 
     private static void addBand(ProfileReadContext ctx, Product p, Variable variable, int[] origin,
@@ -222,11 +169,6 @@ public class CfBandPart extends ProfilePartIO {
         }
     }
 
-
-
-
-
-
     static float getSpectralWavelength(Variable variable) {
         Attribute attribute = variable.findAttribute(Constants.RADIATION_WAVELENGTH);
         if (attribute == null) {
@@ -253,7 +195,8 @@ public class CfBandPart extends ProfilePartIO {
             if (sourceUnit.isCompatible(nanoMeter)) {
                 return sourceUnit.convertTo(value, nanoMeter);
             }
-        } catch (SpecificationException | UnitDBException | PrefixDBException | UnitSystemException | ConversionException e) {
+        } catch (SpecificationException | UnitDBException | PrefixDBException | UnitSystemException |
+                 ConversionException e) {
             final Logger global = Logger.getGlobal();
             global.log(Level.WARNING, e.getMessage(), e);
         }
@@ -270,8 +213,6 @@ public class CfBandPart extends ProfilePartIO {
         }
         return null;
     }
-
-
 
     private static int getRasterDataType(Variable variable, DataTypeWorkarounds workarounds) {
         if (workarounds != null && workarounds.hasWorkaround(variable.getFullName(), variable.getDataType())) {
@@ -334,14 +275,14 @@ public class CfBandPart extends ProfilePartIO {
                 case BYTE:
                 case UBYTE:
                     sampleCoding.addSample(sampleName,
-                                           DataType.unsignedByteToShort(
-                                                   sampleValues.getNumericValue(i).byteValue()), null);
+                            DataType.unsignedByteToShort(
+                                    sampleValues.getNumericValue(i).byteValue()), null);
                     break;
                 case SHORT:
                 case USHORT:
                     sampleCoding.addSample(sampleName,
-                                           DataType.unsignedShortToInt(
-                                                   sampleValues.getNumericValue(i).shortValue()), null);
+                            DataType.unsignedShortToInt(
+                                    sampleValues.getNumericValue(i).shortValue()), null);
                     break;
                 case INT:
                 case UINT:
@@ -445,6 +386,80 @@ public class CfBandPart extends ProfilePartIO {
             return strings;
         }
         return sampleMeanings.getStringValue().split(" ");
+    }
+
+    @Override
+    public void preDecode(ProfileReadContext ctx, Product p) throws IOException {
+        final Variable[] rasterVariables = ctx.getRasterDigest().getRasterVariables();
+        Variable longitude = null;
+        Variable latitude = null;
+
+        for (Variable variable : rasterVariables) {
+            final String variableName = variable.getShortName();
+            if (isLongitudeVarName(variableName)) {
+                longitude = variable;
+                continue;
+            }
+            if (isLatitudeVarName(variableName)) {
+                latitude = variable;
+            }
+        }
+
+        if (latitude != null && longitude != null) {
+            addBand(ctx, p, longitude, new int[0], longitude.getShortName());
+            addBand(ctx, p, latitude, new int[0], latitude.getShortName());
+        }
+    }
+
+    @Override
+    public void decode(final ProfileReadContext ctx, final Product p) throws IOException {
+        for (final Variable variable : ctx.getRasterDigest().getRasterVariables()) {
+            String variableName = variable.getShortName();
+
+            UnsignedChecker.setUnsignedType(variable);
+            final List<Dimension> dimensions = variable.getDimensions();
+            final int rank = dimensions.size();
+            final String bandBasename = variableName;
+
+            if (rank == 2) {
+                addBand(ctx, p, variable, new int[]{}, bandBasename);
+            } else {
+                final int[] sizeArray = new int[rank - 2];
+                final int startIndexToCopy = DimKey.findStartIndexOfBandVariables(dimensions);
+                System.arraycopy(variable.getShape(), startIndexToCopy, sizeArray, 0, sizeArray.length);
+                ForLoop.execute(sizeArray, (indexes, sizes) -> {
+                    final StringBuilder bandNameBuilder = new StringBuilder(bandBasename);
+                    for (int i = 0; i < sizes.length; i++) {
+                        final Dimension zDim = dimensions.get(i + startIndexToCopy);
+                        String zName = zDim.getShortName();
+                        final String skipPrefix = "n_";
+                        if (zName != null
+                                && zName.toLowerCase().startsWith(skipPrefix)
+                                && zName.length() > skipPrefix.length()) {
+                            zName = zName.substring(skipPrefix.length());
+                        }
+                        if (zDim.getLength() > 1) {
+                            if (zName != null) {
+                                bandNameBuilder.append(String.format("_%s%d", zName, (indexes[i] + 1)));
+                            } else {
+                                bandNameBuilder.append(String.format("_%d", (indexes[i] + 1)));
+                            }
+                        }
+
+                    }
+                    addBand(ctx, p, variable, indexes, bandNameBuilder.toString());
+                });
+            }
+        }
+        p.setAutoGrouping(getAutoGrouping(ctx));
+    }
+
+    @Override
+    public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
+        // In order to inform the writer that it shall write the geophysical values of log scaled bands
+        // we set this property here.
+        ctx.setProperty(Constants.CONVERT_LOGSCALED_BANDS_PROPERTY, true);
+        defineRasterDataNodes(ctx, p.getBands());
     }
 
     private String getAutoGrouping(ProfileReadContext ctx) {

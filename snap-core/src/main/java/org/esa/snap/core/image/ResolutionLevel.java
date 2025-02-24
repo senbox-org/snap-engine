@@ -17,7 +17,7 @@
 package org.esa.snap.core.image;
 
 import com.bc.ceres.core.Assert;
-import com.bc.ceres.glevel.MultiLevelModel;
+import com.bc.ceres.multilevel.MultiLevelModel;
 
 /**
  * Represent a level in a multi-resolution image pyramid.

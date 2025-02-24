@@ -18,6 +18,8 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.multilevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.zarr.ZarrArray;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -40,7 +42,7 @@ import java.io.IOException;
  * @author Sabine Embacher
  * @see RasterDataNode#getSourceImage()
  * @see RasterDataNode#getGeophysicalImage()
- * @see RasterDataNode#setSourceImage(com.bc.ceres.glevel.MultiLevelImage)
+ * @see RasterDataNode#setSourceImage(MultiLevelImage)
  */
 public class ZarrOpImage extends SingleBandedOpImage {
 
@@ -53,7 +55,7 @@ public class ZarrOpImage extends SingleBandedOpImage {
      * @param rasterDataNode The target raster data node.
      * @param level          The resolution level.
      *
-     * @see ResolutionLevel#create(com.bc.ceres.glevel.MultiLevelModel, int)
+     * @see ResolutionLevel#create(MultiLevelModel, int)
      */
     public ZarrOpImage(RasterDataNode rasterDataNode, int[] shape, int[] chunks, ZarrArray reader, ResolutionLevel level) {
         super(ImageManager.getDataBufferType(rasterDataNode.getDataType()),

@@ -49,7 +49,7 @@ public class Debug {
     /**
      * If false, debugging will be disabled.
      */
-    private static boolean _enabled = false;
+    private static boolean _enabled = Boolean.getBoolean("snap.debug");
 
     /**
      * The current writer.
