@@ -205,18 +205,22 @@ public abstract class AbstractProductReader implements ProductReader {
         if (this.subsetDef != null && this.subsetDef.getSubsetPolygon() != null && !(input instanceof Product)) {
             final ProductSubsetDef polygonSubset = new ProductSubsetDef();
             final PixelSubsetRegion currentRegion = (PixelSubsetRegion) this.subsetDef.getSubsetRegion();
-            final double xOff = currentRegion.getPixelRegion().getX();
-            final double yOff = currentRegion.getPixelRegion().getY();
-            for (Coordinate coordinate : this.subsetDef.getSubsetPolygon().getCoordinates()) {
-                final double x = coordinate.getX() - xOff;
-                final double y = coordinate.getY() - yOff;
-                if (x >= 0 && y >= 0) {
-                    coordinate.setX(x);
-                    coordinate.setY(y);
+            if (product.getSceneRasterSize().equals(currentRegion.getPixelRegion().getSize())) {
+                final double xOff = currentRegion.getPixelRegion().getX();
+                final double yOff = currentRegion.getPixelRegion().getY();
+                for (Coordinate coordinate : this.subsetDef.getSubsetPolygon().getCoordinates()) {
+                    final double x = coordinate.getX() - xOff;
+                    final double y = coordinate.getY() - yOff;
+                    if (x >= 0 && y >= 0) {
+                        coordinate.setX(x);
+                        coordinate.setY(y);
+                    }
                 }
+                polygonSubset.setSubsetRegion(new PixelSubsetRegion(0, 0, currentRegion.getPixelRegion().width, currentRegion.getPixelRegion().height, 0));
+            } else {
+                polygonSubset.setSubsetRegion(this.subsetDef.getSubsetRegion());
             }
             polygonSubset.setSubsetPolygon(this.subsetDef.getSubsetPolygon());
-            polygonSubset.setSubsetRegion(new PixelSubsetRegion(0, 0, currentRegion.getPixelRegion().width, currentRegion.getPixelRegion().height, 0));
             polygonSubset.setNodeNames(this.subsetDef.getNodeNames());
             return product.createSubset(polygonSubset, product.getName(), product.getDescription());
         }
