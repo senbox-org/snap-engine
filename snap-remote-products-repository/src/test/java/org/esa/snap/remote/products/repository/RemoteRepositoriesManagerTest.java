@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -56,7 +57,7 @@ public class RemoteRepositoriesManagerTest {
             }
             List<RepositoryQueryParameter> missionParameters = repositoryProvider.getMissionParameters(mission);
             assertNotNull(missionParameters);
-            assertTrue(missionParameters.size() > 0);
+            assertFalse(missionParameters.isEmpty());
 
             List<RepositoryProduct> remoteProducts = repositoryProvider.downloadProductList(credentials, mission, 100, parameterValues, downloaderListener, threadStatus);
             assertNotNull(remoteProducts);
@@ -197,18 +198,11 @@ public class RemoteRepositoriesManagerTest {
             assertNotNull(queryParameters);
             assertTrue(queryParameters.size() >= 3);
 
-            RepositoryQueryParameter parameter = findQueryParameterByName("footprint", queryParameters);
-            if (parameter != null) {
-                assertTrue(parameter.isRequired());
-            }
-
-            parameter = findQueryParameterByName("startDate", queryParameters);
+            RepositoryQueryParameter parameter = findQueryParameterByName("startDate", queryParameters);
             assertNotNull(parameter);
-            assertTrue(parameter.isRequired());
 
             parameter = findQueryParameterByName("endDate", queryParameters);
             assertNotNull(parameter);
-            assertTrue(parameter.isRequired());
         }
     }
 

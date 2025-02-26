@@ -1,8 +1,13 @@
 package org.esa.snap.core.util;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
@@ -460,6 +465,59 @@ public class GeoUtilsTest {
         assertEquals(19.204973220825195, bounds.getY(), 1e-8);
         assertEquals(1.0644378662109375, bounds.getWidth(), 1e-8);
         assertEquals(0.2536754608154297, bounds.getHeight(), 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testProjectPolygonToGeocoding() throws Exception {
+        final Coordinate[] polygonCoordinates = new Coordinate[]{
+                new Coordinate(1, 1),
+                new Coordinate(1, 8),
+                new Coordinate(8, 1),
+                new Coordinate(1, 1),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(polygonCoordinates), new LinearRing[0]);
+        final GeoCoding polygonGeoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, 10, 10, 10, 10, 0.3, 0.3);
+        final GeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, 5, 5, 10, 10, 0.9, 0.9);
+        final org.locationtech.jts.geom.Polygon resultPolygon = GeoUtils.projectPolygonToGeocoding(polygon, polygonGeoCoding, geoCoding);
+        assertNotNull(resultPolygon);
+        assertEquals("POLYGON ((0 0, 0 3, 3 0, 0 0))", resultPolygon.toText());
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testProjectPolygonToImage() throws Exception {
+        final Coordinate[] polygonCoordinates = new Coordinate[]{
+                new Coordinate(10.15, 9.85),
+                new Coordinate(10.15, 7.75),
+                new Coordinate(12.25, 9.85),
+                new Coordinate(10.15, 9.85),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(polygonCoordinates), new LinearRing[0]);
+        final GeoCoding polygonGeoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, 10, 10, 10, 10, 0.3, 0.3);
+        final org.locationtech.jts.geom.Polygon resultPolygon = GeoUtils.projectPolygonToImage(polygon, polygonGeoCoding);
+        assertNotNull(resultPolygon);
+        assertEquals("POLYGON ((1 1, 1 8, 8 1, 1 1))", resultPolygon.toText());
+    }
+
+    @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testComputePolygonExtent(){
+        final Coordinate[] polygonCoordinates = new Coordinate[]{
+                new Coordinate(2, 2),
+                new Coordinate(2, 8),
+                new Coordinate(6, 2),
+                new Coordinate(2, 2),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(polygonCoordinates), new LinearRing[0]);
+        final Rectangle rectangle = GeoUtils.computePolygonExtent(polygon);
+        assertEquals(2, rectangle.x);
+        assertEquals(2, rectangle.y);
+        assertEquals(4, rectangle.width);
+        assertEquals(6, rectangle.height);
     }
 
     private static Product createSLSTR() {

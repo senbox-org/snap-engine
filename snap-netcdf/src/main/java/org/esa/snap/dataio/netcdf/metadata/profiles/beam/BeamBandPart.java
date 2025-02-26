@@ -55,7 +55,6 @@ import java.util.List;
 
 import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
-import static org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamGeocodingPart.TIEPOINT_COORDINATES;
 
 public class BeamBandPart extends ProfilePartIO {
 
@@ -70,12 +69,85 @@ public class BeamBandPart extends ProfilePartIO {
     private static final int LON_INDEX = 0;
     private static final int LAT_INDEX = 1;
 
+    private static void readBeamBandAttributes(Variable variable, Band band) {
+        // todo se -- units for bandwidth and wavelength
+
+        Attribute attribute = variable.findAttribute(BANDWIDTH);
+        if (attribute != null) {
+            band.setSpectralBandwidth(attribute.getNumericValue().floatValue());
+        }
+        attribute = variable.findAttribute(WAVELENGTH);
+        if (attribute != null) {
+            band.setSpectralWavelength(attribute.getNumericValue().floatValue());
+        }
+        attribute = variable.findAttribute(SPECTRAL_BAND_INDEX);
+        if (attribute != null) {
+            band.setSpectralBandIndex(attribute.getNumericValue().intValue());
+        }
+        attribute = variable.findAttribute(VALID_PIXEL_EXPRESSION);
+        if (attribute != null) {
+            band.setValidPixelExpression(attribute.getStringValue());
+        }
+        attribute = variable.findAttribute(SOLAR_FLUX);
+        if (attribute != null) {
+            band.setSolarFlux(attribute.getNumericValue().floatValue());
+        }
+
+        band.setName(ReaderUtils.getRasterName(variable));
+    }
+
+    private static void applySolarFluxFromMetadata(Band band, int spectralIndex) {
+        MetadataElement metadataRoot = band.getProduct().getMetadataRoot();
+        band.setSolarFlux(getSolarFluxFromMetadata(metadataRoot, spectralIndex));
+    }
+
+    private static float getSolarFluxFromMetadata(MetadataElement metadataRoot, int bandIndex) {
+        if (metadataRoot != null) {
+            MetadataElement scalingFactorGads = metadataRoot.getElement("Scaling_Factor_GADS");
+            if (scalingFactorGads != null) {
+                MetadataAttribute sunSpecFlux = scalingFactorGads.getAttribute("sun_spec_flux");
+                ProductData data = sunSpecFlux.getData();
+                if (data.getNumElems() > bandIndex) {
+                    return data.getElemFloatAt(bandIndex);
+                }
+            }
+        }
+        return 0.0f;
+    }
+
+    public static void writeBeamBandAttributes(Band band, NVariable variable) throws IOException {
+        // todo se -- units for bandwidth and wavelength
+
+        final float spectralBandwidth = band.getSpectralBandwidth();
+        if (spectralBandwidth > 0) {
+            variable.addAttribute(BANDWIDTH, spectralBandwidth);
+        }
+        final float spectralWavelength = band.getSpectralWavelength();
+        if (spectralWavelength > 0) {
+            variable.addAttribute(WAVELENGTH, spectralWavelength);
+        }
+        final String validPixelExpression = band.getValidPixelExpression();
+        if (validPixelExpression != null && validPixelExpression.trim().length() > 0) {
+            variable.addAttribute(VALID_PIXEL_EXPRESSION, validPixelExpression);
+        }
+        final float solarFlux = band.getSolarFlux();
+        if (solarFlux > 0) {
+            variable.addAttribute(SOLAR_FLUX, solarFlux);
+        }
+        final float spectralBandIndex = band.getSpectralBandIndex();
+        if (spectralBandIndex >= 0) {
+            variable.addAttribute(SPECTRAL_BAND_INDEX, spectralBandIndex);
+        }
+        if (!band.getName().equals(variable.getName())) {
+            variable.addAttribute(Constants.ORIG_NAME_ATT_NAME, band.getName());
+        }
+    }
 
     @Override
     public void preDecode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final Attribute geoCodingAtt = netcdfFile.findGlobalAttribute(GEOCODING);
-        if(geoCodingAtt != null) {
+        if (geoCodingAtt != null) {
             final String xml = geoCodingAtt.getStringValue();
             if (xml.contains(TAG_COMPONENT_GEO_CODING)) {
                 try {
@@ -139,15 +211,18 @@ public class BeamBandPart extends ProfilePartIO {
         final int width = dimensions.get(xDimIndex).getLength();
         final int height = dimensions.get(yDimIndex).getLength();
         Band band;
-        if (height == p.getSceneRasterHeight()
-                && width == p.getSceneRasterWidth()) {
-            band = p.addBand(variable.getFullName(), rasterDataType);
+        String variableFullName = variable.getFullName();
+        if (height == p.getSceneRasterHeight() && width == p.getSceneRasterWidth()) {
+            if (p.containsBand(variableFullName)) {
+                return;
+            }
+            band = p.addBand(variableFullName, rasterDataType);
         } else {
             if (dimensions.get(xDimIndex).getFullName().startsWith("tp_") ||
                     dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
                 return;
             }
-            band = new Band(variable.getFullName(), rasterDataType, width, height);
+            band = new Band(variableFullName, rasterDataType, width, height);
             setGeoCoding(ctx, p, variable, band);
             p.addBand(band);
         }
@@ -249,7 +324,7 @@ public class BeamBandPart extends ProfilePartIO {
             final int bandSceneRasterWidth = band.getRasterWidth();
             final int bandSceneRasterHeight = band.getRasterHeight();
             if (bandSceneRasterWidth != p.getSceneRasterWidth() || bandSceneRasterHeight != p.getSceneRasterHeight()) {
-                final String key = "" + bandSceneRasterWidth + " " + bandSceneRasterHeight;
+                final String key = bandSceneRasterWidth + " " + bandSceneRasterHeight;
                 String dimString = dimMap.get(key);
                 if (dimString == null) {
                     final int size = dimMap.size();
@@ -290,8 +365,7 @@ public class BeamBandPart extends ProfilePartIO {
                 final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
                 final String value = StringUtils.toXMLString(xmlFromObject);
                 variable.addAttribute(GEOCODING, value);
-            } else if (geoCoding instanceof TiePointGeoCoding) {
-                final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
+            } else if (geoCoding instanceof TiePointGeoCoding tpGC) {
                 final String[] names = new String[2];
                 names[LON_INDEX] = tpGC.getLonGrid().getName();
                 names[LAT_INDEX] = tpGC.getLatGrid().getName();
@@ -317,44 +391,15 @@ public class BeamBandPart extends ProfilePartIO {
 
     private boolean isPixelGeoCodingBand(Band band) {
         final GeoCoding geoCoding = band.getGeoCoding();
-        if (geoCoding instanceof BasicPixelGeoCoding) {
-            BasicPixelGeoCoding pixelGeoCoding = (BasicPixelGeoCoding) geoCoding;
+        if (geoCoding instanceof BasicPixelGeoCoding pixelGeoCoding) {
             return pixelGeoCoding.getLatBand() == band || pixelGeoCoding.getLonBand() == band;
         }
         return false;
 
     }
 
-    private static void readBeamBandAttributes(Variable variable, Band band) {
-        // todo se -- units for bandwidth and wavelength
-
-        Attribute attribute = variable.findAttribute(BANDWIDTH);
-        if (attribute != null) {
-            band.setSpectralBandwidth(attribute.getNumericValue().floatValue());
-        }
-        attribute = variable.findAttribute(WAVELENGTH);
-        if (attribute != null) {
-            band.setSpectralWavelength(attribute.getNumericValue().floatValue());
-        }
-        attribute = variable.findAttribute(SPECTRAL_BAND_INDEX);
-        if (attribute != null) {
-            band.setSpectralBandIndex(attribute.getNumericValue().intValue());
-        }
-        attribute = variable.findAttribute(VALID_PIXEL_EXPRESSION);
-        if (attribute != null) {
-            band.setValidPixelExpression(attribute.getStringValue());
-        }
-        attribute = variable.findAttribute(SOLAR_FLUX);
-        if (attribute != null) {
-            band.setSolarFlux(attribute.getNumericValue().floatValue());
-        }
-
-        band.setName(ReaderUtils.getRasterName(variable));
-    }
-
-
     private void maybeApplySpectralIndexAndSolarFluxFromMetadata(Product p) {
-        List<Band> bands = Arrays.asList(p.getBands());
+        Band[] bands = p.getBands();
         int spectralIndex = 0;
         for (Band band : bands) {
             boolean isSpectralBand = band.getSpectralWavelength() != 0.0f;
@@ -367,53 +412,6 @@ public class BeamBandPart extends ProfilePartIO {
                 }
                 spectralIndex++;
             }
-        }
-    }
-
-    private static void applySolarFluxFromMetadata(Band band, int spectralIndex) {
-        MetadataElement metadataRoot = band.getProduct().getMetadataRoot();
-        band.setSolarFlux(getSolarFluxFromMetadata(metadataRoot, spectralIndex));
-    }
-
-    private static float getSolarFluxFromMetadata(MetadataElement metadataRoot, int bandIndex) {
-        if (metadataRoot != null) {
-            MetadataElement scalingFactorGads = metadataRoot.getElement("Scaling_Factor_GADS");
-            if (scalingFactorGads != null) {
-                MetadataAttribute sunSpecFlux = scalingFactorGads.getAttribute("sun_spec_flux");
-                ProductData data = sunSpecFlux.getData();
-                if (data.getNumElems() > bandIndex) {
-                    return data.getElemFloatAt(bandIndex);
-                }
-            }
-        }
-        return 0.0f;
-    }
-
-    public static void writeBeamBandAttributes(Band band, NVariable variable) throws IOException {
-        // todo se -- units for bandwidth and wavelength
-
-        final float spectralBandwidth = band.getSpectralBandwidth();
-        if (spectralBandwidth > 0) {
-            variable.addAttribute(BANDWIDTH, spectralBandwidth);
-        }
-        final float spectralWavelength = band.getSpectralWavelength();
-        if (spectralWavelength > 0) {
-            variable.addAttribute(WAVELENGTH, spectralWavelength);
-        }
-        final String validPixelExpression = band.getValidPixelExpression();
-        if (validPixelExpression != null && validPixelExpression.trim().length() > 0) {
-            variable.addAttribute(VALID_PIXEL_EXPRESSION, validPixelExpression);
-        }
-        final float solarFlux = band.getSolarFlux();
-        if (solarFlux > 0) {
-            variable.addAttribute(SOLAR_FLUX, solarFlux);
-        }
-        final float spectralBandIndex = band.getSpectralBandIndex();
-        if (spectralBandIndex >= 0) {
-            variable.addAttribute(SPECTRAL_BAND_INDEX, spectralBandIndex);
-        }
-        if (!band.getName().equals(variable.getName())) {
-            variable.addAttribute(Constants.ORIG_NAME_ATT_NAME, band.getName());
         }
     }
 }
