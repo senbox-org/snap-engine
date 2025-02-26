@@ -19,6 +19,7 @@ package org.esa.snap.core.gpf.common;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
+import org.esa.snap.core.dataio.ProductSubsetByPolygon;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -38,13 +39,17 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,11 +114,21 @@ public class SubsetOp extends Operator {
     @Parameter(defaultValue = "false",
             description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
+    @Parameter(description = "The file from which the polygon is read.")
+    private File vectorFile;
+
+    @Parameter(converter = JtsGeometryConverter.class,
+            description = "The subset region in pixel coordinates using WKT-format,\n" +
+                    "e.g. POLYGON(({x} {y}, {x1} {y1}, ..., {x} {y}))\n" +
+                    "If not given, the geometryRegion or pixelRegion is used.")
+    private Polygon polygonRegion;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
     private boolean copyMetadata;
 
     private transient ProductReader subsetReader;
+
+    private final ProductSubsetByPolygon productSubsetByPolygon = new ProductSubsetByPolygon();
 
     public SubsetOp() {
         this.subSamplingX = 1;
@@ -193,6 +208,34 @@ public class SubsetOp extends Operator {
             subsetDef.addNodeNames(referencedNodeNames.toArray(new String[0]));
         }
 
+        try {
+            if (this.vectorFile != null || this.polygonRegion != null || (this.geoRegion != null && !this.geoRegion.isRectangle())) {
+                final MetadataInspector.Metadata productMetadata = new MetadataInspector.Metadata(sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                productMetadata.setGeoCoding(sourceProduct.getSceneGeoCoding());
+                if (this.polygonRegion != null) {
+                    this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), true, productMetadata, ProgressMonitor.NULL);
+                } else if (this.vectorFile != null) {
+                    this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
+                } else {
+                    this.productSubsetByPolygon.loadPolygonFromWKTString(this.geoRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
+                }
+                if (referenceBand != null) {
+                    final GeoCoding referenceBandGeocoding = sourceProduct.getBand(referenceBand).getGeoCoding();
+                    this.polygonRegion = this.productSubsetByPolygon.getSubsetPolygonProjectedToGeocoding(referenceBandGeocoding);
+                    this.region = this.productSubsetByPolygon.getExtentOfPolygonProjectedToGeocoding(referenceBandGeocoding);
+                } else {
+                    this.polygonRegion = this.productSubsetByPolygon.getSubsetPolygon();
+                    this.region = this.productSubsetByPolygon.getExtentOfPolygon();
+                }
+                this.geoRegion = null;
+                this.subSamplingX = 1;
+                this.subSamplingY = 1;
+                subsetDef.setSubsetPolygon(this.polygonRegion);
+            }
+        } catch (Throwable t) {
+            throw new OperatorException(t);
+        }
+
         if (geoRegion != null) {
             // the geometry region is specified
             if (isMultisize) {
@@ -211,7 +254,7 @@ public class SubsetOp extends Operator {
                 return;
             }
         }
-        if (fullSwath && region != null) {
+        if (fullSwath && region != null && sourceProduct != null) {
             region = new Rectangle(0, region.y, sourceProduct.getSceneRasterWidth(), region.height);
         }
 
@@ -227,18 +270,19 @@ public class SubsetOp extends Operator {
                 subsetDef.setSubsetRegion(new PixelSubsetRegion(region, 0));
             } else {
                 // the source product is multisize and the reference band is specified
-                subsetDef.setRegionMap(computeRegionMap(region, referenceBand, sourceProduct, subsetDef.getNodeNames()));
+                subsetDef.setRegionMap(computeRegionMap(region, polygonRegion, referenceBand, sourceProduct, subsetDef.getNodeNames()));
             }
         }
 
         if (region == null && geoRegion == null && subsetDef.getNodeNames() != null) {
-            HashMap<String, Rectangle> regionMap = new HashMap<>();
+            HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
             for (String nodeName : subsetDef.getNodeNames()) {
                 RasterDataNode rdn = sourceProduct.getRasterDataNode(nodeName);
                 if (rdn == null || rdn.getRasterWidth() == 0 || rdn.getRasterHeight() == 0) {
                     continue;
                 }
-                regionMap.put(nodeName, new Rectangle(rdn.getRasterWidth(), rdn.getRasterHeight()));
+                final Rectangle rectangle = new Rectangle(rdn.getRasterWidth(), rdn.getRasterHeight());
+                regionMap.put(nodeName, new SubsetRegionInfo(rectangle,null));
             }
             if (regionMap.size() > 0) {
                 subsetDef.setRegionMap(regionMap);
@@ -313,7 +357,7 @@ public class SubsetOp extends Operator {
         return GeoUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false,false);
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -324,7 +368,7 @@ public class SubsetOp extends Operator {
 
         HashMap<String, Rectangle> regionMap = new HashMap<>();
         HashMap<String, Geometry> geometryMap = new HashMap<>();
-        HashMap<String, Rectangle> finalRegionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> finalRegionMap = new HashMap<>();
 
         GeoCoding productGeoCoding = product.getSceneGeoCoding();
         int productWidth = product.getSceneRasterWidth();
@@ -362,13 +406,17 @@ public class SubsetOp extends Operator {
                 continue;
             }
             Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true,false);
-            finalRegionMap.put(rasterDataNode.getName(), rect);
+            finalRegionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rect, null));
         }
 
         return finalRegionMap;
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
+        return computeRegionMap(region, null, referenceBandName, product, rasterNames);
+    }
+
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Rectangle region, Polygon regionPolygon, String referenceBandName, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -377,7 +425,7 @@ public class SubsetOp extends Operator {
             }
         }
 
-        HashMap<String, Rectangle> regionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
         RasterDataNode referenceNode = product.getBand(referenceBandName);
         if (referenceNode == null) {
             referenceNode = product.getBandAt(0);
@@ -399,7 +447,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
             if (rasterDataNode.getGeoCoding().equals(referenceNode.getGeoCoding())) {
-                regionMap.put(rasterDataNode.getName(), region);
+                regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(region, regionPolygon));
                 continue;
             }
             boolean usePixelCenter = true;
@@ -409,13 +457,14 @@ public class SubsetOp extends Operator {
                 usePixelCenter = false;
             }
             Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, usePixelCenter, multiSize);
-            regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
+            final Polygon rasterRegionPolygon = GeoUtils.projectPolygonToGeocoding(regionPolygon, referenceRasterGeoCoding, rasterDataNode.getGeoCoding());
+            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rasterPixelRegion, rasterRegionPolygon));
         }
 
         return regionMap;
     }
 
-    public static HashMap<String, Rectangle> computeRegionMap(Geometry geoRegion, Product product, String[] rasterNames) {
+    public static HashMap<String, SubsetRegionInfo> computeRegionMap(Geometry geoRegion, Product product, String[] rasterNames) {
         if (rasterNames == null || rasterNames.length == 0) {
             List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
             rasterNames = new String[rasterDataNodes.size()];
@@ -424,7 +473,7 @@ public class SubsetOp extends Operator {
             }
         }
 
-        HashMap<String, Rectangle> regionMap = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> regionMap = new HashMap<>();
 
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
@@ -433,7 +482,7 @@ public class SubsetOp extends Operator {
             }
 
             Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true, false);
-            regionMap.put(rasterDataNode.getName(), rect);
+            regionMap.put(rasterDataNode.getName(), new SubsetRegionInfo(rect, null));
         }
 
         return regionMap;

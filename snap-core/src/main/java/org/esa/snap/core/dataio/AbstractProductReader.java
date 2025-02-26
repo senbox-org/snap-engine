@@ -17,14 +17,20 @@ package org.esa.snap.core.dataio;
 
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.TreeNode;
 import org.esa.snap.runtime.Config;
+import org.locationtech.jts.geom.Coordinate;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -196,6 +202,28 @@ public abstract class AbstractProductReader implements ProductReader {
             logger.log(Level.FINE, message.toString());
         }
 
+        if (this.subsetDef != null && this.subsetDef.getSubsetPolygon() != null && !(input instanceof Product)) {
+            final ProductSubsetDef polygonSubset = new ProductSubsetDef();
+            final PixelSubsetRegion currentRegion = (PixelSubsetRegion) this.subsetDef.getSubsetRegion();
+            if (product.getSceneRasterSize().equals(currentRegion.getPixelRegion().getSize())) {
+                final int xOff = currentRegion.getPixelRegion().x;
+                final int yOff = currentRegion.getPixelRegion().y;
+                for (Coordinate coordinate : this.subsetDef.getSubsetPolygon().getCoordinates()) {
+                    final int x = (int) (coordinate.x - xOff);
+                    final int y = (int) (coordinate.y - yOff);
+                    if (x >= 0 && y >= 0) {
+                        coordinate.setX(x);
+                        coordinate.setY(y);
+                    }
+                }
+                polygonSubset.setSubsetRegion(new PixelSubsetRegion(0, 0, currentRegion.getPixelRegion().width, currentRegion.getPixelRegion().height, 0));
+            } else {
+                polygonSubset.setSubsetRegion(this.subsetDef.getSubsetRegion());
+            }
+            polygonSubset.setSubsetPolygon(this.subsetDef.getSubsetPolygon());
+            polygonSubset.setNodeNames(this.subsetDef.getNodeNames());
+            return product.createSubset(polygonSubset, product.getName(), product.getDescription());
+        }
         return product;
     }
 
@@ -265,11 +293,13 @@ public abstract class AbstractProductReader implements ProductReader {
             sourceStepX = getSubsetDef().getSubSamplingX();
             sourceStepY = getSubsetDef().getSubSamplingY();
             if (getSubsetDef().getRegionMap() != null && getSubsetDef().getRegionMap().containsKey(destBand.getName())) {
-                sourceOffsetX = getSubsetDef().getRegionMap().get(destBand.getName()).x;
-                sourceOffsetY = getSubsetDef().getRegionMap().get(destBand.getName()).y;
-            } else if (getSubsetDef().getRegion() != null) {
-                sourceOffsetX = getSubsetDef().getRegion().x;
-                sourceOffsetY = getSubsetDef().getRegion().y;
+                sourceOffsetX = getSubsetDef().getRegionMap().get(destBand.getName()).getSubsetExtent().x;
+                sourceOffsetY = getSubsetDef().getRegionMap().get(destBand.getName()).getSubsetExtent().y;
+            } else if (getSubsetDef().getSubsetRegion() != null) {
+                final Product bandProduct = destBand.getProduct();
+                final Rectangle subProductBounds = getSubsetDef().getSubsetRegion().computeBandPixelRegion(bandProduct.getSceneGeoCoding(), destBand.getGeoCoding(), bandProduct.getSceneRasterWidth(), bandProduct.getSceneRasterHeight(), destBand.getRasterWidth(), destBand.getRasterHeight(), true);
+                sourceOffsetX = subProductBounds.x;
+                sourceOffsetY = subProductBounds.y;
             }
         }
         sourceOffsetX += sourceStepX * destOffsetX;
