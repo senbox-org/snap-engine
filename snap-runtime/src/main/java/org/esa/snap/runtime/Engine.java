@@ -35,15 +35,16 @@ public class Engine {
     private final ClassLoader clientClassLoader;
 
     private Engine(boolean standAloneMode) {
-        getConfig().load();
+        final EngineConfig config = getConfig();
+
+        config.load();
         if (standAloneMode) {
             long t0 = System.currentTimeMillis();
-            InstallationScanner.ScanResult scanResult = new InstallationScanner(getConfig()).scanInstallationDir();
+            InstallationScanner.ScanResult scanResult = new InstallationScanner(config).scanInstallationDir();
             long t1 = System.currentTimeMillis();
-            if (getConfig().debug()) {
+            if (config.debug()) {
                 getLogger().info("Scanning of installation directory took " + (t1 - t0) + " ms");
             }
-            setJavaLibraryPath(scanResult.libraryPathEntries);
             clientClassLoader = createClientClassLoader(scanResult.classPathEntries);
         } else {
             clientClassLoader = Thread.currentThread().getContextClassLoader();
@@ -255,45 +256,6 @@ public class Engine {
         return classLoader;
     }
 
-    private void setJavaLibraryPath(List<Path> paths) {
-
-        String javaLibraryPath = System.getProperty("java.library.path");
-        String extraLibraryPath = paths.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator));
-        if (javaLibraryPath == null || javaLibraryPath.isEmpty()) {
-            setJavaLibraryPath(extraLibraryPath);
-        } else if (!extraLibraryPath.isEmpty()) {
-            setJavaLibraryPath(extraLibraryPath + File.pathSeparator + javaLibraryPath);
-        }
-
-        if (getConfig().debug()) {
-            traceLibraryPaths();
-        }
-    }
-
-    private void setJavaLibraryPath(String extraLibraryPath) {
-
-        if (!getConfig().setSystemProperty("java.library.path", extraLibraryPath)) {
-            return;
-        }
-
-        try {
-            //
-            // The following hack is based on an implementation detail of the Oracle ClassLoader implementation.
-            // It checks whether its static field "sys_path" is null, and if so it sets its static field "user_paths"
-            // to the parsed value of system property "java.library.path" and caches it. This behaviour prevents it
-            // from accepting any programmatical changes of system property "java.library.path".
-            //
-            java.lang.reflect.Method initializePathMethod = ClassLoader.class.getDeclaredMethod("initializePath", String.class);
-            initializePathMethod.setAccessible(true);
-            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, "java.library.path");
-            Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
-            usrPathsField.setAccessible(true);
-            usrPathsField.set(null, updatedUsrPaths);
-        } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | java.lang.reflect.InvocationTargetException e) {
-            getLogger().log(Level.SEVERE, "Failed to modify class loader field 'usr_paths'", e);
-        }
-    }
-
     private void traceClassLoader(String name, ClassLoader classLoader) {
         Logger logger = getLogger();
         logger.info(name + ".class = " + classLoader.getClass() + " =========================================================");
@@ -310,25 +272,9 @@ public class Engine {
         }
     }
 
-    private void traceLibraryPaths() {
-        Logger logger = getLogger();
-        String[] paths = System.getProperty("java.library.path", "").split(File.pathSeparator);
-        if (paths.length > 0) {
-            logger.info("JNI library paths:");
-            for (int i = 0; i < paths.length; i++) {
-                String path = paths[i];
-                logger.info("java.library.path[" + i + "] = " + path);
-            }
-        } else {
-            logger.info("JNI library paths: none");
-        }
-    }
-
     private void assertStarted() {
         if (instance == null) {
             throw new IllegalStateException("Please call " + Engine.class + ".start() first.");
         }
     }
-
-
 }
