@@ -35,7 +35,7 @@
             snap.version is the Maven module version.
             snap.nbmSpecVersion is the NetBeans module specification version.
             It is used to filter manifest.mf and set the manifest's "OpenIDE-Module-Specification-Version" header.
-            This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
+            This is necessary to make NetBeans modules updatable and independent of the Maven version (= snap.version).
         -->
         <snap.version>${project.version}</snap.version>
         <snap-help-system.version>1.0.0</snap-help-system.version>
@@ -219,16 +219,7 @@
                 <artifactId>snap-engine-utilities</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.esa.snap</groupId>
-                <artifactId>ceres-core</artifactId>
-                <version>${snap.version}</version>
-                <scope>test</scope>
-                <type>test-jar</type>
-            </dependency>
-
             <!-- SNAP Extension Modules -->
-
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-csv-dataio</artifactId>
