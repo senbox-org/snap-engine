@@ -28,7 +28,7 @@
     <packaging>nbm</packaging>
 
     <properties>
-        <snap.version>12.0.0-SNAPSHOT</snap.version>
+        <snap.version>12.0.0</snap.version>
         <hdf.version>2.7</hdf.version>
     </properties>
 
