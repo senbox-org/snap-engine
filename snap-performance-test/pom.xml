@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>12.0.0-SNAPSHOT</version>
+        <version>12.0.0</version>
     </parent>
 
     <artifactId>snap-performance-test</artifactId>
@@ -36,42 +36,42 @@
         <dependency>
             <groupId>eu.esa.microwavetbx</groupId>
             <artifactId>sar-io</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-s2msi-reader</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-sentinel3-reader</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-landsat-reader</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-enmap-reader</artifactId>
-            <version>12.0.0-SNAPSHOT</version>
+            <version>12.0.0</version>
             <scope>test</scope>
         </dependency>
 
