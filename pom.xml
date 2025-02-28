@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>12.0.0-SNAPSHOT</version>
+    <version>13.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -121,7 +121,6 @@
         <module>snap-test-utils</module>
         <module>snap-stac</module>
         <module>snap-engine-coverage</module>
-        <module>snap-performance-test</module>
     </modules>
 
     <profiles>
