@@ -1,5 +1,7 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import org.esa.snap.core.dataop.downloadable.DownloadStatusManager;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -59,6 +61,8 @@ public class CopernicusDownloader {
         }
         //System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
 
+        DownloadStatusManager.getInstance().setDownloading(true, target_filename);
+
         try (BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream())) {;
             final Path installDirPath = Paths.get(installDir);
             if (Files.notExists(installDirPath)) {
@@ -72,7 +76,10 @@ public class CopernicusDownloader {
                 }
             }
         } catch (Exception e) {
+            DownloadStatusManager.getInstance().setDownloading(false, "");
             throw new FileNotFoundException("Tile does not exist");
+        } finally {
+            DownloadStatusManager.getInstance().setDownloading(false, "");
         }
         return true;
     }
