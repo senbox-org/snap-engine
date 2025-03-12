@@ -61,7 +61,8 @@ public class CopernicusDownloader {
         }
         //System.out.println("Downloading " + download_path + " to fulfill search of area " + lat + ", " + lon + " at specified resolution " + resolution);
 
-        DownloadStatusManager.getInstance().setDownloading(true, target_filename);
+        DownloadStatusManager statusManager = DownloadStatusManager.getInstance();
+        statusManager.setDownloading(true, target_filename);
 
         try (BufferedInputStream is = new BufferedInputStream(new URL(download_path).openStream())) {;
             final Path installDirPath = Paths.get(installDir);
@@ -76,10 +77,10 @@ public class CopernicusDownloader {
                 }
             }
         } catch (Exception e) {
-            DownloadStatusManager.getInstance().setDownloading(false, "");
+            statusManager.setDownloading(false, "");
             throw new FileNotFoundException("Tile does not exist");
         } finally {
-            DownloadStatusManager.getInstance().setDownloading(false, "");
+            statusManager.setDownloading(false, "");
         }
         return true;
     }

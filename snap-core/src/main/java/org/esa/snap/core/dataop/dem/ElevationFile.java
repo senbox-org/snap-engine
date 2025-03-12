@@ -181,7 +181,8 @@ public abstract class ElevationFile {
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
 
-        DownloadStatusManager.getInstance().setDownloading(true, localZipFile.getName());
+        DownloadStatusManager statusManager = DownloadStatusManager.getInstance();
+        statusManager.setDownloading(true, localZipFile.getName());
 
         try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength)) {
             try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
@@ -215,7 +216,7 @@ public abstract class ElevationFile {
             }
         } finally {
             sslUtil.enableSSLCertificateCheck();
-            DownloadStatusManager.getInstance().setDownloading(false, "");
+            statusManager.setDownloading(false, "");
         }
         return outputFile;
     }
