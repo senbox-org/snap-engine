@@ -23,6 +23,7 @@ import java.nio.file.attribute.FileTime;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -345,7 +346,7 @@ public class LocalRepositoryFolderHelper {
 
             ThreadStatus.checkCancelled(threadStatus);
 
-            final StatusProgressMonitor qlPM = new StatusProgressMonitor(StatusProgressMonitor.TYPE.SUBTASK);
+            final ProgressMonitor qlPM = new QlStatusProgressMonitor(threadStatus);
             qlPM.beginTask("Creating quicklook " + product.getName() + "... ", 100);
 
             final ThreadRunnable worker = new ThreadRunnable() {
@@ -353,16 +354,18 @@ public class LocalRepositoryFolderHelper {
                 public void process() {
                     try {
                         QuicklookGenerator quicklookGenerator = new QuicklookGenerator();
-                        Band[] quicklookBands = quicklookGenerator.findQuicklookBands(product);
+                        Band[] quicklookBands = quicklookGenerator.findQuicklookBands(product, qlPM);
                         BufferedImage quickLookImage;
                         if (quicklookBands == null) {
-                            quickLookImage = quicklookGenerator.createQuickLookFromBrowseProduct(product);
+                            quickLookImage = quicklookGenerator.createQuickLookFromBrowseProduct(product, qlPM);
                         } else {
                             quickLookImage = quicklookGenerator.createQuickLookImage(product, quicklookBands, qlPM);
                         }
                         if (quickLookImage != null) {
                             allLocalFolderProductsRepository.writeQuickLookImage(savedProductId, quickLookImage);
                         }
+                    } catch (java.lang.InterruptedException | CancellationException ie) {
+                        logger.log(Level.FINE, "Stop creating the quick look image for product '" + product.getName() + "'.");
                     } catch (Exception exception) {
                         logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
                     } finally {
@@ -445,5 +448,55 @@ public class LocalRepositoryFolderHelper {
             polygon2D.append(geographicalPositions[i].getLon(), geographicalPositions[i].getLat());
         }
         return polygon2D;
+    }
+
+    private static class QlStatusProgressMonitor implements ProgressMonitor {
+        final StatusProgressMonitor internalSPM;
+        final ThreadStatus threadStatus;
+
+        public QlStatusProgressMonitor(ThreadStatus threadStatus) {
+            this.internalSPM = new StatusProgressMonitor(StatusProgressMonitor.TYPE.SUBTASK);
+            this.threadStatus = threadStatus;
+        }
+
+        @Override
+        public void beginTask(String taskName, int totalWork) {
+            internalSPM.beginTask(taskName, totalWork);
+        }
+
+        @Override
+        public void done() {
+            internalSPM.done();
+        }
+
+        @Override
+        public void internalWorked(double work) {
+            internalSPM.internalWorked(work);
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return threadStatus.isFinished() || internalSPM.isCanceled();
+        }
+
+        @Override
+        public void setCanceled(boolean canceled) {
+            internalSPM.setCanceled(canceled);
+        }
+
+        @Override
+        public void setTaskName(String taskName) {
+            internalSPM.setTaskName(taskName);
+        }
+
+        @Override
+        public void setSubTaskName(String subTaskName) {
+            internalSPM.setSubTaskName(subTaskName);
+        }
+
+        @Override
+        public void worked(int work) {
+            internalSPM.worked(work);
+        }
     }
 }
