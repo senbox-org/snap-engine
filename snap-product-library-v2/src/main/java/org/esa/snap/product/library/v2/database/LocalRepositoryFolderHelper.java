@@ -217,6 +217,7 @@ public class LocalRepositoryFolderHelper {
                                 if (!DataAccess.checkSame(product.getName(), productPath)) {
                                     Polygon2D polygon2D = buildProductPolygon(product);
                                     BufferedImage quickLookImage = null; // no quick look image when saving the product
+                                    ThreadStatus.checkCancelled(threadStatus);
                                     saveProductData = this.allLocalFolderProductsRepository.saveLocalProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
                                     // the product has been saved into the database
                                     newProductCount++;
@@ -249,6 +250,8 @@ public class LocalRepositoryFolderHelper {
                             }
                         }
                     }
+                } catch (java.lang.InterruptedException ie) {
+                    throw ie;
                 } catch (Exception exception) {
                     this.errorFiles.put(productPath.toFile(), "Product unreadable");
                     logger.log(Level.SEVERE, "Failed to save the local product from the path '" + productPath.toString() + "'.", exception);
