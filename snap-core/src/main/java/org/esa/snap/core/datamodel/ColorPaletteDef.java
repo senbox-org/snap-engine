@@ -19,21 +19,14 @@ import com.bc.ceres.core.Assert;
 import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.PropertyMap;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.math.LogLinearTransform;
 import org.esa.snap.core.util.math.MathUtils;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * The <code>ColorPaletteDef</code> class represents a curve that is used to transform the sample values of a
@@ -61,6 +54,7 @@ public class ColorPaletteDef implements Cloneable {
     private final static String _PROPERTY_KEY_NUM_POINTS = "numPoints";
     private final static String _PROPERTY_KEY_COLOR = "color";
     private final static String _PROPERTY_KEY_SAMPLE = "sample";
+    private final static String _PROPERTY_KEY_LABEL = "label";
     private final static String _PROPERTY_KEY_AUTODISTRIBUTE = "autoDistribute";
     private final static String _PROPERTY_KEY_IS_LOG_SCALED = "isLogScaled";
 
@@ -187,22 +181,21 @@ public class ColorPaletteDef implements Cloneable {
      * @return true, if a point has been inserted
      */
     public boolean createPointAfter(int index, Scaling scaling) {
-        Point point1 = getPointAt(index);
-        Point point2 = null;
-        if (index < points.indexOf(points.lastElement())) {
-            point2 = getPointAt(index + 1);
+        if (index >= getNumPoints() - 1 || index < 0) {
+            return false;
         }
-        final Point newPoint;
-        if (point2 != null) {
-            final double max = Math.max(point1.getSample(), point2.getSample());
-            final double min = Math.min(point1.getSample(), point2.getSample());
-            final double middle;
-            middle = scaling.scale(0.5 * (scaling.scaleInverse(min) + scaling.scaleInverse(max)));
-            newPoint = new Point(middle, getCenterColor(point1.getColor(), point2.getColor()));
-            insertPointAfter(index, newPoint);
-            return true;
-        }
-        return false;
+
+        final Point point1 = getPointAt(index);
+        final Point point2 = getPointAt(index + 1);
+
+        final double max = Math.max(point1.getSample(), point2.getSample());
+        final double min = Math.min(point1.getSample(), point2.getSample());
+        final double middle = scaling.scale(0.5 * (scaling.scaleInverse(min) + scaling.scaleInverse(max)));
+
+        final Point newPoint = new Point(middle, getCenterColor(point1.getColor(), point2.getColor()));
+        insertPointAfter(index, newPoint);
+
+        return true;
     }
 
     /**
@@ -269,6 +262,8 @@ public class ColorPaletteDef implements Cloneable {
         }
     }
 
+    @Deprecated()
+    // use clone() instead
     public ColorPaletteDef createDeepCopy() {
         return (ColorPaletteDef) clone();
     }
@@ -281,6 +276,8 @@ public class ColorPaletteDef implements Cloneable {
      * @return the color palette definition, never null
      * @throws IOException if an I/O error occurs
      */
+    @Deprecated()
+    // use loadColorPaletteDef(Path path) instead
     public static ColorPaletteDef loadColorPaletteDef(File file) throws IOException {
         return loadColorPaletteDef(file.toPath());
     }
@@ -298,24 +295,34 @@ public class ColorPaletteDef implements Cloneable {
         final int numPoints = propertyMap.getPropertyInt(_PROPERTY_KEY_NUM_POINTS);
         if (numPoints < 2) {
             throw new IOException("The selected file contains less than\n" +
-                                          "two colour points.");
+                    "two colour points.");
         }
         final Point[] points = new Point[numPoints];
         double lastSample = 0;
         for (int i = 0; i < points.length; i++) {
             final Point point = new Point();
+
             final Color color = propertyMap.getPropertyColor(_PROPERTY_KEY_COLOR + i);
+            point.setColor(color);
+
+            final String label = propertyMap.getPropertyString(_PROPERTY_KEY_LABEL + i);
+            if (StringUtils.isNullOrEmpty(label)) {
+                point.setLabel(path.getFileName().toString());
+            } else {
+                point.setLabel(label);
+            }
+
             double sample = propertyMap.getPropertyDouble(_PROPERTY_KEY_SAMPLE + i);
             if (i > 0 && sample < lastSample) {
                 sample = lastSample + 1.0;
             }
-            point.setColor(color);
             point.setSample(sample);
-            point.setLabel(path.getFileName().toString());
+
             points[i] = point;
             lastSample = sample;
         }
-        ColorPaletteDef paletteDef = new ColorPaletteDef(points, 256);
+
+        final ColorPaletteDef paletteDef = new ColorPaletteDef(points, 256);
         paletteDef.setAutoDistribute(propertyMap.getPropertyBool(_PROPERTY_KEY_AUTODISTRIBUTE, false));
         paletteDef.setLogScaled(propertyMap.getPropertyBool(_PROPERTY_KEY_IS_LOG_SCALED, false));
         paletteDef.setSourceFileMin(paletteDef.getMinDisplaySample());
@@ -327,10 +334,10 @@ public class ColorPaletteDef implements Cloneable {
     /**
      * Loads a color palette definition from the given cpt format file
      *
-     * @author Daniel Knowles
      * @param file cpt format file
      * @return the color palette definition, never null
      * @throws IOException if an I/O error occurs
+     * @author Daniel Knowles
      */
     public static ColorPaletteDef loadCpt(File file) throws IOException {
 
@@ -375,7 +382,7 @@ public class ColorPaletteDef implements Cloneable {
 
         final Point[] points = new Point[pointsArrayList.size()];
 
-        int i=0;
+        int i = 0;
         for (Point point : pointsArrayList) {
             points[i] = point;
             i++;
@@ -389,10 +396,6 @@ public class ColorPaletteDef implements Cloneable {
         paletteDef.setSourceFileMax(paletteDef.getMaxDisplaySample());
         return paletteDef;
     }
-
-
-
-
 
 
     public static Color string2Color(String redString, String greenString, String blueString) {
@@ -481,7 +484,6 @@ public class ColorPaletteDef implements Cloneable {
         return fileContents;
     }
 
-
     /**
      * Stores this color palette definition in the given file
      *
@@ -489,7 +491,13 @@ public class ColorPaletteDef implements Cloneable {
      * @param file            the file
      * @throws IOException if an I/O error occurs
      */
+    @Deprecated
+    // use storeColorPaletteDef(ColorPaletteDef colorPaletteDef, Path path) instead
     public static void storeColorPaletteDef(ColorPaletteDef colorPaletteDef, File file) throws IOException {
+        storeColorPaletteDef(colorPaletteDef, file.toPath());
+    }
+
+    public static void storeColorPaletteDef(ColorPaletteDef colorPaletteDef, Path path) throws IOException {
         final Point[] points = colorPaletteDef.getPoints();
         final PropertyMap propertyMap = new DefaultPropertyMap();
         final int numPoints = points.length;
@@ -497,16 +505,22 @@ public class ColorPaletteDef implements Cloneable {
         propertyMap.setPropertyBool(_PROPERTY_KEY_AUTODISTRIBUTE, colorPaletteDef.isAutoDistribute());
         propertyMap.setPropertyBool(_PROPERTY_KEY_IS_LOG_SCALED, colorPaletteDef.isLogScaled());
         for (int i = 0; i < numPoints; i++) {
-            propertyMap.setPropertyColor(_PROPERTY_KEY_COLOR + i, points[i].getColor());
-            propertyMap.setPropertyDouble(_PROPERTY_KEY_SAMPLE + i, points[i].getSample());
+            final Point point = points[i];
+            propertyMap.setPropertyColor(_PROPERTY_KEY_COLOR + i, point.getColor());
+            propertyMap.setPropertyDouble(_PROPERTY_KEY_SAMPLE + i, point.getSample());
+
+            final String label = point.getLabel();
+            if (StringUtils.isNotNullAndNotEmpty(label)) {
+                propertyMap.setPropertyString(_PROPERTY_KEY_LABEL + i, label);
+            }
         }
-        propertyMap.store(file.toPath(), "SNAP Colour Palette Definition File"); /*I18N*/
+        propertyMap.store(path, "SNAP Colour Palette Definition File"); /*I18N*/
     }
 
     /**
      * Stores a 256 point generic color palette
      *
-     * @param colorPaletteDef thje color palette definition
+     * @param colorPaletteDef the color palette definition
      * @param file            the file
      * @throws IOException if an I/O error occurs
      */
@@ -731,11 +745,7 @@ public class ColorPaletteDef implements Cloneable {
         if (numColors != that.numColors) {
             return false;
         }
-        if (!points.equals(that.points)) {
-            return false;
-        }
-
-        return true;
+        return points.equals(that.points);
     }
 
     @Override
@@ -843,14 +853,10 @@ public class ColorPaletteDef implements Cloneable {
             if (Double.compare(point.sample, sample) != 0) {
                 return false;
             }
-            if (color != null ? !color.equals(point.color) : point.color != null) {
+            if (!Objects.equals(color, point.color)) {
                 return false;
             }
-            if (label != null ? !label.equals(point.label) : point.label != null) {
-                return false;
-            }
-
-            return true;
+            return Objects.equals(label, point.label);
         }
 
         @Override
