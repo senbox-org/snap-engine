@@ -486,6 +486,7 @@ public class DataAccess {
                 deleteRecordsFromTable(connection, "products", "id", productId);
                 // commit the data
                 connection.commit();
+                deleteQuickLookImage(productId, dbParams.getParentFolderPath());
             } catch (Exception e) {
                 // rollback the statements from the transaction
                 connection.rollback();
