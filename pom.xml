@@ -51,7 +51,7 @@
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.java.binaries>**/classes</sonar.java.binaries>
         <sonar.exclusions>*/src</sonar.exclusions>
-        <esa-snappy.version>11.0.0-SNAPSHOT</esa-snappy.version>
+        <esa-snappy.version>11.0.0</esa-snappy.version>
     </properties>
 
     <modules>
