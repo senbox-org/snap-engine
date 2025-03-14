@@ -486,6 +486,7 @@ public class DataAccess {
                 deleteRecordsFromTable(connection, "products", "id", productId);
                 // commit the data
                 connection.commit();
+                deleteQuickLookImage(productId, dbParams.getParentFolderPath());
             } catch (Exception e) {
                 // rollback the statements from the transaction
                 connection.rollback();
@@ -1184,7 +1185,7 @@ public class DataAccess {
         if (ZipUtils.isZipped(productPath) || (extension != null && SIMPLE_PRODUCT_EXTENSIONS.contains(extension.toLowerCase()))) {
             computedPath = productPath;
         } else {
-            if (Arrays.stream(DIRECTORY_BASED_PRODUCTS_EXTENSIONS).noneMatch(f -> f.toLowerCase().endsWith(extension))) {
+            if (extension != null && Arrays.stream(DIRECTORY_BASED_PRODUCTS_EXTENSIONS).noneMatch(f -> f.toLowerCase().endsWith(extension))) {
                 computedPath = productPath;
             } else {
                 computedPath = productPath.getParent();
