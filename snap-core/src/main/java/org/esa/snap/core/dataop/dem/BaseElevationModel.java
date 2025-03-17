@@ -136,7 +136,6 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
                 final ElevationTile lastTile = elevationTileCache.get(index);
                 if (lastTile != null) {
                     lastTile.dispose();
-                    System.gc();
                 }
                 elevationTileCache.remove(index);
             }
