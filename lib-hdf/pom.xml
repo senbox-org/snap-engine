@@ -105,18 +105,6 @@
                         <publicPackage>hdf.*</publicPackage>
                         <publicPackage>eu.esa.snap.hdf.*</publicPackage>
                     </publicPackages>
-                    <nbmResources>
-                        <nbmResource>
-                            <directory>src/main/resources/lib/</directory>
-                            <targetPath>modules/lib/</targetPath>
-                            <includes>
-                                <include>**/*.dll</include>
-                                <include>**/*.so</include>
-                                <include>**/*.jnilib</include>
-                                <include>**/*.dylib</include>
-                            </includes>
-                        </nbmResource>
-                    </nbmResources>
                 </configuration>
             </plugin>
             <plugin>
