@@ -16,10 +16,10 @@
 package org.esa.snap.dataio.hdf5;
 
 import com.bc.ceres.core.ProgressMonitor;
-import ncsa.hdf.hdf5lib.H5;
-import ncsa.hdf.hdf5lib.HDF5Constants;
-import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
@@ -51,8 +51,8 @@ import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
     private File outputFile;
-    private Map<Band, Integer> bandIDs;
-    private int fileID;
+    private Map<Band, Long> bandIDs;
+    private long fileID;
     private boolean hdf5LibInit;
     private boolean metadataAnnotated;
 
@@ -145,7 +145,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void writeGeoCoding(ComponentGeoCoding gc) throws IOException {
-        final int groupID = createGeoCodingGroup();
+        final long groupID = createGeoCodingGroup();
         try {
             createScalarAttribute(groupID, "java_class_name", gc.getClass().getName());
             createScalarAttribute(groupID, TAG_FORWARD_CODING_KEY, gc.getForwardCoding().getKey());
@@ -168,7 +168,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void writeGeoCoding(final TiePointGeoCoding geoCoding) throws IOException {
-        final int groupID = createGeoCodingGroup();
+        final long groupID = createGeoCodingGroup();
         try {
             createScalarAttribute(groupID, "java_class_name", TiePointGeoCoding.class.getName());
             createScalarAttribute(groupID, "lat_grid", geoCoding.getLatGrid().getName());
@@ -181,7 +181,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     private void writeGeoCoding(final MapGeoCoding geoCoding) throws IOException {
         final MapInfo mapInfo = geoCoding.getMapInfo();
         final MapProjection mapProjection = mapInfo.getMapProjection();
-        final int groupID = createGeoCodingGroup();
+        final long groupID = createGeoCodingGroup();
         try {
             createScalarAttribute(groupID, "java_class_name", MapGeoCoding.class.getName());
             createScalarAttribute(groupID, "easting", mapInfo.getEasting());
@@ -193,7 +193,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             createScalarAttribute(groupID, "datum", mapInfo.getDatum().getName());
             createScalarAttribute(groupID, "unit", mapProjection.getMapUnit());
             createScalarAttribute(groupID, "projection", mapProjection.getName());
-            final int paramsID = createH5G(groupID, "projection_params");
+            final long paramsID = createH5G(groupID, "projection_params");
             try {
                 final MapTransform mapTransform = mapProjection.getMapTransform();
                 final MapTransformDescriptor mapTransformDescriptor = mapTransform.getDescriptor();
@@ -209,7 +209,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private int createGeoCodingGroup() throws IOException {
+    private long createGeoCodingGroup() throws IOException {
         return createH5G(fileID, "geo_coding");
     }
 
@@ -222,13 +222,13 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         final int sourceBandHeight = sourceBand.getRasterHeight();
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX, sourceOffsetY);
 
-        int memTypeID = -1;
-        int memSpaceID = -1;
+        long memTypeID = -1;
+        long memSpaceID = -1;
 
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);
         try {
-            final int datasetID = getOrCreateBandH5D(sourceBand);
-            final int fileSpaceID = H5.H5Dget_space(datasetID);
+            final long datasetID = getOrCreateBandH5D(sourceBand);
+            final long fileSpaceID = H5.H5Dget_space(datasetID);
             final long[] memDims = new long[]{sourceHeight, sourceWidth};
             final long[] memStart = new long[2];
             final long[] memCount = new long[2];
@@ -281,7 +281,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             return;
         }
         if (bandIDs != null) {
-            for (Integer datasetID : bandIDs.values()) {
+            for (Long datasetID : bandIDs.values()) {
                 if (datasetID != -1) {
                     try {
                         H5.H5Fflush(datasetID, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -321,7 +321,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         fileID = -1;
     }
 
-    private int getH5DataType(int productDataType) {
+    private long getH5DataType(int productDataType) {
         switch (productDataType) {
             case ProductData.TYPE_INT8:
                 return HDF5Constants.H5T_NATIVE_INT8;
@@ -349,9 +349,9 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private int createH5TypeID(int productDataType) throws IOException {
+    private long createH5TypeID(int productDataType) throws IOException {
         try {
-            final int h5DataType = getH5DataType(productDataType);
+            final long h5DataType = getH5DataType(productDataType);
             return H5.H5Tcopy(h5DataType);
         } catch (HDF5LibraryException e) {
             throw new ProductIOException(createErrorMessage(e), e);
@@ -376,7 +376,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         if (flagCodingGroup.getNodeCount() == 0) {
             return;
         }
-        int groupID = createH5G(fileID, "/flag_codings");
+        long groupID = createH5G(fileID, "/flag_codings");
         try {
             for (int i = 0; i < flagCodingGroup.getNodeCount(); i++) {
                 FlagCoding flagCoding = flagCodingGroup.get(i);
@@ -394,8 +394,8 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void writeMetadataElement(int locationID, MetadataElement element) throws IOException {
-        int groupID = createH5G(locationID, element.getName());
+    private void writeMetadataElement(long locationID, MetadataElement element) throws IOException {
+        long groupID = createH5G(locationID, element.getName());
         try {
             List<MetadataAttribute> attributes = enumerateAttributesWithSameName(element);
             for (MetadataAttribute attribute : attributes) {
@@ -487,7 +487,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         return attributeArrayList;
     }
 
-    private void writeMetadataAttribute(int locationID, MetadataAttribute attribute) throws IOException {
+    private void writeMetadataAttribute(long locationID, MetadataAttribute attribute) throws IOException {
         int productDataType = attribute.getDataType();
         if (attribute.getData() instanceof ProductData.ASCII || attribute.getData() instanceof ProductData.UTC) {
             createScalarAttribute(locationID, attribute.getName(), attribute.getData().getElemString());
@@ -509,7 +509,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
     private void writeTiePointGrids() throws IOException {
         if (getSourceProduct().getNumTiePointGrids() > 0) {
-            int groupId = createH5G(fileID, "/tie_point_grids");
+            long groupId = createH5G(fileID, "/tie_point_grids");
             try {
                 for (int i = 0; i < getSourceProduct().getNumTiePointGrids(); i++) {
                     TiePointGrid grid = getSourceProduct().getTiePointGridAt(i);
@@ -525,9 +525,9 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         final int w = grid.getGridWidth();
         final int h = grid.getGridHeight();
         long[] dims = new long[]{h, w};
-        int dataTypeID = -1;
-        int dataSpaceID = -1;
-        int datasetID = -1;
+        long dataTypeID = -1;
+        long dataSpaceID = -1;
+        long datasetID = -1;
         try {
             dataTypeID = createH5TypeID(grid.getDataType());
             dataSpaceID = H5.H5Screate_simple(2, dims, null);
@@ -566,33 +566,33 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void createScalarAttribute(int locationID, String name, int value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, int value) throws IOException {
         createScalarAttribute(locationID, name, HDF5Constants.H5T_NATIVE_INT, new int[]{value});
     }
 
-    private void createScalarAttribute(int locationID, String name, float value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, float value) throws IOException {
         createScalarAttribute(locationID, name, HDF5Constants.H5T_NATIVE_FLOAT, new float[]{value});
     }
 
-    private void createScalarAttribute(int locationID, String name, double value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, double value) throws IOException {
         createScalarAttribute(locationID, name, HDF5Constants.H5T_NATIVE_DOUBLE, new double[]{value});
     }
 
-    private void createScalarAttribute(int locationID, String name, String value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, String value) throws IOException {
         if (value != null && value.length() > 0) {
             createScalarAttribute(locationID, name, HDF5Constants.H5T_C_S1, value.length(), value.getBytes());
         }
     }
 
-    private void createScalarAttribute(int locationID, String name, int jh5DataType, Object value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, long jh5DataType, Object value) throws IOException {
         createScalarAttribute(locationID, name, jh5DataType, -1, value);
     }
 
-    private void createScalarAttribute(int locationID, String name, int jh5DataType, int typeSize, Object value) throws IOException {
+    private void createScalarAttribute(long locationID, String name, long jh5DataType, int typeSize, Object value) throws IOException {
         Debug.trace("Hdf5ProductWriter.createScalarAttribute(" + "locationID=" + locationID + ", name=" + name + ", jh5DataType=" + jh5DataType + ", typeSize=" + typeSize + ", value=" + value + ")");
-        int attrTypeID = -1;
-        int attrSpaceID = -1;
-        int attributeID = -1;
+        long attrTypeID = -1;
+        long attrSpaceID = -1;
+        long attributeID = -1;
         try {
             attrTypeID = H5.H5Tcopy(jh5DataType);
             if (typeSize > 0) {
@@ -610,15 +610,15 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void createArrayAttribute(int locationID, String name, float[] values) throws IOException {
+    private void createArrayAttribute(long locationID, String name, float[] values) throws IOException {
         createArrayAttribute(locationID, name, HDF5Constants.H5T_NATIVE_FLOAT, values.length, values);
     }
 
-    private void createArrayAttribute(int locationID, String name, int jh5DataType, int arraySize, Object value) throws IOException {
+    private void createArrayAttribute(long locationID, String name, long jh5DataType, int arraySize, Object value) throws IOException {
         //Debug.trace("creating array attribute " + name + ", JH5 type " + jh5DataType + ", size " + arraySize);
-        int attrTypeID = -1;
-        int attrSpaceID = -1;
-        int attributeID = -1;
+        long attrTypeID = -1;
+        long attrSpaceID = -1;
+        long attributeID = -1;
         try {
             attrTypeID = H5.H5Tcopy(jh5DataType);
             attrSpaceID = H5.H5Screate_simple(1, new long[]{arraySize}, null);
@@ -637,9 +637,9 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
      * Returns the dataset ID associated with the given {@code Band}. If no dataset ID exists, one is created and
      * fed into the hash map
      */
-    private Integer getOrCreateBandH5D(Band band) throws IOException {
+    private Long getOrCreateBandH5D(Band band) throws IOException {
         synchronized (this) {
-            Integer bandID = getBandH5D(band);
+            Long bandID = getBandH5D(band);
             if (bandID == null) {
                 if (bandIDs == null) {
                     bandIDs = new HashMap<>();
@@ -652,7 +652,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private Integer getBandH5D(Band band) {
+    private Long getBandH5D(Band band) {
         if (bandIDs != null) {
             return bandIDs.get(band);
         }
@@ -660,14 +660,14 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
 
-    private Integer createBandH5D(Band band) throws IOException {
+    private Long createBandH5D(Band band) throws IOException {
 
         final int w = band.getRasterWidth();
         final int h = band.getRasterHeight();
         long[] dims = new long[]{h, w};
-        int datasetID = -1;
-        int fileTypeID = -1;
-        int fileSpaceID = -1;
+        long datasetID = -1;
+        long fileTypeID = -1;
+        long fileSpaceID = -1;
 
         try {
             fileTypeID = createH5TypeID(band.getDataType());
@@ -721,7 +721,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void createGroup(String path) throws IOException {
-        int groupID = -1;
+        long groupID = -1;
         try {
             groupID = H5.H5Gcreate(fileID, path, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         } catch (HDF5LibraryException e) {
@@ -731,7 +731,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private int createH5G(int locationID, String name) throws IOException {
+    private long createH5G(long locationID, String name) throws IOException {
         try {
             return H5.H5Gcreate(locationID, name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         } catch (HDF5LibraryException e) {
@@ -739,7 +739,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void closeH5T(int typeID) {
+    private void closeH5T(long typeID) {
         if (typeID != -1) {
             try {
                 H5.H5Tclose(typeID);
@@ -749,7 +749,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void closeH5S(int spaceID) {
+    private void closeH5S(long spaceID) {
         if (spaceID != -1) {
             try {
                 H5.H5Sclose(spaceID);
@@ -759,7 +759,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void closeH5D(int datasetID) {
+    private void closeH5D(long datasetID) {
         if (datasetID != -1) {
             try {
                 H5.H5Dclose(datasetID);
@@ -769,7 +769,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void closeH5A(int attributeID) {
+    private void closeH5A(long attributeID) {
         if (attributeID != -1) {
             try {
                 H5.H5Aclose(attributeID);
@@ -779,7 +779,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void closeH5G(int groupID) {
+    private void closeH5G(long groupID) {
         if (groupID != -1) {
             try {
                 H5.H5Gclose(groupID);
