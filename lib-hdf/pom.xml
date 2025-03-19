@@ -29,7 +29,7 @@
 
     <properties>
         <snap.version>13.0.0-SNAPSHOT</snap.version>
-        <hdf.version>2.7</hdf.version>
+        <hdf.version>3.3.2</hdf.version>
     </properties>
 
 
@@ -49,24 +49,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>ncsa.hdf</groupId>
-            <artifactId>jhdf</artifactId>
+            <groupId>org.hdfgroup</groupId>
+            <artifactId>jarhdf</artifactId>
             <version>${hdf.version}</version>
         </dependency>
         <dependency>
-            <groupId>ncsa.hdf</groupId>
-            <artifactId>jhdf5</artifactId>
+            <groupId>org.hdfgroup</groupId>
+            <artifactId>jarhdf5</artifactId>
             <version>${hdf.version}</version>
         </dependency>
         <dependency>
-            <groupId>ncsa.hdf</groupId>
-            <artifactId>jhdfobj</artifactId>
+            <groupId>org.hdfgroup</groupId>
+            <artifactId>hdfobject</artifactId>
             <version>${hdf.version}</version>
         </dependency>
         <dependency>
-            <groupId>ncsa.hdf</groupId>
-            <artifactId>jhdf5obj</artifactId>
-            <version>${hdf.version}</version>
+            <groupId>gov.nasa.gsfc.heasarc</groupId>
+            <artifactId>nom-tam-fits</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -83,6 +83,10 @@
             <artifactId>ceres-core</artifactId>
             <version>${snap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-engine-utilities</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -98,7 +102,8 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>ncsa.hdf.*</publicPackage>
+                        <publicPackage>hdf.*</publicPackage>
+                        <publicPackage>eu.esa.snap.hdf.*</publicPackage>
                     </publicPackages>
                     <nbmResources>
                         <nbmResource>
