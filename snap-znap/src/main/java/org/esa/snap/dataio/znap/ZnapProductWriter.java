@@ -149,7 +149,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH_UNIT;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
+import static org.esa.snap.core.dataio.ProductReaderUtils.convertToPath;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.getSnapDataType;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.writeProductMetadata;
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.DEFAULT_COMPRESSION_LEVEL;
