@@ -173,16 +173,6 @@
                         <publicPackage>org.slf4j.impl</publicPackage>
                         <publicPackage>org.esa.snap.dataio.netcdf.*</publicPackage>
                     </publicPackages>
-                    <nbmResources>
-                        <nbmResource>
-                            <directory>src/main/resources/lib/</directory>
-                            <targetPath>modules/lib/</targetPath>
-                            <includes>
-                                <include>**/*.dll</include>
-                                <include>**/*.so*</include>
-                            </includes>
-                        </nbmResource>
-                    </nbmResources>
                 </configuration>
             </plugin>
             <plugin>
