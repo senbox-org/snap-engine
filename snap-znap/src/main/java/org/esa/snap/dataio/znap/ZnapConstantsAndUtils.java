@@ -130,27 +130,6 @@ final class ZnapConstantsAndUtils {
     public static final String NAME_MASKS = "Masks";
     public static final String NAME_FILTER_BANDS = "FilterBands";
 
-    static final Class<?>[] IO_TYPES = new Class[]{
-            Path.class,
-            File.class,
-            String.class
-    };
-
-    private static final OutputConverter[] IO_CONVERTERS = new OutputConverter[]{
-            output -> (Path) output,
-            output -> ((File) output).toPath(),
-            output -> Paths.get((String) output)
-    };
-
-    static Path convertToPath(final Object object) {
-        for (int i = 0; i < IO_TYPES.length; i++) {
-            if (IO_TYPES[i].isInstance(object)) {
-                return IO_CONVERTERS[i].convertOutput(object);
-            }
-        }
-        return null;
-    }
-
     static boolean isExistingEmptyDirectory(Path path) {
         try {
             return Files.isDirectory(path) && Files.list(path).count() == 0;
