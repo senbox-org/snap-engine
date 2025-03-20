@@ -40,7 +40,6 @@ import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -48,7 +47,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,27 +130,6 @@ final class ZnapConstantsAndUtils {
     public static final String NAME_MASKS = "Masks";
     public static final String NAME_FILTER_BANDS = "FilterBands";
 
-    static final Class<?>[] IO_TYPES = new Class[]{
-            Path.class,
-            File.class,
-            String.class
-    };
-
-    private static final OutputConverter[] IO_CONVERTERS = new OutputConverter[]{
-            output -> (Path) output,
-            output -> ((File) output).toPath(),
-            output -> Paths.get((String) output)
-    };
-
-    static Path convertToPath(final Object object) {
-        for (int i = 0; i < IO_TYPES.length; i++) {
-            if (IO_TYPES[i].isInstance(object)) {
-                return IO_CONVERTERS[i].convertOutput(object);
-            }
-        }
-        return null;
-    }
-
     static boolean isExistingEmptyDirectory(Path path) {
         try {
             return Files.isDirectory(path) && Files.list(path).count() == 0;
@@ -160,11 +137,6 @@ final class ZnapConstantsAndUtils {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private interface OutputConverter {
-
-        Path convertOutput(Object output);
     }
 
     static SnapDataType getSnapDataType(DataType zarrDataType) {
