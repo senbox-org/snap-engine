@@ -30,7 +30,7 @@ public class BaseElevationTile implements ElevationTile {
     private int bandWidth;
     private int bandHeight;
     protected final float noDataValue;
-    private final float[][] objectArray;
+    private float[][] objectArray;
     private final boolean useDEMGravitationalModel;
 
     public BaseElevationTile(final ElevationModel demModel, final Product product) {
@@ -40,7 +40,7 @@ public class BaseElevationTile implements ElevationTile {
         this.bandWidth = band.getRasterWidth();
         this.bandHeight = band.getRasterHeight();
         noDataValue = demModel.getDescriptor().getNoDataValue();
-        objectArray = new float[band.getRasterHeight() + 1][];
+        objectArray = new float[bandHeight + 1][];
         useDEMGravitationalModel = Config.instance().preferences().getBoolean("snap.useDEMGravitationalModel", true);
         //System.out.println("Dem Tile "+product.getName());
     }
@@ -52,12 +52,13 @@ public class BaseElevationTile implements ElevationTile {
     }
 
     public final void clearCache() {
-        if (objectArray != null) {
-            Arrays.fill(objectArray, 0, objectArray.length, null);
-        }
+        objectArray = null;
     }
 
     public final float getSample(final int pixelX, final int pixelY) throws Exception {
+        if (objectArray == null) {
+            objectArray = new float[bandHeight + 1][];
+        }
 
         float[] line = objectArray[pixelY];
         if (line == null) {
