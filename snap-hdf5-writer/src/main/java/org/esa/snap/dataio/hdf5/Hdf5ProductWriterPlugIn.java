@@ -15,16 +15,15 @@
  */
 package org.esa.snap.dataio.hdf5;
 
+import eu.esa.snap.hdf.HDFLoader;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.EncodeQualification;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
 import java.io.File;
-import java.text.MessageFormat;
 import java.util.Locale;
 
 /**
@@ -37,32 +36,17 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
     public static final String HDF5_FORMAT_NAME = "HDF5";
     public static final String HDF5_FILE_EXTENSION = ".h5";
 
-    private static final String H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
-
-    private static final boolean hdf5LibAvailable;
-
-    static {
-        hdf5LibAvailable = loadHdf5Lib();
-    }
-
     /**
      * Constructs a new HDF5 product writer plug-in instance.
      */
     public Hdf5ProductWriterPlugIn() {
     }
 
-    /**
-     * Returns whether or not the HDF5 library is available.
-     */
-    public static boolean isHdf5LibAvailable() {
-        return hdf5LibAvailable;
-    }
-
     @Override
     public EncodeQualification getEncodeQualification(Product product) {
         if (product.isMultiSize()) {
             return new EncodeQualification(EncodeQualification.Preservation.UNABLE,
-                                           "Cannot write multisize products. Consider resampling the product first.");
+                    "Cannot write multisize products. Consider resampling the product first.");
         }
         return new EncodeQualification(EncodeQualification.Preservation.PARTIAL);
     }
@@ -71,9 +55,6 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
      * Returns a string array containing the single entry <code>&quot;HDF5&quot;</code>.
      */
     public String[] getFormatNames() {
-        if (!isHdf5LibAvailable()) {
-            return new String[0];
-        }
         return new String[]{HDF5_FORMAT_NAME};
     }
 
@@ -86,9 +67,6 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
      * @return the default file extensions for this product I/O plug-in, never <code>null</code>
      */
     public String[] getDefaultFileExtensions() {
-        if (!isHdf5LibAvailable()) {
-            return new String[0];
-        }
         return new String[]{HDF5_FILE_EXTENSION};
     }
 
@@ -103,9 +81,6 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
      * @see AbstractProductWriter#writeProductNodes
      */
     public Class[] getOutputTypes() {
-        if (!isHdf5LibAvailable()) {
-            return new Class[0];
-        }
         return new Class[]{String.class, File.class};
     }
 
@@ -128,9 +103,7 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
      * @return a new instance of the <code>Hdf5ProductWriter</code> class
      */
     public ProductWriter createWriterInstance() {
-        if (!isHdf5LibAvailable()) {
-            return null;
-        }
+        HDFLoader.ensureHDF5Initialised();
         return new Hdf5ProductWriter(this);
     }
 
@@ -143,20 +116,4 @@ public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
         return new SnapFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
     }
 
-    private static boolean loadHdf5Lib() {
-        try {
-            Class.forName(H5_CLASS_NAME);
-            return true;
-        } catch (ClassNotFoundException ignored) {
-            // no logging here, H5 class may not be provided by intention
-            return false;
-        } catch (LinkageError e) {
-            // warning here, because H5 class exists, but native libs couldn't be loaded
-            SystemUtils.LOG.warning(MessageFormat.format("{0}: HDF-5 library not available: {1}: {2}",
-                                                         Hdf5ProductWriterPlugIn.class,
-                                                         e.getClass(),
-                                                         e.getMessage()));
-            return false;
-        }
-    }
 }
