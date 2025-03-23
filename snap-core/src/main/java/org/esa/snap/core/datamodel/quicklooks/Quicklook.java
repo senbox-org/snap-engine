@@ -197,12 +197,12 @@ public class Quicklook extends ProductNode implements Thumbnail {
                 try {
                     if (browseFile != null) {
                         final Product browseProduct = readBrowseProduct(browseFile);
-                        image = qlGen.createQuickLookFromBrowseProduct(browseProduct);
+                        image = qlGen.createQuickLookFromBrowseProduct(browseProduct, pm);
 
                     } else {
                         if(product != null) {
                             if(quicklookBands == null) {
-                                quicklookBands = qlGen.findQuicklookBands(product);
+                                quicklookBands = qlGen.findQuicklookBands(product, pm);
                             }
                             if(quicklookBands != null) {
                                 image = qlGen.createQuickLookImage(product, quicklookBands, pm);

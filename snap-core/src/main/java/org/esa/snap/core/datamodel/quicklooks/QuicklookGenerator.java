@@ -73,14 +73,16 @@ public class QuicklookGenerator {
         maxWidth = preferences.getInt(PREFERENCE_KEY_QUICKLOOKS_MAX_WIDTH, DEFAULT_VALUE_QUICKLOOKS_MAX_WIDTH);
     }
 
-    public BufferedImage createQuickLookFromBrowseProduct(final Product browseProduct) throws IOException {
+    public BufferedImage createQuickLookFromBrowseProduct(final Product browseProduct, final ProgressMonitor pm) throws IOException, InterruptedException {
 
         final BufferedImage image;
         if (browseProduct.getNumBands() < 3) {
+            checkCancelled(pm);
             image = ProductUtils.createColorIndexedImage(browseProduct.getBandAt(0), ProgressMonitor.NULL);
         } else {
             final List<Band> bandList = new ArrayList<>(3);
             for (int i = 0; i < Math.min(3, browseProduct.getNumBands()); ++i) {
+                checkCancelled(pm);
                 final Band band = browseProduct.getBandAt(i);
                 if (band.getStx().getMean() != 0) {
                     bandList.add(band);
@@ -88,6 +90,7 @@ public class QuicklookGenerator {
             }
             final Band[] bands = bandList.toArray(new Band[bandList.size()]);
 
+            checkCancelled(pm);
             if (bands.length < 3) {
                 image = ProductUtils.createColorIndexedImage(bands[0], ProgressMonitor.NULL);
             } else {
@@ -96,6 +99,7 @@ public class QuicklookGenerator {
             }
         }
 
+        checkCancelled(pm);
         return new FixedSizeThumbnailMaker()
                 .size(maxWidth, maxWidth)
                 .keepAspectRatio(true)
@@ -104,11 +108,12 @@ public class QuicklookGenerator {
     }
 
     public BufferedImage createQuickLookImage(final Product product, Band[] quicklookBands,
-                                       final ProgressMonitor pm) throws IOException {
+                                       final ProgressMonitor pm) throws IOException, InterruptedException {
         Product productSubset = product;
 
         final boolean subsample = true;
         if (subsample) {
+            checkCancelled(pm);
             final int width = maxWidth * 2;// * (MULTILOOK_FACTOR * 2);
             final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
             int scaleFactor = Math.round(Math.max(product.getSceneRasterWidth(), product.getSceneRasterHeight()) / (float) width);
@@ -117,10 +122,12 @@ public class QuicklookGenerator {
             }
             productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
 
+            checkCancelled(pm);
             productSubset = product.createSubset(productSubsetDef, null, null);
 
             final List<Band> bandList = new ArrayList<>();
             for (Band band : quicklookBands) {
+                checkCancelled(pm);
                 if (productSubset.getBand(band.getName()) != null) {
                     bandList.add(productSubset.getBand(band.getName()));
                 } else if (band instanceof VirtualBand) {
@@ -132,6 +139,7 @@ public class QuicklookGenerator {
         }
 
         final BufferedImage image;
+        checkCancelled(pm);
         if(quicklookBands.length < 3 && quicklookBands[0].getIndexCoding() != null) {
             image = ProductUtils.createColorIndexedImage(quicklookBands[0], ProgressMonitor.NULL);
         } else {
@@ -143,6 +151,7 @@ public class QuicklookGenerator {
             productSubset.dispose();
         }
 
+        checkCancelled(pm);
         return new FixedSizeThumbnailMaker()
                 .size(maxWidth, maxWidth)
                 .keepAspectRatio(true)
@@ -150,13 +159,14 @@ public class QuicklookGenerator {
                 .make(image);
     }
 
-    public static Band[] findQuicklookBands(final Product product) {
+    public static Band[] findQuicklookBands(final Product product, final ProgressMonitor pm) throws InterruptedException {
 
         Band[] rgbBands = findSuitableRGBProfileBands(product);
         if (rgbBands != null && rgbBands.length > 0) {
             return rgbBands;
         }
 
+        checkCancelled(pm);
         String bandName = product.getQuicklookBandName();
         if (bandName != null && product.containsBand(bandName)) {
             return new Band[]{product.getBand(bandName)};
@@ -165,8 +175,10 @@ public class QuicklookGenerator {
         final String[] bandNames = product.getBandNames();
         final List<Band> bandList = new ArrayList<>(3);
         for (String name : bandNames) {
+            checkCancelled(pm);
             name = name.toLowerCase();
             for (String qlBand : defaultQuickLookBands) {
+                checkCancelled(pm);
                 if (name.startsWith(qlBand)) {
                     bandList.add(product.getBand(name));
                     break;
@@ -177,6 +189,7 @@ public class QuicklookGenerator {
             }
         }
 
+        checkCancelled(pm);
         String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         if (bandList.size() > 1 && !bandList.get(0).getName().equals(quicklookBandName)) {
             return bandList.toArray(new Band[bandList.size()]);
@@ -374,6 +387,12 @@ public class QuicklookGenerator {
             new FileOutputStream(file).close();
         } else {
             file.setLastModified(System.currentTimeMillis());
+        }
+    }
+
+    private static void checkCancelled(ProgressMonitor pm) throws InterruptedException {
+        if (pm != null && pm.isCanceled()) {
+            throw new InterruptedException(); // stop running
         }
     }
 }
