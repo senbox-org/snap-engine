@@ -108,7 +108,7 @@ public final class AbstractMetadataIO {
         for (Object o : elements) {
             if (o instanceof Element) {
                 final Element elem = (Element) o;
-                if (elem.getName().equals(AbstractMetadata.ABSTRACT_METADATA_ROOT))
+                if (elem.getName().equals(AbstractMetadata.ABSTRACT_METADATA_ROOT) || elem.getName().equals(AbstractMetadata.ORIGINAL_PRODUCT_METADATA))
                     findAbstractedMetadata(elem.getContent(), metadataElem);
                 else if (elem.getName().equals(TPG))
                     parseTiePointGrids(product, elem);
