@@ -17,6 +17,7 @@ package org.esa.snap.core.dataop.dem;
 
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.dataop.downloadable.DownloadStatusManager;
 import org.esa.snap.core.dataop.downloadable.SSLUtil;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.dataop.downloadable.FtpDownloader;
@@ -180,6 +181,9 @@ public abstract class ElevationFile {
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
 
+        DownloadStatusManager statusManager = DownloadStatusManager.getInstance();
+        statusManager.setDownloading(true, localZipFile.getName());
+
         try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength)) {
             try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
                 try (final OutputStream os = new BufferedOutputStream(fileOS)) {
@@ -212,6 +216,7 @@ public abstract class ElevationFile {
             }
         } finally {
             sslUtil.enableSSLCertificateCheck();
+            statusManager.setDownloading(false, "");
         }
         return outputFile;
     }

@@ -35,7 +35,6 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
@@ -368,20 +367,9 @@ public class CfGeocodingPart extends ProfilePartIO {
     }
 
     private static GeoCoding readPixelBasedGeoCoding(ProfileReadContext ctx, Product product) throws IOException {
-        Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
-        if (lonBand == null) {
-            lonBand = product.getBand(Constants.LON_VAR_NAME);
-        }
-        if (lonBand == null) {
-            lonBand = product.getBand(Constants.LONGITUDE_VAR_NAME);
-        }
-        Band latBand = product.getBand(Constants.LAT_INTERN_VAR_NAME);
-        if (latBand == null) {
-            latBand = product.getBand(Constants.LAT_VAR_NAME);
-        }
-        if (latBand == null) {
-            latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
-        }
+        Band lonBand = getLongitudeBand(product);
+        Band latBand = getLatitudeBand(product);
+
         if (latBand == null || lonBand == null) {
             return null;
         }
@@ -422,6 +410,29 @@ public class CfGeocodingPart extends ProfilePartIO {
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();
         return geoCoding;
+    }
+
+     static Band getLatitudeBand(Product product) {
+        Band latBand = product.getBand(Constants.LAT_INTERN_VAR_NAME);
+        if (latBand == null) {
+            latBand = product.getBand(Constants.LAT_VAR_NAME);
+        }
+        if (latBand == null) {
+            latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
+        }
+
+        return latBand;
+    }
+
+     static Band getLongitudeBand(Product product) {
+        Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
+        if (lonBand == null) {
+            lonBand = product.getBand(Constants.LON_VAR_NAME);
+        }
+        if (lonBand == null) {
+            lonBand = product.getBand(Constants.LONGITUDE_VAR_NAME);
+        }
+        return lonBand;
     }
 
     static GeoVariables getGeolocationVariables(NetcdfFile netcdfFile, String lonBandName, String latBandName) {

@@ -16,9 +16,14 @@
 
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -204,6 +209,24 @@ public class ProductSubsetDefTest {
     }
 
     @Test
+    @STTM("SNAP-369,SNAP-1608")
+    public void testGetAndSetPolygon() {
+        assertNull("initially, getSubsetPolygon() should return null", _subset.getSubsetPolygon());
+
+        final Coordinate[] productPolygonCoordinates = new Coordinate[]{
+                new Coordinate(0, 0),
+                new Coordinate(0, 10),
+                new Coordinate(10, 0),
+                new Coordinate(0, 0),
+        };
+        final GeometryFactory geometryFactory = new GeometryFactory();
+        final org.locationtech.jts.geom.Polygon subsetPolygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(productPolygonCoordinates), new LinearRing[0]);
+        _subset.setSubsetPolygon(subsetPolygon);
+        assertNotNull(_subset.getSubsetPolygon());
+        assertEquals("POLYGON ((0 0, 0 10, 10 0, 0 0))", _subset.getSubsetPolygon().toText());
+    }
+
+    @Test
     public void testGetAndSetSubSampling() {
         assertEquals("initially, getSubSamplingX() should return 1", 1.0f, _subset.getSubSamplingX(), EPS);
         assertEquals("initially, getSubSamplingY() should return 1", 1.0f, _subset.getSubSamplingY(), EPS);
@@ -262,7 +285,7 @@ public class ProductSubsetDefTest {
         assertEquals(new Dimension(50, 5), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
-        assertEquals(new Dimension(55, 6), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(50, 6), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubSampling(3, 3);
 
@@ -276,13 +299,13 @@ public class ProductSubsetDefTest {
         assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
-        assertEquals(new Dimension(37, 4), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 120, 12), 0));
-        assertEquals(new Dimension(40, 4), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 130, 13), 0));
-        assertEquals(new Dimension(44, 5), _subset.getSceneRasterSize(100, 100));
+        assertEquals(new Dimension(34, 5), _subset.getSceneRasterSize(100, 100));
     }
 
     @Test
@@ -299,20 +322,20 @@ public class ProductSubsetDefTest {
     @Test
     public void testSetValidSubsetRegionMaps() {
         ProductSubsetDef subsetDef = new ProductSubsetDef();
-        HashMap<String, Rectangle> map = new HashMap<>();
+        HashMap<String, SubsetRegionInfo> map = new HashMap<>();
         Rectangle validRectangle = new Rectangle(0,0,4,23);
         Rectangle invalidRectangle1 = new Rectangle(0,0,0,0);
         Rectangle invalidRectangle2 = new Rectangle(0,0,4,0);
         Rectangle invalidRectangle3 = new Rectangle(0,0,0,23);
 
-        map.put("valid_rectangle", validRectangle);
-        map.put("invalid_rectangle1", invalidRectangle1);
-        map.put("invalid_rectangle2", invalidRectangle2);
-        map.put("invalid_rectangle3", invalidRectangle3);
+        map.put("valid_rectangle", new SubsetRegionInfo(validRectangle, null));
+        map.put("invalid_rectangle1", new SubsetRegionInfo(invalidRectangle1, null));
+        map.put("invalid_rectangle2", new SubsetRegionInfo(invalidRectangle2, null));
+        map.put("invalid_rectangle3", new SubsetRegionInfo(invalidRectangle3, null));
 
         subsetDef.setRegionMap(map);
         subsetDef.setNodeNames(new String[] {"valid_rectangle", "invalid_rectangle1", "invalid_rectangle2", "invalid_rectangle3"});
-        HashMap<String, Rectangle> updatedMap = subsetDef.getRegionMap();
+        HashMap<String, SubsetRegionInfo> updatedMap = subsetDef.getRegionMap();
         String[] nodeNames = subsetDef.getNodeNames();
 
         assertEquals(4, updatedMap.size());
@@ -322,7 +345,7 @@ public class ProductSubsetDefTest {
 
         assertEquals(1, updatedMap.size());
         assertTrue(updatedMap.containsKey("valid_rectangle"));
-        assertEquals(validRectangle, updatedMap.get("valid_rectangle"));
+        assertEquals(validRectangle, updatedMap.get("valid_rectangle").getSubsetExtent());
 
         nodeNames = subsetDef.getNodeNames();
         assertEquals(1, nodeNames.length);

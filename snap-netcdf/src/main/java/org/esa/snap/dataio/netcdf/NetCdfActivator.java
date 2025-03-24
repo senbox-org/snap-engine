@@ -49,9 +49,7 @@ public class NetCdfActivator implements Activator {
                                 // windows
                                 // the order of loading is important! tb 2024-09-10
                                 loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
-                                loaderMethod.invoke(null, jna_path.resolve("libcurl.dll"));
-//                                loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
-                                loaderMethod.invoke(null, jna_path.resolve("hdf5.dll"));
+                                loaderMethod.invoke(null, jna_path.resolve("hdf5_netcdf.dll"));
                                 loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
                                 loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
 

@@ -33,9 +33,14 @@ import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.runtime.Config;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
 import javax.media.jai.Histogram;
 import java.awt.Dimension;
@@ -324,27 +329,32 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                           ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
         Band sourceBand = (Band) bandMap.get(destBand);
+        final Polygon subsetPolygon = getSubsetPolygon(sourceBand);
         // if the band already has an internal raster
         if (sourceBand.getRasterData() != null) {
-            // if the destination region equals the entire raster
-            if (sourceBand.getRasterWidth() == destWidth
-                && sourceBand.getRasterHeight() == destHeight) {
-                copyBandRasterDataFully(sourceBand,
-                                        destBuffer,
-                                        destWidth, destHeight);
-                // else if the destination region is smaller than the entire raster
+            if (subsetPolygon == null) {
+                // if the destination region equals the entire raster
+                if (sourceBand.getRasterWidth() == destWidth
+                        && sourceBand.getRasterHeight() == destHeight) {
+                    copyBandRasterDataFully(sourceBand,
+                            destBuffer,
+                            destWidth, destHeight);
+                    // else if the destination region is smaller than the entire raster
+                } else {
+                    copyBandRasterDataSubSampling(sourceBand,
+                            sourceOffsetX, sourceOffsetY,
+                            sourceWidth, sourceHeight,
+                            sourceStepX, sourceStepY,
+                            destBuffer,
+                            destWidth);
+                }
             } else {
-                copyBandRasterDataSubSampling(sourceBand,
-                                              sourceOffsetX, sourceOffsetY,
-                                              sourceWidth, sourceHeight,
-                                              sourceStepX, sourceStepY,
-                                              destBuffer,
-                                              destWidth);
+                copyData(sourceBand.getData(), sourceOffsetX, sourceOffsetY, sourceBand.getRasterWidth(), destBuffer, destWidth, destHeight, subsetPolygon, sourceBand.getNoDataValue());
             }
         } else {
             // if the desired destination region equals the source raster
             if (sourceWidth == destWidth
-                && sourceHeight == destHeight) {
+                && sourceHeight == destHeight && subsetPolygon == null) {
                 readBandRasterDataRegion(sourceBand,
                                          sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
@@ -354,13 +364,31 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             } else {
                 Rectangle destRect = new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight);
                 readBandRasterDataSubsampled(sourceBand, destBuffer, destRect, sourceOffsetX, sourceOffsetY,
-                                             sourceWidth, sourceHeight, sourceStepX, sourceStepY);
+                                             sourceWidth, sourceHeight, sourceStepX, sourceStepY, subsetPolygon);
             }
         }
     }
 
+    private Polygon getSubsetPolygon(Band sourceBand) {
+        final Polygon subsetPolygon;
+        final ProductSubsetDef productSubsetDef = getSubsetDef();
+        if (productSubsetDef != null) {
+            final HashMap<String, SubsetRegionInfo> regionMap = productSubsetDef.getRegionMap();
+            if (regionMap != null) {
+                subsetPolygon = regionMap.get(sourceBand.getName()).getSubsetPolygon();
+            } else {
+                final GeoCoding productGeocoding = getSourceProduct().getSceneGeoCoding();
+                final GeoCoding bandGeocoding = sourceBand.getGeoCoding();
+                subsetPolygon = GeoUtils.projectPolygonToGeocoding(productSubsetDef.getSubsetPolygon(), productGeocoding, bandGeocoding);
+            }
+        } else {
+            subsetPolygon = null;
+        }
+        return subsetPolygon;
+    }
+
     private static void readBandRasterDataSubsampled(Band band, ProductData destData, Rectangle destRect, int sourceOffsetX, int sourceOffsetY,
-                                                     int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY) throws IOException {
+                                                     int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, final Polygon subsetPolygon) throws IOException {
 
         if (band.getProductReader() instanceof AbstractProductReader && band.isProductReaderDirectlyUsable()) {
             AbstractProductReader reader = (AbstractProductReader) band.getProductReader();
@@ -390,7 +418,14 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             final int currentSrcYOffset = sourceOffsetY + y * sourceStepY;
             int currentDestYOffset = y * destRect.width;
             for (int x = 0; x < destRect.width; x++) {
-                double value = getSourceValue(band, tileMap, sourceOffsetX + x * sourceStepX, currentSrcYOffset);
+                final Coordinate sourceCoordinate = new Coordinate(sourceOffsetX + x * sourceStepX, currentSrcYOffset);
+                double value = getSourceValue(band, tileMap, (int) sourceCoordinate.getX(), (int) sourceCoordinate.getY());
+                if (subsetPolygon != null) {
+                    final org.locationtech.jts.geom.Point sourcePoint = new GeometryFactory().createPoint(sourceCoordinate);
+                    if(!subsetPolygon.contains(sourcePoint)){
+                        value = band.getNoDataValue();
+                    }
+                }
                 destData.setElemDoubleAt(currentDestYOffset + x, value);
             }
 
@@ -463,6 +498,32 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                  int destPos,
                                  int destLength) {
         System.arraycopy(sourceBuffer.getElems(), sourcePos, destBuffer.getElems(), destPos, destLength);
+    }
+
+    private static void copyData(ProductData sourceBuffer,
+                                 int sourceOffsetX,
+                                 int sourceOffsetY,
+                                 int sourceWidth,
+                                 ProductData destBuffer,
+                                 int destWidth,
+                                 int destHeight,
+                                 Polygon subsetPolygon,
+                                 double noDataValue) {
+        for (int y = 0; y < destHeight; y++) {
+            final int currentSrcYOffset = sourceOffsetY + y;
+            int currentDestYOffset = y * destWidth;
+            for (int x = 0; x < destWidth; x++) {
+                final Coordinate sourceCoordinate = new Coordinate(sourceOffsetX + x, currentSrcYOffset);
+                double value = sourceBuffer.getElemDoubleAt((int) (sourceCoordinate.getX() * sourceWidth + sourceCoordinate.getY()));
+                if (subsetPolygon != null) {
+                    final org.locationtech.jts.geom.Point sourcePoint = new GeometryFactory().createPoint(sourceCoordinate);
+                    if (!subsetPolygon.contains(sourcePoint)) {
+                        value = noDataValue;
+                    }
+                }
+                destBuffer.setElemDoubleAt(currentDestYOffset + x, value);
+            }
+        }
     }
 
     private static void copyLine(ProductData sourceBuffer,

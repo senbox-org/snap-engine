@@ -2,11 +2,16 @@ package org.esa.snap.core.util;
 
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.math.Range;
+import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -767,6 +772,94 @@ public class GeoUtils {
         normalizeGeoPolygon(geoPoints);
         final ArrayList<GeneralPath> pathList = assemblePathList(geoPoints);
         return pathList.toArray(new GeneralPath[pathList.size()]);
+    }
+
+    /**
+     * Projects the polygon from its geocoding to the target geocoding
+     *
+     * @param polygon the polygon in pixel coordinates (X,Y)
+     * @param polygonGeoCoding the polygon geocoding
+     * @param geoCoding the target geocoding
+     * @return the polygon in pixel coordinates (X,Y), projected to the target geocoding
+     */
+    public static Polygon projectPolygonToGeocoding(Polygon polygon, GeoCoding polygonGeoCoding, GeoCoding geoCoding){
+        final Polygon polygonToMap = projectPolygonToMap(polygon, polygonGeoCoding);
+        return projectPolygonToImage(polygonToMap, geoCoding);
+    }
+
+    /**
+     * Projects the polygon from geo coordinates (Lat,Lon) to pixel coordinates (X,Y) using its geocoding
+     *
+     * @param polygon the polygon with geo coordinates (Lat,Lon)
+     * @param geoCoding the polygon geocoding
+     * @return the polygon with pixel coordinates (X,Y)
+     */
+    public static Polygon projectPolygonToImage(Polygon polygon, GeoCoding geoCoding) {
+        return reprojectPolygon(polygon, geoCoding, false);
+    }
+
+    /**
+     * Projects the polygon from pixel coordinates (X,Y) to map coordinates (Lat,Lon) using its geocoding
+     *
+     * @param polygon the polygon with pixel coordinates (X,Y)
+     * @param geoCoding the polygon geocoding
+     * @return the polygon with geo coordinates (Lat,Lon)
+     */
+    private static Polygon projectPolygonToMap(Polygon polygon, GeoCoding geoCoding) {
+        return reprojectPolygon(polygon, geoCoding, true);
+    }
+
+    private static Polygon reprojectPolygon(Polygon polygon, GeoCoding geoCoding, boolean toMap) {
+        if (polygon == null) {
+            return null;
+        }
+        final Coordinate[] polygonCoordinates = polygon.getCoordinates();
+        for (int i = 0; i < polygonCoordinates.length; i++) {
+            polygonCoordinates[i] = reprojectCoordinate(polygonCoordinates[i], geoCoding, toMap);
+        }
+        return new Polygon(new LinearRing(new CoordinateArraySequence(polygonCoordinates), polygon.getFactory()), new LinearRing[0], polygon.getFactory());
+    }
+
+    private static Coordinate reprojectCoordinate(Coordinate coordinate, GeoCoding geoCoding, boolean toMap) {
+        try {
+            final MathTransform modelToImage;
+            if (geoCoding == null) {
+                return coordinate;
+            }
+            if (toMap) {
+                modelToImage = geoCoding.getImageToMapTransform();
+            } else {
+                modelToImage = geoCoding.getImageToMapTransform().inverse();
+            }
+            final DirectPosition2D pos = new DirectPosition2D(coordinate.getX(), coordinate.getY());
+            modelToImage.transform(pos, pos);
+            if (!toMap) {
+                return new Coordinate(Math.max(0, (int) pos.getX()), Math.max(0, (int) pos.getY())); // convert to int and avoid negative values, for pixel coordinates
+            }
+            return new Coordinate(pos.getX(), pos.getY());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Calculates the polygon extent (the rectangle which contains all the points of the polygon)
+     *
+     * @param polygon the polygon to which the extent will be calculated
+     * @return the polygon extent (the rectangle which contains all the points of the polygon)
+     */
+    public static Rectangle computePolygonExtent(Polygon polygon) {
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (Coordinate coordinate : polygon.getCoordinates()) {
+            minX = (int) Math.min(minX, coordinate.getX());
+            maxX = (int) Math.max(maxX, coordinate.getX());
+            minY = (int) Math.min(minY, coordinate.getY());
+            maxY = (int) Math.max(maxY, coordinate.getY());
+        }
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     private static class PixelRegionFinder implements CoordinateFilter {

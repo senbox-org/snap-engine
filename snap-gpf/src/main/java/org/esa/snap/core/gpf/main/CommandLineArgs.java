@@ -59,6 +59,9 @@ public class CommandLineArgs {
     private long tileCacheCapacity;
     private int tileSchedulerParallelism;
 
+    private boolean inputFormatsRequested;
+    private boolean outputFormatsRequested;
+
     private CommandLineArgs(String[] args) {
         this.args = args.clone();
         if (this.args.length == 0) {
@@ -115,6 +118,10 @@ public class CommandLineArgs {
                 } else if (arg.startsWith("-D")) {
                     String[] pair = parseNameValuePair(arg);
                     systemPropertiesMap.put(pair[0], pair[1]);
+                } else if (arg.equals("-oformat")){
+                    outputFormatsRequested = true;
+                } else if (arg.equals("-iformat")){
+                    inputFormatsRequested = true;
                 } else if (arg.equals("-h")) {
                     helpRequested = true;
                 } else if (arg.equals("--diag")) {
@@ -168,7 +175,7 @@ public class CommandLineArgs {
             }
         }
 
-        if (operatorName == null && graphFilePath == null && !helpRequested && !diagnosticRequested) {
+        if (operatorName == null && graphFilePath == null && !helpRequested && !diagnosticRequested && !outputFormatsRequested && !inputFormatsRequested) {
             throw error("Either operator name or graph XML file must be given");
         }
         if (metadataFilePath != null && metadataFilePath.isEmpty()) {
@@ -262,6 +269,14 @@ public class CommandLineArgs {
 
     public boolean isStackTraceDump() {
         return stackTraceDump;
+    }
+
+    public boolean isOutputFormatsRequested() {
+        return outputFormatsRequested;
+    }
+
+    public boolean isInputFormatsRequested() {
+        return inputFormatsRequested;
     }
 
     private String parseOptionArgument(String arg, int index) throws Exception {

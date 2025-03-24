@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>12.0.0-SNAPSHOT</version>
+        <version>13.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-remote-products-repository</artifactId>
@@ -19,7 +19,7 @@
     <description>The Remote Products Repository allows downloading the products from a list of repositories.</description>
 
     <properties>
-        <tao.version>1.5.0</tao.version>
+        <tao.version>1.5.2</tao.version>
     </properties>
 
     <dependencies>

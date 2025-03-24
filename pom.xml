@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>12.0.0-SNAPSHOT</version>
+    <version>13.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -38,7 +38,7 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <snap.version>${project.version}</snap.version>
-        <snap-help-system.version>1.0.0</snap-help-system.version>
+        <snap-help-system.version>1.0.2</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.2</hdf.version>
         <hdf.native.version>2.7.2</hdf.native.version>
@@ -121,7 +121,6 @@
         <module>snap-test-utils</module>
         <module>snap-stac</module>
         <module>snap-engine-coverage</module>
-        <module>snap-performance-test</module>
     </modules>
 
     <profiles>
@@ -584,6 +583,21 @@
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-geojson</artifactId>
+                <version>${geotools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
