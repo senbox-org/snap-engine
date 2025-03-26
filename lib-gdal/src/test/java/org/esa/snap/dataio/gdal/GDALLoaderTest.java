@@ -109,6 +109,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     @STTM("SNAP-3637")
     public void testSyncGDALInitialisation(){
         assertNotNull(TEST_GDAL_LOADER);
+        assumeTrue(TEST_GDAL_LOADER.isNotInitialised());
         try {
             Path gdalRootFolderPath = getExpectedNativeLibrariesRootFolderPath();
             //remove gdal folder
