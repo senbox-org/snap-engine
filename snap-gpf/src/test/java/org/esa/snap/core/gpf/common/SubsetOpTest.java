@@ -161,12 +161,12 @@ public class SubsetOpTest {
         final Product sp = createTestProduct(100, 100);
         GeometryFactory gf = new GeometryFactory();
         Polygon polygon = gf.createPolygon(gf.createLinearRing(new Coordinate[]{
-                new Coordinate(10, 10),
-                new Coordinate(10, 90),
-                new Coordinate(90, 90),
-                new Coordinate(95, 45),
-                new Coordinate(90, 10),
-                new Coordinate(10, 10),
+                new Coordinate(-8.08, 8.08),
+                new Coordinate(-8.08, -8.09),
+                new Coordinate(8.09, -8.09),
+                new Coordinate(9.11, 1.01),
+                new Coordinate(8.09, 8.08),
+                new Coordinate(-8.08, 8.08),
         }), null);
 
         SubsetOp op = new SubsetOp();
@@ -230,12 +230,12 @@ public class SubsetOpTest {
     public void testInstantiationWithGPFForPolygonSubset2() throws GraphException {
         GeometryFactory gf = new GeometryFactory();
         Polygon polygon = gf.createPolygon(gf.createLinearRing(new Coordinate[]{
-                new Coordinate(10, 10),
-                new Coordinate(10, 90),
-                new Coordinate(90, 90),
-                new Coordinate(95, 45),
-                new Coordinate(90, 10),
-                new Coordinate(10, 10),
+                new Coordinate(-8.08, 8.08),
+                new Coordinate(-8.08, -8.09),
+                new Coordinate(8.09, -8.09),
+                new Coordinate(9.11, 1.01),
+                new Coordinate(8.09, 8.08),
+                new Coordinate(-8.08, 8.08),
         }), null);
 
         HashMap<String, Object> parameters = new HashMap<>();
