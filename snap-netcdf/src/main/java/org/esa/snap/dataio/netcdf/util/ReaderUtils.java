@@ -117,6 +117,7 @@ public class ReaderUtils {
         return 0.0;
     }
 
+    // @todo 3 tb/** this is duplicated in optbx - move to suitable location and merge 2025-04-04
     public static Number getAttributeValue(Attribute attribute) {
         if (attribute.isString()) {
             String stringValue = attribute.getStringValue();
