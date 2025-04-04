@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
-import org.esa.lib.gdal.AbstractGDALTest;
+import org.esa.lib.gdal.GDALTestUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class GDALInstallerTest {
             final GDALVersion gdalVersion = GDALVersion.getInternalVersion();
             assertEquals(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion), gdalVersion.getNativeLibrariesFolderPath());
             GDALInstaller.copyDistribution(gdalVersion);
-            assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
+            assertTrue(Files.exists(GDALTestUtils.getExpectedNativeLibrariesRootFolderPath()));
         } catch (IOException e) {
             fail("Error on testCopyDistribution(): " + e.getMessage());
         }
