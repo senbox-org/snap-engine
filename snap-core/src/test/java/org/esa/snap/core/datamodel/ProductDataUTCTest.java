@@ -82,9 +82,9 @@ public class ProductDataUTCTest {
         assertEquals(0, utc2.getSecondsFraction());
         assertEquals(0, utc3.getSecondsFraction());
 
-        assertEquals(845253, utc1.getMicroSecondsFraction());
-        assertEquals(21241, utc2.getMicroSecondsFraction());
-        assertEquals(197229, utc3.getMicroSecondsFraction());
+        assertEquals(845254, utc1.getMicroSecondsFraction());
+        assertEquals(21242, utc2.getMicroSecondsFraction());
+        assertEquals(197230, utc3.getMicroSecondsFraction());
 
     }
 

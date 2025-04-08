@@ -118,8 +118,8 @@ public class SubsetOp extends Operator {
     private File vectorFile;
 
     @Parameter(converter = JtsGeometryConverter.class,
-            description = "The subset region in pixel coordinates using WKT-format,\n" +
-                    "e.g. POLYGON(({x} {y}, {x1} {y1}, ..., {x} {y}))\n" +
+            description = "The subset region in geographical coordinates using WKT-format,\n" +
+                    "e.g. POLYGON(({lon1} {lat1}, {lon2} {lat2}, ..., {lon1} {lat1}))\n" +
                     "If not given, the geometryRegion or pixelRegion is used.")
     private Polygon polygonRegion;
 
@@ -209,15 +209,13 @@ public class SubsetOp extends Operator {
         }
 
         try {
-            if (this.vectorFile != null || this.polygonRegion != null || (this.geoRegion != null && !this.geoRegion.isRectangle())) {
+            if (this.vectorFile != null || this.polygonRegion != null) {
                 final MetadataInspector.Metadata productMetadata = new MetadataInspector.Metadata(sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
                 productMetadata.setGeoCoding(sourceProduct.getSceneGeoCoding());
                 if (this.polygonRegion != null) {
-                    this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), true, productMetadata, ProgressMonitor.NULL);
-                } else if (this.vectorFile != null) {
-                    this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
+                    this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
                 } else {
-                    this.productSubsetByPolygon.loadPolygonFromWKTString(this.geoRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
+                    this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
                 }
                 if (referenceBand != null) {
                     final GeoCoding referenceBandGeocoding = sourceProduct.getBand(referenceBand).getGeoCoding();

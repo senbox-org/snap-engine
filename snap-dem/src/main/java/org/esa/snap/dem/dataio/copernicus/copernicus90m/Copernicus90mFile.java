@@ -45,7 +45,7 @@ public class Copernicus90mFile extends ElevationFile {
             Product subsetProd = subsetOp.getTargetProduct();
 
             tile = new CopernicusElevationTile(demModel, subsetProd);
-
+            product.dispose();
         } else {
             tile = new CopernicusElevationTile(demModel, product);
         }

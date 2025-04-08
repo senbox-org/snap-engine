@@ -111,4 +111,8 @@ public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V>
         window.setFocusableWindowState(false);
         return window;
     }
+
+    public DialogProgressMonitor getDialogProgressMonitor() {
+        return dialogPM;
+    }
 }

@@ -2973,17 +2973,19 @@ public abstract class ProductData implements Cloneable {
         public UTC(double mjd) {
             super(3);
 
-            double microSeconds = (mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND;
-            double seconds = (mjd * SECONDS_PER_DAY) % SECONDS_PER_DAY;
-            final double days = (int) mjd;
+            int microSeconds = (int) Math.round((mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND);
+            int seconds = (int) ((mjd * SECONDS_PER_DAY) % SECONDS_PER_DAY);
+            final int days = (int) mjd;
 
             if (microSeconds < 0) {         // handle date prior to year 2000
                 microSeconds += MICROS_PER_SECOND;
                 seconds -= 1;
+            } else if (microSeconds > 999999) {
+                microSeconds -= 1;
             }
-            setElemIntAt(0, (int) days);
-            setElemIntAt(1, (int) seconds);
-            setElemIntAt(2, (int) microSeconds);
+            setElemIntAt(0, days);
+            setElemIntAt(1, seconds);
+            setElemIntAt(2, microSeconds);
         }
 
         /**
