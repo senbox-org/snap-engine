@@ -137,7 +137,6 @@ public class PropertyPane {
     }
 
 
-
     private boolean isInvisible(PropertyDescriptor descriptor) {
         return Boolean.FALSE.equals(descriptor.getAttribute("visible")) || descriptor.isDeprecated();
     }
@@ -188,11 +187,11 @@ public class PropertyPane {
             layout.setCellWeightX(rowIndex, 0, 0.0);
             panel.add(components[1], cell(rowIndex, 0));
             layout.setCellWeightX(rowIndex, 1, 1.0);
-            if(components[0] instanceof JScrollPane) {
+            if (components[0] instanceof JScrollPane) {
                 layout.setRowWeightY(rowIndex, 1.0);
                 layout.setRowFill(rowIndex, TableLayout.Fill.BOTH);
             }
-            if(components[0] instanceof JComboBox) {
+            if (components[0] instanceof JComboBox) {
                 layout.setRowWeightX(rowIndex, 1.0);
                 layout.setCellFill(rowIndex, 1, TableLayout.Fill.NONE);
             }
@@ -201,31 +200,31 @@ public class PropertyPane {
             layout.setCellColspan(rowIndex, 0, 2);
             layout.setCellWeightX(rowIndex, 0, 1.0);
             if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX) || descriptor.getName().endsWith(PROPERTY_SUBSECTIONBREAK_NAME_SUFFIX)) {
-                if (descriptor.getDisplayName() != null && descriptor.getDisplayName().length() > 0 ) {
+                if (descriptor.getDisplayName() != null && descriptor.getDisplayName().length() > 0) {
                     JLabel sectionLabel;
-            if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)) {
+                    if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)) {
                         sectionLabel = new JLabel(DASHES + " " + descriptor.getDisplayName() + " " + DASHES);
 
 //                        sectionLabel = new JLabel("• " + descriptor.getDisplayName() + " •");
                         int origFontSize = sectionLabel.getFont().getSize();
                         int increasedFontSize = (int) Math.floor(origFontSize * 1.15);
-                        Font sectionFont=new Font(sectionLabel.getFont().getName(),   Font.BOLD,increasedFontSize);
+                        Font sectionFont = new Font(sectionLabel.getFont().getName(), Font.BOLD, increasedFontSize);
                         sectionLabel.setFont(sectionFont);
                     } else {
 //                        sectionLabel = new JLabel( "‣ " + descriptor.getDisplayName() + " --");
-                        sectionLabel = new JLabel( "‣ " + descriptor.getDisplayName() + ":");
+                        sectionLabel = new JLabel("‣ " + descriptor.getDisplayName() + ":");
 //                        sectionLabel = new JLabel( "‣ " + descriptor.getDisplayName());
                         int origFontSize = sectionLabel.getFont().getSize();
                         int increasedFontSize = (int) Math.floor(origFontSize * 1.1);
 //                        Font sectionFont=new Font(sectionLabel.getFont().getName(),Font.ITALIC | Font.BOLD,sectionLabel.getFont().getSize());
-                        Font sectionFont=new Font(sectionLabel.getFont().getName(),  Font.BOLD,increasedFontSize);
+                        Font sectionFont = new Font(sectionLabel.getFont().getName(), Font.BOLD, increasedFontSize);
                         sectionLabel.setFont(sectionFont);
                     }
                     sectionLabel.setToolTipText(descriptor.getDescription());
                     sectionLabel.setForeground(Color.BLACK);
-                    panel.add(sectionLabel);
+                    panel.add(sectionLabel, cell(rowIndex, 0));
                 } else {
-                    panel.add(new JLabel(" "));
+                    panel.add(new JLabel(" "), cell(rowIndex, 0));
                 }
             } else {
                 components[0].setToolTipText(descriptor.getDescription());
