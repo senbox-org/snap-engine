@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 
 /**
@@ -39,6 +40,8 @@ import java.util.Objects;
  * given {@code RasterDataNode} at a given pyramid level.
  */
 public class BandOpImage extends RasterDataNodeOpImage {
+
+    private final static Logger LOG = Logger.getLogger(BandOpImage.class.getName());
 
     public static boolean prefetchTiles;
 
@@ -62,7 +65,8 @@ public class BandOpImage extends RasterDataNodeOpImage {
     protected void computeProductData(ProductData destData, Rectangle destRect) throws IOException {
         Band band = getBand();
         if (band.getProductReader() == null) {
-            throw new IllegalStateException("no product reader for band '" + band.getDisplayName() + "'");
+            LOG.info("no product reader for band '" + band.getDisplayName() + "'. Band raster data will not be read");
+            return;
         }
         if (getLevel() == 0) {
             band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,

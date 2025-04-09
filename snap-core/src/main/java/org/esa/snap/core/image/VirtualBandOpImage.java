@@ -40,6 +40,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 
 /**
@@ -49,6 +50,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Norman Fomferra
  */
 public class VirtualBandOpImage extends SingleBandedOpImage {
+
+    private final static Logger LOG = Logger.getLogger(VirtualBandOpImage.class.getName());
 
     private static final int TRUE = 255;
     private static final int FALSE = 0;
@@ -297,6 +300,10 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
             final RenderedImage sourceImage;
             final int dataType;
             final RasterDataNode rasterDataNode = symbol.getRaster();
+            if (rasterDataNode.getProduct() == null) {
+                LOG.info("no product found for raster node '" + rasterDataNode.getName() + "'. Raster data will not be read");
+                return false;
+            }
             if (symbol.getSource() == RasterDataSymbol.GEOPHYSICAL) {
                 sourceImage = ImageManager.getInstance().getGeophysicalImage(rasterDataNode, getLevel());
                 dataType = rasterDataNode.getGeophysicalDataType();
