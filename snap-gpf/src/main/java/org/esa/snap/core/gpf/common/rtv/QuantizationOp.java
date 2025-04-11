@@ -8,7 +8,6 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Scanner;
 
 import javax.media.jai.util.Range;
 
@@ -188,20 +187,20 @@ public class QuantizationOp extends Operator {
 	        }
 			
 			final Map<Integer, Range> result = new HashMap<>();
-			try (final Scanner scanner = new Scanner(text)) {
-				while (scanner.hasNextLine()) {
-					final String line = scanner.nextLine();
-			        final String[] s = StringUtils.csvToArray(line);
-			        if (s.length != 3) {
-			            throw new ConversionException("Invalid entry: " + line);
-			        }
-	
-			        result.put(Integer.valueOf(s[0]), new Range(Double.class, Double.valueOf(s[1]), false, Double.valueOf(s[2]), true));
+			try {
+				String[] arrIntervals = text.split(";");
+				for (String interval: arrIntervals){
+					final String[] s = StringUtils.csvToArray(interval);
+					if (s.length != 3) {
+						throw new ConversionException("Invalid entry: " + interval);
+					}
+
+					result.put(Integer.valueOf(s[0]), new Range(Double.class, Double.valueOf(s[1]), false, Double.valueOf(s[2]), true));
 				}
 			} catch (Exception ex) {
 				throw new ConversionException("Invalid map parameter", ex);
 			}
-			
+
 			return result;
 		}
 
@@ -213,7 +212,7 @@ public class QuantizationOp extends Operator {
 			
 			final StringBuilder result = new StringBuilder();
 			value.entrySet().stream().forEach(e -> {
-				result.append(e.getKey()).append(",").append(e.getValue().getMinValue()).append(",").append(e.getValue().getMaxValue()).append("\n");
+				result.append(e.getKey()).append(",").append(e.getValue().getMinValue()).append(",").append(e.getValue().getMaxValue()).append(";");
 			});
 			return result.toString();
 		}
