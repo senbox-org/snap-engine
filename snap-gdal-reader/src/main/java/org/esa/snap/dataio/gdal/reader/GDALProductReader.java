@@ -25,7 +25,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
@@ -145,7 +144,7 @@ public class GDALProductReader extends AbstractProductReader {
             double resolutionX = adfGeoTransform[1];
             double resolutionY = (adfGeoTransform[5] > 0) ? adfGeoTransform[5] : -adfGeoTransform[5];
             return ImageUtils.buildCrsGeoCoding(originX, originY, resolutionX, resolutionY, imageWidth, imageHeight, mapCRS, subsetBounds);
-        } else if (product != null) {
+        } else {
             String gcpProjection = gdalDataset.getGCPProjection();
 
             int gcpCount = gdalDataset.getGCPCount();
@@ -163,15 +162,21 @@ public class GDALProductReader extends AbstractProductReader {
             if (gcpCount > 0) {
                 Vector gcps = gdalDataset.getGCPs();
                 final GcpDescriptor gcpDescriptor = GcpDescriptor.getInstance();
-                final ProductNodeGroup<Placemark> gcpGroup = product.getGcpGroup();
+                final List<Placemark> gcpPlacemarksList=new ArrayList<>();
+                final GeoCoding productGeocoding;
+                if (product != null) {
+                    productGeocoding = product.getSceneGeoCoding();
+                } else {
+                    productGeocoding = null;
+                }
                 for (Object gcpJNI : gcps) {
                     GCP gcp = new GCP(gcpJNI);
                     final PixelPos pixelPos = new PixelPos(gcp.getGCPPixel(), gcp.getGCPLine());
                     final GeoPos geoPos = new GeoPos(gcp.getGCPY(), gcp.getGCPX());
-                    final Placemark gcpPlacemark = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i++, "", pixelPos, geoPos, product.getSceneGeoCoding());
-                    gcpGroup.add(gcpPlacemark);
+                    final Placemark gcpPlacemark = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i++, "", pixelPos, geoPos, productGeocoding);
+                    gcpPlacemarksList.add(gcpPlacemark);
                 }
-                final Placemark[] gcpPlacemarks = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
+                final Placemark[] gcpPlacemarks = gcpPlacemarksList.toArray(new Placemark[0]);
                 final Datum datum = getDatum(gcpProjection);
                 final int productWidth = gdalDataset.getRasterXSize();
                 final int productHeight = gdalDataset.getRasterYSize();

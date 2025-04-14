@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
@@ -25,14 +24,12 @@ import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.math.MathUtils;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.jaitools.media.jai.vectorize.VectorizeDescriptor;
 import org.locationtech.jts.geom.Geometry;
@@ -67,8 +64,6 @@ public class RasterToVectorOp extends Operator {
 	private String bandName = null;
 
     private Band bandToConvert;
-    private int numberOfTiles;
-    private AtomicInteger processedTiles = new AtomicInteger(0);
     
     private AffineTransformation jtsTransformation;
 	@Override
@@ -140,11 +135,6 @@ public class RasterToVectorOp extends Operator {
 
 		this.targetProduct.getVectorDataGroup().add(vdn);
 
-		// Count the number of tiles
-		int w = MathUtils.ceilInt((double)bandToConvert.getRasterWidth() / tileSize.getWidth());
-		int h = MathUtils.ceilInt((double)bandToConvert.getRasterHeight() / tileSize.getHeight());
-		this.numberOfTiles =  w * h;
-
 		final AffineTransform transf =  bandToConvert.getImageToModelTransform();
 		this.jtsTransformation =
 				new AffineTransformation(
@@ -154,41 +144,34 @@ public class RasterToVectorOp extends Operator {
 						transf.getShearY(),
 						transf.getScaleY(),
 						transf.getTranslateY());
+
+		// perform jai operation
+		ParameterBlockJAI pb = new ParameterBlockJAI("Vectorize");
+		pb.setSource("source0", bandToConvert.getSourceImage());
+		pb.setParameter("band", 0);
+		pb.setParameter("insideEdges", true);
+		pb.setParameter("removeCollinear", true);
+		final List<Number> noData = new ArrayList<>(1);
+		if (bandToConvert.isNoDataValueUsed()) {
+			noData.add(bandToConvert.getNoDataValue());
+		} else {
+			noData.add(0);
+		}
+		pb.setParameter("outsideValues", noData);
+
+		final RenderedOp dest = JAI.create("Vectorize", pb);
+
+		@SuppressWarnings("unchecked")
+		final Collection<Geometry> geometryCollection =
+				(Collection<Geometry>) dest.getProperty(VectorizeDescriptor.VECTOR_PROPERTY_NAME);
+
+		final DefaultFeatureCollection featureCollection = vdn.getFeatureCollection();
+		int counter = 0;
+		for (final Geometry shape : geometryCollection) {
+			shape.apply(jtsTransformation);
+			featureCollection.add(PlainFeatureFactory.createPlainFeature(vdn.getFeatureType(), String.valueOf(counter++), shape, null));
+		}
 	}
-
-	@Override
-	public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        int computedTiles = this.processedTiles.addAndGet(1);
-        if (computedTiles == numberOfTiles) {
-            // perform jai operation
-            ParameterBlockJAI pb = new ParameterBlockJAI("Vectorize");
-            pb.setSource("source0", bandToConvert.getSourceImage());
-            pb.setParameter("band", 0);
-            pb.setParameter("insideEdges", true);
-            pb.setParameter("removeCollinear", true);
-    		final List<Number> noData = new ArrayList<>(1);
-    		if (bandToConvert.isNoDataValueUsed()) {
-    	        noData.add(bandToConvert.getNoDataValue());
-    		} else {
-    			noData.add(0);
-    		}
-            pb.setParameter("outsideValues", noData);
-
-            final RenderedOp dest = JAI.create("Vectorize", pb);
-
-            @SuppressWarnings("unchecked")
-            final Collection<Geometry> geometryCollection =
-                    (Collection<Geometry>) dest.getProperty(VectorizeDescriptor.VECTOR_PROPERTY_NAME);
-        	
-        	VectorDataNode vdn = this.targetProduct.getVectorDataGroup().get("shapes");
-        	final DefaultFeatureCollection featureCollection = vdn.getFeatureCollection();
-        	int counter = 0;
-        	for (final Geometry shape : geometryCollection) {
-        		shape.apply(jtsTransformation);
-        		featureCollection.add(PlainFeatureFactory.createPlainFeature(vdn.getFeatureType(), String.valueOf(counter++), shape, null));
-        	}
-        }
-	}	
 
 	/**
 	 * Set a new value for the sourceProduct.
