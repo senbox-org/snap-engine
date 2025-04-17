@@ -54,7 +54,7 @@ public class QuantizationOp extends Operator {
 			alias = "bandName", rasterDataNodeType = Band.class)
 	private String bandName = null;
 
-	@Parameter(label = "Intervals", description = "The intervals used for conversion.", 
+	@Parameter(label = "Intervals", description = "The intervals used for conversion, separated by semicolons.",
 			alias = "intervalsMap", converter = MapIntegerRangeConverter.class)
 	private Map<Integer, Range> intervalsMap = new HashMap<>();
 	
