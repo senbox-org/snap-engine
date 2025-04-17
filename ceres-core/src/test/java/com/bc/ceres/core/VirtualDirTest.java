@@ -16,16 +16,21 @@
 
 package com.bc.ceres.core;
 
-import static org.junit.Assert.*;
-
-import org.junit.*;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static org.junit.Assert.*;
 
 public class VirtualDirTest {
 
@@ -69,9 +74,26 @@ public class VirtualDirTest {
         final File file1 = virtualDir.getFile("File1");
         assertTrue(file1.exists());
         assertFalse("Path of File1 should not contain the parent path of the zip file.",
-                    file1.getAbsolutePath().contains(zipFile.getParent()));
+                file1.getAbsolutePath().contains(zipFile.getParent()));
 
         testFileNode(zipFile, virtualDir);
+
+        assertTrue(virtualDir.isCompressed());
+        assertTrue(virtualDir.isArchive());
+    }
+
+    @Test
+    public void testZip_Path() throws IOException {
+        Path testDataPath = getTestDataPath("VirtualDirTest.zip");
+        final VirtualDir virtualDir = VirtualDir.create(testDataPath);
+        final File file1 = virtualDir.getFile("File1");
+        assertTrue(file1.exists());
+
+        assertFalse("Path of File1 should not contain the parent path of the zip file.",
+                file1.getAbsolutePath().contains(testDataPath.getParent().toString()));
+
+
+        testFileNode(testDataPath, virtualDir);
 
         assertTrue(virtualDir.isCompressed());
         assertTrue(virtualDir.isArchive());
@@ -93,6 +115,41 @@ public class VirtualDirTest {
     }
 
     @Test
+    public void testDir_Path() throws IOException {
+        final Path inputPath = getTestDataPath("VirtualDirTest.dir");
+
+        // make empty "dir2", because git removes empty dirs
+        final Path dir2 = inputPath.resolve("dir2");
+        Files.createDirectories(dir2);
+        try {
+            final VirtualDir virtualDir = VirtualDir.create(inputPath);
+            testFileNode(inputPath, virtualDir);
+
+            assertFalse(virtualDir.isCompressed());
+            assertFalse(virtualDir.isArchive());
+        } finally {
+            deleteTree(dir2);
+        }
+    }
+
+    private static void deleteTree(Path path) throws IOException {
+        try (Stream<Path> filePathStream = Files.walk(path)) {
+            filePathStream.forEach(new Consumer<Path>() {
+                @Override
+                public void accept(Path filePath) {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                        System.out.println(filePath);
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+        }
+    }
+
+    @Test
     public void testNoZip() throws IOException {
         File file = getTestDataDir("VirtualDirTest.nozip");
         VirtualDir virtualDir = VirtualDir.create(file);
@@ -102,7 +159,14 @@ public class VirtualDirTest {
     @Test
     public void testNullArg() throws IOException {
         try {
-            VirtualDir.create(null);
+            VirtualDir.create((File) null);
+            fail("NullPointerException?");
+        } catch (NullPointerException e) {
+            // ok
+        }
+
+        try {
+            VirtualDir.create((Path) null);
             fail("NullPointerException?");
         } catch (NullPointerException e) {
             // ok
@@ -154,6 +218,16 @@ public class VirtualDirTest {
 
     private static File getTestDataDir(String path) {
         return new File(getTestDataDir(), path);
+    }
+
+    private static Path getTestDataPath(String path) {
+        final File testDataDir = getTestDataDir();
+        final Path testDataPath = Paths.get(testDataDir.getAbsolutePath());
+        return testDataPath.resolve(path);
+    }
+
+    private void testFileNode(Path inputPath, VirtualDir virtualDir) throws IOException {
+        testFileNode(inputPath.toFile(), virtualDir);
     }
 
     private void testFileNode(File file, VirtualDir virtualDir) throws IOException {

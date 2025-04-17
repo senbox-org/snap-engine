@@ -2,6 +2,8 @@ package org.esa.snap.dataio.netcdf.util;
 
 import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
+import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
@@ -105,7 +107,44 @@ public class ReaderUtilsTest {
         assertTrue(ReaderUtils.mustScale(0.8, 0.0));
         assertTrue(ReaderUtils.mustScale(0.0, -273.0));
         assertTrue(ReaderUtils.mustScale(100.0, 206.0));
+        assertTrue(ReaderUtils.mustScale(1.0, 0.93));
 
         assertFalse(ReaderUtils.mustScale(1.0, 0.0));
+    }
+
+    @Test
+    @STTM("SNAP-1696,SNAP-3711")
+    public void testScaleArray_scaling() {
+        final Array shortArray = Array.factory(DataType.SHORT, new int[]{2, 3}, new short[]{1, 2, 3, 4, 5, 6});
+
+        final Attribute scaleAttribute = mock(Attribute.class);
+        when(scaleAttribute.getNumericValue()).thenReturn(0.5);
+
+        final Attribute offsetAttribute = mock(Attribute.class);
+        when(offsetAttribute.getNumericValue()).thenReturn(-1.0);
+
+        final Variable variable = mock(Variable.class);
+        when(variable.findAttribute("scale_factor")).thenReturn(scaleAttribute);
+        when(variable.findAttribute("add_offset")).thenReturn(offsetAttribute);
+
+        final Array scaledArray = ReaderUtils.scaleArray(shortArray, variable);
+        assertEquals(-0.5, scaledArray.getDouble(0), 1e-8);
+        assertEquals(0.5, scaledArray.getDouble(2), 1e-8);
+        assertEquals(1.5, scaledArray.getDouble(4), 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-1696,SNAP-3711")
+    public void testScaleArray_keepRaw() {
+        final Array shortArray = Array.factory(DataType.INT, new int[]{2, 3}, new int[]{7, 8, 9, 10, 11, 12});
+
+        final Variable variable = mock(Variable.class);
+        when(variable.findAttribute("scale_factor")).thenReturn(null);
+        when(variable.findAttribute("add_offset")).thenReturn(null);
+
+        final Array scaledArray = ReaderUtils.scaleArray(shortArray, variable);
+        assertEquals(7, scaledArray.getDouble(0), 1e-8);
+        assertEquals(9, scaledArray.getDouble(2), 1e-8);
+        assertEquals(11, scaledArray.getDouble(4), 1e-8);
     }
 }
