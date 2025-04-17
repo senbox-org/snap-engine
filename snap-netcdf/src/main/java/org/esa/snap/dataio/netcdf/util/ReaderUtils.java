@@ -19,6 +19,7 @@ package org.esa.snap.dataio.netcdf.util;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import ucar.ma2.Array;
+import ucar.ma2.MAMath;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 import ucar.nc2.iosp.netcdf3.N3iosp;
@@ -84,7 +85,7 @@ public class ReaderUtils {
 
     public static String getVariableName(RasterDataNode rasterDataNode) {
         String name = N3iosp.makeValidNetcdfObjectName(rasterDataNode.getName());
-        name = name.replace( '.', '_' );
+        name = name.replace('.', '_');
         if (!VariableNameHelper.isVariableNameValid(name)) {
             name = VariableNameHelper.convertToValidName(name);
         }
@@ -116,6 +117,7 @@ public class ReaderUtils {
         return 0.0;
     }
 
+    // @todo 3 tb/** this is duplicated in optbx - move to suitable location and merge 2025-04-04
     public static Number getAttributeValue(Attribute attribute) {
         if (attribute.isString()) {
             String stringValue = attribute.getStringValue();
@@ -139,6 +141,21 @@ public class ReaderUtils {
         }
 
         return offset != 0.0;
+    }
+
+    public static Array scaleArray(Array rawArray, Variable variable) {
+        final double scaleFactor = getScalingFactor(variable);
+        final double offset = getAddOffset(variable);
+
+        Array result;
+        if (mustScale(scaleFactor, offset)) {
+            final MAMath.ScaleOffset scaleOffset = new MAMath.ScaleOffset(scaleFactor, offset);
+            result = MAMath.convert2Unpacked(rawArray, scaleOffset);
+        } else {
+            result = rawArray;
+        }
+
+        return result;
     }
 }
 

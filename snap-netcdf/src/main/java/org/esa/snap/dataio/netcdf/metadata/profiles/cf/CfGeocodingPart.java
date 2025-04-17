@@ -458,7 +458,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         public final Variable lonVar;
         public final Variable latVar;
 
-        public GeoVariables(Variable lonVar, Variable latVar) {
+        GeoVariables(Variable lonVar, Variable latVar) {
             this.lonVar = lonVar;
             this.latVar = latVar;
         }
@@ -466,13 +466,7 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     static double[] readVarAsDoubleArray(Variable variable) throws IOException {
         Array lonArray = variable.read();
-
-        final double scaleFactor = ReaderUtils.getScalingFactor(variable);
-        final double offset = ReaderUtils.getAddOffset(variable);
-        if (ReaderUtils.mustScale(scaleFactor, offset)) {
-            final MAMath.ScaleOffset scaleOffset = new MAMath.ScaleOffset(scaleFactor, offset);
-            lonArray = MAMath.convert2Unpacked(lonArray, scaleOffset);
-        }
+        lonArray = ReaderUtils.scaleArray(lonArray, variable);
         return (double[]) lonArray.get1DJavaArray(DataType.DOUBLE);
     }
 }
