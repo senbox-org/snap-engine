@@ -166,10 +166,10 @@ public class FilterOperator extends Operator {
             filterBand = new GeneralFilterBand(bandName, band, generalFilter.operator, getKernel(generalFilter), 1);
         }
         final Band targetBand = new Band(bandName, ProductData.TYPE_FLOAT32, band.getRasterWidth(), band.getRasterHeight());
-        filterBand.setUnit(band.getUnit());
+        targetBand.setUnit(band.getUnit());
         targetBand.setNoDataValueUsed(filterBand.isNoDataValueUsed());
         targetBand.setNoDataValue(filterBand.getNoDataValue());
-        filterBand.setValidPixelExpression(band.getValidPixelExpression());
+        targetBand.setValidPixelExpression(band.getValidPixelExpression());
         ProductUtils.copySpectralBandProperties(band, targetBand);
         targetBand.setDescription(String.format("Filter ''%s''", filter));
         targetBand.setSourceImage(filterBand.getSourceImage());
