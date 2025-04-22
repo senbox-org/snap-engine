@@ -18,10 +18,12 @@
 
 package org.esa.snap.raster.gpf;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +43,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Marco Peters
@@ -216,6 +219,25 @@ public class FilterOperatorSmallDataTest {
                 6.0f, 6.0f, 7.0f, 1.0f, 1.0f,
         };
         assertArrayEquals(expectedB2Data, b2Pixels, 1.0e-6f);
+    }
+
+    @STTM("SNAP-3996")
+    @Test
+    public void test_band_unit() throws IOException {
+
+        final Product sourceProduct = new Product("P1", "T", width, height);
+        final Band srcBand = sourceProduct.addBand("B1", ProductData.TYPE_INT16);
+        BufferedImage srcBandImage = createOneBandedUShortImage(5, 5, sourceDataB1);
+        srcBand.setSourceImage(srcBandImage);
+        srcBand.setUnit(Unit.AMPLITUDE);
+
+        final HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("sourceBands", "B1");
+        parameters.put("selectedFilterName", "Mean 3x3");
+        final Product targetProduct = GPF.createProduct("Image-Filter", parameters, sourceProduct);
+        final Band targetBand = targetProduct.getBand("B1");
+        final String unit = targetBand.getUnit();
+        assertEquals(unit, Unit.AMPLITUDE);
     }
 
 
