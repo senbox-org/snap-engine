@@ -398,7 +398,7 @@ public final class AbstractMetadata {
                 bandMetadataList.add(child);
             }
         }
-        return bandMetadataList.toArray(new MetadataElement[bandMetadataList.size()]);
+        return bandMetadataList.toArray(new MetadataElement[0]);
     }
 
     /**
@@ -585,8 +585,7 @@ public final class AbstractMetadata {
                 try {
                     return ProductData.UTC.parse(newTimeStr, format);
                 } catch (Throwable e) {
-                    ProductData.UTC time = ProductData.UTC.parse(newTimeStr, format);
-                    return time;
+                    return ProductData.UTC.parse(newTimeStr, format);
                 }
             }
             return ProductData.UTC.parse(timeStr, format);

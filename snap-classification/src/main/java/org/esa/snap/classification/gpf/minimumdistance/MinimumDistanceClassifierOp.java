@@ -60,16 +60,16 @@ public class MinimumDistanceClassifierOp extends Operator {
     @Parameter(defaultValue = "false", description = "Choose to save or load classifier")
     private Boolean doLoadClassifier = false;
 
-    @Parameter(defaultValue = "true", description = "Quantization for raster traiing")
+    @Parameter(defaultValue = "true", description = "Quantization for raster training")
     private Boolean doClassValQuantization = true;
 
-    @Parameter(defaultValue = "0.0", description = "Quantization min class value for raster traiing")
+    @Parameter(defaultValue = "0.0", description = "Quantization min class value for raster training")
     private Double minClassValue = 0.0;
 
-    @Parameter(defaultValue = "5.0", description = "Quantization step size for raster traiing")
+    @Parameter(defaultValue = "5.0", description = "Quantization step size for raster training")
     private Double classValStepSize = 5.0;
 
-    @Parameter(defaultValue = "101", description = "Quantization class levels for raster traiing")
+    @Parameter(defaultValue = "101", description = "Quantization class levels for raster training")
     private int classLevels = 101;
 
     @Parameter(description = "Raster bands to train on", label = "Raster Classes")
