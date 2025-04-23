@@ -52,7 +52,7 @@ public class TestClient {
                 new String[]{"sentinel-2-l2a", "landsat-c2-l2"},
                 new double[]{-124.2751, 45.5469, -123.9613, 45.7458},
                 "2020-01-01/2022-11-05");
-        Assert.assertEquals(619, results.length);
+        Assert.assertEquals(670, results.length);
     }
 
     @Test
