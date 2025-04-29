@@ -138,8 +138,12 @@ class ProductNamespaceExtenderImpl implements ProductNamespaceExtender {
         namespace.registerSymbol(new PixelXSymbol(namePrefix + PIXEL_X_SYMBOL));
         namespace.registerSymbol(new PixelYSymbol(namePrefix + PIXEL_Y_SYMBOL));
 
-        namespace.registerSymbol(new PixelLatSymbol(namePrefix + PIXEL_LAT_SYMBOL, product.getSceneGeoCoding(), width, height));
-        namespace.registerSymbol(new PixelLonSymbol(namePrefix + PIXEL_LON_SYMBOL, product.getSceneGeoCoding(), width, height));
+        // @todo 2 tb/tb investigate why using the proxy let's BandMathsOpTest fail 2025-04-29
+        // geocoding proxy for lazy loading - prevents reading of data here tb 2025-04-28
+        //final GeoCodingLazyProxy geoCoding = new GeoCodingLazyProxy(product);
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        namespace.registerSymbol(new PixelLatSymbol(namePrefix + PIXEL_LAT_SYMBOL, geoCoding, width, height));
+        namespace.registerSymbol(new PixelLonSymbol(namePrefix + PIXEL_LON_SYMBOL, geoCoding, width, height));
 
         namespace.registerSymbol(new PixelTimeSymbol(namePrefix + PIXEL_TIME_SYMBOL, product));
         namespace.registerSymbol(new PixelTimeSymbol(namePrefix + "MJD", product)); // For compatibility with SNAP 1.0 only
