@@ -2,7 +2,7 @@ package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
 import eu.esa.snap.core.lib.NativeLibraryTools;
-import org.esa.lib.gdal.AbstractGDALTest;
+import org.esa.lib.gdal.GDALTestUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class GDALVersionTest {
     }
 
     static Path getExpectedGDALVersionLocation(GDALVersion gdalVersion) {
-        return AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedDirName(gdalVersion.name));
+        return GDALTestUtils.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedDirName(gdalVersion.name));
     }
 
     private static String getExpectedLocation() {
@@ -43,7 +43,7 @@ public class GDALVersionTest {
     }
 
     private static URL getExpectedZipFileURLFromSources() {
-        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + AbstractGDALTest.getExpectedDirectory() + "/" + getExpectedZipName(TEST_VERSION.name).replace(File.separator, "/"));
+        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + GDALTestUtils.getExpectedDirectory() + "/" + getExpectedZipName(TEST_VERSION.name).replace(File.separator, "/"));
     }
 
     private static Path getExpectedZipFilePath() {
@@ -114,7 +114,7 @@ public class GDALVersionTest {
     @STTM("SNAP-3523")
     public void testGetNativeLibrariesRootFolderPath() {
         String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
-        assertEquals(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath(), NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot));
+        assertEquals(GDALTestUtils.getExpectedNativeLibrariesRootFolderPath(), NativeLibraryTools.getNativeLibrariesRootFolderPath(libraryRoot));
     }
 
     @Test
