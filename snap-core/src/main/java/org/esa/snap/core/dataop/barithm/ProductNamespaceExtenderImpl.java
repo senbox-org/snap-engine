@@ -140,8 +140,8 @@ class ProductNamespaceExtenderImpl implements ProductNamespaceExtender {
 
         // @todo 2 tb/tb investigate why using the proxy let's BandMathsOpTest fail 2025-04-29
         // geocoding proxy for lazy loading - prevents reading of data here tb 2025-04-28
-        //final GeoCodingLazyProxy geoCoding = new GeoCodingLazyProxy(product);
-        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        final GeoCodingLazyProxy geoCoding = new GeoCodingLazyProxy(product);
+        //final GeoCoding geoCoding = product.getSceneGeoCoding();
         namespace.registerSymbol(new PixelLatSymbol(namePrefix + PIXEL_LAT_SYMBOL, geoCoding, width, height));
         namespace.registerSymbol(new PixelLonSymbol(namePrefix + PIXEL_LON_SYMBOL, geoCoding, width, height));
 
