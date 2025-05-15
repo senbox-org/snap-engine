@@ -51,4 +51,8 @@ public class RasterExtract {
     public int getLayerIdx() {
         return layerIdx;
     }
+
+    public void setLayerIdx(int layerIdx) {
+        this.layerIdx = layerIdx;
+    }
 }

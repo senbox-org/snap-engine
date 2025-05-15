@@ -29,6 +29,7 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.quicklooks.Quicklook;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
+import org.esa.snap.core.dataop.barithm.GeoCodingLazyProxy;
 import org.esa.snap.core.dataop.barithm.RasterDataSymbol;
 import org.esa.snap.core.dataop.barithm.SingleFlagSymbol;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
@@ -2557,7 +2558,12 @@ public class Product extends ProductNode implements Closeable {
                                              refRaster.getRasterWidth(),
                                              refRaster.getRasterHeight(),
                                              expression, color, transparency);
-            mask.setGeoCoding(refRaster.getGeoCoding());
+            if (refRaster.hasGeoCoding()) {
+                final GeoCodingLazyProxy geoCodingLazyProxy = new GeoCodingLazyProxy(refRaster.getProduct());
+                mask.setGeoCoding(geoCodingLazyProxy);
+            } else {
+                mask.setGeoCoding(null);
+            }
         }
         addMask(mask);
         return mask;
