@@ -40,12 +40,12 @@
         <snap.version>${project.version}</snap.version>
         <snap-help-system.version>1.0.2</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <hdf.version>2.7.2</hdf.version>
-        <hdf.native.version>2.7.2</hdf.native.version>
+        <hdf.version>3.3.2</hdf.version>
+        <hdf.native.version>3.3.2</hdf.native.version>
         <slf4j.version>2.0.17</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <geotools.version>28.2</geotools.version>
         <org.locationtech.version>1.17.0</org.locationtech.version>
-        <jide.version>3.7.12</jide.version>
+        <jide.version>3.7.15</jide.version>
         <jackson.version>2.19.0</jackson.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -337,7 +337,7 @@
                 -->
                 <groupId>org.ejml</groupId>
                 <artifactId>ejml-ddense</artifactId>
-                <version>0.43</version>
+                <version>0.44.0</version>
             </dependency>
 
             <!-- JDOM Library ############################################# -->
