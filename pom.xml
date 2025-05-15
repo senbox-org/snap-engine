@@ -40,13 +40,27 @@
         <snap.version>${project.version}</snap.version>
         <snap-help-system.version>1.0.2</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
+
+        <apache.poi.version>5.4.1</apache.poi.version>
+        <commons-codec.version>1.18.0</commons-codec.version>
+        <commons-collections.version>3.2.2</commons-collections.version>
+        <commons-compress.version>1.27.1</commons-compress.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-math3.version>3.6.1</commons-math3.version>
+        <commons-net.version>3.11.1</commons-net.version>
+        <commons-text.version>1.13.1</commons-text.version>
+        <geotools.version>28.2</geotools.version>
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
-        <slf4j.version>2.0.17</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>28.2</geotools.version>
-        <org.locationtech.version>1.17.0</org.locationtech.version>
         <jide.version>3.7.15</jide.version>
+        <jna.version>5.17.0</jna.version>
         <jackson.version>2.19.0</jackson.version>
+        <slf4j.version>2.0.17</slf4j.version> <!-- used by netcdf, yes we hate that! -->
+        <org.locationtech.version>1.17.0</org.locationtech.version>
+        <mockito.version>5.17.0</mockito.version>
+        <velocity.version>2.4.1</velocity.version>
+
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
@@ -56,7 +70,6 @@
             ${project.basedir}/snap-engine-coverage/target/site/
             jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <mockito.version>5.17.0</mockito.version>
     </properties>
 
     <modules>
@@ -281,12 +294,12 @@
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.17.0</version>
+                <version>${jna.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>5.17.0</version>
+                <version>${jna.version}</version>
             </dependency>
 
             <dependency>
@@ -305,16 +318,6 @@
                 <artifactId>snap-gdal-writer</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
-            <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
-
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>1.7.30</version>
-            </dependency>
-            -->
 
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -369,20 +372,20 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.12.0</version>
+                <version>${commons-lang3.version}</version>
             </dependency>
 
             <!-- keep for backwards compatibility with imageio-ext libs -->
             <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
+                <version>${commons-lang.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
-                <version>1.10.0</version>
+                <version>${commons-text.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -397,33 +400,33 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-math3</artifactId>
-                <version>3.6.1</version>
+                <version>${commons-math3.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
-                <version>3.2.2</version>
+                <version>${commons-collections.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.velocity</groupId>
                 <artifactId>velocity-engine-core</artifactId>
-                <version>2.3</version>
+                <version>${velocity.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.26.0</version>
+                <version>${commons-compress.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi</artifactId>
-                <version>5.4.1</version>
+                <version>${apache.poi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
-                <version>5.4.1</version>
+                <version>${apache.poi.version}</version>
             </dependency>
 
             <dependency>
