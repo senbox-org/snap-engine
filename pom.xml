@@ -41,6 +41,7 @@
         <snap-help-system.version>1.0.2</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
 
+        <apache.httpclient.version>4.5.14</apache.httpclient.version>
         <apache.poi.version>5.4.1</apache.poi.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-collections.version>3.2.2</commons-collections.version>
@@ -426,6 +427,17 @@
                 <version>${commons-compress.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${apache.httpclient.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi</artifactId>
