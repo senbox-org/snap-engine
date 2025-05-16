@@ -62,6 +62,7 @@
                         <publicPackage>javax.measure.*</publicPackage>
                         <publicPackage>javax.vecmath.*</publicPackage>
                         <publicPackage>org.jdom.*</publicPackage>
+                        <publicPackage>org.jspecify.*</publicPackage>
                         <publicPackage>org.geotools.*</publicPackage>
                         <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>org.locationtech.jts.*</publicPackage>
