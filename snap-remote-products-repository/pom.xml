@@ -20,6 +20,7 @@
 
     <properties>
         <tao.version>1.5.2</tao.version>
+        <apache.httpclient.version>4.5.14</apache.httpclient.version>
     </properties>
 
     <dependencies>
@@ -43,7 +44,13 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <version>${apache.httpclient.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

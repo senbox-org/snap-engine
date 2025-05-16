@@ -45,12 +45,14 @@
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-compress.version>1.27.1</commons-compress.version>
+        <commons-io.version>2.19.0</commons-io.version>
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-math3.version>3.6.1</commons-math3.version>
         <commons-net.version>3.11.1</commons-net.version>
         <commons-text.version>1.13.1</commons-text.version>
-        <geotools.version>28.2</geotools.version>
+        <geotools.version>28.6</geotools.version>
+        <geotools.opengis.version>28.6</geotools.opengis.version>
         <guava.version>33.4.8-jre</guava.version>
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
@@ -383,7 +385,11 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
@@ -475,12 +481,21 @@
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
+                <artifactId>gt-epsg-extension</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
@@ -491,7 +506,7 @@
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-opengis</artifactId>
-                <version>${geotools.version}</version>
+                <version>${geotools.opengis.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
@@ -531,6 +546,10 @@
                         <artifactId>commons-codec</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
@@ -567,6 +586,14 @@
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -597,6 +624,10 @@
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
