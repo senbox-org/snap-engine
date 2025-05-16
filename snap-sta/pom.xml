@@ -33,10 +33,13 @@
 
     <dependencies>
         <!-- SNAP dependencies -->
-
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
         </dependency>
 
         <dependency>

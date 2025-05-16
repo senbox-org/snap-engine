@@ -27,12 +27,6 @@
     <artifactId>lib-hdf</artifactId>
     <packaging>nbm</packaging>
 
-    <properties>
-        <snap.version>13.0.0-SNAPSHOT</snap.version>
-        <hdf.version>3.3.2</hdf.version>
-    </properties>
-
-
     <name>HDF Library</name>
     <description>A wrapper module for the native libraries used to read data products in HDF format.</description>
     <url>https://www.hdfgroup.org/</url>
@@ -71,17 +65,14 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>

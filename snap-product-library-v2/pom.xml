@@ -45,6 +45,16 @@
             <groupId>org.orbisgis</groupId>
             <artifactId>h2gis</artifactId>
             <version>1.5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- JUnit -->
