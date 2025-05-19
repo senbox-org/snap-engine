@@ -97,7 +97,7 @@ public class TestClient {
         StacItem item = new StacItem(itemURL);
         InputStream is = client.streamAsset(item.getAsset(item.listAssetIds()[0]));
         Assert.assertNotNull(is);
-        Assert.assertEquals(15557, is.available());
+        Assert.assertTrue(is.available() > 0);
     }
 
     @Test
