@@ -147,6 +147,10 @@ public class ReaderUtils {
         final double scaleFactor = getScalingFactor(variable);
         final double offset = getAddOffset(variable);
 
+        return scaleArray(rawArray, scaleFactor, offset);
+    }
+
+    public static Array scaleArray(Array rawArray, double scaleFactor, double offset) {
         Array result;
         if (mustScale(scaleFactor, offset)) {
             final MAMath.ScaleOffset scaleOffset = new MAMath.ScaleOffset(scaleFactor, offset);
@@ -154,7 +158,6 @@ public class ReaderUtils {
         } else {
             result = rawArray;
         }
-
         return result;
     }
 }
