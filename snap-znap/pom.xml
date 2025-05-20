@@ -46,18 +46,6 @@
             <artifactId>jzarr</artifactId>
             <version>0.3.4</version>
         </dependency>
-        <!-- Force cdm-core 5.7.0 to avoid jzarr from pulling older version -->
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>cdm-core</artifactId>
-            <version>5.7.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>org.hamcrest</groupId>
