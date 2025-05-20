@@ -62,6 +62,7 @@
                         <publicPackage>javax.measure.*</publicPackage>
                         <publicPackage>javax.vecmath.*</publicPackage>
                         <publicPackage>org.jdom.*</publicPackage>
+                        <publicPackage>org.jspecify.*</publicPackage>
                         <publicPackage>org.geotools.*</publicPackage>
                         <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>org.locationtech.jts.*</publicPackage>
@@ -188,7 +189,12 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
+            <version>${commons-codec.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
@@ -250,7 +256,7 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.9.0</version>
+            <version>${commons-net.version}</version>
         </dependency>
 
         <dependency>
@@ -281,7 +287,7 @@
         <dependency>
             <groupId>net.coobird</groupId>
             <artifactId>thumbnailator</artifactId>
-            <version>0.4.5</version>
+            <version>0.4.20</version>
         </dependency>
         <dependency>
             <groupId>tec.uom</groupId>
