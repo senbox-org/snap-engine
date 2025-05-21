@@ -470,7 +470,17 @@
                         <groupId>xerces</groupId>
                         <artifactId>xercesImpl</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>io.airlift</groupId>
+                        <artifactId>aircompressor</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <!-- replaces older version of aircompressor with vulnerability in imageio-ext-tiff -->
+            <dependency>
+                <groupId>io.airlift</groupId>
+                <artifactId>aircompressor</artifactId>
+                <version>0.27</version>
             </dependency>
 
             <dependency>
