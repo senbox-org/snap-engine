@@ -99,6 +99,21 @@ public class FileUtils {
     }
 
     /**
+     * Removes all extensions from a fiven file name
+     *
+     * @param filename the name of the file whose filename is to be extracted.
+     * @return the filename without its extensions.
+     */
+    public static String getFilenameWithoutAnyExtensions(String filename) {
+        String name = filename;
+        int dot;
+        while ((dot = name.lastIndexOf('.')) > 0) {
+            name = name.substring(0, dot);
+        }
+        return name;
+    }
+
+    /**
      * Returns the file string with the given new extension. If the given file string have no extension, the given
      * extension will be added.
      * <p>
