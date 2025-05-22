@@ -127,6 +127,16 @@ public class FileUtilsTest {
     }
 
     @Test
+    @STTM("SNAP-3916")
+    public void testGetFilenameWithoutAnyExtensions() {
+        assertEquals("target", FileUtils.getFilenameWithoutAnyExtensions("target.znap.zip"));
+        assertEquals("target", FileUtils.getFilenameWithoutAnyExtensions("target.zip"));
+        assertEquals("filename", FileUtils.getFilenameWithoutAnyExtensions("filename"));
+        assertEquals("", FileUtils.getFilenameWithoutAnyExtensions(""));
+        assertEquals(".bashrc", FileUtils.getFilenameWithoutAnyExtensions(".bashrc"));
+    }
+
+    @Test
     public void testExtractFileName() {
         final String expected1 = "tesfile1.dim";
         final String expected2 = "tesfile2.dim";
