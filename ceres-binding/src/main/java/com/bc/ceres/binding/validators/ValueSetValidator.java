@@ -16,14 +16,16 @@
 
 package com.bc.ceres.binding.validators;
 
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
-import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.Property;
-
+import com.bc.ceres.binding.ValueSet;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 public class ValueSetValidator implements Validator {
+
     private final PropertyDescriptor propertyDescriptor;
 
     public ValueSetValidator(PropertyDescriptor propertyDescriptor) {
@@ -33,9 +35,12 @@ public class ValueSetValidator implements Validator {
     @Override
     public void validateValue(Property property, Object value) throws ValidationException {
         if (value != null || propertyDescriptor.isNotNull()) {
-            if (!propertyDescriptor.getValueSet().contains(value)) {
-                throw new ValidationException(MessageFormat.format("Value for ''{0}'' is invalid: ''{1}''",
-                                                                   property.getDescriptor().getDisplayName(), value));
+            ValueSet valueSet = propertyDescriptor.getValueSet();
+            if (!valueSet.contains(value)) {
+                throw new ValidationException(
+                        MessageFormat.format("Value for ''{0}'' is invalid: ''{1}''. Allowed values are: {2}.",
+                                property.getDescriptor().getDisplayName(), value,
+                                Arrays.toString(valueSet.getItems())));
             }
         }
     }
