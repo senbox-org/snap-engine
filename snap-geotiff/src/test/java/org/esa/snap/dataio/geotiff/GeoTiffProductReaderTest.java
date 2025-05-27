@@ -15,7 +15,10 @@
  */
 package org.esa.snap.dataio.geotiff;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import it.geosolutions.imageio.plugins.tiff.TIFFField;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
@@ -34,6 +37,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -204,6 +209,34 @@ public class GeoTiffProductReaderTest {
         assertEquals(161.69f, band.getSampleFloat(123, 230), 0.0f);
         assertEquals(93.21f, band.getSampleFloat(200, 100), 0.0f);
         assertEquals(161.32f, band.getSampleFloat(401, 270), 0.0f);
+    }
+
+    @Test
+    @STTM("SNAP-3888")
+    public void testGetFillValue() throws IOException {
+        final GeoTiffImageReader reader = mock(GeoTiffImageReader.class);
+        final TIFFImageMetadata imageMetadata = mock(TIFFImageMetadata.class);
+
+        final TIFFField tiffField = mock(TIFFField.class);
+        when(tiffField.getAsDouble(0)).thenReturn(-8.54);
+
+        when(imageMetadata.getTIFFField(42113)).thenReturn(tiffField);  // GDAL_NO_DATA id
+        when(reader.getImageMetadata()).thenReturn(imageMetadata);
+
+        final Double fillValue = GeoTiffProductReader.getFillValue(reader);
+        assertEquals(-8.54, fillValue, 1e-8);
+    }
+
+    @Test
+    @STTM("SNAP-3888")
+    public void testGetFillValue_notPresent() throws IOException {
+        final GeoTiffImageReader reader = mock(GeoTiffImageReader.class);
+        final TIFFImageMetadata imageMetadata = mock(TIFFImageMetadata.class);
+
+        when(imageMetadata.getTIFFField(42113)).thenReturn(null);
+        when(reader.getImageMetadata()).thenReturn(imageMetadata);
+
+        assertNull(GeoTiffProductReader.getFillValue(reader));
     }
 
     private static ProductReader buildProductReader() {

@@ -65,6 +65,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     // non standard ASCII tag (code 42112) to extract GDAL metadata,
     // see https://gdal.org/drivers/raster/gtiff.html#metadata:
     private static final int TIFFTAG_GDAL_METADATA = 42112;
+    private static final int TIFFTAG_GDAL_NODATA = 42113;
 
     private ImageInputStreamSpi imageInputStreamSpi;
     private GeoTiffImageReader geoTiffImageReader;
@@ -81,9 +82,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        if (this.geoTiffImageReader != null) {
-            throw new IllegalStateException("There is already an image reader.");
-        }
         boolean success = false;
         try {
             Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
@@ -200,10 +198,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName, ProductSubsetDef subsetDef) throws Exception {
-        if (geoTiffImageReader == null) {
-            throw new NullPointerException("The image reader is null.");
-        }
-
         final int imageWidth = geoTiffImageReader.getImageWidth();
         final int imageHeight = geoTiffImageReader.getImageHeight();
 
@@ -215,7 +209,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
             productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(geoCoding, imageWidth, imageHeight, false);
         }
 
-        return readProduct(geoTiffImageReader, productName, productBounds, null, subsetDef);
+        Double fillValue = getFillValue(geoTiffImageReader);
+
+        return readProduct(geoTiffImageReader, productName, productBounds, fillValue, subsetDef);
+    }
+
+    // package access for testing only tb 2025-05-27
+    static Double getFillValue(GeoTiffImageReader geoTiffImageReader) throws IOException {
+        final TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
+        final TIFFField tiffField = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
+        Double fillValue = null;
+        if (tiffField != null) {
+            fillValue = tiffField.getAsDouble(0);
+        }
+        return fillValue;
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
@@ -229,13 +236,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds,
                                Double noDataValue, ProductSubsetDef subsetDef)
             throws Exception {
-
-        if (geoTiffImageReader == null) {
-            throw new NullPointerException("The image reader is null.");
-        }
-        if (productBounds.isEmpty()) {
-            throw new IllegalStateException("Empty product bounds.");
-        }
         Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -303,6 +303,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     }
                     if (bandIndex >= sampleModel.getNumBands()) {
                         throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
+                    }
+                    if (noDataValue != null) {
+                        band.setNoDataValue(noDataValue);
+                        band.setNoDataValueUsed(true);
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
 
