@@ -764,7 +764,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                     destBand.setSampleCoding(null);
                 }
                 if (isFullScene(getSubsetDef(), sourceBand) && sourceBand.isStxSet()) {
-                    copyStx(sourceBand, destBand);
+                    ProductUtils.copyStx(sourceBand, destBand);
                 }
 
                 product.addBand(destBand);
@@ -798,36 +798,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if (isNodeAccepted(gridName) || (gridName.equals(latGridName) || gridName.equals(lonGridName))) {
                 final TiePointGrid tiePointGrid = TiePointGrid.createSubset(sourceTiePointGrid, getSubsetDef());
                 if (isFullScene(getSubsetDef(), tiePointGrid) && sourceTiePointGrid.isStxSet()) {
-                    copyStx(sourceTiePointGrid, tiePointGrid);
+                    ProductUtils.copyStx(sourceTiePointGrid, tiePointGrid);
                 }
                 product.addTiePointGrid(tiePointGrid);
                 copyImageInfo(sourceTiePointGrid, tiePointGrid);
             }
         }
-    }
-
-    private void copyStx(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
-        final Stx sourceStx = sourceRaster.getStx();
-        final Histogram sourceHistogram = sourceStx.getHistogram();
-        final Histogram targetHistogram = new Histogram(sourceStx.getHistogramBinCount(),
-                                                        sourceHistogram.getLowValue(0),
-                                                        sourceHistogram.getHighValue(0),
-                                                        1);
-
-        System.arraycopy(sourceHistogram.getBins(0), 0, targetHistogram.getBins(0), 0, sourceStx.getHistogramBinCount());
-
-        final Stx targetStx = new Stx(sourceStx.getMinimum(),
-                                      sourceStx.getMaximum(),
-                                      sourceStx.getMean(),
-                                      sourceStx.getStandardDeviation(),
-                                      sourceStx.getCoefficientOfVariation(),
-                                      sourceStx.getEquivalentNumberOfLooks(),
-                                      sourceStx.isLogHistogram(),
-                                      sourceStx.isIntHistogram(),
-                                      targetHistogram,
-                                      sourceStx.getResolutionLevel());
-
-        targetRaster.setStx(targetStx);
     }
 
     private void copyImageInfo(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
