@@ -86,7 +86,6 @@ public class RemoteRepositoriesManager {
             Map<String, Map<String, Map<String, String>>> filteredParameters = null;
             if ("Alaska Satellite Facility".equals(dataSource.getId())) {
                 filteredParameters = buildAlaskaSatelliteFacilityParameterFilter();
-            } else if ("Amazon Web Services".equals(dataSource.getId())) {
             } else if ("Scientific Data Hub".equals(dataSource.getId())) {
             } else if ("USGS".equals(dataSource.getId())) {
             }
