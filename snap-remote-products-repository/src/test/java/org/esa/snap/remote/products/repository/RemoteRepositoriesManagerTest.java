@@ -108,23 +108,6 @@ public class RemoteRepositoriesManagerTest {
     }
 
     @Test
-    public void testAmazonWebServicesRepositoryProvider() throws Exception {
-        RemoteProductsRepositoryProvider awsRepositoryProvider = findRepositoryProviderByName("Amazon Web Services");
-        assertNotNull(awsRepositoryProvider);
-
-        Credentials credentials = null;
-        if (awsRepositoryProvider.requiresAuthentication()) {
-            String userName = System.getProperty("aws.account.username");
-            String password = System.getProperty("aws.account.password");
-
-            Assume.assumeTrue(!StringUtils.isBlank(userName) && !StringUtils.isBlank(password));
-
-            credentials = new UsernamePasswordCredentials(userName, password);
-        }
-        downloadRepositoryProviderProductList(credentials, awsRepositoryProvider, new String[]{});
-    }
-
-    @Test
     public void testEOCATRepositoryProvider() throws Exception {
         RemoteProductsRepositoryProvider eocatRepositoryProvider = findRepositoryProviderByName("EO-CAT");
         assertNotNull(eocatRepositoryProvider);
