@@ -46,6 +46,7 @@ import java.io.IOException;
  * CreateElevationBandOp adds an elevation band to a product
  */
 
+@SuppressWarnings("FieldMayBeFinal")
 @OperatorMetadata(alias = "AddElevation",
         category = "Raster/DEM Tools",
         authors = "Jun Lu, Luis Veci",

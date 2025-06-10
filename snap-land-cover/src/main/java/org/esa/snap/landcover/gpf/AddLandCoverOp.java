@@ -55,6 +55,7 @@ import java.util.Map;
  * AddLandCover adds a land cover band to a product
  */
 
+@SuppressWarnings("FieldCanBeLocal")
 @OperatorMetadata(alias = "AddLandCover",
         category = "Raster/Masks",
         authors = "Jun Lu, Luis Veci",
