@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
  * A utility class used to decode/encode primitive Java types from/to a byte buffer using
  * a specified {@link ByteOrder}.
  */
+@SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
 public abstract class ByteArrayCodec {
     public final static ByteArrayCodec LITTLE_ENDIAN = new LE();
     public final static ByteArrayCodec BIG_ENDIAN = new BE();
