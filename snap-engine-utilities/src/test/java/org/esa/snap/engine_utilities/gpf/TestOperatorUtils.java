@@ -129,6 +129,7 @@ public class TestOperatorUtils {
     }
 
     @Test
+    @STTM("SNAP-4033")
     public void testGetTargetDimensions() {
         Dimension dim;
         dim = OperatorUtils.getTargetDimensions(
@@ -151,5 +152,12 @@ public class TestOperatorUtils {
                 100, 100);
         assertEquals(50, dim.width);
         assertEquals(50, dim.height);
+
+        dim = OperatorUtils.getTargetDimensions(
+                25740, 49934,
+                3217, 6241,
+                25740, 49934);
+        assertEquals(3217, dim.width);
+        assertEquals(6241, dim.height);
     }
 }
