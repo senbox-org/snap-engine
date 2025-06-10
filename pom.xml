@@ -121,7 +121,6 @@
         <module>snap-test-utils</module>
         <module>snap-stac</module>
         <module>snap-engine-coverage</module>
-        <module>snap-performance-test</module>
     </modules>
 
     <profiles>
