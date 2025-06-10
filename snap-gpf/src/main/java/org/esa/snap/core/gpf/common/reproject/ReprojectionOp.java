@@ -48,6 +48,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.util.Debug;
@@ -72,6 +73,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -165,7 +167,7 @@ public class ReprojectionOp extends Operator {
             description = "The method used for resampling of floating-point raster data.",
             valueSet = {"Nearest", "Bilinear", "Bicubic"},
             defaultValue = "Nearest")
-    private String resamplingName;
+    private String resampling;
 
     @Parameter(description = "The X-position of the reference pixel.")
     private Double referencePixelX;
@@ -210,6 +212,19 @@ public class ReprojectionOp extends Operator {
             defaultValue = "false")
     private boolean addDeltaBands;
 
+    @Parameter(description = "Apply the valid pixel expression to determine whether a source pixel gets used",
+            defaultValue = "true")
+    private boolean applyValidPixelExpression;
+
+    @Parameter(description = "Copy source valid pixel expression(s) to the corresponding bands of the reprojected file",
+            defaultValue = "true")
+    private boolean retainValidPixelExpression;
+
+
+    @Parameter(description = "Logical expression of masks and/or bands to apply to determine whether a source pixel gets used",
+            defaultValue = "")
+    private String maskExpression;
+
     private ReprojectionSettingsProvider reprojectionSettingsProvider;
 
     private ElevationModel elevationModel;
@@ -223,7 +238,7 @@ public class ReprojectionOp extends Operator {
             } catch (OperatorException e) {
                 //Catch exception in order to clarify the error message
                 throw new OperatorException("The product selected as reference (Collocation product) contains rasters of different sizes and cannot be used as input.\n" +
-                                                          "Please consider resampling it so that all rasters have the same size.");
+                        "Please consider resampling it so that all rasters have the same size.");
             }
         }
         validateSourceProduct();
@@ -234,25 +249,25 @@ public class ReprojectionOp extends Operator {
         validateSARProduct();
 
         /*
-        * 1. Compute the target CRS
-        */
+         * 1. Compute the target CRS
+         */
         GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
         final GeoPos centerGeoPos =
                 getCenterGeoPos(sceneGeoCoding, sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         CoordinateReferenceSystem targetCrs = createTargetCRS(centerGeoPos);
         /*
-        * 2. Compute the target geometry
-        */
+         * 2. Compute the target geometry
+         */
         ImageGeometry targetImageGeometry = createImageGeometry(targetCrs);
 //        determineDefaultSourceModel();
         /*
-        * 3. Create the target product
-        */
+         * 3. Create the target product
+         */
         Rectangle targetRect = targetImageGeometry.getImageRect();
         targetProduct = new Product("projected_" + sourceProduct.getName(),
-                                    sourceProduct.getProductType(),
-                                    targetRect.width,
-                                    targetRect.height);
+                sourceProduct.getProductType(),
+                targetRect.width,
+                targetRect.height);
         targetProduct.setDescription(sourceProduct.getDescription());
         Dimension tileSize;
         if (tileSizeX != null && tileSizeY != null) {
@@ -264,14 +279,14 @@ public class ReprojectionOp extends Operator {
                 if (sourceProductPreferredTileSize.width == sourceProduct.getSceneRasterWidth()) {
                     tileSize.width = targetProduct.getSceneRasterWidth();
                     tileSize.height = Math.min(sourceProductPreferredTileSize.height,
-                                               targetProduct.getSceneRasterHeight());
+                            targetProduct.getSceneRasterHeight());
                 }
             }
         }
         targetProduct.setPreferredTileSize(tileSize);
         /*
-        * 4. Define some target properties
-        */
+         * 4. Define some target properties
+         */
         if (orthorectify) {
             elevationModel = createElevationModel();
         }
@@ -280,8 +295,8 @@ public class ReprojectionOp extends Operator {
         copyIndexCoding();
         try {
             targetProduct.setSceneGeoCoding(new CrsGeoCoding(targetImageGeometry.getMapCrs(),
-                                                             targetRect,
-                                                             targetImageGeometry.getImage2MapTransform()));
+                    targetRect,
+                    targetImageGeometry.getImage2MapTransform()));
         } catch (Exception e) {
             throw new OperatorException(e);
         }
@@ -300,6 +315,36 @@ public class ReprojectionOp extends Operator {
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+
+        // todo Danny added these metadata lines
+        String operatorName = "Reproject";
+
+        OperatorDescriptor operatorDescriptor = null;
+        OperatorParameterSupport parameterSupport = null;
+
+        ProductUtils.setMapProjectionMetaDataFields(targetProduct);
+        ProductUtils.setResolutionMetaDataField(targetProduct, true);
+        ProductUtils.prependHistoryMetaDataField(targetProduct, operatorName);
+        ProductUtils.markProductMetaDataFieldAsDerivedFrom(targetProduct);
+
+        final Map<String, Object> parameterMap = new HashMap<>();
+        updateParameterMap(parameterMap);
+
+        operatorDescriptor = getSpi().getOperatorDescriptor();
+        parameterSupport = new OperatorParameterSupport(operatorDescriptor, null, parameterMap, null);
+
+        String parameterXml = "";
+        try {
+            DomElement domElement = parameterSupport.toDomElement();
+            parameterXml = domElement.toXml();
+        } catch (Exception e) {
+        }
+
+        if (parameterXml != null) {
+            ProductUtils.setMetaDataField(targetProduct, operatorName + "_gpt_parameters", parameterXml.toString().replaceAll("\n", "").replaceAll(" ", ""));
+        }
+
+        // todo end Danny additions
 
         if (addDeltaBands) {
             addDeltaBands();
@@ -333,9 +378,9 @@ public class ReprojectionOp extends Operator {
 
     private Orthorectifier createOrthorectifier(final RasterDataNode sourceBand) {
         return new Orthorectifier2(sourceBand.getRasterWidth(),
-                                   sourceBand.getRasterHeight(),
-                                   sourceBand.getPointing(),
-                                   elevationModel, 25);
+                sourceBand.getRasterHeight(),
+                sourceBand.getPointing(),
+                elevationModel, 25);
     }
 
 
@@ -346,6 +391,37 @@ public class ReprojectionOp extends Operator {
     }
 
     private void reprojectSourceRaster(RasterDataNode sourceRaster) {
+        boolean validPixelExpressionSet = false;
+
+        String validPixelExpressionOriginal = sourceRaster.getValidPixelExpression();
+        String validPixelExpression = (applyValidPixelExpression) ? validPixelExpressionOriginal: "";
+
+        String bandDescriptionOriginal = sourceRaster.getDescription();
+        String bandDescription = bandDescriptionOriginal;
+
+        if (maskExpression != null && maskExpression.length() > 0) {
+            if (validPixelExpression != null && validPixelExpression.length() > 0) {
+                validPixelExpression = "(" + validPixelExpression + ") && " + maskExpression;
+            } else {
+                validPixelExpression = maskExpression;
+            }
+        }
+
+        if (validPixelExpression != null && validPixelExpression.length() > 0) {
+            if (validPixelExpression.equals(validPixelExpressionOriginal)) {
+                bandDescription = bandDescription + "\n[Reprojected with source validPixelExpression applied:\nexpression=" + validPixelExpressionOriginal +"]";
+            } else {
+                bandDescription = bandDescription + "\n[Reprojected with source masking criteria:\nexpression=" + validPixelExpression +"]";
+                sourceRaster.setValidPixelExpression(validPixelExpression);
+                validPixelExpressionSet = true;
+            }
+
+        } else {
+            bandDescription = bandDescription + " [Reprojected with no source masking criteria]";
+            sourceRaster.setValidPixelExpression("");
+            validPixelExpressionSet = true;
+        }
+
         final ReprojectionSettings reprojectionSettings = reprojectionSettingsProvider.getReprojectionSettings(sourceRaster);
         final int targetDataType;
         MultiLevelImage sourceImage;
@@ -376,6 +452,16 @@ public class ReprojectionOp extends Operator {
             sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
         }
 
+        if (retainValidPixelExpression && validPixelExpressionOriginal != null && validPixelExpressionOriginal.length() > 0) {
+            targetBand.setValidPixelExpression(validPixelExpressionOriginal);
+        }
+
+        if (validPixelExpressionSet) {
+            sourceRaster.setValidPixelExpression(validPixelExpressionOriginal);
+        }
+
+
+
         final Interpolation resampling = getResampling(targetBand);
         MultiLevelModel targetModel = reprojectionSettings.getTargetModel();
         if (targetModel == null) {
@@ -388,7 +474,7 @@ public class ReprojectionOp extends Operator {
             reprojectionSettings.setReprojection(reprojection);
         }
         MultiLevelImage projectedImage = createProjectedImage(sourceGeoCoding, sourceImage, reprojectionSettings.getSourceModel(),
-                                                              targetBand, resampling, targetModel, reprojection);
+                targetBand, resampling, targetModel, reprojection);
         if (mustReplaceNaN(sourceRaster, targetDataType, targetNoDataValue.doubleValue())) {
             projectedImage = createNaNReplacedImage(projectedImage, targetModel, targetNoDataValue.doubleValue());
         }
@@ -398,8 +484,8 @@ public class ReprojectionOp extends Operator {
         targetBand.setSourceImage(projectedImage);
 
         /*
-        * Flag and index codings
-        */
+         * Flag and index codings
+         */
         if (sourceRaster instanceof Band) {
             final Band sourceBand = (Band) sourceRaster;
             ProductUtils.copySpectralBandProperties(sourceBand, targetBand);
@@ -496,9 +582,9 @@ public class ReprojectionOp extends Operator {
                 RenderedImage leveledSourceImage = sourceImage.getImage(sourceLevel);
 
                 final Rectangle sourceBounds = new Rectangle(leveledSourceImage.getMinX(),
-                                                             leveledSourceImage.getMinY(),
-                                                             leveledSourceImage.getWidth(),
-                                                             leveledSourceImage.getHeight());
+                        leveledSourceImage.getMinY(),
+                        leveledSourceImage.getWidth(),
+                        leveledSourceImage.getHeight());
 
                 // the following transformation maps the source level image to level zero and then to the model,
                 // which either is a map or an image CRS
@@ -507,8 +593,8 @@ public class ReprojectionOp extends Operator {
                 i2mSource.concatenate(sourceImageToMapTransform);
 
                 ImageGeometry sourceGeometry = new ImageGeometry(sourceBounds,
-                                                                 sourceModelCrs,
-                                                                 i2mSource);
+                        sourceModelCrs,
+                        i2mSource);
 
                 ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(
                         ImageManager.getDataBufferType(targetBand.getDataType()),
@@ -517,7 +603,7 @@ public class ReprojectionOp extends Operator {
                         targetProduct.getPreferredTileSize(),
                         ResolutionLevel.create(getModel(), targetLevel));
                 Rectangle targetBounds = new Rectangle(imageLayout.getMinX(null), imageLayout.getMinY(null),
-                                                       imageLayout.getWidth(null), imageLayout.getHeight(null));
+                        imageLayout.getWidth(null), imageLayout.getHeight(null));
 
                 // the following transformation maps the target level image to level zero and then to the model,
                 // which always is a map
@@ -526,16 +612,16 @@ public class ReprojectionOp extends Operator {
                 i2mTarget.concatenate(targetImageToMapTransform);
 
                 ImageGeometry targetGeometry = new ImageGeometry(targetBounds,
-                                                                 targetModelCrs,
-                                                                 i2mTarget);
+                        targetModelCrs,
+                        i2mTarget);
                 Hints hints = new Hints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
                 hints.put(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
 
                 Dimension tileSize = ImageManager.getPreferredTileSize(targetProduct);
                 try {
                     return reprojection.reproject(leveledSourceImage, sourceGeometry, targetGeometry,
-                                                  targetBand.getNoDataValue(), resampling, hints, targetLevel,
-                                                  tileSize);
+                            targetBand.getNoDataValue(), resampling, hints, targetLevel,
+                            tileSize);
                 } catch (FactoryException | TransformException e) {
                     Debug.trace(e);
                     throw new RuntimeException(e);
@@ -582,7 +668,7 @@ public class ReprojectionOp extends Operator {
 
     private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
         final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
-                                                     0.5 * height + 0.5);
+                0.5 * height + 0.5);
         return geoCoding.getGeoPos(centerPixelPos, null);
     }
 
@@ -664,11 +750,11 @@ public class ReprojectionOp extends Operator {
 
     private int getResampleType() {
         final int resamplingType;
-        if ("Nearest".equalsIgnoreCase(resamplingName)) {
+        if ("Nearest".equalsIgnoreCase(resampling)) {
             resamplingType = Interpolation.INTERP_NEAREST;
-        } else if ("Bilinear".equalsIgnoreCase(resamplingName)) {
+        } else if ("Bilinear".equalsIgnoreCase(resampling)) {
             resamplingType = Interpolation.INTERP_BILINEAR;
-        } else if ("Bicubic".equalsIgnoreCase(resamplingName)) {
+        } else if ("Bicubic".equalsIgnoreCase(resampling)) {
             resamplingType = Interpolation.INTERP_BICUBIC;
         } else {
             resamplingType = -1;
@@ -678,7 +764,7 @@ public class ReprojectionOp extends Operator {
 
     void validateResamplingParameter() {
         if (getResampleType() == -1) {
-            throw new OperatorException("Invalid resampling method: " + resamplingName);
+            throw new OperatorException("Invalid resampling method: " + resampling);
         }
     }
 
@@ -686,7 +772,7 @@ public class ReprojectionOp extends Operator {
         if (!((referencePixelX == null && referencePixelY == null && easting == null && northing == null)
                 || (referencePixelX != null && referencePixelY != null && easting != null && northing != null))) {
             throw new OperatorException("Invalid referencing parameters: \n" +
-                                                "'referencePixelX', 'referencePixelY', 'easting' and 'northing' have to be specified either all or not at all.");
+                    "'referencePixelX', 'referencePixelY', 'easting' and 'northing' have to be specified either all or not at all.");
         }
     }
 
@@ -720,10 +806,10 @@ public class ReprojectionOp extends Operator {
             imageGeometry = ImageGeometry.createCollocationTargetGeometry(sourceProduct, collocationProduct);
         } else {
             imageGeometry = ImageGeometry.createTargetGeometry(sourceProduct, targetCrs,
-                                                               pixelSizeX, pixelSizeY,
-                                                               width, height, orientation,
-                                                               easting, northing,
-                                                               referencePixelX, referencePixelY);
+                    pixelSizeX, pixelSizeY,
+                    width, height, orientation,
+                    easting, northing,
+                    referencePixelX, referencePixelY);
             final AxisDirection targetAxisDirection = targetCrs.getCoordinateSystem().getAxis(1).getDirection();
             if (!AxisDirection.DISPLAY_DOWN.equals(targetAxisDirection)) {
                 imageGeometry.changeYAxisDirection();
@@ -749,7 +835,7 @@ public class ReprojectionOp extends Operator {
         deltaLatBand.setImageInfo(createDeltaBandImageInfo(-0.01, +0.01));
 
         final Band deltaLonMetBand = targetProduct.addBand("delta_lon_metric",
-                                                           "cos(rad(LAT)) * 6378137 * rad(longitude - LON)");
+                "cos(rad(LAT)) * 6378137 * rad(longitude - LON)");
         deltaLonMetBand.setUnit("m");
         deltaLonMetBand.setDescription("Delta between old longitude and new longitude in meters");
         deltaLonMetBand.setNoDataValueUsed(true);
@@ -841,15 +927,15 @@ public class ReprojectionOp extends Operator {
             if (!reprojectionSettingsMap.containsKey(key)) {
                 GeoPos centerGeoPos =
                         getCenterGeoPos(rasterDataNode.getGeoCoding(),
-                                        rasterDataNode.getRasterWidth(),
-                                        rasterDataNode.getRasterHeight());
+                                rasterDataNode.getRasterWidth(),
+                                rasterDataNode.getRasterHeight());
                 CoordinateReferenceSystem targetCrs = createTargetCRS(centerGeoPos);
                 ImageGeometry targetImageGeometry = ImageGeometry.createTargetGeometry(rasterDataNode, targetCrs,
-                                                                                       pixelSizeX, pixelSizeY,
-                                                                                       width, height,
-                                                                                       orientation, easting,
-                                                                                       northing, referencePixelX,
-                                                                                       referencePixelY);
+                        pixelSizeX, pixelSizeY,
+                        width, height,
+                        orientation, easting,
+                        northing, referencePixelX,
+                        referencePixelY);
                 AxisDirection targetAxisDirection = targetCrs.getCoordinateSystem().getAxis(1).getDirection();
                 if (!AxisDirection.DISPLAY_DOWN.equals(targetAxisDirection)) {
                     targetImageGeometry.changeYAxisDirection();
@@ -857,8 +943,8 @@ public class ReprojectionOp extends Operator {
                 Rectangle targetRect = targetImageGeometry.getImageRect();
                 try {
                     CrsGeoCoding geoCoding = new CrsGeoCoding(targetImageGeometry.getMapCrs(),
-                                                              targetRect,
-                                                              targetImageGeometry.getImage2MapTransform());
+                            targetRect,
+                            targetImageGeometry.getImage2MapTransform());
                     MultiLevelModel sourceModel = rasterDataNode.getMultiLevelModel();
                     reprojectionSettingsMap.put(key, new ReprojectionSettings(geoCoding, sourceModel, targetImageGeometry));
                 } catch (FactoryException | TransformException e) {
@@ -918,5 +1004,25 @@ public class ReprojectionOp extends Operator {
         }
 
     }
-
+    void updateParameterMap(Map<String, Object> parameterMap) {
+        parameterMap.clear();
+        parameterMap.put("resampling", resampling);
+        parameterMap.put("includeTiePointGrids", includeTiePointGrids);
+        parameterMap.put("addDeltaBands", addDeltaBands);
+        parameterMap.put("noDataValue", noDataValue);
+        parameterMap.put("crs", crs);
+        parameterMap.put("orthorectify", orthorectify);
+        parameterMap.put("elevationModelName", elevationModelName);
+        parameterMap.put("referencePixelX", referencePixelX);
+        parameterMap.put("referencePixelY", referencePixelY);
+        parameterMap.put("easting", easting);
+        parameterMap.put("northing", northing);
+        parameterMap.put("orientation", orientation);
+        parameterMap.put("pixelSizeX", pixelSizeX);
+        parameterMap.put("pixelSizeY", pixelSizeY);
+        parameterMap.put("width", width);
+        parameterMap.put("height", height);
+        parameterMap.put("tileSizeX", tileSizeX);
+        parameterMap.put("tileSizeY", tileSizeY);
+    }
 }
