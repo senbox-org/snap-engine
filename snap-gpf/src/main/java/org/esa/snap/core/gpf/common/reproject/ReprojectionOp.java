@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common.reproject;
 
+import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
