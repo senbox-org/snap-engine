@@ -136,17 +136,6 @@
             <artifactId>tao-datasources-asf</artifactId>
             <version>${tao.version}</version>
         </dependency>
-        <dependency>
-            <groupId>ro.c-s.tao</groupId>
-            <artifactId>tao-datasources-aws</artifactId>
-            <version>${tao.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.geotools</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>ro.c-s.tao</groupId>

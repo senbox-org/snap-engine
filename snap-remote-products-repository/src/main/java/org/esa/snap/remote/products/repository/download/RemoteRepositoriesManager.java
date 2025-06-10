@@ -86,7 +86,6 @@ public class RemoteRepositoriesManager {
             Map<String, Map<String, Map<String, String>>> filteredParameters = null;
             if ("Alaska Satellite Facility".equals(dataSource.getId())) {
                 filteredParameters = buildAlaskaSatelliteFacilityParameterFilter();
-            } else if ("Amazon Web Services".equals(dataSource.getId())) {
             } else if ("Scientific Data Hub".equals(dataSource.getId())) {
             } else if ("USGS".equals(dataSource.getId())) {
             }
@@ -349,8 +348,7 @@ public class RemoteRepositoriesManager {
             }
             boolean required = param.isRequired();
             if (!required) {
-                if (param.getName().equals(CommonParameterNames.PLATFORM) || param.getName().equals(CommonParameterNames.START_DATE)
-                        || param.getName().equals(CommonParameterNames.END_DATE) || param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+                if (param.getName().equals(CommonParameterNames.PLATFORM)) {
 
                     required = true;
                 }
