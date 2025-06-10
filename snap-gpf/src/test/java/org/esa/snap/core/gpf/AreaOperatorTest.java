@@ -68,6 +68,7 @@ public class AreaOperatorTest {
 
     }
 
+    @SuppressWarnings("FieldCanBeLocal")
     private static class SomeAreaOp extends Operator {
 
         @SourceProduct
