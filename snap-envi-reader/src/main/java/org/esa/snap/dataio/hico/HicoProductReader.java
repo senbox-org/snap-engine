@@ -186,6 +186,7 @@ class HicoProductReader extends AbstractProductReader {
         }
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     private void handleFlagProduct(Product product) {
         Product hicoProductPart = hicoProductParts.get(FileType.FLAG);
         if (hicoProductPart != null) {

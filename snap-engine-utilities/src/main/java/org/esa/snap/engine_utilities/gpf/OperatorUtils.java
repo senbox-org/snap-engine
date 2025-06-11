@@ -608,11 +608,15 @@ public final class OperatorUtils {
     static Dimension getTargetDimensions(int srcProductWidth, int srcProductHeight,
                                                 int trgProductWidth, int trgProductHeight,
                                                 int srcBandWidth, int srcBandHeight) {
-        double ratioW = srcProductWidth / (double) trgProductWidth;
-        double ratioH = srcProductHeight / (double) trgProductHeight;
-        int targetWidth = (int) (srcBandWidth / ratioW);
-        int targetHeight = (int) (srcBandHeight / ratioH);
-        return new Dimension(targetWidth, targetHeight);
+        if (srcProductWidth == srcBandWidth) {
+            return new Dimension(trgProductWidth, trgProductHeight);
+        } else {
+            double ratioW = srcProductWidth / (double) trgProductWidth;
+            double ratioH = srcProductHeight / (double) trgProductHeight;
+            int targetWidth = (int) (srcBandWidth / ratioW);
+            int targetHeight = (int) (srcBandHeight / ratioH);
+            return new Dimension(targetWidth, targetHeight);
+        }
     }
 
     /**

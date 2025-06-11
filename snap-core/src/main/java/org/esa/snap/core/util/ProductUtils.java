@@ -43,6 +43,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import javax.media.jai.Histogram;
 import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.geom.*;
@@ -51,7 +52,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
-import java.util.List;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -546,8 +546,11 @@ public class ProductUtils {
             }
         }
     }
+    public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames){
+        copyMasks( sourceProduct, targetProduct, sourceMaskNames,true);
+    }
 
-    public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames) {
+    public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames, boolean adaptToSceneRasterSize) {
         double scaleX = (double) sourceProduct.getSceneRasterWidth() / targetProduct.getSceneRasterWidth();
         double scaleY = (double) sourceProduct.getSceneRasterHeight() / targetProduct.getSceneRasterHeight();
         GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
@@ -567,8 +570,9 @@ public class ProductUtils {
             if (imageType.getName().equals(Mask.BandMathsType.TYPE_NAME)) {
                 String expression = Mask.BandMathsType.getExpression(sourceMask);
                 Mask targetMask = Mask.BandMathsType.create(sourceMask.getName(), sourceMask.getDescription(),
-                        targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight(), expression,
+                        adaptToSceneRasterSize ? targetProduct.getSceneRasterWidth() : sourceMask.getRasterWidth(),
+                        adaptToSceneRasterSize ?targetProduct.getSceneRasterHeight(): sourceMask.getRasterHeight(),
+                        expression,
                         sourceMask.getImageColor(), sourceMask.getImageTransparency());
                 targetProduct.addMask(targetMask);
             } else if (imageType.getName().equals(Mask.VectorDataType.TYPE_NAME)) {
@@ -771,8 +775,12 @@ public class ProductUtils {
                 adaptToSceneRasterSize ? target.getSceneRasterWidth() : srcBand.getRasterWidth(),
                 adaptToSceneRasterSize ? target.getSceneRasterHeight() : srcBand.getRasterHeight(),
                 srcBand.getExpression());
-        virtBand.setUnit(srcBand.getUnit());
-        virtBand.setDescription(srcBand.getDescription());
+        if (srcBand.getUnit() != null) {
+            virtBand.setUnit(srcBand.getUnit());
+        }
+        if (srcBand.getDescription() != null) {
+            virtBand.setDescription(srcBand.getDescription());
+        }
         virtBand.setNoDataValue(srcBand.getNoDataValue());
         virtBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
         virtBand.setOwner(target);
@@ -780,6 +788,67 @@ public class ProductUtils {
         return virtBand;
     }
 
+    public static VirtualBand copyVirtualBandWithStatistics(final Product target, final VirtualBand srcBand, final String name, boolean adaptToSceneRasterSize) {
+
+        final VirtualBand virtBand = copyVirtualBand(target, srcBand, name, adaptToSceneRasterSize);
+        virtBand.setScalingFactor(srcBand.getScalingFactor());
+        virtBand.setScalingOffset(srcBand.getScalingOffset());
+        virtBand.setLog10Scaled(srcBand.isLog10Scaled());
+        virtBand.setSpectralBandIndex(srcBand.getSpectralBandIndex());
+        virtBand.setSpectralWavelength(srcBand.getSpectralWavelength());
+        virtBand.setSpectralBandwidth(srcBand.getSpectralBandwidth());
+        virtBand.setAngularValue(srcBand.getAngularValue());
+        virtBand.setAngularBandIndex(srcBand.getAngularBandIndex());
+        virtBand.setSolarFlux(srcBand.getSolarFlux());
+        virtBand.setValidPixelExpression(srcBand.getValidPixelExpression());
+        FlagCoding sourceFlagCoding = srcBand.getFlagCoding();
+        IndexCoding sourceIndexCoding = srcBand.getIndexCoding();
+        if (sourceFlagCoding != null) {
+            String flagCodingName = sourceFlagCoding.getName();
+            FlagCoding destFlagCoding = target.getFlagCodingGroup().get(flagCodingName);
+            if (destFlagCoding == null) {
+                destFlagCoding = ProductUtils.copyFlagCoding(sourceFlagCoding, target);
+            }
+            virtBand.setSampleCoding(destFlagCoding);
+        } else if (sourceIndexCoding != null) {
+            String indexCodingName = sourceIndexCoding.getName();
+            IndexCoding destIndexCoding = target.getIndexCodingGroup().get(indexCodingName);
+            if (destIndexCoding == null) {
+                destIndexCoding = ProductUtils.copyIndexCoding(sourceIndexCoding, target);
+            }
+            virtBand.setSampleCoding(destIndexCoding);
+        } else {
+            virtBand.setSampleCoding(null);
+        }
+        if (srcBand.isStxSet()) {
+            copyStx(srcBand, virtBand);
+        }
+        return virtBand;
+    }
+
+    public static void copyStx(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
+        final Stx sourceStx = sourceRaster.getStx();
+        final Histogram sourceHistogram = sourceStx.getHistogram();
+        final Histogram targetHistogram = new Histogram(sourceStx.getHistogramBinCount(),
+                sourceHistogram.getLowValue(0),
+                sourceHistogram.getHighValue(0),
+                1);
+
+        System.arraycopy(sourceHistogram.getBins(0), 0, targetHistogram.getBins(0), 0, sourceStx.getHistogramBinCount());
+
+        final Stx targetStx = new Stx(sourceStx.getMinimum(),
+                sourceStx.getMaximum(),
+                sourceStx.getMean(),
+                sourceStx.getStandardDeviation(),
+                sourceStx.getCoefficientOfVariation(),
+                sourceStx.getEquivalentNumberOfLooks(),
+                sourceStx.isLogHistogram(),
+                sourceStx.isIntHistogram(),
+                targetHistogram,
+                sourceStx.getResolutionLevel());
+
+        targetRaster.setStx(targetStx);
+    }
 
     /**
      * Copies the named band from the source product to the target product.
