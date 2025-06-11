@@ -422,7 +422,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 double value = getSourceValue(band, tileMap, (int) sourceCoordinate.getX(), (int) sourceCoordinate.getY());
                 if (subsetPolygon != null) {
                     final org.locationtech.jts.geom.Point sourcePoint = new GeometryFactory().createPoint(sourceCoordinate);
-                    if(!subsetPolygon.contains(sourcePoint)){
+                    if(!sourcePoint.isWithinDistance(subsetPolygon, 0.75)){
                         value = band.getNoDataValue();
                     }
                 }
