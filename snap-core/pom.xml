@@ -248,11 +248,6 @@
         </dependency>
 
         <dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-tiff</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
             <version>3.9.0</version>

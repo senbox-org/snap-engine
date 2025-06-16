@@ -76,8 +76,9 @@
                         <publicPackage>com.bc.ceres.compiler</publicPackage>
                         <publicPackage>com.bc.ceres.multilevel.*</publicPackage>
                         <publicPackage>com.bc.ceres.jai.*</publicPackage>
-                        <publicPackage>it.geosolutions.imageio.plugins.tiff</publicPackage>
-                        <publicPackage>it.geosolutions.imageioimpl.plugins.tiff</publicPackage>
+                        <publicPackage>it.geosolutions.imageio.*</publicPackage>
+                        <publicPackage>it.geosolutions.imageioimpl.plugins.tiff.*</publicPackage>
+                        <publicPackage>it.geosolutions.io.*</publicPackage>
                         <publicPackage>org.mozilla.javascript.*</publicPackage>
                     </publicPackages>
                 </configuration>
