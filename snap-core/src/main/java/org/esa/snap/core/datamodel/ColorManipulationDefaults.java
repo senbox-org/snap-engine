@@ -241,7 +241,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose";
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "<html>Scheme selector will show the verbose VERBOSE_NAME field<br>" +
             " from the color_palette_schemes.xml</html>";
-    public static boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
 
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled";
