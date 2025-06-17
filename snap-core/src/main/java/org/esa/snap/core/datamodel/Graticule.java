@@ -149,6 +149,7 @@ public class Graticule {
      */
     public static Graticule create(RasterDataNode raster,
                                    int desiredNumGridLines,
+                                   int desiredMinorSteps,
                                    double latMajorStep,
                                    double lonMajorStep,
                                    boolean formatCompass,
@@ -163,31 +164,36 @@ public class Graticule {
             desiredNumGridLines = 2;
         }
 
-        final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
 
+//        final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
+        final GeoPos geoDeltaScene = getGeoDeltaScene(geoCoding, raster);
+
+        boolean autoBoth = (latMajorStep == 0 && lonMajorStep == 0) ? true : false;
         if (latMajorStep == 0) {
-            int height = raster.getRasterHeight();
-            double ratio = height / (desiredNumGridLines - 1);
-
-            double tmpLatMajorStep = ratio * geoDelta.lat;
+            double tmpLatMajorStep =  geoDeltaScene.lat / desiredNumGridLines;
 
             latMajorStep = getSensibleDegreeIncrement(tmpLatMajorStep);
         }
 
         if (lonMajorStep == 0) {
-            int width = raster.getRasterWidth();
-            double ratio = width / (desiredNumGridLines - 1);
-
-            double tmpLonMajorStep = ratio * geoDelta.lon;
+            double tmpLonMajorStep = geoDeltaScene.lon / desiredNumGridLines;
 
             lonMajorStep = getSensibleDegreeIncrement(tmpLonMajorStep);
         }
 
-        final int desiredMinorSteps = getDesiredMinorSteps(raster);
-        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
-        final double latMinorStep = ratioLatMinor * geoDelta.lat;
-        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
-        final double lonMinorStep = ratioLonMinor * geoDelta.lon;
+        if (autoBoth) {
+            latMajorStep = Math.min(latMajorStep, lonMajorStep);
+            lonMajorStep = latMajorStep;
+        }
+
+//        final int desiredMinorSteps = getDesiredMinorSteps(raster);
+//        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+//        double latMinorStep = ratioLatMinor * geoDelta.lat;
+//        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+//        double lonMinorStep = ratioLonMinor * geoDelta.lon;
+
+        double latMinorStep = latMajorStep / desiredMinorSteps;
+        double lonMinorStep = lonMajorStep / desiredMinorSteps;
 
         int geoBoundaryStep = getGeoBoundaryStep(geoCoding, raster);
         GeoPos[] geoBoundary = createGeoBoundary(raster, geoBoundaryStep);
@@ -203,9 +209,9 @@ public class Graticule {
         final Range latRange = ranges[1];
 
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
-                                                                   lonRange.getMin(), lonRange.getMax());
+                lonRange.getMin(), lonRange.getMax());
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
-                                                                   latRange.getMin(), latRange.getMax());
+                latRange.getMin(), latRange.getMax());
 
         if (parallelList.size() > 0 && meridianList.size() > 0) {
             final GeneralPath[] paths = createPaths(parallelList, meridianList);
@@ -224,28 +230,28 @@ public class Graticule {
             final PixelPos[] tickPointsEast = createTickPoints(parallelList, meridianList, TextLocation.EAST);
 
             return new Graticule(paths,
-                                 textGlyphsNorth,
-                                 textGlyphsSouth,
-                                 textGlyphsWest,
-                                 textGlyphsEast,
-                                 textGlyphsLatCorners,
-                                 textGlyphsLonCorners,
-                                 tickPointsNorth,
-                                 tickPointsSouth,
-                                 tickPointsWest,
-                                 tickPointsEast);
+                    textGlyphsNorth,
+                    textGlyphsSouth,
+                    textGlyphsWest,
+                    textGlyphsEast,
+                    textGlyphsLatCorners,
+                    textGlyphsLonCorners,
+                    tickPointsNorth,
+                    tickPointsSouth,
+                    tickPointsWest,
+                    tickPointsEast);
         } else {
             return new Graticule(null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null,
-                                 null);
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
         }
     }
 
@@ -825,6 +831,82 @@ public class Graticule {
         return ranges;
     }
 
+
+    static double getLonSpan(GeoCoding geoCoding, RasterDataNode dataNode, int y) {
+        PixelPos pixelPrev = null;
+        GeoPos geoPosPrev = null;
+        double degreesSpanTotal = 0.0;
+        for (double i=0.0 ; i <= 1 ; i += 0.01 ) {
+            PixelPos pixelCurr;
+            if (i < 1) {
+                pixelCurr = new PixelPos(dataNode.getRasterWidth()*i, 0);
+            } else {
+                pixelCurr = new PixelPos((dataNode.getRasterWidth()-1)*i, 0);
+            }
+            final GeoPos geoPosCurr = geoCoding.getGeoPos(pixelCurr, null);
+
+
+            if (pixelPrev != null && geoPosPrev != null) {
+                double degreesSpanCurr = Math.abs(geoPosCurr.lon - geoPosPrev.lon);
+                if (degreesSpanCurr > 180) {
+                    degreesSpanCurr -=  360;
+                }
+                degreesSpanTotal += degreesSpanCurr;
+            }
+
+            pixelPrev = pixelCurr;
+            geoPosPrev = geoPosCurr;
+        }
+
+        return degreesSpanTotal;
+    }
+
+
+    static double getLatSpan(GeoCoding geoCoding, RasterDataNode dataNode, int x) {
+        PixelPos pixelPrev = null;
+        GeoPos geoPosPrev = null;
+        double degreesSpanTotal = 0.0;
+
+        for (double i=0.0 ; i <= 1 ; i += 0.01 ) {
+            PixelPos pixelCurr;
+            if (i < 1) {
+                pixelCurr = new PixelPos(x, dataNode.getRasterHeight()*i);
+            } else {
+                pixelCurr = new PixelPos(x, (dataNode.getRasterHeight()-1)*i);
+            }
+            final GeoPos geoPosCurr = geoCoding.getGeoPos(pixelCurr, null);
+
+            if (pixelPrev != null && geoPosPrev != null) {
+                double degreesSpanCurr = Math.abs(geoPosCurr.lat - geoPosPrev.lat);
+                degreesSpanTotal += degreesSpanCurr;
+            }
+
+            pixelPrev = pixelCurr;
+            geoPosPrev = geoPosCurr;
+        }
+
+        return degreesSpanTotal;
+    }
+
+
+
+
+    static GeoPos getGeoDeltaScene(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+        double deltaLonTop = getLonSpan( geoCoding,  dataNode,  0);
+        double deltaLonBottom = getLonSpan( geoCoding,  dataNode,  dataNode.getRasterHeight()-1);
+        double deltaLatLeft = getLatSpan(geoCoding, dataNode, 0);
+        double deltaLatRight = getLatSpan(geoCoding, dataNode, dataNode.getRasterWidth()-1);
+
+        double deltaLon = Math.min(deltaLonTop, deltaLonBottom);
+        double deltaLat = Math.min(deltaLatLeft, deltaLatRight);
+
+        return new GeoPos(deltaLat, deltaLon);
+    }
+
+
+
+
     static GeoPos getGeoDelta(GeoCoding geoCoding, RasterDataNode dataNode) {
         final double posX = 0.5 * dataNode.getRasterWidth();
         final double posy = 0.5 * dataNode.getRasterHeight();
@@ -851,7 +933,7 @@ public class Graticule {
 
     static TextGlyph createTextGlyph(String text, Coord coord1, Coord coord2) {
         final double angle = Math.atan2(coord2.pixelPos.y - coord1.pixelPos.y,
-                                        coord2.pixelPos.x - coord1.pixelPos.x);
+                coord2.pixelPos.x - coord1.pixelPos.x);
         return new TextGlyph(text, coord1.pixelPos.x, coord1.pixelPos.y, angle);
     }
 
