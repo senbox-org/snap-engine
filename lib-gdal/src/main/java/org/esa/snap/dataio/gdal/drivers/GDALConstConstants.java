@@ -29,6 +29,15 @@ public class GDALConstConstants {
     }
 
     /**
+     * Fetches the JNI GDAL GDT_Int8 constant
+     *
+     * @return the JNI GDAL GDT_Int8 constant
+     */
+    public static Integer gdtInt8() {
+        return GDALReflection.fetchGDALLibraryConstant(CLASS_NAME, "GDT_Int8");
+    }
+
+    /**
      * Calls the JNI GDAL GDT_Int16 constant
      *
      * @return the JNI GDAL GDT_Int16 constant

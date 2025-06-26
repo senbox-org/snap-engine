@@ -162,8 +162,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
         } else if (dataBufferType == DataBuffer.TYPE_BYTE && destBuffer.getElems() instanceof byte[]) {
             int[] dArray = new int[destWidth * destHeight];
             sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
+            boolean signed8 = isSigned8Bit();
             for (int i = 0; i < dArray.length; i++) {
-                destBuffer.setElemIntAt(i, dArray[i]);
+                int raw = dArray[i] & 0xFF;
+                int val = signed8 ? (raw < 128 ? raw : raw - 256) : raw;
+                destBuffer.setElemIntAt(i, val);
             }
         } else {
             double[] dArray = new double[destWidth * destHeight];
@@ -176,6 +179,19 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 }
             }
         }
+    }
+
+    private boolean isSigned8Bit() throws IOException {
+        TIFFImageMetadata metadata = geoTiffImageReader.getImageMetadata();
+        TiffFileInfo tiffInfo = new TiffFileInfo(metadata.getRootIFD());
+        TIFFField sampleFormat = tiffInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
+        return isSignedSampleFormat(sampleFormat);
+    }
+
+    static boolean isSignedSampleFormat(TIFFField sampleFormat) {
+        return sampleFormat != null
+                && sampleFormat.getAsInts().length > 0
+                && sampleFormat.getAsInts()[0] == 2;
     }
 
     private void closeResources() {
@@ -383,7 +399,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         SampleModel sampleModel = baseImage.getSampleModel();
         int numBands = sampleModel.getNumBands();
-        int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());
+        int productDataType = getProductDataType(tiffInfo, sampleModel.getDataType());
 
         // check if GDAL metadata exists. If so, extract all band info and add to bands.
         // todo: so far this has been implemented and tested for PROBA-V S* GeoTiff products only (SIIITBX-85),
@@ -405,6 +421,16 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
 
         return bands;
+    }
+
+    static int getProductDataType(TiffFileInfo tiffInfo, int dataType) {
+        if (dataType == DataBuffer.TYPE_BYTE) {
+            TIFFField sfField = tiffInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
+            if (isSignedSampleFormat(sfField)) {
+                return ProductData.TYPE_INT8;
+            }
+        }
+        return ImageManager.getProductDataType(dataType);
     }
 
     private static Product buildProductFromDimapHeader(String tagNumberText, Dimension productSize) throws IOException {
