@@ -17,26 +17,27 @@ package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;
+import it.geosolutions.imageio.plugins.tiff.TIFFTag;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.Rectangle;
+import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -242,5 +243,64 @@ public class GeoTiffProductReaderTest {
     private static ProductReader buildProductReader() {
         GeoTiffProductReaderPlugIn readerPlugIn = new GeoTiffProductReaderPlugIn();
         return readerPlugIn.createReaderInstance();
+    }
+
+
+    @Test
+    @STTM("SNAP-3697")
+    public void testIsSignedSampleFormat_nullField() {
+        assertFalse(GeoTiffProductReader.isSignedSampleFormat(null));
+    }
+
+    @Test
+    @STTM("SNAP-3697")
+    public void testIsSignedSampleFormat_unsigned() {
+        TIFFTag tag = BaselineTIFFTagSet.getInstance()
+                .getTag(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
+        TIFFField unsignedField = new TIFFField(tag, 1);
+
+        assertFalse(GeoTiffProductReader.isSignedSampleFormat(unsignedField));
+    }
+
+    @Test
+    @STTM("SNAP-3697")
+    public void testIsSignedSampleFormat_signed() {
+        TIFFTag tag = BaselineTIFFTagSet.getInstance()
+                .getTag(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
+        TIFFField signedField = new TIFFField(tag, 2);
+
+        assertTrue(GeoTiffProductReader.isSignedSampleFormat(signedField));
+    }
+
+    @Test
+    @STTM("SNAP-3697")
+    public void testGetProductDataType_unsignedByte() {
+        // preparation
+        TiffFileInfo tiffFileInfo = mock(TiffFileInfo.class);
+        TIFFField tiffField = mock(TIFFField.class);
+        when(tiffFileInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT)).thenReturn(tiffField);
+        when(tiffField.getAsInts()).thenReturn(new int[]{1});
+
+        // execution
+        int pdType = GeoTiffProductReader.getProductDataType(tiffFileInfo, DataBuffer.TYPE_BYTE);
+
+        // validation
+        assertEquals(ProductData.TYPE_UINT8, pdType);
+    }
+
+    @Test
+    @STTM("SNAP-3697")
+    public void testGetProductDataType_signedByte() {
+        // preparation
+        TiffFileInfo tiffFileInfo = mock(TiffFileInfo.class);
+        TIFFField tiffField = mock(TIFFField.class);
+        when(tiffFileInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT)).thenReturn(tiffField);
+        when(tiffField.getAsInts()).thenReturn(new int[]{2});
+
+        // execution
+        int pdType = GeoTiffProductReader.getProductDataType(tiffFileInfo, DataBuffer.TYPE_BYTE);
+
+        // validation
+        assertEquals(ProductData.TYPE_INT8, pdType);
     }
 }

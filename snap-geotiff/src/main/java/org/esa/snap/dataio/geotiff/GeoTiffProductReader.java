@@ -185,7 +185,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
         TIFFImageMetadata metadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(metadata.getRootIFD());
         TIFFField sampleFormat = tiffInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
-        return sampleFormat != null && sampleFormat.getAsInts()[0] == 2;
+        return isSignedSampleFormat(sampleFormat);
+    }
+
+    static boolean isSignedSampleFormat(TIFFField sampleFormat) {
+        return sampleFormat != null
+                && sampleFormat.getAsInts().length > 0
+                && sampleFormat.getAsInts()[0] == 2;
     }
 
     private void closeResources() {
@@ -417,11 +423,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return bands;
     }
 
-    private static int getProductDataType(TiffFileInfo tiffInfo, int dataType) {
+    static int getProductDataType(TiffFileInfo tiffInfo, int dataType) {
         if (dataType == DataBuffer.TYPE_BYTE) {
             TIFFField sfField = tiffInfo.getField(BaselineTIFFTagSet.TAG_SAMPLE_FORMAT);
-            boolean signed8 = sfField != null && sfField.getAsInts()[0] == 2;
-            if (signed8) {
+            if (isSignedSampleFormat(sfField)) {
                 return ProductData.TYPE_INT8;
             }
         }
