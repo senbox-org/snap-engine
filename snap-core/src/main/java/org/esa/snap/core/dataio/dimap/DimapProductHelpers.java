@@ -1530,13 +1530,28 @@ public class DimapProductHelpers {
         private void addSamples(String tagNameSampleElements, String tagNameSampleName, String tagNameSampleValue,
                                 String tagNameSampleDescription,
                                 Element sampleCodingElement, SampleCoding sampleCoding) {
-            final List list = sampleCodingElement.getChildren(tagNameSampleElements);
-            for (Object o : list) {
-                final Element element = (Element) o;
-                final String name = element.getChildTextTrim(tagNameSampleName);
-                final int value = Integer.parseInt(element.getChildTextTrim(tagNameSampleValue));
-                final String description = element.getChildTextTrim(tagNameSampleDescription);
-                sampleCoding.addSample(name, value, description);
+            List<Element> list = sampleCodingElement.getChildren(tagNameSampleElements);
+            for (Element element : list) {
+                String name = element.getChildTextTrim(tagNameSampleName);
+                String description = element.getChildTextTrim(tagNameSampleDescription);
+                if (sampleCoding instanceof FlagCoding) {
+                    final FlagCoding fc = (FlagCoding) sampleCoding;
+                    String maskText = element.getChildTextTrim(DimapProductConstants.TAG_FLAG_MASK);
+                    int mask = maskText != null
+                            ? Integer.parseInt(maskText)
+                            : Integer.parseInt(element.getChildTextTrim(tagNameSampleValue));
+                    String valueText = element.getChildTextTrim(DimapProductConstants.TAG_FLAG_VALUE);
+                    if (valueText != null) {
+                        int value = Integer.parseInt(valueText);
+                        fc.addFlag(name, mask, value, description);
+                    } else {
+                        fc.addFlag(name, mask, description);
+                    }
+                }
+                else if (sampleCoding instanceof IndexCoding) {
+                    int idx = Integer.parseInt(element.getChildTextTrim(tagNameSampleValue));
+                    ((IndexCoding) sampleCoding).addIndex(name, idx, description);
+                }
             }
         }
 

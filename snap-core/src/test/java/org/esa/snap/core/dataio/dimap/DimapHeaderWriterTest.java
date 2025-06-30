@@ -234,6 +234,54 @@ public class DimapHeaderWriterTest {
         assertEquals(expected, stringWriter.toString());
     }
 
+    @Test
+    @STTM("SNAP-3641")
+    public void testWriteFlags_usingMasks() {
+        FlagCoding fc = new FlagCoding("FlagCoding1");
+        fc.addFlag("FlagA", 3, 1, "DescriptionA");
+        product.getFlagCodingGroup().add(fc);
+
+        final String expected =
+                header +
+                        "    <Flag_Coding name=\"FlagCoding1\">" + LS +
+                        "        <Flag>" + LS +
+                        "            <Flag_Name>FlagA</Flag_Name>" + LS +
+                        "            <Flag_Mask>3</Flag_Mask>" + LS +
+                        "            <Flag_Value>1</Flag_Value>" + LS +
+                        "            <Flag_description>DescriptionA</Flag_description>" + LS +
+                        "        </Flag>" + LS +
+                        "    </Flag_Coding>" + LS +
+                        getRasterDimensions() +
+                        footer;
+
+        dimapHeaderWriter.writeHeader();
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testWriteFlags() {
+        FlagCoding fc = new FlagCoding("FlagCoding1");
+        fc.addFlag("FlagA", 3, "DescriptionA");
+        product.getFlagCodingGroup().add(fc);
+
+        final String expected =
+                header +
+                        "    <Flag_Coding name=\"FlagCoding1\">" + LS +
+                        "        <Flag>" + LS +
+                        "            <Flag_Name>FlagA</Flag_Name>" + LS +
+                        "            <Flag_Index>3</Flag_Index>" + LS +
+                        "            <Flag_description>DescriptionA</Flag_description>" + LS +
+                        "        </Flag>" + LS +
+                        "    </Flag_Coding>" + LS +
+                        getRasterDimensions() +
+                        footer;
+
+        dimapHeaderWriter.writeHeader();
+        assertEquals(expected, stringWriter.toString());
+    }
+
+
 
     private String addBandWithTransformAndGetExpected() {
         final Band band = product.addBand("b1", "X + Y");
