@@ -15,17 +15,13 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
@@ -37,6 +33,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
 
     private static final String FLAG_MASKS = "flag_masks";
     private static final String FLAG_MEANINGS = "flag_meanings";
+    private static final String FLAG_VALUES = "flag_values";
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
@@ -52,36 +49,66 @@ public class CfFlagCodingPart extends ProfilePartIO {
     }
 
     public static void writeFlagCoding(Band band, NFileWriteable ncFile) throws IOException {
-        final FlagCoding flagCoding = band.getFlagCoding();
-        if (flagCoding != null) {
-            final String[] flagNames = flagCoding.getFlagNames();
-            ProductData flagValueData = ProductData.createInstance(band.getDataType(), flagNames.length);
-            final StringBuilder meanings = new StringBuilder();
-            for (int i = 0; i < flagValueData.getNumElems(); i++) {
-                if (meanings.length() > 0) {
-                    meanings.append(" ");
-                }
-                String name = flagNames[i];
-                meanings.append(name);
-                flagValueData.setElemIntAt(i, flagCoding.getFlagMask(name));
+        final FlagCoding fc = band. getFlagCoding();
+        if (fc == null) {
+            return;
+        }
+
+        String[] flagNames = fc.getFlagNames();
+        int numFlags = flagNames.length;
+        NVariable var = ncFile.findVariable(band.getName());
+        DataType dType = ncFile.getNetcdfDataType(band.getDataType());
+
+        StringBuilder meanings = new StringBuilder();
+        String desc = fc.getDescription();
+        int[] masks = new int[numFlags];
+        int[] values = new int[numFlags];
+        boolean hasValues = false;
+
+
+        // construct meanings, masks and (if present) values
+        for (int ii = 0; ii < numFlags; ii++) {
+            if (ii > 0) {
+                meanings.append(" ");
             }
-            String variableName = ReaderUtils.getVariableName(band);
-            String description = flagCoding.getDescription();
-            if (description != null) {
-                ncFile.findVariable(variableName).addAttribute("long_name", description);
-            }
-            ncFile.findVariable(variableName).addAttribute(FLAG_MEANINGS, meanings.toString());
-            final Array maskValues = Array.factory(ncFile.getNetcdfDataType(band.getDataType()) ,new int[]{flagNames.length},flagValueData.getElems());
-            NVariable variable = ncFile.findVariable(variableName);
-            Attribute attribute = variable.addAttribute(FLAG_MASKS, maskValues);
-            try {
-                if (flagValueData.isUnsigned()) {
-                    attribute.setDataType(attribute.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
-                }
-            } catch (NullPointerException ignore) {
-                // how can this happen? isn't something else wrong in this case?
+            meanings.append(flagNames[ii]);
+
+            MetadataAttribute attr = fc.getFlag(flagNames[ii]);
+            ProductData data = attr.getData();
+            masks[ii] = data.getElemIntAt(0);
+            values[ii] = masks[ii];
+
+            if (data.getNumElems() > 1) {
+                values[ii] = data.getElemIntAt(1);
+                hasValues = true;
             }
         }
+
+        // add attributes meanings, description, masks and  (if present) values
+        var.addAttribute(FLAG_MEANINGS, meanings.toString());
+        if (desc != null && !desc.isEmpty()) {
+            var.addAttribute("long_name", desc);
+        }
+        Object maskStorage = toStorageArray(dType, masks);
+        Array maskArray = Array.factory(dType, new int[]{numFlags}, maskStorage);
+        Attribute attrMasks = var.addAttribute(FLAG_MASKS, maskArray);
+        Attribute attrValues = null;
+        if (hasValues) {
+            Object valuesStorage = toStorageArray(dType, values);
+            Array valueArray = Array.factory(dType, new int[]{numFlags}, valuesStorage);
+            attrValues = var.addAttribute(FLAG_VALUES, valueArray);
+        }
+
+        try {
+            if (dType.isUnsigned()) {
+                DataType dtMasks = attrMasks.getDataType().withSignedness(DataType.Signedness.UNSIGNED);
+                attrMasks.setDataType(dtMasks);
+                if (attrValues != null) {
+                    DataType dtValues = attrValues.getDataType().withSignedness(DataType.Signedness.UNSIGNED);
+                    attrValues.setDataType(dtValues);
+                }
+            }
+        } catch (NullPointerException ignore) {}
     }
 
     public static FlagCoding readFlagCoding(ProfileReadContext ctx, String variableName) {
@@ -159,5 +186,40 @@ public class CfFlagCodingPart extends ProfilePartIO {
 
     static String replaceNonWordCharacters(String flagName) {
         return flagName.replaceAll("\\W+", "_");
+    }
+
+
+    private static Object toStorageArray(ucar.ma2.DataType dType, int[] in) {
+        switch (dType) {
+            case BYTE:
+            case UBYTE: {
+                byte[] a = new byte[in.length];
+                for (int i = 0; i < in.length; i++) {
+                    a[i] = (byte) in[i];
+                }
+                return a;
+            }
+            case SHORT:
+            case USHORT: {
+                short[] a = new short[in.length];
+                for (int i = 0; i < in.length; i++) {
+                    a[i] = (short) in[i];
+                }
+                return a;
+            }
+            case INT:
+            case UINT:
+                return in;
+            case LONG:
+            case ULONG: {
+                long[] a = new long[in.length];
+                for (int i = 0; i < in.length; i++) {
+                    a[i] = in[i];
+                }
+                return a;
+            }
+            default:
+                return in;
+        }
     }
 }

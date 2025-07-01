@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -121,5 +122,91 @@ public class CfFlagCodingPartTest {
         assertEquals(2147483647, unsingedInt.getInt(2));
         // Long data type is not supported, so this values needs to stay negative.
         assertEquals(-2147483648, unsingedInt.getInt(3));
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testWriteFlagCodingWithOptionalValues() throws Exception {
+        Band flagBand = new Band("flag_band", ProductData.TYPE_UINT8, 10, 10);
+        FlagCoding flagCoding = new FlagCoding("some_flags");
+        flagCoding.setDescription("Flags with and without values");
+        flagBand.setSampleCoding(flagCoding);
+
+        final int mask = 0b0001;
+        final int maskAndValValue = 42;
+        flagCoding.addFlag("maskOnly", mask, "nur mask");
+        flagCoding.addFlag("maskWithValue", mask, maskAndValValue, "mit value");
+
+        NFileWriteable n3w = NWritableFactory.create("unused", "netcdf3");
+        n3w.addDimension("y", flagBand.getRasterHeight());
+        n3w.addDimension("x", flagBand.getRasterWidth());
+        DataType ncType = DataTypeUtils.getNetcdfDataType(flagBand.getDataType());
+        NVariable var = n3w.addVariable(flagBand.getName(), ncType, null, "y x");
+
+        CfBandPart.writeCfBandAttributes(flagBand, var);
+        CfFlagCodingPart.writeFlagCoding(flagBand, n3w);
+
+        Attribute meaningsAttr = var.findAttribute("flag_meanings");
+        assertEquals("maskOnly maskWithValue", meaningsAttr.getStringValue());
+
+        // assertions for flag_masks
+        Attribute masksAttr = var.findAttribute("flag_masks");
+        assertNotNull(masksAttr);
+        assertEquals(2, masksAttr.getLength());
+        Array masksArr = masksAttr.getValues();
+        assertEquals(mask, masksArr.getInt(0));
+        assertEquals(mask, masksArr.getInt(1));
+        assertTrue(masksAttr.getDataType().isUnsigned());
+
+        // assertions for flag_values
+        Attribute valuesAttr = var.findAttribute("flag_values");
+        assertNotNull(valuesAttr);
+        assertEquals(2, valuesAttr.getLength());
+        Array valuesArr = valuesAttr.getValues();
+        assertEquals(mask, valuesArr.getInt(0));
+        assertEquals(maskAndValValue, valuesArr.getInt(1));
+        assertTrue( valuesAttr.getDataType().isUnsigned());
+
+        Attribute descAttr = var.findAttribute("long_name");
+        assertEquals("Flags with and without values", descAttr.getStringValue());
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testWriteFlagCodingWithoutValues() throws Exception {
+        Band flagBand = new Band("flag_band", ProductData.TYPE_UINT8, 10, 10);
+        FlagCoding flagCoding = new FlagCoding("some_flags");
+        flagCoding.setDescription("Flags without values");
+        flagBand.setSampleCoding(flagCoding);
+
+        final int mask1 = 0b0001;
+        final int mask2 = 0b0010;
+        flagCoding.addFlag("mask1", mask1,"mask1");
+        flagCoding.addFlag("mask2", mask2, "mask2");
+
+        NFileWriteable n3w = NWritableFactory.create("unused", "netcdf3");
+        n3w.addDimension("y", flagBand.getRasterHeight());
+        n3w.addDimension("x", flagBand.getRasterWidth());
+        DataType ncType = DataTypeUtils.getNetcdfDataType(flagBand.getDataType());
+        NVariable var = n3w.addVariable(flagBand.getName(), ncType, null, "y x");
+
+        CfBandPart.writeCfBandAttributes(flagBand, var);
+        CfFlagCodingPart.writeFlagCoding(flagBand, n3w);
+
+        // assertions for flag_masks
+        Attribute masksAttr = var.findAttribute("flag_masks");
+        assertNotNull(masksAttr);
+        assertEquals(2, masksAttr.getLength());
+        Array masksArr = masksAttr.getValues();
+        assertEquals(mask1, masksArr.getInt(0));
+        assertEquals(mask2, masksArr.getInt(1));
+        assertTrue(masksAttr.getDataType().isUnsigned());
+
+        // assertions for flag_values
+        Attribute valuesAttr = var.findAttribute("flag_values");
+        assertNull(valuesAttr);
+
+        Attribute descAttr = var.findAttribute("long_name");
+        assertEquals("Flags without values", descAttr.getStringValue());
     }
 }
