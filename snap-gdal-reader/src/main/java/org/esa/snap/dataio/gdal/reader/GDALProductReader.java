@@ -55,7 +55,8 @@ public class GDALProductReader extends AbstractProductReader {
 
     static {
         BUFFER_TYPES = new HashMap<>();
-        BUFFER_TYPES.put(GDALConstConstants.gdtByte(), new BufferTypeDescriptor(8, true, ProductData.TYPE_UINT8, DataBuffer.TYPE_BYTE));
+        BUFFER_TYPES.put(GDALConstConstants.gdtByte(), new BufferTypeDescriptor(8, false, ProductData.TYPE_UINT8, DataBuffer.TYPE_BYTE));
+        BUFFER_TYPES.put(GDALConstConstants.gdtInt8(), new BufferTypeDescriptor(8, true, ProductData.TYPE_INT8, DataBuffer.TYPE_BYTE));
         BUFFER_TYPES.put(GDALConstConstants.gdtInt16(), new BufferTypeDescriptor(16, true, ProductData.TYPE_INT16, DataBuffer.TYPE_SHORT));
         BUFFER_TYPES.put(GDALConstConstants.gdtUint16(), new BufferTypeDescriptor(16, false, ProductData.TYPE_UINT16, DataBuffer.TYPE_USHORT));
         BUFFER_TYPES.put(GDALConstConstants.gdtInt32(), new BufferTypeDescriptor(32, true, ProductData.TYPE_INT32, DataBuffer.TYPE_INT));
