@@ -52,10 +52,10 @@ public class TestElevationFile {
     }
 
     @Test
-    @STTM("SNAP-3689")
+    @STTM("SNAP-4035")
     public void test30mCreateFile() throws Exception {
 
-        final float[] expected = new float[] {155.64882f,147.27896f,144.38275f};
+        final float[] expected = new float[] {159.47452f, 150.17595f, 143.38873f};
         Copernicus30mElevationModel model = new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.NEAREST_NEIGHBOUR);
         Copernicus30mFile file = new Copernicus30mFile(model, new File("/tmp/Copernicus_DSM_COG_10_N55_00_W005_00_DEM.tif"), (new GeoTiffProductReaderPlugIn()).createReaderInstance());
         final ElevationTile tile = file.getTile();

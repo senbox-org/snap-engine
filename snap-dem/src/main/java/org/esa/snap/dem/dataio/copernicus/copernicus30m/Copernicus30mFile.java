@@ -1,18 +1,26 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus30m;
 
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 
 import java.awt.*;
+import java.awt.image.Raster;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.common.SubsetOp;
 import org.esa.snap.core.gpf.common.resample.ResamplingOp;
+import org.esa.snap.core.gpf.internal.TileImpl;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+import org.esa.snap.engine_utilities.gpf.TileIndex;
 
 public class Copernicus30mFile extends ElevationFile {
 
@@ -28,23 +36,43 @@ public class Copernicus30mFile extends ElevationFile {
 
         if (product.getSceneRasterWidth() != product.getSceneRasterHeight()){
 
-            ResamplingOp resampler = new ResamplingOp();
-            resampler.setParameter("targetWidth", 3601);
-            resampler.setParameter("targetHeight", 3601);
-            resampler.setParameter("upsampling", "Bilinear");
-            resampler.setParameter("downsampling", "First");
-            resampler.setParameter("flagDownsampling", "First");
-            resampler.setSourceProduct(product);
-            Product resampled = resampler.getTargetProduct();
-            product.getName();
-            resampled.getBandAt(0).readRasterDataFully();
+            final int sourceWidth = product.getSceneRasterWidth();
+            final int sourceHeight = product.getSceneRasterHeight();
+            final int targetWidth = 3600;
+            final int targetHeight = 3600;
+            final double upSamplingFactor = (double)targetWidth / (double)sourceWidth;
 
-            SubsetOp subsetOp = new SubsetOp();
-            subsetOp.setSourceProduct(resampled);
-            subsetOp.setRegion(new Rectangle(1, 1, 3600, 3600));
-            Product subsetProd = subsetOp.getTargetProduct();
+            final Band sourceBand = product.getBandAt(0);
+            final Rectangle sourceRectangle = new Rectangle(0, 0, sourceWidth, sourceHeight);
+            final MultiLevelImage image = sourceBand.getSourceImage();
+            final Raster awtRaster = image.getData(sourceRectangle);
+            final Tile sourceTile = new TileImpl(sourceBand, awtRaster);
+            final ProductData sourceData = sourceTile.getDataBuffer();
 
-            tile = new CopernicusElevationTile(demModel, subsetProd);
+            final Product targetProduct = new Product(product.getName(), product.getProductType(), targetWidth, targetHeight);
+            final Band targetBand = new Band(sourceBand.getName(), ProductData.TYPE_FLOAT32, targetWidth, targetHeight);
+            final ProductData data = targetBand.createCompatibleRasterData(targetWidth, targetHeight);
+            targetBand.setRasterData(data);
+            targetProduct.addBand(targetBand);
+            ProductUtils.copyProductNodes(product, targetProduct);
+
+            for (int ty = 0; ty < targetHeight; ++ty) {
+                double[] upSampledLine = new double[targetWidth];
+                for (int tx = 0; tx < targetWidth; ++tx) {
+                    final double sx = tx / upSamplingFactor;
+                    final int sx0 = (int)sx;
+                    final int sx1 = Math.min(sx0 + 1, sourceWidth - 1);
+                    final int idx0 = sourceTile.getDataBufferIndex(sx0, ty);
+                    final int idx1 = sourceTile.getDataBufferIndex(sx1, ty);
+                    final double sv0 = sourceData.getElemDoubleAt(idx0);
+                    final double sv1 = sourceData.getElemDoubleAt(idx1);
+                    final double mu = sx - sx0;
+                    upSampledLine[tx] = (1 - mu) * sv0 + mu * sv1;
+                }
+                targetBand.setPixels(0, ty, targetWidth, 1, upSampledLine);
+            }
+
+            tile = new CopernicusElevationTile(demModel, targetProduct);
             product.dispose();
         } else {
             tile = new CopernicusElevationTile(demModel, product);
