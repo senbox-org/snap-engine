@@ -189,7 +189,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
     }
 
 
-    private static Object toStorageArray(ucar.ma2.DataType dType, int[] in) {
+    static Object toStorageArray(ucar.ma2.DataType dType, int[] in) {
         switch (dType) {
             case BYTE:
             case UBYTE: {
@@ -210,16 +210,8 @@ public class CfFlagCodingPart extends ProfilePartIO {
             case INT:
             case UINT:
                 return in;
-            case LONG:
-            case ULONG: {
-                long[] a = new long[in.length];
-                for (int i = 0; i < in.length; i++) {
-                    a[i] = in[i];
-                }
-                return a;
-            }
             default:
-                return in;
+                throw new IllegalArgumentException("Unsupported DataType: " + dType);
         }
     }
 }

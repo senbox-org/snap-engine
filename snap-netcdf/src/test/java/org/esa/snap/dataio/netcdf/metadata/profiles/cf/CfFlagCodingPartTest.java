@@ -209,4 +209,96 @@ public class CfFlagCodingPartTest {
         Attribute descAttr = var.findAttribute("long_name");
         assertEquals("Flags without values", descAttr.getStringValue());
     }
+
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testToStorageArray_byte() {
+        // sigend byte
+        int[] in_signed = new int[] { -128, 127 };
+        byte[] expected_signed = new byte[] {-128, 127 };
+        DataType dType_signed = DataType.BYTE;
+
+        Object storageArray = CfFlagCodingPart.toStorageArray(dType_signed, in_signed);
+
+        assertTrue(storageArray instanceof byte[]);
+        byte[] actual = (byte[]) storageArray;
+        assertArrayEquals(expected_signed, actual);
+
+        // unsigend byte
+        int[] in_unsigned = new int[] { 0, 255 };
+        byte[] expected_unsigned = new byte[] {0, (byte)255 };
+        DataType dType_unsigned = DataType.UBYTE;
+
+        Object storageArray_unsigned = CfFlagCodingPart.toStorageArray(dType_unsigned, in_unsigned);
+
+        assertTrue(storageArray_unsigned instanceof byte[]);
+        byte[] actual_unsigned = (byte[]) storageArray_unsigned;
+        assertArrayEquals(expected_unsigned, actual_unsigned);
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testToStorageArray_short() {
+        // signed short
+        int[] in_signed = new int[] { Short.MIN_VALUE, Short.MAX_VALUE };
+        short[] expected_signed = new short[] { Short.MIN_VALUE, Short.MAX_VALUE };
+        DataType dType_signed = DataType.SHORT;
+
+        Object storage_signed = CfFlagCodingPart.toStorageArray(dType_signed, in_signed);
+        assertTrue(storage_signed instanceof short[]);
+        short[] actual_signed = (short[]) storage_signed;
+        assertArrayEquals(expected_signed, actual_signed);
+
+        // unsigned short
+        int[] in_unsigned = new int[] { 0, 0xFFFF };
+        short[] expected_unsigned = new short[] { (short) 0, (short) 0xFFFF };
+        DataType dType_unsigned = DataType.USHORT;
+
+        Object storage_unsigned = CfFlagCodingPart.toStorageArray(dType_unsigned, in_unsigned);
+        assertTrue(storage_unsigned instanceof short[]);
+        short[] actual_unsigned = (short[]) storage_unsigned;
+        assertArrayEquals(expected_unsigned, actual_unsigned);
+        assertEquals(0,      Short.toUnsignedInt(actual_unsigned[0]));
+        assertEquals(0xFFFF, Short.toUnsignedInt(actual_unsigned[1]));
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testToStorageArray_int() {
+        // signed int
+        int[] inSigned = new int[] { Integer.MIN_VALUE, Integer.MAX_VALUE };
+        int[] expectedSigned = new int[] { Integer.MIN_VALUE, Integer.MAX_VALUE };
+        DataType dTypeSigned = DataType.INT;
+
+        Object storageSigned = CfFlagCodingPart.toStorageArray(dTypeSigned, inSigned);
+        assertTrue(storageSigned instanceof int[]);
+        int[] actualSigned = (int[]) storageSigned;
+        assertArrayEquals(expectedSigned, actualSigned);
+
+        // unsigned int
+        int[] inUnsigned = new int[] { 0, 0xFFFFFFFF };
+        int[] expectedUnsigned = new int[] { 0, (int) 0xFFFFFFFF };
+        DataType dTypeUnsigned = DataType.UINT;
+
+        Object storageUnsigned = CfFlagCodingPart.toStorageArray(dTypeUnsigned, inUnsigned);
+        assertTrue(storageUnsigned instanceof int[]);
+        int[] actualUnsigned = (int[]) storageUnsigned;
+        assertArrayEquals(expectedUnsigned, actualUnsigned);
+        assertEquals(0L, Integer.toUnsignedLong(actualUnsigned[0]));
+        assertEquals(0xFFFFFFFFL, Integer.toUnsignedLong(actualUnsigned[1]));
+    }
+
+    @Test
+    @STTM("SNAP-3641")
+    public void testToStorageArray_notSupportedDataType() {
+        int[] in = new int[] { Integer.MIN_VALUE, Integer.MAX_VALUE };
+        DataType dType = DataType.LONG;
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> CfFlagCodingPart.toStorageArray(dType, in)
+        );
+        assertEquals("Unsupported DataType: " + dType, ex.getMessage());
+    }
 }
