@@ -186,6 +186,8 @@ public final class DimapProductConstants {
     public static final String TAG_FLAG_NAME = "Flag_Name";
     public static final String TAG_FLAG_INDEX = "Flag_Index";
     public static final String TAG_FLAG_DESCRIPTION = "Flag_description";
+    public static final String TAG_FLAG_VALUE = "Flag_Value";
+    public static final String TAG_FLAG_MASK = "Flag_Mask";
 
     // BEAM-Dimap index coding tags
     public static final String TAG_INDEX_CODING = "Index_Coding";

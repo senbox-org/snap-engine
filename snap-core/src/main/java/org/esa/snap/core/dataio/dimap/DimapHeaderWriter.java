@@ -506,21 +506,56 @@ public final class DimapHeaderWriter extends XmlWriter {
         }
     }
 
-    private void writeSampleCoding(int indent, SampleCoding sampleCoding, String[] fcTags, String tagFlag,
-                                   String tagName,
-                                   String tagIndex, String tagDescription) {
-        final String[] names = sampleCoding.getAttributeNames();
-        for (String name : names) {
-            final MetadataAttribute attribute = sampleCoding.getAttribute(name);
-            final String[] fTags = createTags(indent + 1, tagFlag);
-            println(fTags[0]);
-            printLine(indent + 2, tagName, attribute.getName());
-            printLine(indent + 2, tagIndex, attribute.getData().getElemInt());
-            printLine(indent + 2, tagDescription, attribute.getDescription());
-            println(fTags[1]);
+
+    private void writeSampleCoding(int indent, SampleCoding sampleCoding, String[] fcTags, String tagSample, String tagName, String tagIndex, String tagDescription) {
+
+        if (sampleCoding instanceof FlagCoding) {
+            FlagCoding fc = (FlagCoding) sampleCoding;
+            for (String name : fc.getFlagNames()) {
+                MetadataAttribute attr = fc.getFlag(name);
+                ProductData data = attr.getData();
+                int elems = data.getNumElems();
+                String desc = attr.getDescription();
+
+                println(sp(indent+1) + "<" + tagSample + ">");
+                println(sp(indent+2) + "<" + tagName + ">" + name + "</" + tagName + ">");
+
+                if (elems == 1) {
+                    int idx = data.getElemInt();
+                    println(sp(indent+2) + "<" + tagIndex + ">" + idx + "</" + tagIndex + ">");
+                } else {
+                    int mask  = data.getElemIntAt(0);
+                    int value = data.getElemIntAt(1);
+                    println(sp(indent+2) + "<" + DimapProductConstants.TAG_FLAG_MASK  + ">" + mask  + "</" + DimapProductConstants.TAG_FLAG_MASK  + ">");
+                    println(sp(indent+2) + "<" + DimapProductConstants.TAG_FLAG_VALUE + ">" + value + "</" + DimapProductConstants.TAG_FLAG_VALUE + ">");
+                }
+
+                println(sp(indent+2) + "<" + tagDescription + ">" + desc + "</" + tagDescription + ">");
+                println(sp(indent+1) + "</" + tagSample + ">");
+            }
+
+        } else if (sampleCoding instanceof IndexCoding) {
+            IndexCoding ic = (IndexCoding) sampleCoding;
+            for (String name : ic.getIndexNames()) {
+                MetadataAttribute attr = ic.getIndex(name);
+                int idx = attr.getData().getElemInt();
+                String desc = attr.getDescription();
+
+                println(sp(indent+1) + "<" + tagSample + ">");
+                println(sp(indent+2) + "<" + tagName  + ">" + name + "</" + tagName  + ">");
+                println(sp(indent+2) + "<" + tagIndex + ">" + idx  + "</" + tagIndex + ">");
+                println(sp(indent+2) + "<" + tagDescription + ">" + desc + "</" + tagDescription + ">");
+                println(sp(indent+1) + "</" + tagSample + ">");
+            }
         }
+
         println(fcTags[1]);
     }
+
+    private String sp(int n) {
+        return "    ".repeat(n);
+    }
+
 
     protected void writeGeoCoding(final int indent) {
         if (product.isUsingSingleGeoCoding()) {
