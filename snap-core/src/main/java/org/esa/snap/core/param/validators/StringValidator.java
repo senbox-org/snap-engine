@@ -33,8 +33,6 @@ public class StringValidator extends AbstractParamValidator {
 
     public Object parse(Parameter parameter, String text) throws ParamParseException {
 
-        Debug.assertTrue(text != null);
-
         if (isAllowedNullText(parameter, text)) {
             return null;
         }

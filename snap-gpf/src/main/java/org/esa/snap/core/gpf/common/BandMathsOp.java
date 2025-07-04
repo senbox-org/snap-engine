@@ -459,6 +459,9 @@ public class BandMathsOp extends Operator {
         Namespace namespace = createNamespace();
         final Term term;
         try {
+            if (StringUtils.isNullOrEmpty(expression)){
+                throw new ParseException("Empty expression.");
+            }
             Parser parser = new ParserImpl(namespace, performTypeChecking);
             term = parser.parse(expression);
         } catch (ParseException e) {
