@@ -161,14 +161,14 @@ public class DEMFactory {
         final int maxX = x0 + tileWidth + 1;
         final GeoPos geoPos = new GeoPos();
 
-        Double alt;
-        boolean valid = false;
-        final double[][] v = new double[4][4];
-        for (int y = y0 - 1; y < maxY; y++) {
-            final int yy = y - y0 + 1;
-
-            for (int x = x0 - 1; x < maxX; x++) {
-                tileGeoRef.getGeoPos(x, y, geoPos);
+        try {
+            Double alt;
+            boolean valid = false;
+            final double[][] v = new double[4][4];
+            for (int y = y0 - 1; y < maxY; y++) {
+                final int yy = y - y0 + 1;
+                for (int x = x0 - 1; x < maxX; x++) {
+                    tileGeoRef.getGeoPos(x, y, geoPos);
                 /*if(!geoPos.isValid()) {
                     localDEM[yy][x - x0 + 1] = demNoDataValue;
                     continue;
@@ -179,20 +179,23 @@ public class DEMFactory {
                     geoPos.lon += 360;
                 }    */
 
-                alt = dem.getElevation(geoPos);
+                    alt = dem.getElevation(geoPos);
 
-                if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
-                    alt = (double)EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, v);
+                    if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
+                        alt = (double)EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, v);
+                    }
+
+                    if (!valid && !alt.equals(demNoDataValue)) {
+                        valid = true;
+                    }
+
+                    localDEM[yy][x - x0 + 1] = alt;
                 }
-
-                if (!valid && !alt.equals(demNoDataValue)) {
-                    valid = true;
-                }
-
-                localDEM[yy][x - x0 + 1] = alt;
             }
+            return valid;
+        } catch (Exception e) {
+            return false;
         }
-        return valid;
     }
 
   /*  public synchronized static boolean getLocalDEMUsingDelaunayInterpolation(
