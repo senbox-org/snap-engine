@@ -1,0 +1,90 @@
+{
+  "id": "MOD2022_1_h18v08_clasification_V5_1",
+  "decodeQualification": "SUITABLE",
+  "expectedContent": {
+    "sceneWidth": 4800,
+    "sceneHeight": 4800,
+    "geoCoding": {
+      "coordinates": [
+        {
+          "x": 2070.0,
+          "y": 2580.0,
+          "lat": 4.624999999586048,
+          "lon": 4.326588278813599
+        },
+        {
+          "x": 3563.0,
+          "y": 3114.0,
+          "lat": 3.51249999968562,
+          "lon": 7.436887186226839
+        }
+      ],
+      "reverseAccuracy": 0.0
+    },
+    "bands": [
+      {
+        "name": "band_1",
+        "bandWidth": 4800,
+        "bandHeight": 4800,
+        "noDataValue": "-28672.0",
+        "noDataValueUsed": "true",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 250,
+            "y": 855,
+            "value": 27.0
+          },
+          {
+            "x": 3288,
+            "y": 4082,
+            "value": -2.0
+          }
+        ]
+      }
+    ],
+    "metadata": [
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GeogAngularUnitsGeoKey",
+        "value": "Angular_Degree"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/ProjFalseNorthingGeoKey",
+        "value": "0.0"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/ProjFalseNorthingGeoKey",
+        "value": "0.0"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GeogSemiMajorAxisGeoKey",
+        "value": "6371007.181"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GeogSemiMajorAxisGeoKey",
+        "value": "6371007.181"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GTModelTypeGeoKey",
+        "value": "ModelTypeProjected"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/ProjectionGeoKey",
+        "value": "32767"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/ProjCoordTransGeoKey",
+        "value": "24"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GeogEllipsoidGeoKey",
+        "value": "32767"
+      },
+      {
+        "path": "TIFF Metadata/GeoTIFF Metadata/GeoKeyDirectory/GTModelTypeGeoKey",
+        "value": "ModelTypeProjected"
+      }
+    ]
+  }
+}
