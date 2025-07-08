@@ -39,6 +39,11 @@
             "id": "t011949_corr",
             "relativePath": "applications/generic_reader/GeoTIFF/t011949_corr.tif",
             "description": "GeoTIFF data product with longitude spanning 0-360°"
+        },
+        {
+            "id": "MOD2022_1_h18v08_clasification_V5_1",
+            "relativePath": "applications/generic_reader/GeoTIFF/MOD2022_1_h18v08_clasification_V5.1.tif",
+            "description": "Geotiff with negative data values and fillValue"
         }
     ]
 }

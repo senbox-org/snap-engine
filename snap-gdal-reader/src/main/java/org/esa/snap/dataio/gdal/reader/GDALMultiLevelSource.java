@@ -116,4 +116,9 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
         int topLeftTileHeight = computeTopLeftUncompressedTileHeight(this.imageReadBounds, this.tileSize.height);
         return ImageUtils.buildImageLayout(this.dataBufferType, this.imageReadBounds.width, this.imageReadBounds.height, 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
     }
+
+    @Override
+    protected double[][] getMosaicOpSourceThreshold() {
+        return new double[][]{{ Double.NEGATIVE_INFINITY }};
+    }
 }
