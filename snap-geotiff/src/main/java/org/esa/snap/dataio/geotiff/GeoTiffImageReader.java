@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import eu.esa.snap.core.lib.NotRegularFileException;
+import it.geosolutions.imageio.plugins.tiff.TIFFField;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
@@ -35,8 +36,7 @@ import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.CropDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -64,6 +64,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
 
+    private static final int TIFFTAG_GDAL_NODATA = 42113;
     private static final Logger logger = Logger.getLogger(GeoTiffImageReader.class.getName());
 
     private static final int BUFFER_SIZE = 1024 * 1024;
@@ -76,19 +77,24 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     private Rectangle rectangle;
     private ImageReadParam readParam;
 
+    private Double noDataValue;
+
     public GeoTiffImageReader(ImageInputStream imageInputStream) {
         this.imageReader = findImageReader(imageInputStream);
         this.closeable = new NullCloseable();
+        this.noDataValue = readNoDataValue();
     }
 
     public GeoTiffImageReader(File file) throws IOException {
         this.imageReader = buildImageReader(file);
         this.closeable = new NullCloseable();
+        this.noDataValue = readNoDataValue();
     }
 
     public GeoTiffImageReader(InputStream inputStream, Closeable closeable) throws IOException {
         this.imageReader = buildImageReader(inputStream);
         this.closeable = closeable;
+        this.noDataValue = readNoDataValue();
     }
 
     @Override
@@ -144,7 +150,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
             this.rectangle.setBounds(destOffsetX, destOffsetY, destWidth, destHeight);
             if (isGlobalShifted180) {
                 if (this.swappedSubsampledImage == null) {
-                    this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
+                    this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage), this.noDataValue);
                 }
                 return this.swappedSubsampledImage.getData(this.rectangle);
             } else {
@@ -284,14 +290,30 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         return new RenderedImage[]{leftImage, rightImage};
     }
 
-    private static RenderedImage horizontalMosaic(RenderedImage[] halfImages) {
+    private static RenderedImage horizontalMosaic(RenderedImage[] halfImages, Double noDataValue) {
         final RenderedImage leftImage = halfImages[0];
         final RenderedImage rightImage = halfImages[1];
         // Translate the left image to shift it fullWidth/2 pixels to the right, and vice versa
         RenderedImage translatedLeftImage = TranslateDescriptor.create(leftImage, (float) leftImage.getWidth(), 0f, new InterpolationNearest(), null);
         RenderedImage translatedRightImage = TranslateDescriptor.create(rightImage, -1.0f * rightImage.getWidth(), 0f, new InterpolationNearest(), null);
+
+        double bgValue = noDataValue != null ? noDataValue : 0.0;
+        double[] backgroundValues = new double[] {bgValue};
+        double[][] sourceThreshold = new double[][]{{ Double.NEGATIVE_INFINITY }};
         // Now mosaic the two images.
-        return MosaicDescriptor.create(new RenderedImage[]{translatedRightImage, translatedLeftImage}, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, null);
+        return MosaicDescriptor.create(new RenderedImage[]{translatedRightImage, translatedLeftImage}, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, sourceThreshold, backgroundValues, null);
+    }
+
+    private Double readNoDataValue() {
+        Double noDataValue = null;
+        try {
+            TIFFImageMetadata imageMetadata = getImageMetadata();
+            TIFFField field = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
+            if (field != null) {
+                noDataValue = field.getAsDouble(0);
+            }
+        } catch(IOException e) {}
+        return noDataValue;
     }
 
     public static GeoTiffImageReader buildGeoTiffImageReader(Path productPath) throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
