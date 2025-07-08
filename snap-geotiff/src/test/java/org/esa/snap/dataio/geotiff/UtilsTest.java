@@ -1,12 +1,13 @@
 package org.esa.snap.dataio.geotiff;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Marco Peters
@@ -33,4 +34,29 @@ public class UtilsTest {
         assertEquals("Tiff", tiffMode);
 
     }
+
+    @Test
+    @STTM("SNAP-3888")
+    public void testIsDegreesPerPixel_NullArray() {
+        assertFalse(Utils.isDegreesPerPixel(null));
+    }
+
+    @Test
+    @STTM("SNAP-3888")
+    public void testIsDegreesPerPixel_InvalidArray() {
+        assertFalse(Utils.isDegreesPerPixel(new double[]{-0.1, 0.5}));
+        assertFalse(Utils.isDegreesPerPixel(new double[]{0.5, -0.1}));
+        assertFalse(Utils.isDegreesPerPixel(new double[]{0.0, 0.5}));
+        assertFalse(Utils.isDegreesPerPixel(new double[]{0.5, 0.0}));
+        assertFalse(Utils.isDegreesPerPixel(new double[]{1.1, 0.5}));
+        assertFalse(Utils.isDegreesPerPixel(new double[]{0.5, 1.1}));
+    }
+
+    @Test
+    @STTM("SNAP-3888")
+    public void testIsDegreesPerPixel_ValidArray() {
+        assertTrue(Utils.isDegreesPerPixel(new double[]{1.0, 1.0}));
+        assertTrue(Utils.isDegreesPerPixel(new double[]{0.0001, 0.5}));
+    }
+
 }

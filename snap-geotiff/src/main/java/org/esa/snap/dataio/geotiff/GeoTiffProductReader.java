@@ -519,7 +519,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             double[] pixelScales = pixelScaleField.getAsDoubles();
             double[] tiePoints = tiePointField.getAsDoubles();
 
-            if (isPixelScaleValid(pixelScales)) {
+            if (isPixelScaleValid(pixelScales) && Utils.isDegreesPerPixel(pixelScales)) {
                 // create new TiePointGeocoding based on given info:
                 //int gridWidth = product.getSceneRasterWidth(); // productWidth
                 //int gridHeight = product.getSceneRasterHeight(); // productHeight
@@ -560,7 +560,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         if (pixelScaleField != null) {
             double[] pixelScales = pixelScaleField.getAsDoubles();
 
-            if (isPixelScaleValid(pixelScales)) {
+            if (isPixelScaleValid(pixelScales) && Utils.isDegreesPerPixel(pixelScales)) {
                 double widthInDegree = pixelScales[0] * productWidth;
                 return (Math.ceil(widthInDegree) >= 360);
             }

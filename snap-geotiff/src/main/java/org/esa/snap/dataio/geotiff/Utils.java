@@ -392,4 +392,10 @@ public class Utils {
             stream.reset();
         }
     }
+
+    public static boolean isDegreesPerPixel(double[] pixelScales) {
+        return pixelScales != null
+                && pixelScales[0] > 0 && pixelScales[0] <= 1.0
+                && pixelScales[1] > 0 && pixelScales[1] <= 1.0;
+    }
 }
