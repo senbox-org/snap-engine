@@ -31,7 +31,7 @@
 
     <profiles>
         <profile>
-            <id>generated-anotation</id>
+            <id>generated-annotation</id>
             <!-- In JDK11+ the class @javax.annotation.Generated was moved to @javax.annotation.processing.Generated.
             Netbeans is still using this class when generating source code. The following dependency shall help to mitigate
             this issue till NetBeans is also updated to its latest version. Then this issue will probably not occur anymore.
@@ -253,10 +253,6 @@
             <artifactId>ejml-ddense</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-tiff</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.airlift</groupId>
             <artifactId>aircompressor</artifactId>
