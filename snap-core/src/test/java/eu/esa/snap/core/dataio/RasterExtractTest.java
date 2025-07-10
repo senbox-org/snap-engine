@@ -34,4 +34,13 @@ public class RasterExtractTest {
         assertEquals(6, rasterExtract.getStepY());
         assertEquals(7, rasterExtract.getLayerIdx());
     }
+
+    @Test
+    public void testSetGetLayerIdx() {
+        final RasterExtract rasterExtract = new RasterExtract(1, 2, 3, 4, 5, 6);
+        assertEquals(-1, rasterExtract.getLayerIdx());
+
+        rasterExtract.setLayerIdx(14);
+        assertEquals(14, rasterExtract.getLayerIdx());
+    }
 }
