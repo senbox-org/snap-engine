@@ -2,12 +2,12 @@ package eu.esa.snap.core.dataio;
 
 public class RasterExtract {
 
-    private int xOffset;
-    private int yOffset;
-    private int width;
-    private int height;
-    private int stepX;
-    private int stepY;
+    private final int xOffset;
+    private final int yOffset;
+    private final int width;
+    private final int height;
+    private final int stepX;
+    private final int stepY;
     private int layerIdx;
 
     public RasterExtract(int xOffset, int yOffset, int width, int height, int stepX, int stepY) {
