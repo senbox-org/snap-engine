@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyManagementException;
@@ -56,12 +57,12 @@ import java.util.logging.Logger;
 public class BundleInstaller implements AutoCloseable {
     private static final int TIMEOUT = 20000;
     private static final int BUFFER_SIZE = 262144;
-    private static Logger logger = Logger.getLogger(BundleInstaller.class.getName());
+    private static final Logger logger = Logger.getLogger(BundleInstaller.class.getName());
     private static final Path baseModulePath;
     private static final OSFamily currentOS;
 
     private final ExecutorService executor;
-    private ToolAdapterOperatorDescriptor descriptor;
+    private final ToolAdapterOperatorDescriptor descriptor;
     private ProgressMonitor progressMonitor;
     private Callable<Void> callback;
     private int taskCount;
@@ -71,9 +72,7 @@ public class BundleInstaller implements AutoCloseable {
         baseModulePath = SystemUtils.getApplicationDataDir().toPath().resolve("modules").resolve("lib");
         try {
             fixUnsignedCertificates();
-        } catch (KeyManagementException e) {
-            logger.warning(e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             logger.warning(e.getMessage());
         }
     }
@@ -371,8 +370,8 @@ public class BundleInstaller implements AutoCloseable {
         connection.setConnectTimeout(TIMEOUT);
         connection.setReadTimeout(TIMEOUT);
         long length = connection.getContentLengthLong();
-        double taskWeight = (double) (100 / taskCount);
-        double worked = 0.0;
+        double taskWeight = 100.0 / taskCount;
+        double worked;
         Path tmpFile;
         if (!Files.exists(targetFile) || length != Files.size(targetFile)) {
             Files.deleteIfExists(targetFile);
@@ -441,9 +440,9 @@ public class BundleInstaller implements AutoCloseable {
     }
 
     class Action implements Callable<Void> {
-        private Path source;
-        private Bundle bundle;
-        private BiConsumer<Path, Bundle> method;
+        private final Path source;
+        private final Bundle bundle;
+        private final BiConsumer<Path, Bundle> method;
 
         Action(Path source, Bundle bundle, BiConsumer<Path, Bundle> methodRef) throws Exception {
             this.source = source;
