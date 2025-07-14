@@ -382,7 +382,8 @@ public class BundleInstaller implements AutoCloseable {
             try (InputStream inputStream = connection.getInputStream()) {
                 try (OutputStream outputStream = Files.newOutputStream(tmpFile)) {
                     byte[] buffer = new byte[BUFFER_SIZE];
-                    int read, totalRead = 0;
+                    int read;
+                    long totalRead = 0;
                     while ((read = inputStream.read(buffer)) != -1) {
                         outputStream.write(buffer, 0, read);
                         totalRead += read;
