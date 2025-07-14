@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -366,7 +365,7 @@ public class BundleInstaller implements AutoCloseable {
             throw new IllegalArgumentException("Invalid download parameters");
         }
         URL url = new URL(remoteUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        URLConnection connection = url.openConnection();
         connection.setConnectTimeout(TIMEOUT);
         connection.setReadTimeout(TIMEOUT);
         long length = connection.getContentLengthLong();
