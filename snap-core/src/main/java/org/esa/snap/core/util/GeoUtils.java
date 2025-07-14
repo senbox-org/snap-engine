@@ -3,6 +3,7 @@ package org.esa.snap.core.util;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.math.Range;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
 import org.locationtech.jts.geom.Geometry;
@@ -11,6 +12,7 @@ import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.*;
@@ -840,6 +842,23 @@ public class GeoUtils {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Projects the input point from the source CRS to the target CRS
+     *
+     * @param point     the input point
+     * @param sourceCRS the source CRS (eg. EPSG:4326 (lat,lon))
+     * @param targetCRS the target CRS (eg. EPSG:3857 (x,y))
+     * @return the point projected to the target CRS
+     * @throws Exception when an error occurs
+     */
+    public static Point2D.Double reprojectPoint(Point2D.Double point, CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) throws Exception {
+        final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
+        final double[] sourceCoords = new double[]{point.getX(), point.getY()};
+        final double[] targetCoords = new double[2];
+        transform.transform(sourceCoords, 0, targetCoords, 0, 1);
+        return new Point2D.Double(targetCoords[0], targetCoords[1]);
     }
 
     /**

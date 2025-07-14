@@ -3,6 +3,7 @@ package org.esa.snap.core.util;
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -518,6 +519,19 @@ public class GeoUtilsTest {
         assertEquals(2, rectangle.y);
         assertEquals(4, rectangle.width);
         assertEquals(6, rectangle.height);
+    }
+
+    @Test
+    @STTM("SNAP-3903")
+    public void testReprojectPoint() throws Exception {
+        final CoordinateReferenceSystem wgs84CRS = DefaultGeographicCRS.WGS84;
+        final CoordinateReferenceSystem mercatorCRS = CRS.decode("EPSG:3857");
+        final Point2D.Double expectedPointWGS84 = new Point2D.Double(23.803738061655903, 44.324568093658435);
+        final Point2D.Double expectedPointMercator = new Point2D.Double(2649820, 5515808);
+        final Point2D.Double pointMercator = GeoUtils.reprojectPoint(expectedPointWGS84, wgs84CRS, mercatorCRS);
+        final Point2D.Double pointWGS84 = GeoUtils.reprojectPoint(expectedPointMercator, mercatorCRS, wgs84CRS);
+        assertEquals(expectedPointMercator, pointMercator);
+        assertEquals(expectedPointWGS84, pointWGS84);
     }
 
     private static Product createSLSTR() {
