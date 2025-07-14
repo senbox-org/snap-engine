@@ -698,7 +698,7 @@ public class ToolAdapterIO {
             String firstEntry = fileNames.values().iterator().next();
             String token = firstEntry.substring(0, firstEntry.indexOf("/"));
             if (fileNames.values().stream().allMatch(n -> n.startsWith(token))) {
-                fileNames.values().forEach(n -> n = n.substring(n.indexOf("/") + 1));
+                fileNames.replaceAll((key, value) -> value.substring(value.indexOf("/") + 1));
             }
             entries = zipFile.entries();
             while (entries.hasMoreElements()) {
