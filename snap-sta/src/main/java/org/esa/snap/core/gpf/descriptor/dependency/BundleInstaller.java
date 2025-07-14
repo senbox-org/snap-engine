@@ -156,7 +156,6 @@ public class BundleInstaller implements AutoCloseable {
                     } catch (Exception e) {
                         logger.warning(e.getMessage());
                     }
-                    ;
                     break;
                 case INSTALLER:
                     try {
@@ -179,7 +178,6 @@ public class BundleInstaller implements AutoCloseable {
                     } catch (Exception e) {
                         logger.warning(e.getMessage());
                     }
-                    ;
                     break;
                 default:
                     break;
