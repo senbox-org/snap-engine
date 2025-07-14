@@ -703,7 +703,7 @@ public class ToolAdapterIO {
             entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 entry = entries.nextElement();
-                Path filePath = destination.resolve(fileNames.get(entry.getName()));
+                Path filePath = destination.resolve(token).resolve(fileNames.get(entry.getName()));
                 if (!Files.exists(filePath)) {
                     if (entry.isDirectory()) {
                         Files.createDirectories(filePath);
