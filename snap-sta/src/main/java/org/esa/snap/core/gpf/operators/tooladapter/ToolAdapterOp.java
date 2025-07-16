@@ -28,11 +28,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.descriptor.ParameterDescriptor;
-import org.esa.snap.core.gpf.descriptor.SystemVariable;
-import org.esa.snap.core.gpf.descriptor.TemplateParameterDescriptor;
-import org.esa.snap.core.gpf.descriptor.ToolAdapterOperatorDescriptor;
-import org.esa.snap.core.gpf.descriptor.ToolParameterDescriptor;
+import org.esa.snap.core.gpf.descriptor.*;
 import org.esa.snap.core.gpf.descriptor.template.FileTemplate;
 import org.esa.snap.core.gpf.descriptor.template.Template;
 import org.esa.snap.core.gpf.descriptor.template.TemplateContext;
@@ -345,10 +341,12 @@ public class ToolAdapterOp extends Operator {
             reportProgress("Starting tool execution");
             List<String> cmdLine = getCommandLineTokens();
             logCommandLine(cmdLine);
-            ret = this.executor.execute(cmdLine,
-                                        this.descriptor.getVariables().stream()
-                                            .collect(Collectors.toMap(SystemVariable::getKey,SystemVariable::getValue)),
-                                        this.descriptor.resolveVariables(this.descriptor.getWorkingDir()));
+            VariableResolver resolver = VariableResolver.newInstance(descriptor);
+            Map<String, String> envVars = this.descriptor.getVariables().stream()
+                    .collect(Collectors.toMap(SystemVariable::getKey,
+                            variable -> resolver.resolveString(variable.getValue())));
+            File workingDir = this.descriptor.resolveVariables(this.descriptor.getWorkingDir());
+            ret = this.executor.execute(cmdLine, envVars, workingDir);
         } catch (IOException e) {
             this.wasCancelled = true;
             throw new OperatorException(String.format("%s execution was interrupted [%s]",descriptor.getName(), e));
