@@ -680,30 +680,18 @@ public class ToolAdapterIO {
         }
         byte[] buffer;
         try (ZipFile zipFile = new ZipFile(sourceFile.toFile())) {
-            ZipEntry entry;
             progressMonitor.setSubTaskName(String.format("Extracting %s...", zipFile.getName()));
             int size = zipFile.size();
             int workUnits = 100 / totalTasks;
             int count = 0;
             int progress;
-            // Inspect all zip entries to see if there is a root zip folder.
-            // If yes, it will be discarded so that the uncompression root folder is
-            // the zip file name
-            LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
+
+            Map<String, String> fileNames = getFileNameMapping(zipFile);
+
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
-                entry = entries.nextElement();
-                fileNames.put(entry.getName(), entry.getName());
-            }
-            String firstEntry = fileNames.values().iterator().next();
-            String token = firstEntry.substring(0, firstEntry.indexOf("/"));
-            if (fileNames.values().stream().allMatch(n -> n.startsWith(token))) {
-                fileNames.replaceAll((key, value) -> value.substring(value.indexOf("/") + 1));
-            }
-            entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                entry = entries.nextElement();
-                Path filePath = destination.resolve(token).resolve(fileNames.get(entry.getName()));
+                ZipEntry entry = entries.nextElement();
+                Path filePath = destination.resolve(fileNames.get(entry.getName()));
                 if (!Files.exists(filePath)) {
                     if (entry.isDirectory()) {
                         Files.createDirectories(filePath);
@@ -726,6 +714,32 @@ public class ToolAdapterIO {
         } catch (Exception ex){
             throw ex;
         }
+    }
+
+    /**
+     * Generates a mapping of file names within a given ZipFile.
+     * The method inspects all entries in the zip file and evaluates whether they
+     * share a common root folder. If a common root folder exists, the mappings
+     * are adjusted to exclude the root folder, mapping filenames relative to it.
+     *
+     * @param zipFile the zip file to inspect and generate file name mappings for
+     * @return a map where keys and values represent the original file names and
+     *         their corresponding mapped names, respectively
+     */
+    static Map<String, String> getFileNameMapping(ZipFile zipFile) {
+        LinkedHashMap<String, String> fileNameMappings = new LinkedHashMap<>();
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            fileNameMappings.put(entry.getName(), entry.getName());
+        }
+        String firstEntry = fileNameMappings.values().iterator().next();
+        String token = firstEntry.substring(0, firstEntry.indexOf("/"));
+        boolean commonRootFolder = fileNameMappings.values().stream().allMatch(n -> n.startsWith(token));
+        if (commonRootFolder) {
+            fileNameMappings.replaceAll((key, value) -> value.substring(value.indexOf("/") + 1));
+        }
+        return fileNameMappings;
     }
 
     static List<ProductReaderPlugIn> getReaderPlugInsByExtension(String extension) {
