@@ -828,24 +828,36 @@ public class ProductUtils {
 
     public static void copyStx(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
         final Stx sourceStx = sourceRaster.getStx();
-        final Histogram sourceHistogram = sourceStx.getHistogram();
-        final Histogram targetHistogram = new Histogram(sourceStx.getHistogramBinCount(),
-                sourceHistogram.getLowValue(0),
-                sourceHistogram.getHighValue(0),
-                1);
+        final Histogram srcHist = sourceStx.getHistogram();
+        final int binCount = sourceStx.getHistogramBinCount();
+        final boolean intHist = sourceStx.isIntHistogram();
+        final boolean logHist = sourceStx.isLogHistogram();
+        final double low  = srcHist.getLowValue(0);
+        final double high = srcHist.getHighValue(0);
 
-        System.arraycopy(sourceHistogram.getBins(0), 0, targetHistogram.getBins(0), 0, sourceStx.getHistogramBinCount());
+        WrappedHistogram wrapped = new WrappedHistogram(binCount, low, high, intHist, logHist);
 
-        final Stx targetStx = new Stx(sourceStx.getMinimum(),
+        int[] srcBins = srcHist.getBins(0);
+        int[] delBins = wrapped.getDelegateHistogram().getBins(0);
+        System.arraycopy(srcBins, 0, delBins, 0, binCount);
+
+        long[] longBins = wrapped.getLongBins(0);
+        for (int i = 0; i < binCount; i++) {
+            longBins[i] = srcBins[i];
+        }
+
+        final Stx targetStx = new Stx(
+                sourceStx.getMinimum(),
                 sourceStx.getMaximum(),
                 sourceStx.getMean(),
                 sourceStx.getStandardDeviation(),
                 sourceStx.getCoefficientOfVariation(),
                 sourceStx.getEquivalentNumberOfLooks(),
-                sourceStx.isLogHistogram(),
-                sourceStx.isIntHistogram(),
-                targetHistogram,
-                sourceStx.getResolutionLevel());
+                logHist,
+                intHist,
+                wrapped,
+                sourceStx.getResolutionLevel()
+        );
 
         targetRaster.setStx(targetStx);
     }

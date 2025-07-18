@@ -29,7 +29,7 @@ import javax.media.jai.UnpackedImageData;
  */
 final public class HistogramStxOp extends StxOp {
 
-    private final Histogram histogram;
+    private final WrappedHistogram histogram;
     private final Scaling scaling;
 
     public HistogramStxOp(int binCount, double minimum, double maximum, boolean intHistogram, boolean logHistogram) {
@@ -41,10 +41,14 @@ final public class HistogramStxOp extends StxOp {
             maximum = minimum;
         }
         scaling = Stx.getHistogramScaling(logHistogram);
-        histogram = StxFactory.createHistogram(binCount, minimum, maximum, logHistogram, intHistogram);
+        histogram = new WrappedHistogram(binCount, minimum, maximum, intHistogram, logHistogram);
     }
 
     public Histogram getHistogram() {
+        return histogram.getDelegateHistogram();
+    }
+
+    public WrappedHistogram getWrappedHistogram() {
         return histogram;
     }
 
@@ -80,7 +84,7 @@ final public class HistogramStxOp extends StxOp {
 
         // }} Block End
 
-        final int[] bins = histogram.getBins(0);
+        final long[] bins = histogram.getLongBins(0);
         final double lowValue = histogram.getLowValue(0);
         final double highValue = histogram.getHighValue(0);
         final double binWidth = (highValue - lowValue) / bins.length;
@@ -96,7 +100,7 @@ final public class HistogramStxOp extends StxOp {
                         if (i == bins.length) {
                             i--;
                         }
-                        bins[i]++;
+                        histogram.incrementBin(0, i);
                     }
                 }
                 dataPixelOffset += dataPixelStride;

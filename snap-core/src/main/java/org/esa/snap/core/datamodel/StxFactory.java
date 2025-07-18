@@ -39,7 +39,7 @@ public class StxFactory {
     private Number maximum;
     private Number mean;
     private Number standardDeviation;
-    private Histogram histogram;
+    private WrappedHistogram histogram;
     private Integer resolutionLevel;
     private Mask roiMask;
     private RenderedImage roiImage;
@@ -85,7 +85,7 @@ public class StxFactory {
         return this;
     }
 
-    public StxFactory withHistogram(Histogram histogram) {
+    public StxFactory withHistogram(WrappedHistogram histogram) {
         this.histogram = histogram;
         return this;
     }
@@ -152,7 +152,7 @@ public class StxFactory {
 
         double coeffOfVariation = this.coefficientOfVariation != null ? this.coefficientOfVariation.doubleValue() : Double.NaN;
         double enl = this.enl != null ? this.enl.doubleValue() : Double.NaN;
-        Histogram histogram = this.histogram;
+        WrappedHistogram histogram = this.histogram;
 
         Assert.argument(roiMasks == null || roiMasks.length == rasters.length, "roiMasks == null || roiMasks.length == rasters.length");
 
@@ -227,7 +227,7 @@ public class StxFactory {
                         final RasterDataNode rasterDataNode = filteredRasters[i];
                         accumulate(rasterDataNode, level, roiImages[i], roiShapes[i], histogramOp, SubProgressMonitor.create(pm, 50));
                     }
-                    histogram = histogramOp.getHistogram();
+                    histogram = histogramOp.getWrappedHistogram();
                 }
             } finally {
                 pm.done();
@@ -236,7 +236,7 @@ public class StxFactory {
 
         if (histogram == null) {
             if (this.histogramBins != null) {
-                histogram = createHistogram(minimum, maximum, logHistogram, intHistogram, this.histogramBins);
+                histogram = createWrappedHistogram(minimum, maximum, logHistogram, intHistogram, this.histogramBins);
             } else {
                 throw new IllegalStateException("Failed to derive histogram");
             }
@@ -439,6 +439,22 @@ public class StxFactory {
         final Histogram histogram = createHistogram(bins.length, minimum, maximum, logHistogram, intHistogram);
         System.arraycopy(bins, 0, histogram.getBins(0), 0, bins.length);
         return histogram;
+    }
+
+    static WrappedHistogram createWrappedHistogram(double minimum, double maximum,
+                                                   boolean logHistogram,
+                                                   boolean intHistogram,
+                                                   int[] bins) {
+        WrappedHistogram wh = new WrappedHistogram(bins.length, minimum, maximum, intHistogram, logHistogram);
+
+        int[] delegateBins = wh.getDelegateHistogram().getBins(0);
+        System.arraycopy(bins, 0, delegateBins, 0, bins.length);
+
+        long[] longBins = wh.getLongBins(0);
+        for (int i = 0; i < bins.length; i++) {
+            longBins[i] = bins[i];
+        }
+        return wh;
     }
 
     static long computeSum(int[] sampleFrequencies) {
