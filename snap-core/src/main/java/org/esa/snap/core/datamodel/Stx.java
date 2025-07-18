@@ -50,7 +50,7 @@ public class Stx {
     private final int resolutionLevel;
     private final boolean logHistogram;
     private final boolean intHistogram;
-    private final Histogram histogram;
+    private final WrappedHistogram histogram;
 
     private final Scaling histogramScaling;
 
@@ -73,7 +73,7 @@ public class Stx {
      */
     public Stx(double minimum, double maximum, double mean, double standardDeviation,
                double coeffOfVariation, double enl,
-               boolean logHistogram, boolean intHistogram, Histogram histogram, int resolutionLevel) {
+               boolean logHistogram, boolean intHistogram, WrappedHistogram histogram, int resolutionLevel) {
 
         Assert.argument(!Double.isNaN(minimum), "minimum must not be NaN");
         Assert.argument(!Double.isInfinite(minimum), "minimum must not be infinity");
@@ -82,7 +82,8 @@ public class Stx {
         Assert.argument(resolutionLevel >= 0, "resolutionLevel");
 
         // todo - this is still a lot of behaviour, move all computations to StxFactory (nf)
-        this.sampleCount = StxFactory.computeSum(histogram.getBins(0));
+        this.histogram = histogram;
+        this.sampleCount = histogram.getLongTotal(0);
         this.minimum = minimum;
         this.maximum = maximum;
         this.histogramScaling = getHistogramScaling(logHistogram);
@@ -91,16 +92,25 @@ public class Stx {
             this.standardDeviation = 0.0;
             this.median = maximum;
         } else {
-            this.mean = Double.isNaN(mean) ? histogramScaling.scaleInverse(histogram.getMean()[0]) : mean;
-            this.standardDeviation = Double.isNaN(standardDeviation) ? histogramScaling.scaleInverse(histogram.getStandardDeviation()[0]) : standardDeviation;
-            this.median = histogramScaling.scaleInverse(StxFactory.computeMedian(histogram, this.sampleCount));
+            this.mean = Double.isNaN(mean) ? histogramScaling.scaleInverse(getHistogram().getMean()[0]) : mean;
+            this.standardDeviation = Double.isNaN(standardDeviation) ? histogramScaling.scaleInverse(getHistogram().getStandardDeviation()[0]) : standardDeviation;
+            this.median = histogramScaling.scaleInverse(StxFactory.computeMedian(getHistogram(), this.sampleCount));
         }
         this.logHistogram = logHistogram;
         this.intHistogram = intHistogram;
-        this.histogram = histogram;
         this.resolutionLevel = resolutionLevel;
         this.coefficientOfVariation = coeffOfVariation;
         this.enl = enl;
+    }
+
+    public Stx(double minimum, double maximum, double mean, double standardDeviation,
+               double coeffOfVariation, double enl,
+               boolean logHistogram, boolean intHistogram,
+               Histogram histogram, int resolutionLevel) {
+        this(minimum, maximum, mean, standardDeviation,
+                coeffOfVariation, enl,
+                logHistogram, intHistogram,
+                new WrappedHistogram(histogram), resolutionLevel);
     }
 
     /**
@@ -167,7 +177,7 @@ public class Stx {
      * @see #getHistogramScaling()
      */
     public Histogram getHistogram() {
-        return histogram;
+        return histogram.getDelegateHistogram();
     }
 
     /**
@@ -197,7 +207,7 @@ public class Stx {
      * @return The (inclusive) minimum value of the bin given by the bin index.
      */
     public double getHistogramBinMinimum(int binIndex) {
-        double value = histogram.getBinLowValue(0, binIndex);
+        double value = getHistogram().getBinLowValue(0, binIndex);
         return histogramScaling.scaleInverse(value);
     }
 
@@ -211,7 +221,7 @@ public class Stx {
      * @return The (exclusive) maximum value of the bin given by the bin index.
      */
     public double getHistogramBinMaximum(int binIndex) {
-        double value = binIndex < histogram.getNumBins(0) ? histogram.getBinLowValue(0, binIndex + 1) : histogram.getHighValue(0);
+        double value = binIndex < histogram.getNumBins(0) ? getHistogram().getBinLowValue(0, binIndex + 1) : histogram.getHighValue(0);
         return histogramScaling.scaleInverse(value);
     }
 
@@ -244,7 +254,11 @@ public class Stx {
      * @return The histogram bins (sample counts).
      */
     public int[] getHistogramBins() {
-        return histogram.getBins(0);
+        return getHistogram().getBins(0);
+    }
+
+    public long[] getLongBins(int band) {
+        return histogram.getLongBins(band);
     }
 
     /**
