@@ -26,18 +26,13 @@ import org.esa.snap.core.gpf.operators.tooladapter.ProcessExecutor;
 import org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO;
 import org.esa.snap.core.util.SystemUtils;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyManagementException;
@@ -55,30 +50,28 @@ import java.util.logging.Logger;
 /**
  * Installer class for adapter bundles.
  *
- * @author  Cosmin Cara
- * @since   5.0.4
+ * @author Cosmin Cara
+ * @since 5.0.4
  */
 public class BundleInstaller implements AutoCloseable {
     private static final int TIMEOUT = 20000;
     private static final int BUFFER_SIZE = 262144;
-    private static Logger logger = Logger.getLogger(BundleInstaller.class.getName());
+    private static final Logger logger = Logger.getLogger(BundleInstaller.class.getName());
     private static final Path baseModulePath;
     private static final OSFamily currentOS;
 
     private final ExecutorService executor;
-    private ToolAdapterOperatorDescriptor descriptor;
+    private final ToolAdapterOperatorDescriptor descriptor;
     private ProgressMonitor progressMonitor;
     private Callable<Void> callback;
     private int taskCount;
 
     static {
         currentOS = Bundle.getCurrentOS();
-        baseModulePath =  SystemUtils.getApplicationDataDir().toPath().resolve("modules").resolve("lib");
+        baseModulePath = SystemUtils.getApplicationDataDir().toPath().resolve("modules").resolve("lib");
         try {
             fixUnsignedCertificates();
-        } catch (KeyManagementException e) {
-            logger.warning(e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             logger.warning(e.getMessage());
         }
     }
@@ -86,7 +79,7 @@ public class BundleInstaller implements AutoCloseable {
     /**
      * Creates an installer for the given adapter descriptor.
      *
-     * @param descriptor    The adapter descriptor
+     * @param descriptor The adapter descriptor
      */
     public BundleInstaller(ToolAdapterOperatorDescriptor descriptor) {
         this.descriptor = descriptor;
@@ -96,7 +89,7 @@ public class BundleInstaller implements AutoCloseable {
     /**
      * Checks if a bundle file (archive or installer) is present.
      *
-     * @param bundle    The bundle to be checked
+     * @param bundle The bundle to be checked
      */
     public static boolean isBundleFileAvailable(Bundle bundle) {
         return bundle != null && (getLocalSourcePath(bundle) != null || bundle.getDownloadURL() != null);
@@ -105,7 +98,7 @@ public class BundleInstaller implements AutoCloseable {
     /**
      * Sets a progress monitor for this installer.
      *
-     * @param monitor   The progress monitor
+     * @param monitor The progress monitor
      */
     public void setProgressMonitor(ProgressMonitor monitor) {
         this.progressMonitor = monitor;
@@ -114,7 +107,7 @@ public class BundleInstaller implements AutoCloseable {
     /**
      * Sets a callback to be invoked when the execution completes.
      *
-     * @param completionCallback    The completion callback
+     * @param completionCallback The completion callback
      */
     public void setCallback(Callable<Void> completionCallback) {
         this.callback = completionCallback;
@@ -163,7 +156,6 @@ public class BundleInstaller implements AutoCloseable {
                     } catch (Exception e) {
                         logger.warning(e.getMessage());
                     }
-                    ;
                     break;
                 case INSTALLER:
                     try {
@@ -186,7 +178,6 @@ public class BundleInstaller implements AutoCloseable {
                     } catch (Exception e) {
                         logger.warning(e.getMessage());
                     }
-                    ;
                     break;
                 default:
                     break;
@@ -253,8 +244,8 @@ public class BundleInstaller implements AutoCloseable {
             throw new IOException("No target defined");
         }
         ToolAdapterIO.unzip(source,
-                            descriptor.resolveVariables(targetLocation).toPath(),
-                            this.progressMonitor, taskCount);
+                descriptor.resolveVariables(targetLocation).toPath(),
+                this.progressMonitor, taskCount);
         if (!bundle.isLocal()) {
             Files.deleteIfExists(source);
         }
@@ -338,15 +329,17 @@ public class BundleInstaller implements AutoCloseable {
     }
 
     private static void fixUnsignedCertificates() throws KeyManagementException, NoSuchAlgorithmException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
+        TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
                     public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }
 
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
 
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
 
                 }
         };
@@ -370,12 +363,12 @@ public class BundleInstaller implements AutoCloseable {
             throw new IllegalArgumentException("Invalid download parameters");
         }
         URL url = new URL(remoteUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        URLConnection connection = url.openConnection();
         connection.setConnectTimeout(TIMEOUT);
         connection.setReadTimeout(TIMEOUT);
         long length = connection.getContentLengthLong();
-        double taskWeight = (double) (100 / taskCount);
-        double worked = 0.0;
+        double taskWeight = 100.0 / taskCount;
+        double worked;
         Path tmpFile;
         if (!Files.exists(targetFile) || length != Files.size(targetFile)) {
             Files.deleteIfExists(targetFile);
@@ -387,9 +380,10 @@ public class BundleInstaller implements AutoCloseable {
             try (InputStream inputStream = connection.getInputStream()) {
                 try (OutputStream outputStream = Files.newOutputStream(tmpFile)) {
                     byte[] buffer = new byte[BUFFER_SIZE];
-                    int read, totalRead = 0;
+                    int read;
+                    long totalRead = 0;
                     while ((read = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0 ,read);
+                        outputStream.write(buffer, 0, read);
                         totalRead += read;
                         if (this.progressMonitor != null) {
                             worked = (double) totalRead / (double) length * taskWeight;
@@ -439,13 +433,14 @@ public class BundleInstaller implements AutoCloseable {
                 throw new RuntimeException(ex);
             }
         }
+
         void throwingAccept(T t, U u) throws Exception;
     }
 
     class Action implements Callable<Void> {
-        private Path source;
-        private Bundle bundle;
-        private BiConsumer<Path, Bundle> method;
+        private final Path source;
+        private final Bundle bundle;
+        private final BiConsumer<Path, Bundle> method;
 
         Action(Path source, Bundle bundle, BiConsumer<Path, Bundle> methodRef) throws Exception {
             this.source = source;

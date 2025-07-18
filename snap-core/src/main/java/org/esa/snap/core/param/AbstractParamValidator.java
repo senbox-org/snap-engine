@@ -134,9 +134,7 @@ public abstract class AbstractParamValidator implements ParamValidator {
      */
     protected static boolean isAllowedNullText(Parameter parameter, String text) {
         Debug.assertNotNull(parameter);
-        Debug.assertNotNull(text);
-        return text.trim().length() == 0
-               && parameter.getProperties().isNullValueAllowed();
+        return parameter.getProperties().isNullValueAllowed() && (text == null || text.trim().length() == 0) ;
     }
 
     /**
