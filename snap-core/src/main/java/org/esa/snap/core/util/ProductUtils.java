@@ -991,17 +991,16 @@ public class ProductUtils {
      * @param targetProduct the target product
      */
     public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        ProductUtils.copyMasks(sourceProduct, targetProduct);
-        ProductUtils.copyVectorData(sourceProduct, targetProduct);
-        ProductUtils.copyIndexCodings(sourceProduct, targetProduct);
-        ProductUtils.copyQuicklookBandName(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        copyMetadata(sourceProduct, targetProduct);
+        copyTiePointGrids(sourceProduct, targetProduct);
+        copyFlagCodings(sourceProduct, targetProduct);
+        copyFlagBands(sourceProduct, targetProduct, true);
+        copyGeoCoding(sourceProduct, targetProduct);
+        copyMasks(sourceProduct, targetProduct);
+        copyVectorData(sourceProduct, targetProduct);
+        copyIndexCodings(sourceProduct, targetProduct);
+        copyQuicklookBandName(sourceProduct, targetProduct);
+        copyTimeInformation(sourceProduct, targetProduct);
         targetProduct.setDescription(sourceProduct.getDescription());
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
     }
