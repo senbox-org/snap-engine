@@ -369,9 +369,10 @@ public class OperatorExecutor {
 
         @Override
         public void init(ProgressMonitor pm) {
-            OperatorContext operatorContext = getOperatorContext(operator);
-            Product targetProduct = operator.getTargetProduct();
+
             operator.execute(pm);
+
+            Product targetProduct = operator.getTargetProduct();
             // todo - [multisize_products] fix: don't rely on tiling is same for all bands (nf)
             Dimension tileSize = targetProduct.getPreferredTileSize();
 
@@ -380,8 +381,8 @@ public class OperatorExecutor {
             Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
             tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
             tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
-            Band[] targetBands = targetProduct.getBands();
-            images = createImages(targetBands, operatorContext);
+
+            images = createImages(targetProduct.getBands(), getOperatorContext(operator));
         }
 
         private static PlanarImage[] createImages(Band[] targetBands, OperatorContext operatorContext) {

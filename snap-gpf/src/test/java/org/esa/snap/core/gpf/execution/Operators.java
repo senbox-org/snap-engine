@@ -168,6 +168,7 @@ public class Operators {
             RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
             Band band = targetProduct.addBand("band2", ProductData.TYPE_INT8);
             band.setSourceImage(constantImage);
+            setTargetProduct(targetProduct);
             pm.done();
         }
 
@@ -348,6 +349,7 @@ public class Operators {
             for (Band sourceBand : bands) {
                 targetProduct.addBand("computed_" + sourceBand.getName(), sourceBand.getDataType());
             }
+            setTargetProduct(targetProduct);
             pm.done();
         }
 

@@ -35,12 +35,7 @@ import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorCancelException;
@@ -76,6 +71,7 @@ import java.awt.RenderingHints;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -134,7 +130,7 @@ public class OperatorContext {
     private PropertySet parameterSet;
     private boolean initialising;
     private boolean requiresAllBands;
-    private AtomicBoolean executed;
+    private final AtomicBoolean executed;
 
     public OperatorContext(Operator operator) {
         if (operator == null) {
@@ -462,9 +458,31 @@ public class OperatorContext {
         return disposed;
     }
 
+    private static boolean isProductOpened(ProductManager productManager, Product targetProduct) {
+        if (productManager.contains(targetProduct)) {
+            return true;
+        }
+        final File file = targetProduct.getFileLocation();
+        if (file == null) {
+            return false;
+        }
+
+        final Product[] openedProducts = productManager.getProducts();
+        for (Product openedProduct : openedProducts) {
+            if (file.equals(openedProduct.getFileLocation())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void dispose() {
         if (!disposed) {
             disposed = true;
+            if (targetProduct != null && !(operator != null && isProductOpened(operator.getProductManager(), targetProduct))) {
+                targetProduct.dispose();
+                targetProduct = null;
+            }
             configuration = null;
             sourceProductMap.clear();
             sourceProductList.clear();
@@ -738,7 +756,6 @@ public class OperatorContext {
 
     private void setTargetImages() {
         final Band[] targetBands = targetProduct.getBands();
-        targetImageMap = new HashMap<>(targetBands.length * 2);
         if (targetProduct.getPreferredTileSize() == null) {
             targetProduct.setPreferredTileSize(getPreferredTileSize());
         }
@@ -783,8 +800,10 @@ public class OperatorContext {
                     // by using the band's source images. Otherwise the WriteOp.computeTile()
                     // method would never be called.
                     //
-                    if (!targetBand.isSourceImageSet()) {
-                        targetBand.setSourceImage(image);
+                    if(!(getOperator() instanceof WriteOp)) {
+                        if (!targetBand.isSourceImageSet()) {
+                            targetBand.setSourceImage(image);
+                        }
                     }
                 } else {
                     // Someone has added a band whose image comes from another operator that
@@ -829,9 +848,10 @@ public class OperatorContext {
             return null;
         }
         // If the OperatorImage's context is not us, then it is not ours
+        // or if it has different target band. This can happen if the target product is reinitialised in doExecute
         OperatorImage operatorImage = (OperatorImage) renderedImage;
         //noinspection ObjectEquality
-        if (this != operatorImage.getOperatorContext()) {
+        if (this != operatorImage.getOperatorContext() || operatorImage.getTargetBand() != targetBand) {
             return null;
         }
         // Now it must be an OperatorImage that we have created
@@ -1298,6 +1318,7 @@ public class OperatorContext {
                 }
             }
             getOperator().doExecute(pm);
+            initTargetProduct();
             setTargetImages();
             executed.set(true);
         }
