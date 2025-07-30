@@ -518,7 +518,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                 String desc = attr.getDescription();
 
                 println(sp(indent+1) + "<" + tagSample + ">");
-                println(sp(indent+2) + "<" + tagName + ">" + name + "</" + tagName + ">");
+                println(sp(indent+2) + "<" + tagName + ">" + DimapProductHelpers.escapeXml(name) + "</" + tagName + ">");
 
                 if (elems == 1) {
                     int idx = data.getElemInt();
@@ -530,7 +530,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                     println(sp(indent+2) + "<" + DimapProductConstants.TAG_FLAG_VALUE + ">" + value + "</" + DimapProductConstants.TAG_FLAG_VALUE + ">");
                 }
 
-                println(sp(indent+2) + "<" + tagDescription + ">" + desc + "</" + tagDescription + ">");
+                println(sp(indent+2) + "<" + tagDescription + ">" + DimapProductHelpers.escapeXml(desc) + "</" + tagDescription + ">");
                 println(sp(indent+1) + "</" + tagSample + ">");
             }
 
@@ -542,9 +542,9 @@ public final class DimapHeaderWriter extends XmlWriter {
                 String desc = attr.getDescription();
 
                 println(sp(indent+1) + "<" + tagSample + ">");
-                println(sp(indent+2) + "<" + tagName  + ">" + name + "</" + tagName  + ">");
+                println(sp(indent+2) + "<" + tagName  + ">" + DimapProductHelpers.escapeXml(name) + "</" + tagName  + ">");
                 println(sp(indent+2) + "<" + tagIndex + ">" + idx  + "</" + tagIndex + ">");
-                println(sp(indent+2) + "<" + tagDescription + ">" + desc + "</" + tagDescription + ">");
+                println(sp(indent+2) + "<" + tagDescription + ">" + DimapProductHelpers.escapeXml(desc) + "</" + tagDescription + ">");
                 println(sp(indent+1) + "</" + tagSample + ">");
             }
         }
