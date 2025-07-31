@@ -1,2 +1,2 @@
-${project.version}
+9.3.0
 

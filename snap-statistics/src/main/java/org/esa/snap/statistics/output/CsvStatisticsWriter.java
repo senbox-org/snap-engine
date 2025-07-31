@@ -1,15 +1,10 @@
 package org.esa.snap.statistics.output;
 
+import org.esa.snap.statistics.tools.TimeInterval;
+
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
-import org.esa.snap.statistics.tools.TimeInterval;
+import java.util.*;
 
 public class CsvStatisticsWriter implements StatisticsOutputter {
 
@@ -37,7 +32,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
     public void initialiseOutput(StatisticsOutputContext statisticsOutputContext) {
         this.measureNames = statisticsOutputContext.measureNames;
         featureId = statisticsOutputContext.featureId;
-        Arrays.sort(measureNames);
+//        Arrays.sort(measureNames);
     }
 
     /**

@@ -1,12 +1,8 @@
 package org.esa.snap.statistics.tools;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.esa.snap.statistics.StatisticsOp;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class StatisticalMappingAnalyser {
 
@@ -36,7 +32,7 @@ public class StatisticalMappingAnalyser {
         algorithms.add(StatisticsOp.MINIMUM);
         algorithms.add(StatisticsOp.MAXIMUM);
         algorithms.add(StatisticsOp.MEDIAN);
-        algorithms.add(StatisticsOp.AVERAGE);
+        algorithms.add(StatisticsOp.MEAN);
         algorithms.add(StatisticsOp.SIGMA);
         for (int percentile : percentiles) {
             algorithms.add(StatisticsOp.PERCENTILE_PREFIX + percentile + StatisticsOp.PERCENTILE_SUFFIX);

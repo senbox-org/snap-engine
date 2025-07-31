@@ -38,8 +38,6 @@ public class VersionChecker {
 
     public static final String PK_CHECK_INTERVAL = "snap.versionCheck.interval";
     private static final String PK_LAST_DATE = "snap.versionCheck.lastDate";
-    private static final String VERSION_FILE_NAME = "VERSION.txt";
-    private static final String REMOTE_VERSION_FILE_URL = "http://step.esa.int/downloads/" + VERSION_FILE_NAME;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     private static VersionChecker instance = new VersionChecker();
@@ -78,6 +76,10 @@ public class VersionChecker {
         return CHECK.valueOf(intervalName);
     }
 
+    public String getCheckIntervalString() {
+        return  preferences.get(VersionChecker.PK_CHECK_INTERVAL, CHECK.WEEKLY.name());
+    }
+
     public LocalDateTime getDateTimeOfLastCheck() {
         String dateText = preferences.get(VersionChecker.PK_LAST_DATE, null);
         return dateText != null ? LocalDateTime.parse(dateText, DATE_FORMATTER) : null;
@@ -86,12 +88,12 @@ public class VersionChecker {
     public boolean checkForNewRelease() {
         Version localVersion = getLocalVersion();
         if (localVersion == null) {
-            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new SNAP version. Local version could not be retrieved.");
+            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new " + SystemUtils.getApplicationName() + " version. Local version could not be retrieved.");
             return false;
         }
         Version remoteVersion = getRemoteVersion();
         if (remoteVersion == null) {
-            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new SNAP version. Remote version could not be retrieved.");
+            SystemUtils.LOG.log(Level.WARNING, "Not able to check for new " + SystemUtils.getApplicationName() + " version. Remote version could not be retrieved.");
             return false;
         }
         return compareVersions();
@@ -113,7 +115,7 @@ public class VersionChecker {
      */
     public Version getLocalVersion() {
         if (localVersion.get() == null) {
-            Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(VersionChecker.VERSION_FILE_NAME);
+            Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(SystemUtils.VERSION_FILE_NAME);
             try {
                 if (localVersionStream != null) {
                     localVersion.set(readVersionFromStream(localVersionStream));
@@ -141,7 +143,7 @@ public class VersionChecker {
         if (remoteVersion.get() == null) {
             try {
                 remoteVersion.set(readVersionFromStream(
-                        remoteVersionStream == null ? new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openStream() : remoteVersionStream));
+                        remoteVersionStream == null ? new URL(SystemUtils.getApplicationRemoteVersionUrl()).openStream() : remoteVersionStream));
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
