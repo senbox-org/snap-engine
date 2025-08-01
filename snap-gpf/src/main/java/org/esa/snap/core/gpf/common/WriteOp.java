@@ -263,7 +263,6 @@ public class WriteOp extends Operator {
         Product targetProduct = new Product(source.getName(), source.getProductType(),
                 source.getSceneRasterWidth(),
                 source.getSceneRasterHeight());
-        ProductUtils.copyProductNodes(source, targetProduct);
         ProductReader productReader = source.getProductReader();
         if (productReader != null) {
             targetProduct.setProductReader(productReader);
@@ -278,6 +277,8 @@ public class WriteOp extends Operator {
                 }
             }
         }
+        ProductUtils.copyProductNodes(source, targetProduct);
+
         return targetProduct;
     }
 
