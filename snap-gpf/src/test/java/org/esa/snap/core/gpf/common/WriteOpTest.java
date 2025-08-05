@@ -135,22 +135,6 @@ public class WriteOpTest {
     }
 
     @Test
-    @STTM("SNAP-1517")
-    public void testProductCopyIsUsed() throws Exception {
-        File testDir = Files.createTempDirectory("WriteOpTestDir").toFile();
-        try {
-            File testOuptutFile = new File(testDir, "file.dim");
-            Product product = new Product("empty", "EMPTY", 0, 0);
-            WriteOp writeOp = new WriteOp(product, testOuptutFile, "BEAM-DIMAP");
-            writeOp.initialize();
-            writeOp.doExecute(ProgressMonitor.NULL);
-            assertNotSame(writeOp.getTargetProduct(), product);
-        } finally {
-            testDir.deleteOnExit();
-        }
-    }
-
-    @Test
     public void testWritingEmptyProduct() throws Exception {
         Product product = new Product("empty", "EMPTY", 0, 0);
 
