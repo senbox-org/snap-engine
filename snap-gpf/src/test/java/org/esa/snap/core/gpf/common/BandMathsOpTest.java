@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.dom.DefaultDomConverter;
@@ -28,11 +29,11 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.GPFFacadeTest;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphIO;
-import org.esa.snap.core.gpf.graph.Node;
+import org.esa.snap.core.gpf.graph.*;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -45,12 +46,14 @@ import org.opengis.referencing.operation.TransformException;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class BandMathsOpTest {
 
@@ -476,6 +479,73 @@ public class BandMathsOpTest {
         DefaultDomElement parameters = new DefaultDomElement("parameters");
         domConverter.convertValueToDom(parameterSet, parameters);
         assertEquals(expectedXML, StringEscapeUtils.unescapeXml(parameters.toXml().trim()));
+    }
+
+    @Test
+    @STTM("SNAP-4028")
+    public void testEmptyExpressionGraph() throws Exception {
+        HashMap<String, Object> parameterMap = new HashMap<>();
+        Class<BandMathsOp> opType = BandMathsOp.class;
+
+        String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
+        String graphOpXml = "<graph id=\"g\">\n" +
+                "    <version>1.0</version>\n" +
+                "    <node id=\"readNode\">\n" +
+                "        <operator>Read</operator>\n" +
+                "\t\t<parameters class=\"com.bc.ceres.binding.dom.XppDomElement\">\n" +
+                "            <file>" + filePath + "</file>\n" +
+                "        </parameters>\n" +
+                "    </node>\n" +
+                "    <node id=\"bandMathsNode\">\n" +
+                "        <operator>BandMaths</operator>\n" +
+                "        <sources>\n" +
+                "            <sourceProducts>readNode</sourceProducts>\n" +
+                "        </sources>\n" +
+                "\t\t<parameters class=\"com.bc.ceres.binding.dom.XppDomElement\">\n" +
+                "\t\t  <targetBands>\n" +
+                "\t\t\t<targetBand>\n" +
+                "\t\t\t  <name>emptyBand</name>\n" +
+                "\t\t\t  <type>float32</type>\n" +
+                "\t\t\t  <expression/>\n" +
+                "\t\t\t  <description/>\n" +
+                "\t\t\t  <unit/>\n" +
+                "\t\t\t  <noDataValue>0.0</noDataValue>\n" +
+                "\t\t\t</targetBand>\n" +
+                "\t\t  </targetBands>\n" +
+                "\t\t  <variables/>\n" +
+                "\t\t</parameters>\n" +
+                "    </node>\n" +
+                "</graph>";
+
+        Graph graph = GraphIO.read( new StringReader(graphOpXml));
+
+        Node bandMathsNode = graph.getNode("bandMathsNode");
+        DomElement configurationDomElement = bandMathsNode.getConfiguration();
+        ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
+
+        PropertySet parameterSet = PropertyContainer.createMapBacked(parameterMap, opType, parameterDescriptorFactory);
+
+        DefaultDomConverter domConverter = new DefaultDomConverter(opType, parameterDescriptorFactory);
+        domConverter.convertDomToValue(configurationDomElement, parameterSet);
+        assertNotNull(parameterSet.getProperty("targetBands"));
+        assertNotNull(parameterSet.getProperty("targetBands").getValue());
+        assertNotNull(parameterSet.getProperty("variables"));
+        assertNotNull(parameterSet.getProperty("variables").getValue());
+
+        Object targetBandsObj = parameterSet.getProperty("targetBands").getValue();
+        assertTrue(targetBandsObj instanceof BandMathsOp.BandDescriptor[]);
+        BandMathsOp.BandDescriptor[] targetBands = (BandMathsOp.BandDescriptor[]) targetBandsObj;
+        assertEquals(1, targetBands.length);
+        assertEquals("emptyBand", targetBands[0].name);
+        assertTrue(StringUtils.isNullOrEmpty(targetBands[0].expression));
+
+        Object variablesObj = parameterSet.getProperty("variables").getValue();
+        assertTrue(variablesObj instanceof BandMathsOp.Variable[]);
+        BandMathsOp.Variable[] variables = (BandMathsOp.Variable[]) variablesObj;
+        assertEquals(0, variables.length);
+
+        Exception exception = assertThrows(GraphException.class, ()->new GraphProcessor().executeGraph(graph, ProgressMonitor.NULL));
+        assertEquals("[NodeId: bandMathsNode] Could not parse expression: 'null'. Empty expression.", exception.getMessage());
     }
 
     private static BandMathsOp.BandDescriptor createBandDescription(String bandName, String expression, String type, String unit) {

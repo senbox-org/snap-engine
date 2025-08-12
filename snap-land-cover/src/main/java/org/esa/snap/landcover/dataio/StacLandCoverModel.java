@@ -41,7 +41,7 @@ public class StacLandCoverModel implements LandCoverModel {
     private final StacClient client;
     protected final LandCoverModelDescriptor descriptor;
     protected JSONObject aoiGeoJSON;
-    protected FileLandCoverTile[] tileList = null;
+    protected List<FileLandCoverTile> tileList = null;
 
     protected static final ProductReaderPlugIn productReaderPlugIn = new GeoTiffProductReaderPlugIn();
 
@@ -59,6 +59,8 @@ public class StacLandCoverModel implements LandCoverModel {
                     tile.dispose();
                 }
             }
+            tileList.clear();
+            tileList = null;
         }
     }
 
@@ -115,6 +117,8 @@ public class StacLandCoverModel implements LandCoverModel {
             if (tileList == null) {
                 search(aoiGeoJSON);
             }
+            if(tileList == null || tileList.isEmpty())
+                return 0;
             for (FileLandCoverTile tile : tileList) {
                 if (tile.getTileGeocoding() == null)
                     continue;
@@ -132,7 +136,7 @@ public class StacLandCoverModel implements LandCoverModel {
                 }
                 return value;
             }
-            return tileList[0].getNoDataValue();
+            return tileList.getFirst().getNoDataValue();
         } catch (Exception e) {
             throw new Exception("Problem reading : " + e.getMessage());
         }
@@ -149,7 +153,7 @@ public class StacLandCoverModel implements LandCoverModel {
 
         results = filterItems(results);
 
-        downloadAssets(results);
+        tileList = downloadAssets(results);
     }
 
     protected StacItem[] filterItems(final StacItem[] items) {
@@ -176,7 +180,7 @@ public class StacLandCoverModel implements LandCoverModel {
         return filteredAssetsIds.toArray(new String[0]);
     }
 
-    private void downloadAssets(final StacItem[] results) throws Exception {
+    private List<FileLandCoverTile> downloadAssets(final StacItem[] results) throws Exception {
         final List<FileLandCoverTile> tiles = new ArrayList<>();
         for (StacItem item : results) {
 
@@ -201,7 +205,7 @@ public class StacLandCoverModel implements LandCoverModel {
             }
         }
 
-        tileList = tiles.toArray(new FileLandCoverTile[0]);
+        return tiles;
     }
 
     @Override
