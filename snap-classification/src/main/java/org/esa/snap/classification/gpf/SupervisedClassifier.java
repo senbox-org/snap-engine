@@ -41,7 +41,7 @@ public interface SupervisedClassifier {
     void computeTileStack(Operator operator, Map<Band, Tile> targetTileMap, Rectangle targetRectangle,
                           ProgressMonitor pm) throws OperatorException, IOException;
 
-    Classifier createMLClassifier(final BaseClassifier.FeatureInfo[] featureInfos);
+    Classifier createMLClassifier(final FeatureInfo[] featureInfos);
 
     Classifier getMLClassifier();
 
