@@ -186,7 +186,7 @@ public class NaiveBayesClassifier {
             for (int x = x0; x < xMax; ++x) {
                 final int tgtIdx = tgtIndex.getIndex(x);
                 final double[] features = ClassificationUtils.getFeatures(featureTiles, featureInfoList, x, y);
-                if (features == null) {
+                if (features == null || ClassificationUtils.hasInvalidFeature(features, featureInfoList)) {
                     labelBuffer.setElemDoubleAt(tgtIdx, noDataVal);
                     confidenceBuffer.setElemDoubleAt(tgtIdx, FeatureInfo.DOUBLE_NO_DATA_VALUE);
                     continue;
@@ -202,25 +202,28 @@ public class NaiveBayesClassifier {
                 double confidence = FeatureInfo.DOUBLE_NO_DATA_VALUE;
                 double[] arrInstanceDistr = null;
 
-                Object classVal;
+                Double classIdx;
+                String classLabel;
+                Double classValue = noDataVal;
                 try {
-                    classVal = mlClassifier.classifyInstance(instance);
+                    classIdx = (Double)mlClassifier.classifyInstance(instance);
                     arrInstanceDistr = mlClassifier.distributionForInstance(instance);
                 } catch (Exception e) {
-                    classVal = null;
+                    classIdx = null;
                 }
-                if (classVal == null) {
-                    classVal = noDataVal;
-                } else {
+                if (classIdx != null) {
                     if(arrInstanceDistr != null) {
                         try {
-                            confidence = arrInstanceDistr[((Double) classVal).intValue()];
+                            confidence = arrInstanceDistr[((Double) classIdx).intValue()];
                         }catch(Exception ex){
-                            Debug.trace("Get confidence value - cannot covert class value to int " + classVal + " : " + ex.getMessage());
+                            Debug.trace("Get confidence value - cannot covert class value to int " + classIdx + " : " + ex.getMessage());
                         }
                     }
+
+                    classLabel = mlClassifier.getWekaHeader().classAttribute().value(classIdx.intValue());
+                    classValue = getClassValueFromLabel(classLabel);
                 }
-                labelBuffer.setElemDoubleAt(tgtIdx, (double) classVal);
+                labelBuffer.setElemDoubleAt(tgtIdx,  classValue);
                 confidenceBuffer.setElemDoubleAt(tgtIdx, confidence);
             }
         }
@@ -929,6 +932,8 @@ public class NaiveBayesClassifier {
             final double[] featureMaxValues = classifierDescriptor.getFeatureMaxValues();
             double[] sortedClasses = classifierDescriptor.getSortedClassValues();
 
+            classesMap = new HashMap<>();
+
             //load vectors if trained on vectors
             if (classifierDescriptor.getClassName().compareTo(TRAIN_ON_VECTOR_CLASSNAME) == 0) {
                 String[] labels = classifierDescriptor.getPolygonsAsClasses();
@@ -939,12 +944,18 @@ public class NaiveBayesClassifier {
                         final int idx = labels[i].indexOf("::");
                         if (idx < 0) {
                             indexCoding.addIndex(labels[i], (int) sortedClasses[i], "");
+                            classesMap.put(sortedClasses[i], labels[i]);
                         } else {
                             indexCoding.addIndex(labels[i].substring(0, idx), (int) sortedClasses[i], "");
+                            classesMap.put(sortedClasses[i], labels[i].substring(0, idx));
                         }
                     }
                     targetProduct.getIndexCodingGroup().add(indexCoding);
                     classificationBand.setSampleCoding(indexCoding);
+                }
+            }else{
+                for (Double classValue: sortedClasses){
+                    classesMap.put(classValue, classValue.toString());
                 }
             }
 
@@ -992,10 +1003,10 @@ public class NaiveBayesClassifier {
                 }
 
                 featureInfos.add(new FeatureInfo(featureBand, i, noDataValue, offset, scale));
-
-                SystemUtils.LOG.info("*** Loaded " + params.getClassifierType() + " classifier (filename = " + params.getSavedClassifierName()
-                        + ") to predict " + classifierDescriptor.getClassName());
             }
+
+            SystemUtils.LOG.info("*** Loaded " + params.getClassifierType() + " classifier (filename = " + params.getSavedClassifierName()
+                    + ") to predict " + classifierDescriptor.getClassName());
 
             featureInfoList = featureInfos.toArray(new FeatureInfo[0]);
 
