@@ -51,4 +51,11 @@ public class ClassificationUtils {
         return features;
     }
 
+    public static boolean hasInvalidFeature(double[] features, FeatureInfo[] featureInfoList) {
+        for (int i = 0; i < features.length; i++) {
+            if (Double.isNaN(features[i]) || features[i] == featureInfoList[i].featureNoDataValue) return true;
+        }
+        return false;
+    }
+
 }
