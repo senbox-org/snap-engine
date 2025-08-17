@@ -51,7 +51,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(coordinateReferenceSystem.getName());
             assertEquals("WGS84(DD)", coordinateReferenceSystem.getName().getCode());
 
-            assertEquals(2, product.getMaskGroup().getNodeCount());
+            assertEquals(1, product.getMaskGroup().getNodeCount());
 
             assertEquals(1, product.getBands().length);
 
@@ -104,7 +104,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
             assertNotNull(coordinateReferenceSystem.getName());
             assertEquals("WGS84(DD)", coordinateReferenceSystem.getName().getCode());
 
-            assertEquals(1, product.getMaskGroup().getNodeCount());
+            assertEquals(0, product.getMaskGroup().getNodeCount());
 
             assertEquals(1, product.getBands().length);
 
