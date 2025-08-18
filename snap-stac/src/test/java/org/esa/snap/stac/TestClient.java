@@ -20,7 +20,9 @@ import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -35,6 +37,9 @@ public class TestClient {
     private static final String catalogURL = "https://planetarycomputer.microsoft.com/api/stac/v1";
 
     StacClient client;
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Before
     public void setup() {
@@ -63,11 +68,7 @@ public class TestClient {
                 null);
         Assert.assertEquals(2, results.length);
 
-        File tmpDir = new File("/tmp");
-        if (!tmpDir.exists()) {
-            return;
-        }
-
+        File tmpDir = tempFolder.newFolder("stac");
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
         Assert.assertEquals(4, folder.listFiles().length);
@@ -81,11 +82,7 @@ public class TestClient {
                 null);
         Assert.assertEquals(1, results.length);
 
-        File tmpDir = new File("/tmp");
-        if (!tmpDir.exists()) {
-            return;
-        }
-
+        File tmpDir = tempFolder.newFolder("stac");
         File folder = client.downloadItem(results[0], tmpDir);
         Assert.assertTrue(folder.exists());
         Assert.assertEquals(3, folder.listFiles().length);
@@ -102,14 +99,12 @@ public class TestClient {
 
     @Test
     public void testDownloadAsset() throws Exception {
-        File tmpDir = new File("/tmp");
-        if (!tmpDir.exists()) {
-            return;
-        }
 
         String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
         StacItem item = new StacItem(itemURL);
         Assets.Asset asset = item.getAsset(item.listAssetIds()[0]);
+
+        File tmpDir = tempFolder.newFolder("stac");
         File outputFile = client.downloadAsset(asset, tmpDir);
         Assert.assertTrue(outputFile.exists());
         Assert.assertEquals(117392, outputFile.length());
@@ -120,12 +115,9 @@ public class TestClient {
     //Very long running test.
 //    @Test
 //    public void testDownloadItem() throws Exception {
-//        File tmpDir = new File("/tmp");
-//        if(!tmpDir.exists()){
-//            return;
-//        }
 //        String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
 //        StacItem item = new StacItem(itemURL);
+//        File tmpDir = tempFolder.newFolder("stac");
 //        File folder = client.downloadItem(item, tmpDir);
 //        Assert.assertTrue(folder.exists());
 //    }

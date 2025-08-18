@@ -10,25 +10,37 @@ import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mFile;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModel;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mFile;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 
 public class TestElevationFile {
 
-    @Test
-    public void test30mFile() {
-        Copernicus30mElevationModel model = new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.BICUBIC_INTERPOLATION);
-        Copernicus30mFile file = new Copernicus30mFile(model, new File("/tmp/Copernicus_DSM_COG_10_N64_00_E060_00_DEM.tif"), (new GeoTiffProductReaderPlugIn()).createReaderInstance());
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
+    @Test
+    public void test30mFile() throws IOException {
+        File testFile = new File (tempFolder.newFolder("dem"), "Copernicus_DSM_COG_10_N55_00_W005_00_DEM.tif");
+
+        Copernicus30mElevationModel model = new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.BICUBIC_INTERPOLATION);
+        Copernicus30mFile file = new Copernicus30mFile(model, testFile, (new GeoTiffProductReaderPlugIn()).createReaderInstance());
+
+        Assert.assertNotNull(file);
+        Assert.assertNotNull(file.getTile());
     }
 
     @Test
-    public void test90mFile() {
-        Copernicus90mElevationModel model = new Copernicus90mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.BICUBIC_INTERPOLATION);
-        Copernicus90mFile file = new Copernicus90mFile(model, new File("/tmp/Copernicus_DSM_COG_30_N64_00_E060_00_DEM.tif"), (new GeoTiffProductReaderPlugIn()).createReaderInstance());
+    public void test90mFile() throws IOException {
+        File testFile = new File (tempFolder.newFolder("dem"), "Copernicus_DSM_COG_30_N55_00_W005_00_DEM.tif");
 
+        Copernicus90mElevationModel model = new Copernicus90mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.BICUBIC_INTERPOLATION);
+        Copernicus90mFile file = new Copernicus90mFile(model, testFile, (new GeoTiffProductReaderPlugIn()).createReaderInstance());
+        Assert.assertNotNull(file);
+        Assert.assertNotNull(file.getTile());
     }
 
     @Test
@@ -55,19 +67,18 @@ public class TestElevationFile {
     @STTM("SNAP-4035")
     public void test30mCreateFile() throws Exception {
 
+        File testFile = new File (tempFolder.newFolder("dem"), "Copernicus_DSM_COG_10_N55_00_W005_00_DEM.tif");
+
         final float[] expected = new float[] {159.47452f, 150.17595f, 143.38873f};
         Copernicus30mElevationModel model = new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.NEAREST_NEIGHBOUR);
-        Copernicus30mFile file = new Copernicus30mFile(model, new File("/tmp/Copernicus_DSM_COG_10_N55_00_W005_00_DEM.tif"), (new GeoTiffProductReaderPlugIn()).createReaderInstance());
+        Copernicus30mFile file = new Copernicus30mFile(model, testFile, (new GeoTiffProductReaderPlugIn()).createReaderInstance());
         final ElevationTile tile = file.getTile();
+
         final float[] actual = new float[3];
         actual[0] = tile.getSample(0, 0);
         actual[1] = tile.getSample(0, 1);
         actual[2] = tile.getSample(0, 2);
-        for (int i = 0; i < actual.length; ++i) {
-            if (Math.abs(actual[i] - expected[i]) > 1e5) {
-                throw new IOException("Mismatch [" + i + "] " + actual[i] + " is not " + expected[i]);
-            }
-        }
+        Assert.assertArrayEquals(expected, actual, 1e-5f);
     }
 
 }
