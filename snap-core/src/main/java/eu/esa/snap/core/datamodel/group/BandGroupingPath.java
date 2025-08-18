@@ -26,8 +26,8 @@ public class BandGroupingPath {
                      // Rename the group
                      final String[] split = StringUtils.split(groupPattern, new char[]{'#'}, true);
                      final String groupName = split[0];
-                     this.groups[i] = groupName;
-                     // todo this is problematic, although it does work, the Band 'Properties' editor reads it as only the name and not the full expression
+                     // comment this out as this is problematic, although it does work, the Band 'Properties' editor reads it as only the name and not the full expression
+//                     this.groups[i] = groupName;
                      entries[i] = new BandNamesEntry(groupName, split[1]);
                  } else {
                      // Maintain the original group expression as the group name
