@@ -13,6 +13,7 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
     private final int bandIndex;
     private final Double noDataValue;
     private final Dimension defaultJAIReadTileSize;
+    private final boolean signed;
 
     private static Dimension readTileSize(Path fromFile, int bandIndex) {
         try (Dataset dataset = GDAL.open(fromFile.toString(), GDALConst.gaReadonly())) {
@@ -55,6 +57,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
         this.bandIndex = bandIndex;
         this.noDataValue = noDataValue;
         this.defaultJAIReadTileSize = this.tileSize;
+        this.signed = isSigned(dataBufferType);
     }
 
     /**
@@ -70,6 +73,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
         this.bandIndex = bandIndex;
         this.noDataValue = noDataValue;
         this.defaultJAIReadTileSize = defaultJAIReadTileSize;
+        this.signed = isSigned(dataBufferType);
     }
 
     @Override
@@ -88,7 +92,7 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
     protected RenderedImage createImage(int level) {
         java.util.List<RenderedImage> tileImages = buildUncompressedTileImages(level, this.imageReadBounds, this.tileSize.width, this.tileSize.height, 0.0f, 0.0f, this, null);
         if (!tileImages.isEmpty()) {
-            return buildMosaicOp(level, tileImages, false);
+            return buildMosaicOp(level, tileImages, signed);
         }
         return null;
     }
@@ -99,6 +103,14 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
             return super.getMosaicOpBackgroundValues();
         }
         return new double[]{this.noDataValue};
+    }
+
+    @Override
+    protected double[][] getMosaicOpSourceThreshold() {
+        if (signed) {
+            return new double[][]{{ Double.NEGATIVE_INFINITY }};
+        }
+        return super.getMosaicOpSourceThreshold();
     }
 
     @Override
@@ -115,5 +127,19 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
         int topLeftTileWidth = computeTopLeftUncompressedTileWidth(this.imageReadBounds, this.tileSize.width);
         int topLeftTileHeight = computeTopLeftUncompressedTileHeight(this.imageReadBounds, this.tileSize.height);
         return ImageUtils.buildImageLayout(this.dataBufferType, this.imageReadBounds.width, this.imageReadBounds.height, 0, this.defaultJAIReadTileSize, topLeftTileWidth, topLeftTileHeight);
+    }
+
+    private boolean isSigned(int dataBufferType) {
+        switch (dataBufferType){
+            case DataBuffer.TYPE_SHORT,
+                 DataBuffer.TYPE_INT,
+                 DataBuffer.TYPE_FLOAT,
+                 DataBuffer.TYPE_DOUBLE -> {
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
     }
 }
