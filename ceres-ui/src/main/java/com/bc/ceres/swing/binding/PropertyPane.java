@@ -62,6 +62,7 @@ public class PropertyPane {
 
     public static final String PROPERTY_SECTIONBREAK_NAME_SUFFIX = ".section";
     public static final String PROPERTY_SUBSECTIONBREAK_NAME_SUFFIX = ".subsection";
+    public static final String PROPERTY_HEADER_NAME_SUFFIX = ".header";
 
     public PropertyPane(PropertySet propertySet) {
         this(new BindingContext(propertySet));
@@ -199,7 +200,9 @@ public class PropertyPane {
         } else {
             layout.setCellColspan(rowIndex, 0, 2);
             layout.setCellWeightX(rowIndex, 0, 1.0);
-            if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX) || descriptor.getName().endsWith(PROPERTY_SUBSECTIONBREAK_NAME_SUFFIX)) {
+            if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)
+                    || descriptor.getName().endsWith(PROPERTY_SUBSECTIONBREAK_NAME_SUFFIX)
+                    ||  descriptor.getName().endsWith(PROPERTY_HEADER_NAME_SUFFIX)) {
                 if (descriptor.getDisplayName() != null && descriptor.getDisplayName().length() > 0) {
                     JLabel sectionLabel;
                     if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)) {
@@ -209,6 +212,12 @@ public class PropertyPane {
                         int origFontSize = sectionLabel.getFont().getSize();
                         int increasedFontSize = (int) Math.floor(origFontSize * 1.15);
                         Font sectionFont = new Font(sectionLabel.getFont().getName(), Font.BOLD, increasedFontSize);
+                        sectionLabel.setFont(sectionFont);
+                    } else if (descriptor.getName().endsWith(PROPERTY_HEADER_NAME_SUFFIX)) {
+                        sectionLabel = new JLabel(descriptor.getDisplayName());
+                        int origFontSize = sectionLabel.getFont().getSize();
+                        int increasedFontSize = (int) Math.floor(origFontSize * 1.5);
+                        Font sectionFont = new Font(sectionLabel.getFont().getName(), Font.ITALIC, increasedFontSize);
                         sectionLabel.setFont(sectionFont);
                     } else {
 //                        sectionLabel = new JLabel( "‣ " + descriptor.getDisplayName() + " --");
