@@ -15,9 +15,7 @@
  */
 package org.esa.snap.classification.gpf.randomForest;
 
-import org.esa.snap.classification.gpf.BaseClassifier;
-import org.esa.snap.classification.gpf.ClassifierDescriptor;
-import org.esa.snap.classification.gpf.SupervisedClassifier;
+import org.esa.snap.classification.gpf.*;
 import be.abeel.util.MTRandom;
 import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.classification.tree.RandomForest;
