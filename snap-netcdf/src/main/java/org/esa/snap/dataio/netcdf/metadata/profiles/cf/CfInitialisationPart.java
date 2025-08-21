@@ -25,6 +25,7 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DimKey;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 import ucar.nc2.constants.CDM;
@@ -75,12 +76,30 @@ public class CfInitialisationPart extends ProfileInitPartIO {
 
     private boolean initPreferredTileSizeFromChunkSizes(ProfileReadContext ctx, Product product) {
         List<Variable> variables = ctx.getNetcdfFile().getVariables();
-        Variable variable = getFirst2dVariable(variables);
+
+        // First try to find a 'pseudo 3D' raster variable. A common case for this is a raster array
+        // with a time dimension for a single time stamp, such as array(time, lat, lon) with
+        // time = UNLIMITED (1 currently)
+        Variable variable = getFirstPseudo3dRasterVariable(variables);
         if (variable != null) {
-            Attribute att = variable.findAttribute(CDM.CHUNK_SIZES);
+            final Attribute att = variable.findAttribute(CDM.CHUNK_SIZES);
             if (att != null) {
-                Number numericValue = att.getNumericValue(0);
-                Number numericValue1 = att.getNumericValue(1);
+                final Number numericValue = att.getNumericValue(1);
+                final Number numericValue1 = att.getNumericValue(2);
+                if (numericValue != null && numericValue1 != null) {
+                    product.setPreferredTileSize(numericValue.intValue(), numericValue1.intValue());
+                    return true;
+                }
+            }
+        }
+
+        // if there is no 3D variable, search for a 2D raster variable...
+        variable = getFirst2dRasterVariable(variables);
+        if (variable != null) {
+            final Attribute att = variable.findAttribute(CDM.CHUNK_SIZES);
+            if (att != null) {
+                final Number numericValue = att.getNumericValue(0);
+                final Number numericValue1 = att.getNumericValue(1);
                 if (numericValue != null && numericValue1 != null) {
                     product.setPreferredTileSize(numericValue.intValue(), numericValue1.intValue());
                     return true;
@@ -90,13 +109,41 @@ public class CfInitialisationPart extends ProfileInitPartIO {
         return false;
     }
 
-    private Variable getFirst2dVariable(List<Variable> variables) {
+    private Variable getFirst2dRasterVariable(List<Variable> variables) {
+        // if present, finds the first 2D raster variable (i.e., dimensions are typical raster dimensions)
         for (Variable variable : variables) {
             final List<ucar.nc2.Dimension> dimensions = variable.getDimensions();
             if (dimensions.size() == 2) {
-                return variable;
+                // make sure that dimensions are typical raster dimensions,
+                // i.e., that names of dimensions are in DimKey.TYPICAL_X_DIM_NAMES, DimKey.TYPICAL_Y_DIM_NAMES
+                final DimKey dimKey = new DimKey(dimensions.get(0), dimensions.get(1));
+                if (dimKey.isTypicalRasterDim()) {
+                    return variable;
+                }
             }
+        }
+        return null;
+    }
 
+    private Variable getFirstPseudo3dRasterVariable(List<Variable> variables) {
+        // if present, finds the first 3D variable with first dimension value = 1,
+        // and second and third dimension form typical raster dimensions
+        for (Variable variable : variables) {
+            final List<ucar.nc2.Dimension> dimensions = variable.getDimensions();
+            if (dimensions.size() == 3) {
+                final Attribute att = variable.findAttribute(CDM.CHUNK_SIZES);
+                if (att != null) {
+                    final Number firstDimNumericValue = att.getNumericValue(0);
+                    if (firstDimNumericValue != null && firstDimNumericValue.intValue() == 1) {
+                        // make sure that 2nd and 3rd dimensions are typical raster dimensions,
+                        // i.e., that names of dimensions are in DimKey.TYPICAL_X_DIM_NAMES, DimKey.TYPICAL_Y_DIM_NAMES
+                        final DimKey dimKey = new DimKey(dimensions.get(1), dimensions.get(2));
+                        if (dimKey.isTypicalRasterDim()) {
+                            return variable;
+                        }
+                    }
+                }
+            }
         }
         return null;
     }
@@ -117,7 +164,7 @@ public class CfInitialisationPart extends ProfileInitPartIO {
     }
 
     private boolean isLatLonPresent(Product product) {
-            return product.containsRasterDataNode("lat") && product.containsRasterDataNode("lon");
+        return product.containsRasterDataNode("lat") && product.containsRasterDataNode("lon");
     }
 
     private void writeDimensions(NFileWriteable writeable, Product p, String dimY, String dimX) throws IOException {
@@ -128,7 +175,7 @@ public class CfInitialisationPart extends ProfileInitPartIO {
     public String readProductType(final ProfileReadContext ctx) {
         Attribute productType = ctx.getNetcdfFile().findGlobalAttribute("Conventions");
         if (productType != null && StringUtils.isNotNullAndNotEmpty(productType.getStringValue())) {
-            return  productType.getStringValue();
+            return productType.getStringValue();
         } else {
             return Constants.FORMAT_NAME;
         }
