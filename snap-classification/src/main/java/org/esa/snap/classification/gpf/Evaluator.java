@@ -155,7 +155,7 @@ public class Evaluator {
         return tpPct;
     }
 
-    public void evaluateFeatures(final BaseClassifier.FeatureInfo[] featureInfoList,
+    public void evaluateFeatures(final FeatureInfo[] featureInfoList,
                                  final Dataset dataset, final String datasetType, final ProgressMonitor pm) {
 
         final StringBuilder log = new StringBuilder(512);
@@ -184,10 +184,10 @@ public class Evaluator {
             String scoreStr = "score: tp=" + f(fs[i].tp) + " accuracy=" + f(fs[i].accuracy) + " precision=" + f(fs[i].precision)
                     + " correlation=" + f(fs[i].correlation) + " errorRate=" + f(fs[i].errorRate) + " cost=" + f(fs[i].cost)
                     + " GainRatio = " + f(gr.score(i));
-            score.featureScoreMap.put(featureInfoList[i].featureBand.getName(), scoreStr);
+            score.featureScoreMap.put(featureInfoList[i].getFeatureBand().getName(), scoreStr);
 
             log.append("   rank " + String.format("%-3d", rank) + " feature " + String.format("%-3d", i + 1) + ": " +
-                               String.format("%-25s", featureInfoList[i].featureBand.getName()) +
+                               String.format("%-25s", featureInfoList[i].getFeatureBand().getName()) +
                                scoreStr + '\n');
             key = sortedMap.lowerKey(key);
             rank++;
