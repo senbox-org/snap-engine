@@ -1018,6 +1018,7 @@
                             -Xmx1024M -Dfile.encoding=UTF-8
                             --add-exports java.desktop/sun.awt=ALL-UNNAMED
                             --add-exports java.desktop/sun.awt.image=ALL-UNNAMED
+                            --add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED
                             --add-opens java.base/java.net=ALL-UNNAMED
                             --add-opens java.desktop/javax.swing=ALL-UNNAMED
                             --add-opens java.base/java.security=ALL-UNNAMED
