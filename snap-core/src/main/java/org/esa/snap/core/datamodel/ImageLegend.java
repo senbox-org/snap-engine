@@ -1751,8 +1751,11 @@ public class ImageLegend {
 
             boolean unitsAreNull = testIfUnitsNullSource(unitsString);
             if (unitsAreNull) {
-                if ("[DISPLAY_SOURCE_VALUE]".equalsIgnoreCase(getUnitsNull())) {
+                if (ColorBarLayerType.UNITS_NULL_DISPLAY_SOURCE_VALUE.equalsIgnoreCase(getUnitsNull())) {
                     // maintain source null units value
+                } else if (ColorBarLayerType.UNITS_NULL_DISPLAY_BLANK.equalsIgnoreCase(getUnitsNull())) {
+                    unitsString = "";
+                    showUnits = false;
                 } else {
                     unitsString = getUnitsNull();
                 }
