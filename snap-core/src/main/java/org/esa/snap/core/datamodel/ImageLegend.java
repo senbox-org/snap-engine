@@ -290,7 +290,7 @@ public class ImageLegend {
         setUnits(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_KEY, ColorBarLayerType.PROPERTY_UNITS_DEFAULT));
 
         setUnitsNull(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT));
-        setUnitsNullSource(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT));
+        setUnitsNullSource(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_DEFAULT));
 
         setConvertCaret(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY, ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT));
         setUnitsParenthesis(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY, ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT));
