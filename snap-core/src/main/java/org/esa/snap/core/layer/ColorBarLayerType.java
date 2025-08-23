@@ -123,13 +123,17 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_UNITS_TYPE = String.class;
 
 
+    public static final String UNITS_NULL_DISPLAY_SOURCE_VALUE = "[DISPLAY_SOURCE_VALUE]";
+    public static final String UNITS_NULL_DISPLAY_BLANK = "[DISPLAY_BLANK]";
     public static final String PROPERTY_UNITS_NULL_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null";
     public static final String PROPERTY_UNITS_NULL_LABEL = "Units Null Value (display)";
     public static final String PROPERTY_UNITS_NULL_TOOLTIP = "<html>Text to display as units when they are null<br>" +
-            "To use native value from source file use this: [DISPLAY_SOURCE_VALUE]</html>";
+            "To use native value from source file use this: " + UNITS_NULL_DISPLAY_SOURCE_VALUE  +"<br>" +
+            "To display nothing when units are null, set this field to " + UNITS_NULL_DISPLAY_BLANK +  " or leave it blank</html>";
     public static final String PROPERTY_UNITS_NULL_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Null";
-    public static final String PROPERTY_UNITS_NULL_DEFAULT = "";
+    public static final String PROPERTY_UNITS_NULL_DEFAULT = UNITS_NULL_DISPLAY_SOURCE_VALUE;
     public static final Class PROPERTY_UNITS_NULL_TYPE = String.class;
+
 
     public static final String PROPERTY_UNITS_NULL_SOURCE_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null.source";
     public static final String PROPERTY_UNITS_NULL_SOURCE_LABEL = "Units Null Value (source)";
