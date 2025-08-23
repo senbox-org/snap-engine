@@ -104,6 +104,7 @@ public class ImageLegend {
     private String titleText;
     private String unitsText;
     private String unitsNull;
+    private String unitsNullSource;
     private boolean convertCaret;
     private boolean unitsParenthesis;
     private String orientation;
@@ -221,6 +222,7 @@ public class ImageLegend {
         imageLegendCopy.setShowUnits(isShowUnits());
         imageLegendCopy.setUnits(getUnitsText());
         imageLegendCopy.setUnitsNull(getUnitsNull());
+        imageLegendCopy.setUnitsNullSource(getUnitsNullSource());
         imageLegendCopy.setUnitsParenthesis(isUnitsParenthesis());
         imageLegendCopy.setConvertCaret(isConvertCaret());
         imageLegendCopy.setUnitsFontSize(getUnitsFontSize());
@@ -288,6 +290,7 @@ public class ImageLegend {
         setUnits(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_KEY, ColorBarLayerType.PROPERTY_UNITS_DEFAULT));
 
         setUnitsNull(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT));
+        setUnitsNullSource(configuration.getPropertyString(ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_KEY, ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_DEFAULT));
 
         setConvertCaret(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_CONVERT_CARET_KEY, ColorBarLayerType.PROPERTY_CONVERT_CARET_DEFAULT));
         setUnitsParenthesis(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_KEY, ColorBarLayerType.PROPERTY_UNITS_PARENTHESIS_DEFAULT));
@@ -613,6 +616,19 @@ public class ImageLegend {
     public void setUnitsNull(String unitsNull) {
         this.unitsNull = unitsNull;
     }
+
+    public String getUnitsNullSource() {
+        if (unitsNullSource == null || unitsNullSource.length() == 0) {
+            return "";
+        } else {
+            return unitsNullSource;
+        }
+    }
+
+    public void setUnitsNullSource(String unitsNullSource) {
+        this.unitsNullSource = unitsNullSource;
+    }
+
 
 
     public boolean isConvertCaret() {
@@ -1727,18 +1743,56 @@ public class ImageLegend {
         g2d.setFont(getTitleUnitsFont());
         String unitsString = getUnitsText();
 
-        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
-
-
         unitsString = MetadataUtils.getReplacedStringAllVariables(unitsString, raster, "", "", MetadataUtils.INFO_PARAM_WAVE);
 
-//        unitsString = getUnitsNullAndParenthesisFormatted(unitsString);
+        if (unitsString != null) {
+            boolean showUnits = true;
+            unitsString = unitsString.trim();
 
+            boolean unitsAreNull = testIfUnitsNullSource(unitsString);
+            if (unitsAreNull) {
+                if ("[DISPLAY_SOURCE_VALUE]".equalsIgnoreCase(getUnitsNull())) {
+                    // maintain source null units value
+                } else {
+                    unitsString = getUnitsNull();
+                }
 
-        DrawingUtils.drawText(g2d, unitsString, isConvertCaret());
+                if (unitsString.isBlank()) {
+                    showUnits = false;
+                }
+            }
 
-        g2d.setFont(origFont);
-        g2d.setPaint(origPaint);
+            if (showUnits) {
+                if (isUnitsParenthesis()) {
+                    unitsString = "(" + unitsString + ")";
+                }
+
+                DrawingUtils.drawText(g2d, unitsString, isConvertCaret());
+
+                g2d.setFont(origFont);
+                g2d.setPaint(origPaint);
+            }
+        }
+    }
+
+    private boolean testIfUnitsNullSource(String units) {
+
+        if (units == null || units.isBlank()) {
+            return true;
+        }
+
+        units = units.trim();
+
+        String[] unitsNullSourceArray = unitsNullSource.split(",");
+        for (String unitsNullSource : unitsNullSourceArray) {
+            unitsNullSource = unitsNullSource.trim();
+            if (units.equalsIgnoreCase(unitsNullSource)) {
+                return true;
+            }
+
+        }
+
+        return false;
     }
 
 

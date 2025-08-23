@@ -124,11 +124,19 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_UNITS_NULL_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null";
-    public static final String PROPERTY_UNITS_NULL_LABEL = "Units Null Value";
-    public static final String PROPERTY_UNITS_NULL_TOOLTIP = "Text to display as units when they are null";
+    public static final String PROPERTY_UNITS_NULL_LABEL = "Units Null Value (display)";
+    public static final String PROPERTY_UNITS_NULL_TOOLTIP = "<html>Text to display as units when they are null<br>" +
+            "To use native value from source file use this: [DISPLAY_SOURCE_VALUE]</html>";
     public static final String PROPERTY_UNITS_NULL_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "Null";
-    public static final String PROPERTY_UNITS_NULL_DEFAULT = "dimensionless";
+    public static final String PROPERTY_UNITS_NULL_DEFAULT = "";
     public static final Class PROPERTY_UNITS_NULL_TYPE = String.class;
+
+    public static final String PROPERTY_UNITS_NULL_SOURCE_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".null.source";
+    public static final String PROPERTY_UNITS_NULL_SOURCE_LABEL = "Units Null Value (source)";
+    public static final String PROPERTY_UNITS_NULL_SOURCE_TOOLTIP = "Source file units (comma delimited) to be treated as null";
+    public static final String PROPERTY_UNITS_NULL_SOURCE_ALIAS = PROPERTY_HEADER_UNITS_ROOT_ALIAS + "NullSource";
+    public static final String PROPERTY_UNITS_NULL_SOURCE_DEFAULT = "dimensionless,none,null";
+    public static final Class PROPERTY_UNITS_NULL_SOURCE_TYPE = String.class;
 
 
     public static final String PROPERTY_CONVERT_CARET_KEY = PROPERTY_HEADER_UNITS_ROOT_KEY + ".convert.caret";
@@ -233,8 +241,8 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
-    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_MANUAL_STR;
-    public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
+    public static final String[] PROPERTY_LABEL_VALUES_MODE_VALUE_SET = {
             PROPERTY_LABEL_VALUES_MODE_OPTION1,
             PROPERTY_LABEL_VALUES_MODE_OPTION2,
             PROPERTY_LABEL_VALUES_MODE_OPTION3 };
@@ -1027,6 +1035,14 @@ public class ColorBarLayerType extends LayerType {
                 true);
         unitsNullModel.getDescriptor().setAlias(PROPERTY_UNITS_NULL_ALIAS);
         vc.addProperty(unitsNullModel);
+
+        final Property unitsNullSourceModel = Property.create(PROPERTY_UNITS_NULL_SOURCE_KEY,
+                PROPERTY_UNITS_NULL_SOURCE_TYPE,
+                PROPERTY_UNITS_NULL_SOURCE_DEFAULT,
+                true);
+        unitsNullSourceModel.getDescriptor().setAlias(PROPERTY_UNITS_NULL_SOURCE_ALIAS);
+        vc.addProperty(unitsNullSourceModel);
+
 
         final Property convertCaretModel = Property.create(PROPERTY_CONVERT_CARET_KEY,
                 PROPERTY_CONVERT_CARET_TYPE,
