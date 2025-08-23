@@ -384,6 +384,7 @@ public class ColorBarLayer extends Layer {
             imageLegend.setTitle(getTitle());
             imageLegend.setUnits(getUnits());
             imageLegend.setUnitsNull(getUnitsNull());
+            imageLegend.setUnitsNullSource(getUnitsNullSource());
             imageLegend.setConvertCaret(isConvertCaret());
             imageLegend.setUnitsParenthesis(isUnitsParenthesis());
 
@@ -920,6 +921,11 @@ public class ColorBarLayer extends Layer {
     private String getUnitsNull() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_NULL_KEY,
                 ColorBarLayerType.PROPERTY_UNITS_NULL_DEFAULT);
+    }
+
+    private String getUnitsNullSource() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_KEY,
+                ColorBarLayerType.PROPERTY_UNITS_NULL_SOURCE_DEFAULT);
     }
 
     private void setUnitsNull(String value) {
