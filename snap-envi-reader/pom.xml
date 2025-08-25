@@ -20,7 +20,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>13.0.0-rc1</version>
+        <version>13.0.0-RC2-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-envi-reader</artifactId>
