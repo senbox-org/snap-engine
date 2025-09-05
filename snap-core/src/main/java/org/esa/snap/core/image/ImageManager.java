@@ -1053,6 +1053,29 @@ public class ImageManager {
         return createColoredMaskImage(color, levelImage, invertMask);
     }
 
+    public static Color computeColor(ImageInfo imageInfo, Double rasterValue) {
+        final ColorPaletteDef cpd = imageInfo.getColorPaletteDef();
+        if (rasterValue <= cpd.getMinDisplaySample()) {
+            return cpd.getFirstPoint().getColor();
+        } else if (rasterValue >= cpd.getMaxDisplaySample()) {
+            return cpd.getLastPoint().getColor();
+        } else {
+            BorderSamplesAndColors boSaCo = new BorderSamplesAndColors();
+            final boolean logScaled = imageInfo.isLogScaled();
+            if (logScaled) {
+                rasterValue = Stx.LOG10_SCALING.scale(rasterValue);
+            }
+            for (int i = 0; i < cpd.getNumPoints() - 1; i++) {
+                boSaCo = getBorderSamplesAndColors(imageInfo, i, boSaCo);
+                if (rasterValue >= boSaCo.sample1 && rasterValue <= boSaCo.sample2) {
+                    return computeColor(rasterValue, boSaCo);
+                }
+            }
+        }
+        return Color.black;
+    }
+
+
     private static class BorderSamplesAndColors {
 
         double sample1;
