@@ -45,7 +45,7 @@ public class NumericEditor extends PropertyEditor {
     @Override
     public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
         JTextField textField = new JTextField();
-        textField.setHorizontalAlignment(SwingConstants.RIGHT);
+        textField.setHorizontalAlignment(SwingConstants.LEFT);
         int fontSize = textField.getFont().getSize();
         textField.setFont(new Font("Courier", Font.PLAIN, fontSize));
         ComponentAdapter adapter = new TextComponentAdapter(textField);
