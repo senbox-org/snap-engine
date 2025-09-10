@@ -137,12 +137,31 @@ public class CrsGrid implements MosaickingGrid {
             }
             Envelope envelopeCRS = CRS.getEnvelope(this.crs);
             System.out.println("envelopeCRS = " + envelopeCRS);
-            // the envelope may be odd regarding any assumed resolution, minX for UTM is 166021.4430960772
+            // The envelope may be odd regarding any assumed resolution, minX for UTM is 166021.4430960772
+            // A given target geometry may expand the nominal envelope.
+            final double minLon;
+            final double minLat;
+            final double maxLon;
+            final double maxLat;
+            if (this.targetGeometryInCrsCoordinates != null) {
+                final org.locationtech.jts.geom.Envelope providedEnvelope =
+                        this.targetGeometryInCrsCoordinates.getEnvelopeInternal();
+                System.out.println("targetEnvelope = " + providedEnvelope);
+                minLon = providedEnvelope.getMinX();
+                minLat = providedEnvelope.getMinY();
+                maxLon = providedEnvelope.getMaxX();
+                maxLat = providedEnvelope.getMaxY();
+            } else {
+                minLon = envelopeCRS.getMinimum(LON_DIM);
+                minLat = envelopeCRS.getMinimum(LAT_DIM);
+                maxLon = envelopeCRS.getMaximum(LON_DIM);
+                maxLat = envelopeCRS.getMaximum(LAT_DIM);
+            }
             envelopeCRS = new CRSEnvelope(crsCode,
-                                          Math.floor(envelopeCRS.getMinimum(LON_DIM) / this.pixelSizeX) * this.pixelSizeX,
-                                          Math.floor(envelopeCRS.getMinimum(LAT_DIM) / pixelSize) * pixelSize,
-                                          Math.ceil(envelopeCRS.getMaximum(LON_DIM) / this.pixelSizeX) * this.pixelSizeX,
-                                          Math.ceil(envelopeCRS.getMaximum(LAT_DIM) / pixelSize) * pixelSize);
+                                          Math.floor(minLon / this.pixelSizeX) * this.pixelSizeX,
+                                          Math.floor(minLat / pixelSize) * pixelSize,
+                                          Math.ceil(maxLon / this.pixelSizeX) * this.pixelSizeX,
+                                          Math.ceil(maxLat / pixelSize) * pixelSize);
             System.out.println("gridded envelopeCRS = " + envelopeCRS);
             String units = this.crs.getCoordinateSystem().getAxis(LON_DIM).getUnit().toString();
             this.pixelSize = pixelSize;

@@ -130,9 +130,19 @@ public class SpatialProductBinner {
         for (int idx = 0; idx < sliceRectangles.length; idx++) {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
-            numObsTotal += processSlice(spatialBinner, progressMonitor, superSamplingSteps, maskImage, varImages,
-                                        product, sliceRectangles[idx]);
-            final String label = String.format("Processed slice %d of %d : ", idx + 1, sliceRectangles.length);
+            String label;
+            try {
+                numObsTotal += processSlice(spatialBinner, progressMonitor, superSamplingSteps, maskImage, varImages,
+                                            product, sliceRectangles[idx]);
+                label = String.format("Processed slice %d of %d : ", idx + 1, sliceRectangles.length);
+            } catch (IllegalArgumentException ex) {
+                // handle mosaic with non-geographic target grid where filter in generator has only checked geo-bounding-box
+                if (ex.getMessage() != null && ex.getMessage().startsWith("The specified region, if not null, must intersect with the image`s bounds")) {
+                    label = String.format("Skipped slice %d of %d : ", idx + 1, sliceRectangles.length);
+                } else {
+                    throw ex;
+                }
+            }
             stopWatch.stop();
             logger.info(label + stopWatch.getTimeDiffString());
         }
