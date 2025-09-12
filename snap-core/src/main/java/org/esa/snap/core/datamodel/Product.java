@@ -47,7 +47,6 @@ import org.esa.snap.core.util.ObjectUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.io.WildcardMatcher;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -59,6 +58,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.crs.ImageCRS;
 import org.opengis.referencing.datum.PixelInCell;
 import org.opengis.referencing.operation.MathTransform;
+import eu.esa.snap.core.datamodel.group.BandGroupingPath;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -2895,21 +2895,18 @@ public class Product extends ProductNode implements Closeable {
      *
      * @since BEAM 4.8
      */
+    /*
     @Deprecated // use eu.esa.snap.core.datamodel.group.BandGrouping
     public interface AutoGrouping extends List<String[]> {
 
         static AutoGrouping parse(String text) {
-            return AutoGroupingImpl.parse(text);
+            return BandGroupImpl.parse(text);
         }
 
-        /**
-         * Gets the index of the first group path that matches the given name.
-         *
-         * @param name A product node name.
-         * @return The index of the group path or {@code -1} if no group path matches the given name.
-         */
+
         int indexOf(String name);
     }
+    */
 
     @Deprecated // use eu.esa.snap.core.datamodel.group.Entry
     interface Entry {
@@ -2918,6 +2915,8 @@ public class Product extends ProductNode implements Closeable {
 
     }
 
+
+/*
     @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingImpl
     private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
 
@@ -3072,15 +3071,18 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
+ */
+
+    /*
     @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingPath
     private static class AutoGroupingPath {
 
         private final String[] groups;
-        private final Entry[] entries;
+        private final eu.esa.snap.core.datamodel.group.Entry[] entries;
 
         AutoGroupingPath(String[] groups) {
             this.groups = groups;
-            entries = new Entry[groups.length];
+            entries = new eu.esa.snap.core.datamodel.group.Entry[groups.length];
             for (int i = 0; i < groups.length; i++) {
                 if (groups[i].contains("*") || groups[i].contains("?")) {
                     entries[i] = new WildCardEntry(groups[i]);
@@ -3091,7 +3093,7 @@ public class Product extends ProductNode implements Closeable {
         }
 
         boolean contains(String name) {
-            for (Entry entry : entries) {
+            for (eu.esa.snap.core.datamodel.group.Entry entry : entries) {
                 if (!entry.matches(name)) {
                     return false;
                 }
@@ -3105,6 +3107,9 @@ public class Product extends ProductNode implements Closeable {
 
     }
 
+     */
+
+    /*
     @Deprecated // use eu.esa.snap.core.datamodel.group.EntryImpl
     private static class EntryImpl implements Entry {
 
@@ -3121,6 +3126,9 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
+     */
+
+    /*
     @Deprecated // use eu.esa.snap.core.datamodel.group.WildCardEntry
     private static class WildCardEntry implements Entry {
 
@@ -3135,6 +3143,8 @@ public class Product extends ProductNode implements Closeable {
             return wildcardMatcher.matches(name);
         }
     }
+
+     */
 
     private class VectorDataNodeProductNodeGroup extends ProductNodeGroup<VectorDataNode> {
 
