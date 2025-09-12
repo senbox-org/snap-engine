@@ -22,7 +22,8 @@ import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.ceres.multilevel.MultiLevelSource;
 import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
-import eu.esa.snap.core.datamodel.group.*;
+import eu.esa.snap.core.datamodel.group.BandGroup;
+import eu.esa.snap.core.datamodel.group.BandGroupImpl;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -36,18 +37,9 @@ import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.image.VirtualBandOpImage;
-import org.esa.snap.core.jexp.Namespace;
-import org.esa.snap.core.jexp.ParseException;
-import org.esa.snap.core.jexp.Parser;
-import org.esa.snap.core.jexp.Term;
-import org.esa.snap.core.jexp.WritableNamespace;
+import org.esa.snap.core.jexp.*;
 import org.esa.snap.core.jexp.impl.ParserImpl;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.ObjectUtils;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.io.WildcardMatcher;
+import org.esa.snap.core.util.*;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -60,8 +52,7 @@ import org.opengis.referencing.crs.ImageCRS;
 import org.opengis.referencing.datum.PixelInCell;
 import org.opengis.referencing.operation.MathTransform;
 
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -71,6 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -103,8 +95,8 @@ public class Product extends ProductNode implements Closeable {
      * The default BEAM image coordinate reference system.
      */
     public static final ImageCRS DEFAULT_IMAGE_CRS = new DefaultImageCRS("SNAP_IMAGE_CRS",
-                                                                         new DefaultImageDatum("SNAP_IMAGE_DATUM", PixelInCell.CELL_CORNER),
-                                                                         DefaultCartesianCS.DISPLAY);
+            new DefaultImageDatum("SNAP_IMAGE_DATUM", PixelInCell.CELL_CORNER),
+            DefaultCartesianCS.DISPLAY);
     private static final String PIN_GROUP_NAME = "pins";
     private static final String GCP_GROUP_NAME = "ground_control_points";
     private final MetadataElement metadataRoot;
@@ -481,8 +473,8 @@ public class Product extends ProductNode implements Closeable {
      */
     public boolean isSceneCrsASharedModelCrs() {
         return isSceneCrsEqualToModelCrsOf(getBandGroup())
-               && isSceneCrsEqualToModelCrsOf(getTiePointGridGroup())
-               && isSceneCrsEqualToModelCrsOf(getMaskGroup());
+                && isSceneCrsEqualToModelCrsOf(getTiePointGridGroup())
+                && isSceneCrsEqualToModelCrsOf(getMaskGroup());
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1029,7 +1021,7 @@ public class Product extends ProductNode implements Closeable {
     public void addTiePointGrid(final TiePointGrid tiePointGrid) {
         if (containsRasterDataNode(tiePointGrid.getName())) {
             throw new IllegalArgumentException("The Product '" + getName() + "' already contains " +
-                                               "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
+                    "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
         }
         tiePointGridGroup.add(tiePointGrid);
     }
@@ -1133,7 +1125,7 @@ public class Product extends ProductNode implements Closeable {
     public void addBand(final Band band) {
         Assert.notNull(band, "band");
         Assert.argument(!containsRasterDataNode(band.getName()),
-                        "The Product '" + getName() + "' already contains " +
+                "The Product '" + getName() + "' already contains " +
                         "a band with the name '" + band.getName() + "'.");
         bandGroup.add(band);
     }
@@ -1178,7 +1170,7 @@ public class Product extends ProductNode implements Closeable {
      */
     public Band addBand(final String bandName, final String expression, final int dataType) {
         final Band band = new VirtualBand(bandName, dataType, getSceneRasterWidth(), getSceneRasterHeight(),
-                                          expression);
+                expression);
         addBand(band);
         return band;
     }
@@ -1331,16 +1323,14 @@ public class Product extends ProductNode implements Closeable {
     }
 
 
-    //////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////
     // Mask support
-
     public ProductNodeGroup<Quicklook> getQuicklookGroup() {
         return quicklookGroup;
     }
 
-    //////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////
     // Vector data support
-
     public Quicklook getDefaultQuicklook() {
         if (quicklookGroup.getNodeCount() == 0) {
             boolean wasModified = isModified();
@@ -1393,9 +1383,8 @@ public class Product extends ProductNode implements Closeable {
         return maskGroup;
     }
 
-    //////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////
     // GCP support
-
     public ProductNodeGroup<VectorDataNode> getVectorDataGroup() {
         return vectorDataGroup;
     }
@@ -1404,9 +1393,8 @@ public class Product extends ProductNode implements Closeable {
         return flagCodingGroup;
     }
 
-    //////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////
     // Pin support
-
     public ProductNodeGroup<IndexCoding> getIndexCodingGroup() {
         return indexCodingGroup;
     }
@@ -1421,7 +1409,7 @@ public class Product extends ProductNode implements Closeable {
      */
     public boolean containsPixel(final double x, final double y) {
         return x >= 0.0f && x <= getSceneRasterWidth() &&
-               y >= 0.0f && y <= getSceneRasterHeight();
+                y >= 0.0f && y <= getSceneRasterHeight();
     }
 
     //
@@ -1595,8 +1583,8 @@ public class Product extends ProductNode implements Closeable {
         final ProductManager productManager = getProductManager();
         if (productManager != null) {
             nodes = BandArithmetic.getRefRasters(expression,
-                                                 productManager.getProducts(),
-                                                 productManager.getProductIndex(this));
+                    productManager.getProducts(),
+                    productManager.getProductIndex(this));
         } else {
             nodes = BandArithmetic.getRefRasters(expression, this);
         }
@@ -1876,16 +1864,6 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
-//    private static String extractProductName(File file) {
-//        Guardian.assertNotNull("file", file);
-//        String filename = file.getName();
-//        int dotIndex = filename.indexOf('.');
-//        if (dotIndex > -1) {
-//            filename = filename.substring(0, dotIndex);
-//        }
-//        return filename;
-//    }
-
     /**
      * Gets an estimated, raw storage size in bytes of this product node.
      *
@@ -1948,8 +1926,7 @@ public class Product extends ProductNode implements Closeable {
             sb.append(geoPos.getLatString());
             sb.append("\tdegree\n");
 
-            if (getSceneGeoCoding() instanceof MapGeoCoding) {
-                final MapGeoCoding mapGeoCoding = (MapGeoCoding) getSceneGeoCoding();
+            if (getSceneGeoCoding() instanceof MapGeoCoding mapGeoCoding) {
                 final MapProjection mapProjection = mapGeoCoding.getMapInfo().getMapProjection();
                 final MapTransform mapTransform = mapProjection.getMapTransform();
                 final Point2D mapPoint = mapTransform.forward(geoPos, null);
@@ -1966,7 +1943,7 @@ public class Product extends ProductNode implements Closeable {
         }
 
         if (pixelX >= 0 && pixelX < getSceneRasterWidth()
-            && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
+                && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
 
             sb.append("\n");
 
@@ -2126,8 +2103,7 @@ public class Product extends ProductNode implements Closeable {
             sb.append(geoPos.getLatString());
             sb.append("\tdegree\n");
 
-            if (getSceneGeoCoding() instanceof MapGeoCoding) {
-                final MapGeoCoding mapGeoCoding = (MapGeoCoding) getSceneGeoCoding();
+            if (getSceneGeoCoding() instanceof MapGeoCoding mapGeoCoding) {
                 final MapProjection mapProjection = mapGeoCoding.getMapInfo().getMapProjection();
                 final MapTransform mapTransform = mapProjection.getMapTransform();
                 final Point2D mapPoint = mapTransform.forward(geoPos, null);
@@ -2347,8 +2323,7 @@ public class Product extends ProductNode implements Closeable {
             return getSuitableMaskDefDescription((Term.Ref) term);
         }
 
-        if (term instanceof Term.NotB) {
-            final Term.NotB notTerm = ((Term.NotB) term);
+        if (term instanceof Term.NotB notTerm) {
             final Term arg = notTerm.getArgs()[0];
             if (arg instanceof Term.Ref) {
                 final String description = getSuitableMaskDefDescription((Term.Ref) arg);
@@ -2545,19 +2520,19 @@ public class Product extends ProductNode implements Closeable {
             }
         } catch (ParseException e) {
             Logger.getLogger(Product.class.getName()).warning(String.format("Adding invalid expression '%s' to product",
-                                                                            expression));
+                    expression));
         }
         Mask mask;
         if (refRasters.length == 0) {
             mask = Mask.BandMathsType.create(maskName, description,
-                                             getSceneRasterWidth(), getSceneRasterHeight(),
-                                             expression, color, transparency);
+                    getSceneRasterWidth(), getSceneRasterHeight(),
+                    expression, color, transparency);
         } else {
             final RasterDataNode refRaster = refRasters[0];
             mask = Mask.BandMathsType.create(maskName, description,
-                                             refRaster.getRasterWidth(),
-                                             refRaster.getRasterHeight(),
-                                             expression, color, transparency);
+                    refRaster.getRasterWidth(),
+                    refRaster.getRasterHeight(),
+                    expression, color, transparency);
             if (refRaster.hasGeoCoding()) {
                 final GeoCodingLazyProxy geoCodingLazyProxy = new GeoCodingLazyProxy(refRaster.getProduct());
                 mask.setGeoCoding(geoCodingLazyProxy);
@@ -2587,9 +2562,9 @@ public class Product extends ProductNode implements Closeable {
                         Color color,
                         double transparency) {
         final Mask mask = new Mask(maskName,
-                                   getSceneRasterWidth(),
-                                   getSceneRasterHeight(),
-                                   Mask.VectorDataType.INSTANCE);
+                getSceneRasterWidth(),
+                getSceneRasterHeight(),
+                Mask.VectorDataType.INSTANCE);
         Mask.VectorDataType.setVectorData(mask, vectorDataNode);
         mask.setDescription(description);
         mask.setImageColor(color);
@@ -2618,9 +2593,9 @@ public class Product extends ProductNode implements Closeable {
                         double transparency,
                         RasterDataNode prototypeRasterDataNode) {
         final Mask mask = new Mask(maskName,
-                                   prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterWidth() : getSceneRasterWidth(),
-                                   prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterHeight() : getSceneRasterHeight(),
-                                   Mask.VectorDataType.INSTANCE);
+                prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterWidth() : getSceneRasterWidth(),
+                prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterHeight() : getSceneRasterHeight(),
+                Mask.VectorDataType.INSTANCE);
         Mask.VectorDataType.setVectorData(mask, vectorDataNode);
         mask.setDescription(description);
         mask.setImageColor(color);
@@ -2639,8 +2614,8 @@ public class Product extends ProductNode implements Closeable {
      */
     public void addMask(Mask mask) {
         Assert.argument(!containsRasterDataNode(mask.getName()),
-                        String.format("The Product '%s' already contains a raster with the name '%s'.",
-                                      getName(), mask.getName()));
+                String.format("The Product '%s' already contains a raster with the name '%s'.",
+                        getName(), mask.getName()));
 
         getMaskGroup().add(mask);
     }
@@ -2763,9 +2738,8 @@ public class Product extends ProductNode implements Closeable {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////
     // Deprecated API
-
     private void handleVectorDataNodeRemoved(ProductNodeEvent event) {
         final Mask mask = getMask((VectorDataNode) event.getSourceNode());
         if (mask != null) {
@@ -2874,11 +2848,11 @@ public class Product extends ProductNode implements Closeable {
         };
         acceptVisitor(productVisitorAdapter);
     }
-    
+
 
     /**
-     * Sets this product's name. 
-     * 
+     * Sets this product's name.
+     *
      * <p> The name can be identical to a band name.
      *
      * @param name The name.
@@ -2887,253 +2861,6 @@ public class Product extends ProductNode implements Closeable {
     public void setName(final String name) {
         Guardian.assertNotNull("name", name);
         setNodeName(name.trim(), false, true);
-    }
-
-	/**
-     * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
-     * as a tree of product nodes.
-     *
-     * @since BEAM 4.8
-     */
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGrouping
-    public interface AutoGrouping extends List<String[]> {
-
-        static AutoGrouping parse(String text) {
-            return AutoGroupingImpl.parse(text);
-        }
-
-        /**
-         * Gets the index of the first group path that matches the given name.
-         *
-         * @param name A product node name.
-         * @return The index of the group path or {@code -1} if no group path matches the given name.
-         */
-        int indexOf(String name);
-    }
-
-    @Deprecated // use eu.esa.snap.core.datamodel.group.Entry
-    interface Entry {
-
-        boolean matches(String name);
-
-    }
-
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingImpl
-    private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
-
-        private static final String GROUP_SEPARATOR = "/";
-        private static final String PATH_SEPARATOR = ":";
-
-        private final AutoGroupingPath[] autoGroupingPaths;
-        private final Index[] indexes;
-
-        private AutoGroupingImpl(String[][] inputPaths) {
-            autoGroupingPaths = new AutoGroupingPath[inputPaths.length];
-            this.indexes = new Index[inputPaths.length];
-            for (int i = 0; i < inputPaths.length; i++) {
-                final AutoGroupingPath autoGroupingPath = new AutoGroupingPath(inputPaths[i]);
-                autoGroupingPaths[i] = autoGroupingPath;
-                indexes[i] = new Index(autoGroupingPath, i);
-            }
-            Arrays.sort(indexes, (o1, o2) -> {
-                final String[] o1InputPath = o1.path.getInputPath();
-                final String[] o2InputPath = o2.path.getInputPath();
-                int index = 0;
-
-                while (index < o1InputPath.length && index < o2InputPath.length) {
-                    final String currentO1InputPathString = o1InputPath[index];
-                    final String currentO2InputPathString = o2InputPath[index];
-                    if (currentO1InputPathString.length() != currentO2InputPathString.length()) {
-                        return currentO2InputPathString.length() - currentO1InputPathString.length();
-                    }
-                    index++;
-                }
-                if (o1InputPath.length != o2InputPath.length) {
-                    return o2InputPath.length - o1InputPath.length;
-                }
-                return o2InputPath[0].compareTo(o1InputPath[0]);
-            });
-        }
-
-        public static AutoGrouping parse(String text) {
-            List<String[]> pathLists = new ArrayList<>();
-            if (StringUtils.isNotNullAndNotEmpty(text)) {
-                String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
-                for (String pathText : pathTexts) {
-                    final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
-                    final ArrayList<String> subPathsList = new ArrayList<>();
-                    for (String subPath : subPaths) {
-                        if (StringUtils.isNotNullAndNotEmpty(subPath)) {
-                            subPathsList.add(subPath);
-                        }
-                    }
-                    if (!subPathsList.isEmpty()) {
-                        pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
-                    }
-                }
-                if (pathLists.isEmpty()) {
-                    return null;
-                }
-                return new AutoGroupingImpl(pathLists.toArray(new String[pathLists.size()][]));
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public int indexOf(String name) {
-            for (Index index : indexes) {
-                final int i = index.index;
-                if (index.path.contains(name)) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        @Override
-        public String[] get(int index) {
-            return autoGroupingPaths[index].getInputPath();
-        }
-
-        @Override
-        public int size() {
-            return autoGroupingPaths.length;
-        }
-
-        public String format() {
-            if (autoGroupingPaths.length > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < autoGroupingPaths.length; i++) {
-                    if (i > 0) {
-                        sb.append(PATH_SEPARATOR);
-                    }
-                    String[] path = autoGroupingPaths[i].getInputPath();
-                    for (int j = 0; j < path.length; j++) {
-                        if (j > 0) {
-                            sb.append(GROUP_SEPARATOR);
-                        }
-                        sb.append(path[j]);
-                    }
-                }
-                return sb.toString();
-            } else {
-                return "";
-            }
-        }
-
-        @Override
-        public String toString() {
-            return format();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            } else if (o instanceof AutoGrouping) {
-                AutoGrouping other = (AutoGrouping) o;
-                if (other.size() != size()) {
-                    return false;
-                }
-                for (int i = 0; i < autoGroupingPaths.length; i++) {
-                    String[] path = autoGroupingPaths[i].getInputPath();
-                    if (!ObjectUtils.equalObjects(path, other.get(i))) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            int code = 0;
-            for (AutoGroupingPath autoGroupingPath : autoGroupingPaths) {
-                String[] path = autoGroupingPath.getInputPath();
-                code += Arrays.hashCode(path);
-            }
-            return code;
-        }
-
-
-        private static class Index {
-
-            final int index;
-            final AutoGroupingPath path;
-
-            private Index(AutoGroupingPath path, int index) {
-                this.path = path;
-                this.index = index;
-            }
-
-        }
-    }
-
-    @Deprecated // use eu.esa.snap.core.datamodel.group.BandGroupingPath
-    private static class AutoGroupingPath {
-
-        private final String[] groups;
-        private final Entry[] entries;
-
-        AutoGroupingPath(String[] groups) {
-            this.groups = groups;
-            entries = new Entry[groups.length];
-            for (int i = 0; i < groups.length; i++) {
-                if (groups[i].contains("*") || groups[i].contains("?")) {
-                    entries[i] = new WildCardEntry(groups[i]);
-                } else {
-                    entries[i] = new EntryImpl(groups[i]);
-                }
-            }
-        }
-
-        boolean contains(String name) {
-            for (Entry entry : entries) {
-                if (!entry.matches(name)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        String[] getInputPath() {
-            return groups;
-        }
-
-    }
-
-    @Deprecated // use eu.esa.snap.core.datamodel.group.EntryImpl
-    private static class EntryImpl implements Entry {
-
-        private final String group;
-
-        EntryImpl(String group) {
-            this.group = group;
-        }
-
-
-        @Override
-        public boolean matches(String name) {
-            return name.contains(group);
-        }
-    }
-
-    @Deprecated // use eu.esa.snap.core.datamodel.group.WildCardEntry
-    private static class WildCardEntry implements Entry {
-
-        private final WildcardMatcher wildcardMatcher;
-
-        WildCardEntry(String group) {
-            wildcardMatcher = new WildcardMatcher(group);
-        }
-
-        @Override
-        public boolean matches(String name) {
-            return wildcardMatcher.matches(name);
-        }
     }
 
     private class VectorDataNodeProductNodeGroup extends ProductNodeGroup<VectorDataNode> {
