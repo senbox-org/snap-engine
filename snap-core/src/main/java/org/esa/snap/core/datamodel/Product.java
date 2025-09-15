@@ -22,6 +22,7 @@ import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.ceres.multilevel.MultiLevelSource;
 import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
+import eu.esa.snap.core.datamodel.PixelInfoStringBuilder;
 import eu.esa.snap.core.datamodel.group.BandGroup;
 import eu.esa.snap.core.datamodel.group.BandGroupImpl;
 import org.esa.snap.core.dataio.ProductReader;
@@ -1900,6 +1901,7 @@ public class Product extends ProductNode implements Closeable {
      * @param pixelY the pixel Y co-ordinate
      * @return the info string at the given position
      */
+    @Deprecated //
     public String createPixelInfoString(final int pixelX, final int pixelY) {
         final StringBuilder sb = new StringBuilder(1024);
 
@@ -2063,62 +2065,20 @@ public class Product extends ProductNode implements Closeable {
                                         final RasterDataNode raster) {
         final StringBuilder sb = new StringBuilder(1024);
 
+        PixelInfoStringBuilder.addProductName(getName(), sb);
+
         final boolean isMultiSize = isMultiSize();
-
-        sb.append("Product:\t");
-        sb.append(getName()).append("\n\n");
-
         if (!isMultiSize) {
-            sb.append("Image-X:\t");
-            sb.append(pixelX);
-            sb.append("\tpixel\n");
-
-            sb.append("Image-Y:\t");
-            sb.append(pixelY);
-            sb.append("\tpixel\n");
+            PixelInfoStringBuilder.addPixelLocation(pixelX, pixelY, sb);
         } else {
             // Add the raster name to the identification of the pixel
-            sb.append("Image-X." + raster.getName() + ":\t");
-            sb.append(pixelX);
-            sb.append("\tpixel\n");
-
-            sb.append("Image-Y." + raster.getName() + ":\t");
-            sb.append(pixelY);
-            sb.append("\tpixel\n");
+            PixelInfoStringBuilder.addPixelLocation(pixelX, pixelY, raster.getName(), sb);
         }
 
         // All the positions computations will be done at the centre of pixel cell
         final PixelPos pixelPosRef = new PixelPos(pixelX + 0.5f, pixelY + 0.5f);
 
-        final GeoCoding rasterGeocoding = raster.getGeoCoding();
-        GeoPos geoPos = null;
-        if (rasterGeocoding != null) {
-            geoPos = rasterGeocoding.getGeoPos(pixelPosRef, null);
-
-            sb.append("Longitude:\t");
-            sb.append(geoPos.getLonString());
-            sb.append("\tdegree\n");
-
-            sb.append("Latitude:\t");
-            sb.append(geoPos.getLatString());
-            sb.append("\tdegree\n");
-
-            if (getSceneGeoCoding() instanceof MapGeoCoding mapGeoCoding) {
-                final MapProjection mapProjection = mapGeoCoding.getMapInfo().getMapProjection();
-                final MapTransform mapTransform = mapProjection.getMapTransform();
-                final Point2D mapPoint = mapTransform.forward(geoPos, null);
-                final String mapUnit = mapProjection.getMapUnit();
-
-                sb.append("Map-X:\t");
-                sb.append(mapPoint.getX());
-                sb.append("\t").append(mapUnit).append("\n");
-
-                sb.append("Map-Y:\t");
-                sb.append(mapPoint.getY());
-                sb.append("\t").append(mapUnit).append("\n");
-            }
-        } // rasterGeoding not null
-
+        PixelInfoStringBuilder.addGeoPosInformation(pixelPosRef, raster, sb);
 
         if (raster.isPixelWithinImageBounds(pixelX, pixelY)) {
 
@@ -2158,8 +2118,12 @@ public class Product extends ProductNode implements Closeable {
                     }
                 }
 
-                PixelPos pixelForBand = getPixelForBand(pixelPosRef, raster, band);
+                final PixelPos pixelForBand = getPixelForBand(pixelPosRef, raster, band);
+                final boolean dataUsed = band.hasRasterData();
                 sb.append(band.getPixelString(MathUtils.floorInt(pixelForBand.getX()), MathUtils.floorInt(pixelForBand.getY())));
+                if (!dataUsed) {
+                    band.dispose();
+                }
                 sb.append("\t");
                 if (band.getUnit() != null) {
                     sb.append(band.getUnit());

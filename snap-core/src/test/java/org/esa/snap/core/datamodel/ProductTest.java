@@ -939,28 +939,6 @@ public class ProductTest {
         pos2.lat = -22.52;
         assertFalse(Product.equalsLatLon(pos1, pos2, 0.0001f));
     }
-/*
-    @Test
-    @STTM("SNAP-3849")
-    public void testAddPixelLocation() {
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        Product.addPixelLocation(48, 2065, stringBuilder);
-
-        assertEquals("Image-X:\t48\tpixel\nImage-Y:\t2065\tpixel\n",  stringBuilder.toString());
-    }
-
-    @Test
-    @STTM("SNAP-3849")
-    public void testAddPixelLocation_withRasterName() {
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        Product.addPixelLocation(48, 2065, "rastaman", stringBuilder);
-
-        assertEquals("Image-X:\t48\tpixel\nImage-Y:\t2065\tpixel\n",  stringBuilder.toString());
-    }
-
- */
 
     private static class MyProductNodeListener implements ProductNodeListener {
         String pname;

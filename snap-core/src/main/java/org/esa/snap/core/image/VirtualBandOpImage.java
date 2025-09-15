@@ -311,6 +311,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
                 sourceImage = ImageManager.getInstance().getSourceImage(rasterDataNode, getLevel());
                 dataType = rasterDataNode.getDataType();
             }
+            // @todo tb/* here is A LOT of memory being allocated 2025-09-15
             final Raster sourceRaster = sourceImage.getData(r);
             if (sourceRaster instanceof NoDataRaster) {
                 return false;
