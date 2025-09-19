@@ -2322,7 +2322,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
         return isLog10Scaled() ? ReinterpretDescriptor.EXPONENTIAL : ReinterpretDescriptor.LINEAR;
     }
 
-    private InterpretationType getInterpretationType() {
+    InterpretationType getInterpretationType() {
         switch (getDataType()) {
             case ProductData.TYPE_INT8:
                 return ReinterpretDescriptor.INTERPRET_BYTE_SIGNED;
