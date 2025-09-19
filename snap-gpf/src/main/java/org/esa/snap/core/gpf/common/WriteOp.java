@@ -18,13 +18,12 @@ package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.multilevel.MultiLevelImage;
-import org.esa.snap.core.dataio.EncodeQualification;
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.dataio.ProductWriter;
+import org.esa.snap.core.dataio.*;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -37,6 +36,7 @@ import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.gpf.internal.OperatorExecutor.ExecutionOrder;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
@@ -45,11 +45,8 @@ import javax.media.jai.TileCache;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This standard operator is used to store a data product to a specified file location.
@@ -258,8 +255,31 @@ public class WriteOp extends Operator {
                     "': " + encodeQualification.getInfoString());
         }
         productWriter.setIncrementalMode(incremental);
-        productWriter.setFormatName(formatName);
-        targetProduct.setProductWriter(productWriter);
+        productWriter.setFormatName(formatName); // only effective for ImageIOWriter
+        setTargetProduct(targetProduct);
+    }
+
+    private static Product copyProduct(Product source) {
+        Product targetProduct = new Product(source.getName(), source.getProductType(),
+                source.getSceneRasterWidth(),
+                source.getSceneRasterHeight());
+        ProductReader productReader = source.getProductReader();
+        if (productReader != null) {
+            targetProduct.setProductReader(productReader);
+        }
+        targetProduct.setFileLocation(source.getFileLocation());
+        for (Band band : source.getBands()) {
+            if(!targetProduct.containsBand( band.getName())) {
+                if (band instanceof VirtualBand) {
+                    ProductUtils.copyVirtualBandWithStatistics(targetProduct, (VirtualBand) band, band.getName(), false);
+                } else {
+                    ProductUtils.copyBand(band.getName(), source, targetProduct, true);
+                }
+            }
+        }
+        ProductUtils.copyProductNodes(source, targetProduct);
+
+        return targetProduct;
     }
 
     private Dimension determineTileSize(Band band) {
@@ -277,6 +297,8 @@ public class WriteOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) {
+        targetProduct.setProductWriter(productWriter);
+        setTargetProduct(targetProduct);
         final Band[] bands = targetProduct.getBands();
         writableBands = new ArrayList<>(bands.length);
         for (final Band band : bands) {
@@ -305,7 +327,7 @@ public class WriteOp extends Operator {
                 }
                 pm.worked(1);
             }
-            if (writableBands.size() > 0) {
+            if (!writableBands.isEmpty()) {
                 if (writeEntireTileRows) {
                     targetProduct.setPreferredTileSize(tileSizes[0]);
                 }
@@ -413,10 +435,10 @@ public class WriteOp extends Operator {
     /**
      * Writes a row of tiles to a specified band. Optionally clears the cache for each tile row after writing.
      *
-     * @param band                     The band to which the tile row is written.
-     * @param cacheLine                The array of tiles representing a row to be written.
-     * @param clearCacheAfterRowWrite  If true, clears the cache for each tile after the row is written.
-     * @throws IOException             If an I/O error occurs during writing.
+     * @param band                    The band to which the tile row is written.
+     * @param cacheLine               The array of tiles representing a row to be written.
+     * @param clearCacheAfterRowWrite If true, clears the cache for each tile after the row is written.
+     * @throws IOException If an I/O error occurs during writing.
      */
     private void writeTileRow(Band band, Tile[] cacheLine, boolean clearCacheAfterRowWrite) throws IOException {
         int lineWidth = 0;
@@ -449,7 +471,7 @@ public class WriteOp extends Operator {
         Point[] tileIndices = sourceImage.getTileIndices(dataTileRect);
         for (Point tileIndex : tileIndices) {
             Rectangle imageTileRect = sourceImage.getTileRect(tileIndex.x, tileIndex.x);
-            if(dataTileRect.intersects(imageTileRect)) {
+            if (dataTileRect.intersects(imageTileRect)) {
                 ImageManager.removeCachedTile(sourceImage, tileIndex);
             }
         }

@@ -17,6 +17,7 @@ package org.esa.snap.classification.gpf.maximumlikelihood;
 
 import org.esa.snap.classification.gpf.BaseClassifier;
 import org.esa.snap.classification.gpf.ClassifierDescriptor;
+import org.esa.snap.classification.gpf.FeatureInfo;
 import org.esa.snap.classification.gpf.SupervisedClassifier;
 import net.sf.javaml.classification.Classifier;
 

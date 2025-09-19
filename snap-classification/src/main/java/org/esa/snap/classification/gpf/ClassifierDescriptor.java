@@ -37,13 +37,13 @@ public class ClassifierDescriptor implements Serializable {
     private int classLevels;
     private String[] polygonsAsClasses;
 
-    ClassifierDescriptor(final String classifierType, final String filename, final Object object,
-                         final double[] sortedClassValues, final String className, final String classUnit,
-                         final String[] featureNames,
-                         final double[] featureMinValues, final double[] featureMaxValues,
-                         final boolean doClassValQuantization, final double minClassValue,
-                         final double classValStepSize, final int classLevels,
-                         final String[] polygonsAsClasses) {
+    public ClassifierDescriptor(final String classifierType, final String filename, final Object object,
+                                final double[] sortedClassValues, final String className, final String classUnit,
+                                final String[] featureNames,
+                                final double[] featureMinValues, final double[] featureMaxValues,
+                                final boolean doClassValQuantization, final double minClassValue,
+                                final double classValStepSize, final int classLevels,
+                                final String[] polygonsAsClasses) {
         this.classifierType = classifierType;
         this.filename = filename;
         this.object = object;

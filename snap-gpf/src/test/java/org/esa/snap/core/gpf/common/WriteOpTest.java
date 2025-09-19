@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common;
 
+import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.dataio.ProductIO;

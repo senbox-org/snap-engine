@@ -15,9 +15,7 @@
  */
 package org.esa.snap.classification.gpf.kdtknn;
 
-import org.esa.snap.classification.gpf.BaseClassifier;
-import org.esa.snap.classification.gpf.ClassifierDescriptor;
-import org.esa.snap.classification.gpf.SupervisedClassifier;
+import org.esa.snap.classification.gpf.*;
 import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.classification.KDtreeKNN;
 import net.sf.javaml.core.Dataset;
