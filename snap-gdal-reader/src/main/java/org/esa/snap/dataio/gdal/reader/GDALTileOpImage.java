@@ -16,6 +16,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Vector;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.media.jai.PlanarImage;
 import org.esa.snap.core.image.AbstractSubsetTileOpImage;
 import org.esa.snap.core.image.ImageReadBoundsSupport;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.gdal.drivers.Band;
 import org.esa.snap.dataio.gdal.drivers.BuildVRTOptions;
 import org.esa.snap.dataio.gdal.drivers.Dataset;
@@ -85,6 +87,8 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                         levelDestinationHeight);
                 levelDestinationRaster.setDataElements(levelDestinationRaster.getMinX(), levelDestinationRaster.getMinY(),
                         imageRaster);
+            } catch (ProductClosedException ignore) {
+                SystemUtils.LOG.fine("Product was already closed. Leave tile empty");
             } catch (IOException ex) {
                 throw new IllegalStateException(
                         "Failed to read the data for level " + level + " and rectangle " + levelDestinationRectangle + ".", ex);
@@ -117,10 +121,25 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
 
         Raster read(int areaX, int areaY, int areaWidth, int areaHeight) throws IOException {
             final int pixels = areaWidth * areaHeight;
+            if (!filesExist(this.paths)) {
+                throw new ProductClosedException();
+            }
             final ByteBuffer data = readRasterFromDataset(areaX, areaY, areaWidth, areaHeight, pixels, true);
             final int dataBufferType = getDataBufferType();
             final DataBuffer imageDataBuffer = buildImageDataBuffer(data, dataBufferType, pixels);
             return buildWritableRaster(imageDataBuffer, areaWidth, areaHeight);
+        }
+
+        private boolean filesExist(Path[] paths) {
+            if (paths == null || paths.length == 0) {
+                return false;
+            }
+            for (Path p : paths) {
+                if (p == null || !Files.exists(p)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         ByteBuffer readRasterFromDataset(int areaX, int areaY, int areaWidth, int areaHeight, int pixels, boolean retry)
@@ -267,6 +286,13 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
             if (this.vrtDataset != null) {
                 this.vrtDataset.close();
             }
+        }
+    }
+
+    static final class ProductClosedException extends IOException {
+
+        ProductClosedException(){
+            super("product closed");
         }
     }
 }
