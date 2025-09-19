@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.jai.operator.ReinterpretDescriptor;
 import com.bc.ceres.multilevel.MultiLevelModel;
 import org.junit.Test;
 
@@ -25,9 +26,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.*;
 
 /**
  * @author Marco Peters
@@ -156,4 +155,93 @@ public class RasterDataNodeTest {
         assertEquals("4", b4.getPixelString(1, 0));
     }
 
+    @Test
+    public void testGetGeophysicalDataType() {
+        final Product product = new Product("TestProduct", "TestType", 10, 10);
+
+        // Test with different data types without scaling
+        Band int8Band = product.addBand("int8", ProductData.TYPE_INT8);
+        Band int16Band = product.addBand("int16", ProductData.TYPE_INT16);
+        Band int32Band = product.addBand("int32", ProductData.TYPE_INT32);
+        Band uint8Band = product.addBand("uint8", ProductData.TYPE_UINT8);
+        Band uint16Band = product.addBand("uint16", ProductData.TYPE_UINT16);
+        Band uint32Band = product.addBand("uint32", ProductData.TYPE_UINT32);
+        Band float32Band = product.addBand("float32", ProductData.TYPE_FLOAT32);
+        Band float64Band = product.addBand("float64", ProductData.TYPE_FLOAT64);
+
+        // Without scaling, geophysical data type should match original data type
+        // todo: Maybe a bug, why is INT8 converted to INT16
+        assertEquals(ProductData.TYPE_INT16, int8Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_INT16, int16Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_INT32, int32Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_UINT8, uint8Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_UINT16, uint16Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_FLOAT64, uint32Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_FLOAT32, float32Band.getGeophysicalDataType());
+        assertEquals(ProductData.TYPE_FLOAT64, float64Band.getGeophysicalDataType());
+
+        Band scaledInt8Band = product.addBand("scaledInt8", ProductData.TYPE_INT8);
+        scaledInt8Band.setScalingFactor(0.0006);
+        scaledInt8Band.setScalingOffset(-1.0);
+        assertEquals(ProductData.TYPE_FLOAT32, scaledInt8Band.getGeophysicalDataType());
+
+        Band scaledUInt8Band = product.addBand("scaledUInt8", ProductData.TYPE_UINT8);
+        scaledUInt8Band.setScalingFactor(0.0006);
+        scaledUInt8Band.setScalingOffset(-1.0);
+        assertEquals(ProductData.TYPE_FLOAT32, scaledUInt8Band.getGeophysicalDataType());
+
+        Band scaledInt16Band = product.addBand("scaledInt16", ProductData.TYPE_INT16);
+        scaledInt16Band.setScalingFactor(0.0006);
+        scaledInt16Band.setScalingOffset(-1.0);
+        assertEquals(ProductData.TYPE_FLOAT32, scaledInt16Band.getGeophysicalDataType());
+
+        // Test with log10 scaling
+        Band scaledUInt16Band = product.addBand("logScaledUint16", ProductData.TYPE_UINT16);
+        scaledUInt16Band.setLog10Scaled(true);
+        assertEquals(ProductData.TYPE_FLOAT32, scaledUInt16Band.getGeophysicalDataType());
+
+        Band scaledInt32 = product.addBand("scaledInt32", ProductData.TYPE_INT32);
+        scaledInt32.setScalingFactor(0.0006);
+        scaledInt32.setScalingOffset(-1.0);
+        assertEquals(ProductData.TYPE_FLOAT64, scaledInt32.getGeophysicalDataType());
+
+        Band scaledUint32 = product.addBand("scaledUint32", ProductData.TYPE_UINT32);
+        scaledUint32.setScalingFactor(0.0006);
+        scaledUint32.setScalingOffset(-1.0);
+        assertEquals(ProductData.TYPE_FLOAT64, scaledUint32.getGeophysicalDataType());
+
+        Band scaledFloat32Band = product.addBand("logScaledFloat32", ProductData.TYPE_FLOAT32);
+        scaledFloat32Band.setLog10Scaled(true);
+        assertEquals(ProductData.TYPE_FLOAT32, scaledFloat32Band.getGeophysicalDataType());
+
+        Band scaledFloat64Band = product.addBand("logScaledFloat64", ProductData.TYPE_FLOAT64);
+        scaledFloat64Band.setLog10Scaled(true);
+        assertEquals(ProductData.TYPE_FLOAT64, scaledFloat64Band.getGeophysicalDataType());
+    }
+
+    @Test
+    public void testGetInterpretationType() {
+        final Product product = new Product("TestProduct", "TestType", 10, 10);
+
+        Band int8Band = product.addBand("int8", ProductData.TYPE_INT8);
+        Band int16Band = product.addBand("int16", ProductData.TYPE_INT16);
+        Band int32Band = product.addBand("int32", ProductData.TYPE_INT32);
+        Band uint8Band = product.addBand("uint8", ProductData.TYPE_UINT8);
+        Band uint16Band = product.addBand("uint16", ProductData.TYPE_UINT16);
+        Band uint32Band = product.addBand("uint32", ProductData.TYPE_UINT32);
+        Band float32Band = product.addBand("float32", ProductData.TYPE_FLOAT32);
+        Band float64Band = product.addBand("float64", ProductData.TYPE_FLOAT64);
+
+        // todo: BYTE_SIGNED is AWT DataBuffer default for int8
+        assertEquals(ReinterpretDescriptor.INTERPRET_BYTE_SIGNED, int8Band.getInterpretationType());
+        // todo: should uint8 be INTERPRET_INT_UNSIGNED?
+        assertEquals(ReinterpretDescriptor.AWT, uint8Band.getInterpretationType());
+        assertEquals(ReinterpretDescriptor.AWT, int16Band.getInterpretationType());
+        // todo: shouldn't unint16 be INTERPRET_INT_UNSIGNED
+        assertEquals(ReinterpretDescriptor.AWT, uint16Band.getInterpretationType());
+        assertEquals(ReinterpretDescriptor.AWT, int32Band.getInterpretationType());
+        assertEquals(ReinterpretDescriptor.INTERPRET_INT_UNSIGNED, uint32Band.getInterpretationType());
+        assertEquals(ReinterpretDescriptor.AWT, float32Band.getInterpretationType());
+        assertEquals(ReinterpretDescriptor.AWT, float64Band.getInterpretationType());
+    }
 }
