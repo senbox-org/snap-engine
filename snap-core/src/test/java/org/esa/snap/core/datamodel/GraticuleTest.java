@@ -171,7 +171,7 @@ public class GraticuleTest {
 
         final List<Graticule.TextGlyph> resultList = new ArrayList<>();
 
-        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN);
+        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN, null);
 
         assertEquals(1, resultList.size());
         final Graticule.TextGlyph glyph = resultList.get(0);
@@ -191,7 +191,7 @@ public class GraticuleTest {
 
         final List<Graticule.TextGlyph> resultList = new ArrayList<>();
 
-        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN);
+        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN, null);
 
         assertEquals(0, resultList.size());
     }
