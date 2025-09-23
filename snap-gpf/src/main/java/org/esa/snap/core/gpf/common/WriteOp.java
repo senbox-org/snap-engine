@@ -470,7 +470,7 @@ public class WriteOp extends Operator {
         Rectangle dataTileRect = tile.getRectangle();
         Point[] tileIndices = sourceImage.getTileIndices(dataTileRect);
         for (Point tileIndex : tileIndices) {
-            Rectangle imageTileRect = sourceImage.getTileRect(tileIndex.x, tileIndex.x);
+            Rectangle imageTileRect = sourceImage.getTileRect(tileIndex.x, tileIndex.y);
             if (dataTileRect.intersects(imageTileRect)) {
                 ImageManager.removeCachedTile(sourceImage, tileIndex);
             }
