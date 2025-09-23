@@ -208,6 +208,7 @@ public class Graticule {
         final Range lonRange = ranges[0];
         final Range latRange = ranges[1];
 
+        // todo
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
                 lonRange.getMin(), lonRange.getMax());
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
@@ -216,10 +217,10 @@ public class Graticule {
         if (parallelList.size() > 0 && meridianList.size() > 0) {
             final GeneralPath[] paths = createPaths(parallelList, meridianList);
 
-            final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelList, meridianList, TextLocation.NORTH, formatCompass, decimalFormat);
-            final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelList, meridianList, TextLocation.SOUTH, formatCompass, decimalFormat);
-            final TextGlyph[] textGlyphsWest = createTextGlyphs(parallelList, meridianList, TextLocation.WEST, formatCompass, decimalFormat);
-            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelList, meridianList, TextLocation.EAST, formatCompass, decimalFormat);
+            final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelList, meridianList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep);
+            final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelList, meridianList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep);
+            final TextGlyph[] textGlyphsWest = createTextGlyphs(parallelList, meridianList, TextLocation.WEST, formatCompass, decimalFormat, latMajorStep);
+            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelList, meridianList, TextLocation.EAST, formatCompass, decimalFormat,latMajorStep);
 
             final TextGlyph[] textGlyphsLatCorners = createLatCornerTextGlyphs(raster, formatCompass, decimalFormat);
             final TextGlyph[] textGlyphsLonCorners = createLonCornerTextGlyphs(raster, formatCompass, decimalFormat);
@@ -382,9 +383,40 @@ public class Graticule {
                     int2 = intersections[i];
                     lat = int1.lat;
                     lon = int1.lon;
+                    if (lon > 119.99 && lon < 120.01) {
+                        int test =1;
+                        int test2 = 9;
+                    }
+
                     for (int k = 0; k <= 1; ) {
                         geoPos = new GeoPos(lat, limitLon(lon));
                         pixelPos = geoCoding.getPixelPos(geoPos, null);
+                        boolean validFound = false;
+                        if (!pixelPos.isValid()) {
+                            for (double latOffset = 0 ; latOffset < latMinorStep*5; latOffset+= latMinorStep/100) {
+                                for (double offset = lonMajorStep / 100; offset < lonMajorStep; offset += lonMajorStep / 100) {
+                                    geoPos = new GeoPos(lat - latOffset, limitLon(lon + offset));
+                                    pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                    if (pixelPos.isValid()) {
+                                        int1.lon = limitLon(lon + offset);
+                                        validFound = true;
+                                        break;
+                                    } else {
+                                        geoPos = new GeoPos(lat - latOffset, limitLon(lon - offset));
+                                        pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                        if (pixelPos.isValid()) {
+                                            int1.lon = limitLon(lon - offset);
+                                            validFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (validFound) {
+                                    break;
+                                }
+                            }
+                        }
+
 
                         // DANNY added this to avoid adding in null pixels
                         if (pixelPos.isValid()) {
@@ -448,24 +480,64 @@ public class Graticule {
         double lonBoundaryCurr;
         double latBoundaryCurr;
 
+        boolean lonFound = false;
+        boolean lonBoundaryIncreasingFound = false;
+        boolean lonBoundaryDecreasingFound = false;
+
         for (int i = 1; i < geoBoundary.length; i++) {
             geoPos = geoBoundary[i];
             lonBoundaryCurr = geoPos.lon;
             latBoundaryCurr = geoPos.lat;
 
+            // todo test
+
+            if (lonBoundaryCurr > 117.99 & lonBoundaryCurr < 118.01) {
+                int r=0;
+                int t = r;
+            }
+            if (lonBoundaryCurr > 119.99 & lonBoundaryCurr < 120.01) {
+                int r=0;
+                int t = r;
+            }
+
+
             // only examine steps around geoBoundary where lon is changing
             if (lonBoundaryCurr != lonBoundaryPrev) {
-                // find the step which crosses over desired lon
-                if (((lon >= lonBoundaryPrev && lon <= lonBoundaryCurr) ||
-                        (lon >= lonBoundaryCurr && lon <= lonBoundaryPrev))) {
+                boolean lonBoundaryIsIncreasing = lonBoundaryCurr > lonBoundaryPrev;
 
-                    // compute lon based on interpolation and add geoPos to intersectionList
-                    final double interpolationWeight = (lon - lonBoundaryPrev) / (lonBoundaryCurr - lonBoundaryPrev);
-                    if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
-                        final double lat = latBoundaryPrev + interpolationWeight * (latBoundaryCurr - latBoundaryPrev);
-                        intersectionList.add(new GeoPos(lat, lon));
+                boolean useThis = false;
+                if (lonBoundaryIsIncreasing) {
+                    if (!lonBoundaryIncreasingFound && lonBoundaryCurr >= lon) {
+                        useThis = true;
+                        lonBoundaryIncreasingFound =true;
+                    }
+                } else {
+                    if (!lonBoundaryDecreasingFound && lonBoundaryCurr <= lon) {
+                        useThis = true;
+                        lonBoundaryDecreasingFound = true;
                     }
                 }
+
+                if (useThis) {
+                        // compute lon based on interpolation and add geoPos to intersectionList
+                        final double interpolationWeight = (lon - lonBoundaryPrev) / (lonBoundaryCurr - lonBoundaryPrev);
+                        if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
+                            final double lat = latBoundaryPrev + interpolationWeight * (latBoundaryCurr - latBoundaryPrev);
+                            intersectionList.add(new GeoPos(lat, lon));
+                        }
+                }
+
+                // find the step which crosses over desired lon
+//                if (((lon >= lonBoundaryPrev && lon <= lonBoundaryCurr) ||
+//                        (lon >= lonBoundaryCurr && lon <= lonBoundaryPrev))) {
+//
+//                    // compute lon based on interpolation and add geoPos to intersectionList
+//                    final double interpolationWeight = (lon - lonBoundaryPrev) / (lonBoundaryCurr - lonBoundaryPrev);
+//                    if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
+//                        final double lat = latBoundaryPrev + interpolationWeight * (latBoundaryCurr - latBoundaryPrev);
+//                        intersectionList.add(new GeoPos(lat, lon));
+//                    }
+//                }
             }
 
             lonBoundaryPrev = lonBoundaryCurr;
@@ -590,15 +662,15 @@ public class Graticule {
 
     private static TextGlyph[] createTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
                                                 List<List<Coord>> longitudeGridLinePoints,
-                                                TextLocation textLocation, boolean formatCompass, boolean formatDecimal) {
+                                                TextLocation textLocation, boolean formatCompass, boolean formatDecimal, double majorStep) {
         final List<TextGlyph> textGlyphs = new ArrayList<TextGlyph>();
 
         switch (textLocation) {
             case NORTH:
-                createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal);
+                createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep);
                 break;
             case SOUTH:
-                createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal);
+                createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep);
                 break;
             case WEST:
                 createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal);
@@ -713,7 +785,7 @@ public class Graticule {
     }
 
     private static void createNorthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
-                                                          List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
+                                                          List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep) {
 
         // Assumes that the line was drawn from north to south
         // coord1 set to first point in order to anchor the text to the edge of the line
@@ -731,7 +803,22 @@ public class Graticule {
 
 
                 if (isCoordPairValid(coord1, coord2)) {
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(formatCompass, formatDecimal), coord1, coord2);
+                    double lon = coord1.geoPos.lon;
+                    double lonToUse = lon;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+                    if (majorStep != Double.NaN) {
+                        for (double curr = -180; curr <= 180; curr += majorStep) {
+                            currDiff = Math.abs(lon - curr);
+                            if (currDiff < lowestDiff) {
+                                lowestDiff = currDiff;
+                                lonToUse = curr;
+                            }
+                        }
+                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse,formatCompass, formatDecimal), coord1, coord2);
                     textGlyphs.add(textGlyph);
                 }
             }
@@ -756,7 +843,7 @@ public class Graticule {
 
 
     static void createSouthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
-                                                  List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
+                                                  List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep) {
 
         // Assumes that the line was drawn from north to south
         // coord1 set to last point in order to anchor the text to the edge of the line
@@ -770,7 +857,22 @@ public class Graticule {
                 final Coord coord2 = new Coord(coord1.geoPos, pixelPos2);
 
                 if (isCoordPairValid(coord1, coord2)) {
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(formatCompass, formatDecimal), coord1, coord2);
+                    double lon = coord1.geoPos.lon;
+                    double lonToUse = lon;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+                    if (majorStep != Double.NaN) {
+                        for (double curr = -180; curr <= 180; curr += majorStep) {
+                            currDiff = Math.abs(lon - curr);
+                            if (currDiff < lowestDiff) {
+                                lowestDiff = currDiff;
+                                lonToUse = curr;
+                            }
+                        }
+                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse,formatCompass, formatDecimal), coord1, coord2);
                     textGlyphs.add(textGlyph);
                 }
             }
