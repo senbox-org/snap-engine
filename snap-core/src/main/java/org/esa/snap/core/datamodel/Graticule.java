@@ -542,7 +542,7 @@ public class Graticule {
                 }
 
                 if (useThis) {
-                    // compute lon based on interpolation and add geoPos to intersectionList
+                    // compute lat based on interpolation and add geoPos to intersectionList
                     final double interpolationWeight = (lon - lonBoundaryPrev) / (lonBoundaryCurr - lonBoundaryPrev);
                     if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
                         final double lat = latBoundaryPrev + interpolationWeight * (latBoundaryCurr - latBoundaryPrev);
