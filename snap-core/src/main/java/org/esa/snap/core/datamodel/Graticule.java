@@ -384,56 +384,96 @@ public class Graticule {
                     lat = int1.lat;
                     lon = int1.lon;
 
+                    if (lon > 178.5 || lon < -178.5) {
+                        System.out.println("int1.lat=" + int1.lat + " int1.lon=" + int1.lon);
+                        System.out.println("int2.lat=" + int2.lat + " int2.lon=" + int2.lon);
+                    }
+
                     for (int k = 0; k <= 1; ) {
                         geoPos = new GeoPos(lat, limitLon(lon));
                         pixelPos = geoCoding.getPixelPos(geoPos, null);
-                        boolean validFound = false;
                         if (!pixelPos.isValid()) {
-                            for (double latOffset = 0 ; latOffset < latMinorStep*5; latOffset-= latMinorStep/100) {
-                                for (double offset = 0; offset < lonMajorStep/2.0; offset += lonMajorStep / 1000) {
+                            double offsetMax = lonMajorStep / 2.0;
+                            double offsetIncrement = lonMajorStep / 1000.0;
+                            double offset = 0;
 
-                                    geoPos = new GeoPos(lat + latOffset, limitLon(lon + offset));
-                                    pixelPos = geoCoding.getPixelPos(geoPos, null);
-                                    if (pixelPos.isValid()) {
-                                        int1.lon = limitLon(lon + offset);
-                                        validFound = true;
-                                        break;
-                                    }
+                            if (lon > 178.5 || lon < -178.5) {
+                                System.out.println("offset=" + offset);
+                                System.out.println("offsetIncrement=" + offsetIncrement);
+                            }
 
-                                    geoPos = new GeoPos(lat + latOffset, limitLon(lon - offset));
-                                    pixelPos = geoCoding.getPixelPos(geoPos, null);
-                                    if (pixelPos.isValid()) {
-                                        int1.lon = limitLon(lon + offset);
-                                        validFound = true;
-                                        break;
-                                    }
+                            for (int index=0; index < 20; index++) {
 
-                                    geoPos = new GeoPos(lat - latOffset, limitLon(lon + offset));
-                                    pixelPos = geoCoding.getPixelPos(geoPos, null);
-                                    if (pixelPos.isValid()) {
-                                        int1.lon = limitLon(lon + offset);
-                                        validFound = true;
-                                        break;
-                                    }
-
-                                    geoPos = new GeoPos(lat - latOffset, limitLon(lon - offset));
-                                    pixelPos = geoCoding.getPixelPos(geoPos, null);
-                                    if (pixelPos.isValid()) {
-                                        int1.lon = limitLon(lon + offset);
-                                        validFound = true;
-                                        break;
-                                    }
+                                if (index > 0) {
+                                    offset += offsetIncrement;
                                 }
-                                if (validFound) {
+
+                                if (offset > offsetMax) {
                                     break;
                                 }
+
+                                geoPos = new GeoPos(lat + offset, limitLon(lon + offset));
+//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+//                                if (pixelPos.isValid()) {
+//                                    int1.lon = limitLon(lon + offset);
+//                                    break;
+//                                }
+//
+//                                geoPos = new GeoPos(lat + offset, limitLon(lon - offset));
+//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+//                                if (pixelPos.isValid()) {
+//                                    int1.lon = limitLon(lon + offset);
+//                                    break;
+//                                }
+
+                                double latNew = lat + offset;
+                                double lonNew = limitLon(lon);
+                                if (lon > 178.5 || lon < -178.5) {
+                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
+                                }
+                                geoPos = new GeoPos(latNew, lonNew);
+                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                if (pixelPos.isValid()) {
+                                    if (lon > 178.5 || lon < -178.5) {
+                                        System.out.println("found\n");
+                                        lat = latNew;
+                                        lon = lonNew;
+                                    }
+//                                    int1.lon = limitLon(lonNew);
+                                    break;
+                                }
+
+                                latNew = lat - offset;
+                                lonNew = limitLon(lon);
+                                if (lon > 178.5 || lon < -178.5) {
+                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
+                                }
+                                geoPos = new GeoPos(latNew, lonNew);
+                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                if (pixelPos.isValid()) {
+                                    if (lon > 178.5 || lon < -178.5) {
+                                        System.out.println("found\n");
+                                    }
+                                    lat = latNew;
+                                    lon = lonNew;
+//                                    int1.lon = limitLon(lonNew);
+                                    break;
+                                }
+
                             }
+
+
+
                         }
 
 
                         // DANNY added this to avoid adding in null pixels
                         if (pixelPos.isValid()) {
                             meridian.add(new Coord(geoPos, pixelPos));
+                        } else {
+                            if (lon > 178.5 || lon < -178.5) {
+                                System.out.println("NOT found\n");
+                            }
                         }
                         lat -= latMinorStep;
                         if (lat <= int2.lat) {
