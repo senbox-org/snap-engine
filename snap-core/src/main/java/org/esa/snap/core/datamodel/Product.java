@@ -1180,8 +1180,25 @@ public class Product extends ProductNode implements Closeable {
      *
      * @param band the band to be removed, ignored if {@code null}
      * @return {@code true} if removed succesfully, otherwise {@code false}
+     * @throws IllegalStateException if the band is referenced by a virtual band
      */
     public boolean removeBand(final Band band) {
+        Band[] allBands = getBands();
+        for (Band b : allBands) {
+            if (b instanceof VirtualBand vBand) {
+                String expression = vBand.getExpression();
+                Term term = VirtualBandOpImage.parseExpression(expression, this);
+                RasterDataNode[] refRasters = BandArithmetic.getRefRasters(term);
+
+                for (RasterDataNode ref : refRasters) {
+                    if (ref == band) {
+                        throw new IllegalStateException("Band '" + band.getName() + "' must not be removed " +
+                                "because it is referenced by a virtual band '" + vBand.getName() + "'.");
+                    }
+                }
+            }
+        }
+
         return bandGroup.remove(band);
     }
 

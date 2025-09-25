@@ -645,6 +645,25 @@ public class ProductTest {
     }
 
     @Test
+    @STTM("SNAP-3855")
+    public void testRemoveBand_throwsException() {
+        Product product = new Product("A", "B", _sceneWidth, _sceneHeight);
+        Band b1 = new Band("b1", ProductData.TYPE_FLOAT32, _sceneWidth, _sceneHeight);
+        VirtualBand v1 = new VirtualBand("v1", ProductData.TYPE_FLOAT32, _sceneWidth, _sceneHeight, "b1*2");
+
+        product.addBand(b1);
+        product.addBand(v1);
+
+        try {
+            product.removeBand(b1);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException e) {
+            assertEquals("Band 'b1' must not be removed " +
+                    "because it is referenced by a virtual band 'v1'.", e.getMessage());
+        }
+    }
+
+    @Test
     public void testModifiedFlagAfterBandHasBeenModified() {
 
         Band band = new Band("band1", ProductData.TYPE_FLOAT32, _sceneWidth, _sceneHeight);
