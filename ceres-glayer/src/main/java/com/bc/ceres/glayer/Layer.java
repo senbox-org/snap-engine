@@ -23,8 +23,8 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ExtensibleObject;
 import com.bc.ceres.grender.Rendering;
 
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -401,9 +401,14 @@ public abstract class Layer extends ExtensibleObject {
                 g.setComposite(getComposite().getAlphaComposite((float) (1.0 - transparency)));
             }
             final double swipe = getSwipePercent();
-            if(swipe < 1.0) {
-                final Rectangle clip = rendering.getGraphics().getClipBounds();
-                rendering.getGraphics().clip(new Rectangle(clip.x,clip.y,(int)(clip.width*swipe),clip.height));
+            if (swipe < 1.0) {
+                Rectangle2D modelBounds = getModelBounds();
+                AffineTransform m2vTransform = rendering.getViewport().getModelToViewTransform();
+
+                Shape swipeShapeModel = new Rectangle2D.Double(modelBounds.getMinX(), modelBounds.getMinY(), modelBounds.getWidth() * swipe, modelBounds.getHeight());
+                Shape swipeShapeViewport = m2vTransform.createTransformedShape(swipeShapeModel);
+
+                g.clip(swipeShapeViewport);
             }
             if (filter == null) {
                 renderLayer(rendering);
