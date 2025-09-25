@@ -210,9 +210,10 @@ public class Graticule {
 
         // todo
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
-                lonRange.getMin(), lonRange.getMax());
+                lonRange.getMin(), lonRange.getMax(), raster);
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
                 latRange.getMin(), latRange.getMax());
+
 
         if (parallelList.size() > 0 && meridianList.size() > 0) {
             final GeneralPath[] paths = createPaths(parallelList, meridianList);
@@ -310,6 +311,10 @@ public class Graticule {
             final TiePointGeoCoding tiePointGeoCoding = (TiePointGeoCoding) geoCoding;
             step = Math.round((int) Math.min(tiePointGeoCoding.getLonGrid().getSubSamplingX(), tiePointGeoCoding.getLonGrid().getSubSamplingY()));
         }
+
+        if (step > 1) {
+            step = 1;
+        }
         return step;
     }
 
@@ -363,7 +368,37 @@ public class Graticule {
                                                          final double lonMajorStep,
                                                          final double latMinorStep,
                                                          final double xMin,
-                                                         final double xMax) {
+                                                         final double xMax,
+                                                         RasterDataNode raster) {
+
+        double x = 0;
+        double y = 0;
+
+        x = 0;
+        y = 0;
+        PixelPos point = new PixelPos(x,y);
+        GeoPos coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
+
+        x = 1;
+        y = 1;
+        point = new PixelPos(x,y);
+        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
+
+        x = 1.5;
+        y = 1.5;
+        point = new PixelPos(x,y);
+        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
+
+        x = 2;
+        y = 2;
+        point = new PixelPos(x,y);
+        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
+
+        
         List<List<Coord>> meridianList = new ArrayList<>();
         List<GeoPos> intersectionList = new ArrayList<>();
         GeoPos geoPos, int1, int2;
@@ -393,7 +428,7 @@ public class Graticule {
                         geoPos = new GeoPos(lat, limitLon(lon));
                         pixelPos = geoCoding.getPixelPos(geoPos, null);
                         if (!pixelPos.isValid()) {
-                            double offsetMax = lonMajorStep / 2.0;
+                            double offsetMax = lonMajorStep / 4.0;
                             double offsetIncrement = lonMajorStep / 1000.0;
                             double offset = 0;
 
@@ -402,7 +437,7 @@ public class Graticule {
                                 System.out.println("offsetIncrement=" + offsetIncrement);
                             }
 
-                            for (int index=0; index < 20; index++) {
+                            for (int index=0; index < 50000; index++) {
 
                                 if (index > 0) {
                                     offset += offsetIncrement;
@@ -412,7 +447,7 @@ public class Graticule {
                                     break;
                                 }
 
-                                geoPos = new GeoPos(lat + offset, limitLon(lon + offset));
+//                                geoPos = new GeoPos(lat + offset, limitLon(lon + offset));
 //                                pixelPos = geoCoding.getPixelPos(geoPos, null);
 //                                if (pixelPos.isValid()) {
 //                                    int1.lon = limitLon(lon + offset);
@@ -426,8 +461,8 @@ public class Graticule {
 //                                    break;
 //                                }
 
-                                double latNew = lat + offset;
-                                double lonNew = limitLon(lon);
+                                double latNew = lat;
+                                double lonNew = limitLon(lon + offset);
                                 if (lon > 178.5 || lon < -178.5) {
                                     System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
                                 }
@@ -436,9 +471,44 @@ public class Graticule {
                                 if (pixelPos.isValid()) {
                                     if (lon > 178.5 || lon < -178.5) {
                                         System.out.println("found\n");
-                                        lat = latNew;
-                                        lon = lonNew;
+//                                        lat = latNew;
+//                                        lon = lonNew;
                                     }
+//                                    int1.lon = limitLon(lonNew);
+                                    break;
+                                }
+
+                                latNew = lat;
+                                lonNew = limitLon(lon - offset);
+                                if (lon > 178.5 || lon < -178.5) {
+                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
+                                }
+                                geoPos = new GeoPos(latNew, lonNew);
+                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                if (pixelPos.isValid()) {
+                                    if (lon > 178.5 || lon < -178.5) {
+                                        System.out.println("found\n");
+//                                        lat = latNew;
+//                                        lon = lonNew;
+                                    }
+//                                    int1.lon = limitLon(lonNew);
+                                    break;
+                                }
+
+
+                                latNew = lat + offset;
+                                lonNew = limitLon(lon);
+                                if (lon > 178.5 || lon < -178.5) {
+                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
+                                }
+                                geoPos = new GeoPos(latNew, lonNew);
+                                pixelPos = geoCoding.getPixelPos(geoPos, null);
+                                if (pixelPos.isValid()) {
+                                    if (lon > 178.5 || lon < -178.5) {
+                                        System.out.println("found\n");
+                                    }
+//                                    lat = latNew;
+//                                    lon = lonNew;
 //                                    int1.lon = limitLon(lonNew);
                                     break;
                                 }
@@ -454,11 +524,13 @@ public class Graticule {
                                     if (lon > 178.5 || lon < -178.5) {
                                         System.out.println("found\n");
                                     }
-                                    lat = latNew;
-                                    lon = lonNew;
+//                                    lat = latNew;
+//                                    lon = lonNew;
 //                                    int1.lon = limitLon(lonNew);
                                     break;
                                 }
+
+
 
                             }
 
