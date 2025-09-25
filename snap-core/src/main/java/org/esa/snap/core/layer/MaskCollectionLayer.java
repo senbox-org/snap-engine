@@ -52,7 +52,10 @@ public class MaskCollectionLayer extends CollectionLayer {
         this.raster = raster;
         this.maskPNL = new MaskPNL();
         setId(ID);
-        getProduct().addProductNodeListener(maskPNL);
+        Product product = getProduct();
+        if (product != null) {
+            product.addProductNodeListener(maskPNL);
+        }
         addListener(new VisibilityLL());
     }
 

@@ -70,7 +70,10 @@ public class GraticuleLayer extends Layer {
         this.raster = raster;
 
         productNodeHandler = new ProductNodeHandler();
-        raster.getProduct().addProductNodeListener(productNodeHandler);
+        Product product = raster.getProduct();
+        if (product != null) {
+            product.addProductNodeListener(productNodeHandler);
+        }
 
         setTransparency(0.0);
     }
