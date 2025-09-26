@@ -127,7 +127,9 @@ class VirtualBandMultiLevelImage extends DefaultMultiLevelImage implements Produ
             referencedRasters.add(refRaster);
         }
         for (Product referencedProduct : referencedProducts) {
-            referencedProduct.addProductNodeListener(this);
+            if (referencedProduct != null) {
+                referencedProduct.addProductNodeListener(this);
+            }
         }
     }
 
