@@ -1197,9 +1197,9 @@ public class MetaDataLayer extends Layer {
     private int getFooter2FontType() {
         if (isFooter2FontItalic() && isFooter2FontBold()) {
             return Font.ITALIC | Font.BOLD;
-        } else if (isMarginFontItalic()) {
+        } else if (isFooter2FontItalic()) {
             return Font.ITALIC;
-        } else if (isMarginFontBold()) {
+        } else if (isFooter2FontBold()) {
             return Font.BOLD;
         } else {
             return Font.PLAIN;
