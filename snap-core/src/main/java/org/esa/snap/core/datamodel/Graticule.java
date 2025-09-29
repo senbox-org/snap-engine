@@ -406,6 +406,68 @@ public class Graticule {
         double lat, lon;
         double mx = lonMajorStep * Math.floor(xMin / lonMajorStep);
         for (; mx <= xMax; mx += lonMajorStep) {
+            List<Coord> meridian = new ArrayList<>();
+
+            double pixelY = 0;
+            double lonCurr = -181;
+            double lonPrev = -181;
+
+            // Find crossing at top
+            for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX++ ) {
+                if (pixelX == 0) {
+                    point = new PixelPos(pixelX, pixelY);
+                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+                    lonPrev = coordAtPoint.lon;
+                    if (coordAtPoint.lon > mx) {
+                        break;
+                    } else if (coordAtPoint.lon == mx) {
+                        meridian.add(new Coord(coordAtPoint, point));
+                    }
+
+                    continue;
+                }
+
+                if (pixelX >= mx) {
+                    point = new PixelPos(pixelX, pixelY);
+                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+                    meridian.add(new Coord(coordAtPoint, point));
+                    break;
+                }
+            }
+
+
+
+            // Find crossing at bottom
+            pixelY = raster.getRasterHeight() - 1;
+
+            for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX++ ) {
+                if (pixelX == 0) {
+                    point = new PixelPos(pixelX, pixelY);
+                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+                    lonPrev = coordAtPoint.lon;
+                    if (coordAtPoint.lon > mx) {
+                        break;
+                    } else if (coordAtPoint.lon == mx) {
+                        meridian.add(new Coord(coordAtPoint, point));
+                    }
+
+                    continue;
+                }
+
+                if (pixelX >= mx) {
+                    point = new PixelPos(pixelX, pixelY);
+                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+                    meridian.add(new Coord(coordAtPoint, point));
+                    break;
+                }
+            }
+
+
+
+        }
+
+
+        for (; mx <= xMax; mx += lonMajorStep) {
             intersectionList.clear();
             computeMeridianIntersections(geoBoundary, mx, intersectionList);
             if (intersectionList.size() > 0 && intersectionList.size() % 2 == 0) {
