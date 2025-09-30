@@ -630,6 +630,11 @@ public abstract class VirtualDir {
                 + baseName + "0 to " + baseName + (TEMP_DIR_ATTEMPTS - 1) + ')');
     }
 
+    public static void clearTempFiles() throws IOException {
+        final File baseDir = getBaseTempDir();
+        deleteFileTree(baseDir);
+    }
+
     private static File getBaseTempDir() throws IOException {
         String contextId = "snap";
         File tempDir;
