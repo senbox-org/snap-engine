@@ -535,16 +535,17 @@ public class ProductIO {
                         executorService.submit(() -> {
                             try {
                                 processTileForBand(band, finalX, finalY);
-                                semaphore.release();
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
+                            } finally {
+                                semaphore.release();
                             }
                         });
                     }
                 }
             }
         } finally {
-            shutdownExecutor(executorService);
+            shutdownExecutor(executorService, pm);
             pm.worked(bandsToWrite.size());
         }
     }
@@ -582,7 +583,7 @@ public class ProductIO {
                 tileIndex.y >= sourceImage.getMinTileY() && tileIndex.y <= sourceImage.getMaxTileY();
     }
 
-    private static void shutdownExecutor(ExecutorService executorService) throws IOException {
+    private static void shutdownExecutor(ExecutorService executorService, ProgressMonitor pm) throws IOException {
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_MINUTES, TimeUnit.MINUTES)) {
@@ -590,7 +591,9 @@ public class ProductIO {
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
-            throw new IOException("Writing of band tile data took too long", e);
+            if (!pm.isCanceled()) {
+                throw new IOException("Writing of band tile data took too long", e);
+            }
         }
     }
 

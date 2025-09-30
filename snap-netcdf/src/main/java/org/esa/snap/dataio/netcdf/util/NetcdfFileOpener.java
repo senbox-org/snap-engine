@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
+import com.bc.ceres.core.VirtualDir;
 import org.esa.snap.core.util.SystemUtils;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.iosp.IOServiceProvider;
@@ -62,6 +63,7 @@ public class NetcdfFileOpener {
     private static final byte[] NC3_MAGIC_LONG = {0x43, 0x44, 0x46, 0x02}; // 64-bit offset format : only affects the variable offset value
     private static final byte[] H4_MAGIC = {0x0e, 0x03, 0x13, 0x01};
     private static final byte[] H5_MAGIC = {(byte) 0x89, 'H', 'D', 'F', '\r', '\n', 0x1a, '\n'};
+    private static final String NC_CACHE_DIR = getNetcdfCacheFolder();
 
 // currently unused
 //    public static boolean canOpenNetcdf(Object input) throws IOException {
@@ -85,6 +87,21 @@ public class NetcdfFileOpener {
 //        return false;
 //    }
 
+    private static String getNetcdfCacheFolder() {
+        try {
+            final File localTempFolder = VirtualDir.createUniqueTempDir();
+            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            return localTempFolder.getAbsolutePath();
+        } catch (IOException e) {
+            final File localTempFolder = new File(System.getProperty("user.home", "."), ".snap/temp/nc_cache");
+            localTempFolder.delete();
+            if (localTempFolder.mkdirs()) {
+                LOG.fine("successfully created the NC cache dir: " + localTempFolder.getAbsolutePath());
+            }
+            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            return localTempFolder.getAbsolutePath();
+        }
+    }
 
     public static NetcdfFile open(Object input) throws IOException {
         try {
@@ -275,13 +292,17 @@ public class NetcdfFileOpener {
     // copied from ucar.nc2.NetcdfFile
     static private String makeUncompressed(String filename) throws Exception {
         // see if its a compressed file
-        int pos = filename.lastIndexOf('.');
+        final File compressedFile = new File(filename);
+        final File ncCacheDir = new File(NC_CACHE_DIR);
+        final String compressedFileName = compressedFile.getName();
+        int pos = compressedFileName.lastIndexOf('.');
         if (pos < 0) {
             return null;
         }
 
-        String suffix = filename.substring(pos + 1);
-        String uncompressedFilename = filename.substring(0, pos);
+        String suffix = compressedFileName.substring(pos + 1);
+        final String uncompressedFileName = compressedFileName.substring(0, pos);
+        String uncompressedFilename = ncCacheDir.toPath().resolve(uncompressedFileName).toString();
 
         if (!suffix.equalsIgnoreCase("Z") && !suffix.equalsIgnoreCase("zip") && !suffix.equalsIgnoreCase("gzip")
             && !suffix.equalsIgnoreCase("gz") && !suffix.equalsIgnoreCase("bz2")) {
@@ -290,6 +311,7 @@ public class NetcdfFileOpener {
 
         // see if already decompressed, look in cache if need be
         File uncompressedFile = DiskCache.getFileStandardPolicy(uncompressedFilename);
+        uncompressedFile.deleteOnExit(); // request to delete the temporary file when the SNAP application is closed
         if (uncompressedFile.exists() && uncompressedFile.length() > 0) {
             // see if its locked - another thread is writing it
             FileInputStream stream = null;
