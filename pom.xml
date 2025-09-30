@@ -1020,6 +1020,7 @@
                             --add-exports java.desktop/sun.awt.image=ALL-UNNAMED
                             --add-opens java.desktop/sun.awt.shell=ALL-UNNAMED
                             --add-opens java.base/java.net=ALL-UNNAMED
+                            --add-opens java.base/java.io=ALL-UNNAMED
                             --add-opens java.desktop/javax.swing=ALL-UNNAMED
                             --add-opens java.base/java.security=ALL-UNNAMED
                             --add-exports java.desktop/com.sun.imageio.plugins.jpeg=ALL-UNNAMED
