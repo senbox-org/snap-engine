@@ -404,225 +404,103 @@ public class Graticule {
         GeoPos geoPos, int1, int2;
         PixelPos pixelPos;
         double lat, lon;
-        double mx = lonMajorStep * Math.floor(xMin / lonMajorStep);
-        for (; mx <= xMax; mx += lonMajorStep) {
+//        double mx = lonMajorStep * Math.floor(xMin / lonMajorStep);
+//        for (; mx <= xMax; mx += lonMajorStep) {
+
+
+        double pixelY;
+
+        double numSteps = 100;
+
+        for (double mx = -180 + lonMajorStep; mx <= 180; mx += lonMajorStep) {
+
             List<Coord> meridian = new ArrayList<>();
 
-            double pixelY = 0;
-            double lonCurr = -181;
-            double lonPrev = -181;
+            Coord coord;
 
-            // Find crossing at top
-            for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX++ ) {
-                if (pixelX == 0) {
-                    point = new PixelPos(pixelX, pixelY);
-                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-                    lonPrev = coordAtPoint.lon;
-                    if (coordAtPoint.lon > mx) {
-                        break;
-                    } else if (coordAtPoint.lon == mx) {
-                        meridian.add(new Coord(coordAtPoint, point));
-                    }
+            for (double step = 0; step <= numSteps; step += 1.0) {
+//                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
+                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
 
-                    continue;
-                }
-
-                if (pixelX >= mx) {
-                    point = new PixelPos(pixelX, pixelY);
-                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-                    meridian.add(new Coord(coordAtPoint, point));
-                    break;
+                coord = getCoord(mx, pixelY, raster);
+                if (coord != null) {
+                    meridian.add(coord);
                 }
             }
 
 
-
-            // Find crossing at bottom
-            pixelY = raster.getRasterHeight() - 1;
-
-            for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX++ ) {
-                if (pixelX == 0) {
-                    point = new PixelPos(pixelX, pixelY);
-                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-                    lonPrev = coordAtPoint.lon;
-                    if (coordAtPoint.lon > mx) {
-                        break;
-                    } else if (coordAtPoint.lon == mx) {
-                        meridian.add(new Coord(coordAtPoint, point));
-                    }
-
-                    continue;
-                }
-
-                if (pixelX >= mx) {
-                    point = new PixelPos(pixelX, pixelY);
-                    coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-                    meridian.add(new Coord(coordAtPoint, point));
-                    break;
-                }
+            if (meridian.size() > 0) {
+                meridianList.add(meridian);
             }
-
-
-            meridianList.add(meridian);
-
         }
 
-//
-//        for (; mx <= xMax; mx += lonMajorStep) {
-//            intersectionList.clear();
-//            computeMeridianIntersections(geoBoundary, mx, intersectionList);
-//            if (intersectionList.size() > 0 && intersectionList.size() % 2 == 0) {
-//                final GeoPos[] intersections = intersectionList.toArray(new GeoPos[0]);
-//                Arrays.sort(intersections, new GeoPosLatComparator());
-//                List<Coord> meridian = new ArrayList<>();
-//                // loop reverse order
-//                for (int i = intersections.length - 2; i >= 0; i -= 2) {
-//                    int1 = intersections[i + 1];
-//                    int2 = intersections[i];
-//                    lat = int1.lat;
-//                    lon = int1.lon;
-//
-//                    if (lon > 178.5 || lon < -178.5) {
-//                        System.out.println("int1.lat=" + int1.lat + " int1.lon=" + int1.lon);
-//                        System.out.println("int2.lat=" + int2.lat + " int2.lon=" + int2.lon);
-//                    }
-//
-//                    for (int k = 0; k <= 1; ) {
-//                        geoPos = new GeoPos(lat, limitLon(lon));
-//                        pixelPos = geoCoding.getPixelPos(geoPos, null);
-//                        if (!pixelPos.isValid()) {
-//                            double offsetMax = lonMajorStep / 4.0;
-//                            double offsetIncrement = lonMajorStep / 1000.0;
-//                            double offset = 0;
-//
-//                            if (lon > 178.5 || lon < -178.5) {
-//                                System.out.println("offset=" + offset);
-//                                System.out.println("offsetIncrement=" + offsetIncrement);
-//                            }
-//
-//                            for (int index=0; index < 50000; index++) {
-//
-//                                if (index > 0) {
-//                                    offset += offsetIncrement;
-//                                }
-//
-//                                if (offset > offsetMax) {
-//                                    break;
-//                                }
-//
-////                                geoPos = new GeoPos(lat + offset, limitLon(lon + offset));
-////                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-////                                if (pixelPos.isValid()) {
-////                                    int1.lon = limitLon(lon + offset);
-////                                    break;
-////                                }
-////
-////                                geoPos = new GeoPos(lat + offset, limitLon(lon - offset));
-////                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-////                                if (pixelPos.isValid()) {
-////                                    int1.lon = limitLon(lon + offset);
-////                                    break;
-////                                }
-//
-//                                double latNew = lat;
-//                                double lonNew = limitLon(lon + offset);
-//                                if (lon > 178.5 || lon < -178.5) {
-//                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
-//                                }
-//                                geoPos = new GeoPos(latNew, lonNew);
-//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-//                                if (pixelPos.isValid()) {
-//                                    if (lon > 178.5 || lon < -178.5) {
-//                                        System.out.println("found\n");
-////                                        lat = latNew;
-////                                        lon = lonNew;
-//                                    }
-////                                    int1.lon = limitLon(lonNew);
-//                                    break;
-//                                }
-//
-//                                latNew = lat;
-//                                lonNew = limitLon(lon - offset);
-//                                if (lon > 178.5 || lon < -178.5) {
-//                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
-//                                }
-//                                geoPos = new GeoPos(latNew, lonNew);
-//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-//                                if (pixelPos.isValid()) {
-//                                    if (lon > 178.5 || lon < -178.5) {
-//                                        System.out.println("found\n");
-////                                        lat = latNew;
-////                                        lon = lonNew;
-//                                    }
-////                                    int1.lon = limitLon(lonNew);
-//                                    break;
-//                                }
-//
-//
-//                                latNew = lat + offset;
-//                                lonNew = limitLon(lon);
-//                                if (lon > 178.5 || lon < -178.5) {
-//                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
-//                                }
-//                                geoPos = new GeoPos(latNew, lonNew);
-//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-//                                if (pixelPos.isValid()) {
-//                                    if (lon > 178.5 || lon < -178.5) {
-//                                        System.out.println("found\n");
-//                                    }
-////                                    lat = latNew;
-////                                    lon = lonNew;
-////                                    int1.lon = limitLon(lonNew);
-//                                    break;
-//                                }
-//
-//                                latNew = lat - offset;
-//                                lonNew = limitLon(lon);
-//                                if (lon > 178.5 || lon < -178.5) {
-//                                    System.out.println("offset=" + offset + " Lat=" + latNew + " Lon=" + lonNew);
-//                                }
-//                                geoPos = new GeoPos(latNew, lonNew);
-//                                pixelPos = geoCoding.getPixelPos(geoPos, null);
-//                                if (pixelPos.isValid()) {
-//                                    if (lon > 178.5 || lon < -178.5) {
-//                                        System.out.println("found\n");
-//                                    }
-////                                    lat = latNew;
-////                                    lon = lonNew;
-////                                    int1.lon = limitLon(lonNew);
-//                                    break;
-//                                }
-//
-//
-//
-//                            }
-//
-//
-//
-//                        }
-//
-//
-//                        // DANNY added this to avoid adding in null pixels
-//                        if (pixelPos.isValid()) {
-//                            meridian.add(new Coord(geoPos, pixelPos));
-//                        } else {
-//                            if (lon > 178.5 || lon < -178.5) {
-//                                System.out.println("NOT found\n");
-//                            }
-//                        }
-//                        lat -= latMinorStep;
-//                        if (lat <= int2.lat) {
-//                            lat = int2.lat;
-//                            k++;
-//                        }
-//                    }
-//                }
-//                meridianList.add(meridian);
-//            }
-//        }
+
         return meridianList;
     }
 
+    static Coord getCoord(double mx, double pixelY, RasterDataNode raster) {
+
+        PixelPos point;
+        GeoPos coordAtPoint;
+        boolean isFirstGeoPixel = false;
+        boolean isLastGeoPixel = false;
+
+        int increment = 1;
+
+        boolean geoPixelsStarted = false;
+        boolean geoPixelsFinished = false;
+
+        for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX += increment) {
+            point = new PixelPos(pixelX, pixelY);
+            coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+            double lonPixel = coordAtPoint.lon;
+
+
+            // Determine if last valid geo pixel (from left to right) and determine whether to make a line here
+            if (geoPixelsStarted && !validLon(lonPixel)) {
+                geoPixelsFinished = true;
+
+            }
+
+
+            // Determine if first valid geo pixel (from left to right) and determine whether to make a line here
+            if (!geoPixelsStarted && validLon(lonPixel)) {
+                geoPixelsStarted = true;
+                if (mx < lonPixel) {
+                    if (pixelX < raster.getRasterWidth()) {
+                        // Determine whether to force creation of line
+                        // todo tolerance may be added as well
+                        double nextPixelX = pixelX + 1.0;
+                        PixelPos nextPoint = new PixelPos(nextPixelX, pixelY);
+                        GeoPos nextCoordAtPoint = raster.getGeoCoding().getGeoPos(nextPoint, null);
+                        double nextLonPixel = nextCoordAtPoint.lon;
+                        double deltaLon = nextLonPixel - lonPixel;
+                        if (mx > (lonPixel - deltaLon)) {
+                            return new Coord(coordAtPoint, point);
+                        }
+                    }
+                    break;
+                }
+            }
+
+
+            if (mx <= lonPixel) {
+                return new Coord(coordAtPoint, point);
+            }
+        }
+
+        return null;
+    }
+
+
+
+    static boolean validLon(double lon) {
+        if (lon >= -180 && lon <= 180) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     static void computeParallelIntersections(final GeoPos[] geoBoundary,
                                              final double lat,
