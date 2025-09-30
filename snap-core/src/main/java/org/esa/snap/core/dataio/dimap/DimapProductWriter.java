@@ -73,6 +73,7 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     private boolean useCache;
     private WriteCache writeCache;
+    private volatile boolean isCanceled = false;
 
     /**
      * Construct a new instance of a product writer for the given BEAM-DIMAP product writer plug-in.
@@ -148,6 +149,10 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     public void setUseCache(boolean useCache) {
         this.useCache = useCache;
+    }
+
+    public void setCanceled(boolean canceled) {
+        this.isCanceled = canceled;
     }
 
     /**
@@ -247,6 +252,9 @@ public class DimapProductWriter extends AbstractProductWriter {
                                     int sourceWidth, int sourceHeight,
                                     ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
+        if (isCanceled) {
+            return;
+        }
         Guardian.assertNotNull("sourceBand", sourceBand);
         Guardian.assertNotNull("sourceBuffer", sourceBuffer);
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
@@ -318,7 +326,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      */
     @Override
     public synchronized void flush() throws IOException {
-        if (bandOutputStreams == null) {
+        if (bandOutputStreams == null || isCanceled) {
             return;
         }
         if (useCache) {
@@ -377,9 +385,9 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     private void writeTiePointGrid(TiePointGrid tiePointGrid) throws IOException {
         ensureExistingTiePointGridDir();
-        final ImageOutputStream outputStream = createImageOutputStream(tiePointGrid);
-        tiePointGrid.getGridData().writeTo(outputStream);
-        outputStream.close();
+        try (final ImageOutputStream outputStream = createImageOutputStream(tiePointGrid)) {
+            tiePointGrid.getGridData().writeTo(outputStream);
+        }
     }
 
     private void ensureExistingTiePointGridDir() {
