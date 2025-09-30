@@ -21,6 +21,7 @@ import com.bc.ceres.core.runtime.ConfigurableExtension;
 import com.bc.ceres.core.runtime.ConfigurationElement;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.ParseException;
+import org.esa.snap.core.jexp.Parser;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
@@ -107,6 +108,7 @@ public class RGBImageProfile implements ConfigurableExtension {
     private boolean internal;
     private final RGBChannelDef rgbChannelDef;
     private String[] pattern;
+    private Parser bandArithmeticParser;
 
     // only for testing 2021-04-27 tb
     RGBImageProfile() {
@@ -192,6 +194,14 @@ public class RGBImageProfile implements ConfigurableExtension {
 
     public void setInternal(final boolean internal) {
         this.internal = internal;
+    }
+
+    public void setBandArithmeticParser(Parser bandArithmeticParser) {
+        this.bandArithmeticParser = bandArithmeticParser;
+    }
+
+    public Parser getBandArithmeticParser() {
+        return bandArithmeticParser;
     }
 
     public boolean equalExpressions(RGBImageProfile profile) {
@@ -333,7 +343,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         final String[] expressions = getRgbExpressions();
         for (final String expression : expressions) {
             if (!expression.equals("")) {
-                if (!product.isCompatibleBandArithmeticExpression(expression)) {
+                if (!product.isCompatibleBandArithmeticExpression(expression, getBandArithmeticParser())) {
                     return false;
                 }
             }
