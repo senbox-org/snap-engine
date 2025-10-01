@@ -371,34 +371,6 @@ public class Graticule {
                                                          final double xMax,
                                                          RasterDataNode raster) {
 
-        double x = 0;
-        double y = 0;
-
-        x = 0;
-        y = 0;
-        PixelPos point = new PixelPos(x,y);
-        GeoPos coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
-
-        x = 1;
-        y = 1;
-        point = new PixelPos(x,y);
-        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
-
-        x = 1.5;
-        y = 1.5;
-        point = new PixelPos(x,y);
-        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
-
-        x = 2;
-        y = 2;
-        point = new PixelPos(x,y);
-        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
-        System.out.println("x,y=" + x + "," + y +"lat=" + coordAtPoint.lat + " lon=" + coordAtPoint.lon);
-
-        
         List<List<Coord>> meridianList = new ArrayList<>();
         List<GeoPos> intersectionList = new ArrayList<>();
         GeoPos geoPos, int1, int2;
@@ -410,9 +382,17 @@ public class Graticule {
 
         double pixelY;
 
+
+        // todo make option in GUI
         double numSteps = 100;
 
-        for (double mx = -180 + lonMajorStep; mx <= 180; mx += lonMajorStep) {
+        // todo make option in GUI
+        double tolerance = 0.1; // fraction of major step
+        double toleranceDegrees =  lonMajorStep * tolerance;
+
+
+
+        for (double mx = -180; mx <= 180; mx += lonMajorStep) {
 
             List<Coord> meridian = new ArrayList<>();
 
@@ -422,23 +402,48 @@ public class Graticule {
 //                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
 
-                coord = getCoord(mx, pixelY, raster);
+                coord = getCoord(mx, pixelY, raster, toleranceDegrees, false);
                 if (coord != null) {
                     meridian.add(coord);
                 }
             }
 
+            if (meridian.size() > 0) {
+                meridianList.add(meridian);
+            }
+
+        }
+
+
+        for (double mx = -180; mx <= 180; mx += lonMajorStep) {
+
+            List<Coord> meridian = new ArrayList<>();
+
+            Coord coord;
+
+//            // add on the duplicate meridian if needed
+//            // todo this part can be improved as it takes longer repeating this
+            for (double step = 0; step <= numSteps; step += 1.0) {
+//                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
+                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
+
+                coord = getCoord(mx, pixelY, raster, toleranceDegrees, true);
+                if (coord != null) {
+                    meridian.add(coord);
+                }
+            }
 
             if (meridian.size() > 0) {
                 meridianList.add(meridian);
             }
+
         }
 
 
         return meridianList;
     }
 
-    static Coord getCoord(double mx, double pixelY, RasterDataNode raster) {
+    static Coord getCoord(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees, boolean skipFirst) {
 
         PixelPos point;
         GeoPos coordAtPoint;
@@ -449,6 +454,15 @@ public class Graticule {
 
         boolean geoPixelsStarted = false;
         boolean geoPixelsFinished = false;
+        double NAN_PIXEL = 9991234;
+        double prevLonPixel = NAN_PIXEL;
+        PixelPos prevPoint = null;
+        GeoPos prevCoordAtPoint = null;
+
+        double tolerance = 1;
+
+        boolean firstFound = false;
+
 
         for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX += increment) {
             point = new PixelPos(pixelX, pixelY);
@@ -456,37 +470,71 @@ public class Graticule {
             double lonPixel = coordAtPoint.lon;
 
 
-            // Determine if last valid geo pixel (from left to right) and determine whether to make a line here
-            if (geoPixelsStarted && !validLon(lonPixel)) {
-                geoPixelsFinished = true;
-
-            }
-
-
-            // Determine if first valid geo pixel (from left to right) and determine whether to make a line here
-            if (!geoPixelsStarted && validLon(lonPixel)) {
-                geoPixelsStarted = true;
-                if (mx < lonPixel) {
-                    if (pixelX < raster.getRasterWidth()) {
-                        // Determine whether to force creation of line
-                        // todo tolerance may be added as well
-                        double nextPixelX = pixelX + 1.0;
-                        PixelPos nextPoint = new PixelPos(nextPixelX, pixelY);
-                        GeoPos nextCoordAtPoint = raster.getGeoCoding().getGeoPos(nextPoint, null);
-                        double nextLonPixel = nextCoordAtPoint.lon;
-                        double deltaLon = nextLonPixel - lonPixel;
-                        if (mx > (lonPixel - deltaLon)) {
+            if (validLon(lonPixel)) {
+                if (prevLonPixel == NAN_PIXEL) {
+                    // this is first valid pixel
+                    if (mx >= (lonPixel - toleranceDegrees) && mx <= (lonPixel)) {
+                        if (!skipFirst || skipFirst && firstFound) {
                             return new Coord(coordAtPoint, point);
+                        } else {
+                            firstFound = true;
                         }
                     }
-                    break;
+                } else {
+                    if (lonPixel > prevLonPixel) {
+                        // dateline not crossed
+                        if (mx > prevLonPixel && mx <= lonPixel) {
+                            if (!skipFirst || skipFirst && firstFound) {
+                                return new Coord(coordAtPoint, point);
+                            } else {
+                                firstFound = true;
+                            }
+                        }
+                    } else if (lonPixel < prevLonPixel) {
+                        // dateline just crossed
+                        if (mx == 180) {
+                            if (!skipFirst || skipFirst && firstFound) {
+                                return new Coord(coordAtPoint, point);
+                            } else {
+                                firstFound = true;
+                            }
+                        }
+                    } else {
+                        // ignore
+                    }
+
+                    if (lonPixel == raster.getRasterWidth() - 1 ) {
+                        // this is last pixel
+                        if (mx >= (lonPixel) && mx <= (lonPixel + toleranceDegrees)) {
+                            if (!skipFirst || skipFirst && firstFound) {
+                                return new Coord(coordAtPoint, point);
+                            } else {
+                                firstFound = true;
+                            }
+                        }
+                    }
+
+                }
+
+                prevLonPixel = lonPixel;
+                prevPoint = point;
+                prevCoordAtPoint = coordAtPoint;
+            } else {
+                if (validLon(prevLonPixel)) {
+                    // this is first pixel after last valid pixel
+                    if (mx >= (prevLonPixel - toleranceDegrees) && mx <= (prevLonPixel + toleranceDegrees)) {
+                        if (!skipFirst || skipFirst && firstFound) {
+                            return new Coord(prevCoordAtPoint, prevPoint);
+                        } else {
+                            firstFound = true;
+                        }
+                    }
+
+                    return null;
                 }
             }
 
 
-            if (mx <= lonPixel) {
-                return new Coord(coordAtPoint, point);
-            }
         }
 
         return null;
