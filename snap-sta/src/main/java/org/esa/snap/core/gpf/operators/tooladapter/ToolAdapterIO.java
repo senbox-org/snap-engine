@@ -733,12 +733,12 @@ public class ToolAdapterIO {
             ZipEntry entry = entries.nextElement();
             fileNameMappings.put(entry.getName(), entry.getName());
         }
-        String firstEntry = fileNameMappings.values().iterator().next();
-        String token = firstEntry.substring(0, firstEntry.indexOf("/"));
-        boolean commonRootFolder = fileNameMappings.values().stream().allMatch(n -> n.startsWith(token));
-        if (commonRootFolder) {
-            fileNameMappings.replaceAll((key, value) -> value.substring(value.indexOf("/") + 1));
-        }
+//        String firstEntry = fileNameMappings.values().iterator().next();
+//        String token = firstEntry.substring(0, firstEntry.indexOf("/"));
+//        boolean commonRootFolder = fileNameMappings.values().stream().allMatch(n -> n.startsWith(token));
+//        if (commonRootFolder) {
+//            fileNameMappings.replaceAll((key, value) -> value.substring(value.indexOf("/") + 1));
+//        }
         return fileNameMappings;
     }
 
