@@ -21,9 +21,9 @@ public class ToolAdapterIOTest extends TestCase {
             // Verify the mapping is not empty
             assertEquals("There should be two entries", 3, rootDirMapping.size());
 
-            assertEquals("", rootDirMapping.get("root/"));
-            assertEquals("dir1/", rootDirMapping.get("root/dir1/"));
-            assertEquals("dir2/", rootDirMapping.get("root/dir2/"));
+            assertEquals("root/", rootDirMapping.get("root/"));
+            assertEquals("root/dir1/", rootDirMapping.get("root/dir1/"));
+            assertEquals("root/dir2/", rootDirMapping.get("root/dir2/"));
         }
 
     }
