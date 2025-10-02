@@ -394,47 +394,32 @@ public class Graticule {
 
         for (double mx = -180; mx <= 180; mx += lonMajorStep) {
 
-            List<Coord> meridian = new ArrayList<>();
+            List<Coord> meridian1 = new ArrayList<>();
+            List<Coord> meridian2 = new ArrayList<>();
 
-            Coord coord;
+            Coord[] coords;
 
             for (double step = 0; step <= numSteps; step += 1.0) {
 //                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
 
-                coord = getCoord(mx, pixelY, raster, toleranceDegrees, false);
-                if (coord != null) {
-                    meridian.add(coord);
+                coords = getCoord(mx, pixelY, raster, toleranceDegrees);
+                if (coords != null) {
+                    if (coords[0] != null) {
+                        meridian1.add(coords[0]);
+                    }
+                    if (coords[1] != null) {
+                        meridian2.add(coords[1]);
+                    }
                 }
             }
 
-            if (meridian.size() > 0) {
-                meridianList.add(meridian);
+            if (meridian1.size() > 0) {
+                meridianList.add(meridian1);
             }
 
-        }
-
-
-        for (double mx = -180; mx <= 180; mx += lonMajorStep) {
-
-            List<Coord> meridian = new ArrayList<>();
-
-            Coord coord;
-
-//            // add on the duplicate meridian if needed
-//            // todo this part can be improved as it takes longer repeating this
-            for (double step = 0; step <= numSteps; step += 1.0) {
-//                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
-                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
-
-                coord = getCoord(mx, pixelY, raster, toleranceDegrees, true);
-                if (coord != null) {
-                    meridian.add(coord);
-                }
-            }
-
-            if (meridian.size() > 0) {
-                meridianList.add(meridian);
+            if (meridian2.size() > 0) {
+                meridianList.add(meridian2);
             }
 
         }
@@ -443,60 +428,58 @@ public class Graticule {
         return meridianList;
     }
 
-    static Coord getCoord(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees, boolean skipFirst) {
+    static Coord[] getCoord(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees) {
+
+        Coord coord1 = null;
+        Coord coord2 = null; // this would be a second ocurance, for instance a 90 rotated global map with -90 at far left and -90 at far right
 
         PixelPos point;
         GeoPos coordAtPoint;
-        boolean isFirstGeoPixel = false;
-        boolean isLastGeoPixel = false;
 
         int increment = 1;
 
-        boolean geoPixelsStarted = false;
-        boolean geoPixelsFinished = false;
-        double NAN_PIXEL = 9991234;
+
+        double NAN_PIXEL = 9991234;  // just needs to be unique (note 999 is used for no data)
+//        double NAN_PIXEL = Double.NaN;  // just needs to be unique (note 999 is used for no data)
         double prevLonPixel = NAN_PIXEL;
         PixelPos prevPoint = null;
         GeoPos prevCoordAtPoint = null;
 
-        double tolerance = 1;
 
-        boolean firstFound = false;
-
-
-        for (double pixelX = 0; pixelX < (raster.getRasterWidth() - 1); pixelX += increment) {
+        for (double pixelX = 0; pixelX <= (raster.getRasterWidth() - 1); pixelX += increment) {
             point = new PixelPos(pixelX, pixelY);
             coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
             double lonPixel = coordAtPoint.lon;
+//            lonPixel = validAdjust(lonPixel);
 
 
             if (validLon(lonPixel)) {
                 if (prevLonPixel == NAN_PIXEL) {
                     // this is first valid pixel
                     if (mx >= (lonPixel - toleranceDegrees) && mx <= (lonPixel)) {
-                        if (!skipFirst || skipFirst && firstFound) {
-                            return new Coord(coordAtPoint, point);
-                        } else {
-                            firstFound = true;
+                        if (coord1 == null) {
+                            coord1 = new Coord(coordAtPoint, point);
+                        } else if (coord2 == null) {
+                            coord2 = new Coord(coordAtPoint, point);
                         }
                     }
                 } else {
                     if (lonPixel > prevLonPixel) {
                         // dateline not crossed
                         if (mx > prevLonPixel && mx <= lonPixel) {
-                            if (!skipFirst || skipFirst && firstFound) {
-                                return new Coord(coordAtPoint, point);
-                            } else {
-                                firstFound = true;
+                            if (coord1 == null) {
+                                coord1 = new Coord(coordAtPoint, point);
+                            } else if (coord2 == null) {
+                                coord2 = new Coord(coordAtPoint, point);
                             }
                         }
                     } else if (lonPixel < prevLonPixel) {
                         // dateline just crossed
                         if (mx == 180) {
-                            if (!skipFirst || skipFirst && firstFound) {
-                                return new Coord(coordAtPoint, point);
-                            } else {
-                                firstFound = true;
+                            if (coord1 == null) {
+                                coord1 = new Coord(coordAtPoint, point);
+                            } else if (coord2 == null) {
+                                coord2 = new Coord(coordAtPoint, point);
                             }
                         }
                     } else {
@@ -506,10 +489,10 @@ public class Graticule {
                     if (lonPixel == raster.getRasterWidth() - 1 ) {
                         // this is last pixel
                         if (mx >= (lonPixel) && mx <= (lonPixel + toleranceDegrees)) {
-                            if (!skipFirst || skipFirst && firstFound) {
-                                return new Coord(coordAtPoint, point);
-                            } else {
-                                firstFound = true;
+                            if (coord1 == null) {
+                                coord1 = new Coord(coordAtPoint, point);
+                            } else if (coord2 == null) {
+                                coord2 = new Coord(coordAtPoint, point);
                             }
                         }
                     }
@@ -523,21 +506,22 @@ public class Graticule {
                 if (validLon(prevLonPixel)) {
                     // this is first pixel after last valid pixel
                     if (mx >= (prevLonPixel - toleranceDegrees) && mx <= (prevLonPixel + toleranceDegrees)) {
-                        if (!skipFirst || skipFirst && firstFound) {
-                            return new Coord(prevCoordAtPoint, prevPoint);
-                        } else {
-                            firstFound = true;
+                        if (coord1 == null) {
+                            coord1 = new Coord(prevCoordAtPoint, prevPoint);
+                        } else if (coord2 == null) {
+                            coord2 = new Coord(prevCoordAtPoint, prevPoint);
                         }
                     }
 
-                    return null;
+                    break;
                 }
             }
 
 
         }
 
-        return null;
+        Coord[] coords = {coord1, coord2};
+        return coords;
     }
 
 
@@ -547,6 +531,18 @@ public class Graticule {
             return true;
         } else {
             return false;
+        }
+    }
+
+    static double validAdjust(double lon) {
+        // Allows data to contain lon values exceeding 180 by 360, but adjusts to normal
+        // Conforms all invalid lon values to Double.NaN
+        if (lon >= -180 && lon <= 180) {
+            return lon;
+        } else if (lon > 180 && lon <= (180 + 360)) {
+            return lon - 360;
+        } else {
+            return Double.NaN;
         }
     }
 
