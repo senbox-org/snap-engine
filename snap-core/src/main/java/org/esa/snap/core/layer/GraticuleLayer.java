@@ -442,6 +442,9 @@ public class GraticuleLayer extends Layer {
     private boolean isTextConflict(PixelPos pixelPos, Graphics2D g2d, Graticule.TextLocation textLocation,
                                    boolean isCorner,
                                    RasterDataNode raster) {
+        if (1 == 1) {
+            return false;
+        }
         Font origFont = g2d.getFont();
         Font font = new Font(getLabelsFont(), getFontType(), getFontSizePixels());
         g2d.setFont(font);

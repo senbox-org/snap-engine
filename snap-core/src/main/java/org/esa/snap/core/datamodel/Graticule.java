@@ -1004,7 +1004,6 @@ public class Graticule {
         for (final List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
 
             if (latitudeGridLinePoint.size() >= 2) {
-
                 int first = 0;
                 int second = 1;
 
@@ -1014,9 +1013,45 @@ public class Graticule {
                 PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() + 1), (float) coord1.pixelPos.getY());
                 coord2 = new Coord(coord1.geoPos, pixelPos2);
 
-                if (isCoordPairValid(coord1, coord2)) {
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
+                double yPos = (coord1.pixelPos.getY());
+                double xPos = (coord1.pixelPos.getX());
+                int height = raster.getRasterHeight();
+                int width = raster.getRasterWidth();
+
+                boolean onSide = false;
+                if (yPos < 1 || yPos > (height - 1)) {
+                    if (xPos < 1) {
+                        onSide = true;
+                    }
+                }
+
+
+
+
+                if (isCoordPairValid(coord1, coord2) && !onSide) {
+
+                    double lat = coord1.geoPos.lat;
+                    double latToUse = lat;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+                    if (majorStep != Double.NaN) {
+                        for (double curr = -90; curr <= 90; curr += majorStep) {
+                            currDiff = Math.abs(lat - curr);
+                            if (currDiff < lowestDiff) {
+                                lowestDiff = currDiff;
+                                latToUse = curr;
+                            }
+                        }
+                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(latToUse,formatCompass, formatDecimal), coord1, coord2);
                     textGlyphs.add(textGlyph);
+
+
+
+//                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
+//                    textGlyphs.add(textGlyph);
                 }
             }
         }
@@ -1057,8 +1092,39 @@ public class Graticule {
                 PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() - 1), (float) coord1.pixelPos.getY());
                 coord2 = new Coord(coord1.geoPos, pixelPos2);
 
-                if (isCoordPairValid(coord1, coord2)) {
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
+
+                double yPos = (coord1.pixelPos.getY());
+                double xPos = (coord1.pixelPos.getX());
+                int height = raster.getRasterHeight();
+                int width = raster.getRasterWidth();
+
+                boolean onSide = false;
+                if (yPos < 1 || yPos > (height - 1)) {
+                    if (xPos < (width -1)) {
+                        onSide = true;
+                    }
+                }
+
+
+                if (isCoordPairValid(coord1, coord2) && !onSide) {
+
+                    double lat = coord1.geoPos.lat;
+                    double latToUse = lat;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+                    if (majorStep != Double.NaN) {
+                        for (int curr = -90; curr <= 90; curr += majorStep) {
+                            double currDouble = (double) curr;
+                            currDiff = Math.abs(lat - currDouble);
+                            if (currDiff < lowestDiff) {
+                                lowestDiff = currDiff;
+                                latToUse = currDouble;
+                            }
+                        }
+                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coord1, coord2);
                     textGlyphs.add(textGlyph);
                 }
             }
