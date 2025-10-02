@@ -212,7 +212,7 @@ public class Graticule {
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
                 lonRange.getMin(), lonRange.getMax(), raster);
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
-                latRange.getMin(), latRange.getMax());
+                latRange.getMin(), latRange.getMax(), raster);
 
 
         if (parallelList.size() > 0 && meridianList.size() > 0) {
@@ -318,7 +318,7 @@ public class Graticule {
         return step;
     }
 
-    private static List<List<Coord>> computeParallelList(final GeoCoding geoCoding,
+    private static List<List<Coord>> computeParallelListOld(final GeoCoding geoCoding,
                                                          final GeoPos[] geoBoundary,
                                                          final double latMajorStep,
                                                          final double lonMinorStep,
@@ -363,6 +363,67 @@ public class Graticule {
         return parallelList;
     }
 
+
+    private static List<List<Coord>> computeParallelList(final GeoCoding geoCoding,
+                                                         final GeoPos[] geoBoundary,
+                                                         final double latMajorStep,
+                                                         final double lonMinorStep,
+                                                         final double xMin,
+                                                         final double xMax,
+                                                         RasterDataNode raster) {
+
+        List<List<Coord>> parallelList = new ArrayList<>();
+
+        double pixelX;
+
+
+        // todo make option in GUI
+        double numSteps = 100;
+
+        // todo make option in GUI
+        double tolerance = 0.1; // fraction of major step
+        double toleranceDegrees =  latMajorStep * tolerance;
+
+
+
+        for (double mx = -90; mx <= 90; mx += latMajorStep) {
+
+            List<Coord> parallel1 = new ArrayList<>();
+            List<Coord> parallel2 = new ArrayList<>();
+
+            Coord[] coords;
+
+            for (double step = 0; step <= numSteps; step += 1.0) {
+                pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / numSteps);
+
+                coords = getCoordParallel(mx, pixelX, raster, toleranceDegrees);
+                if (coords != null) {
+                    if (coords[0] != null) {
+                        parallel1.add(coords[0]);
+                    }
+                    if (coords[1] != null) {
+                        parallel2.add(coords[1]);
+                    }
+                }
+            }
+
+            if (parallel1.size() > 0) {
+                parallelList.add(parallel1);
+            }
+
+            if (parallel2.size() > 0) {
+                parallelList.add(parallel2);
+            }
+
+        }
+
+
+        return parallelList;
+    }
+
+
+
+
     private static List<List<Coord>> computeMeridianList(final GeoCoding geoCoding,
                                                          final GeoPos[] geoBoundary,
                                                          final double lonMajorStep,
@@ -403,7 +464,7 @@ public class Graticule {
 //                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
 
-                coords = getCoord(mx, pixelY, raster, toleranceDegrees);
+                coords = getCoordMeridian(mx, pixelY, raster, toleranceDegrees);
                 if (coords != null) {
                     if (coords[0] != null) {
                         meridian1.add(coords[0]);
@@ -428,7 +489,8 @@ public class Graticule {
         return meridianList;
     }
 
-    static Coord[] getCoord(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees) {
+
+    static Coord[] getCoordMeridian(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees) {
 
         Coord coord1 = null;
         Coord coord2 = null; // this would be a second ocurance, for instance a 90 rotated global map with -90 at far left and -90 at far right
@@ -505,7 +567,7 @@ public class Graticule {
             } else {
                 if (validLon(prevLonPixel)) {
                     // this is first pixel after last valid pixel
-                    if (mx >= (prevLonPixel - toleranceDegrees) && mx <= (prevLonPixel + toleranceDegrees)) {
+                    if (mx >= (prevLonPixel) && mx <= (prevLonPixel + toleranceDegrees)) {
                         if (coord1 == null) {
                             coord1 = new Coord(prevCoordAtPoint, prevPoint);
                         } else if (coord2 == null) {
@@ -526,8 +588,118 @@ public class Graticule {
 
 
 
+
+
+    static Coord[] getCoordParallel(double mx, double pixelXnew, RasterDataNode raster, double toleranceDegrees) {
+
+        Coord coord1 = null;
+        Coord coord2 = null; // this would be a second ocurance, for instance a 90 rotated global map with -90 at far left and -90 at far right
+
+        PixelPos point;
+        GeoPos coordAtPoint;
+
+        int increment = 1;
+
+
+        double NAN_PIXEL = 9991234;  // just needs to be unique (note 999 is used for no data)
+//        double NAN_PIXEL = Double.NaN;  // just needs to be unique (note 999 is used for no data)
+        double prevLatPixel = NAN_PIXEL;
+        PixelPos prevPoint = null;
+        GeoPos prevCoordAtPoint = null;
+
+
+        for (double pixelYnew =  (raster.getRasterWidth() - 1); pixelYnew >= 0;  pixelYnew -= increment) {
+            point = new PixelPos(pixelXnew, pixelYnew);
+            coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+            double latPixel = coordAtPoint.lat;
+//            lonPixel = validAdjust(lonPixel);
+
+
+            if (validLat(latPixel)) {
+                if (prevLatPixel == NAN_PIXEL) {
+                    // this is first valid pixel
+                    if (mx >= (latPixel - toleranceDegrees) && mx <= (latPixel)) {
+                        if (coord1 == null) {
+                            coord1 = new Coord(coordAtPoint, point);
+                        } else if (coord2 == null) {
+                            coord2 = new Coord(coordAtPoint, point);
+                        }
+                    }
+                } else {
+                    if (latPixel > prevLatPixel) {
+                        // dateline not crossed
+                        if (mx > prevLatPixel && mx <= latPixel) {
+                            if (coord1 == null) {
+                                coord1 = new Coord(coordAtPoint, point);
+                            } else if (coord2 == null) {
+                                coord2 = new Coord(coordAtPoint, point);
+                            }
+                        }
+                    } else if (latPixel < prevLatPixel) {
+                        // dateline just crossed
+//                        if (mx == 180) {
+//                            if (coord1 == null) {
+//                                coord1 = new Coord(coordAtPoint, point);
+//                            } else if (coord2 == null) {
+//                                coord2 = new Coord(coordAtPoint, point);
+//                            }
+//                        }
+                    } else {
+                        // ignore
+                    }
+
+                    if (latPixel == 0 ) {
+                        // this is last pixel
+                        if (mx >= (latPixel) && mx <= (latPixel + toleranceDegrees)) {
+                            if (coord1 == null) {
+                                coord1 = new Coord(coordAtPoint, point);
+                            } else if (coord2 == null) {
+                                coord2 = new Coord(coordAtPoint, point);
+                            }
+                        }
+                    }
+
+                }
+
+                prevLatPixel = latPixel;
+                prevPoint = point;
+                prevCoordAtPoint = coordAtPoint;
+            } else {
+                if (validLat(prevLatPixel)) {
+                    // this is first pixel after last valid pixel
+                    if (mx >= (prevLatPixel) && mx <= (prevLatPixel + toleranceDegrees)) {
+                        if (coord1 == null) {
+                            coord1 = new Coord(prevCoordAtPoint, prevPoint);
+                        } else if (coord2 == null) {
+                            coord2 = new Coord(prevCoordAtPoint, prevPoint);
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+
+        }
+
+        Coord[] coords = {coord1, coord2};
+        return coords;
+    }
+
+
+
+
+
     static boolean validLon(double lon) {
         if (lon >= -180 && lon <= 180) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean validLat(double lat) {
+        if (lat >= -90 && lat <= 90) {
             return true;
         } else {
             return false;
@@ -798,10 +970,10 @@ public class Graticule {
                 createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster);
                 break;
             case WEST:
-                createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal);
+                createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster);
                 break;
             case EAST:
-                createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal);
+                createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster);
                 break;
         }
 
@@ -825,7 +997,7 @@ public class Graticule {
     }
 
     private static void createWesternLatitudeTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
-                                                        List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
+                                                        List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep, RasterDataNode raster) {
 
         // Assumes that the line was drawn from west to east
         // coord1 set to first point in order to anchor the text to the edge of the line
@@ -868,7 +1040,7 @@ public class Graticule {
     }
 
     private static void createEasternLatitudeTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
-                                                        List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
+                                                        List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep, RasterDataNode raster) {
 
         // Assumes that the line was drawn from west to east
         // coord1 set to last point in order to anchor the text to the edge of the line
