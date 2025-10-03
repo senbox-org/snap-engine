@@ -210,13 +210,18 @@ public class Graticule {
         final Range lonRange = ranges[0];
         final Range latRange = ranges[1];
 
+        System.out.println("MinX=" + lonRange.getMin());
+        System.out.println("MaxX=" + lonRange.getMax());
+        System.out.println("MinY=" + latRange.getMin());
+        System.out.println("MaxY=" + latRange.getMax());
+
 
 
         // todo
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
-                lonRange.getMin(), lonRange.getMax(), raster);
+                lonRange.getMin(), lonRange.getMax(), raster, geoDeltaScene);
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
-                latRange.getMin(), latRange.getMax(), raster);
+                latRange.getMin(), latRange.getMax(), raster, geoDeltaScene);
 
 //        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), null, lonMajorStep, latMinorStep,
 //                0.0, 0.0, raster);
@@ -381,7 +386,8 @@ public class Graticule {
                                                          final double lonMinorStep,
                                                          final double yMin,
                                                          final double yMax,
-                                                         RasterDataNode raster) {
+                                                         RasterDataNode raster,
+                                                         GeoPos geoDeltaScene) {
 
         List<List<Coord>> parallelList = new ArrayList<>();
 
@@ -397,16 +403,35 @@ public class Graticule {
         }
 
         // todo make option in GUI
-        double tolerance = 0.1; // fraction of major step
+        double tolerance = 0.00; // fraction of major step
         double toleranceDegrees =  latMajorStep * tolerance;
 
+        // todo  determine this for real
+        double sceneTop = yMax;
+        double sceneBottom = yMin;
 
-        double min = -90;
-        double max = 90;
-        if (latMajorStep < 1) {
-            min = yMin;
-            max = yMax;
+
+//        double min = -90;
+//        double max = 90;
+//        if (latMajorStep < 1) {
+//            min = yMin;
+//            max = yMax;
+//        }
+
+        double min = yMin;
+        double max = yMax;
+//        if (lonMajorStep < 1) {
+//            min = xMin;
+//            max = xMax;
+//        }
+        if (geoDeltaScene.lat >= 90) {
+            min = -90;
+            max = 90;
+        } else if (geoDeltaScene.lat >= 2) {
+            min = Math.floor(yMin);
+            max = Math.ceil(yMax);
         }
+
 
 
         for (double mx = min; mx <= max; mx += latMajorStep) {
@@ -416,13 +441,66 @@ public class Graticule {
 
             Coord[] coords;
 
+            boolean found = false;
+            boolean finished = false;
+            double prevPixel = -1;
+
             for (double step = 0; step <= numSteps; step += 1.0) {
                 pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / numSteps);
                 if (pixelX != prevPixelX) {
+                    if (mx == min || mx == max) {
+                        // todo still missing the top or bottom sometimes
+                        toleranceDegrees = 0.1 * latMajorStep;
+                    } else {
+                        toleranceDegrees = 0.0;
+                    }
                     coords = getCoordParallel(mx, pixelX, raster, toleranceDegrees);
                     if (coords != null) {
                         if (coords[0] != null) {
+                            if (!found) {
+                                // need to look back for actual intersection
+                                if (pixelX > 0) {
+                                    for (double toleranceInner = 0; toleranceInner > 0.5; toleranceInner +=0.02) {
+                                        if (found) {
+                                            break;
+                                        }
+                                        if (mx != min && mx != max && toleranceInner > 0) {
+                                            break;
+                                        }
+                                        toleranceDegrees = toleranceInner * latMajorStep;
+
+                                        for (double innerPixel = prevPixel; innerPixel < pixelX; innerPixel += 1.0) {
+                                            Coord[] coordsInner = getCoordParallel(mx, innerPixel, raster, toleranceDegrees);
+                                            if (coordsInner != null) {
+                                                if (coordsInner[0] != null) {
+                                                    parallel1.add(coordsInner[0]);
+                                                    found = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                found = true;
+                            }
                             parallel1.add(coords[0]);
+                        } else {
+                            if (found && !finished) {
+                                // need to look back for actual intersection
+                                if (pixelX < (raster.getRasterWidth() - 1)) {
+                                    for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
+                                        Coord[] coordsInner = getCoordParallel(mx, innerPixel, raster, toleranceDegrees);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                parallel1.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                finished = true;
+                            }
                         }
                         if (coords[1] != null) {
                             parallel2.add(coords[1]);
@@ -456,7 +534,8 @@ public class Graticule {
                                                          final double latMinorStep,
                                                          final double xMin,
                                                          final double xMax,
-                                                         RasterDataNode raster) {
+                                                         RasterDataNode raster,
+                                                         GeoPos geoDeltaScene) {
 
         List<List<Coord>> meridianList = new ArrayList<>();
         List<GeoPos> intersectionList = new ArrayList<>();
@@ -482,11 +561,18 @@ public class Graticule {
         double toleranceDegrees =  lonMajorStep * tolerance;
 
 
-        double min = -180;
-        double max = 180;
-        if (lonMajorStep < 1) {
-            min = xMin;
-            max = xMax;
+        double min = xMin;
+        double max = xMax;
+//        if (lonMajorStep < 1) {
+//            min = xMin;
+//            max = xMax;
+//        }
+        if (geoDeltaScene.lon >= 180) {
+            min = -180;
+            max = 180;
+        } else if (geoDeltaScene.lon >= 2) {
+            min = Math.floor(xMin);
+            max = Math.ceil(xMax);
         }
 
         for (double mx = min; mx <= max; mx += lonMajorStep) {
@@ -1419,9 +1505,9 @@ public class Graticule {
         for (double i=0.0 ; i <= 1 ; i += 0.01 ) {
             PixelPos pixelCurr;
             if (i < 1) {
-                pixelCurr = new PixelPos(dataNode.getRasterWidth()*i, 0);
+                pixelCurr = new PixelPos(dataNode.getRasterWidth()*i, y);
             } else {
-                pixelCurr = new PixelPos((dataNode.getRasterWidth()-1)*i, 0);
+                pixelCurr = new PixelPos((dataNode.getRasterWidth()-1)*i, y);
             }
             final GeoPos geoPosCurr = geoCoding.getGeoPos(pixelCurr, null);
 
@@ -1473,13 +1559,22 @@ public class Graticule {
 
     static GeoPos getGeoDeltaScene(GeoCoding geoCoding, RasterDataNode dataNode) {
 
-        double deltaLonTop = getLonSpan( geoCoding,  dataNode,  0);
-        double deltaLonBottom = getLonSpan( geoCoding,  dataNode,  dataNode.getRasterHeight()-1);
-        double deltaLatLeft = getLatSpan(geoCoding, dataNode, 0);
-        double deltaLatRight = getLatSpan(geoCoding, dataNode, dataNode.getRasterWidth()-1);
+        double deltaLonTop = getLonSpan(geoCoding,  dataNode,  0);
+        double deltaLonBottom = getLonSpan(geoCoding,  dataNode,  dataNode.getRasterHeight()-1);
+        int centerHeight = (int) Math.floor(dataNode.getRasterHeight() / 2.0);
+        double deltaLonCenter = getLonSpan(geoCoding,  dataNode,  centerHeight);
 
         double deltaLon = Math.min(deltaLonTop, deltaLonBottom);
+        deltaLon = Math.min(deltaLonCenter, deltaLon);
+
+
+        double deltaLatLeft = getLatSpan(geoCoding, dataNode, 0);
+        double deltaLatRight = getLatSpan(geoCoding, dataNode, dataNode.getRasterWidth()-1);
+        int centerWidth = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
+        double deltaLatCenter = getLonSpan(geoCoding,  dataNode,  centerWidth);
+
         double deltaLat = Math.min(deltaLatLeft, deltaLatRight);
+        deltaLat = Math.min(deltaLatCenter, deltaLat);
 
         return new GeoPos(deltaLat, deltaLon);
     }

@@ -146,7 +146,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_ROTATION_LAT_LABEL = "Labels Rotation (Latitude)";
     public static final String PROPERTY_LABELS_ROTATION_LAT_TOOLTIP = "Rotate latitude labels (0 degrees = perpendicular)";
     private static final String PROPERTY_LABELS_ROTATION_LAT_ALIAS = "labelsRotationLat";
-    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 90;
+    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 0;
     public static final Class PROPERTY_LABELS_ROTATION_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME = PROPERTY_ROOT + ".labels.font.name";
@@ -235,7 +235,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_BORDER_SHOW_LABEL = "Show";
     public static final String PROPERTY_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
     private static final String PROPERTY_BORDER_SHOW_ALIAS = PROPERTY_ROOT + "BorderShow";
-    public static final boolean PROPERTY_BORDER_SHOW_DEFAULT = true;
+    public static final boolean PROPERTY_BORDER_SHOW_DEFAULT = false;
     public static final Class PROPERTY_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_BORDER_WIDTH_NAME = PROPERTY_ROOT + ".border.width";
