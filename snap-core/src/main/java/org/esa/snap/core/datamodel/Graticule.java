@@ -15,11 +15,13 @@
  */
 package org.esa.snap.core.datamodel;
 
+import org.checkerframework.checker.units.qual.N;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.Range;
 
+import javax.print.attribute.standard.MediaSize;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -208,11 +210,18 @@ public class Graticule {
         final Range lonRange = ranges[0];
         final Range latRange = ranges[1];
 
+
+
         // todo
         final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
                 lonRange.getMin(), lonRange.getMax(), raster);
         final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
                 latRange.getMin(), latRange.getMax(), raster);
+
+//        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), null, lonMajorStep, latMinorStep,
+//                0.0, 0.0, raster);
+//        final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), null, latMajorStep, lonMinorStep,
+//                0.0, 0.0, raster);
 
 
         if (parallelList.size() > 0 && meridianList.size() > 0) {
@@ -278,6 +287,8 @@ public class Graticule {
         }
         return desiredMinorSteps;
     }
+
+
 
     static double getSensibleDegreeIncrement(double degreeIncrement) {
         if (degreeIncrement > 30.0) {
@@ -368,25 +379,37 @@ public class Graticule {
                                                          final GeoPos[] geoBoundary,
                                                          final double latMajorStep,
                                                          final double lonMinorStep,
-                                                         final double xMin,
-                                                         final double xMax,
+                                                         final double yMin,
+                                                         final double yMax,
                                                          RasterDataNode raster) {
 
         List<List<Coord>> parallelList = new ArrayList<>();
 
         double pixelX;
+        double prevPixelX = -1;
 
 
         // todo make option in GUI
         double numSteps = 100;
+        double maxSteps = Math.floor((raster.getRasterWidth() - 1) / 5.0);
+        if (numSteps > maxSteps) {
+            numSteps = maxSteps;
+        }
 
         // todo make option in GUI
         double tolerance = 0.1; // fraction of major step
         double toleranceDegrees =  latMajorStep * tolerance;
 
 
+        double min = -90;
+        double max = 90;
+        if (latMajorStep < 1) {
+            min = yMin;
+            max = yMax;
+        }
 
-        for (double mx = -90; mx <= 90; mx += latMajorStep) {
+
+        for (double mx = min; mx <= max; mx += latMajorStep) {
 
             List<Coord> parallel1 = new ArrayList<>();
             List<Coord> parallel2 = new ArrayList<>();
@@ -395,16 +418,19 @@ public class Graticule {
 
             for (double step = 0; step <= numSteps; step += 1.0) {
                 pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / numSteps);
-
-                coords = getCoordParallel(mx, pixelX, raster, toleranceDegrees);
-                if (coords != null) {
-                    if (coords[0] != null) {
-                        parallel1.add(coords[0]);
-                    }
-                    if (coords[1] != null) {
-                        parallel2.add(coords[1]);
+                if (pixelX != prevPixelX) {
+                    coords = getCoordParallel(mx, pixelX, raster, toleranceDegrees);
+                    if (coords != null) {
+                        if (coords[0] != null) {
+                            parallel1.add(coords[0]);
+                        }
+                        if (coords[1] != null) {
+                            parallel2.add(coords[1]);
+                        }
                     }
                 }
+
+                prevPixelX = pixelX;
             }
 
             if (parallel1.size() > 0) {
@@ -442,18 +468,28 @@ public class Graticule {
 
 
         double pixelY;
+        double prevPixelY = -1;
 
 
         // todo make option in GUI
         double numSteps = 100;
-
+        double maxSteps = Math.floor((raster.getRasterHeight() - 1) / 5.0);
+        if (numSteps > maxSteps) {
+            numSteps = maxSteps;
+        }
         // todo make option in GUI
         double tolerance = 0.1; // fraction of major step
         double toleranceDegrees =  lonMajorStep * tolerance;
 
 
+        double min = -180;
+        double max = 180;
+        if (lonMajorStep < 1) {
+            min = xMin;
+            max = xMax;
+        }
 
-        for (double mx = -180; mx <= 180; mx += lonMajorStep) {
+        for (double mx = min; mx <= max; mx += lonMajorStep) {
 
             List<Coord> meridian1 = new ArrayList<>();
             List<Coord> meridian2 = new ArrayList<>();
@@ -461,18 +497,21 @@ public class Graticule {
             Coord[] coords;
 
             for (double step = 0; step <= numSteps; step += 1.0) {
-//                pixelY = 0 + (int) Math.floor((raster.getRasterHeight() -1) *  step / numSteps);
-                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
 
-                coords = getCoordMeridian(mx, pixelY, raster, toleranceDegrees);
-                if (coords != null) {
-                    if (coords[0] != null) {
-                        meridian1.add(coords[0]);
-                    }
-                    if (coords[1] != null) {
-                        meridian2.add(coords[1]);
+                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
+                if (pixelY != prevPixelY) {
+                    coords = getCoordMeridian(mx, pixelY, raster, toleranceDegrees);
+                    if (coords != null) {
+                        if (coords[0] != null) {
+                            meridian1.add(coords[0]);
+                        }
+                        if (coords[1] != null) {
+                            meridian2.add(coords[1]);
+                        }
                     }
                 }
+
+                prevPixelY = pixelY;
             }
 
             if (meridian1.size() > 0) {
@@ -506,6 +545,7 @@ public class Graticule {
         double prevLonPixel = NAN_PIXEL;
         PixelPos prevPoint = null;
         GeoPos prevCoordAtPoint = null;
+        double firstPixelX = NAN_PIXEL;
 
 
         for (double pixelX = 0; pixelX <= (raster.getRasterWidth() - 1); pixelX += increment) {
@@ -520,9 +560,12 @@ public class Graticule {
                     // this is first valid pixel
                     if (mx >= (lonPixel - toleranceDegrees) && mx <= (lonPixel)) {
                         if (coord1 == null) {
+                            firstPixelX = lonPixel;
                             coord1 = new Coord(coordAtPoint, point);
                         } else if (coord2 == null) {
-                            coord2 = new Coord(coordAtPoint, point);
+                            if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
+                                coord2 = new Coord(coordAtPoint, point);
+                            }
                         }
                     }
                 } else {
@@ -530,18 +573,24 @@ public class Graticule {
                         // dateline not crossed
                         if (mx > prevLonPixel && mx <= lonPixel) {
                             if (coord1 == null) {
+                                firstPixelX = lonPixel;
                                 coord1 = new Coord(coordAtPoint, point);
                             } else if (coord2 == null) {
-                                coord2 = new Coord(coordAtPoint, point);
+                                if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
+                                    coord2 = new Coord(coordAtPoint, point);
+                                }
                             }
                         }
                     } else if (lonPixel < prevLonPixel) {
                         // dateline just crossed
                         if (mx == 180) {
                             if (coord1 == null) {
+                                firstPixelX = lonPixel;
                                 coord1 = new Coord(coordAtPoint, point);
                             } else if (coord2 == null) {
-                                coord2 = new Coord(coordAtPoint, point);
+                                if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
+                                    coord2 = new Coord(coordAtPoint, point);
+                                }
                             }
                         }
                     } else {
@@ -552,9 +601,12 @@ public class Graticule {
                         // this is last pixel
                         if (mx >= (lonPixel) && mx <= (lonPixel + toleranceDegrees)) {
                             if (coord1 == null) {
+                                firstPixelX = lonPixel;
                                 coord1 = new Coord(coordAtPoint, point);
                             } else if (coord2 == null) {
-                                coord2 = new Coord(coordAtPoint, point);
+                                if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
+                                    coord2 = new Coord(coordAtPoint, point);
+                                }
                             }
                         }
                     }
@@ -569,9 +621,12 @@ public class Graticule {
                     // this is first pixel after last valid pixel
                     if (mx >= (prevLonPixel) && mx <= (prevLonPixel + toleranceDegrees)) {
                         if (coord1 == null) {
+                            firstPixelX = lonPixel;
                             coord1 = new Coord(prevCoordAtPoint, prevPoint);
                         } else if (coord2 == null) {
-                            coord2 = new Coord(prevCoordAtPoint, prevPoint);
+                            if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
+                                coord2 = new Coord(prevCoordAtPoint, prevPoint);
+                            }
                         }
                     }
 
@@ -592,6 +647,7 @@ public class Graticule {
 
     static Coord[] getCoordParallel(double mx, double pixelXnew, RasterDataNode raster, double toleranceDegrees) {
 
+
         Coord coord1 = null;
         Coord coord2 = null; // this would be a second ocurance, for instance a 90 rotated global map with -90 at far left and -90 at far right
 
@@ -607,8 +663,12 @@ public class Graticule {
         PixelPos prevPoint = null;
         GeoPos prevCoordAtPoint = null;
 
+        // todo maybe loosen restriction
+        boolean firstFound = false;
+        double firstPixelY = NAN_PIXEL;
 
-        for (double pixelYnew =  (raster.getRasterWidth() - 1); pixelYnew >= 0;  pixelYnew -= increment) {
+
+        for (double pixelYnew =  (raster.getRasterHeight() - 1); pixelYnew >= 0;  pixelYnew -= increment) {
             point = new PixelPos(pixelXnew, pixelYnew);
             coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
             double latPixel = coordAtPoint.lat;
@@ -620,9 +680,12 @@ public class Graticule {
                     // this is first valid pixel
                     if (mx >= (latPixel - toleranceDegrees) && mx <= (latPixel)) {
                         if (coord1 == null) {
+                            firstPixelY = latPixel;
                             coord1 = new Coord(coordAtPoint, point);
                         } else if (coord2 == null) {
-                            coord2 = new Coord(coordAtPoint, point);
+                            if (Math.abs(latPixel - firstPixelY) > (raster.getRasterHeight() / 4.0)) {
+                                coord2 = new Coord(coordAtPoint, point);
+                            }
                         }
                     }
                 } else {
@@ -630,9 +693,12 @@ public class Graticule {
                         // dateline not crossed
                         if (mx > prevLatPixel && mx <= latPixel) {
                             if (coord1 == null) {
+                                firstPixelY = latPixel;
                                 coord1 = new Coord(coordAtPoint, point);
                             } else if (coord2 == null) {
-                                coord2 = new Coord(coordAtPoint, point);
+                                if (Math.abs(latPixel - firstPixelY) > (raster.getRasterHeight() / 4.0)) {
+                                    coord2 = new Coord(coordAtPoint, point);
+                                }
                             }
                         }
                     } else if (latPixel < prevLatPixel) {
@@ -653,8 +719,11 @@ public class Graticule {
                         if (mx >= (latPixel) && mx <= (latPixel + toleranceDegrees)) {
                             if (coord1 == null) {
                                 coord1 = new Coord(coordAtPoint, point);
+                                firstPixelY = latPixel;
                             } else if (coord2 == null) {
-                                coord2 = new Coord(coordAtPoint, point);
+                                if (Math.abs(latPixel - firstPixelY) > (raster.getRasterHeight() / 4.0)) {
+                                    coord2 = new Coord(coordAtPoint, point);
+                                }
                             }
                         }
                     }
@@ -670,8 +739,11 @@ public class Graticule {
                     if (mx >= (prevLatPixel) && mx <= (prevLatPixel + toleranceDegrees)) {
                         if (coord1 == null) {
                             coord1 = new Coord(prevCoordAtPoint, prevPoint);
+                            firstPixelY = latPixel;
                         } else if (coord2 == null) {
-                            coord2 = new Coord(prevCoordAtPoint, prevPoint);
+                            if (Math.abs(latPixel - firstPixelY) > (raster.getRasterHeight() / 4.0)) {
+                                coord2 = new Coord(prevCoordAtPoint, prevPoint);
+                            }
                         }
                     }
 
@@ -1035,8 +1107,12 @@ public class Graticule {
                     double currDiff;
                     double lowestDiff = 100000;
 
-                    if (majorStep != Double.NaN) {
+                    if (majorStep != Double.NaN && majorStep >= 1) {
                         for (double curr = -90; curr <= 90; curr += majorStep) {
+                            // todo
+                            if ((lat < (curr - majorStep)) || (lat > (curr + majorStep))) {
+                                continue;
+                            }
                             currDiff = Math.abs(lat - curr);
                             if (currDiff < lowestDiff) {
                                 lowestDiff = currDiff;
@@ -1113,8 +1189,12 @@ public class Graticule {
                     double currDiff;
                     double lowestDiff = 100000;
 
-                    if (majorStep != Double.NaN) {
+                    if (majorStep != Double.NaN && majorStep >= 1) {
                         for (int curr = -90; curr <= 90; curr += majorStep) {
+                            // todo
+                            if ((lat < (curr - majorStep)) || (lat > (curr + majorStep))) {
+                                continue;
+                            }
                             double currDouble = (double) curr;
                             currDiff = Math.abs(lat - currDouble);
                             if (currDiff < lowestDiff) {
@@ -1184,8 +1264,12 @@ public class Graticule {
                     double currDiff;
                     double lowestDiff = 100000;
 
-                    if (majorStep != Double.NaN) {
+                    if (majorStep != Double.NaN && majorStep >= 1) {
                         for (double curr = -180; curr <= 180; curr += majorStep) {
+                            // todo
+                            if ((lon < (curr - majorStep)) || (lon > (curr + majorStep))) {
+                                continue;
+                            }
                             currDiff = Math.abs(lon - curr);
                             if (currDiff < lowestDiff) {
                                 lowestDiff = currDiff;
@@ -1252,8 +1336,12 @@ public class Graticule {
                     double currDiff;
                     double lowestDiff = 100000;
 
-                    if (majorStep != Double.NaN) {
+                    if (majorStep != Double.NaN && majorStep >= 1) {
                         for (double curr = -180; curr <= 180; curr += majorStep) {
+                            // todo
+                            if ((lon < (curr - majorStep)) || (lon > (curr + majorStep))) {
+                                continue;
+                            }
                             currDiff = Math.abs(lon - curr);
                             if (currDiff < lowestDiff) {
                                 lowestDiff = currDiff;
