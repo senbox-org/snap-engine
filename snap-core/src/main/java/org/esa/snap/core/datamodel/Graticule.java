@@ -15,13 +15,11 @@
  */
 package org.esa.snap.core.datamodel;
 
-import org.checkerframework.checker.units.qual.N;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.Range;
 
-import javax.print.attribute.standard.MediaSize;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,6 +152,7 @@ public class Graticule {
                                    int desiredMinorSteps,
                                    double latMajorStep,
                                    double lonMajorStep,
+                                   boolean interpolate,
                                    boolean formatCompass,
                                    boolean decimalFormat) {
         Guardian.assertNotNull("product", raster);
@@ -218,9 +217,9 @@ public class Graticule {
 
 
         // todo
-        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, latMinorStep,
-                lonRange.getMin(), lonRange.getMax(), raster, geoDeltaScene);
-        final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, lonMinorStep,
+        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), geoBoundary, lonMajorStep, desiredMinorSteps,
+                lonRange.getMin(), lonRange.getMax(), raster, geoDeltaScene, interpolate);
+        final List<List<Coord>> parallelList = computeParallelList(raster.getGeoCoding(), geoBoundary, latMajorStep, desiredMinorSteps,
                 latRange.getMin(), latRange.getMax(), raster, geoDeltaScene);
 
 //        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), null, lonMajorStep, latMinorStep,
@@ -383,7 +382,7 @@ public class Graticule {
     private static List<List<Coord>> computeParallelList(final GeoCoding geoCoding,
                                                          final GeoPos[] geoBoundary,
                                                          final double latMajorStep,
-                                                         final double lonMinorStep,
+                                                         double minorSteps,
                                                          final double yMin,
                                                          final double yMax,
                                                          RasterDataNode raster,
@@ -396,10 +395,9 @@ public class Graticule {
 
 
         // todo make option in GUI
-        double numSteps = 100;
         double maxSteps = Math.floor((raster.getRasterWidth() - 1) / 5.0);
-        if (numSteps > maxSteps) {
-            numSteps = maxSteps;
+        if (minorSteps > maxSteps) {
+            minorSteps = maxSteps;
         }
 
         // todo make option in GUI
@@ -445,8 +443,8 @@ public class Graticule {
             boolean finished = false;
             double prevPixel = -1;
 
-            for (double step = 0; step <= numSteps; step += 1.0) {
-                pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / numSteps);
+            for (double step = 0; step <= minorSteps; step += 1.0) {
+                pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / minorSteps);
                 if (pixelX != prevPixelX) {
                     if (mx == min || mx == max) {
                         // todo still missing the top or bottom sometimes
@@ -531,11 +529,12 @@ public class Graticule {
     private static List<List<Coord>> computeMeridianList(final GeoCoding geoCoding,
                                                          final GeoPos[] geoBoundary,
                                                          final double lonMajorStep,
-                                                         final double latMinorStep,
+                                                         double minorSteps,
                                                          final double xMin,
                                                          final double xMax,
                                                          RasterDataNode raster,
-                                                         GeoPos geoDeltaScene) {
+                                                         GeoPos geoDeltaScene,
+                                                         boolean interpolate) {
 
         List<List<Coord>> meridianList = new ArrayList<>();
         List<GeoPos> intersectionList = new ArrayList<>();
@@ -551,10 +550,9 @@ public class Graticule {
 
 
         // todo make option in GUI
-        double numSteps = 100;
         double maxSteps = Math.floor((raster.getRasterHeight() - 1) / 5.0);
-        if (numSteps > maxSteps) {
-            numSteps = maxSteps;
+        if (minorSteps > maxSteps) {
+            minorSteps = maxSteps;
         }
         // todo make option in GUI
         double tolerance = 0.1; // fraction of major step
@@ -582,11 +580,11 @@ public class Graticule {
 
             Coord[] coords;
 
-            for (double step = 0; step <= numSteps; step += 1.0) {
+            for (double step = 0; step <= minorSteps; step += 1.0) {
 
-                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / numSteps);
+                pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / minorSteps);
                 if (pixelY != prevPixelY) {
-                    coords = getCoordMeridian(mx, pixelY, raster, toleranceDegrees);
+                    coords = getCoordMeridian(mx, pixelY, raster, toleranceDegrees, interpolate);
                     if (coords != null) {
                         if (coords[0] != null) {
                             meridian1.add(coords[0]);
@@ -615,7 +613,7 @@ public class Graticule {
     }
 
 
-    static Coord[] getCoordMeridian(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees) {
+    static Coord[] getCoordMeridian(double mx, double pixelY, RasterDataNode raster, double toleranceDegrees, boolean interpolate) {
 
         Coord coord1 = null;
         Coord coord2 = null; // this would be a second ocurance, for instance a 90 rotated global map with -90 at far left and -90 at far right
@@ -660,7 +658,16 @@ public class Graticule {
                         if (mx > prevLonPixel && mx <= lonPixel) {
                             if (coord1 == null) {
                                 firstPixelX = lonPixel;
-                                coord1 = new Coord(coordAtPoint, point);
+                                Coord coordCurr = new Coord(coordAtPoint, point);
+                                Coord coordPrev = new Coord(prevCoordAtPoint, prevPoint);
+                                // todo
+                                // todo make option in GUI
+                                if (interpolate) {
+                                    coord1 = getCoordInterpolateToFixedLon(coordPrev, coordCurr, mx);
+                                } else {
+                                    coord1 = coordCurr;
+                                }
+
                             } else if (coord2 == null) {
                                 if (Math.abs(lonPixel - firstPixelX) > (raster.getRasterWidth() / 4.0)) {
                                     coord2 = new Coord(coordAtPoint, point);
@@ -724,10 +731,46 @@ public class Graticule {
         }
 
         Coord[] coords = {coord1, coord2};
+
+
+
+
         return coords;
     }
 
 
+    static Coord getCoordInterpolateToFixedLon(Coord prevCoordAtPoint, Coord currCoordAtPoint, double lonDesired) {
+
+        double lonCurr = currCoordAtPoint.geoPos.lon;
+        double lonPrev = prevCoordAtPoint.geoPos.lon;
+        double latPrev = prevCoordAtPoint.geoPos.lat;
+        double latCurr = currCoordAtPoint.geoPos.lat;
+
+        double xPrev = prevCoordAtPoint.pixelPos.x;
+        double xCurr = currCoordAtPoint.pixelPos.x;
+        double yPrev = prevCoordAtPoint.pixelPos.y;
+        double yCurr = currCoordAtPoint.pixelPos.y;
+
+        final double interpolationWeight = (lonDesired - lonPrev) / (lonCurr - lonPrev);
+        if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
+            final double latDesired = latPrev + interpolationWeight * (latCurr - latPrev);
+            final double x = xPrev + interpolationWeight * (xCurr - xPrev);
+            final double y = yPrev + interpolationWeight * (yCurr - yPrev);
+
+            GeoPos desiredGeoPos = new GeoPos(latDesired, lonDesired);
+            PixelPos desiredPixelPos = new PixelPos(x,y);
+            Coord desiredCoord = new Coord(desiredGeoPos, desiredPixelPos);
+            return desiredCoord;
+        }
+
+        return currCoordAtPoint;
+
+
+
+//        point = new PixelPos(pixelX, pixelY);
+//        coordAtPoint = raster.getGeoCoding().getGeoPos(point, null);
+//        double lonPixel = coordAtPoint.lon;
+    }
 
 
 

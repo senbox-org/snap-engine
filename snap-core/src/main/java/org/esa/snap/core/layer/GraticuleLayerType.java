@@ -23,7 +23,6 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.awt.*;
@@ -199,14 +198,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRIDLINES_WIDTH_LABEL = "Gridline Width";
     public static final String PROPERTY_GRIDLINES_WIDTH_TOOLTIP = "Set width of gridlines";
     private static final String PROPERTY_GRIDLINES_WIDTH_ALIAS = PROPERTY_ROOT + "gridlinesWidth";
-    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1.5;
+    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 0.3;
     public static final Class PROPERTY_GRIDLINES_WIDTH_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_NAME = PROPERTY_ROOT + ".gridlines.dashed.phase";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_LABEL = "Gridline Dash Length";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_TOOLTIP = "Set dash length of gridlines or solid gridlines (0=SOLID)";
     private static final String PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS = PROPERTY_ROOT + "GridlinesDashedPhase";
-    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 6;
+    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 0;
     public static final Class PROPERTY_GRIDLINES_DASHED_PHASE_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_TRANSPARENCY_NAME = PROPERTY_ROOT + ".gridlines.transparency";
@@ -359,11 +358,19 @@ public class GraticuleLayerType extends LayerType {
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
 
     public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".minor.steps";
-    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 10;
-    public static final String PROPERTY_MINOR_STEPS_LABEL = "Minor Steps Between Gridlines";
-    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of minor steps between gridlines";
+    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 100;
+    public static final String PROPERTY_MINOR_STEPS_LABEL = "Smoothing Steps";
+    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of steps across full image to use for generating the line";
     public static final String PROPERTY_MINOR_STEPS_ALIAS = PROPERTY_ROOT + "minorSteps";
     public static final Class PROPERTY_MINOR_STEPS_TYPE = Integer.class;
+
+
+    public static final String PROPERTY_INTERPOLATE_KEY = PROPERTY_ROOT + ".interpolate";
+    public static final boolean PROPERTY_INTERPOLATE_DEFAULT = true;
+    public static final String PROPERTY_INTERPOLATE_LABEL = "Interpolate";
+    public static final String PROPERTY_INTERPOLATE_TOOLTIP = "Interpolate each pixel to sub pixel level";
+    public static final String PROPERTY_INTERPOLATE_ALIAS = PROPERTY_ROOT + "interpolate";
+    public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
 
 
     // Property Setting: Restore Defaults
@@ -418,6 +425,12 @@ public class GraticuleLayerType extends LayerType {
         final Property minorStepsModel = Property.create(PROPERTY_MINOR_STEPS_NAME, Integer.class, PROPERTY_MINOR_STEPS_DEFAULT, true);
         minorStepsModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_ALIAS);
         vc.addProperty(minorStepsModel);
+
+        final Property interpolateModel = Property.create(PROPERTY_INTERPOLATE_KEY, Boolean.class, PROPERTY_INTERPOLATE_DEFAULT, true);
+        interpolateModel.getDescriptor().setAlias(PROPERTY_INTERPOLATE_ALIAS);
+        vc.addProperty(interpolateModel);
+
+
 
         final Property gridSpacingLatModel = Property.create(PROPERTY_GRID_SPACING_LAT_NAME, PROPERTY_GRID_SPACING_LAT_TYPE, PROPERTY_GRID_SPACING_LAT_DEFAULT, true);
         gridSpacingLatModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LAT_ALIAS);
