@@ -45,6 +45,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Files;
@@ -177,6 +178,7 @@ public class RemoteRepositoriesManager {
         }
 
         DataSourceComponent dataSourceComponent = null;
+        Authenticator prevAuthenticator = null;
         try {
             if (logger.isLoggable(Level.FINE)) {
                 StringBuilder logMessage = new StringBuilder();
@@ -228,6 +230,9 @@ public class RemoteRepositoriesManager {
             additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
             additionalProperties.put("progress.interval", "1500");
 
+            prevAuthenticator = Authenticator.getDefault(); //backup de current Authenticator object
+            Authenticator.setDefault(null); // clear the current Authenticator object to prevent showing the login UI in Product Library [SNAP-3776]
+
             int waitTime = 10000;
             do {
                 dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
@@ -263,6 +268,9 @@ public class RemoteRepositoriesManager {
                 throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
             }
         } finally {
+            if (prevAuthenticator != null) {
+                Authenticator.setDefault(prevAuthenticator); //recover de current Authenticator object
+            }
             if (dataSourceComponent != null) {
                 synchronized (this.downloadingProducts) {
                     this.downloadingProducts.remove(key);
