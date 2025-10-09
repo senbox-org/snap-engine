@@ -210,6 +210,7 @@ public class RemoteRepositoriesManager {
             dataSourceComponent.setPassword(credentials.getPassword());
             dataSourceComponent.setProgressListener(taoProgressListener);
             dataSourceComponent.setProductStatusListener(taoProductStatusListener);
+            dataSourceComponent.setPrincipal(credentials.getUserPrincipal());
 
             final CustomEOProduct product = new CustomEOProduct();
             product.setProgressListener(progressListener);
