@@ -1,23 +1,30 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import eu.esa.snap.core.dataio.cache.CacheDataProvider;
-import eu.esa.snap.core.dataio.cache.CacheManager;
-import eu.esa.snap.core.dataio.cache.ProductCache;
-import eu.esa.snap.core.dataio.cache.VariableDescriptor;
-import org.esa.snap.core.dataio.*;
-import org.esa.snap.core.datamodel.*;
+import eu.esa.snap.core.dataio.cache.*;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
+import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
 
+import static org.esa.snap.dataio.netcdf.util.DataTypeUtils.getRasterDataType;
+
 public class DeleteMeReader extends AbstractProductReader implements CacheDataProvider {
 
     private NetcdfFile netcdfFile;
-    private ProductCache cache;
+    private ProductCache productCache;
 
     /**
      * Constructs a new abstract product reader.
@@ -38,27 +45,38 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
             throw new IOException("Failed to open file " + fileLocation.getPath());
         }
 
-        cache = new ProductCache(this);
-        CacheManager.getInstance().register(cache);
+        productCache = new ProductCache(this);
+        CacheManager.getInstance().register(productCache);
 
         // get Dimensions "ccd_pixels"=width and "number_of_scans"=height
         final int width = getDimensionLength("ccd_pixels");
         final int height = getDimensionLength("number_of_scans");
 
-        return new Product("dit", "dat", width, height, this);
+        final Product product = new Product("dit", "dat", width, height, this);
+
+        Band heightBand = new Band("height", ProductData.TYPE_INT16, width, height);
+        product.addBand(heightBand);
+
+        return product;
     }
 
-    private int getDimensionLength(String ccdPixels) {
-        final Dimension widthDim = netcdfFile.findDimension(ccdPixels);
-        if (widthDim == null) {
+    private int getDimensionLength(String dimensionName) {
+        final Dimension dimension = netcdfFile.findDimension(dimensionName);
+        if (dimension == null) {
             return -1;
         }
-        return widthDim.getLength();
+        return dimension.getLength();
     }
 
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
-        throw new RuntimeException("not implemented");
+        final int[] offsets = {sourceOffsetY, sourceOffsetX};
+        final int[] shapes = {sourceHeight, sourceWidth};
+
+        ProductData read = productCache.read(destBand, offsets, shapes);
+
+        // @todo 1 tb/tb copy to appropriate location in target buffer
+        // @todo 2 take subsampling into account
     }
 
     @Override
@@ -70,12 +88,12 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
     public void close() throws IOException {
         super.close();
 
-        if (cache != null) {
-            CacheManager.getInstance().remove(cache);
-            cache = null;
+        if (productCache != null) {
+            CacheManager.getInstance().remove(productCache);
+            productCache = null;
         }
 
-        if(netcdfFile != null) {
+        if (netcdfFile != null) {
             netcdfFile.close();
             netcdfFile = null;
         }
@@ -83,6 +101,39 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
 
     @Override
     public VariableDescriptor getVariableDescriptor(String variableName) {
-        throw new RuntimeException("not implemented");
+        final Variable heightVar = netcdfFile.findVariable("geolocation_data/height");
+
+        final VariableDescriptor variableDescriptor = new VariableDescriptor();
+        variableDescriptor.dataType = getRasterDataType(heightVar.getDataType(), false);
+
+        int[] shape = heightVar.getShape();
+
+        final Array chunkSizesValues;
+        final Attribute chunkSizes = heightVar.findAttribute("_ChunkSizes");
+        if (chunkSizes != null) {
+            chunkSizesValues = chunkSizes.getValues();
+        } else {
+            chunkSizesValues = Array.factory(DataType.INT, shape);
+        }
+
+        if (shape.length == 2) {
+            variableDescriptor.width = shape[1];
+            variableDescriptor.height = shape[0];
+            variableDescriptor.layer = -1;
+
+            variableDescriptor.tileWidth = chunkSizesValues.getInt(1);
+            variableDescriptor.tileHeight = chunkSizesValues.getInt(0);
+            variableDescriptor.tileLayer = -1;
+        } else if (shape.length == 3) {
+            variableDescriptor.width = shape[2];
+            variableDescriptor.height = shape[1];
+            variableDescriptor.layer = shape[0];
+
+            variableDescriptor.tileWidth = chunkSizesValues.getInt(2);
+            variableDescriptor.tileHeight = chunkSizesValues.getInt(1);
+            variableDescriptor.tileLayer = chunkSizesValues.getInt(0);
+        }
+
+        return variableDescriptor;
     }
 }

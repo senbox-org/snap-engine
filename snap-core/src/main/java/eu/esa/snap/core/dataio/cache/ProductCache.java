@@ -16,15 +16,18 @@ public class ProductCache {
     }
 
     public void dispose() {
-        // @todo run over map and dispose VariableCaches
+        variableCacheMap.forEach((key, value) -> dispose());
         variableCacheMap.clear();
     }
 
-    ProductData read(Band band, int[] offsets, int[] shapes) {
+    public ProductData read(Band band, int[] offsets, int[] shapes) {
         final String bandName = band.getName();
-        final VariableCache variableCache = variableCacheMap.get(bandName);
+        VariableCache variableCache = variableCacheMap.get(bandName);
         if (variableCache == null) {
-            // @todo create VariableCache, attach to dataProvider
+            final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
+            variableCache = new VariableCache(variableDescriptor);
+            variableCacheMap.put(bandName, variableCache);
+            // @todo send allocation message
         }
 
         return variableCache.read(offsets, shapes);

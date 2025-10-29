@@ -4,6 +4,10 @@ import org.esa.snap.core.datamodel.ProductData;
 
 public class VariableCache {
 
+    public VariableCache(VariableDescriptor variableDescriptor) {
+
+    }
+
     public void dispose() {
     }
 

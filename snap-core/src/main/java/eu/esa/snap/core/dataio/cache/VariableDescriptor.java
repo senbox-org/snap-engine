@@ -2,13 +2,13 @@ package eu.esa.snap.core.dataio.cache;
 
 public class VariableDescriptor {
 
-    int dataType;
+    public int dataType;
 
-    int width;
-    int height;
-    int layer;
+    public int width;
+    public int height;
+    public int layer;
 
-    int tileWidth;
-    int tileHeight;
-    int tileLayer;
+    public int tileWidth;
+    public int tileHeight;
+    public int tileLayer;
 }
