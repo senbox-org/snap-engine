@@ -82,8 +82,23 @@ public class QuantizationOp extends Operator {
 
         this.targetProduct = new Product(sourceProduct.getName()+"_rl", sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+		final Dimension tileSize = sourceProduct.getPreferredTileSize();
+		this.targetProduct.setPreferredTileSize(tileSize);
+		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
+		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
+        this.targetProduct.setStartTime(this.sourceProduct.getStartTime());
+        this.targetProduct.setEndTime(this.sourceProduct.getEndTime());
+        
+		ProductUtils.copyGeoCoding(this.sourceProduct, this.targetProduct);
 
 		Band newBand = new Band(TARGET_BAND_NAME, ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
+		
+		newBand.setGeoCoding(bandToConvert.getGeoCoding());
+		newBand.setScalingFactor(bandToConvert.getScalingFactor());
+		newBand.setScalingOffset(bandToConvert.getScalingOffset());
+		newBand.setNoDataValueUsed(true);
+		newBand.setNoDataValue(0);
+		
 		this.targetProduct.addBand(newBand);
 
 	}
@@ -104,13 +119,6 @@ public class QuantizationOp extends Operator {
 		if (bandToConvert == null  ){
 			throw new OperatorException("Please select the source band.");
 		}
-
-		final Dimension tileSize = sourceProduct.getPreferredTileSize();
-		this.targetProduct.setPreferredTileSize(tileSize);
-		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
-		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
-
-		ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
 
 		Band targetBand = this.targetProduct.getBand(TARGET_BAND_NAME);
 		targetBand.setGeoCoding(bandToConvert.getGeoCoding());
