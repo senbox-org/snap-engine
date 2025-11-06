@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeEvent;
 import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.PixelPos;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -33,7 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 
-import org.esa.snap.core.datamodel.PixelPos;
+import static org.esa.snap.core.datamodel.Graticule.containsValidGeoCorners;
 
 
 /**
@@ -93,11 +94,20 @@ public class GraticuleLayer extends Layer {
 
         getUserValues();
 
+        int spacer = getEdgeLabelsSpacer();
+
+
         if (graticule == null) {
             graticule = Graticule.create(raster,
                     getNumGridLines(),
+                    getNumMinorSteps(),
                     getGridSpacingLat(),
-                    getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
+                    getGridSpacingLon(),
+                    isInterpolate(),
+                    getTolerance(),
+                    isLabelsSuffix(),
+                    isLabelsDecimal(),
+                    spacer);
         }
         if (graticule != null) {
 
@@ -124,7 +134,11 @@ public class GraticuleLayer extends Layer {
                 }
 
                 if (isBorderShow()) {
-                    drawBorder(g2d, raster);
+                    boolean containsValidGeoCorners = containsValidGeoCorners(raster);
+
+                    if (containsValidGeoCorners) {
+                        drawBorder(g2d, raster);
+                    }
                 }
 
 
@@ -441,6 +455,9 @@ public class GraticuleLayer extends Layer {
     private boolean isTextConflict(PixelPos pixelPos, Graphics2D g2d, Graticule.TextLocation textLocation,
                                    boolean isCorner,
                                    RasterDataNode raster) {
+        if (1 == 1) {
+            return false;
+        }
         Font origFont = g2d.getFont();
         Font font = new Font(getLabelsFont(), getFontType(), getFontSizePixels());
         g2d.setFont(font);
@@ -893,7 +910,11 @@ public class GraticuleLayer extends Layer {
         if (
                 propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -920,6 +941,22 @@ public class GraticuleLayer extends Layer {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME,
                 GraticuleLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT);
     }
+
+    private int getNumMinorSteps() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME,
+                GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT);
+    }
+
+    private boolean isInterpolate() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY,
+                GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT);
+    }
+
+    private double getTolerance() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_KEY,
+                GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT);
+    }
+
 
 
     private Color getGridlinesColor() {
@@ -988,25 +1025,38 @@ public class GraticuleLayer extends Layer {
     }
 
 
+    private int getEdgeLabelsSpacer() {
+        int fontSizePts = getConfigurationProperty(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME,
+                GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_DEFAULT);
+
+        return (int) Math.round(getPtsToPixelsMultiplier() * fontSizePts);
+    }
+
 
     private double getPtsToPixelsMultiplier() {
 
         if (ptsToPixelsMultiplier == NULL_DOUBLE) {
-            final double PTS_PER_INCH = 72.0;
-            final double PAPER_HEIGHT = 11.0;
-            final double PAPER_WIDTH = 8.5;
+//            final double PTS_PER_INCH = 72.0;
+//            final double PAPER_HEIGHT = 11.0;
+//            final double PAPER_WIDTH = 8.5;
+//
+//            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
+//            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
+//
+//            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
+//                // use height
+//                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
+//            } else {
+//                // use width
+//                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
+//            }
 
-            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
-            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
+            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2;
+//            double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
 
-            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
-                // use height
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
-            } else {
-                // use width
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
-            }
+            ptsToPixelsMultiplier = averageSideSize * 0.001;
         }
+
 
         return ptsToPixelsMultiplier;
     }

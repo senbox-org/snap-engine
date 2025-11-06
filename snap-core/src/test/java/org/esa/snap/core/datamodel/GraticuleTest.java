@@ -81,7 +81,7 @@ public class GraticuleTest {
         final Graticule.Coord coord_1 = new Graticule.Coord(null, new PixelPos(10, 12));
         final Graticule.Coord coord_2 = new Graticule.Coord(null, new PixelPos(11, 14));
 
-        final Graticule.TextGlyph glyph = Graticule.createTextGlyph("Wassupman", coord_1, coord_2);
+        final Graticule.TextGlyph glyph = Graticule.createTextGlyph("Wassupman", coord_1, coord_2, 0, 0);
         assertEquals("Wassupman", glyph.getText());
         assertEquals(10.0, glyph.getX(), 1e-8);
         assertEquals(12.0, glyph.getY(), 1e-8);
@@ -171,7 +171,7 @@ public class GraticuleTest {
 
         final List<Graticule.TextGlyph> resultList = new ArrayList<>();
 
-        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true);
+        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN, null);
 
         assertEquals(1, resultList.size());
         final Graticule.TextGlyph glyph = resultList.get(0);
@@ -191,7 +191,7 @@ public class GraticuleTest {
 
         final List<Graticule.TextGlyph> resultList = new ArrayList<>();
 
-        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true);
+        Graticule.createSouthernLongitudeTextGlyphs(listOfLists, resultList, true, true, Double.NaN, null);
 
         assertEquals(0, resultList.size());
     }
