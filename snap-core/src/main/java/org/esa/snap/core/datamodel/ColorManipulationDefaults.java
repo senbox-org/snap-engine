@@ -16,7 +16,7 @@ public class ColorManipulationDefaults {
 
     public static final boolean COLOR_MANIPULATION_DEBUG = false;
 
-    public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manipulation";
+    public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manager";
 
 
     // Directory names
@@ -114,7 +114,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_GENERAL_CUSTOM_LABEL = "Enable";
     public static final String PROPERTY_GENERAL_CUSTOM_TOOLTIP = "<html>Use following scheme parameters as default<br>" +
             " when opening a band<br>otherwise use settings from the file reader.</html>";
-    public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = false;
+    public static boolean PROPERTY_GENERAL_CUSTOM_DEFAULT = true;
 
 
     public static final String PROPERTY_GENERAL_PALETTE_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".palette";
@@ -155,7 +155,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Auto-apply";
     public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE + " schemes automatically<br>" +
             " when opening a band based on its name</html>";
-    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
+    public static boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
 
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
@@ -283,12 +283,12 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".categorize";
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
 
     public static final String PROPERTY_PALETTE_SHOW_DISABLED_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_PALETTE_SHOW_DISABLED_LABEL = "Show Disabled Palettes";
-    public static final String PROPERTY_PALETTE_SHOW_DISABLED_TOOLTIP = "<html>Show disabled palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
+    public static final String PROPERTY_PALETTE_SHOW_DISABLED_TOOLTIP = "<html>Show disabled palettes in palette selector<br>See ~/.seadas/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_SHOW_DISABLED_DEFAULT = false;
 
     public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".remove.extension";
