@@ -241,7 +241,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose";
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "<html>Scheme selector will show the verbose VERBOSE_NAME field<br>" +
             " from the color_palette_schemes.xml</html>";
-    public static boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
+    public static boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = false;
 
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled";
@@ -283,12 +283,12 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".categorize";
     public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_LABEL = "Categorize";
-    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
+    public static final String PROPERTY_PALETTE_CATEGORIZE_DISPLAY_TOOLTIP = "<html>Categorize palettes in palette selector<br>See ~/.seadas/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_CATEGORIZE_DISPLAY_DEFAULT = true;
 
     public static final String PROPERTY_PALETTE_SHOW_DISABLED_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_PALETTE_SHOW_DISABLED_LABEL = "Show Disabled Palettes";
-    public static final String PROPERTY_PALETTE_SHOW_DISABLED_TOOLTIP = "<html>Show disabled palettes in palette selector<br>See ~/.seadas9/auxdata/color_palettes/color_palette.xml</html>";
+    public static final String PROPERTY_PALETTE_SHOW_DISABLED_TOOLTIP = "<html>Show disabled palettes in palette selector<br>See ~/.seadas/auxdata/color_palettes/color_palette.xml</html>";
     public static boolean PROPERTY_PALETTE_SHOW_DISABLED_DEFAULT = false;
 
     public static final String PROPERTY_PALETTE_REMOVE_EXTENSION_KEY = PROPERTY_PALETTE_SELECTOR_KEY_SUFFIX + ".remove.extension";
