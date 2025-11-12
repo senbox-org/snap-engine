@@ -38,6 +38,7 @@ public class StxFactory {
     private Number minimum;
     private Number maximum;
     private Number mean;
+    private Number median;
     private Number standardDeviation;
     private WrappedHistogram histogram;
     private Integer resolutionLevel;
@@ -48,6 +49,10 @@ public class StxFactory {
     private Boolean intHistogram;
     private Boolean logHistogram;
     private int[] histogramBins;
+    private boolean calculateMedian = false;
+    private Number binMin;
+    private Number binMax;
+    private Number binWidth;
 
     private Number coefficientOfVariation;
     private Number enl;
@@ -55,6 +60,20 @@ public class StxFactory {
     public StxFactory() {
     }
 
+    public StxFactory withBinMin(Number binMin) {
+        this.binMin = binMin;
+        return this;
+    }
+
+    public StxFactory withBinWidth(Number binWidth) {
+        this.binWidth = binWidth;
+        return this;
+    }
+
+    public StxFactory withBinMax(Number binMax) {
+        this.binMax = binMax;
+        return this;
+    }
     public StxFactory withMinimum(Number minimum) {
         this.minimum = minimum;
         return this;
@@ -72,6 +91,10 @@ public class StxFactory {
 
     public StxFactory withStandardDeviation(Number standardDeviation) {
         this.standardDeviation = standardDeviation;
+        return this;
+    }
+    public StxFactory withMedian(boolean calculateMedian) {
+        this.calculateMedian = calculateMedian;
         return this;
     }
 
@@ -142,9 +165,13 @@ public class StxFactory {
      * @return The statistics.
      */
     public Stx create(Mask[] roiMasks, RasterDataNode[] rasters, ProgressMonitor pm) {
+        double binWidth = this.binWidth != null ? this.binWidth.doubleValue() : Double.NaN;
+        double binMin = this.binMin != null ? this.binMin.doubleValue() : Double.NaN;
+        double binMax = this.binMax != null ? this.binMax.doubleValue() : Double.NaN;
         double minimum = this.minimum != null ? this.minimum.doubleValue() : Double.NaN;
         double maximum = this.maximum != null ? this.maximum.doubleValue() : Double.NaN;
         double mean = this.mean != null ? this.mean.doubleValue() : Double.NaN;
+        double median = this.median != null ? this.median.doubleValue() : Double.NaN;
         double stdDev = this.standardDeviation != null ? this.standardDeviation.doubleValue() : Double.NaN;
         boolean logHistogram = this.logHistogram != null ? this.logHistogram : false;
         boolean intHistogram = this.intHistogram != null ? this.intHistogram : false;
@@ -195,7 +222,12 @@ public class StxFactory {
                 pm.beginTask("Computing statistics", mustComputeSummaryStx && mustComputeHistogramStx ? 100 : 50);
 
                 if (mustComputeSummaryStx) {
-                    final SummaryStxOp meanOp = new SummaryStxOp();
+                    SummaryStxOp meanOp;
+                    if (calculateMedian) {
+                        meanOp = new SummaryStxOp(true);
+                    } else {
+                        meanOp = new SummaryStxOp();
+                    }
                     for (int i = 0; i < filteredRasters.length; i++) {
                         final RasterDataNode rasterDataNode = filteredRasters[i];
                         accumulate(rasterDataNode, level, roiImages[i], roiShapes[i], meanOp, SubProgressMonitor.create(pm, 50));
@@ -208,6 +240,9 @@ public class StxFactory {
                     }
                     if (this.mean == null) {
                         mean = meanOp.getMean();
+                    }
+                    if (this.median == null  && calculateMedian) {
+                        median = meanOp.getMedian();
                     }
                     if (this.standardDeviation == null) {
                         stdDev = meanOp.getStandardDeviation();
@@ -222,7 +257,24 @@ public class StxFactory {
 
                 if (mustComputeHistogramStx) {
                     int binCount = histogramBinCount != null ? histogramBinCount : DEFAULT_BIN_COUNT;
-                    final HistogramStxOp histogramOp = new HistogramStxOp(binCount, minimum, maximum, intHistogram, logHistogram);
+                    if (Double.isNaN(binMin)) {
+                        binMin = minimum;
+                    }
+                    if (Double.isNaN(binMax)) {
+                        binMax = maximum;
+                    }
+
+
+                    if (!Double.isNaN(binWidth) && binWidth != 0 && !Double.isNaN(binMin) && !Double.isNaN(binMax)) {
+                        int binCountTmp = (int) ((binMax - binMin) /binWidth);
+                        if (binCountTmp > 0) {
+                            binCount = binCountTmp;
+                        }
+
+                    }
+
+//                    if (binCount > 0 && binMax > binMin) {
+                    final HistogramStxOp histogramOp = new HistogramStxOp(binCount, binMin, binMax, intHistogram, logHistogram);
                     for (int i = 0; i < filteredRasters.length; i++) {
                         final RasterDataNode rasterDataNode = filteredRasters[i];
                         accumulate(rasterDataNode, level, roiImages[i], roiShapes[i], histogramOp, SubProgressMonitor.create(pm, 50));
@@ -258,7 +310,7 @@ public class StxFactory {
             }
         }
 
-        return new Stx(minimum, maximum, mean, stdDev, coeffOfVariation, enl, logHistogram, intHistogram, histogram, level);
+        return new Stx(minimum, maximum, mean, stdDev, coeffOfVariation, enl, median, true, logHistogram, intHistogram, histogram, level);
     }
 
     /**

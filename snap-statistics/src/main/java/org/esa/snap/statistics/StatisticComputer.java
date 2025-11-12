@@ -27,15 +27,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.Histogram;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class StatisticComputer {
@@ -47,18 +45,25 @@ public class StatisticComputer {
     private final Map<BandConfiguration, StxOpMapping>[] stxOpMappingsList;
     private final int initialBinCount;
     private final Logger logger;
+    private boolean calculateMedian = false;
     private final TimeInterval[] timeIntervals;
     private String featureId;
 
     public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
-                             String featureId, Logger logger) {
+                             TimeInterval[] timeIntervals, String featureId, Logger logger) {
         this(shapefile, bandConfigurations, initialBinCount,
                 new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))},
-                featureId, logger);
+                featureId, logger, false);
+    }
+    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
+                             String featureId, Logger logger, Boolean calculateMedian) {
+        this(shapefile, bandConfigurations, initialBinCount,
+                new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))},
+                featureId, logger, calculateMedian);
     }
 
     public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
-                             TimeInterval[] timeIntervals, String featureId, Logger logger) {
+                             TimeInterval[] timeIntervals, String featureId, Logger logger, Boolean calculateMedian) {
         this.initialBinCount = initialBinCount;
         this.timeIntervals = timeIntervals;
         this.logger = logger != null ? logger : SystemUtils.LOG;
@@ -88,6 +93,7 @@ public class StatisticComputer {
         pm = ProgressMonitor.NULL;
         this.bandConfigurations = bandConfigurations;
         stxOpMappingsList = new Map[Math.max(1, timeIntervals.length)];
+        this.calculateMedian = calculateMedian;
         for (int i = 0; i < stxOpMappingsList.length; i++) {
             stxOpMappingsList[i] = new HashMap<>();
         }
@@ -167,7 +173,7 @@ public class StatisticComputer {
             final QualitativeStxOp qualitativeStxOp = stxOpsMapping.getQualitativeStxOp(regionName, band);
             StxFactory.accumulate(band, 0, roiImage, roiShape, qualitativeStxOp, SubProgressMonitor.create(pm, 50));
         } else {
-            final SummaryStxOp summaryStxOp = stxOpsMapping.getSummaryOp(regionName);
+            final SummaryStxOp summaryStxOp = stxOpsMapping.getSummaryOp(regionName, calculateMedian);
             StxFactory.accumulate(band, 0, roiImage, roiShape, summaryStxOp, SubProgressMonitor.create(pm, 50));
             final double minimum = summaryStxOp.getMinimum();
             final double maximum = summaryStxOp.getMaximum();
@@ -252,10 +258,10 @@ public class StatisticComputer {
             return qualitativeStxOp;
         }
 
-        private SummaryStxOp getSummaryOp(String vdnName) {
+        private SummaryStxOp getSummaryOp(String vdnName, boolean calculateMedian) {
             SummaryStxOp summaryStxOp = summaryMap.get(vdnName);
             if (summaryStxOp == null) {
-                summaryStxOp = new SummaryStxOp();
+                summaryStxOp = new SummaryStxOp(calculateMedian);
                 summaryMap.put(vdnName, summaryStxOp);
             }
             return summaryStxOp;
