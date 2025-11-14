@@ -128,6 +128,9 @@ public class RGBImageProfile implements ConfigurableExtension {
         this(name, rgbaExpressions, null, pattern, null);
     }
 
+    public RGBImageProfile(final String name, String[] rgbaExpressions, String[] pattern, Range[] valueRanges) {
+        this(name, rgbaExpressions, null, pattern, valueRanges);
+    }
 
     /**
      * Creates a new RGB profile.
