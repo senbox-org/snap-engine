@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeEvent;
 import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.PixelPos;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -33,7 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 
-import org.esa.snap.core.datamodel.PixelPos;
+import static org.esa.snap.core.datamodel.Graticule.containsValidGeoCorners;
 
 
 /**
@@ -93,12 +94,20 @@ public class GraticuleLayer extends Layer {
 
         getUserValues();
 
+        int spacer = getEdgeLabelsSpacer();
+
+
         if (graticule == null) {
             graticule = Graticule.create(raster,
                     getNumGridLines(),
                     getNumMinorSteps(),
                     getGridSpacingLat(),
-                    getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
+                    getGridSpacingLon(),
+                    isInterpolate(),
+                    getTolerance(),
+                    isLabelsSuffix(),
+                    isLabelsDecimal(),
+                    spacer);
         }
         if (graticule != null) {
 
@@ -125,7 +134,11 @@ public class GraticuleLayer extends Layer {
                 }
 
                 if (isBorderShow()) {
-                    drawBorder(g2d, raster);
+                    boolean containsValidGeoCorners = containsValidGeoCorners(raster);
+
+                    if (containsValidGeoCorners) {
+                        drawBorder(g2d, raster);
+                    }
                 }
 
 
@@ -442,6 +455,9 @@ public class GraticuleLayer extends Layer {
     private boolean isTextConflict(PixelPos pixelPos, Graphics2D g2d, Graticule.TextLocation textLocation,
                                    boolean isCorner,
                                    RasterDataNode raster) {
+        if (1 == 1) {
+            return false;
+        }
         Font origFont = g2d.getFont();
         Font font = new Font(getLabelsFont(), getFontType(), getFontSizePixels());
         g2d.setFont(font);
@@ -894,8 +910,11 @@ public class GraticuleLayer extends Layer {
         if (
                 propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -928,6 +947,15 @@ public class GraticuleLayer extends Layer {
                 GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT);
     }
 
+    private boolean isInterpolate() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY,
+                GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT);
+    }
+
+    private double getTolerance() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_KEY,
+                GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT);
+    }
 
 
 
@@ -996,6 +1024,13 @@ public class GraticuleLayer extends Layer {
         return (int) Math.round(getPtsToPixelsMultiplier() * fontSizePts);
     }
 
+
+    private int getEdgeLabelsSpacer() {
+        int fontSizePts = getConfigurationProperty(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME,
+                GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_DEFAULT);
+
+        return (int) Math.round(getPtsToPixelsMultiplier() * fontSizePts);
+    }
 
 
     private double getPtsToPixelsMultiplier() {
