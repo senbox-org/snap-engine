@@ -23,7 +23,6 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.awt.*;
@@ -53,14 +52,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRID_SPACING_LAT_LABEL = "Latitude Spacing";
     public static final String PROPERTY_GRID_SPACING_LAT_TOOLTIP = "Set latitude grid spacing in degrees (0=AUTOSPACING)";
     private static final String PROPERTY_GRID_SPACING_LAT_ALIAS = PROPERTY_ROOT + "SpacingLat";
-    public static final double PROPERTY_GRID_SPACING_LAT_DEFAULT = 0.0;
+    public static final double PROPERTY_GRID_SPACING_LAT_DEFAULT = 0;
     public static final Class PROPERTY_GRID_SPACING_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_GRID_SPACING_LON_NAME = PROPERTY_ROOT + ".spacing.lon";
     public static final String PROPERTY_GRID_SPACING_LON_LABEL = "Longitude Spacing";
     public static final String PROPERTY_GRID_SPACING_LON_TOOLTIP = "Set longitude grid spacing in degrees (0=AUTOSPACING)";
     private static final String PROPERTY_GRID_SPACING_LON_ALIAS = PROPERTY_ROOT + "SpacingLon";
-    public static final double PROPERTY_GRID_SPACING_LON_DEFAULT = 0.0;
+    public static final double PROPERTY_GRID_SPACING_LON_DEFAULT = 0;
     public static final Class PROPERTY_GRID_SPACING_LON_TYPE = Double.class;
 
 
@@ -146,7 +145,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_ROTATION_LAT_LABEL = "Labels Rotation (Latitude)";
     public static final String PROPERTY_LABELS_ROTATION_LAT_TOOLTIP = "Rotate latitude labels (0 degrees = perpendicular)";
     private static final String PROPERTY_LABELS_ROTATION_LAT_ALIAS = "labelsRotationLat";
-    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 90;
+    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 0;
     public static final Class PROPERTY_LABELS_ROTATION_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME = PROPERTY_ROOT + ".labels.font.name";
@@ -172,6 +171,17 @@ public class GraticuleLayerType extends LayerType {
     public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 70;
     public static final String PROPERTY_LABELS_SIZE_INTERVAL = "[" + GraticuleLayerType.PROPERTY_LABELS_SIZE_VALUE_MIN + "," + GraticuleLayerType.PROPERTY_LABELS_SIZE_VALUE_MAX + "]";
 
+    public static final String PROPERTY_EDGE_LABELS_SPACER_NAME = PROPERTY_ROOT + ".labels.spacer.edge";
+    public static final String PROPERTY_EDGE_LABELS_SPACER_LABEL = "Edge Labels Spacer";
+    public static final String PROPERTY_EDGE_LABELS_SPACER_TOOLTIP = "Sets a spacer for edge labels";
+    private static final String PROPERTY_EDGE_LABELS_SPACER_ALIAS = PROPERTY_ROOT + "LabelsEdge";
+    public static final int PROPERTY_EDGE_LABELS_SPACER_DEFAULT = 25;
+    public static final Class PROPERTY_EDGE_LABELS_SPACER_TYPE = Integer.class;
+    public static final int PROPERTY_EDGE_LABELS_SPACER_VALUE_MIN = -1;
+    public static final int PROPERTY_EDGE_LABELS_SPACER_VALUE_MAX = 200;
+    public static final String PROPERTY_EDGE_LABELS_SPACER_INTERVAL = "[" + GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_VALUE_MIN + "," + GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_VALUE_MAX + "]";
+
+    
 
     public static final String PROPERTY_LABELS_COLOR_NAME = PROPERTY_ROOT + ".labels.color";
     public static final String PROPERTY_LABELS_COLOR_LABEL = "Labels Font Color";
@@ -199,14 +209,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRIDLINES_WIDTH_LABEL = "Gridline Width";
     public static final String PROPERTY_GRIDLINES_WIDTH_TOOLTIP = "Set width of gridlines";
     private static final String PROPERTY_GRIDLINES_WIDTH_ALIAS = PROPERTY_ROOT + "gridlinesWidth";
-    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1.5;
+    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1;
     public static final Class PROPERTY_GRIDLINES_WIDTH_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_NAME = PROPERTY_ROOT + ".gridlines.dashed.phase";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_LABEL = "Gridline Dash Length";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_TOOLTIP = "Set dash length of gridlines or solid gridlines (0=SOLID)";
     private static final String PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS = PROPERTY_ROOT + "GridlinesDashedPhase";
-    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 6;
+    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 0;
     public static final Class PROPERTY_GRIDLINES_DASHED_PHASE_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_TRANSPARENCY_NAME = PROPERTY_ROOT + ".gridlines.transparency";
@@ -359,11 +369,26 @@ public class GraticuleLayerType extends LayerType {
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
 
     public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".minor.steps";
-    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 10;
-    public static final String PROPERTY_MINOR_STEPS_LABEL = "Minor Steps Between Gridlines";
-    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of minor steps between gridlines";
+    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 64;
+    public static final String PROPERTY_MINOR_STEPS_LABEL = "Smoothing Steps";
+    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of steps across full image to use for generating the line";
     public static final String PROPERTY_MINOR_STEPS_ALIAS = PROPERTY_ROOT + "minorSteps";
     public static final Class PROPERTY_MINOR_STEPS_TYPE = Integer.class;
+
+
+    public static final String PROPERTY_INTERPOLATE_KEY = PROPERTY_ROOT + ".interpolate";
+    public static final boolean PROPERTY_INTERPOLATE_DEFAULT = true;
+    public static final String PROPERTY_INTERPOLATE_LABEL = "Interpolate";
+    public static final String PROPERTY_INTERPOLATE_TOOLTIP = "Interpolate each pixel to sub pixel level";
+    public static final String PROPERTY_INTERPOLATE_ALIAS = PROPERTY_ROOT + "interpolate";
+    public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
+
+    public static final String PROPERTY_TOLERANCE_KEY = PROPERTY_ROOT + ".tolerance";
+    public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.5;
+    public static final String PROPERTY_TOLERANCE_LABEL = "Tolerance";
+    public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to force edge pixels onto gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_ALIAS = PROPERTY_ROOT + "tolerance";
+    public static final Class PROPERTY_TOLERANCE_TYPE = Double.class;
 
 
     // Property Setting: Restore Defaults
@@ -418,6 +443,16 @@ public class GraticuleLayerType extends LayerType {
         final Property minorStepsModel = Property.create(PROPERTY_MINOR_STEPS_NAME, Integer.class, PROPERTY_MINOR_STEPS_DEFAULT, true);
         minorStepsModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_ALIAS);
         vc.addProperty(minorStepsModel);
+
+        final Property interpolateModel = Property.create(PROPERTY_INTERPOLATE_KEY, Boolean.class, PROPERTY_INTERPOLATE_DEFAULT, true);
+        interpolateModel.getDescriptor().setAlias(PROPERTY_INTERPOLATE_ALIAS);
+        vc.addProperty(interpolateModel);
+
+        final Property toleranceModel = Property.create(PROPERTY_TOLERANCE_KEY, Double.class, PROPERTY_TOLERANCE_DEFAULT, true);
+        toleranceModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_ALIAS);
+        vc.addProperty(toleranceModel);
+
+
 
         final Property gridSpacingLatModel = Property.create(PROPERTY_GRID_SPACING_LAT_NAME, PROPERTY_GRID_SPACING_LAT_TYPE, PROPERTY_GRID_SPACING_LAT_DEFAULT, true);
         gridSpacingLatModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LAT_ALIAS);
@@ -491,6 +526,10 @@ public class GraticuleLayerType extends LayerType {
         final Property textFontSizeModel = Property.create(PROPERTY_LABELS_SIZE_NAME, Integer.class, PROPERTY_LABELS_SIZE_DEFAULT, true);
         textFontSizeModel.getDescriptor().setAlias(PROPERTY_LABELS_SIZE_ALIAS);
         vc.addProperty(textFontSizeModel);
+
+        final Property edgeLabelsSpacerModel = Property.create(PROPERTY_EDGE_LABELS_SPACER_NAME, Integer.class, PROPERTY_EDGE_LABELS_SPACER_DEFAULT, true);
+        edgeLabelsSpacerModel.getDescriptor().setAlias(PROPERTY_EDGE_LABELS_SPACER_ALIAS);
+        vc.addProperty(edgeLabelsSpacerModel);
 
 
         final Property textFontItalicModel = Property.create(PROPERTY_LABELS_ITALIC_NAME, Boolean.class, PROPERTY_LABELS_ITALIC_DEFAULT, true);
