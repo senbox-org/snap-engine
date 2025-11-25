@@ -16,7 +16,7 @@ public class ProductCache {
     }
 
     public void dispose() {
-        variableCacheMap.forEach((key, value) -> dispose());
+        variableCacheMap.values().forEach(VariableCache::dispose);
         variableCacheMap.clear();
     }
 

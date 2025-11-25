@@ -9,6 +9,7 @@ public class VariableCache {
     }
 
     public void dispose() {
+        System.out.println("VarCache - dispose()");
     }
 
     public ProductData read(int[] offsets, int[] shapes) {
