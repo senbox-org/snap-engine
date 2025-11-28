@@ -26,6 +26,7 @@ import java.text.ParseException;
 public class TimeUtils {
 
     private static final String ALTERNATIVE_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String ALTERNATIVE2_DATE_TIME_PATTERN = "yyyyMMdd'T'HHmmss'Z'";
 
     public static ProductData.UTC getSceneRasterTime(NetcdfFile ncFile, String dateAttrName, String timeAttrName) {
         final Attribute dateAttr = ncFile.findGlobalAttribute(dateAttrName);
@@ -78,9 +79,13 @@ public class TimeUtils {
             } catch (ParseException ignore2) {
                 try {
                     return ProductData.UTC.parse(dateTimeStr, ALTERNATIVE_DATE_TIME_PATTERN);
-                } catch (ParseException ignoreAgain) {
-                    SystemUtils.LOG.warning("Failed to parse time string '" + dateTimeStr + "'");
-                    return null;
+                } catch (ParseException ignore3) {
+                    try {
+                        return ProductData.UTC.parse(dateTimeStr, ALTERNATIVE2_DATE_TIME_PATTERN);
+                    } catch (ParseException ignoreAgain) {
+                        SystemUtils.LOG.warning("Failed to parse time string '" + dateTimeStr + "'");
+                        return null;
+                    }
                 }
             }
         }
