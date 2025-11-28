@@ -45,6 +45,11 @@ public class S3ResponseHandler extends DefaultHandler {
     private static final String NEXT_CONTINUATION_TOKEN_ELEMENT = "NextContinuationToken";
 
     /**
+     * The name of XML element for NextContinuationToken, used on parsing VFS service response XML.
+     */
+    private static final String NEXT_MARKER_ELEMENT = "NextMarker";
+
+    /**
      * The name of XML element for IsTruncated, used on parsing VFS service response XML.
      */
     private static final String IS_TRUNCATED_ELEMENT = "IsTruncated";
@@ -195,6 +200,7 @@ public class S3ResponseHandler extends DefaultHandler {
                     this.isTruncated = getBooleanValue(ch, start, length);
                     break;
                 case NEXT_CONTINUATION_TOKEN_ELEMENT:
+                case NEXT_MARKER_ELEMENT:
                     this.nextContinuationToken = getTextValue(ch, start, length);
                     break;
                 case PREFIX_ELEMENT:
