@@ -143,7 +143,7 @@ class S3Walker extends AbstractRemoteWalker {
         addParam(paramBase, "prefix", prefix);
         addParam(paramBase, "delimiter", this.delimiter);
         StringBuilder params = new StringBuilder(paramBase);
-        addParam(params, "continuation-token", nextContinuationToken);
+        addParam(params, "marker", nextContinuationToken);
         String s3URL = this.address + (this.address.endsWith(this.delimiter) ? "" : this.delimiter) + currentBucket;
         if (params.length() > 0) {
             s3URL += "?" + params;
