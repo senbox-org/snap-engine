@@ -2,6 +2,7 @@ package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import eu.esa.snap.core.dataio.cache.*;
+import eu.esa.snap.core.datamodel.band.BandUsingReaderDirectly;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
@@ -54,7 +55,7 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
 
         final Product product = new Product("dit", "dat", width, height, this);
 
-        Band heightBand = new Band("height", ProductData.TYPE_INT16, width, height);
+        final Band heightBand = new BandUsingReaderDirectly("height", ProductData.TYPE_INT16, width, height);
         product.addBand(heightBand);
 
         return product;
@@ -113,7 +114,7 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         if (chunkSizes != null) {
             chunkSizesValues = chunkSizes.getValues();
         } else {
-            chunkSizesValues = Array.factory(DataType.INT, shape);
+            chunkSizesValues = Array.factory(heightVar.getDataType(), shape);
         }
 
         if (shape.length == 2) {

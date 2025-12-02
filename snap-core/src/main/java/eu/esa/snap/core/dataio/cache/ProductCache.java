@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class ProductCache {
 
-    private final HashMap<String, VariableCache> variableCacheMap;
+    private final HashMap<String, VariableCache2D> variableCacheMap;
     private final CacheDataProvider dataProvider;
 
     public ProductCache(CacheDataProvider dataProvider) {
@@ -16,16 +16,16 @@ public class ProductCache {
     }
 
     public void dispose() {
-        variableCacheMap.values().forEach(VariableCache::dispose);
+        variableCacheMap.values().forEach(VariableCache2D::dispose);
         variableCacheMap.clear();
     }
 
     public ProductData read(Band band, int[] offsets, int[] shapes) {
         final String bandName = band.getName();
-        VariableCache variableCache = variableCacheMap.get(bandName);
+        VariableCache2D variableCache = variableCacheMap.get(bandName);
         if (variableCache == null) {
             final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-            variableCache = new VariableCache(variableDescriptor);
+            variableCache = new VariableCache2D(variableDescriptor);
             variableCacheMap.put(bandName, variableCache);
             // @todo send allocation message
         }
