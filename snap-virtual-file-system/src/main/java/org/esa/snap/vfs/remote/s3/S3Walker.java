@@ -130,6 +130,12 @@ class S3Walker extends AbstractRemoteWalker {
         return items;
     }
 
+    protected URL getDirectoryURL(VFSPath dir) throws IOException {
+        String dirPath = dir.toString();
+        String s3Prefix = buildPrefix(dirPath + (dirPath.endsWith("/") ? "" : "/"));
+        return new URL(buildS3URL(s3Prefix, ""));
+    }
+
     private String buildPrefix(String prefix) {
         prefix = prefix.replace(this.root, "");
         prefix = prefix.replaceAll("^/", "");
