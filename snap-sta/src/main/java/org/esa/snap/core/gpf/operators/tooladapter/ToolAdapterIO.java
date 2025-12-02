@@ -25,6 +25,7 @@ import org.esa.snap.core.gpf.descriptor.TemplateParameterDescriptor;
 import org.esa.snap.core.gpf.descriptor.ToolAdapterOperatorDescriptor;
 import org.esa.snap.core.gpf.descriptor.ToolParameterDescriptor;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 
 import javax.xml.transform.OutputKeys;
@@ -681,6 +682,8 @@ public class ToolAdapterIO {
         byte[] buffer;
         try (ZipFile zipFile = new ZipFile(sourceFile.toFile())) {
             progressMonitor.setSubTaskName(String.format("Extracting %s...", zipFile.getName()));
+            Path targetDir = hasSingleRootDirectory(sourceFile) ? destination : destination.resolve(FileUtils.getFilenameWithoutExtension(sourceFile.toFile().getName()));
+
             int size = zipFile.size();
             int workUnits = 100 / totalTasks;
             int count = 0;
@@ -691,7 +694,7 @@ public class ToolAdapterIO {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                Path filePath = destination.resolve(fileNames.get(entry.getName()));
+                Path filePath = targetDir.resolve(fileNames.get(entry.getName()));
                 if (!Files.exists(filePath)) {
                     if (entry.isDirectory()) {
                         Files.createDirectories(filePath);
@@ -714,6 +717,45 @@ public class ToolAdapterIO {
         } catch (Exception ex){
             throw ex;
         }
+    }
+    public static boolean hasSingleRootDirectory(Path zipPath) throws IOException {
+        try (ZipFile zip = new ZipFile(zipPath.toFile())) {
+            Set<String> topLevel = new HashSet<>();
+
+            Enumeration<? extends ZipEntry> entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+
+                // Skip empty entries
+                if (name.isBlank()) continue;
+
+                // Normalize: remove trailing slash if it's a directory
+                String normalized = name.endsWith("/") ? name.substring(0, name.length() - 1) : name;
+
+                // Get top-level component before first slash
+                String[] parts = normalized.split("/", 2);
+                topLevel.add(parts[0]);
+
+                // Early exit: more than one top-level element
+                if (topLevel.size() > 1) {
+                    return false;
+                }
+            }
+
+            // If there's exactly one top-level name, ensure it’s a directory
+            if (topLevel.size() == 1) {
+                String rootName = topLevel.iterator().next();
+                ZipEntry rootEntry = zip.getEntry(rootName + "/");
+                return rootEntry != null && rootEntry.isDirectory();
+            }
+        }catch (Exception ex){
+            throw ex;
+        }
+
+        // Empty zip or no clear structure
+        return false;
+
     }
 
     /**
