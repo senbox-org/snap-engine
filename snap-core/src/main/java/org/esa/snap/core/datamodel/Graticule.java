@@ -542,6 +542,149 @@ public class Graticule {
 
 
     /**
+     * Creates a list of longitudes to attempt to use as the gridlines.
+     *
+     * @param geoSpan geoSpan of the scene
+     * @param lonMajorStep the grid cell size in longitudinal direction
+     * @param PARALLELS_COUNT_MAX maximum size of list
+     * @return list of latitudes to attempt to use as the gridlines.
+     */
+    private  static ArrayList<Double> getMeridiansLonsArrayList(GeoSpan geoSpan,
+                                                                double lonMajorStep,
+                                                                int PARALLELS_COUNT_MAX) {
+
+        ArrayList<Double> meridiansLonsArrayList = new ArrayList<Double>();
+
+
+        boolean forceFullEarth = false;
+
+        double min;
+        double max;
+
+        if (geoSpan.lonSpan >= 90) {
+            forceFullEarth = true;
+            min = -180;
+            max = 180;
+        } else {
+            if (geoSpan.lonAscending && !geoSpan.lonDescending) {
+                min = Math.floor(geoSpan.firstLon);
+                max = Math.ceil(geoSpan.lastLon);
+            } else if (geoSpan.lonDescending && !geoSpan.lonAscending) {
+                min = Math.floor(geoSpan.lastLon);
+                max = Math.ceil(geoSpan.firstLon);
+            } else {
+                forceFullEarth = true;
+                min = -180;
+                max = 180;
+            }
+        }
+
+
+
+
+        // increase min and max to add a slight buffer to be able to potentially add lines just outside the actual scene area.
+        min = min - lonMajorStep;
+        max = max + lonMajorStep;
+
+        // restrict min to a valid value
+        if (min < -180) {
+            min = -180;
+        }
+
+        // restrict min to a valid value
+        if (max > 180) {
+            max = 180;
+        }
+
+
+
+        int parallelsAddedCount = 0;
+
+        if (geoSpan.datelineCrossed && !forceFullEarth) {
+
+            // East of crossing
+            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+                if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                    meridiansLonsArrayList.add(meridianLon);
+                    parallelsAddedCount++;
+                }
+            }
+
+
+            // West of crossing
+            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+                if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                    meridiansLonsArrayList.add(meridianLon);
+                    parallelsAddedCount++;
+                }
+            }
+
+
+        } else {
+            // Eastern hemisphere
+            if (max >= 0) {
+                for (double meridianLon = 0; meridianLon <= max; meridianLon += lonMajorStep) {
+                    if (meridianLon >= min) {
+                        if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                            meridiansLonsArrayList.add(meridianLon);
+                            parallelsAddedCount++;
+                        }
+                    }
+                }
+            }
+
+
+            // Western hemisphere
+            if (min < 0) {
+                for (double meridianLon = 0 - lonMajorStep; meridianLon >= min; meridianLon -= lonMajorStep) {
+                    if (meridianLon <= max) {
+                        if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                            meridiansLonsArrayList.add(meridianLon);
+                            parallelsAddedCount++;
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+
+
+
+
+
+//        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
+//        if (geoSpan.datelineCrossed) {
+//
+//            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//
+//
+//            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        } else {
+//            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        }
+//
+//        // todo temp testing
+//        meridianLonsArrayList.add(-70.0);
+//        meridianLonsArrayList.add(-75.0);
+//        meridianLonsArrayList.add(-80.0);
+//        meridianLonsArrayList.add(-85.0);
+//        meridianLonsArrayList.add(-90.0);
+//        meridianLonsArrayList.add(-95.0);
+
+
+
+        return meridiansLonsArrayList;
+
+    }
+    /**
      * Creates a list of latitudes to attempt to use as the gridlines.
      *
      * @param geoSpan geoSpan of the scene
@@ -667,89 +810,105 @@ public class Graticule {
             minorSteps = maxSteps;
         }
 
-        double min = Math.floor(geoSpan.firstLon);
-        double max = Math.ceil(geoSpan.lastLon);
 
+        int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
+        // Get a list of longitudes to attempt to use as the gridlines.
+        ArrayList<Double> meridianLonsArrayList = getMeridiansLonsArrayList(geoSpan, lonMajorStep, MERIDIANS_COUNT_MAX);
 
-        boolean forceFullEarth = false;
-
-        if (geoSpan.lonSpan >= 90 && forceFullEarth) {
-            // big enough so use whole earth
-            min = -180;
-            max = 180;
-        } else if (geoSpan.lonSpan >= 1) {
-
-            double minTmp;
-            double maxTmp;
-
-            if (lonMajorStep >= 1) {
-                // in this case: check for every lon across the full earth
-                minTmp = -180;
-                maxTmp = 180;
-            } else {
-                //  in this case: limit check to the lon range of the scene
-                minTmp = Math.floor(geoSpan.firstLon);
-                maxTmp = Math.ceil(geoSpan.lastLon);
-            }
-
-            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
-                if (i >= (geoSpan.firstLon)) {
-                    min = i - lonMajorStep;
-                    if (min < -180) {
-                        min = -180;
-                    }
-                    break;
-                }
-            }
-
-            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
-                if (i >= (geoSpan.lastLon)) {
-                    max = i + lonMajorStep;
-                    if (max > 180) {
-                        max = 180;
-                    }
-                    break;
-                }
-            }
-
-        }
-
-
-        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
-        if (geoSpan.datelineCrossed) {
-
-            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
 
 //
+//        double min = Math.floor(geoSpan.firstLon);
+//        double max = Math.ceil(geoSpan.lastLon);
 //
-//            boolean mx180Found = false;
-//            for (double mx = min; mx <= 180; mx += lonMajorStep) {
-//                meridianLonsArrayList.add(mx);
 //
-//                if (mx == 180) {
-//                    mx180Found = true;
+//        boolean forceFullEarth = false;
+//
+//        if (geoSpan.lonSpan >= 90 && forceFullEarth) {
+//            // big enough so use whole earth
+//            min = -180;
+//            max = 180;
+//        } else if (geoSpan.lonSpan >= 1) {
+//
+//            double minTmp;
+//            double maxTmp;
+//
+//            if (lonMajorStep >= 1) {
+//                // in this case: check for every lon across the full earth
+//                minTmp = -180;
+//                maxTmp = 180;
+//            } else {
+//                //  in this case: limit check to the lon range of the scene
+//                minTmp = Math.floor(geoSpan.firstLon);
+//                maxTmp = Math.ceil(geoSpan.lastLon);
+//            }
+
+//
+//            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
+//                if (i >= (geoSpan.firstLon)) {
+//                    min = i - lonMajorStep;
+//                    if (min < -180) {
+//                        min = -180;
+//                    }
+//                    break;
 //                }
 //            }
 //
-//            if (!mx180Found) {
-//                meridianLonsArrayList.add(180.0);
+//            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
+//                if (i >= (geoSpan.lastLon)) {
+//                    max = i + lonMajorStep;
+//                    if (max > 180) {
+//                        max = 180;
+//                    }
+//                    break;
+//                }
+//            }
+//
+//        }
+//
+//
+//        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
+//        if (geoSpan.datelineCrossed) {
+//
+//            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//
+////
+////
+////            boolean mx180Found = false;
+////            for (double mx = min; mx <= 180; mx += lonMajorStep) {
+////                meridianLonsArrayList.add(mx);
+////
+////                if (mx == 180) {
+////                    mx180Found = true;
+////                }
+////            }
+////
+////            if (!mx180Found) {
+////                meridianLonsArrayList.add(180.0);
+////            }
+//
+//            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        } else {
+//            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
 //            }
 
-            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
-        } else {
-            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
-        }
+//        }
+//
+//        // todo temp testing
+//        meridianLonsArrayList.add(-70.0);
+//        meridianLonsArrayList.add(-75.0);
+//        meridianLonsArrayList.add(-80.0);
+//        meridianLonsArrayList.add(-85.0);
+//        meridianLonsArrayList.add(-90.0);
+//        meridianLonsArrayList.add(-95.0);
 
 
         // loop through each desired meridian lon
         int meridiansCount = 0;
-        int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
         for (double meridianLon : meridianLonsArrayList) {
 
             List<Coord> meridian1 = new ArrayList<>();
