@@ -129,4 +129,13 @@ public interface GeoCoding {
      */
     boolean canClone();
 
+    /**
+     * Check if geocoding is global.
+     * This could be overridden to return true in case the geoCoding for a global product should be lazy
+     *
+     * @return if so or not
+     */
+    default boolean isGlobal() {
+        return false;
+    }
 }
