@@ -12,6 +12,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -73,8 +74,11 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
         final int[] offsets = {sourceOffsetY, sourceOffsetX};
         final int[] shapes = {sourceHeight, sourceWidth};
+        final int[] targetOffsets = {destOffsetY, destOffsetX};
+        final int[] targetShapes = {destHeight, destWidth};
 
-        ProductData read = productCache.read(destBand, offsets, shapes);
+
+        ProductData read = productCache.read(destBand.getName(), destBuffer, offsets, shapes, targetOffsets, targetShapes);
 
         // @todo 1 tb/tb copy to appropriate location in target buffer
         // @todo 2 take subsampling into account
@@ -114,6 +118,7 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         if (chunkSizes != null) {
             chunkSizesValues = chunkSizes.getValues();
         } else {
+            // @todo 2 tb/tb missing default values? 2025-12-02
             chunkSizesValues = Array.factory(heightVar.getDataType(), shape);
         }
 
@@ -136,5 +141,29 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         }
 
         return variableDescriptor;
+    }
+
+    @Override
+    public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+        System.out.println(variableName + "  x: " + offsets[1] + " y: " + offsets[0] + " width: " + shapes[1] + " height: " + shapes[0]);
+        if (targetData == null) {
+            // @todo 1 tb/tb allocate appropriate buffer - data type, width, height
+            targetData = ProductData.createInstance(ProductData.TYPE_INT16, shapes[0] * shapes[1]);
+        }
+
+        // @todo 1 deduce NC path from variables name - eventually decode layer
+        final Variable heightVar = netcdfFile.findVariable(variableName);
+        Array rawBuffer = null;
+        try {
+            rawBuffer = heightVar.read(offsets, shapes);
+        } catch (InvalidRangeException e) {
+            throw new IOException(e);
+        }
+        // @todo 1 tb/tb check if scaled - if so: convert
+        // @todo 1 tb/tb allocate depending on data type
+        final short[] tileData = (short[]) rawBuffer.copyTo1DJavaArray();
+        targetData.setElems(tileData);
+
+        return targetData;
     }
 }

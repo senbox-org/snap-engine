@@ -15,17 +15,40 @@ public class VariableCache2DTest {
         assertEquals(2, data[3].length);
         assertEquals(5, data.length);
 
+        assertEquals(0, data[0][0].getxMin());
+        assertEquals(59, data[0][0].getxMax());
+        assertEquals(0, data[0][0].getyMin());
+        assertEquals(109, data[0][0].getyMax());
+
+        // second in a tile row is clipped
+        assertEquals(60, data[0][1].getxMin());
+        assertEquals(99, data[0][1].getxMax());
+        assertEquals(0, data[0][0].getyMin());
+        assertEquals(109, data[0][0].getyMax());
+
+
         variableDescriptor = createDescriptor(100, 500, 100, 140);
         data = VariableCache2D.initiateCache(variableDescriptor);
         assertEquals(1, data[0].length);
         assertEquals(1, data[2].length);
         assertEquals(4, data.length);
+
+        assertEquals(0, data[1][0].getxMin());
+        assertEquals(99, data[1][0].getxMax());
+        assertEquals(140, data[1][0].getyMin());
+        assertEquals(279, data[1][0].getyMax());
+
+        // last row data has less pixel-rows
+        assertEquals(0, data[3][0].getxMin());
+        assertEquals(99, data[3][0].getxMax());
+        assertEquals(420, data[3][0].getyMin());
+        assertEquals(499, data[3][0].getyMax());
     }
 
     @Test
     public void testDispose() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
-        final VariableCache2D cache = new VariableCache2D(variableDescriptor);
+        final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
         CacheData2D[][] cacheData = cache.getCacheData();
         assertEquals(5, cacheData.length);
 
@@ -34,34 +57,42 @@ public class VariableCache2DTest {
     }
 
     @Test
-    public void testGetAffectedTileLocations_nothingCached() {
-        final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
-        final VariableCache2D cache = new VariableCache2D(variableDescriptor);
-
-        final RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 0}, new int[]{50, 50});
-        assertEquals(0, affectedTileLocations.length);
-    }
-
-    @Test
     public void testGetAffectedTileLocations_cacheHit() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
-        final VariableCache2D cache = new VariableCache2D(variableDescriptor);
+        final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
 
-        cache.getCacheData()[0][0] = new CacheData2D(0, 99, 0, 109);
-
-        final RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 0}, new int[]{50, 50});
+        RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 0}, new int[]{50, 50});
         assertEquals(1, affectedTileLocations.length);
+        assertEquals(0, affectedTileLocations[0].getCacheCol());
+        assertEquals(0, affectedTileLocations[0].getCacheRow());
+
+        affectedTileLocations = cache.getAffectedTileLocations(new int[]{410, 30}, new int[]{50, 20});
+        assertEquals(2, affectedTileLocations.length);
+        assertEquals(0, affectedTileLocations[0].getCacheCol());
+        assertEquals(3, affectedTileLocations[0].getCacheRow());
+        assertEquals(0, affectedTileLocations[1].getCacheCol());
+        assertEquals(4, affectedTileLocations[1].getCacheRow());
     }
 
     @Test
     public void testGetAffectedTileLocations_cacheMiss() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
-        final VariableCache2D cache = new VariableCache2D(variableDescriptor);
+        final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
 
-        cache.getCacheData()[0][0] = new CacheData2D(0, 59, 0, 109);
-        cache.getCacheData()[0][1] = new CacheData2D(60, 99, 0, 109);
+        // right outside
+        RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 200}, new int[]{50, 50});
+        assertEquals(0, affectedTileLocations.length);
 
-        final RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{200, 0}, new int[]{50, 50});
+        // left outside
+        affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, -100}, new int[]{50, 50});
+        assertEquals(0, affectedTileLocations.length);
+
+        // bottom outside
+        affectedTileLocations = cache.getAffectedTileLocations(new int[]{600, 0}, new int[]{50, 50});
+        assertEquals(0, affectedTileLocations.length);
+
+        // top outside
+        affectedTileLocations = cache.getAffectedTileLocations(new int[]{-200, 0}, new int[]{50, 50});
         assertEquals(0, affectedTileLocations.length);
     }
 

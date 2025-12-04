@@ -1,5 +1,10 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
+
+import java.awt.*;
+import java.io.IOException;
+
 class CacheData2D {
 
     private final int xMin;
@@ -7,11 +12,20 @@ class CacheData2D {
     private final int yMin;
     private final int yMax;
 
+    private ProductData data;
+    private Rectangle boundingRect;
+    private CacheDataProvider cacheDataProvider;
+
     CacheData2D(int xMin, int xMax, int yMin, int yMax) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
         this.yMax = yMax;
+        boundingRect = null;
+    }
+
+    public void setCacheDataProvider(CacheDataProvider cacheDataProvider) {
+        this.cacheDataProvider = cacheDataProvider;
     }
 
     boolean intersects(int[] offsets, int[] shapes) {
@@ -32,5 +46,64 @@ class CacheData2D {
 
     boolean inside_x(int x) {
         return x >= xMin && x <= xMax;
+    }
+
+    int getxMin() {
+        return xMin;
+    }
+
+    int getxMax() {
+        return xMax;
+    }
+
+    int getyMin() {
+        return yMin;
+    }
+
+    int getyMax() {
+        return yMax;
+    }
+
+    void copyData(int[] offsets, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) throws IOException {
+        ensureData();
+
+        final int cacheWidth = getBoundingRect().width;
+        copyDataBuffer(offsets, cacheWidth, data, targetOffsets, targetShapes, targetWidth, targetData);
+    }
+
+    @SuppressWarnings("SuspiciousSystemArraycopy")
+    // package access for testing only tb 2025-12-04
+    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) {
+        final int numLines = targetShapes[0];
+        final int numCols = targetShapes[1];
+
+        int srcOffset = offsets[0] * srcWidth + offsets[1];
+        int destOffset = targetOffsets[0] * targetWidth + targetOffsets[1];
+        for (int line = 0; line < numLines; line++) {
+            System.arraycopy(cacheBuffer.getElems(), srcOffset, targetData.getElems(), destOffset, numCols);
+            srcOffset += srcWidth;
+            destOffset += targetWidth;
+        }
+    }
+
+    private void ensureData() throws IOException {
+        if (data == null) {
+            // @ todo read from interface tb 2025-12-02
+            String name = "geolocation_data/height";
+            int[] offsets = {yMin, xMin};
+            final Rectangle bounds = getBoundingRect();
+            int[] shapes = {bounds.height, bounds.width};
+            // @ todo tb 2025-12-02
+            // dataType!
+            // scale or not?
+            data = cacheDataProvider.readCacheBlock(name, offsets, shapes, data);
+        }
+    }
+
+    Rectangle getBoundingRect() {
+        if (boundingRect == null) {
+            boundingRect = new Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+        }
+        return boundingRect;
     }
 }

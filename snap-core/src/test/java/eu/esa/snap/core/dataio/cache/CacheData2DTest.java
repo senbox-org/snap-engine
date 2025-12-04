@@ -1,9 +1,11 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.awt.*;
+
+import static org.junit.Assert.*;
 
 public class CacheData2DTest {
 
@@ -104,5 +106,208 @@ public class CacheData2DTest {
 
         assertFalse(cacheData2D.inside_x(99));
         assertFalse(cacheData2D.inside_x(200));
+    }
+
+    @Test
+    public void testGetBoundingRect() {
+        final CacheData2D cacheData2D = new CacheData2D(150, 249, 460, 509);
+        final Rectangle rect = cacheData2D.getBoundingRect();
+        assertEquals(150, rect.x);
+        assertEquals(460, rect.y);
+        assertEquals(100, rect.width);
+        assertEquals(50, rect.height);
+    }
+
+    @Test
+    public void testCopyDataBuffer_requestCompletelyInCache() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT8, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{0, 0};
+
+        // 10x10 upper left corner, byte
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT8, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 0};
+        int[] dstShapes = new int[]{10, 10};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(1, targetBuffer.getElemIntAt(1));
+        assertEquals(15, targetBuffer.getElemIntAt(10));
+        assertEquals(31, targetBuffer.getElemIntAt(21));
+
+        // 10x10 shifted by 3 in x-dir, byte
+        srcOffsets = new int[]{0, 3};
+        dstOffsets = new int[]{0, 0};
+        dstShapes = new int[]{10, 10};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(3, targetBuffer.getElemIntAt(0));
+        assertEquals(4, targetBuffer.getElemIntAt(1));
+        assertEquals(18, targetBuffer.getElemIntAt(10));
+        assertEquals(34, targetBuffer.getElemIntAt(21));
+    }
+
+    @Test
+    public void testCopyDataBuffer_outLeft() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{7, 0};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 2};
+        int[] dstShapes = new int[]{10, 8};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(105, targetBuffer.getElemIntAt(2));
+        assertEquals(120, targetBuffer.getElemIntAt(12));
+        assertEquals(247, targetBuffer.getElemIntAt(99));
+    }
+
+    @Test
+    public void testCopyDataBuffer_upperLeftCorner() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{0, 0};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{4, 3};
+        int[] dstShapes = new int[]{6, 7};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(43));
+        assertEquals(1, targetBuffer.getElemIntAt(44));
+        assertEquals(75, targetBuffer.getElemIntAt(93));
+        assertEquals(76, targetBuffer.getElemIntAt(94));
+        assertEquals(81, targetBuffer.getElemIntAt(99));
+    }
+
+    @Test
+    public void testCopyDataBuffer_outTop() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{0, 4};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{8, 0};
+        int[] dstShapes = new int[]{2, 10};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(0, targetBuffer.getElemIntAt(1));
+        assertEquals(4, targetBuffer.getElemIntAt(80));
+        assertEquals(5, targetBuffer.getElemIntAt(81));
+        assertEquals(28, targetBuffer.getElemIntAt(99));
+    }
+
+    @Test
+    public void testCopyDataBuffer_upperRightCorner() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{0, 11};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{3, 0};
+        int[] dstShapes = new int[]{7, 4};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(11, targetBuffer.getElemIntAt(30));
+        assertEquals(12, targetBuffer.getElemIntAt(31));
+        assertEquals(101, targetBuffer.getElemIntAt(90));
+        assertEquals(104, targetBuffer.getElemIntAt(93));
+        assertEquals(0, targetBuffer.getElemIntAt(95));
+    }
+
+    @Test
+    public void testCopyDataBuffer_outRight() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT64, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{6, 9};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT64, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 0};
+        int[] dstShapes = new int[]{10, 6};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(99, targetBuffer.getElemIntAt(0));
+        assertEquals(100, targetBuffer.getElemIntAt(1));
+        assertEquals(104, targetBuffer.getElemIntAt(5));
+        assertEquals(0, targetBuffer.getElemIntAt(6));
+        assertEquals(234, targetBuffer.getElemIntAt(90));
+        assertEquals(239, targetBuffer.getElemIntAt(95));
+        assertEquals(0, targetBuffer.getElemIntAt(99));
+    }
+
+    @Test
+    public void testCopyDataBuffer_lowerRightCorner() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{14, 10};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT16, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 0};
+        int[] dstShapes = new int[]{5, 5};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(220, targetBuffer.getElemIntAt(0));
+        assertEquals(224, targetBuffer.getElemIntAt(4));
+        assertEquals(0, targetBuffer.getElemIntAt(5));
+        assertEquals(280, targetBuffer.getElemIntAt(40));
+        assertEquals(284, targetBuffer.getElemIntAt(44));
+        assertEquals(0, targetBuffer.getElemIntAt(45));
+    }
+
+    @Test
+    public void testCopyDataBuffer_outBottom() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT32, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{16, 3};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT32, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 0};
+        int[] dstShapes = new int[]{4, 10};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(243, targetBuffer.getElemIntAt(0));
+        assertEquals(244, targetBuffer.getElemIntAt(1));
+        assertEquals(252, targetBuffer.getElemIntAt(9));
+        assertEquals(288, targetBuffer.getElemIntAt(30));
+        assertEquals(0, targetBuffer.getElemIntAt(40));
+        assertEquals(0, targetBuffer.getElemIntAt(45));
+    }
+
+    @Test
+    public void testCopyDataBuffer_lowerLeftCorner() {
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
+        final int cacheWidth = 15;
+        int[] srcOffsets = new int[]{19, 0};
+
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT16, 100);
+        final int targetWidth = 10;
+        int[] dstOffsets = new int[]{0, 9};
+        int[] dstShapes = new int[]{1, 1};
+
+        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(285, targetBuffer.getElemIntAt(9));
+        assertEquals(0, targetBuffer.getElemIntAt(10));
+        assertEquals(0, targetBuffer.getElemIntAt(19));
+    }
+
+    private static ProductData createPreparedBuffer(int dataType, int numElems) {
+        final ProductData productData = ProductData.createInstance(dataType, numElems);
+        for (int i = 0; i < numElems; i++) {
+            productData.setElemIntAt(i, i);
+        }
+        return productData;
     }
 }
