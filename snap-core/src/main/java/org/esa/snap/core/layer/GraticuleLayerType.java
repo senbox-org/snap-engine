@@ -376,7 +376,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_FLIP_WARNING_COLOR_LABEL = "Flip Warning Color";
     public static final String PROPERTY_FLIP_WARNING_COLOR_TOOLTIP = "Color to use when inverted/flipped mappings are detected";
     private static final String PROPERTY_FLIP_WARNING_COLOR_ALIAS = PROPERTY_ROOT + "flipWarningColor";
-    public static final Color PROPERTY_FLIP_WARNING_COLOR_DEFAULT = new Color(200,0,0);
+    public static final Color PROPERTY_FLIP_WARNING_COLOR_DEFAULT = new Color(180,0,0);
     public static final Class PROPERTY_FLIP_WARNING_COLOR_TYPE = Color.class;
 
 
