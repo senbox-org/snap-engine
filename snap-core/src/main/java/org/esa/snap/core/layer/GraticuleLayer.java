@@ -149,7 +149,8 @@ public class GraticuleLayer extends Layer {
                             drawTickMarks(g2d, graticule.getTickPointsNorth(), Graticule.TextLocation.NORTH, false);
                         }
 
-                        drawTextLabels(g2d, textGlyphsNorth, Graticule.TextLocation.NORTH, false, raster);
+
+                        drawTextLabels(g2d, textGlyphsNorth, Graticule.TextLocation.NORTH, false, raster, graticule.isFlippedLons());
                     }
                 }
 
@@ -160,7 +161,7 @@ public class GraticuleLayer extends Layer {
                         if (isTickmarksShow()) {
                             drawTickMarks(g2d, graticule.getTickPointsSouth(), Graticule.TextLocation.SOUTH, false);
                         }
-                        drawTextLabels(g2d, textGlyphsSouth, Graticule.TextLocation.SOUTH, false, raster);
+                        drawTextLabels(g2d, textGlyphsSouth, Graticule.TextLocation.SOUTH, false, raster, graticule.isFlippedLons());
                     }
                 }
 
@@ -170,7 +171,7 @@ public class GraticuleLayer extends Layer {
                         if (isTickmarksShow()) {
                             drawTickMarks(g2d, graticule.getTickPointsWest(), Graticule.TextLocation.WEST, false);
                         }
-                        drawTextLabels(g2d, textGlyphsWest, Graticule.TextLocation.WEST, false, raster);
+                        drawTextLabels(g2d, textGlyphsWest, Graticule.TextLocation.WEST, false, raster, graticule.isFlippedLats());
                     }
                 }
 
@@ -181,7 +182,7 @@ public class GraticuleLayer extends Layer {
                         if (isTickmarksShow()) {
                             drawTickMarks(g2d, graticule.getTickPointsEast(), Graticule.TextLocation.EAST, false);
                         }
-                        drawTextLabels(g2d, textGlyphsEast, Graticule.TextLocation.EAST, false, raster);
+                        drawTextLabels(g2d, textGlyphsEast, Graticule.TextLocation.EAST, false, raster, graticule.isFlippedLats());
                     }
                 }
 
@@ -250,7 +251,7 @@ public class GraticuleLayer extends Layer {
 
         final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
         if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.WEST, true, raster);
+            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.WEST, true, raster, false);
         }
     }
 
@@ -270,7 +271,7 @@ public class GraticuleLayer extends Layer {
 
         final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
         if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.EAST, true, raster);
+            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.EAST, true, raster, false);
         }
     }
 
@@ -290,7 +291,7 @@ public class GraticuleLayer extends Layer {
 
         final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
         if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.NORTH, true, raster);
+            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.NORTH, true, raster, false);
         }
     }
 
@@ -310,7 +311,7 @@ public class GraticuleLayer extends Layer {
 
         final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
         if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.SOUTH, true, raster);
+            drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.SOUTH, true, raster, false);
         }
     }
 
@@ -332,6 +333,11 @@ public class GraticuleLayer extends Layer {
             g2d.setComposite(getAlphaComposite(getGridlinesTransparency()));
         }
         g2d.setPaint(getGridlinesColor());
+
+//        if (graticule.isFlippedLats() || graticule.isFlippedLons()) {
+//            g2d.setPaint(Color.RED);
+//        }
+
 
 
         Stroke drawingStroke;
@@ -536,7 +542,8 @@ public class GraticuleLayer extends Layer {
                                 final Graticule.TextGlyph[] textGlyphs,
                                 Graticule.TextLocation textLocation,
                                 boolean isCorner,
-                                RasterDataNode raster) {
+                                RasterDataNode raster,
+                                boolean overrideColor) {
 
         double halfPixelCorrection = 0.0;
         if (!isCorner) {
@@ -549,6 +556,10 @@ public class GraticuleLayer extends Layer {
             g2d.setPaint(getLabelsColor());
         } else {
             g2d.setPaint(getLabelsColor());
+        }
+
+        if (overrideColor) {
+            g2d.setPaint(Color.RED);
         }
 
 

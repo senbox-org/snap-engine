@@ -95,6 +95,8 @@ public class Graticule {
     private final PixelPos[] _tickPointsSouth;
     private final PixelPos[] _tickPointsWest;
     private final PixelPos[] _tickPointsEast;
+    private final boolean _flippedLons;
+    private final boolean _flippedLats;
 
     public enum TextLocation {
         NORTH,
@@ -128,7 +130,9 @@ public class Graticule {
                       PixelPos[] tickPointsNorth,
                       PixelPos[] tickPointsSouth,
                       PixelPos[] tickPointsWest,
-                      PixelPos[] tickPointsEast
+                      PixelPos[] tickPointsEast,
+                      boolean flippedLats,
+                      boolean flippedLons
     ) {
         _linePaths = paths;
         _textGlyphsNorth = textGlyphsNorth;
@@ -141,12 +145,25 @@ public class Graticule {
         _tickPointsSouth = tickPointsSouth;
         _tickPointsWest = tickPointsWest;
         _tickPointsEast = tickPointsEast;
+        _flippedLats = flippedLats;
+        _flippedLons = flippedLons;
     }
 
 
     public GeneralPath[] getLinePaths() {
         return _linePaths;
     }
+
+    public boolean isFlippedLats() {
+        return _flippedLats;
+    }
+
+    public boolean isFlippedLons() {
+        return _flippedLons;
+    }
+
+
+
 
     public TextGlyph[] getTextGlyphsNorth() {
         return _textGlyphsNorth;
@@ -295,6 +312,9 @@ public class Graticule {
             final PixelPos[] tickPointsWest = createTickPoints(parallelsList, meridiansList, TextLocation.WEST);
             final PixelPos[] tickPointsEast = createTickPoints(parallelsList, meridiansList, TextLocation.EAST);
 
+            final boolean flippedLats = geoSpan.latDescending && !geoSpan.latAscending;
+            final boolean flippedLons = geoSpan.lonDescending && !geoSpan.lonAscending;
+
             return new Graticule(paths,
                     textGlyphsNorth,
                     textGlyphsSouth,
@@ -305,7 +325,9 @@ public class Graticule {
                     tickPointsNorth,
                     tickPointsSouth,
                     tickPointsWest,
-                    tickPointsEast);
+                    tickPointsEast,
+                    flippedLats,
+                    flippedLons);
         } else {
             return new Graticule(null,
                     null,
@@ -317,7 +339,9 @@ public class Graticule {
                     null,
                     null,
                     null,
-                    null);
+                    null,
+                    false,
+                    false);
         }
     }
 
@@ -2491,7 +2515,7 @@ public class Graticule {
                                     }
 
                                     currDirection = DIRECTION.DESCENDING;
-                                    ascending = true;
+                                    descending = true;
                                 }
                             }
 
