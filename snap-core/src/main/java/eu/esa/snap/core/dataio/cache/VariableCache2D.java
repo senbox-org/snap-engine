@@ -71,7 +71,8 @@ public class VariableCache2D {
             final int col = tileLocation.getCacheCol();
             final CacheData2D cacheData2D = cacheData[row][col];
 
-            cacheData2D.setCacheDataProvider(dataProvider); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
+            final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
+            cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
 
             final Rectangle cacheRect = cacheData2D.getBoundingRect();
             final Rectangle intersection = cacheRect.intersection(targetRect);

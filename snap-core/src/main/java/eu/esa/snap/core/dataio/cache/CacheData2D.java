@@ -14,7 +14,7 @@ class CacheData2D {
 
     private ProductData data;
     private Rectangle boundingRect;
-    private CacheDataProvider cacheDataProvider;
+    private CacheContext context;
 
     CacheData2D(int xMin, int xMax, int yMin, int yMax) {
         this.xMin = xMin;
@@ -24,8 +24,8 @@ class CacheData2D {
         boundingRect = null;
     }
 
-    public void setCacheDataProvider(CacheDataProvider cacheDataProvider) {
-        this.cacheDataProvider = cacheDataProvider;
+    public void setCacheContext(CacheContext context) {
+        this.context = context;
     }
 
     boolean intersects(int[] offsets, int[] shapes) {
@@ -64,6 +64,10 @@ class CacheData2D {
         return yMax;
     }
 
+    ProductData getData() {
+        return data;
+    }
+
     void copyData(int[] offsets, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) throws IOException {
         ensureData();
 
@@ -88,15 +92,15 @@ class CacheData2D {
 
     private void ensureData() throws IOException {
         if (data == null) {
-            // @ todo read from interface tb 2025-12-02
-            String name = "geolocation_data/height";
-            int[] offsets = {yMin, xMin};
+            final String name = context.getVariableDescriptor().name;
+            final int[] offsets = {yMin, xMin};
             final Rectangle bounds = getBoundingRect();
-            int[] shapes = {bounds.height, bounds.width};
+            final int[] shapes = {bounds.height, bounds.width};
             // @ todo tb 2025-12-02
             // dataType!
             // scale or not?
-            data = cacheDataProvider.readCacheBlock(name, offsets, shapes, data);
+            final CacheDataProvider dataProvider = context.getDataProvider();
+            data = dataProvider.readCacheBlock(name, offsets, shapes, data);
         }
     }
 

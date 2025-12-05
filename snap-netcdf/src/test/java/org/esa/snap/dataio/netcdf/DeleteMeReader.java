@@ -1,7 +1,10 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import eu.esa.snap.core.dataio.cache.*;
+import eu.esa.snap.core.dataio.cache.CacheDataProvider;
+import eu.esa.snap.core.dataio.cache.CacheManager;
+import eu.esa.snap.core.dataio.cache.ProductCache;
+import eu.esa.snap.core.dataio.cache.VariableDescriptor;
 import eu.esa.snap.core.datamodel.band.BandUsingReaderDirectly;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -10,8 +13,8 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import ucar.ma2.Array;
-import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -20,6 +23,8 @@ import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.esa.snap.dataio.netcdf.util.DataTypeUtils.getRasterDataType;
 
@@ -27,6 +32,7 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
 
     private NetcdfFile netcdfFile;
     private ProductCache productCache;
+    private final Map<String, String> variablePaths;
 
     /**
      * Constructs a new abstract product reader.
@@ -36,6 +42,10 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
      */
     protected DeleteMeReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
+
+        variablePaths = new HashMap<>();
+        variablePaths.put("height", "geolocation_data/height");
+        variablePaths.put("sensor_azimuth", "geolocation_data/sensor_azimuth");
     }
 
     @Override
@@ -54,12 +64,28 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         final int width = getDimensionLength("ccd_pixels");
         final int height = getDimensionLength("number_of_scans");
 
-        final Product product = new Product("dit", "dat", width, height, this);
+        final String productName = getProductName();
+        final Product product = new Product(productName, "dat", width, height, this);
 
         final Band heightBand = new BandUsingReaderDirectly("height", ProductData.TYPE_INT16, width, height);
         product.addBand(heightBand);
 
+        final Band sensorAzimuthBand = new BandUsingReaderDirectly("sensor_azimuth", ProductData.TYPE_INT16, width, height);
+        product.addBand(sensorAzimuthBand);
+
         return product;
+    }
+
+    private String getProductName() {
+        String productName;
+        final Attribute nameAttribute = netcdfFile.findAttribute("product_name");
+        if (nameAttribute != null) {
+            productName = nameAttribute.getStringValue();
+        } else {
+            // @todo 1 tb there must be code to extract a meaningful input name
+            productName = getInput().toString();
+        }
+        return productName;
     }
 
     private int getDimensionLength(String dimensionName) {
@@ -105,21 +131,26 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
     }
 
     @Override
-    public VariableDescriptor getVariableDescriptor(String variableName) {
-        final Variable heightVar = netcdfFile.findVariable("geolocation_data/height");
+    public VariableDescriptor getVariableDescriptor(String variableName) throws IOException {
+        // @todo 1 tb/tb foresee that it is not stored in mapping
+        final String ncPath = variablePaths.get(variableName);
+        final Variable netcdVariable = netcdfFile.findVariable(ncPath);
+        if (netcdVariable == null) {
+            throw new IOException("Variable not known: " + variableName);
+        }
 
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
-        variableDescriptor.dataType = getRasterDataType(heightVar.getDataType(), false);
+        variableDescriptor.dataType = getRasterDataType(netcdVariable.getDataType(), false);
 
-        int[] shape = heightVar.getShape();
+        int[] shape = netcdVariable.getShape();
 
         final Array chunkSizesValues;
-        final Attribute chunkSizes = heightVar.findAttribute("_ChunkSizes");
+        final Attribute chunkSizes = netcdVariable.findAttribute("_ChunkSizes");
         if (chunkSizes != null) {
             chunkSizesValues = chunkSizes.getValues();
         } else {
             // @todo 2 tb/tb missing default values? 2025-12-02
-            chunkSizesValues = Array.factory(heightVar.getDataType(), shape);
+            chunkSizesValues = Array.factory(netcdVariable.getDataType(), shape);
         }
 
         if (shape.length == 2) {
@@ -145,21 +176,26 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
 
     @Override
     public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+        // @todo 1 tb/tb foresee that it is not stored in mapping
+        final String netcdfPath = variablePaths.get(variableName);
+        final Variable netcdfVariable = netcdfFile.findVariable(netcdfPath);
+        // todo 2 tb/tb shall we check for null? Should never happen, if so it is a programming error.
+        final int rasterDataType = getRasterDataType(netcdfVariable);
+
         System.out.println(variableName + "  x: " + offsets[1] + " y: " + offsets[0] + " width: " + shapes[1] + " height: " + shapes[0]);
         if (targetData == null) {
-            // @todo 1 tb/tb allocate appropriate buffer - data type, width, height
-            targetData = ProductData.createInstance(ProductData.TYPE_INT16, shapes[0] * shapes[1]);
+            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
         }
 
-        // @todo 1 deduce NC path from variables name - eventually decode layer
-        final Variable heightVar = netcdfFile.findVariable(variableName);
-        Array rawBuffer = null;
+        Array rawBuffer;
         try {
-            rawBuffer = heightVar.read(offsets, shapes);
+            rawBuffer = netcdfVariable.read(offsets, shapes);
         } catch (InvalidRangeException e) {
             throw new IOException(e);
         }
-        // @todo 1 tb/tb check if scaled - if so: convert
+        // @todo 2 tb/tb foresee that users may want the raw data 2025-12-05
+        rawBuffer = ReaderUtils.scaleArray(rawBuffer, netcdfVariable);
+
         // @todo 1 tb/tb allocate depending on data type
         final short[] tileData = (short[]) rawBuffer.copyTo1DJavaArray();
         targetData.setElems(tileData);

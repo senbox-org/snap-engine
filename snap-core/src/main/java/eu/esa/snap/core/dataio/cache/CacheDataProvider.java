@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public interface CacheDataProvider {
 
-    VariableDescriptor getVariableDescriptor(String variableName);
+    VariableDescriptor getVariableDescriptor(String variableName) throws IOException;
 
     ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException;
 }

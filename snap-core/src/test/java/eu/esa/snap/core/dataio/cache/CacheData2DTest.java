@@ -4,8 +4,10 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import java.awt.*;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class CacheData2DTest {
 
@@ -303,11 +305,36 @@ public class CacheData2DTest {
         assertEquals(0, targetBuffer.getElemIntAt(19));
     }
 
+    @Test
+    public void testEnsureData() throws IOException {
+        final CacheDataProvider cacheDataProvider = new MockProvider();
+        final CacheData2D cacheData2D = new CacheData2D(200, 209, 350, 359);
+
+        CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        cacheData2D.setCacheContext(cacheContext);
+        assertNull(cacheData2D.getData());
+
+        cacheData2D.copyData(new int[]{0,0}, new int[]{5,5}, new int[]{5,5},10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+        assertNotNull(cacheData2D.getData());
+    }
+
     private static ProductData createPreparedBuffer(int dataType, int numElems) {
         final ProductData productData = ProductData.createInstance(dataType, numElems);
         for (int i = 0; i < numElems; i++) {
             productData.setElemIntAt(i, i);
         }
         return productData;
+    }
+
+    private static class MockProvider implements CacheDataProvider {
+        @Override
+        public VariableDescriptor getVariableDescriptor(String variableName) {
+            throw new RuntimeException("not implemented");
+        }
+
+        @Override
+        public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+            return ProductData.createInstance(ProductData.TYPE_UINT16, 100);
+        }
     }
 }
