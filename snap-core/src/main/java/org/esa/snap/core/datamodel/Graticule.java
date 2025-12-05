@@ -84,7 +84,8 @@ public class Graticule {
     private static final double ONE_MINUTE = 1.0 / 60.0;
     private static final double TEN_MINUTES = 10.0 / 60.0;
 
-    private final GeneralPath[] _linePaths;
+    private final GeneralPath[] _meridiansLinePaths;
+    private final GeneralPath[] _parallelsLinePaths;
     private final TextGlyph[] _textGlyphsNorth;
     private final TextGlyph[] _textGlyphsSouth;
     private final TextGlyph[] _textGlyphsWest;
@@ -95,6 +96,8 @@ public class Graticule {
     private final PixelPos[] _tickPointsSouth;
     private final PixelPos[] _tickPointsWest;
     private final PixelPos[] _tickPointsEast;
+    private final boolean _flippedLons;
+    private final boolean _flippedLats;
 
     public enum TextLocation {
         NORTH,
@@ -118,7 +121,8 @@ public class Graticule {
     public static int BOTTOM_RIGHT_CORNER_INDEX = 2;
     public static int BOTTOM_LEFT_CORNER_INDEX = 3;
 
-    private Graticule(GeneralPath[] paths,
+    private Graticule(GeneralPath[] meridiansLinePaths,
+                      GeneralPath[] parallelsLinePaths,
                       TextGlyph[] textGlyphsNorth,
                       TextGlyph[] textGlyphsSouth,
                       TextGlyph[] textGlyphsWest,
@@ -128,9 +132,12 @@ public class Graticule {
                       PixelPos[] tickPointsNorth,
                       PixelPos[] tickPointsSouth,
                       PixelPos[] tickPointsWest,
-                      PixelPos[] tickPointsEast
+                      PixelPos[] tickPointsEast,
+                      boolean flippedLats,
+                      boolean flippedLons
     ) {
-        _linePaths = paths;
+        _meridiansLinePaths = meridiansLinePaths;
+        _parallelsLinePaths = parallelsLinePaths;
         _textGlyphsNorth = textGlyphsNorth;
         _textGlyphsSouth = textGlyphsSouth;
         _textGlyphsWest = textGlyphsWest;
@@ -141,12 +148,29 @@ public class Graticule {
         _tickPointsSouth = tickPointsSouth;
         _tickPointsWest = tickPointsWest;
         _tickPointsEast = tickPointsEast;
+        _flippedLats = flippedLats;
+        _flippedLons = flippedLons;
     }
 
 
-    public GeneralPath[] getLinePaths() {
-        return _linePaths;
+    public GeneralPath[] getMeridiansLinePaths() {
+        return _meridiansLinePaths;
     }
+
+    public GeneralPath[] getParallelsLinePaths() {
+        return _parallelsLinePaths;
+    }
+
+    public boolean isFlippedLats() {
+        return _flippedLats;
+    }
+
+    public boolean isFlippedLons() {
+        return _flippedLons;
+    }
+
+
+
 
     public TextGlyph[] getTextGlyphsNorth() {
         return _textGlyphsNorth;
@@ -280,7 +304,8 @@ public class Graticule {
 
         // todo maybe make this ||
         if (parallelsList.size() > 0 || meridiansList.size() > 0) {
-            final GeneralPath[] paths = createPaths(parallelsList, meridiansList);
+            final GeneralPath[] meridiansPaths = createPathsNew(meridiansList);
+            final GeneralPath[] parallelsPaths = createPathsNew(parallelsList);
 
             final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelsList, meridiansList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
             final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelsList, meridiansList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
@@ -295,7 +320,11 @@ public class Graticule {
             final PixelPos[] tickPointsWest = createTickPoints(parallelsList, meridiansList, TextLocation.WEST);
             final PixelPos[] tickPointsEast = createTickPoints(parallelsList, meridiansList, TextLocation.EAST);
 
-            return new Graticule(paths,
+            final boolean flippedLats = geoSpan.latDescending && !geoSpan.latAscending;
+            final boolean flippedLons = geoSpan.lonDescending && !geoSpan.lonAscending;
+
+            return new Graticule(meridiansPaths,
+                    parallelsPaths,
                     textGlyphsNorth,
                     textGlyphsSouth,
                     textGlyphsWest,
@@ -305,7 +334,9 @@ public class Graticule {
                     tickPointsNorth,
                     tickPointsSouth,
                     tickPointsWest,
-                    tickPointsEast);
+                    tickPointsEast,
+                    flippedLats,
+                    flippedLons);
         } else {
             return new Graticule(null,
                     null,
@@ -317,7 +348,10 @@ public class Graticule {
                     null,
                     null,
                     null,
-                    null);
+                    null,
+                    null,
+                    false,
+                    false);
         }
     }
 
@@ -542,6 +576,149 @@ public class Graticule {
 
 
     /**
+     * Creates a list of longitudes to attempt to use as the gridlines.
+     *
+     * @param geoSpan geoSpan of the scene
+     * @param lonMajorStep the grid cell size in longitudinal direction
+     * @param PARALLELS_COUNT_MAX maximum size of list
+     * @return list of latitudes to attempt to use as the gridlines.
+     */
+    private  static ArrayList<Double> getMeridiansLonsArrayList(GeoSpan geoSpan,
+                                                                double lonMajorStep,
+                                                                int PARALLELS_COUNT_MAX) {
+
+        ArrayList<Double> meridiansLonsArrayList = new ArrayList<Double>();
+
+
+        boolean forceFullEarth = false;
+
+        double min;
+        double max;
+
+        if (geoSpan.lonSpan >= 90) {
+            forceFullEarth = true;
+            min = -180;
+            max = 180;
+        } else {
+            if (geoSpan.lonAscending && !geoSpan.lonDescending) {
+                min = Math.floor(geoSpan.firstLon);
+                max = Math.ceil(geoSpan.lastLon);
+            } else if (geoSpan.lonDescending && !geoSpan.lonAscending) {
+                min = Math.floor(geoSpan.lastLon);
+                max = Math.ceil(geoSpan.firstLon);
+            } else {
+                forceFullEarth = true;
+                min = -180;
+                max = 180;
+            }
+        }
+
+
+
+
+        // increase min and max to add a slight buffer to be able to potentially add lines just outside the actual scene area.
+        min = min - lonMajorStep;
+        max = max + lonMajorStep;
+
+        // restrict min to a valid value
+        if (min < -180) {
+            min = -180;
+        }
+
+        // restrict min to a valid value
+        if (max > 180) {
+            max = 180;
+        }
+
+
+
+        int parallelsAddedCount = 0;
+
+        if (geoSpan.datelineCrossed && !forceFullEarth) {
+
+            // East of crossing
+            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+                if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                    meridiansLonsArrayList.add(meridianLon);
+                    parallelsAddedCount++;
+                }
+            }
+
+
+            // West of crossing
+            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+                if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                    meridiansLonsArrayList.add(meridianLon);
+                    parallelsAddedCount++;
+                }
+            }
+
+
+        } else {
+            // Eastern hemisphere
+            if (max >= 0) {
+                for (double meridianLon = 0; meridianLon <= max; meridianLon += lonMajorStep) {
+                    if (meridianLon >= min) {
+                        if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                            meridiansLonsArrayList.add(meridianLon);
+                            parallelsAddedCount++;
+                        }
+                    }
+                }
+            }
+
+
+            // Western hemisphere
+            if (min < 0) {
+                for (double meridianLon = 0 - lonMajorStep; meridianLon >= min; meridianLon -= lonMajorStep) {
+                    if (meridianLon <= max) {
+                        if (parallelsAddedCount <= PARALLELS_COUNT_MAX) {
+                            meridiansLonsArrayList.add(meridianLon);
+                            parallelsAddedCount++;
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+
+
+
+
+
+//        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
+//        if (geoSpan.datelineCrossed) {
+//
+//            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//
+//
+//            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        } else {
+//            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        }
+//
+//        // todo temp testing
+//        meridianLonsArrayList.add(-70.0);
+//        meridianLonsArrayList.add(-75.0);
+//        meridianLonsArrayList.add(-80.0);
+//        meridianLonsArrayList.add(-85.0);
+//        meridianLonsArrayList.add(-90.0);
+//        meridianLonsArrayList.add(-95.0);
+
+
+
+        return meridiansLonsArrayList;
+
+    }
+    /**
      * Creates a list of latitudes to attempt to use as the gridlines.
      *
      * @param geoSpan geoSpan of the scene
@@ -667,89 +844,105 @@ public class Graticule {
             minorSteps = maxSteps;
         }
 
-        double min = Math.floor(geoSpan.firstLon);
-        double max = Math.ceil(geoSpan.lastLon);
 
+        int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
+        // Get a list of longitudes to attempt to use as the gridlines.
+        ArrayList<Double> meridianLonsArrayList = getMeridiansLonsArrayList(geoSpan, lonMajorStep, MERIDIANS_COUNT_MAX);
 
-        boolean forceFullEarth = false;
-
-        if (geoSpan.lonSpan >= 90 && forceFullEarth) {
-            // big enough so use whole earth
-            min = -180;
-            max = 180;
-        } else if (geoSpan.lonSpan >= 1) {
-
-            double minTmp;
-            double maxTmp;
-
-            if (lonMajorStep >= 1) {
-                // in this case: check for every lon across the full earth
-                minTmp = -180;
-                maxTmp = 180;
-            } else {
-                //  in this case: limit check to the lon range of the scene
-                minTmp = Math.floor(geoSpan.firstLon);
-                maxTmp = Math.ceil(geoSpan.lastLon);
-            }
-
-            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
-                if (i >= (geoSpan.firstLon)) {
-                    min = i - lonMajorStep;
-                    if (min < -180) {
-                        min = -180;
-                    }
-                    break;
-                }
-            }
-
-            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
-                if (i >= (geoSpan.lastLon)) {
-                    max = i + lonMajorStep;
-                    if (max > 180) {
-                        max = 180;
-                    }
-                    break;
-                }
-            }
-
-        }
-
-
-        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
-        if (geoSpan.datelineCrossed) {
-
-            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
 
 //
+//        double min = Math.floor(geoSpan.firstLon);
+//        double max = Math.ceil(geoSpan.lastLon);
 //
-//            boolean mx180Found = false;
-//            for (double mx = min; mx <= 180; mx += lonMajorStep) {
-//                meridianLonsArrayList.add(mx);
 //
-//                if (mx == 180) {
-//                    mx180Found = true;
+//        boolean forceFullEarth = false;
+//
+//        if (geoSpan.lonSpan >= 90 && forceFullEarth) {
+//            // big enough so use whole earth
+//            min = -180;
+//            max = 180;
+//        } else if (geoSpan.lonSpan >= 1) {
+//
+//            double minTmp;
+//            double maxTmp;
+//
+//            if (lonMajorStep >= 1) {
+//                // in this case: check for every lon across the full earth
+//                minTmp = -180;
+//                maxTmp = 180;
+//            } else {
+//                //  in this case: limit check to the lon range of the scene
+//                minTmp = Math.floor(geoSpan.firstLon);
+//                maxTmp = Math.ceil(geoSpan.lastLon);
+//            }
+
+//
+//            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
+//                if (i >= (geoSpan.firstLon)) {
+//                    min = i - lonMajorStep;
+//                    if (min < -180) {
+//                        min = -180;
+//                    }
+//                    break;
 //                }
 //            }
 //
-//            if (!mx180Found) {
-//                meridianLonsArrayList.add(180.0);
+//            for (double i = minTmp; i <= maxTmp; i += lonMajorStep) {
+//                if (i >= (geoSpan.lastLon)) {
+//                    max = i + lonMajorStep;
+//                    if (max > 180) {
+//                        max = 180;
+//                    }
+//                    break;
+//                }
+//            }
+//
+//        }
+//
+//
+//        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
+//        if (geoSpan.datelineCrossed) {
+//
+//            for (double meridianLon = 180; meridianLon >= min; meridianLon -= lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//
+////
+////
+////            boolean mx180Found = false;
+////            for (double mx = min; mx <= 180; mx += lonMajorStep) {
+////                meridianLonsArrayList.add(mx);
+////
+////                if (mx == 180) {
+////                    mx180Found = true;
+////                }
+////            }
+////
+////            if (!mx180Found) {
+////                meridianLonsArrayList.add(180.0);
+////            }
+//
+//            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
+//            }
+//        } else {
+//            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
+//                meridianLonsArrayList.add(meridianLon);
 //            }
 
-            for (double meridianLon = -180 + lonMajorStep; meridianLon <= max; meridianLon += lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
-        } else {
-            for (double meridianLon = min; meridianLon <= max; meridianLon += lonMajorStep) {
-                meridianLonsArrayList.add(meridianLon);
-            }
-        }
+//        }
+//
+//        // todo temp testing
+//        meridianLonsArrayList.add(-70.0);
+//        meridianLonsArrayList.add(-75.0);
+//        meridianLonsArrayList.add(-80.0);
+//        meridianLonsArrayList.add(-85.0);
+//        meridianLonsArrayList.add(-90.0);
+//        meridianLonsArrayList.add(-95.0);
 
 
         // loop through each desired meridian lon
         int meridiansCount = 0;
-        int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
         for (double meridianLon : meridianLonsArrayList) {
 
             List<Coord> meridian1 = new ArrayList<>();
@@ -801,6 +994,11 @@ public class Graticule {
                                     double tolerance,
                                     boolean interpolate) {
 
+        enum DIRECTION {
+            NOT_SET,
+            ASCENDING,
+            DESCENDING
+        }
         Coord coord1 = null;
         Coord coord2 = null; // this would be a second occurrence, for instance a 90 rotated global map with -90 at far left and -90 at far right
 
@@ -815,6 +1013,10 @@ public class Graticule {
         PixelPos pixelPosPrev = null;
         GeoPos geoPosPrev = null;
 
+        DIRECTION direction = DIRECTION.NOT_SET;
+        boolean directionChange = false;
+        boolean directionChangeMaintained = false;
+        boolean datelineJustCrossed = false;
         double deltaPixel = 0;
         double toleranceDegrees = 0;
 
@@ -829,11 +1031,45 @@ public class Graticule {
 
             if (validLon(lonCurr)) {
                 if (geoPosPrev != null) {
-                    deltaPixel = Math.abs(geoPosCurr.lon - geoPosPrev.lon);
+                    deltaPixel = geoPosCurr.lon - geoPosPrev.lon;
                 } else {
                     PixelPos pixPosNext = new PixelPos(pixelX + 1, pixelY);
                     GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
-                    deltaPixel = Math.abs(geoPosNext.lon - geoPosCurr.lon);
+                    deltaPixel = geoPosNext.lon - geoPosCurr.lon;
+                }
+
+
+                // establish direction and whether direction has changed this time
+
+                // todo maybe add a 2nd check for maintained direction change?
+                if (Math.abs(deltaPixel) < 180) {
+                    if (deltaPixel >= 0) {
+                        if (direction != DIRECTION.NOT_SET && direction == DIRECTION.DESCENDING) {
+                            if (directionChange == true) {
+                                directionChangeMaintained = true;
+                                directionChange = false;
+                            } else {
+                                directionChange = true;
+                            }
+                        }
+                        // todo maybe not maintained?
+                        direction = DIRECTION.ASCENDING;
+                    } else {
+                        if (direction != DIRECTION.NOT_SET && direction == DIRECTION.ASCENDING) {
+                            if (directionChange == true) {
+                                directionChangeMaintained = true;
+                                directionChange = false;
+                            } else {
+                                directionChange = true;
+                            }
+                        }
+                        // todo maybe not maintained?
+                        direction = DIRECTION.DESCENDING;
+                    }
+
+                    datelineJustCrossed = false;
+                } else {
+                    datelineJustCrossed = true;
                 }
 
                 if (lonPrev == NAN_PIXEL) {
@@ -866,9 +1102,14 @@ public class Graticule {
                         }
                     }
                 } else {
-                    if (lonCurr > lonPrev) {
+                    // this is not the first geo pixel and probably not the last (but could be the last)
+
+
+                    if ((direction == DIRECTION.ASCENDING && lonCurr > lonPrev)
+                    || (direction == DIRECTION.DESCENDING && lonCurr < lonPrev)) {
                         // dateline not crossed
-                        if (meridianLon > lonPrev && meridianLon <= lonCurr) {
+                        if ((direction == DIRECTION.ASCENDING && meridianLon > lonPrev && meridianLon <= lonCurr) ||
+                                (direction == DIRECTION.DESCENDING && meridianLon < lonPrev && meridianLon >= lonCurr)) {
                             Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
                             Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
 
@@ -891,11 +1132,16 @@ public class Graticule {
                             }
                         }
 
-                    } else if (lonCurr < lonPrev) {
+                    } else if (datelineJustCrossed) {
                         // dateline just crossed
 
                         if (meridianLon == 180) {
-                            PixelPos pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
+                            PixelPos pixelPosPrev2Back;
+                            if (direction == DIRECTION.ASCENDING) {
+                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
+                            } else {
+                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x + 1, pixelPosPrev.y);
+                            }
                             GeoPos geoPosPrev2Back = raster.getGeoCoding().getGeoPos(pixelPosPrev2Back, null);
 
                             Coord coordPrev2Back = new Coord(geoPosPrev2Back, pixelPosPrev2Back);
@@ -1120,7 +1366,7 @@ public class Graticule {
                             }
                         }
                     } else {
-                        // pole crossed ?
+                        // skipping initial direction change in case bow-tie effect or some other artifact
                     }
 
                     if (matchFound) {
@@ -1503,6 +1749,11 @@ public class Graticule {
         }
     }
 
+    private static GeneralPath[] createPathsNew(List<List<Coord>> pathsList) {
+        final ArrayList<GeneralPath> generalPathList = new ArrayList<GeneralPath>();
+        addToPath(pathsList, generalPathList);
+        return generalPathList.toArray(new GeneralPath[0]);
+    }
 
     private static GeneralPath[] createPaths(List<List<Coord>> parallelList, List<List<Coord>> meridianList) {
         final ArrayList<GeneralPath> generalPathList = new ArrayList<GeneralPath>();
@@ -2279,7 +2530,7 @@ public class Graticule {
                                     }
 
                                     currDirection = DIRECTION.DESCENDING;
-                                    ascending = true;
+                                    descending = true;
                                 }
                             }
 
