@@ -99,6 +99,7 @@ public class GraticuleLayer extends Layer {
         if (graticule == null) {
             graticule = Graticule.create(raster,
                     getNumGridLines(),
+                    getNumMinorSteps(),
                     getGridSpacingLat(),
                     getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
         }
@@ -897,6 +898,7 @@ public class GraticuleLayer extends Layer {
                 propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -923,6 +925,13 @@ public class GraticuleLayer extends Layer {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME,
                 GraticuleLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT);
     }
+
+    private int getNumMinorSteps() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME,
+                GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT);
+    }
+
+
 
 
     private Color getGridlinesColor() {
@@ -995,21 +1004,27 @@ public class GraticuleLayer extends Layer {
     private double getPtsToPixelsMultiplier() {
 
         if (ptsToPixelsMultiplier == NULL_DOUBLE) {
-            final double PTS_PER_INCH = 72.0;
-            final double PAPER_HEIGHT = 11.0;
-            final double PAPER_WIDTH = 8.5;
+//            final double PTS_PER_INCH = 72.0;
+//            final double PAPER_HEIGHT = 11.0;
+//            final double PAPER_WIDTH = 8.5;
+//
+//            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
+//            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
+//
+//            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
+//                // use height
+//                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
+//            } else {
+//                // use width
+//                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
+//            }
 
-            double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
-            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
+            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2;
+//            double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
 
-            if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
-                // use height
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterHeight() / (PAPER_HEIGHT));
-            } else {
-                // use width
-                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
-            }
+            ptsToPixelsMultiplier = averageSideSize * 0.001;
         }
+
 
         return ptsToPixelsMultiplier;
     }

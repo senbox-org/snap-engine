@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import static org.esa.snap.core.util.SystemUtils.getApplicationContextId;
+
 /**
  * {@code Product} instances are an in-memory representation of a remote sensing data product. The product is more
  * an abstract hull containing references to the data of the product or readers to retrieve the data on demand. The
@@ -2777,8 +2779,35 @@ public class Product extends ProductNode implements Closeable {
     }
 
     private void addMask(VectorDataNode node) {
+        String PREFERENCE_KEY_MASK_COLOR_STRING_KEY = ".mask.color";
+        String PREFERENCE_KEY_MASK_COLOR_STRING_DEFAULT = "255,0,0";
+        String PREFERENCE_KEY_MASK_TRANSPARENCY_KEY = ".mask.transparency";
+        double PREFERENCE_KEY_MASK_TRANSPARENCY_DEFAULT = 0.5;
+        String colorString = Config.instance().preferences().get(getApplicationContextId() + PREFERENCE_KEY_MASK_COLOR_STRING_KEY, PREFERENCE_KEY_MASK_COLOR_STRING_DEFAULT);
+        double transparency = Config.instance().preferences().getDouble(getApplicationContextId() + PREFERENCE_KEY_MASK_TRANSPARENCY_KEY, PREFERENCE_KEY_MASK_TRANSPARENCY_DEFAULT);
+
+        Color defaultColor = null;
+        if (colorString != null) {
+            try {
+                String[] colorStringArray = colorString.split(",");
+
+                if (colorStringArray.length == 3) {
+                    int red = Integer.parseInt(colorStringArray[0]);
+                    int green = Integer.parseInt(colorStringArray[1]);
+                    int blue = Integer.parseInt(colorStringArray[2]);
+                    defaultColor = new Color(red,green,blue);
+                }
+            } catch (Exception e) {
+                defaultColor = Color.RED;
+
+            }
+        }
+        if (defaultColor == null) {
+            defaultColor = Color.RED;
+        }
+
         addMask(node.getName(), node,
-                "Mask derived from geometries in '" + node.getName() + "'", Color.RED, 0.5);
+                "Mask derived from geometries in '" + node.getName() + "'", defaultColor, transparency);
     }
 
     private void handleFeatureCollectionChange(ProductNodeEvent event) {
