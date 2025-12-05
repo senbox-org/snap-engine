@@ -356,6 +356,32 @@ public class GraticuleLayerType extends LayerType {
     public static final double PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_DEFAULT = 0.3;
     public static final Class PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_TYPE = Double.class;
 
+
+
+    // Property Settings: Flip Warning Section
+
+    public static final String PROPERTY_FLIP_WARNING_SECTION_KEY = PROPERTY_ROOT + ".flip.warning.section";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_ALIAS = PROPERTY_ROOT + "flipWarningSection";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_LABEL = "Warnings for Inverted/Flipped Mappings";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_TOOLTIP = "Alternate color to use when inverted/flipped mappings are detected";
+
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_KEY = PROPERTY_ROOT + ".flip.warning.enable";
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_LABEL = "Enable Flip Warning";
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_TOOLTIP = "Use the color 'Flip Warning Color' when inverted/flipped mappings are detected";
+    private static final String PROPERTY_FLIP_WARNING_ENABLE_ALIAS = PROPERTY_ROOT + "flipWarningEnable";
+    public static final boolean PROPERTY_FLIP_WARNING_ENABLE_DEFAULT = true;
+    public static final Class PROPERTY_FLIP_WARNING_ENABLE_TYPE = Boolean.class;
+
+    public static final String PROPERTY_FLIP_WARNING_COLOR_KEY = PROPERTY_ROOT + ".flip.warning.color";
+    public static final String PROPERTY_FLIP_WARNING_COLOR_LABEL = "Flip Warning Color";
+    public static final String PROPERTY_FLIP_WARNING_COLOR_TOOLTIP = "Color to use when inverted/flipped mappings are detected";
+    private static final String PROPERTY_FLIP_WARNING_COLOR_ALIAS = PROPERTY_ROOT + "flipWarningColor";
+    public static final Color PROPERTY_FLIP_WARNING_COLOR_DEFAULT = new Color(180,0,0);
+    public static final Class PROPERTY_FLIP_WARNING_COLOR_TYPE = Color.class;
+
+
+
+
     // ---------------------------------------------------------
 
     public static final String PROPERTY_NAME_RASTER = "raster";
@@ -648,6 +674,20 @@ public class GraticuleLayerType extends LayerType {
         vc.addProperty(tickmarkColorModel);
 
 
+
+        // Flip Warning
+
+        final Property flipWarningSectionModel = Property.create(PROPERTY_FLIP_WARNING_SECTION_KEY, Boolean.class, true, true);
+        flipWarningSectionModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_SECTION_ALIAS);
+        vc.addProperty(flipWarningSectionModel);
+
+        final Property flipWarningEnableModel = Property.create(PROPERTY_FLIP_WARNING_ENABLE_KEY, Boolean.class, PROPERTY_FLIP_WARNING_ENABLE_DEFAULT, true);
+        flipWarningEnableModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_ENABLE_ALIAS);
+        vc.addProperty(flipWarningEnableModel);
+
+        final Property flipWarningColorModel = Property.create(PROPERTY_FLIP_WARNING_COLOR_KEY, Color.class, PROPERTY_FLIP_WARNING_COLOR_DEFAULT, true);
+        flipWarningColorModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_COLOR_ALIAS);
+        vc.addProperty(flipWarningColorModel);
 
         return vc;
     }
