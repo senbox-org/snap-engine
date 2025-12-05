@@ -340,8 +340,8 @@ public class GraticuleLayer extends Layer {
         }
         g2d.setPaint(getGridlinesColor());
 
-        if (overrideColor) {
-            g2d.setPaint(Color.RED);
+        if (overrideColor && isFlipWarningEnable()) {
+            g2d.setPaint(getFlipWarningColor());
         }
 
 
@@ -569,8 +569,8 @@ public class GraticuleLayer extends Layer {
             g2d.setPaint(getLabelsColor());
         }
 
-        if (overrideColor) {
-            g2d.setPaint(Color.RED);
+        if (overrideColor && isFlipWarningEnable()) {
+            g2d.setPaint(getFlipWarningColor());
         }
 
 
@@ -817,8 +817,8 @@ public class GraticuleLayer extends Layer {
         Color origPaint = (Color) g2d.getPaint();
         g2d.setPaint(getTickmarksColor());
 
-        if (overrideColor) {
-            g2d.setPaint(Color.RED);
+        if (overrideColor && isFlipWarningEnable()) {
+            g2d.setPaint(getFlipWarningColor());
         }
 
 
@@ -1004,6 +1004,17 @@ public class GraticuleLayer extends Layer {
     private Color getTickmarksColor() {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_TICKMARKS_COLOR_NAME,
                 GraticuleLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT);
+    }
+
+
+    private boolean isFlipWarningEnable() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_FLIP_WARNING_ENABLE_KEY,
+                GraticuleLayerType.PROPERTY_FLIP_WARNING_ENABLE_DEFAULT);
+    }
+
+    private Color getFlipWarningColor() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_FLIP_WARNING_COLOR_KEY,
+                GraticuleLayerType.PROPERTY_FLIP_WARNING_COLOR_DEFAULT);
     }
 
 
