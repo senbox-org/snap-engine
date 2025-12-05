@@ -84,7 +84,8 @@ public class Graticule {
     private static final double ONE_MINUTE = 1.0 / 60.0;
     private static final double TEN_MINUTES = 10.0 / 60.0;
 
-    private final GeneralPath[] _linePaths;
+    private final GeneralPath[] _meridiansLinePaths;
+    private final GeneralPath[] _parallelsLinePaths;
     private final TextGlyph[] _textGlyphsNorth;
     private final TextGlyph[] _textGlyphsSouth;
     private final TextGlyph[] _textGlyphsWest;
@@ -120,7 +121,8 @@ public class Graticule {
     public static int BOTTOM_RIGHT_CORNER_INDEX = 2;
     public static int BOTTOM_LEFT_CORNER_INDEX = 3;
 
-    private Graticule(GeneralPath[] paths,
+    private Graticule(GeneralPath[] meridiansLinePaths,
+                      GeneralPath[] parallelsLinePaths,
                       TextGlyph[] textGlyphsNorth,
                       TextGlyph[] textGlyphsSouth,
                       TextGlyph[] textGlyphsWest,
@@ -134,7 +136,8 @@ public class Graticule {
                       boolean flippedLats,
                       boolean flippedLons
     ) {
-        _linePaths = paths;
+        _meridiansLinePaths = meridiansLinePaths;
+        _parallelsLinePaths = parallelsLinePaths;
         _textGlyphsNorth = textGlyphsNorth;
         _textGlyphsSouth = textGlyphsSouth;
         _textGlyphsWest = textGlyphsWest;
@@ -150,8 +153,12 @@ public class Graticule {
     }
 
 
-    public GeneralPath[] getLinePaths() {
-        return _linePaths;
+    public GeneralPath[] getMeridiansLinePaths() {
+        return _meridiansLinePaths;
+    }
+
+    public GeneralPath[] getParallelsLinePaths() {
+        return _parallelsLinePaths;
     }
 
     public boolean isFlippedLats() {
@@ -297,7 +304,8 @@ public class Graticule {
 
         // todo maybe make this ||
         if (parallelsList.size() > 0 || meridiansList.size() > 0) {
-            final GeneralPath[] paths = createPaths(parallelsList, meridiansList);
+            final GeneralPath[] meridiansPaths = createPathsNew(meridiansList);
+            final GeneralPath[] parallelsPaths = createPathsNew(parallelsList);
 
             final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelsList, meridiansList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
             final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelsList, meridiansList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
@@ -315,7 +323,8 @@ public class Graticule {
             final boolean flippedLats = geoSpan.latDescending && !geoSpan.latAscending;
             final boolean flippedLons = geoSpan.lonDescending && !geoSpan.lonAscending;
 
-            return new Graticule(paths,
+            return new Graticule(meridiansPaths,
+                    parallelsPaths,
                     textGlyphsNorth,
                     textGlyphsSouth,
                     textGlyphsWest,
@@ -330,6 +339,7 @@ public class Graticule {
                     flippedLons);
         } else {
             return new Graticule(null,
+                    null,
                     null,
                     null,
                     null,
@@ -1739,6 +1749,11 @@ public class Graticule {
         }
     }
 
+    private static GeneralPath[] createPathsNew(List<List<Coord>> pathsList) {
+        final ArrayList<GeneralPath> generalPathList = new ArrayList<GeneralPath>();
+        addToPath(pathsList, generalPathList);
+        return generalPathList.toArray(new GeneralPath[0]);
+    }
 
     private static GeneralPath[] createPaths(List<List<Coord>> parallelList, List<List<Coord>> meridianList) {
         final ArrayList<GeneralPath> generalPathList = new ArrayList<GeneralPath>();
