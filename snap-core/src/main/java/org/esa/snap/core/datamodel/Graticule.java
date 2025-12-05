@@ -960,6 +960,11 @@ public class Graticule {
                                     double tolerance,
                                     boolean interpolate) {
 
+        enum DIRECTION {
+            NOT_SET,
+            ASCENDING,
+            DESCENDING
+        }
         Coord coord1 = null;
         Coord coord2 = null; // this would be a second occurrence, for instance a 90 rotated global map with -90 at far left and -90 at far right
 
@@ -974,6 +979,10 @@ public class Graticule {
         PixelPos pixelPosPrev = null;
         GeoPos geoPosPrev = null;
 
+        DIRECTION direction = DIRECTION.NOT_SET;
+        boolean directionChange = false;
+        boolean directionChangeMaintained = false;
+        boolean datelineJustCrossed = false;
         double deltaPixel = 0;
         double toleranceDegrees = 0;
 
@@ -988,11 +997,45 @@ public class Graticule {
 
             if (validLon(lonCurr)) {
                 if (geoPosPrev != null) {
-                    deltaPixel = Math.abs(geoPosCurr.lon - geoPosPrev.lon);
+                    deltaPixel = geoPosCurr.lon - geoPosPrev.lon;
                 } else {
                     PixelPos pixPosNext = new PixelPos(pixelX + 1, pixelY);
                     GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
-                    deltaPixel = Math.abs(geoPosNext.lon - geoPosCurr.lon);
+                    deltaPixel = geoPosNext.lon - geoPosCurr.lon;
+                }
+
+
+                // establish direction and whether direction has changed this time
+
+                // todo maybe add a 2nd check for maintained direction change?
+                if (Math.abs(deltaPixel) < 180) {
+                    if (deltaPixel >= 0) {
+                        if (direction != DIRECTION.NOT_SET && direction == DIRECTION.DESCENDING) {
+                            if (directionChange == true) {
+                                directionChangeMaintained = true;
+                                directionChange = false;
+                            } else {
+                                directionChange = true;
+                            }
+                        }
+                        // todo maybe not maintained?
+                        direction = DIRECTION.ASCENDING;
+                    } else {
+                        if (direction != DIRECTION.NOT_SET && direction == DIRECTION.ASCENDING) {
+                            if (directionChange == true) {
+                                directionChangeMaintained = true;
+                                directionChange = false;
+                            } else {
+                                directionChange = true;
+                            }
+                        }
+                        // todo maybe not maintained?
+                        direction = DIRECTION.DESCENDING;
+                    }
+
+                    datelineJustCrossed = false;
+                } else {
+                    datelineJustCrossed = true;
                 }
 
                 if (lonPrev == NAN_PIXEL) {
@@ -1025,9 +1068,14 @@ public class Graticule {
                         }
                     }
                 } else {
-                    if (lonCurr > lonPrev) {
+                    // this is not the first geo pixel and probably not the last (but could be the last)
+
+
+                    if ((direction == DIRECTION.ASCENDING && lonCurr > lonPrev)
+                    || (direction == DIRECTION.DESCENDING && lonCurr < lonPrev)) {
                         // dateline not crossed
-                        if (meridianLon > lonPrev && meridianLon <= lonCurr) {
+                        if ((direction == DIRECTION.ASCENDING && meridianLon > lonPrev && meridianLon <= lonCurr) ||
+                                (direction == DIRECTION.DESCENDING && meridianLon < lonPrev && meridianLon >= lonCurr)) {
                             Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
                             Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
 
@@ -1050,11 +1098,16 @@ public class Graticule {
                             }
                         }
 
-                    } else if (lonCurr < lonPrev) {
+                    } else if (datelineJustCrossed) {
                         // dateline just crossed
 
                         if (meridianLon == 180) {
-                            PixelPos pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
+                            PixelPos pixelPosPrev2Back;
+                            if (direction == DIRECTION.ASCENDING) {
+                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
+                            } else {
+                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x + 1, pixelPosPrev.y);
+                            }
                             GeoPos geoPosPrev2Back = raster.getGeoCoding().getGeoPos(pixelPosPrev2Back, null);
 
                             Coord coordPrev2Back = new Coord(geoPosPrev2Back, pixelPosPrev2Back);
@@ -1279,7 +1332,7 @@ public class Graticule {
                             }
                         }
                     } else {
-                        // pole crossed ?
+                        // skipping initial direction change in case bow-tie effect or some other artifact
                     }
 
                     if (matchFound) {
