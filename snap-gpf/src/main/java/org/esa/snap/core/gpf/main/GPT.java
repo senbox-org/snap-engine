@@ -17,9 +17,14 @@
 package org.esa.snap.core.gpf.main;
 
 import org.esa.snap.core.util.StopWatch;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 
+import java.io.Console;
+import java.net.*;
 import java.util.Locale;
+import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  * The entry point for the GPF command-line tool (Graph Processing Tool, GPT).
@@ -56,7 +61,49 @@ public class GPT {
         }
         Locale.setDefault(Locale.ENGLISH); // Force usage of english locale
         SystemUtils.init3rdPartyLibs(GPT.class);
+        checkAndSetupProxyAuthentication();
         final CommandLineTool commandLineTool = new CommandLineTool();
         commandLineTool.run(args);
+    }
+
+    private static void checkAndSetupProxyAuthentication() throws Exception {
+        final String proxyHost = System.getProperty("http.proxyHost");
+        final String proxyPortString = System.getProperty("http.proxyPort");
+        if (!StringUtils.isNullOrEmpty(proxyHost) && !StringUtils.isNullOrEmpty(proxyPortString)) {
+            final int proxyPort = Integer.parseInt(proxyPortString);
+            String proxyUser = System.getProperty("proxyUser");
+            String proxyPassword = System.getProperty("proxyPassword");
+            final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+            final HttpURLConnection urlConnection = (HttpURLConnection) new URI("http://step.esa.int").toURL().openConnection(proxy);
+            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_PROXY_AUTH) {
+                Logger.getLogger(GPT.class.getName()).warning("Proxy " + proxyHost + ":" + proxyPort + " requires authentication.");
+                final Console console = System.console();
+                if (StringUtils.isNullOrEmpty(proxyUser)) {
+                    System.out.print("proxy user: ");
+                    if (console != null) {
+                        proxyUser = console.readLine();
+                    } else {
+                        proxyUser = new Scanner(System.in).nextLine();
+                    }
+                }
+                if(StringUtils.isNullOrEmpty(proxyPassword)){
+
+                    System.out.print("proxy password: ");
+                    if (console != null) {
+                        proxyPassword = new String(console.readPassword());
+                    } else {
+                        proxyPassword = new Scanner(System.in).nextLine();
+                    }
+                }
+                final String finalProxyUsername = proxyUser;
+                final String finalProxyPassword = proxyPassword;
+                Authenticator.setDefault(new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(finalProxyUsername, finalProxyPassword.toCharArray());
+                    }
+                });
+            }
+        }
     }
 }

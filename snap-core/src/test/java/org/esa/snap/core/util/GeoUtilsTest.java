@@ -534,6 +534,39 @@ public class GeoUtilsTest {
         assertEquals(expectedPointWGS84, pointWGS84);
     }
 
+    @Test
+    public void createGeoBoundary_usesGlobalShortcutForGlobalGeoCoding() {
+        int width = 360;
+        int height = 180;
+
+        Band band = new Band("b", ProductData.TYPE_FLOAT32, width, height);
+        GeoCoding gc = new TestGlobalGeoCoding();
+        band.setGeoCoding(gc);
+
+        GeoPos[] boundary = GeoUtils.createGeoBoundary(band, null, 60, true);
+
+        assertNotNull(boundary);
+        assertTrue(boundary.length > 0);
+
+        double minLat = Double.POSITIVE_INFINITY;
+        double maxLat = Double.NEGATIVE_INFINITY;
+        double minLon = Double.POSITIVE_INFINITY;
+        double maxLon = Double.NEGATIVE_INFINITY;
+
+        for (GeoPos gp : boundary) {
+            minLat = Math.min(minLat, gp.getLat());
+            maxLat = Math.max(maxLat, gp.getLat());
+            minLon = Math.min(minLon, gp.getLon());
+            maxLon = Math.max(maxLon, gp.getLon());
+        }
+
+        double err = 1e-6;
+        assertEquals( 90.0, maxLat, err);
+        assertEquals(-90.0, minLat, err);
+        assertEquals(-180.0, minLon, err);
+        assertEquals( 180.0, maxLon, err);
+    }
+
     private static Product createSLSTR() {
         final Product product = new Product("slstr-test", "TEST_TYPE", 8, 10);
 
@@ -758,4 +791,77 @@ public class GeoUtilsTest {
             -999.0, -999.0, 51.40531, 51.401234, 51.39783, 51.393734, 51.39032,
             -999.0, -999.0, 51.366833, 51.36275, 51.359344, 51.355247, 51.35183
     };
+
+    private static class TestGlobalGeoCoding implements GeoCoding {
+
+        @Override
+        public boolean isCrossingMeridianAt180() {
+            return true;
+        }
+
+        @Override
+        public boolean canGetPixelPos() {
+            return true;
+        }
+
+        @Override
+        public boolean canGetGeoPos() {
+            return true;
+        }
+
+        @Override
+        public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
+            throw new AssertionError("getPixelPos must not be called for global shortcut test");
+        }
+
+        @Override
+        public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
+            throw new AssertionError("getGeoPos must not be called for global shortcut test");
+        }
+
+        @Override
+        public Datum getDatum() {
+            return null;
+        }
+
+        @Override
+        public void dispose() {
+            // nothing
+        }
+
+        @Override
+        public CoordinateReferenceSystem getImageCRS() {
+            return null;
+        }
+
+        @Override
+        public CoordinateReferenceSystem getMapCRS() {
+            return null;
+        }
+
+        @Override
+        public CoordinateReferenceSystem getGeoCRS() {
+            return null;
+        }
+
+        @Override
+        public MathTransform getImageToMapTransform() {
+            return null;
+        }
+
+        @Override
+        public GeoCoding clone() {
+            return this;
+        }
+
+        @Override
+        public boolean canClone() {
+            return false;
+        }
+
+        @Override
+        public boolean isGlobal() {
+            return true;
+        }
+    }
 }
