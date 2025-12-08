@@ -394,7 +394,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_NUM_GRID_LINES_ALIAS = PROPERTY_ROOT + "numGridLines";
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
 
-    public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".minor.steps";
+    public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".smoothing.steps";
     public static final int PROPERTY_MINOR_STEPS_DEFAULT = 64;
     public static final String PROPERTY_MINOR_STEPS_LABEL = "Smoothing Steps";
     public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of steps across full image to use for generating the line";
@@ -410,7 +410,7 @@ public class GraticuleLayerType extends LayerType {
     public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
 
     public static final String PROPERTY_TOLERANCE_KEY = PROPERTY_ROOT + ".tolerance";
-    public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.5;
+    public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.0;
     public static final String PROPERTY_TOLERANCE_LABEL = "Tolerance";
     public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to force edge pixels onto gridline (fraction of pixel side size in geospace)";
     public static final String PROPERTY_TOLERANCE_ALIAS = PROPERTY_ROOT + "tolerance";

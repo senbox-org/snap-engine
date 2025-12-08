@@ -35,6 +35,9 @@ import java.util.List;
 //JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
 
 
+    // todo
+    // Support level-2 files regarding bow-tie effect
+    // Support flipped files regarding the edges of the scene
     // todo items
     // support level2 MODIS files by having a bowTieSecondSample line (similar and in addition to the farther off second line 
     //      but is distinguished by nearby proximity and conjunction with being in the same direction as the nearby line.
@@ -293,6 +296,12 @@ public class Graticule {
 
 
 
+        if (geoSpan.southPoleCrossed || geoSpan.northPoleCrossed) {
+            if (desiredMinorSteps < 256) {
+                desiredMinorSteps = 256;
+            }
+            tolerance = 0;
+        }
         final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, desiredMinorSteps, raster, geoSpan, tolerance, interpolate);
         final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, desiredMinorSteps, raster, geoSpan, tolerance, interpolate);
 
@@ -1026,6 +1035,7 @@ public class Graticule {
             pixelPosCurr = new PixelPos(pixelX, pixelY);
             geoPosCurr = raster.getGeoCoding().getGeoPos(pixelPosCurr, null);
             double lonCurr = geoPosCurr.lon;
+            boolean matchFound = false;
 //            lonPixel = validAdjust(lonCurr);
 
 
@@ -1075,9 +1085,20 @@ public class Graticule {
                 if (lonPrev == NAN_PIXEL) {
                     // this is first valid pixel
 
-                    toleranceDegrees = tolerance * deltaPixel;
+                    toleranceDegrees = Math.abs(tolerance * deltaPixel);
 
+                    if (direction == DIRECTION.ASCENDING) {
                     if (meridianLon >= (lonCurr - toleranceDegrees) && meridianLon <= (lonCurr)) {
+                            matchFound = true;
+                        }
+                    } else {
+                        if (meridianLon <= (lonCurr + toleranceDegrees) && meridianLon >= (lonCurr)) {
+                            matchFound = true;
+                        }
+                    }
+
+
+                    if (matchFound) {
                         if (coord1 == null) {
                             PixelPos pixelPosNext = new PixelPos(pixelX + 1, pixelY);
                             GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixelPosNext, null);
@@ -1104,6 +1125,7 @@ public class Graticule {
                 } else {
                     // this is not the first geo pixel and probably not the last (but could be the last)
 
+                    if (pixelPosCurr.x < raster.getRasterWidth() - 1) {
 
                     if ((direction == DIRECTION.ASCENDING && lonCurr > lonPrev)
                     || (direction == DIRECTION.DESCENDING && lonCurr < lonPrev)) {
@@ -1168,11 +1190,21 @@ public class Graticule {
                         // ignore
                     }
 
-                    if (pixelPosCurr.x == raster.getRasterWidth() - 1) {
+                    } else {
                         // this is last pixel
-                        toleranceDegrees = tolerance * deltaPixel;
-                        if (meridianLon >= (lonCurr) && meridianLon <= (lonCurr + toleranceDegrees)) {
+                        toleranceDegrees = Math.abs(tolerance * deltaPixel);
 
+                        if (direction == DIRECTION.ASCENDING) {
+                        if (meridianLon >= (lonCurr) && meridianLon <= (lonCurr + toleranceDegrees)) {
+                                matchFound = true;
+                            }
+                        } else {
+                            if (meridianLon <= (lonCurr) && meridianLon >= (lonCurr - toleranceDegrees)) {
+                                matchFound = true;
+                            }
+                        }
+
+                        if (matchFound) {
                             Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
                             Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
 
@@ -1205,8 +1237,20 @@ public class Graticule {
             } else {
                 if (validLon(lonPrev)) {
                     // this is first pixel after last valid pixel
-                    toleranceDegrees = tolerance * deltaPixel;
+                    toleranceDegrees = Math.abs(tolerance * deltaPixel);
+
+                    if (direction == DIRECTION.ASCENDING) {
                     if (meridianLon >= (lonPrev) && meridianLon <= (lonPrev + toleranceDegrees)) {
+                            matchFound = true;
+                        }
+                    } else {
+                        if (meridianLon <= (lonPrev) && meridianLon >= (lonPrev - toleranceDegrees)) {
+                            matchFound = true;
+                        }
+                    }
+
+
+                    if (matchFound) {
 
                         if (pixelPosPrev != null) {
                             PixelPos pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
@@ -1275,20 +1319,21 @@ public class Graticule {
 
         boolean firstValidFound = false;
         DIRECTION direction = DIRECTION.NOT_SET;
+        DIRECTION directionFirst = DIRECTION.NOT_SET;
         boolean directionChange = false;
 
-        // todo
-        boolean restrictNearbyDuplicate = false;
 
         double deltaLat = 0;
         double toleranceDegrees = 0;
 
         double offset = 0.5;
 
+        boolean matchFound = false;
         for (double pixelY =  (raster.getRasterHeight() - 1); pixelY >= 0;  pixelY -= increment) {
             pixPosCurr = new PixelPos(pixelX, pixelY);
             geoPoxCurr = raster.getGeoCoding().getGeoPos(pixPosCurr, null);
             double latCurr = geoPoxCurr.lat;
+            matchFound = false;
 //            lonPixel = validAdjust(lonPixel);
 
             if (validLat(latCurr)) {
@@ -1323,11 +1368,20 @@ public class Graticule {
                     // this is first valid pixel
                     firstValidFound = true;
 
+                    toleranceDegrees = Math.abs(tolerance * deltaLat);
 
-                    toleranceDegrees = tolerance * deltaLat;
+                    if (direction == DIRECTION.ASCENDING) {
 
                     if (parallelLat >= (latCurr - toleranceDegrees) && parallelLat <= (latCurr)) {
-                        if (coord1 == null) {
+                            matchFound = true;
+                        }
+                    } else {
+                        if (parallelLat <= (latCurr + toleranceDegrees) && parallelLat >= (latCurr)) {
+                            matchFound = true;
+                        }
+                    }
+
+                    if (matchFound) {
                             PixelPos pixPosNext = new PixelPos(pixelX, pixelY - 1);
                             GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
 
@@ -1343,18 +1397,21 @@ public class Graticule {
                             coordInterp = getCoordShiftPixelY(coordInterp, offset);
 
 
+                        if (coord1 == null) {
                             coord1 = coordInterp;
+                            directionFirst = direction;
                         } else if (coord2 == null) {
                             // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
-                                coord2 = new Coord(geoPoxCurr, pixPosCurr);
+//                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+                            if (direction != directionFirst) {
+                                coord2 = coordInterp;
                             }
                         }
                     }
                 } else {
 
+                    if (pixPosCurr.y > 0 ) {
                     // this is not the first geo pixel and probably not the last (but could be the last)
-                    boolean matchFound = false;
                     if (!directionChange) {
                         if (direction == DIRECTION.ASCENDING) {
                             if (parallelLat > latPrev && parallelLat <= latCurr) {
@@ -1383,59 +1440,32 @@ public class Graticule {
 
                         if (coord1 == null) {
                             coord1 = coordInterp;
+                                directionFirst = direction;
                         } else if (coord2 == null) {
                             // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-//                            if (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0)) {
-                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+//                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+                                if (direction != directionFirst) {
                                 coord2 = coordInterp;
                             }
                         }
                     }
 
-//
-//                    if (latCurr > latPrev) {
-//                        // dateline not crossed
-//                        if (parallelLat > latPrev && parallelLat <= latCurr) {
-//                            Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
-//                            Coord coordPrev = new Coord(geoPosPrev, pixPosPrev);
-//
-//                            Coord coordInterp;
-//                            if (interpolate) {
-//                                coordInterp = getCoordInterpolateToFixedLat(coordPrev, coordCurr, parallelLat, true);
-//                            } else {
-//                                coordInterp = coordCurr;
-//                            }
-//                            coordInterp = getCoordShiftPixelY(coordInterp, offset);
-//
-//                            if (coord1 == null) {
-//                                coord1 = coordInterp;
-//                            } else if (coord2 == null) {
-//                                // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-//                                if (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0)) {
-//                                    coord2 = coordInterp;
-//                                }
-//                            }
-//                        }
-//                    } else if (latCurr < latPrev) {
-//                        // dateline just crossed
-////                        if (mx == 180) {
-////                            if (coord1 == null) {
-////                                coord1 = new Coord(coordAtPoint, point);
-////                            } else if (coord2 == null) {
-//                        // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-////                        if (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0)) {
-////                                    coord2 = new Coord(coordAtPoint, point);
-////                                }
-////                            }
-////                        }
-//                    } else {
-//                        // ignore
-//                    }
 
-                    if (pixPosCurr.y == 0 ) {
-                        toleranceDegrees = tolerance * deltaLat;
+                    } else {
                         // this is last pixel
+                        toleranceDegrees = Math.abs(tolerance * deltaLat);
+
+                        if (direction == DIRECTION.ASCENDING) {
                         if (parallelLat >= (latCurr) && parallelLat <= (latCurr + toleranceDegrees)) {
+                                matchFound = true;
+                            }
+                        } else {
+                            if (parallelLat <= (latCurr) && parallelLat >= (latCurr - toleranceDegrees)) {
+                                matchFound = true;
+                            }
+                        }
+
+                        if (matchFound) {
                             Coord coordPrev = new Coord(geoPosPrev, pixPosPrev);
                             Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
 
@@ -1451,10 +1481,11 @@ public class Graticule {
 
                             if (coord1 == null) {
                                 coord1 = coordInterp;
+                                directionFirst = direction;
                             } else if (coord2 == null) {
                                 // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-//                                if (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0)) {
-                                if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+//                                if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+                                if (direction != directionFirst) {
                                     coord2 = coordInterp;
                                 }
                             }
@@ -1469,8 +1500,20 @@ public class Graticule {
             } else {
                 if (validLat(latPrev)) {
                     // this is first pixel after last valid pixel
-                    toleranceDegrees = tolerance * deltaLat;
+                    toleranceDegrees = Math.abs(tolerance * deltaLat);
+
+                    if (direction == DIRECTION.ASCENDING) {
                     if (parallelLat >= (latPrev) && parallelLat <= (latPrev + toleranceDegrees)) {
+                            matchFound = true;
+                        }
+                    } else {
+                        if (parallelLat <= (latPrev) && parallelLat >= (latPrev - toleranceDegrees)) {
+                            matchFound = true;
+                        }
+                    }
+
+
+                    if (matchFound) {
                         PixelPos prevPrevPoint = new PixelPos(pixPosPrev.x, pixPosPrev.y + 1);
                         GeoPos prevPrevCoordAtPoint = raster.getGeoCoding().getGeoPos(prevPrevPoint, null);
 
@@ -1487,10 +1530,11 @@ public class Graticule {
 
                         if (coord1 == null) {
                             coord1 = coordInterp;
+                            directionFirst = direction;
                         } else if (coord2 == null) {
                             // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-//                            if (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0)) {
-                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+//                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
+                            if (direction != directionFirst) {
                                 coord2 = coordInterp;
                             }
                         }
