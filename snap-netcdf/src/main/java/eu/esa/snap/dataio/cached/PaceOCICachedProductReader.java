@@ -1,4 +1,4 @@
-package org.esa.snap.dataio.netcdf;
+package eu.esa.snap.dataio.cached;
 
 import com.bc.ceres.core.ProgressMonitor;
 import eu.esa.snap.core.dataio.cache.CacheDataProvider;
@@ -15,7 +15,9 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.ma2.Section;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -27,8 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.esa.snap.dataio.netcdf.util.DataTypeUtils.getRasterDataType;
+import static ucar.ma2.DataType.FLOAT;
 
-public class DeleteMeReader extends AbstractProductReader implements CacheDataProvider {
+public class PaceOCICachedProductReader extends AbstractProductReader implements CacheDataProvider {
 
     private NetcdfFile netcdfFile;
     private ProductCache productCache;
@@ -40,7 +43,7 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
      * @param readerPlugIn the reader plug-in which created this reader, can be {@code null} for internal reader
      *                     implementations
      */
-    protected DeleteMeReader(ProductReaderPlugIn readerPlugIn) {
+    protected PaceOCICachedProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
 
         variablePaths = new HashMap<>();
@@ -70,7 +73,8 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         final Band heightBand = new BandUsingReaderDirectly("height", ProductData.TYPE_INT16, width, height);
         product.addBand(heightBand);
 
-        final Band sensorAzimuthBand = new BandUsingReaderDirectly("sensor_azimuth", ProductData.TYPE_INT16, width, height);
+        // @todo 2 tb/tb this should be float - find a clever way to convert.
+        final Band sensorAzimuthBand = new BandUsingReaderDirectly("sensor_azimuth", ProductData.TYPE_FLOAT64, width, height);
         product.addBand(sensorAzimuthBand);
 
         return product;
@@ -102,7 +106,6 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         final int[] shapes = {sourceHeight, sourceWidth};
         final int[] targetOffsets = {destOffsetY, destOffsetX};
         final int[] targetShapes = {destHeight, destWidth};
-
 
         ProductData read = productCache.read(destBand.getName(), destBuffer, offsets, shapes, targetOffsets, targetShapes);
 
@@ -140,7 +143,12 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         }
 
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
-        variableDescriptor.dataType = getRasterDataType(netcdVariable.getDataType(), false);
+        // @todo 2 tb/tb find out how to used neCDF MAMath to scale to a desired data type.
+        if (ReaderUtils.mustScale(netcdVariable)) {
+            variableDescriptor.dataType = ProductData.TYPE_FLOAT64;
+        } else {
+            variableDescriptor.dataType = getRasterDataType(netcdVariable.getDataType(), false);
+        }
 
         int[] shape = netcdVariable.getShape();
 
@@ -180,13 +188,9 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
         final String netcdfPath = variablePaths.get(variableName);
         final Variable netcdfVariable = netcdfFile.findVariable(netcdfPath);
         // todo 2 tb/tb shall we check for null? Should never happen, if so it is a programming error.
-        final int rasterDataType = getRasterDataType(netcdfVariable);
+        int rasterDataType = getRasterDataType(netcdfVariable);
 
-        System.out.println(variableName + "  x: " + offsets[1] + " y: " + offsets[0] + " width: " + shapes[1] + " height: " + shapes[0]);
-        if (targetData == null) {
-            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
-        }
-
+        System.out.println(variableName + " - read x: " + offsets[1] + " y: " + offsets[0] + " width: " + shapes[1] + " height: " + shapes[0]);
         Array rawBuffer;
         try {
             rawBuffer = netcdfVariable.read(offsets, shapes);
@@ -194,11 +198,29 @@ public class DeleteMeReader extends AbstractProductReader implements CacheDataPr
             throw new IOException(e);
         }
         // @todo 2 tb/tb foresee that users may want the raw data 2025-12-05
-        rawBuffer = ReaderUtils.scaleArray(rawBuffer, netcdfVariable);
+        if (ReaderUtils.mustScale(netcdfVariable)) {
+            rawBuffer = ReaderUtils.scaleArray(rawBuffer, netcdfVariable);
+            rasterDataType = ProductData.TYPE_FLOAT64;
+        }
 
         // @todo 1 tb/tb allocate depending on data type
-        final short[] tileData = (short[]) rawBuffer.copyTo1DJavaArray();
-        targetData.setElems(tileData);
+        if (targetData == null) {
+            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
+        }
+
+        switch (rasterDataType) {
+            case ProductData.TYPE_FLOAT32:
+                targetData.setElems(rawBuffer.get1DJavaArray(DataType.FLOAT));
+                break;
+            case ProductData.TYPE_FLOAT64:
+                targetData.setElems(rawBuffer.get1DJavaArray(DataType.DOUBLE));
+                break;
+            case ProductData.TYPE_INT16:
+                targetData.setElems(rawBuffer.get1DJavaArray(DataType.SHORT));
+                break;
+            default:
+                throw new IOException("Unknown data type: " + rasterDataType);
+        }
 
         return targetData;
     }

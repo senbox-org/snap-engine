@@ -63,17 +63,15 @@ public class VariableCache2D {
             targetData = ProductData.createInstance(variableDescriptor.dataType, size);
         }
 
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final Rectangle targetRect = new Rectangle(targetOffsets[1], targetOffsets[0], targetShapes[1], targetShapes[0]);
-
         final RowCol[] tileLocations = getAffectedTileLocations(offsets, shapes);
         for (RowCol tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
             final int col = tileLocation.getCacheCol();
             final CacheData2D cacheData2D = cacheData[row][col];
 
-            final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
             cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
-
             final Rectangle cacheRect = cacheData2D.getBoundingRect();
             final Rectangle intersection = cacheRect.intersection(targetRect);
             if (!intersection.isEmpty()) {
@@ -84,12 +82,6 @@ public class VariableCache2D {
             }
         }
 
-        // if tile is not cached - load from file
-        // for each tile
-        // - detect intersecting area with requested geometry
-        // - copy data to target buffer
-        // - update timestamp
-        // return buffer
         return targetData;
     }
 
