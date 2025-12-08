@@ -283,22 +283,79 @@ public class GeoUtils {
     private static GeoPos[] getGeoBoundary(GeoCoding gc, Rectangle region, int step, boolean usePixelCenter) {
         final PixelPos[] points = createPixelBoundaryFromRect(region, step, usePixelCenter);
         ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
-        boolean calculateInsets = false;
-        for (final PixelPos pixelPos : points) {
-            final GeoPos gcGeoPos = gc.getGeoPos(pixelPos, null);
-            if (!gcGeoPos.isValid()) {
-                calculateInsets = true;
-                break;
-            }
-            geoPoints.add(gcGeoPos);
-        }
 
-        if (calculateInsets) {
-            geoPoints.clear();
-            geoPoints = createInsetsGeoBoundary(gc, step, region, usePixelCenter);
+        if (gc.isGlobal()) {
+            geoPoints = calculateGeoBoundaryForGlobalProduct(points);
+        } else {
+            boolean calculateInsets = false;
+            for (final PixelPos pixelPos : points) {
+                final GeoPos gcGeoPos = gc.getGeoPos(pixelPos, null);
+                if (!gcGeoPos.isValid()) {
+                    calculateInsets = true;
+                    break;
+                }
+                geoPoints.add(gcGeoPos);
+            }
+
+            if (calculateInsets) {
+                geoPoints.clear();
+                geoPoints = createInsetsGeoBoundary(gc, step, region, usePixelCenter);
+            }
         }
 
         return geoPoints.toArray(new GeoPos[0]);
+    }
+
+    private static ArrayList<GeoPos> calculateGeoBoundaryForGlobalProduct(PixelPos[] points) {
+        ArrayList<GeoPos> result = new ArrayList<>(points.length);
+        if (points.length == 0) {
+            return result;
+        }
+
+        double minX = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+
+        for (PixelPos p : points) {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        }
+
+        double dx = maxX - minX;
+        double dy = maxY - minY;
+        double eps = 0.5;
+
+        for (PixelPos p : points) {
+            double x = p.x;
+            double y = p.y;
+            double lon;
+            double lat;
+
+            double t = dx == 0 ? 0.0 : (x - minX) / dx;
+            if (Math.abs(y - minY) <= eps) {
+                lon = -180.0 + 360.0 * t;
+                lat = 90.0;
+            } else if (Math.abs(y - maxY) <= eps) {
+                lon = -180.0 + 360.0 * t;
+                lat = -90.0;
+            } else {
+                t = dy == 0 ? 0.0 : (y - minY) / dy;
+                if (Math.abs(x - minX) <= eps) {
+                    lon = -180.0;
+                    lat = 90.0 - 180.0 * t;
+                } else {
+                    lon = 180.0;
+                    lat = 90.0 - 180.0 * t;
+                }
+            }
+
+            result.add(new GeoPos(lat, lon));
+        }
+
+        return result;
     }
 
     private static ArrayList<GeoPos> createInsetsGeoBoundary(GeoCoding gc, int step, Rectangle rect, boolean usePixelCenter) {
