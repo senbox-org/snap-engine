@@ -37,7 +37,6 @@ import java.util.List;
 
     // todo
     // Support level-2 files regarding bow-tie effect
-    // Support flipped files regarding the edges of the scene
     // todo items
     // support level2 MODIS files by having a bowTieSecondSample line (similar and in addition to the farther off second line 
     //      but is distinguished by nearby proximity and conjunction with being in the same direction as the nearby line.
@@ -302,8 +301,17 @@ public class Graticule {
             }
             tolerance = 0;
         }
+
+        if (geoSpan.equidistantCylindrical) {
+            // todo should this be 1?
+            // todo also add option in GUI to enforce/disable this?
+            desiredMinorSteps = 4;
+        }
+
         final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, desiredMinorSteps, raster, geoSpan, tolerance, interpolate);
         final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, desiredMinorSteps, raster, geoSpan, tolerance, interpolate);
+
+
 
 //        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), null, lonMajorStep, latMinorStep,
 //                0.0, 0.0, raster);
@@ -2341,6 +2349,124 @@ public class Graticule {
     }
 
 
+    static boolean isEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+       boolean equidistantCylindrical = true;
+       boolean test;
+
+        int centerParallel = (int) Math.floor(dataNode.getRasterHeight() / 2.0);
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, centerParallel);
+        if (!test) {
+            return false;
+        }
+
+        int nearTopParallel = 5;
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearTopParallel);
+        if (!test) {
+            return false;
+        }
+
+        int nearBottomParallel = dataNode.getRasterHeight() - 5;
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearBottomParallel);
+        if (!test) {
+            return false;
+        }
+
+
+
+        int centerMeridian = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, centerMeridian);
+        if (!test) {
+            return false;
+        }
+
+        int nearLeftMeridian = 5;
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearLeftMeridian);
+        if (!test) {
+            return false;
+        }
+
+        int nearRightMeridian = dataNode.getRasterHeight() - 5;
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearRightMeridian);
+        if (!test) {
+            return false;
+        }
+
+
+
+        return equidistantCylindrical;
+    }
+
+    static boolean isParallelLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr) {
+
+        boolean equidistantCylindrical = true;
+
+        if (pixelYCurr < 0 || pixelYCurr >= dataNode.getRasterHeight()) {
+            //ensure valid index
+            return true;
+        }
+
+        double NULL_LAT = -99999;
+        double validLatValue = NULL_LAT;
+        boolean initialLatValueFound = false;
+
+        for (double pixelXCurr=0.0 ; pixelXCurr <= (dataNode.getRasterWidth()-1) ; pixelXCurr++ ) {
+
+            PixelPos pixelPosCurr = new PixelPos(pixelXCurr, pixelYCurr);
+            GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+            if (validLat(geoPosCurr.lat)) {
+                if (initialLatValueFound) {
+                    if (geoPosCurr.lat != validLatValue) {
+                        return false;
+                    }
+                } else {
+                    validLatValue = geoPosCurr.lat;
+                    initialLatValueFound = true;
+                }
+            }
+        }
+
+        return equidistantCylindrical;
+    }
+
+
+
+    static boolean isMeridianLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelXCurr) {
+
+        boolean equidistantCylindrical = true;
+
+        if (pixelXCurr < 0 || pixelXCurr >= dataNode.getRasterWidth()) {
+            //ensure valid index
+            return true;
+        }
+
+        double NULL_LON = -99999;
+        double validLonValue = NULL_LON;
+        boolean initialLonValueFound = false;
+
+        for (double pixelYCurr=0.0 ; pixelYCurr <= (dataNode.getRasterHeight()-1) ; pixelYCurr++ ) {
+
+            PixelPos pixelPosCurr = new PixelPos(pixelXCurr, pixelYCurr);
+            GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+            if (validLat(geoPosCurr.lon)) {
+                if (initialLonValueFound) {
+                    if (geoPosCurr.lon != validLonValue) {
+                        return false;
+                    }
+                } else {
+                    validLonValue = geoPosCurr.lon;
+                    initialLonValueFound = true;
+                }
+            }
+        }
+
+        return equidistantCylindrical;
+    }
+
+
+
     static GeoSpanLon getLonSpan(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr) {
 
         PixelPos pixelPosPrev = null;
@@ -2673,6 +2799,9 @@ public class Graticule {
         boolean southPoleCrossed = false;
 
 
+        boolean isEquidistantCylindrical = isEquidistantCylindrical(geoCoding,  dataNode);
+
+
         // todo  write method  getLatSpan(geoCoding,  dataNode);
         GeoSpanLon lonSpanScene = getLonSpan(geoCoding,  dataNode);
         GeoSpanLat latSpanScene = getLatSpan(geoCoding,  dataNode);
@@ -2942,7 +3071,8 @@ public class Graticule {
                 lonAscending,
                 lonDescending,
                 latAscending,
-                latDescending);
+                latDescending,
+                isEquidistantCylindrical);
         return  geoSpan;
 
 
@@ -3519,6 +3649,8 @@ public class Graticule {
         boolean latAscending;
         boolean latDescending;
 
+        boolean equidistantCylindrical;
+
 
         public GeoSpan(double firstLon,
                        double lastLon,
@@ -3534,7 +3666,8 @@ public class Graticule {
                        boolean lonAscending,
                        boolean lonDescending,
                        boolean latAscending,
-                       boolean latDescending) {
+                       boolean latDescending,
+                       boolean equidistantCylindrical) {
             this.firstLon = firstLon;
             this.lastLon = lastLon;
             this.lonSpan = lonSpan;
@@ -3550,6 +3683,7 @@ public class Graticule {
             this.lonDescending = lonDescending;
             this.latAscending = latAscending;
             this.latDescending = latDescending;
+            this.equidistantCylindrical = equidistantCylindrical;
 
         }
     }
