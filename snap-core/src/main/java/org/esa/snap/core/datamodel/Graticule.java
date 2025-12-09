@@ -324,10 +324,10 @@ public class Graticule {
             final GeneralPath[] meridiansPaths = createPathsNew(meridiansList);
             final GeneralPath[] parallelsPaths = createPathsNew(parallelsList);
 
-            final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelsList, meridiansList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
-            final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelsList, meridiansList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer);
-            final TextGlyph[] textGlyphsWest = createTextGlyphs(parallelsList, meridiansList, TextLocation.WEST, formatCompass, decimalFormat, latMajorStep, raster, spacer);
-            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelsList, meridiansList, TextLocation.EAST, formatCompass, decimalFormat,latMajorStep, raster, spacer);
+            final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelsList, meridiansList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer, geoSpan);
+            final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelsList, meridiansList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer, geoSpan);
+            final TextGlyph[] textGlyphsWest = createTextGlyphs(parallelsList, meridiansList, TextLocation.WEST, formatCompass, decimalFormat, latMajorStep, raster, spacer, geoSpan);
+            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelsList, meridiansList, TextLocation.EAST, formatCompass, decimalFormat,latMajorStep, raster, spacer, geoSpan);
 
             final TextGlyph[] textGlyphsLatCorners = createLatCornerTextGlyphs(raster, formatCompass, decimalFormat);
             final TextGlyph[] textGlyphsLonCorners = createLonCornerTextGlyphs(raster, formatCompass, decimalFormat);
@@ -1928,21 +1928,22 @@ public class Graticule {
                                                 boolean formatDecimal,
                                                 double majorStep,
                                                 RasterDataNode raster,
-                                                int spacer) {
+                                                int spacer,
+                                                GeoSpan geoSpan) {
         final List<TextGlyph> textGlyphs = new ArrayList<TextGlyph>();
 
         switch (textLocation) {
             case NORTH:
-                createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster);
+                createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
                 break;
             case SOUTH:
-                createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster);
+                createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
                 break;
             case WEST:
-                createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer);
+                createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
                 break;
             case EAST:
-                createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer);
+                createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
                 break;
         }
 
@@ -1971,7 +1972,8 @@ public class Graticule {
                                                         boolean formatDecimal,
                                                         double majorStep,
                                                         RasterDataNode raster,
-                                                        int spacer) {
+                                                        int spacer,
+                                                        GeoSpan geoSpan) {
 
         // Assumes that the line was drawn from west to east
         // coord1 set to first point in order to anchor the text to the edge of the line
@@ -1993,23 +1995,34 @@ public class Graticule {
                 int width = raster.getRasterWidth();
 
                 double offsetX = 0.0;
-                boolean onSideDoNotDisplayLabel = false;
-                if (yPos < 1 || yPos > (height - 1)) {
-                    if (xPos > 1) {
-                        if (spacer >= 0) {
-                            offsetX = -spacer;
-                            onSideDoNotDisplayLabel = false;
-                        } else {
-                            onSideDoNotDisplayLabel = true;
-                        };
+
+
+                boolean allowLabel = true;
+                boolean onlyAllowLeftEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+                    onlyAllowLeftEdgeLabels = true;
+                }
+
+                if (onlyAllowLeftEdgeLabels) {
+                    int buffer = 3;
+                    if (xPos > (0 + buffer)) {
+                        allowLabel = false;
+                    }
+                } else {
+                    if (yPos < 1 || yPos > (height - 1)) {
+                        if (xPos > 1) {
+                            if (spacer >= 0) {
+                                offsetX = -spacer;
+                            }
+                        }
                     }
                 }
 
 
 
 
-
-                if (isCoordPairValid(coord1, coord2) && !onSideDoNotDisplayLabel) {
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
 
                     double lat = coord1.geoPos.lat;
                     double latToUse = lat;
@@ -2065,7 +2078,8 @@ public class Graticule {
                                                         boolean formatDecimal,
                                                         double majorStep,
                                                         RasterDataNode raster,
-                                                        int spacer) {
+                                                        int spacer,
+                                                        GeoSpan geoSpan) {
 
         // Assumes that the line was drawn from west to east
         // coord1 set to last point in order to anchor the text to the edge of the line
@@ -2089,22 +2103,33 @@ public class Graticule {
                 int width = raster.getRasterWidth();
 
                 double offsetX = 0.0;
-                boolean onSideDoNotDisplayLabel = false;
-                if (yPos < 1 || yPos > (height - 1)) {
-                    if (xPos < (width -1)) {
-                        if (spacer >= 0) {
-                            offsetX = spacer;
-                            onSideDoNotDisplayLabel = false;
-                        } else {
-                            onSideDoNotDisplayLabel = true;
+
+
+                boolean allowLabel = true;
+                boolean onlyAllowRightEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+                    onlyAllowRightEdgeLabels = true;
+                }
+
+                if (onlyAllowRightEdgeLabels) {
+                    int buffer = 3;
+                    if (xPos < (width - buffer)) {
+                        allowLabel = false;
+                    }
+                } else {
+                    if (yPos < 1 || yPos > (height - 1)) {
+                        if (xPos < (width -1)) {
+                            if (spacer >= 0) {
+                                offsetX = spacer;
+                            }
                         }
                     }
                 }
 
 
 
-
-                if (isCoordPairValid(coord1, coord2) && !onSideDoNotDisplayLabel) {
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
 
                     double lat = coord1.geoPos.lat;
                     double latToUse = lat;
@@ -2150,7 +2175,11 @@ public class Graticule {
     }
 
     private static void createNorthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
-                                                          List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep, RasterDataNode raster) {
+                                                          List<TextGlyph> textGlyphs, boolean formatCompass,
+                                                          boolean formatDecimal,
+                                                          double majorStep,
+                                                          RasterDataNode raster,
+                                                          GeoSpan geoSpan) {
 
         // Assumes that the line was drawn from north to south
         // coord1 set to first point in order to anchor the text to the edge of the line
@@ -2171,16 +2200,23 @@ public class Graticule {
                 int height = raster.getRasterHeight();
                 int width = raster.getRasterWidth();
 
-                boolean onSide = false;
-                if (xPos < 3 || xPos >= (width - 3)) {
-                    if (yPos > 3) {
-                        onSide = true;
+                boolean allowLabel = true;
+                boolean onlyAllowNorthEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+                    onlyAllowNorthEdgeLabels = true;
+                }
+
+                if (onlyAllowNorthEdgeLabels) {
+                    int buffer = 3;
+                    if (yPos > (0 + buffer)) {
+                        allowLabel = false;
                     }
                 }
 
-                System.out.println("Northern:  xPos=" + xPos + "  yPos=" + yPos + " width=" + width + " height=" + height);
+//                System.out.println("Northern:  xPos=" + xPos + "  yPos=" + yPos + " width=" + width + " height=" + height);
 
-                if (isCoordPairValid(coord1, coord2) && !onSide) {
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
                     double lon = coord1.geoPos.lon;
                     double lonToUse = lon;
                     double currDiff;
@@ -2225,7 +2261,10 @@ public class Graticule {
 
 
     static void createSouthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
-                                                  List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal, double majorStep, RasterDataNode raster) {
+                                                  List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal,
+                                                  double majorStep,
+                                                  RasterDataNode raster,
+                                                  GeoSpan geoSpan) {
 
         // Assumes that the line was drawn from north to south
         // coord1 set to last point in order to anchor the text to the edge of the line
@@ -2243,16 +2282,28 @@ public class Graticule {
                 int height = raster.getRasterHeight();
                 int width = raster.getRasterWidth();
 
-                boolean onSide = false;
-                if (xPos < 3 || xPos > (width - 3)) {
-                    if (yPos < (height - 3)) {
-                        onSide = true;
+
+                boolean allowLabel = true;
+                boolean onlyAllowSouthEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+                    onlyAllowSouthEdgeLabels = true;
+                }
+
+
+                if (onlyAllowSouthEdgeLabels) {
+                    int buffer = 3;
+                    if (yPos < (height - buffer)) {
+                        allowLabel = false;
                     }
                 }
 
-                System.out.println("Southern:  xPos=" + xPos + "  yPos=" + yPos + " width=" + width + " height=" + height);
 
-                if (isCoordPairValid(coord1, coord2) && !onSide) {
+
+
+//                System.out.println("Southern:  xPos=" + xPos + "  yPos=" + yPos + " width=" + width + " height=" + height);
+
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
                     double lon = coord1.geoPos.lon;
                     double lonToUse = lon;
                     double currDiff;
