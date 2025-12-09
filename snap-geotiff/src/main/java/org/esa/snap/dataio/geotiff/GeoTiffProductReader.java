@@ -236,7 +236,17 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final TIFFField tiffField = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
         Double fillValue = null;
         if (tiffField != null) {
-            fillValue = tiffField.getAsDouble(0);
+            String strValue = tiffField.getAsString(0);
+
+            if (strValue != null) {
+                strValue = strValue.trim();
+
+                if (strValue.equalsIgnoreCase("nan")) {
+                    fillValue = Double.NaN;
+                } else {
+                    fillValue = Double.valueOf(strValue);
+                }
+            }
         }
         return fillValue;
     }
