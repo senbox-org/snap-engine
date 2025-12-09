@@ -258,10 +258,10 @@ public class GDALProductWriter extends AbstractProductWriter {
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
             gdalBand.setScale(Double.compare(sourceBand.getScalingFactor(), 0.0) == 0 ? 1.0 : sourceBand.getScalingFactor());
             gdalBand.setOffset(sourceBand.getScalingOffset());
-            if (this.gdalDataType == GDALConstConstants.gdtFloat32()) {
-                gdalBand.setNoDataValue(Float.NaN);
+            if (sourceBand.isNoDataValueSet()) {
+            	gdalBand.setNoDataValue(sourceBand.getNoDataValue());
             } else {
-                gdalBand.setNoDataValue(sourceBand.getNoDataValue());
+            	gdalBand.setNoDataValue(Float.NaN);
             }
             gdalBand.setUnitType(sourceBand.getUnit());
             gdalBand.setDescription(sourceBand.getName());
