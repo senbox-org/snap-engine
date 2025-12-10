@@ -85,6 +85,7 @@ public class VariableCache2D {
         return targetData;
     }
 
+    // only for testing tb 2025-12-10
     CacheData2D[][] getCacheData() {
         return cacheData;
     }

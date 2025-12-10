@@ -94,15 +94,10 @@ class CacheData2D {
     private void ensureData() throws IOException {
         synchronized (this) {
             if (data == null) {
-
                 final String name = context.getVariableDescriptor().name;
                 final int[] offsets = {yMin, xMin};
                 final Rectangle bounds = getBoundingRect();
                 final int[] shapes = {bounds.height, bounds.width};
-                // @ todo tb 2025-12-02
-                // dataType!
-                // scale or not?
-                System.out.println(name + " " + boundingRect.toString());
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, data);
             }

@@ -1,19 +1,18 @@
 package eu.esa.snap.core.dataio.cache;
 
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductCache {
 
-    private final HashMap<String, VariableCache2D> variableCacheMap;
+    private final ConcurrentHashMap<String, VariableCache2D> variableCacheMap;
     private final CacheDataProvider dataProvider;
 
     public ProductCache(CacheDataProvider dataProvider) {
         this.dataProvider = dataProvider;
-        variableCacheMap = new HashMap<>();
+        variableCacheMap = new ConcurrentHashMap<>();
     }
 
     public void dispose() {
@@ -22,16 +21,21 @@ public class ProductCache {
     }
 
     public ProductData read(String bandName, ProductData targetBuffer, int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes) throws IOException {
-        VariableCache2D variableCache = variableCacheMap.get(bandName);
-        if (variableCache == null) {
-            final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-            variableDescriptor.name = bandName;
-
-            variableCache = new VariableCache2D(variableDescriptor, dataProvider);
-            variableCacheMap.put(bandName, variableCache);
-            // @todo send allocation message
-        }
+        final VariableCache2D variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
+            try {
+                return createVariableCache2D(bandName);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return variableCache.read(offsets, shapes, targetOffsets, targetShapes, targetBuffer);
+    }
+
+    private VariableCache2D createVariableCache2D(String bandName) throws IOException {
+        final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
+        variableDescriptor.name = bandName;
+
+        return new VariableCache2D(variableDescriptor, dataProvider);
     }
 }
