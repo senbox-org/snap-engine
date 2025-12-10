@@ -17,7 +17,6 @@ import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
-import ucar.ma2.Section;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -26,16 +25,16 @@ import ucar.nc2.Variable;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.esa.snap.dataio.netcdf.util.DataTypeUtils.getRasterDataType;
-import static ucar.ma2.DataType.FLOAT;
 
 public class PaceOCICachedProductReader extends AbstractProductReader implements CacheDataProvider {
 
     private NetcdfFile netcdfFile;
     private ProductCache productCache;
-    private final Map<String, String> variablePaths;
+    private final Map<String, Variable> variablesMap;
 
     /**
      * Constructs a new abstract product reader.
@@ -46,9 +45,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
     protected PaceOCICachedProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
 
-        variablePaths = new HashMap<>();
-        variablePaths.put("height", "geolocation_data/height");
-        variablePaths.put("sensor_azimuth", "geolocation_data/sensor_azimuth");
+        variablesMap = new HashMap<>();
     }
 
     @Override
@@ -70,14 +67,61 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         final String productName = getProductName();
         final Product product = new Product(productName, "dat", width, height, this);
 
+        final List<Variable> variables = netcdfFile.getVariables();
+        addVariables(product, variables);
+
+        /*
         final Band heightBand = new BandUsingReaderDirectly("height", ProductData.TYPE_INT16, width, height);
         product.addBand(heightBand);
 
         // @todo 2 tb/tb this should be float - find a clever way to convert.
         final Band sensorAzimuthBand = new BandUsingReaderDirectly("sensor_azimuth", ProductData.TYPE_FLOAT64, width, height);
         product.addBand(sensorAzimuthBand);
+         */
 
         return product;
+    }
+
+    private void addVariables(Product product, List<Variable> variables) throws IOException {
+        for (Variable variable : variables) {
+            final String parentGroupName = variable.getParentGroup().getShortName();
+            if (parentGroupName.equals("sensor_band_parameters") || parentGroupName.equals("scan_line_attributes")) {
+                continue;
+            }
+
+            final int rank = variable.getRank();
+            if (rank == 2) {
+                add2DVariable(product, variable);
+            } else if (rank == 3) {
+
+            } else {
+                continue;
+            }
+
+            variablesMap.put(variable.getShortName(), variable);
+        }
+    }
+
+    private void add2DVariable(Product product, Variable variable) {
+        final int[] dimensions = variable.getShape();
+        final int height = dimensions[0];
+        final int width = dimensions[1];
+
+        final int sceneRasterWidth = product.getSceneRasterWidth();
+        final int sceneRasterHeight = product.getSceneRasterHeight();
+        if  (height != sceneRasterHeight || width != sceneRasterWidth) {
+            return;
+        }
+
+        int rasterDataType;
+        if (ReaderUtils.mustScale(variable)) {
+            rasterDataType = ProductData.TYPE_FLOAT64;
+        } else {
+            rasterDataType = getRasterDataType(variable.getDataType(), false);
+        }
+
+        final Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
+        product.addBand(band);
     }
 
     private String getProductName() {
@@ -109,8 +153,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         ProductData read = productCache.read(destBand.getName(), destBuffer, offsets, shapes, targetOffsets, targetShapes);
 
-        // @todo 1 tb/tb copy to appropriate location in target buffer
-        // @todo 2 take subsampling into account
+        // @todo 2 tb/tb take subsampling into account
     }
 
     @Override
@@ -126,6 +169,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             CacheManager.getInstance().remove(productCache);
             productCache = null;
         }
+        variablesMap.clear();
 
         if (netcdfFile != null) {
             netcdfFile.close();
@@ -135,15 +179,14 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
     @Override
     public VariableDescriptor getVariableDescriptor(String variableName) throws IOException {
-        // @todo 1 tb/tb foresee that it is not stored in mapping
-        final String ncPath = variablePaths.get(variableName);
-        final Variable netcdVariable = netcdfFile.findVariable(ncPath);
+        // @todo 2 tb/tb look for a better solution - now we're caching all variables internally - develop a lazy solutions
+        final Variable netcdVariable = variablesMap.get(variableName);
         if (netcdVariable == null) {
             throw new IOException("Variable not known: " + variableName);
         }
 
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
-        // @todo 2 tb/tb find out how to used neCDF MAMath to scale to a desired data type.
+        // @todo 2 tb/tb find out how to used NetCDF MAMath to scale to a desired data type.
         if (ReaderUtils.mustScale(netcdVariable)) {
             variableDescriptor.dataType = ProductData.TYPE_FLOAT64;
         } else {
@@ -182,20 +225,19 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         return variableDescriptor;
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
     @Override
     public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
-        // @todo 1 tb/tb foresee that it is not stored in mapping
-        final String netcdfPath = variablePaths.get(variableName);
-        final Variable netcdfVariable = netcdfFile.findVariable(netcdfPath);
-        // todo 2 tb/tb shall we check for null? Should never happen, if so it is a programming error.
+        final Variable netcdfVariable = variablesMap.get(variableName);
         int rasterDataType = getRasterDataType(netcdfVariable);
 
-        System.out.println(variableName + " - read x: " + offsets[1] + " y: " + offsets[0] + " width: " + shapes[1] + " height: " + shapes[0]);
         Array rawBuffer;
-        try {
-            rawBuffer = netcdfVariable.read(offsets, shapes);
-        } catch (InvalidRangeException e) {
-            throw new IOException(e);
+        synchronized (netcdfFile) {
+            try {
+                rawBuffer = netcdfVariable.read(offsets, shapes);
+            } catch (InvalidRangeException e) {
+                throw new IOException(e);
+            }
         }
         // @todo 2 tb/tb foresee that users may want the raw data 2025-12-05
         if (ReaderUtils.mustScale(netcdfVariable)) {

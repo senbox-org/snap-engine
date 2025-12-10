@@ -64,6 +64,7 @@ class CacheData2D {
         return yMax;
     }
 
+    // only for testing tb 2025-12-09
     ProductData getData() {
         return data;
     }
@@ -91,16 +92,20 @@ class CacheData2D {
     }
 
     private void ensureData() throws IOException {
-        if (data == null) {
-            final String name = context.getVariableDescriptor().name;
-            final int[] offsets = {yMin, xMin};
-            final Rectangle bounds = getBoundingRect();
-            final int[] shapes = {bounds.height, bounds.width};
-            // @ todo tb 2025-12-02
-            // dataType!
-            // scale or not?
-            final CacheDataProvider dataProvider = context.getDataProvider();
-            data = dataProvider.readCacheBlock(name, offsets, shapes, data);
+        synchronized (this) {
+            if (data == null) {
+
+                final String name = context.getVariableDescriptor().name;
+                final int[] offsets = {yMin, xMin};
+                final Rectangle bounds = getBoundingRect();
+                final int[] shapes = {bounds.height, bounds.width};
+                // @ todo tb 2025-12-02
+                // dataType!
+                // scale or not?
+                System.out.println(name + " " + boundingRect.toString());
+                final CacheDataProvider dataProvider = context.getDataProvider();
+                data = dataProvider.readCacheBlock(name, offsets, shapes, data);
+            }
         }
     }
 

@@ -54,7 +54,7 @@ public class PaceOCICachedProductReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        throw new RuntimeException("not implemented");
+        return new PaceOCICachedProductReader(this);
     }
 
     @Override

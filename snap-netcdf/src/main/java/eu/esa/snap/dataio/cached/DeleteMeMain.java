@@ -24,8 +24,9 @@ public class DeleteMeMain {
 
             band = product.getBand("sensor_azimuth");
             productData = ProductData.createInstance(band.getDataType(), 512 * 512);
-            band.readRasterData(300, 1000, 512, 512, productData);
-            band.readRasterData(400, 1100, 512, 512, productData);
+            band.readRasterData(300, 0, 512, 512, productData);
+            band.readRasterData(400, 0, 512, 512, productData);
+            band.readRasterData(500, 0, 512, 512, productData);
         }
     }
 }
