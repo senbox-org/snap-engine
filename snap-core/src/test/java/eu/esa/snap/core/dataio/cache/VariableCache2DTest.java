@@ -1,6 +1,9 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -96,12 +99,40 @@ public class VariableCache2DTest {
         assertEquals(0, affectedTileLocations.length);
     }
 
+    @Test
+    public void testGetSizeInBytes() throws IOException {
+        final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
+        final VariableCache2D cache = new VariableCache2D(variableDescriptor, new MockProvider());
+
+        assertEquals(1920, cache.getSizeInBytes());
+
+        // read data to memory
+        cache.read(new int[]{30, 30}, new int[] {100, 50}, new int[]{0, 0}, new int[] {100, 50}, null);
+        assertEquals(28320, cache.getSizeInBytes());
+
+        cache.read(new int[]{370, 30}, new int[] {100, 50}, new int[]{370, 30}, new int[] {100, 50}, null);
+        assertEquals(96320, cache.getSizeInBytes());
+    }
+
     private static VariableDescriptor createDescriptor(int width, int height, int tileWidth, int tileHeight) {
         VariableDescriptor variableDescriptor = new VariableDescriptor();
         variableDescriptor.width = width;
         variableDescriptor.height = height;
         variableDescriptor.tileWidth = tileWidth;
         variableDescriptor.tileHeight = tileHeight;
+        variableDescriptor.dataType = ProductData.TYPE_FLOAT32;
         return variableDescriptor;
+    }
+
+    private static class MockProvider implements CacheDataProvider {
+        @Override
+        public VariableDescriptor getVariableDescriptor(String variableName) throws IOException {
+            throw new RuntimeException("not implemented");
+        }
+
+        @Override
+        public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+            return ProductData.createInstance(ProductData.TYPE_FLOAT32, shapes[0] * shapes[1]);
+        }
     }
 }

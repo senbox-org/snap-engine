@@ -35,6 +35,14 @@ public class CacheManager {
         return productCaches.size();
     }
 
+    public long getSizeInBytes() {
+        long sizeInBytes = 0;
+        for (ProductCache productCache : productCaches) {
+            sizeInBytes += productCache.getSizeInBytes();
+        }
+        return sizeInBytes;
+    }
+
     public void remove(ProductCache productCache) {
         boolean removed = productCaches.remove(productCache);
         if (removed) {

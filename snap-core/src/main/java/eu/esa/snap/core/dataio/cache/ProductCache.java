@@ -3,6 +3,7 @@ package eu.esa.snap.core.dataio.cache;
 import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductCache {
@@ -30,6 +31,16 @@ public class ProductCache {
         });
 
         return variableCache.read(offsets, shapes, targetOffsets, targetShapes, targetBuffer);
+    }
+
+    long getSizeInBytes() {
+        long sizeInBytes = 0;
+        Collection<VariableCache2D> values = variableCacheMap.values();
+        for (VariableCache2D variableCache2D : values) {
+            sizeInBytes += variableCache2D.getSizeInBytes();
+        }
+
+        return sizeInBytes;
     }
 
     private VariableCache2D createVariableCache2D(String bandName) throws IOException {

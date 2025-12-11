@@ -310,12 +310,28 @@ public class CacheData2DTest {
         final CacheDataProvider cacheDataProvider = new MockProvider();
         final CacheData2D cacheData2D = new CacheData2D(200, 209, 350, 359);
 
-        CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
         cacheData2D.setCacheContext(cacheContext);
         assertNull(cacheData2D.getData());
 
         cacheData2D.copyData(new int[]{0,0}, new int[]{5,5}, new int[]{5,5},10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
         assertNotNull(cacheData2D.getData());
+    }
+
+    @Test
+    public void testGetSizeInBytes() throws IOException {
+        final CacheData2D cacheData2D = new CacheData2D(200, 209, 350, 359);
+        // size without having a buffer allocated
+        assertEquals(192, cacheData2D.getSizeInBytes());
+
+        // trigger reading the buffer
+        final CacheDataProvider cacheDataProvider = new MockProvider();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        cacheData2D.setCacheContext(cacheContext);
+        cacheData2D.copyData(new int[]{0,0}, new int[]{5,5}, new int[]{5,5},10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+
+        // now with a data buffer - 100 times size of short added
+        assertEquals(392, cacheData2D.getSizeInBytes());
     }
 
     private static ProductData createPreparedBuffer(int dataType, int numElems) {

@@ -2,19 +2,19 @@ package eu.esa.snap.core.dataio.cache;
 
 class CacheContext {
 
-    VariableDescriptor variableDescriptor;
-    CacheDataProvider dataProvider;
+    private final VariableDescriptor variableDescriptor;
+    private final CacheDataProvider dataProvider;
 
-    public CacheContext(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
+    CacheContext(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
         this.variableDescriptor = variableDescriptor;
         this.dataProvider = dataProvider;
     }
 
-    public VariableDescriptor getVariableDescriptor() {
+    VariableDescriptor getVariableDescriptor() {
         return variableDescriptor;
     }
 
-    public CacheDataProvider getDataProvider() {
+    CacheDataProvider getDataProvider() {
         return dataProvider;
     }
 }

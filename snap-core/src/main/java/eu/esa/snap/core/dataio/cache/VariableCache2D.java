@@ -7,19 +7,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class VariableCache2D {
+class VariableCache2D {
 
     private final VariableDescriptor variableDescriptor;
     private final CacheDataProvider dataProvider;
     private CacheData2D[][] cacheData;
 
-    public VariableCache2D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
+    VariableCache2D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
         this.variableDescriptor = variableDescriptor;
         this.dataProvider = dataProvider;
         cacheData = initiateCache(variableDescriptor);
     }
 
-    // package access for testing only tb 2025-11-27
     static CacheData2D[][] initiateCache(VariableDescriptor variableDescriptor) {
         final int numTilesX = (int) Math.ceil((float) variableDescriptor.width / variableDescriptor.tileWidth);
         final int numTilesY = (int) Math.ceil((float) variableDescriptor.height / variableDescriptor.tileHeight);
@@ -49,14 +48,26 @@ public class VariableCache2D {
         return cacheData2D;
     }
 
-    public void dispose() {
+    @SuppressWarnings("ForLoopReplaceableByForEach")
+    long getSizeInBytes() {
+        long sizeInBytes = 0;
+
+        for (int i = 0; i < cacheData.length; i++) {
+            for (int j = 0; j < cacheData[i].length; j++) {
+                sizeInBytes += cacheData[i][j].getSizeInBytes();
+            }
+        }
+        return sizeInBytes;
+    }
+
+    void dispose() {
         for (CacheData2D[] Row : cacheData) {
             Arrays.fill(Row, null);
         }
         cacheData = null;
     }
 
-    public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
+    ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         // check if buffer supplied
         if (targetData == null) {
             final int size = targetShapes[0] * targetShapes[1];

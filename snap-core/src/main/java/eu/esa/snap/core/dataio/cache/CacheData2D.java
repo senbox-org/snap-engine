@@ -5,7 +5,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.awt.*;
 import java.io.IOException;
 
-class CacheData2D {
+class CacheData2D implements CacheData {
 
     private final int xMin;
     private final int xMax;
@@ -24,7 +24,7 @@ class CacheData2D {
         boundingRect = null;
     }
 
-    public void setCacheContext(CacheContext context) {
+    void setCacheContext(CacheContext context) {
         this.context = context;
     }
 
@@ -74,6 +74,15 @@ class CacheData2D {
 
         final int cacheWidth = getBoundingRect().width;
         copyDataBuffer(offsets, cacheWidth, data, targetOffsets, targetShapes, targetWidth, targetData);
+    }
+
+    @Override
+    public int getSizeInBytes() {
+        int size = 192;
+        if (data != null) {
+            size += data.getNumElems() * data.getElemSize();
+        }
+        return size;
     }
 
     @SuppressWarnings("SuspiciousSystemArraycopy")
