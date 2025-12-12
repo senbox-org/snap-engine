@@ -7,17 +7,18 @@ import java.awt.*;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class CacheData2DTest {
 
     @Test
     public void testIntersects() {
-        final CacheData2D cacheData2D = new CacheData2D(100, 199, 450, 499);
+        int[] offsets = new int[]{450, 100};
+        int[] shapes = new int[]{100, 100};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         // inside
-        int[] offsets = new int[]{460, 120};
-        int[] shapes = new int[]{20, 20};
+        offsets = new int[]{460, 120};
+        shapes = new int[]{20, 20};
         assertTrue(cacheData2D.intersects(offsets, shapes));
 
         // intersect left border
@@ -63,11 +64,13 @@ public class CacheData2DTest {
 
     @Test
     public void testIntersects_outside() {
-        final CacheData2D cacheData2D = new CacheData2D(100, 199, 450, 499);
+        int[] offsets = new int[]{450, 100};
+        int[] shapes = new int[]{100, 100};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         // too far left
-        int[] offsets = new int[]{460, 0};
-        int[] shapes = new int[]{20, 20};
+        offsets = new int[]{460, 0};
+        shapes = new int[]{20, 20};
         assertFalse(cacheData2D.intersects(offsets, shapes));
 
         // too high
@@ -88,7 +91,9 @@ public class CacheData2DTest {
 
     @Test
     public void testInside_y() {
-        final CacheData2D cacheData2D = new CacheData2D(100, 199, 450, 499);
+        final int[] offsets = new int[]{450, 100};
+        final int[] shapes = new int[]{50, 100};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         assertTrue(cacheData2D.inside_y(450));
         assertTrue(cacheData2D.inside_y(470));
@@ -100,7 +105,9 @@ public class CacheData2DTest {
 
     @Test
     public void testInside_x() {
-        final CacheData2D cacheData2D = new CacheData2D(100, 199, 450, 499);
+        final int[] offsets = new int[]{450, 100};
+        final int[] shapes = new int[]{100, 100};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         assertTrue(cacheData2D.inside_x(100));
         assertTrue(cacheData2D.inside_x(156));
@@ -112,7 +119,10 @@ public class CacheData2DTest {
 
     @Test
     public void testGetBoundingRect() {
-        final CacheData2D cacheData2D = new CacheData2D(150, 249, 460, 509);
+        final int[] offsets = new int[]{460, 150};
+        final int[] shapes = new int[]{50, 100};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+
         final Rectangle rect = cacheData2D.getBoundingRect();
         assertEquals(150, rect.x);
         assertEquals(460, rect.y);
@@ -308,19 +318,24 @@ public class CacheData2DTest {
     @Test
     public void testEnsureData() throws IOException {
         final CacheDataProvider cacheDataProvider = new MockProvider();
-        final CacheData2D cacheData2D = new CacheData2D(200, 209, 350, 359);
+        final int[] offsets = new int[]{350, 200};
+        final int[] shapes = new int[]{10, 10};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
         cacheData2D.setCacheContext(cacheContext);
         assertNull(cacheData2D.getData());
 
-        cacheData2D.copyData(new int[]{0,0}, new int[]{5,5}, new int[]{5,5},10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+        cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
         assertNotNull(cacheData2D.getData());
     }
 
     @Test
     public void testGetSizeInBytes() throws IOException {
-        final CacheData2D cacheData2D = new CacheData2D(200, 209, 350, 359);
+        final int[] offsets = new int[]{350, 200};
+        final int[] shapes = new int[]{10, 10};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+
         // size without having a buffer allocated
         assertEquals(192, cacheData2D.getSizeInBytes());
 
@@ -328,7 +343,7 @@ public class CacheData2DTest {
         final CacheDataProvider cacheDataProvider = new MockProvider();
         final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
         cacheData2D.setCacheContext(cacheContext);
-        cacheData2D.copyData(new int[]{0,0}, new int[]{5,5}, new int[]{5,5},10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+        cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
 
         // now with a data buffer - 100 times size of short added
         assertEquals(392, cacheData2D.getSizeInBytes());

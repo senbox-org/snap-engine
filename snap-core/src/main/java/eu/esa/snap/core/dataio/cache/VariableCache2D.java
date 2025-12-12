@@ -37,7 +37,9 @@ class VariableCache2D {
                 if (yMax >= variableDescriptor.height) {
                     yMax = variableDescriptor.height - 1;
                 }
-                cacheData2D[i][j] = new CacheData2D(startX, xMax, startY, yMax);
+                final int[] offsets = {startY, startX};
+                final int[] shapes = {yMax - startY + 1, xMax - startX + 1};
+                cacheData2D[i][j] = new CacheData2D(offsets, shapes);
                 startX += variableDescriptor.tileWidth;
             }
             // next tile row tb 2025-12-02

@@ -16,11 +16,11 @@ class CacheData2D implements CacheData {
     private Rectangle boundingRect;
     private CacheContext context;
 
-    CacheData2D(int xMin, int xMax, int yMin, int yMax) {
-        this.xMin = xMin;
-        this.xMax = xMax;
-        this.yMin = yMin;
-        this.yMax = yMax;
+    CacheData2D(int[] offsets, int[] shapes) {
+        this.xMin = offsets[1];
+        this.xMax = xMin + shapes[1] - 1;
+        this.yMin = offsets[0];
+        this.yMax = yMin + shapes[0] - 1;
         boundingRect = null;
     }
 
@@ -30,11 +30,11 @@ class CacheData2D implements CacheData {
 
     boolean intersects(int[] offsets, int[] shapes) {
         final int yMinRequested = offsets[0];
-        final int xMinRequested = offsets[1];
         final int yMaxRequested = offsets[0] + shapes[0] - 1;
-        final int xMaxRequested = offsets[1] + shapes[1] - 1;
 
         if (inside_y(yMinRequested) || inside_y(yMaxRequested)) {
+            final int xMinRequested = offsets[1];
+            final int xMaxRequested = offsets[1] + shapes[1] - 1;
             return (inside_x(xMinRequested) || inside_x(xMaxRequested));
         }
         return false;

@@ -24,7 +24,13 @@ public class ProductCache {
     public ProductData read(String bandName, ProductData targetBuffer, int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes) throws IOException {
         final VariableCache2D variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
             try {
-                return createVariableCache2D(bandName);
+                final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
+                if (variableDescriptor.layer < 1) {
+                    return createVariableCache2D(bandName);
+                } else {
+                   // return createVariableCache3D(bandName);
+                    throw new RuntimeException("not implemented");
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
