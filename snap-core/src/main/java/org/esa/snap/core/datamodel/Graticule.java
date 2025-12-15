@@ -1308,8 +1308,11 @@ public class Graticule {
 
 
     static double adjustLon(double lon) {
+        // adapt lon that is out of range
         if (lon > 180) {
             lon -= 360;
+        } else if (lon < -180) {
+            lon += 360;
         }
 
         return lon;
