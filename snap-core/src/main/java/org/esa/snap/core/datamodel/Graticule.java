@@ -1027,6 +1027,7 @@ public class Graticule {
         double NAN_PIXEL = 9991234;  // just needs to be unique (note 999 is used for no data)
 //        double NAN_PIXEL = Double.NaN;  // just needs to be unique (note 999 is used for no data)
         double lonPrev = NAN_PIXEL;
+        double lonCurr = NAN_PIXEL;
         PixelPos pixelPosPrev = null;
         GeoPos geoPosPrev = null;
 
@@ -1042,18 +1043,25 @@ public class Graticule {
         for (double pixelX = 0.0; pixelX <= (raster.getRasterWidth() - 1); pixelX += increment) {
             pixelPosCurr = new PixelPos(pixelX, pixelY);
             geoPosCurr = raster.getGeoCoding().getGeoPos(pixelPosCurr, null);
-            double lonCurr = geoPosCurr.lon;
             boolean matchFound = false;
 //            lonPixel = validAdjust(lonCurr);
+
+            lonCurr = adjustLon(geoPosCurr.lon);
+//            lonPrev = adjustLon(geoPosPrev.lon);
 
 
             if (validLon(lonCurr)) {
                 if (geoPosPrev != null) {
-                    deltaPixel = geoPosCurr.lon - geoPosPrev.lon;
+                    if (validLon(lonPrev)) {
+                        deltaPixel = lonCurr - lonPrev;
+                    }
                 } else {
                     PixelPos pixPosNext = new PixelPos(pixelX + 1, pixelY);
                     GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
-                    deltaPixel = geoPosNext.lon - geoPosCurr.lon;
+                    double lonNext = adjustLon(geoPosNext.lon);
+                    if (validLon(lonNext)) {
+                        deltaPixel = lonNext - lonCurr;
+                    }
                 }
 
 
@@ -1107,7 +1115,6 @@ public class Graticule {
 
 
                     if (matchFound) {
-                        if (coord1 == null) {
                             PixelPos pixelPosNext = new PixelPos(pixelX + 1, pixelY);
                             GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixelPosNext, null);
 
@@ -1122,11 +1129,12 @@ public class Graticule {
                             }
                             coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
 
+                        if (coord1 == null) {
                             coord1 = coordInterp;
                         } else if (coord2 == null) {
                             // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
                             if (Math.abs(pixelPosCurr.x - coord1.pixelPos.x) > (raster.getRasterWidth() / 4.0)) {
-                                coord2 = new Coord(geoPosCurr, pixelPosCurr);
+                                coord2 = coordInterp;
                             }
                         }
                     }
@@ -1299,6 +1307,13 @@ public class Graticule {
     }
 
 
+    static double adjustLon(double lon) {
+        if (lon > 180) {
+            lon -= 360;
+        }
+
+        return lon;
+    }
 
 
     static Coord[] getCoordParallel(double parallelLat, double pixelX, RasterDataNode raster, double tolerance, boolean interpolate) {
@@ -1568,8 +1583,8 @@ public class Graticule {
 
     static Coord getCoordInterpolateToFixedLon(Coord prevCoord, Coord currCoord, double lonDesired, boolean interpolate) {
 
-        double lonCurr = currCoord.geoPos.lon;
-        double lonPrev = prevCoord.geoPos.lon;
+        double lonCurr = adjustLon(currCoord.geoPos.lon);
+        double lonPrev = adjustLon(prevCoord.geoPos.lon);
         double latPrev = prevCoord.geoPos.lat;
         double latCurr = currCoord.geoPos.lat;
 
