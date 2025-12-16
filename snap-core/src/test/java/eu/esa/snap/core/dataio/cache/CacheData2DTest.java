@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.awt.*;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.cache.CacheTestUtil.createPreparedBuffer;
 import static org.junit.Assert.*;
 
 public class CacheData2DTest {
@@ -180,10 +181,12 @@ public class CacheData2DTest {
 
     @Test
     public void testCopyDataBuffer_upperLeftCorner() {
+        // size: 20 x 15
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 300);
         final int cacheWidth = 15;
         int[] srcOffsets = new int[]{0, 0};
 
+        // size: 10 x 10
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{4, 3};
@@ -347,14 +350,6 @@ public class CacheData2DTest {
 
         // now with a data buffer - 100 times size of short added
         assertEquals(392, cacheData2D.getSizeInBytes());
-    }
-
-    private static ProductData createPreparedBuffer(int dataType, int numElems) {
-        final ProductData productData = ProductData.createInstance(dataType, numElems);
-        for (int i = 0; i < numElems; i++) {
-            productData.setElemIntAt(i, i);
-        }
-        return productData;
     }
 
     private static class MockProvider implements CacheDataProvider {

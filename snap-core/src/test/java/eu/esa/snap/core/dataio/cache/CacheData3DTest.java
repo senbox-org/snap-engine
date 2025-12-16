@@ -1,9 +1,11 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static eu.esa.snap.core.dataio.cache.CacheTestUtil.createPreparedBuffer;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class CacheData3DTest {
 
@@ -131,5 +133,25 @@ public class CacheData3DTest {
 
     // bounding rect - do we need this in 3d world? Better a bounding cube.
 
+    @Test
+    public void testCopyDataBuffer_requestCompletelyInCache() {
+        // dimension 10 x 10 x 20 (z, y, x)
+        ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 2000);
 
+        // 5x5x10 upper left corner to upper left corner, short
+        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 250);
+        int[] srcOffsets = new int[]{0, 0, 0};
+        int[] targetOffsets = new int[]{0, 0, 0};
+        int[] targetShapes = new int[]{5, 5, 10};
+        int[] targetBufferSizes = new int[]{5, 5, 10};
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+
+        assertEquals(0, targetBuffer.getElemIntAt(0));
+        assertEquals(1, targetBuffer.getElemIntAt(1));
+        assertEquals(5, targetBuffer.getElemIntAt(5));
+        assertEquals(10, targetBuffer.getElemIntAt(10));
+        assertEquals(100, targetBuffer.getElemIntAt(100));
+        assertEquals(174, targetBuffer.getElemIntAt(174));
+        assertEquals(249, targetBuffer.getElemIntAt(249));
+    }
 }

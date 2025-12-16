@@ -21,6 +21,8 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +54,9 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
     protected Product readProductNodesImpl() throws IOException {
         final File fileLocation = new File(getInput().toString());
 
+        // just for testing. A reader should never alter the state of a global setting
+        //NetcdfDatasets.disableNetcdfFileCache();
+
         netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
         if (netcdfFile == null) {
             throw new IOException("Failed to open file " + fileLocation.getPath());
@@ -69,15 +74,6 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         final List<Variable> variables = netcdfFile.getVariables();
         addVariables(product, variables);
-
-        /*
-        final Band heightBand = new BandUsingReaderDirectly("height", ProductData.TYPE_INT16, width, height);
-        product.addBand(heightBand);
-
-        // @todo 2 tb/tb this should be float - find a clever way to convert.
-        final Band sensorAzimuthBand = new BandUsingReaderDirectly("sensor_azimuth", ProductData.TYPE_FLOAT64, width, height);
-        product.addBand(sensorAzimuthBand);
-         */
 
         return product;
     }

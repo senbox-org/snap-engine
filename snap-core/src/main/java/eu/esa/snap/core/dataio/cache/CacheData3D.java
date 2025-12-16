@@ -1,5 +1,7 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
+
 class CacheData3D {
 
     private final int xMin;
@@ -30,7 +32,7 @@ class CacheData3D {
         return x >= xMin && x <= xMax;
     }
 
-    public boolean intersects(int[] offsets, int[] shapes) {
+     boolean intersects(int[] offsets, int[] shapes) {
         final int zMin = offsets[0];
         final int zMax = offsets[0] + shapes[0] - 1;
 
@@ -47,4 +49,27 @@ class CacheData3D {
         }
         return false;
     }
+
+    // package access for testing only tb 2025-12-04
+    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int[] targetBufferSizes, ProductData targetBuffer) {
+        final int numLayers = targetShapes[0];
+        final int numRows = targetShapes[1];
+        //final int numCols = targetShapes[2];
+
+        final int layerSize = targetShapes[1] * targetShapes[2];    // z-layer size: y*x
+        final int rowSize = targetShapes[2];
+        int srcOffset = offsets[0] * layerSize + offsets[1] * rowSize + offsets[2];
+
+        final int targetLayerSize = targetBufferSizes[1] * targetBufferSizes[2];
+        final int targetWidth = targetBufferSizes[2];
+        int destOffset = targetOffsets[0] * targetLayerSize + targetOffsets[1] * targetWidth + targetOffsets[2];
+        for (int layer = 0; layer < numLayers; layer++) {
+            for (int row = 0; row < numRows; row++) {
+                System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getElems(), destOffset, rowSize);
+                srcOffset += srcWidth;
+                destOffset += targetWidth;
+            }
+        }
+    }
+
 }

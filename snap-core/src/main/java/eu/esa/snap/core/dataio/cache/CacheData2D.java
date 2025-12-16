@@ -7,6 +7,8 @@ import java.io.IOException;
 
 class CacheData2D implements CacheData {
 
+    private static final int SIZE_WITHOUT_BUFFER = 192;
+
     private final int xMin;
     private final int xMax;
     private final int yMin;
@@ -78,7 +80,7 @@ class CacheData2D implements CacheData {
 
     @Override
     public int getSizeInBytes() {
-        int size = 192;
+        int size = SIZE_WITHOUT_BUFFER;
         if (data != null) {
             size += data.getNumElems() * data.getElemSize();
         }
@@ -88,12 +90,12 @@ class CacheData2D implements CacheData {
     @SuppressWarnings("SuspiciousSystemArraycopy")
     // package access for testing only tb 2025-12-04
     static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) {
-        final int numLines = targetShapes[0];
+        final int numRows = targetShapes[0];
         final int numCols = targetShapes[1];
 
         int srcOffset = offsets[0] * srcWidth + offsets[1];
         int destOffset = targetOffsets[0] * targetWidth + targetOffsets[1];
-        for (int line = 0; line < numLines; line++) {
+        for (int line = 0; line < numRows; line++) {
             System.arraycopy(cacheBuffer.getElems(), srcOffset, targetData.getElems(), destOffset, numCols);
             srcOffset += srcWidth;
             destOffset += targetWidth;
