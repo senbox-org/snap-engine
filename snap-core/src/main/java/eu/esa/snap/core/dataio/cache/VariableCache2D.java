@@ -26,8 +26,8 @@ class VariableCache2D {
 
         int startY = 0;
         int startX = 0;
-        for (int i = 0; i < cacheData2D.length; i++) {
-            for (int j = 0; j < cacheData2D[i].length; j++) {
+        for (int j = 0; j < cacheData2D.length; j++) {
+            for (int i = 0; i < cacheData2D[j].length; i++) {
                 int xMax = startX + variableDescriptor.tileWidth - 1;
                 if (xMax >= variableDescriptor.width) {
                     xMax = variableDescriptor.width - 1;
@@ -39,7 +39,7 @@ class VariableCache2D {
                 }
                 final int[] offsets = {startY, startX};
                 final int[] shapes = {yMax - startY + 1, xMax - startX + 1};
-                cacheData2D[i][j] = new CacheData2D(offsets, shapes);
+                cacheData2D[j][i] = new CacheData2D(offsets, shapes);
                 startX += variableDescriptor.tileWidth;
             }
             // next tile row tb 2025-12-02

@@ -21,8 +21,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dataset.NetcdfDatasets;
 
 import java.io.File;
 import java.io.IOException;
@@ -203,19 +201,19 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         if (shape.length == 2) {
             variableDescriptor.width = shape[1];
             variableDescriptor.height = shape[0];
-            variableDescriptor.layer = -1;
+            variableDescriptor.layers = -1;
 
             variableDescriptor.tileWidth = chunkSizesValues.getInt(1);
             variableDescriptor.tileHeight = chunkSizesValues.getInt(0);
-            variableDescriptor.tileLayer = -1;
+            variableDescriptor.tileLayers = -1;
         } else if (shape.length == 3) {
             variableDescriptor.width = shape[2];
             variableDescriptor.height = shape[1];
-            variableDescriptor.layer = shape[0];
+            variableDescriptor.layers = shape[0];
 
             variableDescriptor.tileWidth = chunkSizesValues.getInt(2);
             variableDescriptor.tileHeight = chunkSizesValues.getInt(1);
-            variableDescriptor.tileLayer = chunkSizesValues.getInt(0);
+            variableDescriptor.tileLayers = chunkSizesValues.getInt(0);
         }
 
         return variableDescriptor;

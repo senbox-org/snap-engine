@@ -32,11 +32,35 @@ class CacheData3D {
         return x >= xMin && x <= xMax;
     }
 
-     boolean intersects(int[] offsets, int[] shapes) {
+    public int getxMin() {
+        return xMin;
+    }
+
+    public int getxMax() {
+        return xMax;
+    }
+
+    public int getyMin() {
+        return yMin;
+    }
+
+    public int getyMax() {
+        return yMax;
+    }
+
+    public int getzMin() {
+        return zMin;
+    }
+
+    public int getzMax() {
+        return zMax;
+    }
+
+    boolean intersects(int[] offsets, int[] shapes) {
         final int zMin = offsets[0];
         final int zMax = offsets[0] + shapes[0] - 1;
 
-        if (inside_z(zMin)|| inside_z(zMax)) {
+        if (inside_z(zMin) || inside_z(zMax)) {
             final int yMin = offsets[1];
             final int yMax = offsets[1] + shapes[1] - 1;
 
@@ -51,10 +75,10 @@ class CacheData3D {
     }
 
     // package access for testing only tb 2025-12-04
+    @SuppressWarnings("SuspiciousSystemArraycopy")
     static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int[] targetBufferSizes, ProductData targetBuffer) {
         final int numLayers = targetShapes[0];
         final int numRows = targetShapes[1];
-        //final int numCols = targetShapes[2];
 
         final int layerSize = targetShapes[1] * targetShapes[2];    // z-layer size: y*x
         final int rowSize = targetShapes[2];
@@ -62,8 +86,9 @@ class CacheData3D {
 
         final int targetLayerSize = targetBufferSizes[1] * targetBufferSizes[2];
         final int targetWidth = targetBufferSizes[2];
-        int destOffset = targetOffsets[0] * targetLayerSize + targetOffsets[1] * targetWidth + targetOffsets[2];
+
         for (int layer = 0; layer < numLayers; layer++) {
+            int destOffset = (layer + targetOffsets[0]) * targetLayerSize + targetOffsets[1] * targetWidth + targetOffsets[2];
             for (int row = 0; row < numRows; row++) {
                 System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getElems(), destOffset, rowSize);
                 srcOffset += srcWidth;

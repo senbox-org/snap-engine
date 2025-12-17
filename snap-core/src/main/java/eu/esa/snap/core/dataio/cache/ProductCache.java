@@ -25,7 +25,7 @@ public class ProductCache {
         final VariableCache2D variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
             try {
                 final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-                if (variableDescriptor.layer < 1) {
+                if (variableDescriptor.layers < 1) {
                     return createVariableCache2D(bandName);
                 } else {
                    // return createVariableCache3D(bandName);

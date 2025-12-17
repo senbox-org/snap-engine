@@ -9,9 +9,9 @@ public class VariableDescriptor {
 
     public int width;
     public int height;
-    public int layer;
+    public int layers;
 
     public int tileWidth;
     public int tileHeight;
-    public int tileLayer;
+    public int tileLayers;
 }
