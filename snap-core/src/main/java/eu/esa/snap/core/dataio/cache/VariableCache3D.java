@@ -1,6 +1,40 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 class VariableCache3D {
+
+    private CacheData3D[][][] cacheData;
+    private final CacheDataProvider dataProvider;
+    private final VariableDescriptor variableDescriptor;
+
+    VariableCache3D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
+        this.dataProvider = dataProvider;
+        this.variableDescriptor = variableDescriptor;
+
+        cacheData = initiateCache(variableDescriptor);
+    }
+
+    // only for testing tb 2025-12-18
+    CacheData3D[][][] getCacheData() {
+        return cacheData;
+    }
+
+    void dispose() {
+        if (cacheData != null) {
+            for (CacheData3D[][] cacheLayer : cacheData) {
+                for (CacheData3D[] cacheLine : cacheLayer) {
+                    Arrays.fill(cacheLine, null);
+                }
+            }
+        }
+        cacheData = null;
+    }
+
     static CacheData3D[][][] initiateCache(VariableDescriptor descriptor) {
         final int numTilesX = (int) Math.ceil((float) descriptor.width / descriptor.tileWidth);
         final int numTilesY = (int) Math.ceil((float) descriptor.height / descriptor.tileHeight);
@@ -42,5 +76,48 @@ class VariableCache3D {
         }
 
         return cacheData3D;
+    }
+
+    CacheIndex[] getAffectedCacheLocations(int[] offsets, int[] shapes) {
+        final ArrayList<CacheIndex> cacheIndices = new ArrayList<>();
+
+        for (int z = 0; z < cacheData.length; z++) {
+            for (int y = 0; y < cacheData[0].length; y++) {
+                for(int x = 0; x < cacheData[0][0].length; x++) {
+                    final CacheData3D current = cacheData[z][y][x];
+                    if (current.intersects(offsets, shapes)) {
+                        cacheIndices.add(new CacheIndex(z, y, x));
+                    }
+                }
+            }
+        }
+        return cacheIndices.toArray(new CacheIndex[0]);
+    }
+
+    long getSizeInBytes() {
+        long sizeInBytes = 0;
+
+        for (int z = 0; z < cacheData.length; z++) {
+            for (int y = 0; y < cacheData[z].length; y++) {
+                for (int x = 0; x < cacheData[z][y].length; x++) {
+                    sizeInBytes += cacheData[z][y][x].getSizeInBytes();
+                }
+            }
+        }
+        return sizeInBytes;
+    }
+
+    ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
+        final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
+        for (CacheIndex tileLocation : tileLocations) {
+            final int row = tileLocation.getCacheRow();
+            final int col = tileLocation.getCacheCol();
+            final int layer = tileLocation.getCacheLayer();
+            final CacheData3D cacheData3D = cacheData[layer][row][col];
+
+            // calculate intersection between cache-cube and target-cube
+        }
+        return targetData;
     }
 }

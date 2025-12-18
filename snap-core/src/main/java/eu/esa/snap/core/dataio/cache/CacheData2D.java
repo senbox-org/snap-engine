@@ -5,6 +5,8 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.awt.*;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
+
 class CacheData2D implements CacheData {
 
     private static final int SIZE_WITHOUT_BUFFER = 192;
@@ -34,20 +36,20 @@ class CacheData2D implements CacheData {
         final int yMinRequested = offsets[0];
         final int yMaxRequested = offsets[0] + shapes[0] - 1;
 
-        if (inside_y(yMinRequested) || inside_y(yMaxRequested)) {
+        if (intersects_y(yMinRequested, yMaxRequested)) {
             final int xMinRequested = offsets[1];
             final int xMaxRequested = offsets[1] + shapes[1] - 1;
-            return (inside_x(xMinRequested) || inside_x(xMaxRequested));
+            return (intersects_x(xMinRequested, xMaxRequested));
         }
         return false;
     }
 
-    boolean inside_y(int y) {
-        return y >= yMin && y <= yMax;
+    boolean intersects_y(int testMin, int testMax) {
+        return intersectingRange(testMin, testMax, yMin, yMax);
     }
 
-    boolean inside_x(int x) {
-        return x >= xMin && x <= xMax;
+    boolean intersects_x(int testMin, int testMax) {
+        return intersectingRange(testMin, testMax, xMin, xMax);
     }
 
     int getxMin() {

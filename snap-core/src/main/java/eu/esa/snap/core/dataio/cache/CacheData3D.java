@@ -2,7 +2,11 @@ package eu.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.ProductData;
 
-class CacheData3D {
+import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
+
+class CacheData3D implements CacheData{
+
+    private static final int SIZE_WITHOUT_BUFFER = 192;
 
     private final int xMin;
     private final int xMax;
@@ -10,6 +14,8 @@ class CacheData3D {
     private final int yMax;
     private final int zMin;
     private final int zMax;
+
+    private ProductData data;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -20,16 +26,16 @@ class CacheData3D {
         zMax = zMin + shapes[0] - 1;
     }
 
-    boolean inside_z(int z) {
-        return z >= zMin && z <= zMax;
+    boolean intersects_z(int testMin, int testMax) {
+        return intersectingRange(testMin, testMax, zMin, zMax);
     }
 
-    boolean inside_y(int y) {
-        return y >= yMin && y <= yMax;
+    boolean intersects_y(int testMin, int testMax) {
+        return intersectingRange(testMin, testMax, yMin, yMax);
     }
 
-    boolean inside_x(int x) {
-        return x >= xMin && x <= xMax;
+    boolean intersects_x(int testMin, int testMax) {
+        return intersectingRange(testMin, testMax, xMin, xMax);
     }
 
     public int getxMin() {
@@ -60,15 +66,15 @@ class CacheData3D {
         final int zMin = offsets[0];
         final int zMax = offsets[0] + shapes[0] - 1;
 
-        if (inside_z(zMin) || inside_z(zMax)) {
+        if (intersects_z(zMin, zMax)) {
             final int yMin = offsets[1];
             final int yMax = offsets[1] + shapes[1] - 1;
 
-            if (inside_y(yMin) || inside_y(yMax)) {
+            if (intersects_y(yMin, yMax)) {
                 final int xMin = offsets[2];
                 final int xMax = offsets[2] + shapes[2] - 1;
 
-                return inside_x(xMin) | inside_x(xMax);
+                return intersects_x(xMin, xMax);
             }
         }
         return false;
@@ -97,4 +103,12 @@ class CacheData3D {
         }
     }
 
+    @Override
+    public int getSizeInBytes() {
+        int size = SIZE_WITHOUT_BUFFER;
+        if (data != null) {
+            size += data.getNumElems() * data.getElemSize();
+        }
+        return size;
+    }
 }

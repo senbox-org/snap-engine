@@ -10,45 +10,69 @@ import static org.junit.Assert.assertEquals;
 public class CacheData3DTest {
 
     @Test
-    public void testInside_z() {
+    public void testIntersects_z() {
         int[] offsets = new int[]{10, 200, 300};
         int[] shapes = new int[]{20, 50, 50};
         final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        // z ranges from 10 - 29
 
-        assertTrue(cacheData3D.inside_z(12));
-        assertTrue(cacheData3D.inside_z(23));
-        assertTrue(cacheData3D.inside_z(29));
+        // outside bottom
+        assertFalse(cacheData3D.intersects_z(0, 9));
 
-        assertFalse(cacheData3D.inside_z(9));
-        assertFalse(cacheData3D.inside_z(30));
+        // inside
+        assertTrue(cacheData3D.intersects_z(9, 12));
+        assertTrue(cacheData3D.intersects_z(22, 27));
+        assertTrue(cacheData3D.intersects_z(27, 32));
+
+        // contains
+        assertTrue(cacheData3D.intersects_z(9, 32));
+
+        // outside top
+        assertFalse(cacheData3D.intersects_z(41, 58));
     }
 
     @Test
-    public void testInside_y() {
-        final int[] offsets = new int[]{10, 200, 300};
-        final int[] shapes = new int[]{20, 50, 50};
+    public void testIntersects_y() {
+        int[] offsets = new int[]{10, 200, 300};
+        int[] shapes = new int[]{20, 50, 50};
         final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        // y ranges from 200 - 249
 
-        assertTrue(cacheData3D.inside_y(214));
-        assertTrue(cacheData3D.inside_y(236));
-        assertTrue(cacheData3D.inside_y(249));
+        // outside front
+        assertFalse(cacheData3D.intersects_y(0, 9));
 
-        assertFalse(cacheData3D.inside_y(199));
-        assertFalse(cacheData3D.inside_y(250));
+        // inside
+        assertTrue(cacheData3D.intersects_y(199, 212));
+        assertTrue(cacheData3D.intersects_y(222, 227));
+        assertTrue(cacheData3D.intersects_y(248, 255));
+
+        // contains
+        assertTrue(cacheData3D.intersects_y(198, 255));
+
+        // outside back
+        assertFalse(cacheData3D.intersects_y(260, 300));
     }
 
     @Test
-    public void testInside_x() {
-        final int[] offsets = new int[]{10, 200, 300};
-        final int[] shapes = new int[]{20, 50, 50};
+    public void testIntersects_x() {
+        int[] offsets = new int[]{10, 200, 300};
+        int[] shapes = new int[]{20, 50, 50};
         final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        // x ranges from 300 - 349
 
-        assertTrue(cacheData3D.inside_x(306));
-        assertTrue(cacheData3D.inside_x(311));
-        assertTrue(cacheData3D.inside_x(349));
+        // outside left
+        assertFalse(cacheData3D.intersects_x(0, 9));
 
-        assertFalse(cacheData3D.inside_x(299));
-        assertFalse(cacheData3D.inside_x(350));
+        // inside
+        assertTrue(cacheData3D.intersects_x(299, 312));
+        assertTrue(cacheData3D.intersects_x(322, 327));
+        assertTrue(cacheData3D.intersects_x(348, 355));
+
+        // contains
+        assertTrue(cacheData3D.intersects_x(250, 400));
+
+        // outside right
+        assertFalse(cacheData3D.intersects_x(360, 400));
     }
 
     @Test

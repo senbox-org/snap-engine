@@ -60,16 +60,16 @@ public class VariableCache2DTest {
     }
 
     @Test
-    public void testGetAffectedTileLocations_cacheHit() {
+    public void testGetAffectedCacheLocations_cacheHit() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
 
-        RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 0}, new int[]{50, 50});
+        CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0}, new int[]{50, 50});
         assertEquals(1, affectedTileLocations.length);
         assertEquals(0, affectedTileLocations[0].getCacheCol());
         assertEquals(0, affectedTileLocations[0].getCacheRow());
 
-        affectedTileLocations = cache.getAffectedTileLocations(new int[]{410, 30}, new int[]{50, 20});
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{410, 30}, new int[]{50, 20});
         assertEquals(2, affectedTileLocations.length);
         assertEquals(0, affectedTileLocations[0].getCacheCol());
         assertEquals(3, affectedTileLocations[0].getCacheRow());
@@ -78,24 +78,24 @@ public class VariableCache2DTest {
     }
 
     @Test
-    public void testGetAffectedTileLocations_cacheMiss() {
+    public void testGetAffectedCacheLocations_cacheMiss() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
 
         // right outside
-        RowCol[] affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, 200}, new int[]{50, 50});
+        CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 200}, new int[]{50, 50});
         assertEquals(0, affectedTileLocations.length);
 
         // left outside
-        affectedTileLocations = cache.getAffectedTileLocations(new int[]{0, -100}, new int[]{50, 50});
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, -100}, new int[]{50, 50});
         assertEquals(0, affectedTileLocations.length);
 
         // bottom outside
-        affectedTileLocations = cache.getAffectedTileLocations(new int[]{600, 0}, new int[]{50, 50});
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{600, 0}, new int[]{50, 50});
         assertEquals(0, affectedTileLocations.length);
 
         // top outside
-        affectedTileLocations = cache.getAffectedTileLocations(new int[]{-200, 0}, new int[]{50, 50});
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{-200, 0}, new int[]{50, 50});
         assertEquals(0, affectedTileLocations.length);
     }
 
@@ -106,7 +106,7 @@ public class VariableCache2DTest {
 
         assertEquals(1920, cache.getSizeInBytes());
 
-        // read data to memory
+        // read fake data to memory
         cache.read(new int[]{30, 30}, new int[] {100, 50}, new int[]{0, 0}, new int[] {100, 50}, null);
         assertEquals(28320, cache.getSizeInBytes());
 
@@ -122,17 +122,5 @@ public class VariableCache2DTest {
         variableDescriptor.tileHeight = tileHeight;
         variableDescriptor.dataType = ProductData.TYPE_FLOAT32;
         return variableDescriptor;
-    }
-
-    private static class MockProvider implements CacheDataProvider {
-        @Override
-        public VariableDescriptor getVariableDescriptor(String variableName) throws IOException {
-            throw new RuntimeException("not implemented");
-        }
-
-        @Override
-        public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
-            return ProductData.createInstance(ProductData.TYPE_FLOAT32, shapes[0] * shapes[1]);
-        }
     }
 }

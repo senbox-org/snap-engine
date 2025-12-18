@@ -91,31 +91,47 @@ public class CacheData2DTest {
     }
 
     @Test
-    public void testInside_y() {
+    public void testIntersects_y() {
         final int[] offsets = new int[]{450, 100};
         final int[] shapes = new int[]{50, 100};
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+        // y ranges from 450 - 499
 
-        assertTrue(cacheData2D.inside_y(450));
-        assertTrue(cacheData2D.inside_y(470));
-        assertTrue(cacheData2D.inside_y(499));
+        // outside bottom
+        assertFalse(cacheData2D.intersects_y(430, 439));
 
-        assertFalse(cacheData2D.inside_y(449));
-        assertFalse(cacheData2D.inside_y(500));
+        // inside
+        assertTrue(cacheData2D.intersects_y(445, 455));
+        assertTrue(cacheData2D.intersects_y(470, 490));
+        assertTrue(cacheData2D.intersects_y(490, 510));
+
+        // contains
+        assertTrue(cacheData2D.intersects_y(400, 550));
+
+        // outside top
+        assertFalse(cacheData2D.intersects_y(560, 600));
     }
 
     @Test
-    public void testInside_x() {
+    public void testIntersects_x() {
         final int[] offsets = new int[]{450, 100};
-        final int[] shapes = new int[]{100, 100};
+        final int[] shapes = new int[]{50, 100};
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+        // x ranges from 100 - 199
 
-        assertTrue(cacheData2D.inside_x(100));
-        assertTrue(cacheData2D.inside_x(156));
-        assertTrue(cacheData2D.inside_x(199));
+        // outside left
+        assertFalse(cacheData2D.intersects_x(30, 39));
 
-        assertFalse(cacheData2D.inside_x(99));
-        assertFalse(cacheData2D.inside_x(200));
+        // inside
+        assertTrue(cacheData2D.intersects_x(90, 110));
+        assertTrue(cacheData2D.intersects_x(110, 149));
+        assertTrue(cacheData2D.intersects_x(190, 210));
+
+        // contains
+        assertTrue(cacheData2D.intersects_x(90, 250));
+
+        // outside right
+        assertFalse(cacheData2D.intersects_x(260, 300));
     }
 
     @Test

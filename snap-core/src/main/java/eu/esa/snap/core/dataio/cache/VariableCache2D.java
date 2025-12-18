@@ -71,6 +71,7 @@ class VariableCache2D {
 
     ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         // check if buffer supplied
+        // @todo check if we want this - maybe we should require a valid buffer. Thus we keep allocations outside this cache tb 2025-12-18
         if (targetData == null) {
             final int size = targetShapes[0] * targetShapes[1];
             targetData = ProductData.createInstance(variableDescriptor.dataType, size);
@@ -78,8 +79,8 @@ class VariableCache2D {
 
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final Rectangle targetRect = new Rectangle(targetOffsets[1], targetOffsets[0], targetShapes[1], targetShapes[0]);
-        final RowCol[] tileLocations = getAffectedTileLocations(offsets, shapes);
-        for (RowCol tileLocation : tileLocations) {
+        final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
+        for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
             final int col = tileLocation.getCacheCol();
             final CacheData2D cacheData2D = cacheData[row][col];
@@ -103,20 +104,18 @@ class VariableCache2D {
         return cacheData;
     }
 
-    RowCol[] getAffectedTileLocations(int[] offsets, int[] shapes) {
-        final ArrayList<RowCol> rowCols = new ArrayList<>();
+    CacheIndex[] getAffectedCacheLocations(int[] offsets, int[] shapes) {
+        final ArrayList<CacheIndex> cacheIndices = new ArrayList<>();
 
-        for (int i = 0; i < cacheData.length; i++) {
-            for (int j = 0; j < cacheData[i].length; j++) {
-                final CacheData2D current = cacheData[i][j];
-                if (current != null) {
-                    if (current.intersects(offsets, shapes)) {
-                        rowCols.add(new RowCol(i, j));
-                    }
+        for (int y = 0; y < cacheData.length; y++) {
+            for (int x = 0; x < cacheData[y].length; x++) {
+                final CacheData2D current = cacheData[y][x];
+                if (current.intersects(offsets, shapes)) {
+                    cacheIndices.add(new CacheIndex(y, x));
                 }
             }
         }
 
-        return rowCols.toArray(new RowCol[0]);
+        return cacheIndices.toArray(new CacheIndex[0]);
     }
 }

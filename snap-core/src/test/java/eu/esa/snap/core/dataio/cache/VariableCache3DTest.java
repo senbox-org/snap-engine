@@ -2,7 +2,10 @@ package eu.esa.snap.core.dataio.cache;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class VariableCache3DTest {
 
@@ -40,6 +43,101 @@ public class VariableCache3DTest {
         assertEquals(99, cacheData3D.getyMax());
         assertEquals(24, cacheData3D.getzMin());
         assertEquals(29, cacheData3D.getzMax());
+    }
+
+    @Test
+    public void testDispose() {
+        final int[] cacheSizes = {6, 8, 10};
+        final int[] productSizes = new int[]{50, 50, 65};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+
+        CacheData3D[][][] cacheData = cache.getCacheData();
+        assertEquals(9, cacheData.length);
+
+        cache.dispose();
+        assertNull(cache.getCacheData());
+    }
+
+    @Test
+    public void testGetAffectedCacheLocations_cacheHit() {
+        final int[] cacheSizes = {12, 12, 20};
+        final int[] productSizes = new int[]{100, 180, 226};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+
+        CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, 0}, new int[]{10, 10, 10});
+        assertEquals(1, affectedTileLocations.length);
+        assertEquals(0, affectedTileLocations[0].getCacheCol());
+        assertEquals(0, affectedTileLocations[0].getCacheRow());
+        assertEquals(0, affectedTileLocations[0].getCacheLayer());
+
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, 0}, new int[]{10, 50, 50});
+        assertEquals(15, affectedTileLocations.length);
+        assertEquals(0, affectedTileLocations[0].getCacheCol());
+        assertEquals(0, affectedTileLocations[0].getCacheRow());
+        assertEquals(0, affectedTileLocations[0].getCacheLayer());
+
+        assertEquals(0, affectedTileLocations[6].getCacheCol());
+        assertEquals(2, affectedTileLocations[6].getCacheRow());
+        assertEquals(0, affectedTileLocations[6].getCacheLayer());
+
+        assertEquals(2, affectedTileLocations[14].getCacheCol());
+        assertEquals(4, affectedTileLocations[14].getCacheRow());
+        assertEquals(0, affectedTileLocations[14].getCacheLayer());
+
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{90, 170, 200}, new int[]{10, 10, 10});
+        assertEquals(2, affectedTileLocations.length);
+        assertEquals(10, affectedTileLocations[1].getCacheCol());
+        assertEquals(14, affectedTileLocations[1].getCacheRow());
+        assertEquals(8, affectedTileLocations[1].getCacheLayer());
+    }
+
+    @Test
+    public void testGetAffectedCacheLocations_cacheMiss() {
+        final int[] cacheSizes = {12, 12, 20};
+        final int[] productSizes = new int[]{100, 100, 200};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+
+        // front outside
+        CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, -20, 0}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+
+        // left outside
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, -20}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+
+        // bottom outside
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{-20, 0, 0}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+
+        // top outside
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{110, 0, 0}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+
+        // back outside
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 110, 0}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+
+        // right outside
+        affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, 210}, new int[]{10, 10, 10});
+        assertEquals(0, affectedTileLocations.length);
+    }
+
+    @Test
+    public void testGetSizeInBytes() throws IOException {
+        final int[] cacheSizes = {10, 10, 10};
+        final int[] productSizes = new int[]{100, 100, 100};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+
+        assertEquals(192000, cache.getSizeInBytes());
+
+        // read fake data to memory
+        cache.read(new int[]{30, 30, 30}, new int[] {10, 10, 10}, new int[]{0, 0, 0}, new int[] {10, 10, 10}, null);
+        assertEquals(192000, cache.getSizeInBytes());
+
     }
 
     static VariableDescriptor createDescriptor(int[] productSizes, int[] cacheSizes) {
