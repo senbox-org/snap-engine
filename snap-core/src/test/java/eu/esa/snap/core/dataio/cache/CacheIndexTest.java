@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -7,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 public class CacheIndexTest {
 
     @Test
+    @STTM("SNAP-4107")
     public void testConstruction() {
         final CacheIndex cacheIndex = new CacheIndex(1, 2);
         assertEquals(1, cacheIndex.getCacheRow());
@@ -15,6 +17,7 @@ public class CacheIndexTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testConstruction_allParameter() {
         final CacheIndex cacheIndex = new CacheIndex(1, 2, 3);
         assertEquals(1 , cacheIndex.getCacheLayer());

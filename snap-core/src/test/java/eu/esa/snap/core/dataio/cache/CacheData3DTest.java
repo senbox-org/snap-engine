@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class CacheData3DTest {
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_z() {
         int[] offsets = new int[]{10, 200, 300};
         int[] shapes = new int[]{20, 50, 50};
@@ -32,6 +34,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_y() {
         int[] offsets = new int[]{10, 200, 300};
         int[] shapes = new int[]{20, 50, 50};
@@ -54,6 +57,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_x() {
         int[] offsets = new int[]{10, 200, 300};
         int[] shapes = new int[]{20, 50, 50};
@@ -76,6 +80,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects() {
         int[] offsets = new int[]{20, 50, 100};
         int[] shapes = new int[]{20, 100, 100};
@@ -155,9 +160,10 @@ public class CacheData3DTest {
         assertFalse(cacheData3D.intersects(offsets, shapes));
     }
 
-    // bounding rect - do we need this in 3d world? Better a bounding cube.
+    // @todo 1 tb/tb add tests for Cuboid getter 2025-12-19
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_requestCompletelyInCache() {
         // dimension 10 x 10 x 20 (z, y, x)
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 2000);
@@ -196,6 +202,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_front() {
         // dimension 10 x 10 x 20 (z, y, x)
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 2000);
@@ -216,6 +223,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_topLeft() {
         // dimension 10 x 10 x 20 (z, y, x)
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 2000);
@@ -239,6 +247,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_bottomRight() {
         // dimension 10 x 10 x 20 (z, y, x)
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 2000);
@@ -262,6 +271,7 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_intersectBack() {
         // dimension 10 x 10 x 20 (z, y, x)
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT64, 2000);

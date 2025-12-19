@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.After;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetInstance() {
         final CacheManager instance_1 =  CacheManager.getInstance();
         assertNotNull(instance_1);
@@ -23,6 +25,7 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetInstanceAndDispose() {
         final CacheManager instance_1 =  CacheManager.getInstance();
         assertNotNull(instance_1);
@@ -34,6 +37,7 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testRegisterAndRemove() {
         final CacheManager cacheManager = CacheManager.getInstance();
         assertEquals(0, cacheManager.getNumProductCaches());
@@ -48,6 +52,7 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testDisposeIsCalledOnRemove() {
         final CacheManager cacheManager = CacheManager.getInstance();
         final ProductCache productCache = mock(ProductCache.class);
@@ -58,6 +63,7 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testDisposeIsPropagatedToProductCaches() {
         ProductCache productCache_1 = mock(ProductCache.class);
         ProductCache productCache_2 = mock(ProductCache.class);

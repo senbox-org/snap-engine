@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertNull;
 public class VariableCache2DTest {
 
     @Test
+    @STTM("SNAP-4107")
     public void testInitiateCache() {
         VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         CacheData2D[][] data = VariableCache2D.initiateCache(variableDescriptor);
@@ -49,6 +51,7 @@ public class VariableCache2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testDispose() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
@@ -60,6 +63,7 @@ public class VariableCache2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetAffectedCacheLocations_cacheHit() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
@@ -78,6 +82,7 @@ public class VariableCache2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetAffectedCacheLocations_cacheMiss() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, null);
@@ -100,6 +105,7 @@ public class VariableCache2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetSizeInBytes() throws IOException {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, new MockProvider());

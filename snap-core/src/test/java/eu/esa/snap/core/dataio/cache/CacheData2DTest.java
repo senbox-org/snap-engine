@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import static org.junit.Assert.*;
 public class CacheData2DTest {
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects() {
         int[] offsets = new int[]{450, 100};
         int[] shapes = new int[]{100, 100};
@@ -64,6 +66,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_outside() {
         int[] offsets = new int[]{450, 100};
         int[] shapes = new int[]{100, 100};
@@ -91,6 +94,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_y() {
         final int[] offsets = new int[]{450, 100};
         final int[] shapes = new int[]{50, 100};
@@ -113,6 +117,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersects_x() {
         final int[] offsets = new int[]{450, 100};
         final int[] shapes = new int[]{50, 100};
@@ -135,6 +140,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetBoundingRect() {
         final int[] offsets = new int[]{460, 150};
         final int[] shapes = new int[]{50, 100};
@@ -148,6 +154,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_requestCompletelyInCache() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT8, 300);
         final int cacheWidth = 15;
@@ -178,6 +185,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_outLeft() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
         final int cacheWidth = 15;
@@ -196,6 +204,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_upperLeftCorner() {
         // size: 20 x 15
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 300);
@@ -217,6 +226,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_outTop() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
         final int cacheWidth = 15;
@@ -236,6 +246,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_upperRightCorner() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 300);
         final int cacheWidth = 15;
@@ -256,6 +267,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_outRight() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT64, 300);
         final int cacheWidth = 15;
@@ -277,6 +289,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_lowerRightCorner() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
         final int cacheWidth = 15;
@@ -297,6 +310,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_outBottom() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT32, 300);
         final int cacheWidth = 15;
@@ -317,6 +331,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testCopyDataBuffer_lowerLeftCorner() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
         final int cacheWidth = 15;
@@ -335,6 +350,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testEnsureData() throws IOException {
         final CacheDataProvider cacheDataProvider = new MockProvider();
         final int[] offsets = new int[]{350, 200};
@@ -350,6 +366,7 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testGetSizeInBytes() throws IOException {
         final int[] offsets = new int[]{350, 200};
         final int[] shapes = new int[]{10, 10};

@@ -1,5 +1,6 @@
 package eu.esa.snap.core.dataio.cache;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertSame;
 public class CacheContextTest {
 
     @Test
+    @STTM("SNAP-4107")
     public void testConstruction() {
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
         variableDescriptor.name = "nasenmann";
