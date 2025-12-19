@@ -87,13 +87,15 @@ class VariableCache2D {
 
             final Rectangle cacheRect = cacheData2D.getBoundingRect();
             final Rectangle intersection = cacheRect.intersection(targetRect);
-            if (!intersection.isEmpty()) {
-                cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
-                final int[] srcOffsets = new int[]{intersection.y - cacheData2D.getyMin(), intersection.x - cacheData2D.getxMin()};
-                final int[] destOffsets = new int[]{intersection.y - targetOffsets[0], intersection.x - targetOffsets[1]};
-                final int[] intersectionShapes = new int[]{intersection.height, intersection.width};
-                cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetShapes[1], targetData);
+            if (intersection.isEmpty()) {
+                continue;
             }
+
+            cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
+            final int[] srcOffsets = new int[]{intersection.y - cacheData2D.getyMin(), intersection.x - cacheData2D.getxMin()};
+            final int[] destOffsets = new int[]{intersection.y - targetOffsets[0], intersection.x - targetOffsets[1]};
+            final int[] intersectionShapes = new int[]{intersection.height, intersection.width};
+            cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetShapes[1], targetData);
         }
 
         return targetData;

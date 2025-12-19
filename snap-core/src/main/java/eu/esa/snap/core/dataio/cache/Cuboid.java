@@ -49,6 +49,7 @@ class Cuboid {
      * @param other the Cuboid to intersect with
      * @return the intersection or empty Cuboid if no intersection
      */
+    @SuppressWarnings("ManualMinMaxCalculation")
     Cuboid intersection(Cuboid other) {
         int x1 = x;
         if (x < other.x) {

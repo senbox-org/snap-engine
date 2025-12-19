@@ -110,6 +110,8 @@ class VariableCache3D {
     ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
+        final Cuboid targetCuboid = new Cuboid(targetOffsets, targetShapes);
+
         for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
             final int col = tileLocation.getCacheCol();
@@ -117,6 +119,22 @@ class VariableCache3D {
             final CacheData3D cacheData3D = cacheData[layer][row][col];
 
             // calculate intersection between cache-cube and target-cube
+            final Cuboid boundingCuboid = cacheData3D.getBoundingCuboid();
+            final Cuboid intersection = boundingCuboid.intersection(targetCuboid);
+            if (intersection.isEmpty()) {
+                continue;
+            }
+
+            cacheData3D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-19
+            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(),
+                    intersection.getY() - cacheData3D.getyMin(),
+                    intersection.getX() - cacheData3D.getxMin()};
+            final int[] destOffsets = new int[]{intersection.getZ() - targetOffsets[0],
+                    intersection.getY() - targetOffsets[1],
+                    intersection.getX() - targetOffsets[2]};
+            final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
+
+            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetShapes, targetData);
         }
         return targetData;
     }

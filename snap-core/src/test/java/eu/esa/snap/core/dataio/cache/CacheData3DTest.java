@@ -4,6 +4,8 @@ import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static eu.esa.snap.core.dataio.cache.CacheTestUtil.createPreparedBuffer;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -160,7 +162,21 @@ public class CacheData3DTest {
         assertFalse(cacheData3D.intersects(offsets, shapes));
     }
 
-    // @todo 1 tb/tb add tests for Cuboid getter 2025-12-19
+    @Test
+    @STTM("SNAP-4107")
+    public void testGetBoundingCuboid() {
+        int[] offsets = new int[]{100, 2600, 1800};
+        int[] shapes = new int[]{50, 200, 300};
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+
+        final Cuboid bounds = cacheData3D.getBoundingCuboid();
+        assertEquals(100, bounds.getZ());
+        assertEquals(2600, bounds.getY());
+        assertEquals(1800, bounds.getX());
+        assertEquals(50, bounds.getDepth());
+        assertEquals(200, bounds.getHeight());
+        assertEquals(300, bounds.getWidth());
+    }
 
     @Test
     @STTM("SNAP-4107")
@@ -290,5 +306,40 @@ public class CacheData3DTest {
         assertEquals(0, targetBuffer.getElemIntAt(99));
         assertEquals(202, targetBuffer.getElemIntAt(100));
         assertEquals(0, targetBuffer.getElemIntAt(249));
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testEnsureData() throws IOException {
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
+        final int[] offsets = new int[]{0, 0, 0};
+        final int[] shapes = new int[]{30, 40, 40};
+
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        cacheData3D.setCacheContext(cacheContext);
+        assertNull(cacheData3D.getData());
+
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{0, 0, 0}, new int[]{5, 5, 5}, new int[]{4, 10, 10}, ProductData.createInstance(ProductData.TYPE_INT64, 400));
+        assertNotNull(cacheData3D.getData());
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testGetSizeInBytes() throws IOException {
+        final int[] offsets = new int[]{400, 350, 200};
+        final int[] shapes = new int[]{10, 10, 20};
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+
+        assertEquals(192, cacheData3D.getSizeInBytes());
+
+        // trigger reading the buffer
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_FLOAT32);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        cacheData3D.setCacheContext(cacheContext);
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{5, 5, 5}, new int[]{5, 5, 5}, new int[]{5, 10, 20}, ProductData.createInstance(ProductData.TYPE_FLOAT32, 1000));
+
+        // default size plus 2000 floats (10x10x20)
+        assertEquals(8192, cacheData3D.getSizeInBytes());
     }
 }

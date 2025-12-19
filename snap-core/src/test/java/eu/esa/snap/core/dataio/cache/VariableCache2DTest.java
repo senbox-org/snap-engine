@@ -108,7 +108,7 @@ public class VariableCache2DTest {
     @STTM("SNAP-4107")
     public void testGetSizeInBytes() throws IOException {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
-        final VariableCache2D cache = new VariableCache2D(variableDescriptor, new MockProvider());
+        final VariableCache2D cache = new VariableCache2D(variableDescriptor, new MockProvider(ProductData.TYPE_FLOAT32));
 
         assertEquals(1920, cache.getSizeInBytes());
 

@@ -28,7 +28,7 @@ public class ProductCache {
                 if (variableDescriptor.layers < 1) {
                     return createVariableCache2D(bandName);
                 } else {
-                   // return createVariableCache3D(bandName);
+                    //return createVariableCache3D(bandName);
                     throw new RuntimeException("not implemented");
                 }
             } catch (IOException e) {
@@ -54,5 +54,12 @@ public class ProductCache {
         variableDescriptor.name = bandName;
 
         return new VariableCache2D(variableDescriptor, dataProvider);
+    }
+
+    private VariableCache3D createVariableCache3D(String bandName) throws IOException {
+        final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
+        variableDescriptor.name = bandName;
+
+        return new VariableCache3D(variableDescriptor, dataProvider);
     }
 }

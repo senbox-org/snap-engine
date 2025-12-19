@@ -352,7 +352,7 @@ public class CacheData2DTest {
     @Test
     @STTM("SNAP-4107")
     public void testEnsureData() throws IOException {
-        final CacheDataProvider cacheDataProvider = new MockProvider();
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
         final int[] offsets = new int[]{350, 200};
         final int[] shapes = new int[]{10, 10};
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
@@ -376,24 +376,12 @@ public class CacheData2DTest {
         assertEquals(192, cacheData2D.getSizeInBytes());
 
         // trigger reading the buffer
-        final CacheDataProvider cacheDataProvider = new MockProvider();
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
         final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
         cacheData2D.setCacheContext(cacheContext);
         cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
 
         // now with a data buffer - 100 times size of short added
         assertEquals(392, cacheData2D.getSizeInBytes());
-    }
-
-    private static class MockProvider implements CacheDataProvider {
-        @Override
-        public VariableDescriptor getVariableDescriptor(String variableName) {
-            throw new RuntimeException("not implemented");
-        }
-
-        @Override
-        public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
-            return ProductData.createInstance(ProductData.TYPE_UINT16, 100);
-        }
     }
 }

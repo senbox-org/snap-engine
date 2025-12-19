@@ -50,12 +50,84 @@ public class CuboidTest {
     @Test
     @STTM("SNAP-4107")
     public void testIntersection_intersecting() {
+        Cuboid cuboid_1 = new Cuboid(new int[]{100, 100, 100}, new int[]{10, 10, 10});
 
+        Cuboid cuboid_2 = new Cuboid(new int[]{95, 95, 95}, new int[]{10, 10, 10});
+        Cuboid intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(100, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(100, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(100, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{105, 95, 95}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(100, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(100, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(105, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{105, 95, 105}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(105, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(100, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(105, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{95, 95, 105}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(105, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(100, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(100, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{95, 105, 95}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(100, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(105, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(100, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{105, 105, 95}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(100, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(105, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(105, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{105, 105, 105}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(105, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(105, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(105, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
+
+        cuboid_2 = new Cuboid(new int[]{95, 105, 105}, new int[]{10, 10, 10});
+        intersection = cuboid_1.intersection(cuboid_2);
+        assertEquals(105, intersection.getX());
+        assertEquals(5, intersection.getWidth());
+        assertEquals(105, intersection.getY());
+        assertEquals(5, intersection.getHeight());
+        assertEquals(100, intersection.getZ());
+        assertEquals(5, intersection.getDepth());
     }
 
     @Test
     @STTM("SNAP-4107")
-    public void testIntersection_commutativ() {
+    public void testIntersection_commutative() {
         Cuboid cuboid_1 = new Cuboid(new int[]{10, 10, 20}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{5, 10, 20}, new int[]{10, 10, 20});
 

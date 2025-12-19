@@ -2,9 +2,11 @@ package eu.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.ProductData;
 
+import java.io.IOException;
+
 import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
 
-class CacheData3D implements CacheData{
+class CacheData3D implements CacheData {
 
     private static final int SIZE_WITHOUT_BUFFER = 192;
 
@@ -16,6 +18,7 @@ class CacheData3D implements CacheData{
     private final int zMax;
 
     private ProductData data;
+    private CacheContext context;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -110,5 +113,38 @@ class CacheData3D implements CacheData{
             size += data.getNumElems() * data.getElemSize();
         }
         return size;
+    }
+
+    Cuboid getBoundingCuboid() {
+        final int[] offsets = {zMin, yMin, xMin};
+        final int[] shapes = {zMax - zMin + 1, yMax - yMin + 1, xMax - xMin + 1};
+        return new Cuboid(offsets, shapes);
+    }
+
+    void setCacheContext(CacheContext context) {
+        this.context = context;
+    }
+
+    ProductData getData() {
+        return data;
+    }
+
+    void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, int[] targetShapes, ProductData targetData) throws IOException {
+        ensureData();
+
+        copyDataBuffer(srcOffsets, xMax - xMin + 1, data, destOffsets, targetShapes, intersectionShapes, targetData);
+    }
+
+    private void ensureData() throws IOException {
+        synchronized (this) {
+            if (data == null) {
+                final String name = context.getVariableDescriptor().name;
+                final int[] offsets = {zMin, yMin, xMin};
+                Cuboid bounds = getBoundingCuboid();
+                final int[] shapes = {bounds.getDepth(), bounds.getHeight(), bounds.getWidth()};
+                final CacheDataProvider dataProvider = context.getDataProvider();
+                data = dataProvider.readCacheBlock(name, offsets, shapes, data);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package eu.esa.snap.core.dataio.cache;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {6, 8, 10};
         final int[] productSizes = new int[]{50, 50, 65};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
         CacheData3D[][][] cacheData = cache.getCacheData();
         assertEquals(9, cacheData.length);
@@ -68,7 +69,7 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 180, 226};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
         CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, 0}, new int[]{10, 10, 10});
         assertEquals(1, affectedTileLocations.length);
@@ -103,7 +104,7 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 100, 200};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
         // front outside
         CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, -20, 0}, new int[]{10, 10, 10});
@@ -136,15 +137,14 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {10, 10, 10};
         final int[] productSizes = new int[]{100, 100, 100};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider());
+        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
         assertEquals(192000, cache.getSizeInBytes());
 
         // read fake data to memory
-        cache.read(new int[]{30, 30, 30}, new int[] {10, 10, 10}, new int[]{0, 0, 0}, new int[] {10, 10, 10}, null);
-        // @todo 1 continue testing here 2025-12-19
-        // assertEquals(500000, cache.getSizeInBytes());
-
+        cache.read(new int[]{0, 0, 0}, new int[] {10, 10, 10}, new int[]{0, 0, 0}, new int[] {10, 10, 10}, ProductData.createInstance(ProductData.TYPE_UINT16, 1000));
+        // default size plus 1000 * uint_16
+        assertEquals(194000, cache.getSizeInBytes());
     }
 
     static VariableDescriptor createDescriptor(int[] productSizes, int[] cacheSizes) {
