@@ -97,9 +97,16 @@ public class RasterToVectorOp extends Operator {
 
         this.targetProduct = new Product(sourceProduct.getName()+"_rtv", sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+		final Dimension tileSize = sourceProduct.getPreferredTileSize();
+		this.targetProduct.setPreferredTileSize(tileSize);
+		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
+		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
+        this.targetProduct.setStartTime(this.sourceProduct.getStartTime());
+        this.targetProduct.setEndTime(this.sourceProduct.getEndTime());
+        
+		ProductUtils.copyGeoCoding(this.sourceProduct, this.targetProduct);
 
-		Band newBand = new Band(TARGET_BAND_NAME, ProductData.TYPE_INT32, bandToConvert.getRasterWidth(), bandToConvert.getRasterHeight());
-		this.targetProduct.addBand(newBand);
+		ProductUtils.copyBand(bandName, sourceProduct, TARGET_BAND_NAME, targetProduct, true);
 	}
 
 	@Override
@@ -118,16 +125,6 @@ public class RasterToVectorOp extends Operator {
 		if (this.bandToConvert == null ) {
 			throw new OperatorException("Please select the source band.");
 		}
-
-		final Dimension tileSize = ImageManager.getPreferredTileSize(sourceProduct);
-		this.targetProduct.setPreferredTileSize(tileSize);
-		this.targetProduct.setSceneCRS(this.sourceProduct.getSceneCRS());
-		this.targetProduct.setSceneGeoCoding(this.sourceProduct.getSceneGeoCoding());
-
-		ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-
-		Band targetBand = this.targetProduct.getBand(TARGET_BAND_NAME);
-		targetBand.setGeoCoding(bandToConvert.getGeoCoding());
 
 		SimpleFeatureType vectors = PlainFeatureFactory.createPlainFeatureType("vectors", Polygon.class, this.sourceProduct.getSceneCRS());
 
