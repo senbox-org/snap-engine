@@ -29,9 +29,8 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
     public BasicFileAttributes readBasicFileAttributes(VFSPath path) throws IOException {
         // check if the address represents a directory
         String address = path.buildURL().toString();
-        String fileSystemSeparator = path.getFileSystem().getSeparator();
         String fileSystemRoot = path.getFileSystem().getRoot().getPath();
-        URL directoryURL = new URL(address + (address.endsWith(fileSystemSeparator) ? "" : fileSystemSeparator));
+        URL directoryURL = getDirectoryURL(path);
         HttpURLConnection connection = this.remoteConnectionBuilder.buildConnection(fileSystemRoot, directoryURL, "GET", null);
         try {
             int responseCode = connection.getResponseCode();
@@ -44,6 +43,12 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
         }
         // the address does not represent a directory
         return readFileAttributes(address, path.toString(), fileSystemRoot);
+    }
+
+    protected URL getDirectoryURL(VFSPath path) throws IOException{
+        final String address = path.buildURL().toString();
+        final String fileSystemSeparator = path.getFileSystem().getSeparator();
+        return new URL(address + (address.endsWith(fileSystemSeparator) ? "" : fileSystemSeparator));
     }
 
     private BasicFileAttributes readFileAttributes(String urlAddress, String filePath, String fileSystemRoot) throws IOException {

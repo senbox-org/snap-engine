@@ -138,7 +138,7 @@ class VFSByteChannel implements SeekableByteChannel {
         int bytesToRead = destinationBuffer.remaining();
         if (destinationBuffer.hasArray()) {
             bytes = destinationBuffer.array();
-            offset = destinationBuffer.arrayOffset();
+            offset = destinationBuffer.position();
         } else {
             bytes = new byte[bytesToRead];
             offset = 0;
