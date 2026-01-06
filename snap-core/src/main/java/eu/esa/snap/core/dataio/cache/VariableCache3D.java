@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class VariableCache3D {
+class VariableCache3D implements VariableCache {
 
     private CacheData3D[][][] cacheData;
     private final CacheDataProvider dataProvider;
@@ -24,7 +24,7 @@ class VariableCache3D {
         return cacheData;
     }
 
-    void dispose() {
+    public void dispose() {
         if (cacheData != null) {
             for (CacheData3D[][] cacheLayer : cacheData) {
                 for (CacheData3D[] cacheLine : cacheLayer) {
@@ -94,7 +94,7 @@ class VariableCache3D {
         return cacheIndices.toArray(new CacheIndex[0]);
     }
 
-    long getSizeInBytes() {
+    public long getSizeInBytes() {
         long sizeInBytes = 0;
 
         for (int z = 0; z < cacheData.length; z++) {
@@ -107,7 +107,7 @@ class VariableCache3D {
         return sizeInBytes;
     }
 
-    ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
+    public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
         final Cuboid targetCuboid = new Cuboid(targetOffsets, targetShapes);

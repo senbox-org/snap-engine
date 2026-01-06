@@ -85,7 +85,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
             final int rank = variable.getRank();
             if (rank == 2) {
-                add2DVariable(product, variable);
+                addVariable(product, variable);
             } else if (rank == 3) {
 
             } else {
@@ -96,10 +96,19 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         }
     }
 
-    private void add2DVariable(Product product, Variable variable) {
+    private void addVariable(Product product, Variable variable) {
         final int[] dimensions = variable.getShape();
-        final int height = dimensions[0];
-        final int width = dimensions[1];
+        final int height;
+        final int width;
+        if (dimensions.length == 2) {
+            height = dimensions[0];
+            width = dimensions[1];
+        } else if (dimensions.length == 3) {
+            height = dimensions[1];
+            width = dimensions[2];
+        } else  {
+            throw new RuntimeException("Invalid dimensionality");
+        }
 
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();

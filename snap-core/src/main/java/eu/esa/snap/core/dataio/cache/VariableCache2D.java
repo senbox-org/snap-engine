@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class VariableCache2D {
+class VariableCache2D implements VariableCache {
 
     private final VariableDescriptor variableDescriptor;
     private final CacheDataProvider dataProvider;
@@ -51,7 +51,7 @@ class VariableCache2D {
     }
 
     @SuppressWarnings("ForLoopReplaceableByForEach")
-    long getSizeInBytes() {
+    public long getSizeInBytes() {
         long sizeInBytes = 0;
 
         for (int i = 0; i < cacheData.length; i++) {
@@ -62,14 +62,14 @@ class VariableCache2D {
         return sizeInBytes;
     }
 
-    void dispose() {
+    public void dispose() {
         for (CacheData2D[] Row : cacheData) {
             Arrays.fill(Row, null);
         }
         cacheData = null;
     }
 
-    ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
+    public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         // check if buffer supplied
         // @todo check if we want this - maybe we should require a valid buffer. Thus we keep allocations outside this cache tb 2025-12-18
         if (targetData == null) {

@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductCache {
 
-    private final ConcurrentHashMap<String, VariableCache2D> variableCacheMap;
+    private final ConcurrentHashMap<String, VariableCache> variableCacheMap;
     private final CacheDataProvider dataProvider;
 
     public ProductCache(CacheDataProvider dataProvider) {
@@ -17,19 +17,19 @@ public class ProductCache {
     }
 
     public void dispose() {
-        variableCacheMap.values().forEach(VariableCache2D::dispose);
+        variableCacheMap.values().forEach(VariableCache::dispose);
         variableCacheMap.clear();
     }
 
     public ProductData read(String bandName, ProductData targetBuffer, int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes) throws IOException {
-        final VariableCache2D variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
+        final VariableCache variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
             try {
                 final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-                if (variableDescriptor.layers < 1) {
-                    return createVariableCache2D(bandName);
+                variableDescriptor.name = bandName;
+                if (variableDescriptor.layers <= 1) {
+                    return new VariableCache2D(variableDescriptor, dataProvider);
                 } else {
-                    //return createVariableCache3D(bandName);
-                    throw new RuntimeException("not implemented");
+                    return new VariableCache3D(variableDescriptor, dataProvider);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -41,25 +41,11 @@ public class ProductCache {
 
     long getSizeInBytes() {
         long sizeInBytes = 0;
-        Collection<VariableCache2D> values = variableCacheMap.values();
-        for (VariableCache2D variableCache2D : values) {
-            sizeInBytes += variableCache2D.getSizeInBytes();
+        Collection<VariableCache> values = variableCacheMap.values();
+        for (VariableCache variableCache : values) {
+            sizeInBytes += variableCache.getSizeInBytes();
         }
 
         return sizeInBytes;
-    }
-
-    private VariableCache2D createVariableCache2D(String bandName) throws IOException {
-        final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-        variableDescriptor.name = bandName;
-
-        return new VariableCache2D(variableDescriptor, dataProvider);
-    }
-
-    private VariableCache3D createVariableCache3D(String bandName) throws IOException {
-        final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-        variableDescriptor.name = bandName;
-
-        return new VariableCache3D(variableDescriptor, dataProvider);
     }
 }
