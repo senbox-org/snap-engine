@@ -110,7 +110,18 @@ class VariableCache3D implements VariableCache {
     public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
-        final Cuboid targetCuboid = new Cuboid(targetOffsets, targetShapes);
+
+        final int[] target3dOffsets;
+        final int[] target3dShapes;
+        if (targetOffsets.length == 2 && targetShapes.length == 2) {
+            target3dOffsets = new int[]{offsets[0], targetOffsets[0], targetOffsets[1]};
+            target3dShapes = new int[]{1, targetShapes[0], targetShapes[1]};
+        } else {
+            target3dOffsets = targetOffsets;
+            target3dShapes = targetShapes;
+        }
+
+        final Cuboid targetCuboid = new Cuboid(target3dOffsets, target3dShapes);
 
         for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
@@ -129,12 +140,12 @@ class VariableCache3D implements VariableCache {
             final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(),
                     intersection.getY() - cacheData3D.getyMin(),
                     intersection.getX() - cacheData3D.getxMin()};
-            final int[] destOffsets = new int[]{intersection.getZ() - targetOffsets[0],
-                    intersection.getY() - targetOffsets[1],
-                    intersection.getX() - targetOffsets[2]};
+            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0],
+                    intersection.getY() - target3dOffsets[1],
+                    intersection.getX() - target3dOffsets[2]};
             final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
 
-            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetShapes, targetData);
+            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, target3dShapes, targetData);
         }
         return targetData;
     }

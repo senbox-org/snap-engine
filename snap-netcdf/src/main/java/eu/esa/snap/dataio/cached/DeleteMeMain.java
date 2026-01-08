@@ -20,7 +20,7 @@ public class DeleteMeMain {
 
             Band band = product.getBand("height");
             ProductData productData = ProductData.createInstance(band.getDataType(), 512 * 512);
-            band.readRasterData(128, 200, 512, 512, productData);
+            /*band.readRasterData(128, 200, 512, 512, productData);
 
             band.readRasterData(128, 200, 512, 512, productData);
             band.readRasterData(126, 198, 512, 512, productData);
@@ -32,6 +32,18 @@ public class DeleteMeMain {
             band.readRasterData(300, 0, 512, 512, productData);
             band.readRasterData(400, 0, 512, 512, productData);
             band.readRasterData(500, 0, 512, 512, productData);
+
+            System.out.println(cacheManager.getSizeInBytes());
+             */
+
+            band = product.getBand("rhot_blue_083");
+            productData = ProductData.createInstance(band.getDataType(), 512 * 512);
+            band.readRasterData(400, 0, 512, 512, productData);
+
+            System.out.println(cacheManager.getSizeInBytes());
+
+            band = product.getBand("rhot_blue_084");
+            band.readRasterData(400, 0, 512, 512, productData);
 
             System.out.println(cacheManager.getSizeInBytes());
         }

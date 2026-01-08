@@ -41,7 +41,7 @@ public class ProductCache {
 
     long getSizeInBytes() {
         long sizeInBytes = 0;
-        Collection<VariableCache> values = variableCacheMap.values();
+        final Collection<VariableCache> values = variableCacheMap.values();
         for (VariableCache variableCache : values) {
             sizeInBytes += variableCache.getSizeInBytes();
         }

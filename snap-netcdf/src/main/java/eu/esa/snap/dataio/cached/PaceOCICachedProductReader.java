@@ -24,6 +24,7 @@ import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,9 +86,9 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
             final int rank = variable.getRank();
             if (rank == 2) {
-                addVariable(product, variable);
+                add2DVariable(product, variable);
             } else if (rank == 3) {
-
+                add3DVariable(product, variable);
             } else {
                 continue;
             }
@@ -96,23 +97,14 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         }
     }
 
-    private void addVariable(Product product, Variable variable) {
+    private void add2DVariable(Product product, Variable variable) {
         final int[] dimensions = variable.getShape();
-        final int height;
-        final int width;
-        if (dimensions.length == 2) {
-            height = dimensions[0];
-            width = dimensions[1];
-        } else if (dimensions.length == 3) {
-            height = dimensions[1];
-            width = dimensions[2];
-        } else  {
-            throw new RuntimeException("Invalid dimensionality");
-        }
+        final int height = dimensions[0];
+        final int width = dimensions[1];
 
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
-        if  (height != sceneRasterHeight || width != sceneRasterWidth) {
+        if (height != sceneRasterHeight || width != sceneRasterWidth) {
             return;
         }
 
@@ -125,6 +117,57 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         final Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
         product.addBand(band);
+    }
+
+    private void add3DVariable(Product product, Variable variable) {
+        final int[] dimensions = variable.getShape();
+        final int height;
+        final int width;
+        final int numLayers;
+        if (dimensions.length == 2) {
+            height = dimensions[0];
+            width = dimensions[1];
+            numLayers = 1;
+        } else if (dimensions.length == 3) {
+            numLayers = dimensions[0];
+            height = dimensions[1];
+            width = dimensions[2];
+        } else {
+            throw new RuntimeException("Invalid dimensionality");
+        }
+
+        final int sceneRasterWidth = product.getSceneRasterWidth();
+        final int sceneRasterHeight = product.getSceneRasterHeight();
+        if (height != sceneRasterHeight || width != sceneRasterWidth) {
+            return;
+        }
+
+        int rasterDataType;
+        if (ReaderUtils.mustScale(variable)) {
+            rasterDataType = ProductData.TYPE_FLOAT64;
+        } else {
+            rasterDataType = getRasterDataType(variable.getDataType(), false);
+        }
+
+        final String shortName = variable.getShortName();
+        DecimalFormat decimalFormat = getDecimalFormat(numLayers);
+        for (int layer = 1; layer <= numLayers; layer++) {
+            final String layer_ext = decimalFormat.format(layer);
+            final String layeredVariableName = shortName + "_" + layer_ext;
+            final Band band = new BandUsingReaderDirectly(layeredVariableName, rasterDataType, width, height);
+            product.addBand(band);
+        }
+    }
+
+    static DecimalFormat getDecimalFormat(int numLayers) {
+        String pattern = "0";
+        if (numLayers > 10) {
+            pattern = pattern.concat("0");
+        }
+        if (numLayers > 100) {
+            pattern = pattern.concat("0");
+        }
+        return new DecimalFormat(pattern);
     }
 
     private String getProductName() {
@@ -149,12 +192,28 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
-        final int[] offsets = {sourceOffsetY, sourceOffsetX};
-        final int[] shapes = {sourceHeight, sourceWidth};
+        final int[] offsets;
+        final int[] shapes;
+
+        String destBandName = destBand.getName();
+        int layerIndex = -1;
+        final int underscoreIdx = destBandName.lastIndexOf("_");
+
+        if (underscoreIdx > 0) {
+            final String numberExt = destBandName.substring(underscoreIdx + 1);
+            destBandName = destBandName.substring(0, underscoreIdx);
+            layerIndex = Integer.parseInt(numberExt) - 1;
+
+            offsets = new int[]{layerIndex, sourceOffsetY, sourceOffsetX};
+            shapes = new int[]{1, sourceHeight, sourceWidth};
+        } else {
+            offsets = new int[]{sourceOffsetY, sourceOffsetX};
+            shapes = new int[]{sourceHeight, sourceWidth};
+        }
+
         final int[] targetOffsets = {destOffsetY, destOffsetX};
         final int[] targetShapes = {destHeight, destWidth};
-
-        ProductData read = productCache.read(destBand.getName(), destBuffer, offsets, shapes, targetOffsets, targetShapes);
+        ProductData read = productCache.read(destBandName, destBuffer, offsets, shapes, targetOffsets, targetShapes);
 
         // @todo 2 tb/tb take subsampling into account
     }
@@ -250,7 +309,13 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         // @todo 1 tb/tb allocate depending on data type
         if (targetData == null) {
-            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
+            if (shapes.length == 2) {
+                targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
+             } else if (shapes.length == 3) {
+                targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1] * shapes[2]);
+            } else {
+                throw new IOException("Illegal shaped variable");
+            }
         }
 
         switch (rasterDataType) {
