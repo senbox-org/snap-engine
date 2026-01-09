@@ -116,6 +116,7 @@ class CacheData3D implements CacheData {
     }
 
     Cuboid getBoundingCuboid() {
+        // @todo 1 tb implement lazy solution, we don't need to allocate an object everytime this is called 2026-01-09
         final int[] offsets = {zMin, yMin, xMin};
         final int[] shapes = {zMax - zMin + 1, yMax - yMin + 1, xMax - xMin + 1};
         return new Cuboid(offsets, shapes);

@@ -83,7 +83,7 @@ class VariableCache3D implements VariableCache {
 
         for (int z = 0; z < cacheData.length; z++) {
             for (int y = 0; y < cacheData[0].length; y++) {
-                for(int x = 0; x < cacheData[0][0].length; x++) {
+                for (int x = 0; x < cacheData[0][0].length; x++) {
                     final CacheData3D current = cacheData[z][y][x];
                     if (current.intersects(offsets, shapes)) {
                         cacheIndices.add(new CacheIndex(z, y, x));
@@ -94,6 +94,7 @@ class VariableCache3D implements VariableCache {
         return cacheIndices.toArray(new CacheIndex[0]);
     }
 
+    @SuppressWarnings("ForLoopReplaceableByForEach")
     public long getSizeInBytes() {
         long sizeInBytes = 0;
 
@@ -107,18 +108,18 @@ class VariableCache3D implements VariableCache {
         return sizeInBytes;
     }
 
-    public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
+    public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
 
         final int[] target3dOffsets;
         final int[] target3dShapes;
-        if (targetOffsets.length == 2 && targetShapes.length == 2) {
-            target3dOffsets = new int[]{offsets[0], targetOffsets[0], targetOffsets[1]};
-            target3dShapes = new int[]{1, targetShapes[0], targetShapes[1]};
+        if (targetBuffer.getNumLayers() <= 1) {
+            target3dOffsets = new int[]{offsets[0], targetBuffer.getOffsetY(), targetBuffer.getOffsetX()};
+            target3dShapes = new int[]{1, targetBuffer.getHeight(), targetBuffer.getWidth()};
         } else {
-            target3dOffsets = targetOffsets;
-            target3dShapes = targetShapes;
+            target3dOffsets = targetBuffer.getOffsets();
+            target3dShapes = targetBuffer.getShapes();
         }
 
         final Cuboid targetCuboid = new Cuboid(target3dOffsets, target3dShapes);
@@ -137,16 +138,12 @@ class VariableCache3D implements VariableCache {
             }
 
             cacheData3D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-19
-            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(),
-                    intersection.getY() - cacheData3D.getyMin(),
-                    intersection.getX() - cacheData3D.getxMin()};
-            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0],
-                    intersection.getY() - target3dOffsets[1],
-                    intersection.getX() - target3dOffsets[2]};
+            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(), intersection.getY() - cacheData3D.getyMin(), intersection.getX() - cacheData3D.getxMin()};
+            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0], intersection.getY() - target3dOffsets[1], intersection.getX() - target3dOffsets[2]};
             final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
 
-            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, target3dShapes, targetData);
+            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, target3dShapes, targetBuffer.getData());
         }
-        return targetData;
+        return targetBuffer.getData();
     }
 }

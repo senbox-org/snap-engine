@@ -1,10 +1,7 @@
 package eu.esa.snap.dataio.cached;
 
 import com.bc.ceres.core.ProgressMonitor;
-import eu.esa.snap.core.dataio.cache.CacheDataProvider;
-import eu.esa.snap.core.dataio.cache.CacheManager;
-import eu.esa.snap.core.dataio.cache.ProductCache;
-import eu.esa.snap.core.dataio.cache.VariableDescriptor;
+import eu.esa.snap.core.dataio.cache.*;
 import eu.esa.snap.core.datamodel.band.BandUsingReaderDirectly;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -77,7 +74,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         return product;
     }
 
-    private void addVariables(Product product, List<Variable> variables) throws IOException {
+    private void addVariables(Product product, List<Variable> variables) {
         for (Variable variable : variables) {
             final String parentGroupName = variable.getParentGroup().getShortName();
             if (parentGroupName.equals("sensor_band_parameters") || parentGroupName.equals("scan_line_attributes")) {
@@ -197,6 +194,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         String destBandName = destBand.getName();
         int layerIndex = -1;
+        // @todo 2 tb - can't we use an integer index as property. Parsing this info every time seems to be nonsense
         final int underscoreIdx = destBandName.lastIndexOf("_");
 
         if (underscoreIdx > 0) {
@@ -213,7 +211,8 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         final int[] targetOffsets = {destOffsetY, destOffsetX};
         final int[] targetShapes = {destHeight, destWidth};
-        ProductData read = productCache.read(destBandName, destBuffer, offsets, shapes, targetOffsets, targetShapes);
+        final DataBuffer targetBuffer = new DataBuffer(destBuffer, targetOffsets, targetShapes);
+        ProductData read = productCache.read(destBandName, offsets, shapes, targetBuffer);
 
         // @todo 2 tb/tb take subsampling into account
     }
@@ -248,6 +247,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         }
 
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
+        variableDescriptor.name = variableName;
         // @todo 2 tb/tb find out how to used NetCDF MAMath to scale to a desired data type.
         if (ReaderUtils.mustScale(netcdVariable)) {
             variableDescriptor.dataType = ProductData.TYPE_FLOAT64;
@@ -311,7 +311,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         if (targetData == null) {
             if (shapes.length == 2) {
                 targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
-             } else if (shapes.length == 3) {
+            } else if (shapes.length == 3) {
                 targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1] * shapes[2]);
             } else {
                 throw new IOException("Illegal shaped variable");

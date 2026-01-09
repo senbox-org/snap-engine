@@ -21,11 +21,10 @@ public class ProductCache {
         variableCacheMap.clear();
     }
 
-    public ProductData read(String bandName, ProductData targetBuffer, int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes) throws IOException {
+    public ProductData read(String bandName, int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
         final VariableCache variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
             try {
                 final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
-                variableDescriptor.name = bandName;
                 if (variableDescriptor.layers <= 1) {
                     return new VariableCache2D(variableDescriptor, dataProvider);
                 } else {
@@ -36,7 +35,7 @@ public class ProductCache {
             }
         });
 
-        return variableCache.read(offsets, shapes, targetOffsets, targetShapes, targetBuffer);
+        return variableCache.read(offsets, shapes, targetBuffer);
     }
 
     long getSizeInBytes() {

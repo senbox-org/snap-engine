@@ -142,7 +142,8 @@ public class VariableCache3DTest {
         assertEquals(192000, cache.getSizeInBytes());
 
         // read fake data to memory
-        cache.read(new int[]{0, 0, 0}, new int[] {10, 10, 10}, new int[]{0, 0, 0}, new int[] {10, 10, 10}, ProductData.createInstance(ProductData.TYPE_UINT16, 1000));
+        DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_UINT16, new int[]{0, 0, 0}, new int[]{10, 10, 10});
+        cache.read(new int[]{0, 0, 0}, new int[]{10, 10, 10}, dataBuffer);
         // default size plus 1000 * uint_16
         assertEquals(194000, cache.getSizeInBytes());
     }

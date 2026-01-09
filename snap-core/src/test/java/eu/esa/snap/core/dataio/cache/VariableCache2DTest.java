@@ -113,10 +113,12 @@ public class VariableCache2DTest {
         assertEquals(1920, cache.getSizeInBytes());
 
         // read fake data to memory
-        cache.read(new int[]{30, 30}, new int[] {100, 50}, new int[]{0, 0}, new int[] {100, 50}, null);
+        DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{0, 0}, new int[]{100, 50});
+        cache.read(new int[]{30, 30}, new int[] {100, 50}, dataBuffer);
         assertEquals(28320, cache.getSizeInBytes());
 
-        cache.read(new int[]{370, 30}, new int[] {100, 50}, new int[]{370, 30}, new int[] {100, 50}, null);
+        dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{370, 30}, new int[] {100, 50});
+        cache.read(new int[]{370, 30}, new int[] {100, 50}, dataBuffer);
         assertEquals(96320, cache.getSizeInBytes());
     }
 

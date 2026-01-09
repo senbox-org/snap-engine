@@ -47,7 +47,5 @@ public class DeleteMeMain {
 
             System.out.println(cacheManager.getSizeInBytes());
         }
-
-        System.out.println(cacheManager.getSizeInBytes());
     }
 }

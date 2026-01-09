@@ -6,7 +6,7 @@ import java.io.IOException;
 
 interface VariableCache {
 
-    ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException;
+    ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException;
 
     long getSizeInBytes();
 

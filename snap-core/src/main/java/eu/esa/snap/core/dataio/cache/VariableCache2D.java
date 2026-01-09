@@ -69,16 +69,9 @@ class VariableCache2D implements VariableCache {
         cacheData = null;
     }
 
-    public ProductData read(int[] offsets, int[] shapes, int[] targetOffsets, int[] targetShapes, ProductData targetData) throws IOException {
-        // check if buffer supplied
-        // @todo check if we want this - maybe we should require a valid buffer. Thus we keep allocations outside this cache tb 2025-12-18
-        if (targetData == null) {
-            final int size = targetShapes[0] * targetShapes[1];
-            targetData = ProductData.createInstance(variableDescriptor.dataType, size);
-        }
-
+    public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
-        final Rectangle targetRect = new Rectangle(targetOffsets[1], targetOffsets[0], targetShapes[1], targetShapes[0]);
+        final Rectangle targetRect = new Rectangle(targetBuffer.getOffsetX(), targetBuffer.getOffsetY(), targetBuffer.getWidth(), targetBuffer.getHeight());
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
         for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
@@ -93,12 +86,12 @@ class VariableCache2D implements VariableCache {
 
             cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
             final int[] srcOffsets = new int[]{intersection.y - cacheData2D.getyMin(), intersection.x - cacheData2D.getxMin()};
-            final int[] destOffsets = new int[]{intersection.y - targetOffsets[0], intersection.x - targetOffsets[1]};
+            final int[] destOffsets = new int[]{intersection.y - targetBuffer.getOffsetY(), intersection.x - targetBuffer.getOffsetX()};
             final int[] intersectionShapes = new int[]{intersection.height, intersection.width};
-            cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetShapes[1], targetData);
+            cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer.getWidth(), targetBuffer.getData());
         }
 
-        return targetData;
+        return targetBuffer.getData();
     }
 
     // only for testing tb 2025-12-10

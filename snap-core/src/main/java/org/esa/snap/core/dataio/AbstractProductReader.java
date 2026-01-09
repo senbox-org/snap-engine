@@ -278,6 +278,7 @@ public abstract class AbstractProductReader implements ProductReader {
         Guardian.assertNotNull("destBand", destBand);
         Guardian.assertNotNull("destBuffer", destBuffer);
 
+        // @todo 3 tb/* simplify this, extract method, add test 2026-01-09
         if (destBuffer.getNumElems() < destWidth * destHeight) {
             throw new IllegalArgumentException("destination buffer too small");
         }

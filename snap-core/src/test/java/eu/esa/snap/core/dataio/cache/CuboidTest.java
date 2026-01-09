@@ -151,6 +151,7 @@ public class CuboidTest {
     }
 
     @Test
+    @STTM("SNAP-4107")
     public void testIntersection_withSelf() {
         Cuboid cuboid = new Cuboid(new int[]{5, 10, 20}, new int[]{20, 20, 50});
 
