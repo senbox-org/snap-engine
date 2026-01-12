@@ -142,7 +142,7 @@ class VariableCache3D implements VariableCache {
             final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0], intersection.getY() - target3dOffsets[1], intersection.getX() - target3dOffsets[2]};
             final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
 
-            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, target3dShapes, targetBuffer.getData());
+            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer);
         }
         return targetBuffer.getData();
     }

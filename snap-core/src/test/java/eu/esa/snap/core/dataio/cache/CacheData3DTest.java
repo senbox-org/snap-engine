@@ -185,36 +185,38 @@ public class CacheData3DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 2000);
 
         // 5x5x10 upper left corner to upper left corner, short
-        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 250);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_INT16, 250);
         int[] srcOffsets = new int[]{0, 0, 0};
         int[] targetOffsets = new int[]{0, 0, 0};
         int[] targetShapes = new int[]{5, 5, 10};
         int[] targetBufferSizes = new int[]{5, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        DataBuffer targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(0, targetBuffer.getElemIntAt(0));
-        assertEquals(1, targetBuffer.getElemIntAt(1));
-        assertEquals(5, targetBuffer.getElemIntAt(5));
-        assertEquals(10, targetBuffer.getElemIntAt(10));
-        assertEquals(100, targetBuffer.getElemIntAt(100));
-        assertEquals(174, targetBuffer.getElemIntAt(174));
-        assertEquals(249, targetBuffer.getElemIntAt(249));
+        assertEquals(0, targetData.getElemIntAt(0));
+        assertEquals(1, targetData.getElemIntAt(1));
+        assertEquals(5, targetData.getElemIntAt(5));
+        assertEquals(10, targetData.getElemIntAt(10));
+        assertEquals(100, targetData.getElemIntAt(100));
+        assertEquals(174, targetData.getElemIntAt(174));
+        assertEquals(249, targetData.getElemIntAt(249));
 
         // 1x5x10 upper left corner, layer 3 to upper left corner, short
-        targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 250);
+        targetData = ProductData.createInstance(ProductData.TYPE_INT16, 250);
         srcOffsets = new int[]{2, 0, 0};
         targetOffsets = new int[]{0, 0, 0};
         targetShapes = new int[]{1, 5, 10};
         targetBufferSizes = new int[]{5, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(100, targetBuffer.getElemIntAt(0));
-        assertEquals(101, targetBuffer.getElemIntAt(1));
-        assertEquals(105, targetBuffer.getElemIntAt(5));
-        assertEquals(110, targetBuffer.getElemIntAt(10));
-        assertEquals(149, targetBuffer.getElemIntAt(49));
-        assertEquals(0, targetBuffer.getElemIntAt(50));
-        assertEquals(0, targetBuffer.getElemIntAt(249));
+        assertEquals(100, targetData.getElemIntAt(0));
+        assertEquals(101, targetData.getElemIntAt(1));
+        assertEquals(105, targetData.getElemIntAt(5));
+        assertEquals(110, targetData.getElemIntAt(10));
+        assertEquals(149, targetData.getElemIntAt(49));
+        assertEquals(0, targetData.getElemIntAt(50));
+        assertEquals(0, targetData.getElemIntAt(249));
     }
 
     @Test
@@ -224,18 +226,19 @@ public class CacheData3DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 2000);
 
         // 5x5x10 intersecting front, one layer
-        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 250);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_INT32, 250);
         int[] srcOffsets = new int[]{0, 1, 0};
         int[] targetOffsets = new int[]{0, 0, 0};
         int[] targetShapes = new int[]{1, 5, 10};
         int[] targetBufferSizes = new int[]{5, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        final DataBuffer targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(10, targetBuffer.getElemIntAt(0));
-        assertEquals(11, targetBuffer.getElemIntAt(1));
-        assertEquals(16, targetBuffer.getElemIntAt(6));
-        assertEquals(59, targetBuffer.getElemIntAt(49));
-        assertEquals(0, targetBuffer.getElemIntAt(50));
+        assertEquals(10, targetData.getElemIntAt(0));
+        assertEquals(11, targetData.getElemIntAt(1));
+        assertEquals(16, targetData.getElemIntAt(6));
+        assertEquals(59, targetData.getElemIntAt(49));
+        assertEquals(0, targetData.getElemIntAt(50));
     }
 
     @Test
@@ -245,21 +248,22 @@ public class CacheData3DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 2000);
 
         // 2x5x10 intersecting top left, two layers
-        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32, 100);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_FLOAT32, 100);
         int[] srcOffsets = new int[]{0, 0, 0};
         int[] targetOffsets = new int[]{0, 2, 0};
         int[] targetShapes = new int[]{2, 3, 10};
         int[] targetBufferSizes = new int[]{2, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        final DataBuffer targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(0, targetBuffer.getElemIntAt(0));
-        assertEquals(0, targetBuffer.getElemIntAt(1));
-        assertEquals(0, targetBuffer.getElemIntAt(19));
-        assertEquals(1, targetBuffer.getElemIntAt(21));
-        assertEquals(29, targetBuffer.getElemIntAt(49));
-        assertEquals(0, targetBuffer.getElemIntAt(50));
-        assertEquals(30, targetBuffer.getElemIntAt(70));
-        assertEquals(31, targetBuffer.getElemIntAt(71));
+        assertEquals(0, targetData.getElemIntAt(0));
+        assertEquals(0, targetData.getElemIntAt(1));
+        assertEquals(0, targetData.getElemIntAt(19));
+        assertEquals(1, targetData.getElemIntAt(21));
+        assertEquals(29, targetData.getElemIntAt(49));
+        assertEquals(0, targetData.getElemIntAt(50));
+        assertEquals(30, targetData.getElemIntAt(70));
+        assertEquals(31, targetData.getElemIntAt(71));
     }
 
     @Test
@@ -269,21 +273,22 @@ public class CacheData3DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 2000);
 
         // 3x5x10 intersecting top left, two layers
-        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32, 150);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_FLOAT32, 100);
         int[] srcOffsets = new int[]{8, 8, 18};
         int[] targetOffsets = new int[]{0, 0, 0};
         int[] targetShapes = new int[]{2, 2, 2};
         int[] targetBufferSizes = new int[]{2, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        final DataBuffer targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 10, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(66, targetBuffer.getElemIntAt(0));
-        assertEquals(67, targetBuffer.getElemIntAt(1));
-        assertEquals(0, targetBuffer.getElemIntAt(2));
-        assertEquals(76, targetBuffer.getElemIntAt(10));
-        assertEquals(77, targetBuffer.getElemIntAt(11));
-        assertEquals(0, targetBuffer.getElemIntAt(49));
-        assertEquals(86, targetBuffer.getElemIntAt(50));
-        assertEquals(0, targetBuffer.getElemIntAt(70));
+        assertEquals(66, targetData.getElemIntAt(0));
+        assertEquals(67, targetData.getElemIntAt(1));
+        assertEquals(0, targetData.getElemIntAt(2));
+        assertEquals(76, targetData.getElemIntAt(10));
+        assertEquals(77, targetData.getElemIntAt(11));
+        assertEquals(0, targetData.getElemIntAt(49));
+        assertEquals(86, targetData.getElemIntAt(50));
+        assertEquals(0, targetData.getElemIntAt(70));
     }
 
     @Test
@@ -293,19 +298,20 @@ public class CacheData3DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT64, 2000);
 
         // 5x5x10 intersecting back
-        ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT64, 250);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_FLOAT64, 250);
         int[] srcOffsets = new int[]{2, 8, 2};
         int[] targetOffsets = new int[]{0, 0, 0};
         int[] targetShapes = new int[]{5, 2, 10};
         int[] targetBufferSizes = new int[]{5, 5, 10};
-        CacheData3D.copyDataBuffer(srcOffsets, 20, cacheData, targetOffsets, targetShapes, targetBufferSizes, targetBuffer);
+        final DataBuffer targetBuffer = new DataBuffer(targetData, targetOffsets, targetBufferSizes);
+        CacheData3D.copyDataBuffer(srcOffsets, 20, cacheData, targetOffsets, targetShapes, targetBuffer);
 
-        assertEquals(122, targetBuffer.getElemIntAt(0));
-        assertEquals(123, targetBuffer.getElemIntAt(1));
-        assertEquals(168, targetBuffer.getElemIntAt(56));
-        assertEquals(0, targetBuffer.getElemIntAt(99));
-        assertEquals(202, targetBuffer.getElemIntAt(100));
-        assertEquals(0, targetBuffer.getElemIntAt(249));
+        assertEquals(122, targetData.getElemIntAt(0));
+        assertEquals(123, targetData.getElemIntAt(1));
+        assertEquals(168, targetData.getElemIntAt(56));
+        assertEquals(0, targetData.getElemIntAt(99));
+        assertEquals(202, targetData.getElemIntAt(100));
+        assertEquals(0, targetData.getElemIntAt(249));
     }
 
     @Test
@@ -320,7 +326,8 @@ public class CacheData3DTest {
         cacheData3D.setCacheContext(cacheContext);
         assertNull(cacheData3D.getData());
 
-        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{0, 0, 0}, new int[]{5, 5, 5}, new int[]{4, 10, 10}, ProductData.createInstance(ProductData.TYPE_INT64, 400));
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{0, 0, 0}, new int[]{4, 5, 5}, dataBuffer);
         assertNotNull(cacheData3D.getData());
     }
 
@@ -334,12 +341,14 @@ public class CacheData3DTest {
         assertEquals(192, cacheData3D.getSizeInBytes());
 
         // trigger reading the buffer
-        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_FLOAT32);
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
         final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
         cacheData3D.setCacheContext(cacheContext);
-        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{5, 5, 5}, new int[]{5, 5, 5}, new int[]{5, 10, 20}, ProductData.createInstance(ProductData.TYPE_FLOAT32, 1000));
 
-        // default size plus 2000 floats (10x10x20)
-        assertEquals(8192, cacheData3D.getSizeInBytes());
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{1, 0, 0}, new int[]{2, 5, 5}, dataBuffer);
+
+        // default size plus 2000 longs (10x10x20)
+        assertEquals(16192, cacheData3D.getSizeInBytes());
     }
 }

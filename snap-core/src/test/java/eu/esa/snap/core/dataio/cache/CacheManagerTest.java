@@ -77,4 +77,32 @@ public class CacheManagerTest {
         verify(productCache_1, times(1)).dispose();
         verify(productCache_2, times(1)).dispose();
     }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testGetSizeInBytes_empty() {
+        CacheManager cacheManager = CacheManager.getInstance();
+
+        assertEquals(0, cacheManager.getSizeInBytes());
+
+        CacheManager.dispose();
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testGetSizeInBytes_twoProducts() {
+        ProductCache productCache_1 = mock(ProductCache.class);
+        when(productCache_1.getSizeInBytes()).thenReturn(5000L);
+
+        ProductCache productCache_2 = mock(ProductCache.class);
+        when(productCache_2.getSizeInBytes()).thenReturn(1870L);
+
+        CacheManager cacheManager = CacheManager.getInstance();
+        cacheManager.register(productCache_1);
+        cacheManager.register(productCache_2);
+
+        assertEquals(6870, cacheManager.getSizeInBytes());
+
+        CacheManager.dispose();
+    }
 }

@@ -163,4 +163,37 @@ public class CuboidTest {
         assertEquals(20, intersection.getHeight());
         assertEquals(20, intersection.getDepth());
     }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testIntersection_overflowX() {
+        Cuboid cuboid_1 = new Cuboid(new int[]{10, 10, Integer.MAX_VALUE - 1}, new int[]{10, 10, 20});
+        Cuboid cuboid_2 = new Cuboid(new int[]{5, 10, Integer.MIN_VALUE + 1}, new int[]{10, 10, 20});
+
+        Cuboid intersection = cuboid_2.intersection(cuboid_1);
+        assertEquals(2147483646, intersection.getX());
+        assertEquals(-2147483648, intersection.getWidth());
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testIntersection_overflowY() {
+        Cuboid cuboid_1 = new Cuboid(new int[]{10, Integer.MAX_VALUE - 1, 10}, new int[]{10, 10, 20});
+        Cuboid cuboid_2 = new Cuboid(new int[]{5, Integer.MIN_VALUE + 1, 10}, new int[]{10, 10, 20});
+
+        Cuboid intersection = cuboid_2.intersection(cuboid_1);
+        assertEquals(2147483646, intersection.getY());
+        assertEquals(-2147483648, intersection.getHeight());
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testIntersection_overflowZ() {
+        Cuboid cuboid_1 = new Cuboid(new int[]{Integer.MAX_VALUE - 1, 10, 10}, new int[]{10, 10, 20});
+        Cuboid cuboid_2 = new Cuboid(new int[]{Integer.MIN_VALUE + 1, 5, 10}, new int[]{10, 10, 20});
+
+        Cuboid intersection = cuboid_2.intersection(cuboid_1);
+        assertEquals(2147483646, intersection.getZ());
+        assertEquals(-2147483648, intersection.getDepth());
+    }
 }

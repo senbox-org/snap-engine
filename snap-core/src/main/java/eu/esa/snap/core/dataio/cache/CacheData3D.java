@@ -85,7 +85,7 @@ class CacheData3D implements CacheData {
 
     // package access for testing only tb 2025-12-04
     @SuppressWarnings("SuspiciousSystemArraycopy")
-    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int[] targetBufferSizes, ProductData targetBuffer) {
+    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, DataBuffer targetBuffer) {
         final int numLayers = targetShapes[0];
         final int numRows = targetShapes[1];
 
@@ -93,13 +93,13 @@ class CacheData3D implements CacheData {
         final int rowSize = targetShapes[2];
         int srcOffset = offsets[0] * layerSize + offsets[1] * rowSize + offsets[2];
 
-        final int targetLayerSize = targetBufferSizes[1] * targetBufferSizes[2];
-        final int targetWidth = targetBufferSizes[2];
-
+        final int targetWidth = targetBuffer.getWidth();
+        final int targetLayerSize = targetWidth * targetBuffer.getHeight();
+        final int targetRowSize = targetOffsets[1] * targetWidth;
         for (int layer = 0; layer < numLayers; layer++) {
-            int destOffset = (layer + targetOffsets[0]) * targetLayerSize + targetOffsets[1] * targetWidth + targetOffsets[2];
+            int destOffset = (layer + targetOffsets[0]) * targetLayerSize + targetRowSize + targetOffsets[2];
             for (int row = 0; row < numRows; row++) {
-                System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getElems(), destOffset, rowSize);
+                System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getData().getElems(), destOffset, rowSize);
                 srcOffset += srcWidth;
                 destOffset += targetWidth;
             }
@@ -130,10 +130,10 @@ class CacheData3D implements CacheData {
         return data;
     }
 
-    void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, int[] targetShapes, ProductData targetData) throws IOException {
+    void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, DataBuffer targetData) throws IOException {
         ensureData();
 
-        copyDataBuffer(srcOffsets, xMax - xMin + 1, data, destOffsets, targetShapes, intersectionShapes, targetData);
+        copyDataBuffer(srcOffsets, xMax - xMin + 1, data, destOffsets, intersectionShapes, targetData);
     }
 
     private void ensureData() throws IOException {

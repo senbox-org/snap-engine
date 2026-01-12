@@ -50,9 +50,20 @@ public class DataBufferTest {
 
     @Test
     @STTM("SNAP-4107")
-    public void testConstruct_invalid() {
+    public void testConstruct_invalidVectorSizes() {
         try {
             new DataBuffer(12, new int[]{0, 1, 2, 3}, new int[]{44, 55});
+            fail("Exception expected");
+        } catch (Exception expected) {
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4107")
+    public void testConstruct_bufferSizeMismatch() {
+        try {
+            new DataBuffer(ProductData.createInstance(ProductData.TYPE_INT16, 100), new int[]{1, 2, 3}, new int[]{5, 5, 5});
+            // because 5*5*5 != 100
             fail("Exception expected");
         } catch (Exception expected) {
         }
