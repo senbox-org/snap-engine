@@ -15,14 +15,6 @@ public class DataBuffer {
         assignCoordinates(offsets, shapes);
     }
 
-    static int getSize(int[] shapes) {
-        int size = 1;
-        for (int shape : shapes) {
-            size *= shape;
-        }
-        return size;
-    }
-
     public DataBuffer(ProductData productData, int[] offsets, int[] shapes) {
         final int size = getSize(shapes);
         if (size != productData.getNumElems()) {
@@ -67,6 +59,14 @@ public class DataBuffer {
 
     public int[] getShapes() {
         return shapes;
+    }
+
+    static int getSize(int[] shapes) {
+        int size = 1;
+        for (int shape : shapes) {
+            size *= shape;
+        }
+        return size;
     }
 
     private void assignCoordinates(int[] offsets, int[] shapes) {

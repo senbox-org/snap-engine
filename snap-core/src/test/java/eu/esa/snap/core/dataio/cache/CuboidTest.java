@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 public class CuboidTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstructionAndGetter()  {
         Cuboid cuboid = new Cuboid(new int[]{0, 10, 20}, new int[]{20, 30, 40});
 
@@ -22,7 +22,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIsEmpty() {
         Cuboid cuboid = new Cuboid(new int[]{0, 10, 20}, new int[]{20, 30, 40});
         assertFalse(cuboid.isEmpty());
@@ -38,7 +38,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_notIntersecting() {
         Cuboid cuboid_1 = new Cuboid(new int[]{10, 10, 20}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{30, 30, 50}, new int[]{10, 10, 20});
@@ -48,7 +48,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_intersecting() {
         Cuboid cuboid_1 = new Cuboid(new int[]{100, 100, 100}, new int[]{10, 10, 10});
 
@@ -126,7 +126,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_commutative() {
         Cuboid cuboid_1 = new Cuboid(new int[]{10, 10, 20}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{5, 10, 20}, new int[]{10, 10, 20});
@@ -151,7 +151,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_withSelf() {
         Cuboid cuboid = new Cuboid(new int[]{5, 10, 20}, new int[]{20, 20, 50});
 
@@ -165,7 +165,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_overflowX() {
         Cuboid cuboid_1 = new Cuboid(new int[]{10, 10, Integer.MAX_VALUE - 1}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{5, 10, Integer.MIN_VALUE + 1}, new int[]{10, 10, 20});
@@ -176,7 +176,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_overflowY() {
         Cuboid cuboid_1 = new Cuboid(new int[]{10, Integer.MAX_VALUE - 1, 10}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{5, Integer.MIN_VALUE + 1, 10}, new int[]{10, 10, 20});
@@ -187,7 +187,7 @@ public class CuboidTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testIntersection_overflowZ() {
         Cuboid cuboid_1 = new Cuboid(new int[]{Integer.MAX_VALUE - 1, 10, 10}, new int[]{10, 10, 20});
         Cuboid cuboid_2 = new Cuboid(new int[]{Integer.MIN_VALUE + 1, 5, 10}, new int[]{10, 10, 20});

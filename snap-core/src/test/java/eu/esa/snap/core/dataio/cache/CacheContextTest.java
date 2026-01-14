@@ -12,7 +12,7 @@ import static org.junit.Assert.assertSame;
 public class CacheContextTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruction() {
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
         variableDescriptor.name = "nasenmann";

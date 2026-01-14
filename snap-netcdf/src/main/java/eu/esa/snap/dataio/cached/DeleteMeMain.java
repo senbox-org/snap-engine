@@ -36,16 +36,18 @@ public class DeleteMeMain {
             System.out.println(cacheManager.getSizeInBytes());
              */
 
-            band = product.getBand("rhot_blue_083");
+            band = product.getBand("rhot_blue_001");
             productData = ProductData.createInstance(band.getDataType(), 512 * 512);
             band.readRasterData(400, 0, 512, 512, productData);
 
             System.out.println(cacheManager.getSizeInBytes());
 
-            band = product.getBand("rhot_blue_084");
+            band = product.getBand("rhot_blue_002");
             band.readRasterData(400, 0, 512, 512, productData);
 
             System.out.println(cacheManager.getSizeInBytes());
         }
+
+        System.out.println(cacheManager.getSizeInBytes());
     }
 }

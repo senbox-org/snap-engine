@@ -141,7 +141,7 @@ class CacheData3D implements CacheData {
             if (data == null) {
                 final String name = context.getVariableDescriptor().name;
                 final int[] offsets = {zMin, yMin, xMin};
-                Cuboid bounds = getBoundingCuboid();
+                final Cuboid bounds = getBoundingCuboid();
                 final int[] shapes = {bounds.getDepth(), bounds.getHeight(), bounds.getWidth()};
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, data);

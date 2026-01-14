@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNull;
 public class VariableCache3DTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testInitiateCache() {
         final int[] cacheSizes = {8, 10, 10};
         final int[] productSizes = new int[]{30, 100, 65};
@@ -49,7 +49,7 @@ public class VariableCache3DTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testDispose() {
         final int[] cacheSizes = {6, 8, 10};
         final int[] productSizes = new int[]{50, 50, 65};
@@ -64,7 +64,7 @@ public class VariableCache3DTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetAffectedCacheLocations_cacheHit() {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 180, 226};
@@ -99,7 +99,7 @@ public class VariableCache3DTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetAffectedCacheLocations_cacheMiss() {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 100, 200};
@@ -132,7 +132,7 @@ public class VariableCache3DTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
         final int[] cacheSizes = {10, 10, 10};
         final int[] productSizes = new int[]{100, 100, 100};

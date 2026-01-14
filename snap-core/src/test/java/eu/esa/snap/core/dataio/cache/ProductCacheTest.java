@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class ProductCacheTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT32));
 
@@ -41,7 +41,7 @@ public class ProductCacheTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testRead_3DTargetBuffer() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT64, new int[]{20, 100, 50}, new int[]{10, 20, 10}));
 
@@ -55,7 +55,7 @@ public class ProductCacheTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testRead_2DTargetBuffer() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_UINT8, new int[]{6, 100, 50}, new int[]{6, 20, 10}));
 

@@ -8,5 +8,6 @@ public interface CacheDataProvider {
 
     VariableDescriptor getVariableDescriptor(String variableName) throws IOException;
 
+    // @todo 1 tb replace return value with DataBuffer
     ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException;
 }

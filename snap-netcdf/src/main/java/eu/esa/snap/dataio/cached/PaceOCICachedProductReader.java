@@ -9,8 +9,11 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.jspecify.annotations.NonNull;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -22,11 +25,13 @@ import ucar.nc2.Variable;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.esa.snap.dataio.netcdf.util.DataTypeUtils.getRasterDataType;
+import static org.esa.snap.dataio.netcdf.util.MetadataUtils.readNetcdfMetadata;
 
 public class PaceOCICachedProductReader extends AbstractProductReader implements CacheDataProvider {
 
@@ -50,9 +55,6 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
     protected Product readProductNodesImpl() throws IOException {
         final File fileLocation = new File(getInput().toString());
 
-        // just for testing. A reader should never alter the state of a global setting
-        //NetcdfDatasets.disableNetcdfFileCache();
-
         netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
         if (netcdfFile == null) {
             throw new IOException("Failed to open file " + fileLocation.getPath());
@@ -61,20 +63,32 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         productCache = new ProductCache(this);
         CacheManager.getInstance().register(productCache);
 
-        // get Dimensions "ccd_pixels"=width and "number_of_scans"=height
-        final int width = getDimensionLength("ccd_pixels");
-        final int height = getDimensionLength("number_of_scans");
+        final int width = getProductWidth(netcdfFile);
+        final int height = getProductHeight(netcdfFile);
 
         final String productName = getProductName();
-        final Product product = new Product(productName, "dat", width, height, this);
+        // @todo 2 tb product type copied from SeaDAS bundle - migrate later 2026-01-13
+        final Product product = new Product(productName, "PaceOCI_L1B", width, height, this);
+
+        setProductDescription(product);
+        readNetcdfMetadata(netcdfFile, product.getMetadataRoot());
 
         final List<Variable> variables = netcdfFile.getVariables();
         addVariables(product, variables);
 
+        product.setAutoGrouping("rhot_blue:rhot_red:rhot_SWIR:qual_blue:qual_red:qual_SWIR:Lt_blue:Lt_red:Lt_SWIR");
+
         return product;
     }
 
-    private void addVariables(Product product, List<Variable> variables) {
+    private void setProductDescription(Product product) {
+        final Attribute title = netcdfFile.getRootGroup().findAttribute("title");
+        if (title != null) {
+            product.setDescription(title.getStringValue());
+        }
+    }
+
+    private void addVariables(Product product, List<Variable> variables) throws IOException {
         for (Variable variable : variables) {
             final String parentGroupName = variable.getParentGroup().getShortName();
             if (parentGroupName.equals("sensor_band_parameters") || parentGroupName.equals("scan_line_attributes")) {
@@ -82,19 +96,110 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             }
 
             final int rank = variable.getRank();
+            final Band[] bandsAdded;
             if (rank == 2) {
-                add2DVariable(product, variable);
+                bandsAdded = add2DVariable(product, variable);
             } else if (rank == 3) {
-                add3DVariable(product, variable);
+                bandsAdded = add3DVariable(product, variable);
             } else {
                 continue;
             }
 
+            addBandProperties(variable, bandsAdded);
+
             variablesMap.put(variable.getShortName(), variable);
+        }
+
+        final Variable blueWvlVariable = netcdfFile.findVariable("sensor_band_parameters/blue_wavelength");
+        final Array blueWvlArray = blueWvlVariable.read();
+        final float[] blueWvls = (float[]) blueWvlArray.get1DJavaArray(DataType.FLOAT);
+
+        final Variable redWvlVariable = netcdfFile.findVariable("sensor_band_parameters/red_wavelength");
+        final Array redWvlArray = redWvlVariable.read();
+        final float[] redWvls = (float[]) redWvlArray.get1DJavaArray(DataType.FLOAT);
+
+        final Variable swirWvlVariable = netcdfFile.findVariable("sensor_band_parameters/SWIR_wavelength");
+        final Array swirWvlArray = swirWvlVariable.read();
+        final float[] swirWvls = (float[]) swirWvlArray.get1DJavaArray(DataType.FLOAT);
+
+        final float blueRedBandwidth = 5.0f;
+        final Variable swirBandwidthVariable = netcdfFile.findVariable("sensor_band_parameters/SWIR_bandpass");
+        final Array swirBandwidthArray = swirBandwidthVariable.read();
+        final float[] swirBandwidths = (float[]) swirBandwidthArray.get1DJavaArray(DataType.FLOAT);
+        final Band[] bands = product.getBands();
+        int spectralBandIndex = 0;
+        for (final Band band : bands) {
+            final String bandName = band.getName();
+
+            if (bandName.contains("_blue_")) {
+                final int underscoreIdx = bandName.lastIndexOf("_");
+                final int layerIndex = Integer.parseInt(bandName.substring(underscoreIdx + 1)) - 1;
+                band.setSpectralWavelength(blueWvls[layerIndex]);
+                band.setSpectralBandwidth(blueRedBandwidth);
+                band.setSpectralBandIndex(spectralBandIndex++);
+            } else if (bandName.contains("_red_")) {
+                final int underscoreIdx = bandName.lastIndexOf("_");
+                final int layerIndex = Integer.parseInt(bandName.substring(underscoreIdx + 1)) - 1;
+                band.setSpectralWavelength(redWvls[layerIndex]);
+                band.setSpectralBandwidth(blueRedBandwidth);
+                band.setSpectralBandIndex(spectralBandIndex++);
+            } else if (bandName.contains("_SWIR_")) {
+                final int underscoreIdx = bandName.lastIndexOf("_");
+                final int layerIndex = Integer.parseInt(bandName.substring(underscoreIdx + 1)) - 1;
+                band.setSpectralWavelength(swirWvls[layerIndex]);
+                band.setSpectralBandwidth(swirBandwidths[layerIndex]);
+                band.setSpectralBandIndex(spectralBandIndex++);
+            }
         }
     }
 
-    private void add2DVariable(Product product, Variable variable) {
+    // @todo 1 tb add tests 2026-01-14
+    static void addBandProperties(Variable variable, Band[] bandsAdded) {
+        for (final Band band : bandsAdded) {
+            final String unitsString = variable.getUnitsString();
+            if (StringUtils.isNotNullAndNotEmpty(unitsString)) {
+                band.setUnit(unitsString);
+            }
+
+            final Attribute longNameAttribute = variable.findAttribute("long_name");
+            if (longNameAttribute != null) {
+                band.setDescription(longNameAttribute.getStringValue());
+            }
+
+            final Attribute scaleFactorAttribute = variable.findAttribute("scale_factor");
+            if (scaleFactorAttribute != null) {
+                final Number numericValue = scaleFactorAttribute.getNumericValue(0);
+                if (numericValue != null) {
+                    band.setScalingFactor(numericValue.doubleValue());
+                }
+            }
+
+            final Attribute offsetAttribute = variable.findAttribute("add_offset");
+            if (offsetAttribute != null) {
+                final Number numericValue = offsetAttribute.getNumericValue(0);
+                if (numericValue != null) {
+                    band.setScalingOffset(numericValue.doubleValue());
+                }
+            }
+
+            final Attribute fillValueAttribute = variable.findAttribute("_FillValue");
+            if (fillValueAttribute != null) {
+                final Number numericValue = fillValueAttribute.getNumericValue(0);
+                if (numericValue != null) {
+                    band.setNoDataValue(numericValue.doubleValue());
+                    band.setNoDataValueUsed(true);
+                }
+            }
+
+            final Attribute flagMasksAttribute = variable.findAttribute("flag_masks");
+            final Attribute flagMeaningsAttribute = variable.findAttribute("flag_meanings");
+            if (flagMasksAttribute != null && flagMeaningsAttribute != null) {
+                // @todo 1 tb add flag coding - refactor functionality from S3reader 2026-01-14
+            }
+        }
+    }
+
+    private Band[] add2DVariable(Product product, Variable variable) {
         final int[] dimensions = variable.getShape();
         final int height = dimensions[0];
         final int width = dimensions[1];
@@ -102,7 +207,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
         if (height != sceneRasterHeight || width != sceneRasterWidth) {
-            return;
+            return new Band[0];
         }
 
         int rasterDataType;
@@ -114,9 +219,10 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
         final Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
         product.addBand(band);
+        return new Band[]{band};
     }
 
-    private void add3DVariable(Product product, Variable variable) {
+    private Band[] add3DVariable(Product product, Variable variable) {
         final int[] dimensions = variable.getShape();
         final int height;
         final int width;
@@ -136,7 +242,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
         if (height != sceneRasterHeight || width != sceneRasterWidth) {
-            return;
+            return new Band[0];
         }
 
         int rasterDataType;
@@ -146,6 +252,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             rasterDataType = getRasterDataType(variable.getDataType(), false);
         }
 
+        final List<Band> bandList = new ArrayList<>();
         final String shortName = variable.getShortName();
         DecimalFormat decimalFormat = getDecimalFormat(numLayers);
         for (int layer = 1; layer <= numLayers; layer++) {
@@ -153,7 +260,10 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             final String layeredVariableName = shortName + "_" + layer_ext;
             final Band band = new BandUsingReaderDirectly(layeredVariableName, rasterDataType, width, height);
             product.addBand(band);
+            bandList.add(band);
         }
+
+        return bandList.toArray(new Band[0]);
     }
 
     static DecimalFormat getDecimalFormat(int numLayers) {
@@ -169,17 +279,16 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
     private String getProductName() {
         String productName;
-        final Attribute nameAttribute = netcdfFile.findAttribute("product_name");
+        final Attribute nameAttribute = netcdfFile.getRootGroup().findAttribute("product_name");
         if (nameAttribute != null) {
             productName = nameAttribute.getStringValue();
         } else {
-            // @todo 1 tb there must be code to extract a meaningful input name
-            productName = getInput().toString();
+            productName = FileUtils.getFilenameFromPath(getInput().toString());
         }
         return productName;
     }
 
-    private int getDimensionLength(String dimensionName) {
+    static int getDimensionLength(String dimensionName, NetcdfFile netcdfFile) {
         final Dimension dimension = netcdfFile.findDimension(dimensionName);
         if (dimension == null) {
             return -1;
@@ -193,14 +302,11 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         final int[] shapes;
 
         String destBandName = destBand.getName();
-        int layerIndex = -1;
-        // @todo 2 tb - can't we use an integer index as property. Parsing this info every time seems to be nonsense
-        final int underscoreIdx = destBandName.lastIndexOf("_");
-
-        if (underscoreIdx > 0) {
-            final String numberExt = destBandName.substring(underscoreIdx + 1);
+        final int spectralBandIndex = destBand.getSpectralBandIndex();
+        if (spectralBandIndex >= 0) {
+            final int underscoreIdx = destBandName.lastIndexOf("_");
+            final int layerIndex = Integer.parseInt(destBandName.substring(underscoreIdx + 1)) - 1;
             destBandName = destBandName.substring(0, underscoreIdx);
-            layerIndex = Integer.parseInt(numberExt) - 1;
 
             offsets = new int[]{layerIndex, sourceOffsetY, sourceOffsetX};
             shapes = new int[]{1, sourceHeight, sourceWidth};
@@ -212,9 +318,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         final int[] targetOffsets = {destOffsetY, destOffsetX};
         final int[] targetShapes = {destHeight, destWidth};
         final DataBuffer targetBuffer = new DataBuffer(destBuffer, targetOffsets, targetShapes);
-        ProductData read = productCache.read(destBandName, offsets, shapes, targetBuffer);
-
-        // @todo 2 tb/tb take subsampling into account
+        productCache.read(destBandName, offsets, shapes, targetBuffer);
     }
 
     @Override
@@ -300,38 +404,63 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             } catch (InvalidRangeException e) {
                 throw new IOException(e);
             }
-        }
-        // @todo 2 tb/tb foresee that users may want the raw data 2025-12-05
-        if (ReaderUtils.mustScale(netcdfVariable)) {
-            rawBuffer = ReaderUtils.scaleArray(rawBuffer, netcdfVariable);
-            rasterDataType = ProductData.TYPE_FLOAT64;
-        }
 
-        // @todo 1 tb/tb allocate depending on data type
-        if (targetData == null) {
-            if (shapes.length == 2) {
-                targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
-            } else if (shapes.length == 3) {
-                targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1] * shapes[2]);
-            } else {
-                throw new IOException("Illegal shaped variable");
+            // @todo 2 tb/tb foresee that users may want the raw data 2025-12-05
+            if (ReaderUtils.mustScale(netcdfVariable)) {
+                rawBuffer = ReaderUtils.scaleArray(rawBuffer, netcdfVariable);
+                rasterDataType = ProductData.TYPE_FLOAT64;
+            }
+
+            if (targetData == null) {
+                targetData = createTargetDataBuffer(shapes, rasterDataType);
+            }
+
+            switch (rasterDataType) {
+                case ProductData.TYPE_FLOAT32:
+                    targetData.setElems(rawBuffer.get1DJavaArray(DataType.FLOAT));
+                    break;
+                case ProductData.TYPE_FLOAT64:
+                    targetData.setElems(rawBuffer.get1DJavaArray(DataType.DOUBLE));
+                    break;
+                case ProductData.TYPE_INT16:
+                    targetData.setElems(rawBuffer.get1DJavaArray(DataType.SHORT));
+                    break;
+                case ProductData.TYPE_UINT8:
+                    targetData.setElems(rawBuffer.get1DJavaArray(DataType.BYTE));
+                    break;
+                default:
+                    throw new IOException("Unknown data type: " + rasterDataType);
             }
         }
 
-        switch (rasterDataType) {
-            case ProductData.TYPE_FLOAT32:
-                targetData.setElems(rawBuffer.get1DJavaArray(DataType.FLOAT));
-                break;
-            case ProductData.TYPE_FLOAT64:
-                targetData.setElems(rawBuffer.get1DJavaArray(DataType.DOUBLE));
-                break;
-            case ProductData.TYPE_INT16:
-                targetData.setElems(rawBuffer.get1DJavaArray(DataType.SHORT));
-                break;
-            default:
-                throw new IOException("Unknown data type: " + rasterDataType);
-        }
-
         return targetData;
+    }
+
+    private static @NonNull ProductData createTargetDataBuffer(int[] shapes, int rasterDataType) throws IOException {
+        ProductData targetData;
+        if (shapes.length == 2) {
+            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1]);
+        } else if (shapes.length == 3) {
+            targetData = ProductData.createInstance(rasterDataType, shapes[0] * shapes[1] * shapes[2]);
+        } else {
+            throw new IOException("Illegal shaped variable");
+        }
+        return targetData;
+    }
+
+    static int getProductHeight(NetcdfFile netcdfFile) {
+        int numberOfScans = getDimensionLength("scans", netcdfFile);
+        if (numberOfScans <= 0) {
+            numberOfScans = getDimensionLength("number_of_scans", netcdfFile);
+        }
+        return numberOfScans;
+    }
+
+    static int getProductWidth(NetcdfFile netcdfFile) {
+        int ccdPixels = getDimensionLength("pixels", netcdfFile);
+        if (ccdPixels <= 0) {
+            ccdPixels = getDimensionLength("ccd_pixels", netcdfFile);
+        }
+        return ccdPixels;
     }
 }

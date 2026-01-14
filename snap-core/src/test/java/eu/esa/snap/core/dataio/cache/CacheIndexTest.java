@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 public class CacheIndexTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruction() {
         final CacheIndex cacheIndex = new CacheIndex(1, 2);
         assertEquals(1, cacheIndex.getCacheRow());
@@ -17,7 +17,7 @@ public class CacheIndexTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruction_allParameter() {
         final CacheIndex cacheIndex = new CacheIndex(1, 2, 3);
         assertEquals(1 , cacheIndex.getCacheLayer());

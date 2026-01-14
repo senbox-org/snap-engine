@@ -15,7 +15,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetInstance() {
         final CacheManager instance_1 =  CacheManager.getInstance();
         assertNotNull(instance_1);
@@ -25,7 +25,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetInstanceAndDispose() {
         final CacheManager instance_1 =  CacheManager.getInstance();
         assertNotNull(instance_1);
@@ -37,7 +37,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testRegisterAndRemove() {
         final CacheManager cacheManager = CacheManager.getInstance();
         assertEquals(0, cacheManager.getNumProductCaches());
@@ -52,7 +52,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testDisposeIsCalledOnRemove() {
         final CacheManager cacheManager = CacheManager.getInstance();
         final ProductCache productCache = mock(ProductCache.class);
@@ -63,7 +63,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testDisposeIsPropagatedToProductCaches() {
         ProductCache productCache_1 = mock(ProductCache.class);
         ProductCache productCache_2 = mock(ProductCache.class);
@@ -79,7 +79,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetSizeInBytes_empty() {
         CacheManager cacheManager = CacheManager.getInstance();
 
@@ -89,7 +89,7 @@ public class CacheManagerTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetSizeInBytes_twoProducts() {
         ProductCache productCache_1 = mock(ProductCache.class);
         when(productCache_1.getSizeInBytes()).thenReturn(5000L);

@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class DataBufferTest {
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_2D() {
         int productDataType = ProductData.TYPE_FLOAT32;
         int[] offsets = {400, 0};
@@ -29,7 +29,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_3D() {
         int productDataType = ProductData.TYPE_FLOAT64;
         int[] offsets = {100, 400, 0};
@@ -49,7 +49,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_invalidVectorSizes() {
         try {
             new DataBuffer(12, new int[]{0, 1, 2, 3}, new int[]{44, 55});
@@ -59,7 +59,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_bufferSizeMismatch() {
         try {
             new DataBuffer(ProductData.createInstance(ProductData.TYPE_INT16, 100), new int[]{1, 2, 3}, new int[]{5, 5, 5});
@@ -70,7 +70,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_withGivenData_2D() {
         ProductData productData = ProductData.createInstance(ProductData.TYPE_INT8, 300);
 
@@ -87,7 +87,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testConstruct_withGivenData_3D() {
         ProductData productData = ProductData.createInstance(ProductData.TYPE_INT16, 3000);
 
@@ -104,7 +104,7 @@ public class DataBufferTest {
     }
 
     @Test
-    @STTM("SNAP-4107")
+    @STTM("SNAP-4121")
     public void testGetSize() {
         assertEquals(1, DataBuffer.getSize(new int[0]));
         assertEquals(5, DataBuffer.getSize(new int[] {5}));
