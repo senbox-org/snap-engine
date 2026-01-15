@@ -21,7 +21,7 @@ package org.esa.snap.core.dataop.maptransf;
  * @deprecated since BEAM 4.7, use {@link org.opengis.referencing.datum.Ellipsoid} instead.
  */
 @Deprecated
-public class Ellipsoid {
+public class Ellipsoid implements Cloneable {
 
     /**
      * The standard WGS-72 ellipsoid.
@@ -66,9 +66,9 @@ public class Ellipsoid {
     }
 
     @Override
-    public Object clone() {
+    public Ellipsoid clone() {
         try {
-            return super.clone();
+            return (Ellipsoid) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new IllegalStateException(e);
         }
