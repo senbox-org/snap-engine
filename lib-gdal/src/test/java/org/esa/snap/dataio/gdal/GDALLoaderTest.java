@@ -2,7 +2,7 @@ package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
 import eu.esa.snap.core.lib.NativeLibraryTools;
-import org.esa.lib.gdal.AbstractGDALTest;
+import org.esa.lib.gdal.GDALTestUtils;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.ThreadExecutor;
@@ -11,13 +11,13 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConst;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -26,12 +26,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
-public class GDALLoaderTest extends AbstractGDALTest {
+public class GDALLoaderTest {
 
     private static final String TEST_FILE = "U_1005A.NTF";
 
     private static final GDALLoader TEST_GDAL_LOADER = GDALLoader.getInstance();
     private static final GDALVersion TEST_GDAL_VERSION = GDALVersion.getGDALVersion();
+
+    public static final String PROPERTY_NAME_DATA_DIR = "snap.reader.tests.data.dir";
+    private static final String TEST_FOLDER_NAME = "_gdal";
+
+    protected Path libGDALTestsFolderPath;
 
     private Path testFilePath;
 
@@ -82,8 +87,23 @@ public class GDALLoaderTest extends AbstractGDALTest {
         }
     }
 
-    @Before
-    public void setUpLocal() {
+    private static boolean testDataAvailable() {
+        final String testDataDir = System.getProperty(PROPERTY_NAME_DATA_DIR);
+        return (testDataDir != null) && !testDataDir.isEmpty() && Files.exists(Paths.get(testDataDir));
+    }
+
+    private void checkTestDirectoryExists() {
+        final String testDirectoryPathProperty = System.getProperty(PROPERTY_NAME_DATA_DIR);
+        assertNotNull("The system property '" + PROPERTY_NAME_DATA_DIR + "' representing the test directory is not set.", testDirectoryPathProperty);
+        final Path testFolderPath = Paths.get(testDirectoryPathProperty);
+        assertTrue("The test directory path " + testDirectoryPathProperty + " is not valid.", Files.exists(testFolderPath));
+        this.libGDALTestsFolderPath = testFolderPath.resolve(TEST_FOLDER_NAME);
+        assumeTrue("The lib_gdal test directory path (" + this.libGDALTestsFolderPath + ") is not valid.", Files.exists(this.libGDALTestsFolderPath));
+    }
+
+    public final void setUp() {
+        assumeTrue(testDataAvailable());
+        checkTestDirectoryExists();
         testFilePath = this.libGDALTestsFolderPath.resolve(TEST_FILE);
         assumeTrue(Files.exists(testFilePath));
     }
@@ -97,6 +117,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
     @Test
     @STTM("SNAP-3567")
     public void testInitGDAL() {
+        setUp();
         try {
             assertNotNull(TEST_GDAL_LOADER);
             checkGDALInitialised();
@@ -108,9 +129,11 @@ public class GDALLoaderTest extends AbstractGDALTest {
     @Test
     @STTM("SNAP-3637")
     public void testSyncGDALInitialisation(){
+        setUp();
         assertNotNull(TEST_GDAL_LOADER);
+        assumeTrue(TEST_GDAL_LOADER.isNotInitialised());
         try {
-            Path gdalRootFolderPath = getExpectedNativeLibrariesRootFolderPath();
+            Path gdalRootFolderPath = GDALTestUtils.getExpectedNativeLibrariesRootFolderPath();
             //remove gdal folder
             if(Files.exists(gdalRootFolderPath)){
                 FileUtils.deleteTree(gdalRootFolderPath.toFile());
@@ -142,7 +165,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
 
     private void checkGDALInitialised() {
         GDALLoader.ensureGDALInitialised();
-        assertTrue(Files.exists(getExpectedNativeLibrariesRootFolderPath()));
+        assertTrue(Files.exists(GDALTestUtils.getExpectedNativeLibrariesRootFolderPath()));
         assertTrue(GDALInstallInfo.INSTANCE.isPresent());
         assertNotNull(GDAL.open(testFilePath.toString(), GDALConst.gaReadonly()));
 
