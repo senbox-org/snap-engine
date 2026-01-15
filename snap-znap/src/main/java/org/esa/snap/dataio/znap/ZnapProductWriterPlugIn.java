@@ -27,6 +27,7 @@ import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.core.dataio.ProductReaderUtils;
 import org.esa.snap.runtime.Config;
 
 import java.util.Locale;
@@ -39,7 +40,7 @@ public class ZnapProductWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public Class<?>[] getOutputTypes() {
-        return IO_TYPES;
+        return ProductReaderUtils.IO_TYPES;
     }
 
     public ProductWriter createWriterInstance() {
