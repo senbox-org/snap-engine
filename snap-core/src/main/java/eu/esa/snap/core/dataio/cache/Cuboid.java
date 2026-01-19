@@ -43,6 +43,10 @@ class Cuboid {
         return width;
     }
 
+    int[] getShape() {
+        return new int[] {depth, height, width};
+    }
+
     /**
      * This method extends the intersection algorithm used by AWT Rectangle to three dimensions
      *

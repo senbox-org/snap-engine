@@ -1,6 +1,7 @@
 package eu.esa.snap.dataio.cached;
 
 import eu.esa.snap.core.dataio.cache.CacheManager;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -34,18 +35,25 @@ public class DeleteMeMain {
             band.readRasterData(500, 0, 512, 512, productData);
 
             System.out.println(cacheManager.getSizeInBytes());
-             */
+
 
             band = product.getBand("rhot_blue_001");
             productData = ProductData.createInstance(band.getDataType(), 512 * 512);
             band.readRasterData(400, 0, 512, 512, productData);
 
             System.out.println(cacheManager.getSizeInBytes());
-
+*/
             band = product.getBand("rhot_blue_002");
-            band.readRasterData(400, 0, 512, 512, productData);
+            productData = ProductData.createInstance(band.getDataType(), 16 * 16);
+            band.readRasterData(0, 0, 16, 16, productData);
 
-            System.out.println(cacheManager.getSizeInBytes());
+            //ProductData productData_2 = ProductData.createInstance(band.getDataType(), 512 * 512);
+            //band.readRasterData(0, 1, 512, 512, productData_2);
+
+            //System.out.println("data: " + productData.getElemFloatAt(512) + "   " + productData_2.getElemFloatAt(0));
+            System.out.println("data: " + productData.getElemFloatAt(0));
+
+            //ProductIO.writeProduct(product, "C:\\Satellite\\DELETE\\pace_copy.nc", "NetCDF4-CF");
         }
 
         System.out.println(cacheManager.getSizeInBytes());

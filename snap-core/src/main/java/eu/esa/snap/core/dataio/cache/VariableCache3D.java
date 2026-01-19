@@ -123,7 +123,6 @@ class VariableCache3D implements VariableCache {
         }
 
         final Cuboid targetCuboid = new Cuboid(target3dOffsets, target3dShapes);
-
         for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
             final int col = tileLocation.getCacheCol();
@@ -138,8 +137,12 @@ class VariableCache3D implements VariableCache {
             }
 
             cacheData3D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-19
-            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(), intersection.getY() - cacheData3D.getyMin(), intersection.getX() - cacheData3D.getxMin()};
-            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0], intersection.getY() - target3dOffsets[1], intersection.getX() - target3dOffsets[2]};
+            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(),
+                    intersection.getY() - cacheData3D.getyMin(),
+                    intersection.getX() - cacheData3D.getxMin()};
+            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0],
+                    intersection.getY() - target3dOffsets[1],
+                    intersection.getX() - target3dOffsets[2]};
             final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
 
             cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer);

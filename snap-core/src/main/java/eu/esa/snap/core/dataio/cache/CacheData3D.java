@@ -19,6 +19,7 @@ class CacheData3D implements CacheData {
 
     private ProductData data;
     private CacheContext context;
+    private Cuboid boundingCuboid;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -85,19 +86,20 @@ class CacheData3D implements CacheData {
 
     // package access for testing only tb 2025-12-04
     @SuppressWarnings("SuspiciousSystemArraycopy")
-    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, DataBuffer targetBuffer) {
+    static void copyDataBuffer(int[] offsets, int[] srcShapes, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, DataBuffer targetBuffer) {
         final int numLayers = targetShapes[0];
         final int numRows = targetShapes[1];
 
-        final int layerSize = targetShapes[1] * targetShapes[2];    // z-layer size: y*x
+        final int srcLayerSize = srcShapes[1] * srcShapes[2];    // z-layer size: y*x
+        final int srcWidth = srcShapes[2];
         final int rowSize = targetShapes[2];
-        int srcOffset = offsets[0] * layerSize + offsets[1] * rowSize + offsets[2];
-
         final int targetWidth = targetBuffer.getWidth();
         final int targetLayerSize = targetWidth * targetBuffer.getHeight();
-        final int targetRowSize = targetOffsets[1] * targetWidth;
+
+        int srcOffset = offsets[0] * srcLayerSize + offsets[1] * srcWidth + offsets[2];
+        int destOffset = targetOffsets[0] * targetLayerSize + targetOffsets[1] * targetWidth + targetOffsets[2];
+
         for (int layer = 0; layer < numLayers; layer++) {
-            int destOffset = (layer + targetOffsets[0]) * targetLayerSize + targetRowSize + targetOffsets[2];
             for (int row = 0; row < numRows; row++) {
                 System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getData().getElems(), destOffset, rowSize);
                 srcOffset += srcWidth;
@@ -116,10 +118,12 @@ class CacheData3D implements CacheData {
     }
 
     Cuboid getBoundingCuboid() {
-        // @todo 1 tb implement lazy solution, we don't need to allocate an object everytime this is called 2026-01-09
-        final int[] offsets = {zMin, yMin, xMin};
-        final int[] shapes = {zMax - zMin + 1, yMax - yMin + 1, xMax - xMin + 1};
-        return new Cuboid(offsets, shapes);
+        if (boundingCuboid == null) {
+            final int[] offsets = {zMin, yMin, xMin};
+            final int[] shapes = {zMax - zMin + 1, yMax - yMin + 1, xMax - xMin + 1};
+            boundingCuboid = new Cuboid(offsets, shapes);
+        }
+        return boundingCuboid;
     }
 
     void setCacheContext(CacheContext context) {
@@ -133,7 +137,8 @@ class CacheData3D implements CacheData {
     void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, DataBuffer targetData) throws IOException {
         ensureData();
 
-        copyDataBuffer(srcOffsets, xMax - xMin + 1, data, destOffsets, intersectionShapes, targetData);
+        int[] srcShapes = getBoundingCuboid().getShape();
+        copyDataBuffer(srcOffsets, srcShapes, data, destOffsets, intersectionShapes, targetData);
     }
 
     private void ensureData() throws IOException {

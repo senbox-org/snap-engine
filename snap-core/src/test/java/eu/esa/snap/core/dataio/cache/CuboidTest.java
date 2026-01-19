@@ -196,4 +196,12 @@ public class CuboidTest {
         assertEquals(2147483646, intersection.getZ());
         assertEquals(-2147483648, intersection.getDepth());
     }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testGetShape() {
+        final Cuboid cuboid = new Cuboid(new int[]{5, 10, 20}, new int[]{6, 8, 10});
+
+        assertArrayEquals(new int[]{6, 8, 10}, cuboid.getShape());
+    }
 }
