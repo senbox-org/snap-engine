@@ -446,7 +446,7 @@ public class GDALProductReader extends AbstractProductReader {
                         String maskName = computeMaskName(gdalBand, bandName);
                         if (maskName != null && (subsetDef == null || subsetDef.isNodeAccepted(maskName))) {
                             String expression = maskName.startsWith("nodata_")
-                                                ? String.format("feq(%s.raw,%f)", bandName, product.getBand(bandName).getNoDataValue())
+                                                ? String.format("feq('%s.raw',%f)", bandName, product.getBand(bandName).getNoDataValue())
                                                 : bandName;
                             Mask mask = Mask.BandMathsType.create(maskName, maskName, productBounds.width, productBounds.height,
                                                                   expression, Color.white, 0.5);
