@@ -10,5 +10,7 @@ interface VariableCache {
 
     long getSizeInBytes();
 
+    long getLastAccessTime();
+
     void dispose();
 }

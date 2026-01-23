@@ -10,7 +10,7 @@ public class TestCacheDataProvider implements CacheDataProvider {
     }
 
     @Override
-    public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) {
+    public DataBuffer readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) {
         throw new RuntimeException("not implemented");
     }
 }

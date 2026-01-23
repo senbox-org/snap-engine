@@ -31,7 +31,7 @@ public class CacheContextTest {
         }
 
         @Override
-        public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+        public DataBuffer readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
             throw new RuntimeException("not implemented");
         }
     }

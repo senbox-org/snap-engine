@@ -157,8 +157,9 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_requestCompletelyInCache() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT8, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{0, 0};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
 
         // 10x10 upper left corner, byte
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT8, 100);
@@ -166,18 +167,20 @@ public class CacheData2DTest {
         int[] dstOffsets = new int[]{0, 0};
         int[] dstShapes = new int[]{10, 10};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(0));
         assertEquals(1, targetBuffer.getElemIntAt(1));
         assertEquals(15, targetBuffer.getElemIntAt(10));
         assertEquals(31, targetBuffer.getElemIntAt(21));
 
         // 10x10 shifted by 3 in x-dir, byte
-        srcOffsets = new int[]{0, 3};
         dstOffsets = new int[]{0, 0};
         dstShapes = new int[]{10, 10};
+        srcOffsets = new int[]{0, 3};
+        srcShapes = new int[]{20, 15};
+        dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(3, targetBuffer.getElemIntAt(0));
         assertEquals(4, targetBuffer.getElemIntAt(1));
         assertEquals(18, targetBuffer.getElemIntAt(10));
@@ -188,15 +191,16 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_outLeft() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{7, 0};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{0, 2};
         int[] dstShapes = new int[]{10, 8};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(0));
         assertEquals(105, targetBuffer.getElemIntAt(2));
         assertEquals(120, targetBuffer.getElemIntAt(12));
@@ -208,8 +212,10 @@ public class CacheData2DTest {
     public void testCopyDataBuffer_upperLeftCorner() {
         // size: 20 x 15
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT32, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{0, 0};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         // size: 10 x 10
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 100);
@@ -217,7 +223,7 @@ public class CacheData2DTest {
         int[] dstOffsets = new int[]{4, 3};
         int[] dstShapes = new int[]{6, 7};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(43));
         assertEquals(1, targetBuffer.getElemIntAt(44));
         assertEquals(75, targetBuffer.getElemIntAt(93));
@@ -229,15 +235,17 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_outTop() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_INT16, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{0, 4};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_INT16, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{8, 0};
         int[] dstShapes = new int[]{2, 10};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(0));
         assertEquals(0, targetBuffer.getElemIntAt(1));
         assertEquals(4, targetBuffer.getElemIntAt(80));
@@ -251,13 +259,16 @@ public class CacheData2DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT32, 300);
         final int cacheWidth = 15;
         int[] srcOffsets = new int[]{0, 11};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{3, 0};
         int[] dstShapes = new int[]{7, 4};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(0));
         assertEquals(11, targetBuffer.getElemIntAt(30));
         assertEquals(12, targetBuffer.getElemIntAt(31));
@@ -272,13 +283,16 @@ public class CacheData2DTest {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_FLOAT64, 300);
         final int cacheWidth = 15;
         int[] srcOffsets = new int[]{6, 9};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT64, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{0, 0};
         int[] dstShapes = new int[]{10, 6};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(99, targetBuffer.getElemIntAt(0));
         assertEquals(100, targetBuffer.getElemIntAt(1));
         assertEquals(104, targetBuffer.getElemIntAt(5));
@@ -292,15 +306,17 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_lowerRightCorner() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{14, 10};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT16, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{0, 0};
         int[] dstShapes = new int[]{5, 5};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(220, targetBuffer.getElemIntAt(0));
         assertEquals(224, targetBuffer.getElemIntAt(4));
         assertEquals(0, targetBuffer.getElemIntAt(5));
@@ -313,15 +329,17 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_outBottom() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT32, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{16, 3};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT32, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{0, 0};
         int[] dstShapes = new int[]{4, 10};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(243, targetBuffer.getElemIntAt(0));
         assertEquals(244, targetBuffer.getElemIntAt(1));
         assertEquals(252, targetBuffer.getElemIntAt(9));
@@ -334,15 +352,17 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testCopyDataBuffer_lowerLeftCorner() {
         ProductData cacheData = createPreparedBuffer(ProductData.TYPE_UINT16, 300);
-        final int cacheWidth = 15;
         int[] srcOffsets = new int[]{19, 0};
+        int[] srcShapes = new int[]{20, 15};
+        DataBuffer dataBuffer = new DataBuffer(cacheData, srcOffsets, srcShapes);
+
 
         ProductData targetBuffer = ProductData.createInstance(ProductData.TYPE_UINT16, 100);
         final int targetWidth = 10;
         int[] dstOffsets = new int[]{0, 9};
         int[] dstShapes = new int[]{1, 1};
 
-        CacheData2D.copyDataBuffer(srcOffsets, cacheWidth, cacheData, dstOffsets, dstShapes, targetWidth, targetBuffer);
+        CacheData2D.copyDataBuffer(srcOffsets, dataBuffer, dstOffsets, dstShapes, targetWidth, targetBuffer);
         assertEquals(0, targetBuffer.getElemIntAt(0));
         assertEquals(285, targetBuffer.getElemIntAt(9));
         assertEquals(0, targetBuffer.getElemIntAt(10));
@@ -373,7 +393,7 @@ public class CacheData2DTest {
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         // size without having a buffer allocated
-        assertEquals(192, cacheData2D.getSizeInBytes());
+        assertEquals(320, cacheData2D.getSizeInBytes());
 
         // trigger reading the buffer
         final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
@@ -382,6 +402,6 @@ public class CacheData2DTest {
         cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
 
         // now with a data buffer - 100 times size of short added
-        assertEquals(392, cacheData2D.getSizeInBytes());
+        assertEquals(520, cacheData2D.getSizeInBytes());
     }
 }

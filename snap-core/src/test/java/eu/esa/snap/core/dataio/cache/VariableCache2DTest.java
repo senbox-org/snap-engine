@@ -110,16 +110,16 @@ public class VariableCache2DTest {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final VariableCache2D cache = new VariableCache2D(variableDescriptor, new MockProvider(ProductData.TYPE_FLOAT32));
 
-        assertEquals(1920, cache.getSizeInBytes());
+        assertEquals(3200, cache.getSizeInBytes());
 
         // read fake data to memory
         DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{0, 0}, new int[]{100, 50});
         cache.read(new int[]{30, 30}, new int[] {100, 50}, dataBuffer);
-        assertEquals(28320, cache.getSizeInBytes());
+        assertEquals(29600, cache.getSizeInBytes());
 
         dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{370, 30}, new int[] {100, 50});
         cache.read(new int[]{370, 30}, new int[] {100, 50}, dataBuffer);
-        assertEquals(96320, cache.getSizeInBytes());
+        assertEquals(97600, cache.getSizeInBytes());
     }
 
     private static VariableDescriptor createDescriptor(int width, int height, int tileWidth, int tileHeight) {

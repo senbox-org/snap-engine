@@ -12,11 +12,13 @@ class VariableCache2D implements VariableCache {
     private final VariableDescriptor variableDescriptor;
     private final CacheDataProvider dataProvider;
     private CacheData2D[][] cacheData;
+    private long lastAccessTime;
 
     VariableCache2D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
         this.variableDescriptor = variableDescriptor;
         this.dataProvider = dataProvider;
         cacheData = initiateCache(variableDescriptor);
+        lastAccessTime = System.currentTimeMillis();
     }
 
     static CacheData2D[][] initiateCache(VariableDescriptor variableDescriptor) {
@@ -62,6 +64,11 @@ class VariableCache2D implements VariableCache {
         return sizeInBytes;
     }
 
+    @Override
+    public long getLastAccessTime() {
+        return lastAccessTime;
+    }
+
     public void dispose() {
         for (CacheData2D[] Row : cacheData) {
             Arrays.fill(Row, null);
@@ -85,11 +92,14 @@ class VariableCache2D implements VariableCache {
             }
 
             cacheData2D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-03
+
             final int[] srcOffsets = new int[]{intersection.y - cacheData2D.getyMin(), intersection.x - cacheData2D.getxMin()};
             final int[] destOffsets = new int[]{intersection.y - targetBuffer.getOffsetY(), intersection.x - targetBuffer.getOffsetX()};
             final int[] intersectionShapes = new int[]{intersection.height, intersection.width};
             cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer.getWidth(), targetBuffer.getData());
         }
+
+        lastAccessTime = System.currentTimeMillis();
 
         return targetBuffer.getData();
     }

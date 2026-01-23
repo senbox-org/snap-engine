@@ -8,7 +8,7 @@ import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
 
 class CacheData3D implements CacheData {
 
-    private static final int SIZE_WITHOUT_BUFFER = 192;
+    private static final int SIZE_WITHOUT_BUFFER = 384;
 
     private final int xMin;
     private final int xMax;
@@ -17,9 +17,10 @@ class CacheData3D implements CacheData {
     private final int zMin;
     private final int zMax;
 
-    private ProductData data;
+    private DataBuffer data;
     private CacheContext context;
     private Cuboid boundingCuboid;
+    long timeStamp;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -28,6 +29,7 @@ class CacheData3D implements CacheData {
         yMax = yMin + shapes[1] - 1;
         zMin = offsets[0];
         zMax = zMin + shapes[0] - 1;
+        timeStamp = System.currentTimeMillis();
     }
 
     boolean intersects_z(int testMin, int testMax) {
@@ -66,6 +68,10 @@ class CacheData3D implements CacheData {
         return zMax;
     }
 
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
     boolean intersects(int[] offsets, int[] shapes) {
         final int zMin = offsets[0];
         final int zMax = offsets[0] + shapes[0] - 1;
@@ -86,9 +92,11 @@ class CacheData3D implements CacheData {
 
     // package access for testing only tb 2025-12-04
     @SuppressWarnings("SuspiciousSystemArraycopy")
-    static void copyDataBuffer(int[] offsets, int[] srcShapes, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, DataBuffer targetBuffer) {
+    static void copyDataBuffer(int[] offsets, DataBuffer cacheBuffer, int[] targetOffsets, int[] targetShapes, DataBuffer targetBuffer) {
         final int numLayers = targetShapes[0];
         final int numRows = targetShapes[1];
+
+        int[] srcShapes = cacheBuffer.getShapes();
 
         final int srcLayerSize = srcShapes[1] * srcShapes[2];    // z-layer size: y*x
         final int srcWidth = srcShapes[2];
@@ -101,7 +109,7 @@ class CacheData3D implements CacheData {
 
         for (int layer = 0; layer < numLayers; layer++) {
             for (int row = 0; row < numRows; row++) {
-                System.arraycopy(cacheBuffer.getElems(), srcOffset, targetBuffer.getData().getElems(), destOffset, rowSize);
+                System.arraycopy(cacheBuffer.getData().getElems(), srcOffset, targetBuffer.getData().getElems(), destOffset, rowSize);
                 srcOffset += srcWidth;
                 destOffset += targetWidth;
             }
@@ -112,7 +120,8 @@ class CacheData3D implements CacheData {
     public int getSizeInBytes() {
         int size = SIZE_WITHOUT_BUFFER;
         if (data != null) {
-            size += data.getNumElems() * data.getElemSize();
+            final ProductData productData = data.getData();
+            size += productData.getNumElems() * productData.getElemSize();
         }
         return size;
     }
@@ -131,14 +140,19 @@ class CacheData3D implements CacheData {
     }
 
     ProductData getData() {
-        return data;
+        if (data == null) {
+            return null;
+        }
+        return data.getData();
     }
 
     void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, DataBuffer targetData) throws IOException {
         ensureData();
 
-        int[] srcShapes = getBoundingCuboid().getShape();
-        copyDataBuffer(srcOffsets, srcShapes, data, destOffsets, intersectionShapes, targetData);
+        copyDataBuffer(srcOffsets, data, destOffsets, intersectionShapes, targetData);
+
+        // @todo 2 tb maybe encapsulate and add a notify mechanism 2026-01-23
+        timeStamp = System.currentTimeMillis();
     }
 
     private void ensureData() throws IOException {
@@ -149,7 +163,8 @@ class CacheData3D implements CacheData {
                 final Cuboid bounds = getBoundingCuboid();
                 final int[] shapes = {bounds.getDepth(), bounds.getHeight(), bounds.getWidth()};
                 final CacheDataProvider dataProvider = context.getDataProvider();
-                data = dataProvider.readCacheBlock(name, offsets, shapes, data);
+                data = dataProvider.readCacheBlock(name, offsets, shapes, null);
+                // @todo 2 tb add allocation notification - take care of threading issues! 2026-01-23
             }
         }
     }

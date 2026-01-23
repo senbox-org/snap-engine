@@ -393,7 +393,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
     @Override
-    public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
+    public DataBuffer readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) throws IOException {
         final Variable netcdfVariable = variablesMap.get(variableName);
         int rasterDataType = getRasterDataType(netcdfVariable);
 
@@ -433,7 +433,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             }
         }
 
-        return targetData;
+        return new DataBuffer(targetData, offsets, shapes);
     }
 
     private static @NonNull ProductData createTargetDataBuffer(int[] shapes, int rasterDataType) throws IOException {

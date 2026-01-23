@@ -16,7 +16,7 @@ public class VariableCache3DTest {
     public void testInitiateCache() {
         final int[] cacheSizes = {8, 10, 10};
         final int[] productSizes = new int[]{30, 100, 65};
-        VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
 
         CacheData3D[][][] data = VariableCache3D.initiateCache(descriptor);
         assertEquals(4, data.length);
@@ -56,7 +56,7 @@ public class VariableCache3DTest {
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
         final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
-        CacheData3D[][][] cacheData = cache.getCacheData();
+        final CacheData3D[][][] cacheData = cache.getCacheData();
         assertEquals(9, cacheData.length);
 
         cache.dispose();
@@ -139,13 +139,13 @@ public class VariableCache3DTest {
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
         final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
 
-        assertEquals(192000, cache.getSizeInBytes());
+        assertEquals(384000, cache.getSizeInBytes());
 
         // read fake data to memory
-        DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_UINT16, new int[]{0, 0, 0}, new int[]{10, 10, 10});
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_UINT16, new int[]{0, 0, 0}, new int[]{10, 10, 10});
         cache.read(new int[]{0, 0, 0}, new int[]{10, 10, 10}, dataBuffer);
         // default size plus 1000 * uint_16
-        assertEquals(194000, cache.getSizeInBytes());
+        assertEquals(386000, cache.getSizeInBytes());
     }
 
     static VariableDescriptor createDescriptor(int[] productSizes, int[] cacheSizes) {

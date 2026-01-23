@@ -34,7 +34,7 @@ class MockProvider implements CacheDataProvider {
     }
 
     @Override
-    public ProductData readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) {
+    public DataBuffer readCacheBlock(String variableName, int[] offsets, int[] shapes, ProductData targetData) {
         int numElems;
         if (shapes.length == 2) {
             numElems = shapes[0] * shapes[1];
@@ -48,6 +48,6 @@ class MockProvider implements CacheDataProvider {
         for (int i = 0; i<  productData.getNumElems(); i++) {
             productData.setElemIntAt(i, i);
         }
-        return productData;
+        return new DataBuffer(productData, offsets, shapes);
     }
 }

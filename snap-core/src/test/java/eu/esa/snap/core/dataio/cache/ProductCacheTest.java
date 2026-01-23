@@ -25,7 +25,7 @@ public class ProductCacheTest {
         DataBuffer dataBuffer = new DataBuffer(targetBuffer, offsets, shapes);
         productCache.read("whatever", offsets, shapes, dataBuffer);
 
-        assertEquals(1568, productCache.getSizeInBytes());
+        assertEquals(2080, productCache.getSizeInBytes());
 
         // trigger reading the lower right tile
         targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 20);
@@ -34,7 +34,7 @@ public class ProductCacheTest {
         dataBuffer = new DataBuffer(targetBuffer, offsets, shapes);
         productCache.read("whatever", offsets, shapes, dataBuffer);
 
-        assertEquals(2368, productCache.getSizeInBytes());
+        assertEquals(2880, productCache.getSizeInBytes());
 
         productCache.dispose();
         assertEquals(0, productCache.getSizeInBytes());

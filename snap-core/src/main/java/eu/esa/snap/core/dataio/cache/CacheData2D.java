@@ -9,14 +9,14 @@ import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
 
 class CacheData2D implements CacheData {
 
-    private static final int SIZE_WITHOUT_BUFFER = 192;
+    private static final int SIZE_WITHOUT_BUFFER = 320;
 
     private final int xMin;
     private final int xMax;
     private final int yMin;
     private final int yMax;
 
-    private ProductData data;
+    private DataBuffer data;
     private Rectangle boundingRect;
     private CacheContext context;
 
@@ -70,35 +70,40 @@ class CacheData2D implements CacheData {
 
     // only for testing tb 2025-12-09
     ProductData getData() {
-        return data;
+        if (data == null) {
+            return null;
+        }
+        return data.getData();
     }
 
     void copyData(int[] offsets, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) throws IOException {
         ensureData();
 
-        final int cacheWidth = getBoundingRect().width;
-        copyDataBuffer(offsets, cacheWidth, data, targetOffsets, targetShapes, targetWidth, targetData);
+        copyDataBuffer(offsets, data, targetOffsets, targetShapes, targetWidth, targetData);
     }
 
     @Override
     public int getSizeInBytes() {
         int size = SIZE_WITHOUT_BUFFER;
         if (data != null) {
-            size += data.getNumElems() * data.getElemSize();
+            final ProductData productData = data.getData();
+            size += productData.getNumElems() * productData.getElemSize();
         }
         return size;
     }
 
     @SuppressWarnings("SuspiciousSystemArraycopy")
     // package access for testing only tb 2025-12-04
-    static void copyDataBuffer(int[] offsets, int srcWidth, ProductData cacheBuffer, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) {
+    static void copyDataBuffer(int[] offsets, DataBuffer cacheBuffer, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) {
         final int numRows = targetShapes[0];
         final int numCols = targetShapes[1];
+
+        final int srcWidth = cacheBuffer.getWidth();
 
         int srcOffset = offsets[0] * srcWidth + offsets[1];
         int destOffset = targetOffsets[0] * targetWidth + targetOffsets[1];
         for (int line = 0; line < numRows; line++) {
-            System.arraycopy(cacheBuffer.getElems(), srcOffset, targetData.getElems(), destOffset, numCols);
+            System.arraycopy(cacheBuffer.getData().getElems(), srcOffset, targetData.getElems(), destOffset, numCols);
             srcOffset += srcWidth;
             destOffset += targetWidth;
         }
@@ -112,7 +117,7 @@ class CacheData2D implements CacheData {
                 final Rectangle bounds = getBoundingRect();
                 final int[] shapes = {bounds.height, bounds.width};
                 final CacheDataProvider dataProvider = context.getDataProvider();
-                data = dataProvider.readCacheBlock(name, offsets, shapes, data);
+                data = dataProvider.readCacheBlock(name, offsets, shapes, null);
             }
         }
     }

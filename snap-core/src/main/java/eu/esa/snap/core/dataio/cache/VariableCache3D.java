@@ -11,12 +11,15 @@ class VariableCache3D implements VariableCache {
     private CacheData3D[][][] cacheData;
     private final CacheDataProvider dataProvider;
     private final VariableDescriptor variableDescriptor;
+    private long lastAccessTime;
 
     VariableCache3D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
         this.dataProvider = dataProvider;
         this.variableDescriptor = variableDescriptor;
 
         cacheData = initiateCache(variableDescriptor);
+
+        lastAccessTime = System.currentTimeMillis();
     }
 
     // only for testing tb 2025-12-18
@@ -108,6 +111,11 @@ class VariableCache3D implements VariableCache {
         return sizeInBytes;
     }
 
+    @Override
+    public long getLastAccessTime() {
+        return lastAccessTime;
+    }
+
     public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
@@ -147,6 +155,9 @@ class VariableCache3D implements VariableCache {
 
             cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer);
         }
+
+        lastAccessTime = System.currentTimeMillis();
+
         return targetBuffer.getData();
     }
 }
