@@ -445,9 +445,7 @@ public class GDALProductReader extends AbstractProductReader {
                         // add the mask
                         String maskName = computeMaskName(gdalBand, bandName);
                         if (maskName != null && (subsetDef == null || subsetDef.isNodeAccepted(maskName))) {
-                            String expression = maskName.startsWith("nodata_")
-                                                ? String.format("feq('%s.raw',%f)", bandName, product.getBand(bandName).getNoDataValue())
-                                                : bandName;
+                            String expression = computeExpression(bandName, maskName, productBand.getNoDataValue());
                             Mask mask = Mask.BandMathsType.create(maskName, maskName, productBounds.width, productBounds.height,
                                                                   expression, Color.white, 0.5);
                             ProductUtils.copyGeoCoding(productBand, mask);
@@ -459,6 +457,12 @@ public class GDALProductReader extends AbstractProductReader {
             product.setNumResolutionsMax(maximumResolutionCount);
             return product;
         }
+    }
+
+    public static String computeExpression(String bandName, String maskName, double bandNoDataValue){
+        return maskName.startsWith("nodata_")
+                ? String.format("feq('%s.raw',%f)", bandName, bandNoDataValue)
+                : bandName;
     }
 
     private void closeResources() {
