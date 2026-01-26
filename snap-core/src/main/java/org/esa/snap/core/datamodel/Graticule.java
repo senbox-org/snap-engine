@@ -102,6 +102,7 @@ public class Graticule {
     private final boolean _flippedLats;
 
     private static final double NULL_LON = -99999;
+    private static final double NULL_LAT = -99999;
 
     public enum TextLocation {
         NORTH,
@@ -2539,72 +2540,79 @@ public class Graticule {
 
 
 
-    static GeoSpanLon combineLonSpans(GeoSpanLon lonSpanRow1, GeoSpanLon lonSpanRow2) {
+    static boolean validLonSpan(GeoSpanLon geoSpanLon) {
 
-        // todo
-        GeoSpanLon lonSpanCombined = new GeoSpanLon();
+        boolean valid = (geoSpanLon.lonSpan > 0 && validLon(geoSpanLon.firstLon) && validLon(geoSpanLon.lastLon));
 
-
-        if (lonSpanRow2 != null && lonSpanRow2.lonSpan > 0 && lonSpanRow2.firstLon != NULL_LON && lonSpanRow2.lastLon != NULL_LON) {
-
-            if (lonSpanRow1 == null || lonSpanRow1.lonSpan == 0 || lonSpanRow1.firstLon == NULL_LON || lonSpanRow1.lastLon == NULL_LON) {
-
-                lonSpanCombined.firstLon = lonSpanRow2.firstLon;
-                lonSpanCombined.lastLon = lonSpanRow2.lastLon;
-                lonSpanCombined.lonSpan = lonSpanRow2.lonSpan;
-                lonSpanCombined.datelineCrossed = lonSpanRow2.datelineCrossed;
-                lonSpanCombined.ascending = lonSpanRow2.ascending;
-                lonSpanCombined.descending = lonSpanRow2.descending;
-                lonSpanCombined.northPoleCrossed = lonSpanRow2.northPoleCrossed;
-                lonSpanCombined.southPoleCrossed = lonSpanRow2.southPoleCrossed;
+        return valid;
+    }
 
 
+
+    static GeoSpanLon combineLonSpans(GeoSpanLon lonSpanCombined, GeoSpanLon lonSpanNewRow) {
+
+
+        boolean newRowValid = validLonSpan(lonSpanNewRow);
+        if (!newRowValid) {
+            return lonSpanCombined;
+        }
+
+
+        boolean combinedValid = validLonSpan(lonSpanCombined);
+        if (!combinedValid) {
+            GeoSpanLon.GeoSpanLonUpdate(lonSpanCombined, lonSpanNewRow);
+            return lonSpanCombined;
+        }
+
+
+        // At this point both entries are valid so now combine then
+
+
+        if (lonSpanCombined.datelineCrossed == lonSpanNewRow.datelineCrossed) {
+
+            if (lonSpanCombined.ascending && !lonSpanCombined.descending) {
+                lonSpanCombined.firstLon = Math.min(lonSpanNewRow.firstLon, lonSpanCombined.firstLon);
+                lonSpanCombined.lastLon = Math.max(lonSpanNewRow.lastLon, lonSpanCombined.lastLon);
+            } else if (!lonSpanCombined.ascending && lonSpanCombined.descending) {
+                lonSpanCombined.firstLon = Math.max(lonSpanNewRow.firstLon, lonSpanCombined.firstLon);
+                lonSpanCombined.lastLon = Math.min(lonSpanNewRow.lastLon, lonSpanCombined.lastLon);
             } else {
-                if (lonSpanRow1.datelineCrossed == lonSpanRow2.datelineCrossed) {
-
-                    if (lonSpanRow1.ascending && !lonSpanRow1.descending) {
-                        lonSpanCombined.firstLon = Math.min(lonSpanRow2.firstLon, lonSpanRow1.firstLon);
-                        lonSpanCombined.lastLon = Math.max(lonSpanRow2.lastLon, lonSpanRow1.lastLon);
-                    } else if (!lonSpanRow1.ascending && lonSpanRow1.descending) {
-                        lonSpanCombined.firstLon = Math.max(lonSpanRow2.firstLon, lonSpanRow1.firstLon);
-                        lonSpanCombined.lastLon = Math.min(lonSpanRow2.lastLon, lonSpanRow1.lastLon);
-                    } else {
-                        // handle this tougher case or leave with just center values
-                    }
-
-                } else {
-                    // handle this tougher case or leave with just center values
-                }
-
-                lonSpanCombined.lonSpan = Math.max(lonSpanRow2.lonSpan, lonSpanRow1.lonSpan);
-
-
-                if (lonSpanRow1.ascending || lonSpanRow2.ascending) {
-                    lonSpanCombined.ascending = true;
-                }
-
-                if (lonSpanRow1.descending || lonSpanRow2.descending) {
-                    lonSpanCombined.descending = true;
-                }
-
-                if (lonSpanRow1.northPoleCrossed || lonSpanRow2.northPoleCrossed) {
-                    lonSpanCombined.northPoleCrossed = true;
-                }
-
-                if (lonSpanRow1.southPoleCrossed || lonSpanRow2.southPoleCrossed) {
-                    lonSpanCombined.southPoleCrossed = true;
-                }
-
-                if (lonSpanRow1.datelineCrossed || lonSpanRow2.datelineCrossed) {
-                    lonSpanCombined.datelineCrossed = true;
-                }
+                // handle this tougher case or leave with just center values
             }
 
-
+        } else {
+            // handle this tougher case or leave with just center values
         }
+
+        lonSpanCombined.lonSpan = Math.max(lonSpanNewRow.lonSpan, lonSpanCombined.lonSpan);
+
+
+
+
+        if (lonSpanCombined.datelineCrossed || lonSpanNewRow.datelineCrossed) {
+            lonSpanCombined.datelineCrossed = true;
+        }
+
+        if (lonSpanCombined.ascending || lonSpanNewRow.ascending) {
+            lonSpanCombined.ascending = true;
+        }
+
+        if (lonSpanCombined.descending || lonSpanNewRow.descending) {
+            lonSpanCombined.descending = true;
+        }
+
+        if (lonSpanCombined.northPoleCrossed || lonSpanNewRow.northPoleCrossed) {
+            lonSpanCombined.northPoleCrossed = true;
+        }
+
+        if (lonSpanCombined.southPoleCrossed || lonSpanNewRow.southPoleCrossed) {
+            lonSpanCombined.southPoleCrossed = true;
+        }
+
 
         return lonSpanCombined;
     }
+
 
 
 
@@ -2727,29 +2735,29 @@ public class Graticule {
 
         }
 
-        if (ascending && descending) {
-            // likely pole crossing
-            degreesSpanTotal = 360;
-        } else if (ascending) {
+        if (ascending && !descending) {
             if (!datelineCrossed) {
                 degreesSpanTotal = lastLon - firstLon;
             } else {
                 // dateline crossed
                 degreesSpanTotal = lastLon - firstLon + 360;
             }
-        } else if (descending) {
+        } else if (!ascending && descending) {
             if (!datelineCrossed) {
                 degreesSpanTotal = firstLon - lastLon;
             } else {
                 // dateline crossed
                 degreesSpanTotal = firstLon - lastLon + 360;
             }
+        } else {
+            // likely pole crossing
+            degreesSpanTotal = 360;
         }
 
 
         degreesSpanTotal =  Math.abs(degreesSpanTotal);
 
-        if (degreesSpanTotal > 0 && firstLon != NULL_LON && lastLon != NULL_LON) {
+        if (firstLon != NULL_LON && lastLon != NULL_LON) {
             GeoSpanLon geoSpanLon = new GeoSpanLon(firstLon, lastLon, degreesSpanTotal, datelineCrossed, northPoleCrossed, southPoleCrossed, ascending, descending);
             return geoSpanLon;
         } else {
@@ -2760,7 +2768,7 @@ public class Graticule {
 
 
 
-    static GeoSpanLat getLatSpan(GeoCoding geoCoding, RasterDataNode dataNode, int pixelXCurr) {
+    static GeoSpanLat getLatSpanForColumnAtPixelX(GeoCoding geoCoding, RasterDataNode dataNode, int pixelXCurr) {
         PixelPos pixelPosPrev = null;
         GeoPos geoPosPrev = null;
         double degreesSpanTotal = 0.0;
@@ -2866,7 +2874,7 @@ public class Graticule {
         }
 
 
-        if (degreesSpanTotal > 0 && firstLat != NULL_LAT && lastLat != NULL_LAT) {
+        if (firstLat != NULL_LAT && lastLat != NULL_LAT) {
             GeoSpanLat geoSpanLat = new GeoSpanLat(firstLat, lastLat, minLat, maxLat, degreesSpanTotal, northPoleCrossed, southPoleCrossed, ascending, descending);
             return geoSpanLat;
         } else {
@@ -2882,317 +2890,229 @@ public class Graticule {
 
 
 
+
+
     static GeoSpan getGeoSpanScene(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+
+        GeoSpan geoSpan = new GeoSpan();
         
-        double NULL_LON = -99999;
 
-        double lonSpan = 0;
-        double firstLon = NULL_LON;
-        double lastLon = NULL_LON;
-        boolean lonAscending = false;
-        boolean lonDescending = false;
+        GeoSpanLon lonSpanScene = getLonSpan(geoCoding, dataNode);
 
-        boolean datelineCrossed = false;
+        if (lonSpanScene != null && lonSpanScene.lonSpan > 0) {
+            GeoSpanLat latSpanScene = getLatSpan(geoCoding, dataNode);
+
+            if (latSpanScene != null && latSpanScene.latSpan > 0) {
+                // todo add in a field to geospan regarding whether corner pixels have valid geo (this could be used for auto-border since if corner pixels are invalid a border might not be desired)
+
+                geoSpan.lonSpan = lonSpanScene.lonSpan;
+                geoSpan.firstLon = lonSpanScene.firstLon;
+                geoSpan.lastLon = lonSpanScene.lastLon;
+                geoSpan.lonAscending = lonSpanScene.ascending;
+                geoSpan.lonDescending = lonSpanScene.descending;
+
+                geoSpan.datelineCrossed = lonSpanScene.datelineCrossed;
+
+                geoSpan.latSpan = latSpanScene.latSpan;
+                geoSpan.bottomLat = latSpanScene.firstLat;
+                geoSpan.topLat = latSpanScene.lastLat;
+                geoSpan.minLat = latSpanScene.minLat;
+                geoSpan.maxLat = latSpanScene.maxLat;
+                geoSpan.latAscending = latSpanScene.ascending;
+                geoSpan.latDescending = latSpanScene.descending;
+
+                geoSpan.northPoleCrossed = lonSpanScene.northPoleCrossed || latSpanScene.northPoleCrossed;
+                geoSpan.southPoleCrossed = lonSpanScene.southPoleCrossed || latSpanScene.southPoleCrossed;
 
 
-        double NULL_LAT = -99999;
+                geoSpan.equidistantCylindrical = isEquidistantCylindrical(geoCoding,  dataNode);
 
-        double latSpan = 0;
-        double firstLat = NULL_LAT;
-        double lastLat = NULL_LAT;
-        double minLat = NULL_LAT;
-        double maxLat = NULL_LAT;
-        boolean latAscending = false;
-        boolean latDescending = false;
-
-        boolean northPoleCrossed = false;
-        boolean southPoleCrossed = false;
+            }
+        }
 
 
-        boolean isEquidistantCylindrical = isEquidistantCylindrical(geoCoding,  dataNode);
+        return geoSpan;
+    }
 
 
-        // todo  write method  getLatSpan(geoCoding,  dataNode);
-        GeoSpanLon lonSpanScene = getLonSpan(geoCoding,  dataNode);
-        GeoSpanLat latSpanScene = getLatSpan(geoCoding,  dataNode);
-        if (lonSpanScene != null && latSpanScene != null) {
-            lonSpan = lonSpanScene.lonSpan;
-            firstLon = lonSpanScene.firstLon;
-            lastLon = lonSpanScene.lastLon;
-            lonAscending = lonSpanScene.ascending;
-            lonDescending = lonSpanScene.descending;
 
-            datelineCrossed = lonSpanScene.datelineCrossed;
 
-            latSpan = latSpanScene.latSpan;
-            firstLat = latSpanScene.firstLat;
-            lastLat = latSpanScene.lastLat;
-            minLat = latSpanScene.minLat;
-            maxLat = latSpanScene.maxLat;
-            latAscending = latSpanScene.ascending;
-            latDescending = latSpanScene.descending;
+    static boolean validLatSpan(GeoSpanLat geoSpanLat) {
 
-            northPoleCrossed = lonSpanScene.northPoleCrossed || latSpanScene.northPoleCrossed;
-            southPoleCrossed = lonSpanScene.southPoleCrossed || latSpanScene.southPoleCrossed;
+        boolean valid = (geoSpanLat.latSpan > 0 &&
+                validLat(geoSpanLat.firstLat) &&
+                validLat(geoSpanLat.lastLat) &&
+                validLat(geoSpanLat.minLat) &&
+                validLat(geoSpanLat.maxLat));
+
+        return valid;
+
+    }
+
+
+
+    static GeoSpanLat combineLatSpans(GeoSpanLat latSpanCombined, GeoSpanLat latSpanNewColumn) {
+
+
+        boolean newRowValid =  validLatSpan(latSpanNewColumn);
+        if (!newRowValid) {
+            return latSpanCombined;
+        }
+
+
+        boolean combinedValid = validLatSpan(latSpanCombined);
+        if (!combinedValid) {
+            GeoSpanLat.GeoSpanLatUpdate(latSpanCombined, latSpanNewColumn);
+            return latSpanCombined;
         }
 
 
 
-
-        // todo add in a field to geospan regarding whether corner pixels have valid geo (this could be used for auto-border since if corner pixels are invalid a border might not be desired)
-        GeoSpan geoSpan = new GeoSpan(firstLon,
-                lastLon,
-                lonSpan,
-                datelineCrossed,
-                firstLat,
-                lastLat,
-                minLat,
-                maxLat,
-                latSpan,
-                northPoleCrossed,
-                southPoleCrossed,
-                lonAscending,
-                lonDescending,
-                latAscending,
-                latDescending,
-                isEquidistantCylindrical);
-        return  geoSpan;
+        // At this point both entries are valid
 
 
+
+        if ((latSpanCombined.northPoleCrossed == latSpanNewColumn.northPoleCrossed) &&
+                (latSpanCombined.southPoleCrossed == latSpanNewColumn.southPoleCrossed)) {
+
+            latSpanCombined.firstLat = Math.min(latSpanNewColumn.firstLat, latSpanCombined.firstLat);
+
+            // todo add into GeoSceneInfo directions of "ASCENDING, DESCENDING, ASCENDING_THEN_DESCENDING, DESCENDING_THEN_ASCENDING"
+            if (latSpanCombined.ascending && !latSpanCombined.descending) {
+                latSpanCombined.firstLat = Math.min(latSpanNewColumn.firstLat, latSpanCombined.firstLat);
+                latSpanCombined.lastLat = Math.max(latSpanNewColumn.lastLat, latSpanCombined.lastLat);
+            } else if (!latSpanCombined.ascending && latSpanCombined.descending) {
+                latSpanCombined.firstLat = Math.max(latSpanNewColumn.firstLat, latSpanCombined.firstLat);
+                latSpanCombined.lastLat = Math.min(latSpanNewColumn.lastLat, latSpanCombined.lastLat);
+            } else {
+                // handle this tougher case or leave with just center values
+                latSpanCombined.firstLat = Math.min(latSpanNewColumn.firstLat, latSpanCombined.firstLat);
+                latSpanCombined.lastLat = Math.min(latSpanNewColumn.lastLat, latSpanCombined.lastLat);
+            }
+
+            latSpanCombined.latSpan = Math.max(latSpanNewColumn.latSpan, latSpanCombined.latSpan);
+        } else {
+            // handle this tougher case or leave with just center values
+        }
+
+        latSpanCombined.latSpan = Math.max(latSpanNewColumn.latSpan, latSpanCombined.latSpan);
+
+
+
+        latSpanCombined.minLat = Math.min(latSpanNewColumn.minLat, latSpanCombined.minLat);
+        if (latSpanCombined.minLat < -90) {
+            latSpanCombined.minLat = -90;
+        }
+
+
+        latSpanCombined.maxLat = Math.max(latSpanNewColumn.maxLat, latSpanCombined.maxLat);
+        if (latSpanCombined.maxLat > 90) {
+            latSpanCombined.maxLat = 90;
+        }
+
+
+        if (latSpanCombined.ascending || latSpanNewColumn.ascending) {
+            latSpanCombined.ascending = true;
+        }
+
+        if (latSpanCombined.descending || latSpanNewColumn.descending) {
+            latSpanCombined.descending = true;
+        }
+
+
+        if (latSpanCombined.northPoleCrossed || latSpanNewColumn.northPoleCrossed) {
+            latSpanCombined.northPoleCrossed = true;
+        }
+
+        if (latSpanCombined.southPoleCrossed || latSpanNewColumn.southPoleCrossed) {
+            latSpanCombined.southPoleCrossed = true;
+        }
+
+
+        return latSpanCombined;
     }
-
 
 
 
 
     static GeoSpanLat getLatSpan(GeoCoding geoCoding, RasterDataNode dataNode) {
 
-        double NULL_LAT = -99999;
-
-        double latSpanIndividual = 0;
-        double latSpan = 0;
-        double firstLat = NULL_LAT;
-        double lastLat = NULL_LAT;
-        boolean ascending = false;
-        boolean descending = false;
-
-        boolean northPoleCrossed = false;
-        boolean southPoleCrossed = false;
-        
-        double minLat = NULL_LAT;
-        double maxLat = NULL_LAT;
+        GeoSpanLat latSpanCombined = new GeoSpanLat();
 
 
-
-        int pixelXCenter = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
-        GeoSpanLat latSpanCenter = getLatSpan(geoCoding,  dataNode,  pixelXCenter);
-        if (latSpanCenter != null) {
-            ascending = latSpanCenter.ascending;
-            descending = latSpanCenter.descending;
-            northPoleCrossed = latSpanCenter.northPoleCrossed;
-            southPoleCrossed = latSpanCenter.southPoleCrossed;
-            
-            if (validLat(latSpanCenter.minLat)) {
-                minLat = latSpanCenter.minLat;
-            }
-
-            if (validLat(latSpanCenter.maxLat)) {
-                maxLat = latSpanCenter.maxLat;
-            }
-
-            if (validLat(latSpanCenter.firstLat)) {
-                firstLat = latSpanCenter.firstLat;
-            }
-            
-            if (validLat(latSpanCenter.lastLat)) {
-                lastLat = latSpanCenter.lastLat;
-            }
-            
-            latSpanIndividual = latSpanCenter.latSpan;
+        int pixelXCenterColumn = (int) Math.floor ((dataNode.getRasterWidth()-1) * 0.5);
+//        int centerWidth = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
+        GeoSpanLat latSpanCenterColumn = getLatSpanForColumnAtPixelX(geoCoding,  dataNode,  pixelXCenterColumn);
+        if (latSpanCenterColumn != null) {
+            combineLatSpans(latSpanCombined, latSpanCenterColumn);
         }
 
 
 
+        // todo testing new
+        int pixelXNearLeftColumnPixelX = (int) Math.floor ((dataNode.getRasterWidth()-1) * 0.25);
+        GeoSpanLat latSpanNearLeftColumn = getLatSpanForColumnAtPixelX(geoCoding,  dataNode,  pixelXNearLeftColumnPixelX);
+        if (latSpanNearLeftColumn != null) {
+            combineLatSpans(latSpanCombined, latSpanNearLeftColumn);
+        }
 
-
-        int pixelXLeft = 0;
-        GeoSpanLat latSpanLeft = getLatSpan(geoCoding,  dataNode,  pixelXLeft);
-        if (latSpanLeft != null) {
-            if (validLat(latSpanLeft.minLat)) {
-                if (minLat == NULL_LAT || minLat > latSpanLeft.minLat) {
-                    minLat = latSpanLeft.minLat;
-                }
-            }
-
-            if (validLat(latSpanLeft.maxLat)) {
-                if (maxLat == NULL_LAT || maxLat < latSpanLeft.maxLat) {
-                    maxLat = latSpanLeft.maxLat;
-                }
-            }
-
-
-
-            if (!ascending && latSpanLeft.ascending) {
-                ascending = true;
-            }
-            if (!descending && latSpanLeft.descending) {
-                descending = true;
-            }
-
-            if (latSpanLeft.northPoleCrossed && !northPoleCrossed) {
-                northPoleCrossed = true;
-            }
-            if (latSpanLeft.southPoleCrossed && !southPoleCrossed) {
-                southPoleCrossed = true;
-            }
-
-            
-            if (northPoleCrossed == latSpanLeft.northPoleCrossed) {
-                if (firstLat == NULL_LAT && validLat(latSpanLeft.firstLat)) {
-                    firstLat = latSpanLeft.firstLat;
-                }
-
-                if (lastLat == NULL_LAT && validLat(latSpanLeft.lastLat)) {
-                    lastLat = latSpanLeft.lastLat;
-                }
-
-                
-                
-//                firstLat = Math.min(latSpanLeft.firstLat, firstLat);
-
-
-                // todo add into GeoSceneInfo directions of "ASCENDING, DESCENDING, ASCENDING_THEN_DESCENDING, DESCENDING_THEN_ASCENDING" 
-                if (ascending && !descending) {
-                    firstLat = Math.min(latSpanLeft.firstLat, firstLat);
-                    lastLat = Math.max(latSpanLeft.lastLat, lastLat);
-                } else if (!ascending && descending) {
-                    firstLat = Math.max(latSpanLeft.firstLat, firstLat);
-                    lastLat = Math.min(latSpanLeft.lastLat, lastLat);
-                } else {
-                    // handle this tougher case or leave with just center values
-                    firstLat = Math.min(latSpanLeft.firstLat, firstLat);
-                    lastLat = Math.min(latSpanLeft.lastLat, lastLat);
-                }
-                
-
-                latSpanIndividual = Math.max(latSpanLeft.latSpan, latSpanIndividual);
-            } else {
-                // handle this tougher case or leave with just center values
-            }
-
-
-
-            latSpanIndividual = Math.max(latSpanLeft.latSpan, latSpanIndividual);
+        // todo testing new
+        int pixelXNearRightColumnPixelX = (int) Math.floor ((dataNode.getRasterWidth()-1) * 0.75);
+        GeoSpanLat latSpanNearRightColumn = getLatSpanForColumnAtPixelX(geoCoding,  dataNode,  pixelXNearRightColumnPixelX);
+        if (latSpanNearLeftColumn != null) {
+            combineLatSpans(latSpanCombined, latSpanNearRightColumn);
         }
 
 
 
-        int pixelXRight = dataNode.getRasterWidth() - 1;
-        GeoSpanLat latSpanRight = getLatSpan(geoCoding,  dataNode,  pixelXRight);
-        if (latSpanRight != null) {
-            if (validLat(latSpanRight.minLat)) {
-                if (minLat == NULL_LAT || minLat > latSpanRight.minLat) {
-                    minLat = latSpanRight.minLat;
-                }
-            }
-
-            if (validLat(latSpanRight.maxLat)) {
-                if (maxLat == NULL_LAT || maxLat < latSpanRight.maxLat) {
-                    maxLat = latSpanRight.maxLat;
-                }
-            }
+        int pixelXLeftColumn = 0;
+        GeoSpanLat latSpanLeftColumn = getLatSpanForColumnAtPixelX(geoCoding,  dataNode,  pixelXLeftColumn);
+        if (latSpanLeftColumn != null) {
+            combineLatSpans(latSpanCombined, latSpanLeftColumn);
+        }
 
 
-
-            if (!ascending && latSpanRight.ascending) {
-                ascending = true;
-            }
-            if (!descending && latSpanRight.descending) {
-                descending = true;
-            }
-
-            if (latSpanRight.northPoleCrossed && !northPoleCrossed) {
-                northPoleCrossed = true;
-            }
-            if (latSpanRight.southPoleCrossed && !southPoleCrossed) {
-                southPoleCrossed = true;
-            }
-
-
-            if (northPoleCrossed == latSpanRight.northPoleCrossed) {
-                if (firstLat == NULL_LAT && validLat(latSpanRight.firstLat)) {
-                    firstLat = latSpanRight.firstLat;
-                }
-
-                if (lastLat == NULL_LAT && validLat(latSpanRight.lastLat)) {
-                    lastLat = latSpanRight.lastLat;
-                }
-
-
-
-//                firstLat = Math.min(latSpanRight.firstLat, firstLat);
-
-
-                // todo add into GeoSceneInfo directions of "ASCENDING, DESCENDING, ASCENDING_THEN_DESCENDING, DESCENDING_THEN_ASCENDING" 
-                if (ascending && !descending) {
-                    firstLat = Math.min(latSpanRight.firstLat, firstLat);
-                    lastLat = Math.max(latSpanRight.lastLat, lastLat);
-                } else if (!ascending && descending) {
-                    firstLat = Math.max(latSpanRight.firstLat, firstLat);
-                    lastLat = Math.min(latSpanRight.lastLat, lastLat);
-                } else {
-                    // handle this tougher case or leave with just center values
-                    firstLat = Math.min(latSpanRight.firstLat, firstLat);
-                    lastLat = Math.min(latSpanRight.lastLat, lastLat);
-                }
-
-
-                latSpanIndividual = Math.max(latSpanRight.latSpan, latSpanIndividual);
-            } else {
-                // handle this tougher case or leave with just center values
-            }
-
-
-
-            latSpanIndividual = Math.max(latSpanRight.latSpan, latSpanIndividual);
+        int pixelXRightColumn = dataNode.getRasterWidth() - 1;
+        GeoSpanLat latSpanRightColumn = getLatSpanForColumnAtPixelX(geoCoding,  dataNode,  pixelXRightColumn);
+        if (latSpanRightColumn != null) {
+            combineLatSpans(latSpanCombined, latSpanRightColumn);
         }
 
 
 
+        if (validLatSpan(latSpanCombined)) {
 
-        if (firstLat != NULL_LAT && lastLat != NULL_LAT) {
-            if (northPoleCrossed) {
-                latSpan = Math.abs(90 - lastLat) + Math.abs(90 - firstLat);
-            } else if (southPoleCrossed) {
+            // Calculate latSpan and compare against largest individual column latSpan
+
+            double latSpanCalculated = 0;
+
+            if (latSpanCombined.northPoleCrossed) {
+                latSpanCalculated = Math.abs(90 - latSpanCombined.lastLat) + Math.abs(90 - latSpanCombined.firstLat);
+            } else if (latSpanCombined.southPoleCrossed) {
                 // todo fix
-                latSpan = Math.abs(-90 - lastLat) + Math.abs(-90 - firstLat);
+                latSpanCalculated = Math.abs(-90 - latSpanCombined.lastLat) + Math.abs(-90 - latSpanCombined.firstLat);
 
             } else {
-                if (ascending) {
-                    latSpan = lastLat - firstLat;
+                if (latSpanCombined.ascending) {
+                    latSpanCalculated = latSpanCombined.lastLat - latSpanCombined.firstLat;
                 } else {
-                    latSpan = firstLat - lastLat;
+                    latSpanCalculated = latSpanCombined.firstLat - latSpanCombined.lastLat;
                 }
             }
 
-        } else {
-            latSpan = NULL_LAT;
+
+            latSpanCombined.latSpan = Math.max(latSpanCombined.latSpan, latSpanCalculated);
+
         }
 
 
-        latSpan = Math.max(latSpanIndividual, latSpan);
 
-
-//        latSpan = Math.max(latSpan, latSpanIndividual);
-
-
-        if (firstLat != NULL_LAT && lastLat != NULL_LAT) {
-            GeoSpanLat geoSpanLat = new GeoSpanLat(firstLat, lastLat, minLat, maxLat, latSpan, northPoleCrossed, southPoleCrossed, ascending, descending);
-            return geoSpanLat;
+        if (validLatSpan(latSpanCombined)) {
+            return latSpanCombined;
         } else {
             return null;
         }
-
 
     }
 
@@ -3204,67 +3124,80 @@ public class Graticule {
         GeoSpanLon lonSpanCombined = new GeoSpanLon();
 
 
-        int pixelYCenter = (int) Math.floor(dataNode.getRasterHeight() / 2.0);
-        GeoSpanLon lonSpanCenter = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYCenter);
-
-        if (lonSpanCenter != null) {
-            lonSpanCombined = combineLonSpans(lonSpanCombined, lonSpanCenter);
+        int pixelYCenterRow = (int) Math.floor ((dataNode.getRasterHeight()-1) * 0.5);
+//        int centerHeight = (int) Math.floor(dataNode.getRasterHeight() * 0.5);
+        GeoSpanLon lonSpanCenterRow = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYCenterRow);
+        if (lonSpanCenterRow != null) {
+            combineLonSpans(lonSpanCombined, lonSpanCenterRow);
         }
 
 
-        int pixelYTop = 0;
-        GeoSpanLon lonSpanTop = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYTop);
+        // todo testing new
+        int pixelYNearTopRow = (int) Math.floor ((dataNode.getRasterHeight()-1) * 0.25);
+        GeoSpanLon lonSpanNearTopRow = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYNearTopRow);
+        if (lonSpanNearTopRow != null) {
+            combineLonSpans(lonSpanCombined, lonSpanNearTopRow);
+        }
 
-        if (lonSpanTop != null) {
-            lonSpanCombined = combineLonSpans(lonSpanCombined, lonSpanTop);
+        // todo testing new
+        int pixelYNearBottomRow = (int) Math.floor ((dataNode.getRasterHeight()-1) * 0.75);
+        GeoSpanLon lonSpanNearBottomRow = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYNearBottomRow);
+        if (lonSpanNearTopRow != null) {
+            combineLonSpans(lonSpanCombined, lonSpanNearBottomRow);
         }
 
 
 
-        int pixelYBottom = dataNode.getRasterHeight()-1;
-        GeoSpanLon lonSpanBottom = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYBottom);
+        int pixelYTopRow = 0;
+        GeoSpanLon lonSpanTopRow = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYTopRow);
+        if (lonSpanTopRow != null) {
+            combineLonSpans(lonSpanCombined, lonSpanTopRow);
+        }
 
-        if (lonSpanBottom != null) {
-            lonSpanCombined = combineLonSpans(lonSpanCombined, lonSpanBottom);
+
+        int pixelYBottomRow = dataNode.getRasterHeight()-1;
+        GeoSpanLon lonSpanBottomRow = getLonSpanForRowAtPixelY(geoCoding,  dataNode,  pixelYBottomRow);
+        if (lonSpanBottomRow != null) {
+            combineLonSpans(lonSpanCombined, lonSpanBottomRow);
         }
 
 
 
-        // evaluate and do a sanity check in case the lonSpan should be increased beyond the max of the individual row max
-        // this could be the case in a tilted scene such as a level-2 file
-        // do this by evaluating the first lon and last lon.
+        if (validLonSpan(lonSpanCombined)) {
 
-        if (lonSpanCombined.lonSpan > 0) {
+            // Calculate lonSpan and compare against largest individual row lonSpan
+
             double lonSpanCalculated = 0;
 
-            // perform another lonSpan calculation
-            if (lonSpanCombined.ascending && lonSpanCombined.descending) {
-                // likely pole crossing
-                lonSpanCalculated = 360;
-            } else if (lonSpanCombined.ascending) {
+            if (lonSpanCombined.ascending && !lonSpanCombined.descending) {
                 if (!lonSpanCombined.datelineCrossed) {
                     lonSpanCalculated = lonSpanCombined.lastLon - lonSpanCombined.firstLon;
                 } else {
                     // dateline crossed
                     lonSpanCalculated = lonSpanCombined.lastLon - lonSpanCombined.firstLon + 360;
                 }
-            } else if (lonSpanCombined.descending) {
+            } else if (!lonSpanCombined.ascending && lonSpanCombined.descending) {
                 if (!lonSpanCombined.datelineCrossed) {
                     lonSpanCalculated = lonSpanCombined.firstLon - lonSpanCombined.lastLon;
                 } else {
                     // dateline crossed
                     lonSpanCalculated = lonSpanCombined.firstLon - lonSpanCombined.lastLon + 360;
                 }
+            } else {
+                // likely pole crossing
+                lonSpanCalculated = 360;
             }
 
-            lonSpanCalculated = Math.abs(lonSpanCalculated);
+            lonSpanCalculated =  Math.abs(lonSpanCalculated);
+
 
             lonSpanCombined.lonSpan = Math.max(lonSpanCalculated, lonSpanCombined.lonSpan);
+
         }
 
 
 
-        if (lonSpanCombined != null && lonSpanCombined.lonSpan > 0 && lonSpanCombined.firstLon != NULL_LON && lonSpanCombined.lastLon != NULL_LON) {
+        if (validLonSpan(lonSpanCombined)) {
             return lonSpanCombined;
         } else {
             return null;
@@ -3369,7 +3302,6 @@ public class Graticule {
         boolean descending;
 
 
-
         public GeoSpanLon() {
             this.firstLon = NULL_LON;
             this.lastLon = NULL_LON;
@@ -3398,7 +3330,45 @@ public class Graticule {
             this.ascending = ascending;
             this.descending = descending;
         }
+
+
+        public static GeoSpanLon GeoSpanLonCopy(GeoSpanLon geoSpanLonOriginal) {
+
+            if (geoSpanLonOriginal == null) {
+                return null;
+            }
+
+            GeoSpanLon geoSpanLonCopy = new GeoSpanLon();
+
+            geoSpanLonCopy.firstLon = geoSpanLonOriginal.firstLon;
+            geoSpanLonCopy.lastLon = geoSpanLonOriginal.lastLon;
+            geoSpanLonCopy.lonSpan = geoSpanLonOriginal.lonSpan;
+            geoSpanLonCopy.datelineCrossed = geoSpanLonOriginal.datelineCrossed;
+            geoSpanLonCopy.northPoleCrossed = geoSpanLonOriginal.northPoleCrossed;
+            geoSpanLonCopy.southPoleCrossed = geoSpanLonOriginal.southPoleCrossed;
+            geoSpanLonCopy.ascending = geoSpanLonOriginal.ascending;
+            geoSpanLonCopy.descending = geoSpanLonOriginal.descending;
+
+            return geoSpanLonCopy;
+        }
+
+        public static void GeoSpanLonUpdate(GeoSpanLon geoSpanLonTarget,  GeoSpanLon geoSpanLonOriginal) {
+
+            if (geoSpanLonOriginal == null) {
+                return;
+            }
+
+            geoSpanLonTarget.firstLon = geoSpanLonOriginal.firstLon;
+            geoSpanLonTarget.lastLon = geoSpanLonOriginal.lastLon;
+            geoSpanLonTarget.lonSpan = geoSpanLonOriginal.lonSpan;
+            geoSpanLonTarget.datelineCrossed = geoSpanLonOriginal.datelineCrossed;
+            geoSpanLonTarget.northPoleCrossed = geoSpanLonOriginal.northPoleCrossed;
+            geoSpanLonTarget.southPoleCrossed = geoSpanLonOriginal.southPoleCrossed;
+            geoSpanLonTarget.ascending = geoSpanLonOriginal.ascending;
+            geoSpanLonTarget.descending = geoSpanLonOriginal.descending;
+        }
     }
+
 
 
     static class GeoSpanLat {
@@ -3412,6 +3382,17 @@ public class Graticule {
         boolean ascending;
         boolean descending;
 
+        public GeoSpanLat() {
+            this.firstLat = NULL_LAT;
+            this.lastLat = NULL_LAT;
+            this.minLat = NULL_LAT;
+            this.maxLat = NULL_LAT;
+            this.latSpan = 0;
+            this.northPoleCrossed = false;
+            this.southPoleCrossed = false;
+            this.ascending = false;
+            this.descending = false;
+        }
 
         public GeoSpanLat(double firstLat,
                           double lastLat,
@@ -3432,8 +3413,48 @@ public class Graticule {
             this.ascending = ascending;
             this.descending = descending;
         }
-    }
 
+        public static GeoSpanLat GeoSpanLatCopy(GeoSpanLat geoSpanLatOriginal) {
+
+            if (geoSpanLatOriginal == null) {
+                return null;
+            }
+
+            GeoSpanLat geoSpanLatCopy = new GeoSpanLat();
+
+            geoSpanLatCopy.firstLat = geoSpanLatOriginal.firstLat;
+            geoSpanLatCopy.lastLat = geoSpanLatOriginal.lastLat;
+            geoSpanLatCopy.minLat = geoSpanLatOriginal.minLat;
+            geoSpanLatCopy.maxLat = geoSpanLatOriginal.maxLat;
+            geoSpanLatCopy.latSpan = geoSpanLatOriginal.latSpan;
+            geoSpanLatCopy.northPoleCrossed = geoSpanLatOriginal.northPoleCrossed;
+            geoSpanLatCopy.southPoleCrossed = geoSpanLatOriginal.southPoleCrossed;
+            geoSpanLatCopy.ascending = geoSpanLatOriginal.ascending;
+            geoSpanLatCopy.descending = geoSpanLatOriginal.descending;
+
+            return geoSpanLatCopy;
+        }
+
+
+        public static void GeoSpanLatUpdate(GeoSpanLat geoSpanLatTarget,  GeoSpanLat geoSpanLatOriginal) {
+
+            if (geoSpanLatOriginal == null) {
+                return;
+            }
+
+            geoSpanLatTarget.firstLat = geoSpanLatOriginal.firstLat;
+            geoSpanLatTarget.lastLat = geoSpanLatOriginal.lastLat;
+            geoSpanLatTarget.minLat = geoSpanLatOriginal.minLat;
+            geoSpanLatTarget.maxLat = geoSpanLatOriginal.maxLat;
+            geoSpanLatTarget.latSpan = geoSpanLatOriginal.latSpan;
+            geoSpanLatTarget.northPoleCrossed = geoSpanLatOriginal.northPoleCrossed;
+            geoSpanLatTarget.southPoleCrossed = geoSpanLatOriginal.southPoleCrossed;
+            geoSpanLatTarget.ascending = geoSpanLatOriginal.ascending;
+            geoSpanLatTarget.descending = geoSpanLatOriginal.descending;
+        }
+
+
+    }
 
 
     static class GeoSpan {
@@ -3457,6 +3478,30 @@ public class Graticule {
         boolean latDescending;
 
         boolean equidistantCylindrical;
+
+
+        public GeoSpan() {
+            firstLon = NULL_LON;
+            lastLon = NULL_LON;
+            lonSpan = 0;
+
+            bottomLat = NULL_LAT;
+            topLat = NULL_LAT;
+            minLat = NULL_LAT;
+            maxLat = NULL_LAT;
+            latSpan = 0;
+
+            datelineCrossed = false;
+            northPoleCrossed = false;
+            southPoleCrossed = false;
+
+            lonAscending = false;
+            lonDescending = false;
+            latAscending = false;
+            latDescending = false;
+
+            equidistantCylindrical = false;
+        }
 
 
         public GeoSpan(double firstLon,
