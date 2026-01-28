@@ -2469,6 +2469,8 @@ public class Graticule {
         return equidistantCylindrical;
     }
 
+
+
     static boolean isParallelLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr) {
 
         boolean equidistantCylindrical = true;
@@ -2536,6 +2538,170 @@ public class Graticule {
 
         return equidistantCylindrical;
     }
+
+
+
+
+
+
+    static CoordsPolar getCoordsPolar(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+        boolean initialLatValueFound = false;
+
+        GeoPos northernmostGeoPos = null;
+        PixelPos northernmostPixelPos = null;
+        GeoPos southernmostGeoPos = null;
+        PixelPos southernmostPixelPos = null;
+
+        boolean northernmostPixelOnRasterEdge = true;
+        boolean southernmostPixelOnRasterEdge = true;
+
+        boolean northPoleCrossingDetected = false;
+        boolean southPoleCrossingDetected = false;
+
+
+        for (double pixelXCurr=0.0 ; pixelXCurr <= (dataNode.getRasterWidth()-1) ; pixelXCurr++ ) {
+            for (double pixelYCurr=0.0 ; pixelYCurr <= (dataNode.getRasterHeight()-1) ; pixelYCurr++ ) {
+
+                PixelPos pixelPosCurr = new PixelPos(pixelXCurr, pixelYCurr);
+                GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+
+                if (validLat(geoPosCurr.lat) && validLon(geoPosCurr.lon)) {
+                    if (initialLatValueFound) {
+                        if (geoPosCurr.lat >  northernmostGeoPos.lat) {
+                            northernmostGeoPos = geoPosCurr;
+                            northernmostPixelPos = pixelPosCurr;
+                        }
+                        if (geoPosCurr.lat < southernmostGeoPos.lat) {
+                            southernmostGeoPos = geoPosCurr;
+                            southernmostPixelPos = pixelPosCurr;
+                        }
+                    } else {
+                        northernmostGeoPos = geoPosCurr;
+                        northernmostPixelPos = pixelPosCurr;
+                        southernmostGeoPos = geoPosCurr;
+                        southernmostPixelPos = pixelPosCurr;
+                        initialLatValueFound = true;
+                    }
+                }
+            }
+        }
+
+
+
+
+        // Determine whether scene crosses North Pole
+        // Note that likely no pixel in the scene will actually equal 90 degrees lat
+        // So this is done by comparing pixels which surround the northernmost pixel and then extrapolating to determine whether it is close to 90 degrees lat
+        // Sets boolean northPoleCrossingDetected
+
+        if (northernmostPixelPos != null) {
+            if (northernmostPixelPos.x > 0 && northernmostPixelPos.x < (dataNode.getRasterWidth() - 1) &&
+                    northernmostPixelPos.y > 0 && northernmostPixelPos.y < (dataNode.getRasterHeight() - 1)) {
+
+                northernmostPixelOnRasterEdge = false;
+
+                double largestDeltaLat = 0;
+                int validPixFound = 0;
+
+                for (double pixelXCurr = northernmostPixelPos.x - 1; pixelXCurr <= northernmostPixelPos.x - 1; pixelXCurr++) {
+                    for (double pixelYCurr = northernmostPixelPos.y - 1; pixelYCurr <= northernmostPixelPos.y - 1; pixelYCurr++) {
+
+                        PixelPos pixelPosCurr = new PixelPos(pixelXCurr, pixelYCurr);
+                        GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+                        if (validLat(geoPosCurr.lat) && validLon(geoPosCurr.lon)) {
+                            double deltaLat = Math.abs(northernmostGeoPos.lat - geoPosCurr.lat);
+
+                            if (deltaLat > largestDeltaLat) {
+                                largestDeltaLat = deltaLat;
+                                validPixFound++;
+                            }
+                        }
+                    }
+                }
+
+
+                if (validPixFound > 0) {
+                    // increase the delta with a an extra buffer
+                    double buffer = 2;
+                    largestDeltaLat = buffer * largestDeltaLat;
+                } else {
+                    // force a delta as 10% of scene lat expanse
+                    largestDeltaLat = Math.abs(northernmostGeoPos.lat - southernmostGeoPos.lat) * 0.1;
+                }
+
+                if ((northernmostGeoPos.lat + largestDeltaLat) >= 90) {
+                    northPoleCrossingDetected = true;
+                }
+            }
+        }
+
+
+
+        // Determine whether scene crosses South Pole
+        // Note that likely no pixel in the scene will actually equal -90 degrees lat
+        // So this is done by comparing pixels which surround the southernmost pixel and then extrapolating to determine whether it is close to -90 degrees lat
+        // Sets boolean southPoleCrossingDetected
+
+        if (southernmostPixelPos != null) {
+            if (southernmostPixelPos.x > 0 && southernmostPixelPos.x < (dataNode.getRasterWidth() - 1) &&
+                    southernmostPixelPos.y > 0 && southernmostPixelPos.y < (dataNode.getRasterHeight() - 1)) {
+
+                southernmostPixelOnRasterEdge = false;
+
+                double largestDeltaLat = 0;
+                int validPixFound = 0;
+
+                for (double pixelXCurr = southernmostPixelPos.x - 1; pixelXCurr <= southernmostPixelPos.x - 1; pixelXCurr++) {
+                    for (double pixelYCurr = southernmostPixelPos.y - 1; pixelYCurr <= southernmostPixelPos.y - 1; pixelYCurr++) {
+
+                        PixelPos pixelPosCurr = new PixelPos(pixelXCurr, pixelYCurr);
+                        GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+                        if (validLat(geoPosCurr.lat) && validLon(geoPosCurr.lon)) {
+                            double deltaLat = Math.abs(southernmostGeoPos.lat - geoPosCurr.lat);
+
+                            if (deltaLat > largestDeltaLat) {
+                                largestDeltaLat = deltaLat;
+                                validPixFound++;
+                            }
+                        }
+                    }
+                }
+
+
+                if (validPixFound > 0) {
+                    // increase the delta with a an extra buffer
+                    double buffer = 2;
+                    largestDeltaLat = buffer * largestDeltaLat;
+                } else {
+                    // force a delta as 10% of scene lat expanse
+                    largestDeltaLat = Math.abs(northernmostGeoPos.lat - southernmostGeoPos.lat) * 0.1;
+                }
+
+                if ((southernmostGeoPos.lat - largestDeltaLat) <= -90) {
+                    southPoleCrossingDetected = true;
+                }
+            }
+        }
+        
+
+
+        if (northernmostGeoPos != null && northernmostPixelPos != null && southernmostGeoPos != null && southernmostPixelPos != null) {
+            Coord northernmostCoord = new Coord(northernmostGeoPos, northernmostPixelPos);
+            Coord southernmostCoord = new Coord(southernmostGeoPos, southernmostPixelPos);
+
+            return  new CoordsPolar(northernmostCoord, southernmostCoord, northernmostPixelOnRasterEdge, southernmostPixelOnRasterEdge, northPoleCrossingDetected, southPoleCrossingDetected);
+
+        } else {
+            return null;
+        }
+
+    }
+
+
 
 
 
@@ -2898,6 +3064,8 @@ public class Graticule {
         GeoSpan geoSpan = new GeoSpan();
         
 
+        boolean forceCheckForPolar = false;
+
         GeoSpanLon lonSpanScene = getLonSpan(geoCoding, dataNode);
 
         if (lonSpanScene != null && lonSpanScene.lonSpan > 0) {
@@ -2928,8 +3096,38 @@ public class Graticule {
 
                 geoSpan.equidistantCylindrical = isEquidistantCylindrical(geoCoding,  dataNode);
 
+                if (geoSpan.northPoleCrossed || geoSpan.southPoleCrossed || forceCheckForPolar) {
+                    geoSpan.coordsPolar = getCoordsPolar(geoCoding, dataNode);
+
+                    if (geoSpan.coordsPolar != null) {
+                        if (geoSpan.coordsPolar.coordNorthernmost != null) {
+
+                            if (geoSpan.coordsPolar.coordNorthernmost.geoPos != null) {
+                                geoSpan.maxLat = geoSpan.coordsPolar.coordNorthernmost.geoPos.lat;
+                            }
+
+                            if (geoSpan.coordsPolar.northPoleCrossingDetected) {
+                                geoSpan.northPoleCrossed = true;
+                            }
+                        }
+
+                        if (geoSpan.coordsPolar.coordSouthernmost != null) {
+
+                            if (geoSpan.coordsPolar.coordSouthernmost.geoPos != null) {
+                                geoSpan.minLat = geoSpan.coordsPolar.coordSouthernmost.geoPos.lat;
+                            }
+
+                            if (geoSpan.coordsPolar.southPoleCrossingDetected) {
+                                geoSpan.southPoleCrossed = true;
+                            }
+                        }
+
+                    }
+                }
+
             }
         }
+
 
 
         return geoSpan;
@@ -3291,6 +3489,34 @@ public class Graticule {
     }
 
 
+
+    static class CoordsPolar {
+
+        Coord coordNorthernmost;
+        Coord coordSouthernmost;
+        boolean northernmostPixelOnRasterEdge;
+        boolean southernmostPixelOnRasterEdge;
+        boolean northPoleCrossingDetected;
+        boolean southPoleCrossingDetected;
+
+        public CoordsPolar(Coord coordNorthernmost,
+                           Coord coordSouthernmost,
+                           boolean northernmostPixelOnRasterEdge,
+                           boolean southernmostPixelOnRasterEdge,
+                           boolean northPoleCrossingDetected,
+                           boolean southPoleCrossingDetected) {
+            this.coordNorthernmost = coordNorthernmost;
+            this.coordSouthernmost = coordSouthernmost;
+            this.northernmostPixelOnRasterEdge = northernmostPixelOnRasterEdge;
+            this.southernmostPixelOnRasterEdge = southernmostPixelOnRasterEdge;
+            this.northPoleCrossingDetected = northPoleCrossingDetected;
+            this.southPoleCrossingDetected = southPoleCrossingDetected;
+        }
+    }
+
+
+
+
     static class GeoSpanLon {
         double firstLon;
         double lastLon;
@@ -3457,6 +3683,10 @@ public class Graticule {
     }
 
 
+
+
+
+
     static class GeoSpan {
         double firstLon;
         double lastLon;
@@ -3478,6 +3708,7 @@ public class Graticule {
         boolean latDescending;
 
         boolean equidistantCylindrical;
+        CoordsPolar coordsPolar;
 
 
         public GeoSpan() {
@@ -3501,6 +3732,7 @@ public class Graticule {
             latDescending = false;
 
             equidistantCylindrical = false;
+            coordsPolar = null;
         }
 
 
@@ -3519,7 +3751,8 @@ public class Graticule {
                        boolean lonDescending,
                        boolean latAscending,
                        boolean latDescending,
-                       boolean equidistantCylindrical) {
+                       boolean equidistantCylindrical,
+                       CoordsPolar coordsPolar) {
             this.firstLon = firstLon;
             this.lastLon = lastLon;
             this.lonSpan = lonSpan;
@@ -3536,6 +3769,7 @@ public class Graticule {
             this.latAscending = latAscending;
             this.latDescending = latDescending;
             this.equidistantCylindrical = equidistantCylindrical;
+            this.coordsPolar = coordsPolar;
 
         }
     }
