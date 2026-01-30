@@ -11,6 +11,12 @@ public class GeoInfo {
         DESCENDING
     }
 
+    public enum EQUIDISTANT_CYLINDRICAL {
+        TRUE,
+        FALSE,
+        UNABLE_TO_DETERMINE
+    }
+
     public double firstLon = NULL_LON;
     public double lastLon = NULL_LON;
     public double lonSpan = 0;
@@ -899,58 +905,86 @@ public class GeoInfo {
 
     private static boolean isEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode) {
 
-        boolean equidistantCylindrical = true;
-        boolean test;
+        EQUIDISTANT_CYLINDRICAL test;
+        int parallelTrueCount = 0;
+        int meridianTrueCount = 0;
 
-        int centerParallel = (int) Math.floor(dataNode.getRasterHeight() / 2.0);
-        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, centerParallel);
-        if (!test) {
+        double CIRCUMFERENCE_EARTH = 40075;  // km
+        double toleranceMeters = 1;  // 1 meters
+        double toleranceDegrees = toleranceMeters*360/(1000*CIRCUMFERENCE_EARTH);
+
+
+//        int centerParallel = (int) Math.floor(dataNode.getRasterHeight() / 2.0);
+        int centerParallel = (int) Math.floor((dataNode.getRasterHeight() - 1) * 0.5);
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, centerParallel, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            parallelTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
             return false;
         }
 
-        int nearTopParallel = 5;
-        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearTopParallel);
-        if (!test) {
+//        int nearTopParallel = 5;
+        int nearTopParallel = (int) Math.floor((dataNode.getRasterHeight() - 1) * 0.25);
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearTopParallel, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            parallelTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
             return false;
         }
 
-        int nearBottomParallel = dataNode.getRasterHeight() - 5;
-        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearBottomParallel);
-        if (!test) {
-            return false;
-        }
-
-
-        int centerMeridian = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
-        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, centerMeridian);
-        if (!test) {
-            return false;
-        }
-
-        int nearLeftMeridian = 5;
-        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearLeftMeridian);
-        if (!test) {
-            return false;
-        }
-
-        int nearRightMeridian = dataNode.getRasterHeight() - 5;
-        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearRightMeridian);
-        if (!test) {
+//        int nearBottomParallel = dataNode.getRasterHeight() - 5;
+        int nearBottomParallel = (int) Math.floor((dataNode.getRasterHeight() - 1) * 0.75);
+        test = isParallelLineEquidistantCylindrical(geoCoding, dataNode, nearBottomParallel, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            parallelTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
             return false;
         }
 
 
-        return equidistantCylindrical;
+//        int centerMeridian = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
+        int centerMeridian = (int) Math.floor((dataNode.getRasterWidth() - 1) * 0.5);
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, centerMeridian, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            meridianTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
+            return false;
+        }
+
+//        int nearLeftMeridian = 5;
+        int nearLeftMeridian = (int) Math.floor((dataNode.getRasterWidth() - 1) * 0.25);
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearLeftMeridian, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            meridianTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
+            return false;
+        }
+
+//        int nearRightMeridian = dataNode.getRasterHeight() - 5;
+        int nearRightMeridian = (int) Math.floor((dataNode.getRasterWidth() - 1) * 0.75);
+        test = isMeridianLineEquidistantCylindrical(geoCoding, dataNode, nearRightMeridian, toleranceDegrees);
+        if (test == EQUIDISTANT_CYLINDRICAL.TRUE) {
+            meridianTrueCount++;
+        } else if (test == EQUIDISTANT_CYLINDRICAL.FALSE) {
+            return false;
+        }
+
+        if (parallelTrueCount > 1 && meridianTrueCount > 1) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
 
-    private static boolean isParallelLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr) {
+    private static EQUIDISTANT_CYLINDRICAL isParallelLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr, double toleranceDegrees) {
 
-        boolean equidistantCylindrical = true;
+        int validPixelsTestedCount = 0;
 
         if (pixelYCurr < 0 || pixelYCurr >= dataNode.getRasterHeight()) {
             //ensure valid index
-            return true;
+            return EQUIDISTANT_CYLINDRICAL.UNABLE_TO_DETERMINE;
         }
 
         double NULL_LAT = -99999;
@@ -964,8 +998,10 @@ public class GeoInfo {
 
             if (validLat(geoPosCurr.lat)) {
                 if (initialLatValueFound) {
-                    if (geoPosCurr.lat != validLatValue) {
-                        return false;
+                    validPixelsTestedCount++;
+
+                    if (geoPosCurr.lat < (validLatValue-toleranceDegrees) || geoPosCurr.lat > (validLatValue+toleranceDegrees)) {
+                        return EQUIDISTANT_CYLINDRICAL.FALSE;
                     }
                 } else {
                     validLatValue = geoPosCurr.lat;
@@ -974,17 +1010,21 @@ public class GeoInfo {
             }
         }
 
-        return equidistantCylindrical;
+        if (validPixelsTestedCount >= 10) {
+            return EQUIDISTANT_CYLINDRICAL.TRUE;
+        } else {
+            return EQUIDISTANT_CYLINDRICAL.UNABLE_TO_DETERMINE;
+        }
     }
 
 
-    private static boolean isMeridianLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelXCurr) {
+    private static EQUIDISTANT_CYLINDRICAL isMeridianLineEquidistantCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelXCurr, double toleranceDegrees) {
 
-        boolean equidistantCylindrical = true;
+        int validPixelsTestedCount = 0;
 
         if (pixelXCurr < 0 || pixelXCurr >= dataNode.getRasterWidth()) {
             //ensure valid index
-            return true;
+            return EQUIDISTANT_CYLINDRICAL.UNABLE_TO_DETERMINE;
         }
 
         double NULL_LON = -99999;
@@ -998,8 +1038,10 @@ public class GeoInfo {
 
             if (validLat(geoPosCurr.lon)) {
                 if (initialLonValueFound) {
-                    if (geoPosCurr.lon != validLonValue) {
-                        return false;
+                    validPixelsTestedCount++;
+
+                    if (geoPosCurr.lon < (validLonValue-toleranceDegrees) || geoPosCurr.lon > (validLonValue+toleranceDegrees)) {
+                        return EQUIDISTANT_CYLINDRICAL.FALSE;
                     }
                 } else {
                     validLonValue = geoPosCurr.lon;
@@ -1008,7 +1050,11 @@ public class GeoInfo {
             }
         }
 
-        return equidistantCylindrical;
+        if (validPixelsTestedCount >= 10) {
+            return EQUIDISTANT_CYLINDRICAL.TRUE;
+        } else {
+            return EQUIDISTANT_CYLINDRICAL.UNABLE_TO_DETERMINE;
+        }
     }
 
 
