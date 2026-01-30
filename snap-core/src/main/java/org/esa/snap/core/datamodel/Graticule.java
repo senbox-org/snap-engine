@@ -306,6 +306,7 @@ public class Graticule {
             tolerance = 0;
         }
 
+
         if (geoInfo.equidistantCylindrical) {
             // todo should this be 1?
             // todo also add option in GUI to enforce/disable this?
@@ -534,6 +535,7 @@ public class Graticule {
 
                             if (!found) {
                                 // need to look back for actual intersection
+                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
                                 if (pixelX > 0) {
                                     for (double innerPixel = prevPixel; innerPixel < pixelX; innerPixel += 1.0) {
                                         Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
@@ -551,6 +553,7 @@ public class Graticule {
                         } else {
                             if (found && !finished) {
                                 // need to look back for actual intersection
+                                // Start with current pixel and step backward until first valid geo pixel is found
                                 if (pixelX <= (raster.getRasterWidth() - 1)) {
                                     for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
                                         Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
@@ -971,6 +974,10 @@ public class Graticule {
 
             Coord[] coords;
 
+            boolean found = false;
+            boolean finished = false;
+            double prevPixel = -1;
+
             for (double step = 0; step <= minorSteps; step += 1.0) {
 
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / minorSteps);
@@ -978,8 +985,46 @@ public class Graticule {
                     coords = getCoordMeridian(meridianLon, pixelY, raster, tolerance, interpolate);
                     if (coords != null) {
                         if (coords[0] != null) {
+
+                            if (!found) {
+                                // need to look back for actual intersection
+                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
+                                if (pixelY > 0) {
+                                    for (double innerPixel = prevPixel; innerPixel < pixelY; innerPixel += 1.0) {
+                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                meridian1.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                found = true;
+                            }
+
                             meridian1.add(coords[0]);
+                        } else {
+                            if (found && !finished) {
+                                // need to look back for actual intersection
+                                // Start with current pixel and step backward until first valid geo pixel is found
+                                if (pixelY <= (raster.getRasterHeight() - 1)) {
+                                    for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
+                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                meridian1.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                finished = true;
+                            }
                         }
+
+
                         if (coords[1] != null) {
                             meridian2.add(coords[1]);
                         }
@@ -1005,8 +1050,10 @@ public class Graticule {
         }
 
 
+
         return meridiansList;
     }
+
 
 
     static Coord[] getCoordMeridian(double meridianLon,
