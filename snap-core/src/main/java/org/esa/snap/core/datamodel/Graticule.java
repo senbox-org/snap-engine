@@ -313,6 +313,8 @@ public class Graticule {
             desiredMinorSteps = 4;
         }
 
+
+
         final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, desiredMinorSteps, raster, geoInfo, tolerance, interpolate);
         final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, desiredMinorSteps, raster, geoInfo, tolerance, interpolate);
 
@@ -497,6 +499,8 @@ public class Graticule {
 
         double pixelX;
         double prevPixelX = -1;
+        boolean allowGap = false;  // todo Look more into this
+
 
 
         // todo decide whether this should be restricted
@@ -549,7 +553,9 @@ public class Graticule {
                                 }
                                 found = true;
                             }
-                            parallel1.add(coords[0]);
+                            if (!finished || allowGap) {
+                                parallel1.add(coords[0]);
+                            }
                         } else {
                             if (found && !finished) {
                                 // need to look back for actual intersection
@@ -977,12 +983,14 @@ public class Graticule {
             boolean found = false;
             boolean finished = false;
             double prevPixel = -1;
+            boolean allowGap = false;  // todo Look more into this
 
             for (double step = 0; step <= minorSteps; step += 1.0) {
 
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / minorSteps);
                 if (pixelY != prevPixelY) {
                     coords = getCoordMeridian(meridianLon, pixelY, raster, tolerance, interpolate);
+
                     if (coords != null) {
                         if (coords[0] != null) {
 
@@ -1003,7 +1011,9 @@ public class Graticule {
                                 found = true;
                             }
 
-                            meridian1.add(coords[0]);
+                            if (!finished || allowGap) {
+                                meridian1.add(coords[0]);
+                            }
                         } else {
                             if (found && !finished) {
                                 // need to look back for actual intersection
@@ -2060,9 +2070,17 @@ public class Graticule {
                 boolean allowLabel = true;
                 boolean onlyAllowLeftEdgeLabels = false;
                 // todo improve logic or add uers option to control labels
-                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowLeftEdgeLabels = true;
+//                }
+
+
+                if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
                     onlyAllowLeftEdgeLabels = true;
+                } else {
+                    onlyAllowLeftEdgeLabels = false;
                 }
+
 
                 if (onlyAllowLeftEdgeLabels) {
                     int buffer = 3;
@@ -2168,9 +2186,16 @@ public class Graticule {
                 boolean allowLabel = true;
                 boolean onlyAllowRightEdgeLabels = false;
                 // todo improve logic or add uers option to control labels
-                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowRightEdgeLabels = true;
+//                }
+
+                if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
                     onlyAllowRightEdgeLabels = true;
+                } else {
+                    onlyAllowRightEdgeLabels = false;
                 }
+
 
                 if (onlyAllowRightEdgeLabels) {
                     int buffer = 3;
@@ -2263,8 +2288,14 @@ public class Graticule {
                 boolean allowLabel = true;
                 boolean onlyAllowNorthEdgeLabels = false;
                 // todo improve logic or add uers option to control labels
-                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowNorthEdgeLabels = true;
+//                }
+
+                if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
                     onlyAllowNorthEdgeLabels = true;
+                } else {
+                    onlyAllowNorthEdgeLabels = false;
                 }
 
                 if (onlyAllowNorthEdgeLabels) {
@@ -2346,10 +2377,15 @@ public class Graticule {
                 boolean allowLabel = true;
                 boolean onlyAllowSouthEdgeLabels = false;
                 // todo improve logic or add uers option to control labels
-                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
-                    onlyAllowSouthEdgeLabels = true;
-                }
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowSouthEdgeLabels = true;
+//                }
 
+                if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
+                    onlyAllowSouthEdgeLabels = true;
+                } else {
+                    onlyAllowSouthEdgeLabels = false;
+                }
 
                 if (onlyAllowSouthEdgeLabels) {
                     int buffer = 3;
