@@ -37,6 +37,7 @@ public class GeoInfo {
     public boolean latDescending = false;
 
     public boolean equidistantCylindrical = false;
+    public boolean containsValidGeoCorners = false;
     public CoordsPolar coordsPolar = null;
 
     private boolean forceCheckForPolar = false;
@@ -86,6 +87,7 @@ public class GeoInfo {
 
 
                 equidistantCylindrical = isEquidistantCylindrical(geoCoding, dataNode);
+                containsValidGeoCorners = containsValidGeoCorners(geoCoding, dataNode);
 
                 if (northPoleCrossed || southPoleCrossed || forceCheckForPolar) {
                     coordsPolar = getCoordsPolar(geoCoding, dataNode);
@@ -140,6 +142,7 @@ public class GeoInfo {
         latDescending = false;
 
         equidistantCylindrical = false;
+        containsValidGeoCorners = false;
         coordsPolar = null;
     }
 
@@ -1060,7 +1063,7 @@ public class GeoInfo {
 
     // todo improve on this
 
-    public static boolean containsValidGeoCorners(RasterDataNode dataNode) {
+    public static boolean containsValidGeoCornersOld(RasterDataNode dataNode) {
 
         final GeoCoding geoCoding = dataNode.getGeoCoding();
         PixelPos pixelPosCurr = new PixelPos(0, 0);
@@ -1072,6 +1075,66 @@ public class GeoInfo {
             return false;
         }
     }
+
+    private static boolean isValidGeoPixel(GeoCoding geoCoding, RasterDataNode dataNode, int pixelX, int pixelY) {
+
+        boolean validGeoPixel = false;
+
+        if (geoCoding != null && dataNode != null) {
+            PixelPos pixelPosCurr = new PixelPos(pixelX, pixelY);
+            GeoPos geoPosCurr = geoCoding.getGeoPos(pixelPosCurr, null);
+
+            if (validLat(geoPosCurr.lat) && validLon(geoPosCurr.lon)) {
+                validGeoPixel = true;
+            }
+        }
+
+        return validGeoPixel;
+
+    }
+
+
+
+    private static boolean containsValidGeoCorners(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+        double fractionInsideCorner = 0.05;  // todo Maybe look further into this or allow option to set it
+
+        int topLeftCornerPixelX = (int) Math.floor((dataNode.getRasterWidth() - 1) * fractionInsideCorner);
+        int topLeftCornerPixelY = (int) Math.floor((dataNode.getRasterHeight() - 1) * fractionInsideCorner);
+
+        if (!isValidGeoPixel(geoCoding, dataNode, topLeftCornerPixelX, topLeftCornerPixelY)) {
+            return false;
+        }
+
+        int topRightCornerPixelX = (int) Math.floor((dataNode.getRasterWidth() - 1) * (1 - fractionInsideCorner));
+        int topRightCornerPixelY = (int) Math.floor((dataNode.getRasterHeight() - 1) * fractionInsideCorner);
+
+        if (!isValidGeoPixel(geoCoding, dataNode, topRightCornerPixelX, topRightCornerPixelY)) {
+            return false;
+        }
+
+
+        int bottomLeftCornerPixelX = (int) Math.floor((dataNode.getRasterWidth() - 1) * fractionInsideCorner);
+        int bottomLeftCornerPixelY = (int) Math.floor((dataNode.getRasterHeight() - 1) * (1 - fractionInsideCorner));
+
+        if (!isValidGeoPixel(geoCoding, dataNode, bottomLeftCornerPixelX, bottomLeftCornerPixelY)) {
+            return false;
+        }
+
+
+        int bottomRightCornerPixelX = (int) Math.floor((dataNode.getRasterWidth() - 1) * (1 - fractionInsideCorner));
+        int bottomRightCornerPixelY = (int) Math.floor((dataNode.getRasterHeight() - 1) * (1 - fractionInsideCorner));
+
+        if (!isValidGeoPixel(geoCoding, dataNode, bottomRightCornerPixelX, bottomRightCornerPixelY)) {
+            return false;
+        }
+
+
+        return true;
+
+    }
+
+
 
 
     public static class GeoSpanLon {
