@@ -36,6 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
@@ -76,8 +77,10 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 if (fileExtension != null) {
                     boolean extensionMatches = Arrays.stream(TIFF_FILE_EXTENSION).anyMatch(fileExtension::equalsIgnoreCase);
                     if (extensionMatches) {
-                        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(productInputFile)) {
-                            return getDecodeQualificationImpl(imageInputStream);
+                        try (InputStream fileInputStream = productPath.getFileSystem().provider().newInputStream(productPath, StandardOpenOption.READ)) {
+                            try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(fileInputStream)) {
+                                return getDecodeQualificationImpl(imageInputStream);
+                            }
                         }
                     } else if (fileExtension.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
                         return checkZipArchive(productPath);

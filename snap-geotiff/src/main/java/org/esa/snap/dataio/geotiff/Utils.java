@@ -39,9 +39,11 @@ import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,22 +59,24 @@ public class Utils {
      * @param filePath The file path
      */
     public static boolean isCOGGeoTIFF(Path filePath) throws Exception {
-        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(filePath.toFile())) {
-            final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
-            TIFFImageReader tiffReader = null;
-            while (imageReaders.hasNext()) {
-                final ImageReader reader = imageReaders.next();
-                if (reader instanceof TIFFImageReader) {
-                    tiffReader = (TIFFImageReader) reader;
-                    tiffReader.setInput(imageInputStream);
-                    break;
+        try (InputStream fileInputStream = filePath.getFileSystem().provider().newInputStream(filePath, StandardOpenOption.READ)) {
+            try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(fileInputStream)) {
+                final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
+                TIFFImageReader tiffReader = null;
+                while (imageReaders.hasNext()) {
+                    final ImageReader reader = imageReaders.next();
+                    if (reader instanceof TIFFImageReader) {
+                        tiffReader = (TIFFImageReader) reader;
+                        tiffReader.setInput(imageInputStream);
+                        break;
+                    }
                 }
-            }
-            if (tiffReader == null) {
-                throw new Exception("No tiff reader found!");
-            }
+                if (tiffReader == null) {
+                    throw new Exception("No tiff reader found!");
+                }
 
-            return isCOGGeoTIFF(tiffReader);
+                return isCOGGeoTIFF(tiffReader);
+            }
         }
     }
 
