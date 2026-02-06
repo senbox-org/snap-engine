@@ -104,10 +104,12 @@ public class GraticuleLayer extends Layer {
             graticule = Graticule.create(raster,
                     getNumGridLines(),
                     getNumMinorSteps(),
+                    getNumMinorStepsCylindrical(),
                     getGridSpacingLat(),
                     getGridSpacingLon(),
                     isInterpolate(),
                     getTolerance(),
+                    getToleranceCylindrical(),
                     isLabelsSuffix(),
                     isLabelsDecimal(),
                     spacer);
@@ -942,8 +944,10 @@ public class GraticuleLayer extends Layer {
                         propertyName.equals(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_KEY) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -976,6 +980,11 @@ public class GraticuleLayer extends Layer {
                 GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT);
     }
 
+    private int getNumMinorStepsCylindrical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME,
+                GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT);
+    }
+
     private boolean isInterpolate() {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY,
                 GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT);
@@ -984,6 +993,11 @@ public class GraticuleLayer extends Layer {
     private double getTolerance() {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_KEY,
                 GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT);
+    }
+
+    private double getToleranceCylindrical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_KEY,
+                GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT);
     }
 
 
