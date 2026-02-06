@@ -395,11 +395,18 @@ public class GraticuleLayerType extends LayerType {
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
 
     public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".smoothing.steps";
-    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 64;
+    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 128;
     public static final String PROPERTY_MINOR_STEPS_LABEL = "Smoothing Steps";
     public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of steps across full image to use for generating the line";
     public static final String PROPERTY_MINOR_STEPS_ALIAS = PROPERTY_ROOT + "minorSteps";
     public static final Class PROPERTY_MINOR_STEPS_TYPE = Integer.class;
+
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME = PROPERTY_ROOT + ".smoothing.steps.cylindrical";
+    public static final int PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT = 4;
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_LABEL = "Smoothing Steps (Cylindrical)";
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_TOOLTIP = "Number of steps across full image to use for generating the line (Cylindrical Projection)";
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "minorStepsCylindrical";
+    public static final Class PROPERTY_MINOR_STEPS_CYLINDRICAL_TYPE = Integer.class;
 
 
     public static final String PROPERTY_INTERPOLATE_KEY = PROPERTY_ROOT + ".interpolate";
@@ -410,12 +417,18 @@ public class GraticuleLayerType extends LayerType {
     public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
 
     public static final String PROPERTY_TOLERANCE_KEY = PROPERTY_ROOT + ".tolerance";
-    public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.0;
+    public static final Double PROPERTY_TOLERANCE_DEFAULT = 0.0;
     public static final String PROPERTY_TOLERANCE_LABEL = "Tolerance";
     public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to force edge pixels onto gridline (fraction of pixel side size in geospace)";
     public static final String PROPERTY_TOLERANCE_ALIAS = PROPERTY_ROOT + "tolerance";
     public static final Class PROPERTY_TOLERANCE_TYPE = Double.class;
 
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_KEY = PROPERTY_ROOT + ".tolerance_cylindrical";
+    public static final Double PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT = 1.0;
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_LABEL = "Tolerance (Cylindrical)";
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_TOOLTIP = "Tolerance (if cylindrical projection) to force edge pixels onto gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "toleranceCylindrical";
+    public static final Class PROPERTY_TOLERANCE_CYLINDRICAL_TYPE = Double.class;
 
     // Property Setting: Restore Defaults
     public static final String PROPERTY_RESTORE_DEFAULTS_NAME = PROPERTY_ROOT + ".restoreDefaults";
@@ -470,6 +483,10 @@ public class GraticuleLayerType extends LayerType {
         minorStepsModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_ALIAS);
         vc.addProperty(minorStepsModel);
 
+        final Property minorStepsCylindricalModel = Property.create(PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME, Integer.class, PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT, true);
+        minorStepsCylindricalModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_CYLINDRICAL_ALIAS);
+        vc.addProperty(minorStepsCylindricalModel);
+
         final Property interpolateModel = Property.create(PROPERTY_INTERPOLATE_KEY, Boolean.class, PROPERTY_INTERPOLATE_DEFAULT, true);
         interpolateModel.getDescriptor().setAlias(PROPERTY_INTERPOLATE_ALIAS);
         vc.addProperty(interpolateModel);
@@ -477,6 +494,10 @@ public class GraticuleLayerType extends LayerType {
         final Property toleranceModel = Property.create(PROPERTY_TOLERANCE_KEY, Double.class, PROPERTY_TOLERANCE_DEFAULT, true);
         toleranceModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_ALIAS);
         vc.addProperty(toleranceModel);
+
+        final Property toleranceCylindricalModel = Property.create(PROPERTY_TOLERANCE_CYLINDRICAL_KEY, Double.class, PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT, true);
+        toleranceCylindricalModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_CYLINDRICAL_ALIAS);
+        vc.addProperty(toleranceCylindricalModel);
 
 
 

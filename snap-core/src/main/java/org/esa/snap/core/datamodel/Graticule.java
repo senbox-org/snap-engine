@@ -229,10 +229,12 @@ public class Graticule {
     public static Graticule create(RasterDataNode raster,
                                    int desiredNumGridLines,
                                    int desiredMinorSteps,
+                                   int desiredMinorStepsCylindrical,
                                    double latMajorStep,
                                    double lonMajorStep,
                                    boolean interpolate,
                                    double tolerance,
+                                   double toleranceCylindrical,
                                    boolean formatCompass,
                                    boolean decimalFormat,
                                    int spacer) {
@@ -299,7 +301,12 @@ public class Graticule {
 
 
 
-        if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+
+
+        if (geoInfo.cylindrical) {
+            tolerance = toleranceCylindrical;
+            desiredMinorSteps = desiredMinorStepsCylindrical;
+        } else if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
             if (desiredMinorSteps < 256) {
                 desiredMinorSteps = 256;
             }
@@ -307,11 +314,11 @@ public class Graticule {
         }
 
 
-        if (geoInfo.equidistantCylindrical) {
-            // todo should this be 1?
-            // todo also add option in GUI to enforce/disable this?
-            desiredMinorSteps = 4;
-        }
+//        if (geoInfo.cylindrical) {
+//            // todo should this be 1?
+//            // todo also add option in GUI to enforce/disable this?
+//            desiredMinorSteps = 4;
+//        }
 
 
 
@@ -520,6 +527,8 @@ public class Graticule {
 
 
         for (double parallelLat : parellelsLatsArrayList) {
+            boolean twoFound = false;
+
 
             List<Coord> parallel1 = new ArrayList<>();
             List<Coord> parallel1b = new ArrayList<>();
@@ -540,7 +549,19 @@ public class Graticule {
                 if (pixelX != prevPixelX) {
 
                     coords = getCoordParallel(parallelLat, pixelX, raster, tolerance, interpolate);
+                    boolean currentIsTwo = false;
+
                     if (coords != null) {
+                        if (coords[0] != null && coords[1] != null) {
+                            twoFound = true;
+                            currentIsTwo = true;
+                        }
+
+                        if (twoFound && !currentIsTwo) {
+                            continue;
+                        }
+
+
                         if (coords[0] != null) {
 
                             if (!found) {
@@ -1029,6 +1050,8 @@ public class Graticule {
             List<Coord> meridian1b = new ArrayList<>();
             List<Coord> meridian2 = new ArrayList<>();
 
+            boolean twoFound = false;
+
             Coord[] coords;
 
             boolean found = false;
@@ -1046,9 +1069,21 @@ public class Graticule {
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / minorSteps);
                 if (pixelY != prevPixelY) {
                     coords = getCoordMeridian(meridianLon, pixelY, raster, tolerance, interpolate);
+                    boolean currentIsTwo = false;
 
                     if (coords != null) {
                         if (coords[0] != null) {
+
+                            if (coords[0] != null && coords[1] != null) {
+                                twoFound = true;
+                                currentIsTwo = true;
+                            }
+
+                            if (twoFound && !currentIsTwo) {
+                                continue;
+                            }
+
+
 
                             if (!found) {
                                 // need to look back for actual intersection
