@@ -500,6 +500,7 @@ public class Graticule {
         double pixelX;
         double prevPixelX = -1;
         boolean allowGap = false;  // todo Look more into this
+        boolean allowSecondIdenticalParallel = true;
 
 
 
@@ -521,13 +522,18 @@ public class Graticule {
         for (double parallelLat : parellelsLatsArrayList) {
 
             List<Coord> parallel1 = new ArrayList<>();
+            List<Coord> parallel1b = new ArrayList<>();
             List<Coord> parallel2 = new ArrayList<>();
 
             Coord[] coords;
 
             boolean found = false;
             boolean finished = false;
-            double prevPixel = -1;
+
+            boolean found_1b = false;
+            boolean finished_1b = false;
+
+            prevPixelX = -1;
 
             for (double step = 0; step <= minorSteps; step += 1.0) {
                 pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / minorSteps);
@@ -541,7 +547,7 @@ public class Graticule {
                                 // need to look back for actual intersection
                                 // Go back to previous pixel and step forward until first valid geo pixel encountered.
                                 if (pixelX > 0) {
-                                    for (double innerPixel = prevPixel; innerPixel < pixelX; innerPixel += 1.0) {
+                                    for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
                                         Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
                                         if (coordsInner != null) {
                                             if (coordsInner[0] != null) {
@@ -552,10 +558,30 @@ public class Graticule {
                                     }
                                 }
                                 found = true;
+                            } else if (finished && !found_1b) {
+                                // need to look back for actual intersection
+                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
+                                if (pixelX > 0) {
+                                    for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
+                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                parallel1b.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                found_1b = true;
                             }
+
+
                             if (!finished || allowGap) {
                                 parallel1.add(coords[0]);
+                            } else if (!finished_1b || allowGap) {
+                                parallel1b.add(coords[0]);
                             }
+
                         } else {
                             if (found && !finished) {
                                 // need to look back for actual intersection
@@ -573,9 +599,27 @@ public class Graticule {
                                 }
 
                                 finished = true;
+                            } else if (found_1b && !finished_1b) {
+                                // need to look back for actual intersection
+                                // Start with current pixel and step backward until first valid geo pixel is found
+                                if (pixelX <= (raster.getRasterWidth() - 1)) {
+                                    for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
+                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                parallel1b.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                finished_1b = true;
                             }
                         }
-                        if (coords[1] != null) {
+
+
+                        if (allowSecondIdenticalParallel && coords[1] != null) {
                             parallel2.add(coords[1]);
                         }
                     }
@@ -584,11 +628,16 @@ public class Graticule {
                 prevPixelX = pixelX;
             }
 
-            if (parallel1.size() > 0) {
+            
+            if (!parallel1.isEmpty()) {
                 parallelsList.add(parallel1);
             }
 
-            if (parallel2.size() > 0) {
+            if (!parallel1b.isEmpty()) {
+                parallelsList.add(parallel1b);
+            }
+
+            if (!parallel2.isEmpty()) {
                 parallelsList.add(parallel2);
             }
 
@@ -596,6 +645,7 @@ public class Graticule {
             if (parallelsCount > PARALLELS_COUNT_MAX) {
                 break;
             }
+
         }
 
 
@@ -976,14 +1026,20 @@ public class Graticule {
         for (double meridianLon : meridianLonsArrayList) {
 
             List<Coord> meridian1 = new ArrayList<>();
+            List<Coord> meridian1b = new ArrayList<>();
             List<Coord> meridian2 = new ArrayList<>();
 
             Coord[] coords;
 
             boolean found = false;
             boolean finished = false;
-            double prevPixel = -1;
+
+            boolean found_1b = false;
+            boolean finished_1b = false;
+
+            prevPixelY = -1;
             boolean allowGap = false;  // todo Look more into this
+            boolean allowSecondIdenticalMeridian = true;
 
             for (double step = 0; step <= minorSteps; step += 1.0) {
 
@@ -998,7 +1054,7 @@ public class Graticule {
                                 // need to look back for actual intersection
                                 // Go back to previous pixel and step forward until first valid geo pixel encountered.
                                 if (pixelY > 0) {
-                                    for (double innerPixel = prevPixel; innerPixel < pixelY; innerPixel += 1.0) {
+                                    for (double innerPixel = prevPixelY + 1; innerPixel < pixelY; innerPixel += 1.0) {
                                         Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
                                         if (coordsInner != null) {
                                             if (coordsInner[0] != null) {
@@ -1009,11 +1065,31 @@ public class Graticule {
                                     }
                                 }
                                 found = true;
+                            } else if (finished && !found_1b) {
+                                // need to look back for actual intersection
+                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
+                                if (pixelY > 0) {
+                                    for (double innerPixel = prevPixelY + 1; innerPixel < pixelY; innerPixel += 1.0) {
+                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                meridian1b.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                found_1b = true;
                             }
+
 
                             if (!finished || allowGap) {
                                 meridian1.add(coords[0]);
+                            } else if (!finished_1b || allowGap) {
+                                meridian1b.add(coords[0]);
                             }
+
+
                         } else {
                             if (found && !finished) {
                                 // need to look back for actual intersection
@@ -1031,11 +1107,26 @@ public class Graticule {
                                 }
 
                                 finished = true;
+                            } else if (found_1b && !finished_1b) {
+                                // need to look back for actual intersection
+                                // Start with current pixel and step backward until first valid geo pixel is found
+                                if (pixelY <= (raster.getRasterHeight() - 1)) {
+                                    for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
+                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                                        if (coordsInner != null) {
+                                            if (coordsInner[0] != null) {
+                                                meridian1b.add(coordsInner[0]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                finished_1b = true;
                             }
                         }
 
-
-                        if (coords[1] != null) {
+                        if (allowSecondIdenticalMeridian && coords[1] != null) {
                             meridian2.add(coords[1]);
                         }
                     }
@@ -1044,11 +1135,15 @@ public class Graticule {
                 prevPixelY = pixelY;
             }
 
-            if (meridian1.size() > 0) {
+            if (!meridian1.isEmpty()) {
                 meridiansList.add(meridian1);
             }
 
-            if (meridian2.size() > 0) {
+            if (!meridian1b.isEmpty()) {
+                meridiansList.add(meridian1b);
+            }
+
+            if (!meridian2.isEmpty()) {
                 meridiansList.add(meridian2);
             }
 
