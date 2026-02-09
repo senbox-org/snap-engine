@@ -34,10 +34,11 @@ public class SpectralSampleProviderImplTest {
     @STTM("SNAP-4128")
     public void test_readSamples_nullBandYieldsNaN() {
         SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
-        assertEquals(-9999.0, p.noDataValue(band), 0.0);
-
-        verify(band).getGeophysicalNoDataValue();
+        double[] out = p.readSamples(Collections.singletonList(null), 1, 2, 0);
+        assertEquals(1, out.length);
+        assertTrue(Double.isNaN(out[0]));
     }
+
 
     @Test
     @STTM("SNAP-4128")
