@@ -164,8 +164,15 @@ class CacheData3D implements CacheData {
                 final int[] shapes = {bounds.getDepth(), bounds.getHeight(), bounds.getWidth()};
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
-                // @todo 2 tb add allocation notification - take care of threading issues! 2026-01-23
+                trackAllocation();
             }
+        }
+    }
+
+    private void trackAllocation() {
+        final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
+        if (memoryUsageTracker != null) {
+            memoryUsageTracker.allocate(data.getSizeInBytes());
         }
     }
 }

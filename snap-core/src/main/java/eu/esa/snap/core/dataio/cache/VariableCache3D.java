@@ -8,9 +8,10 @@ import java.util.Arrays;
 
 class VariableCache3D implements VariableCache {
 
-    private CacheData3D[][][] cacheData;
-    private final CacheDataProvider dataProvider;
     private final VariableDescriptor variableDescriptor;
+    private CacheDataProvider dataProvider;
+    private MemoryUsageTracker memoryUsageTracker;
+    private CacheData3D[][][] cacheData;
     private long lastAccessTime;
 
     VariableCache3D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
@@ -29,13 +30,20 @@ class VariableCache3D implements VariableCache {
 
     public void dispose() {
         if (cacheData != null) {
+            final long sizeInBytes = getSizeInBytes();
+
             for (CacheData3D[][] cacheLayer : cacheData) {
                 for (CacheData3D[] cacheLine : cacheLayer) {
                     Arrays.fill(cacheLine, null);
                 }
             }
+            if (memoryUsageTracker != null) {
+                memoryUsageTracker.free(sizeInBytes);
+            }
         }
         cacheData = null;
+        dataProvider = null;
+        memoryUsageTracker = null;
     }
 
     static CacheData3D[][][] initiateCache(VariableDescriptor descriptor) {
@@ -104,7 +112,9 @@ class VariableCache3D implements VariableCache {
         for (int z = 0; z < cacheData.length; z++) {
             for (int y = 0; y < cacheData[z].length; y++) {
                 for (int x = 0; x < cacheData[z][y].length; x++) {
-                    sizeInBytes += cacheData[z][y][x].getSizeInBytes();
+                    if (cacheData[z][y][x] != null) {
+                        sizeInBytes += cacheData[z][y][x].getSizeInBytes();
+                    }
                 }
             }
         }
@@ -117,7 +127,7 @@ class VariableCache3D implements VariableCache {
     }
 
     public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
-        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
 
         final int[] target3dOffsets;
@@ -159,5 +169,10 @@ class VariableCache3D implements VariableCache {
         lastAccessTime = System.currentTimeMillis();
 
         return targetBuffer.getData();
+    }
+
+    @Override
+    public void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
+        this.memoryUsageTracker = memoryUsageTracker;
     }
 }

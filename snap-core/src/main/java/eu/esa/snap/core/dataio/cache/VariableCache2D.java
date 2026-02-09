@@ -10,7 +10,8 @@ import java.util.Arrays;
 class VariableCache2D implements VariableCache {
 
     private final VariableDescriptor variableDescriptor;
-    private final CacheDataProvider dataProvider;
+    private CacheDataProvider dataProvider;
+    private MemoryUsageTracker memoryUsageTracker;
     private CacheData2D[][] cacheData;
     private long lastAccessTime;
 
@@ -19,6 +20,11 @@ class VariableCache2D implements VariableCache {
         this.dataProvider = dataProvider;
         cacheData = initiateCache(variableDescriptor);
         lastAccessTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
+        this.memoryUsageTracker = memoryUsageTracker;
     }
 
     static CacheData2D[][] initiateCache(VariableDescriptor variableDescriptor) {
@@ -58,7 +64,9 @@ class VariableCache2D implements VariableCache {
 
         for (int i = 0; i < cacheData.length; i++) {
             for (int j = 0; j < cacheData[i].length; j++) {
-                sizeInBytes += cacheData[i][j].getSizeInBytes();
+                if (cacheData[i][j] != null) {
+                    sizeInBytes += cacheData[i][j].getSizeInBytes();
+                }
             }
         }
         return sizeInBytes;
@@ -71,13 +79,19 @@ class VariableCache2D implements VariableCache {
 
     public void dispose() {
         for (CacheData2D[] Row : cacheData) {
+            final long sizeInBytes = getSizeInBytes();
             Arrays.fill(Row, null);
+            if (memoryUsageTracker != null) {
+                memoryUsageTracker.free(sizeInBytes);
+            }
         }
         cacheData = null;
+        dataProvider = null;
+        memoryUsageTracker = null;
     }
 
     public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
-        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
         final Rectangle targetRect = new Rectangle(targetBuffer.getOffsetX(), targetBuffer.getOffsetY(), targetBuffer.getWidth(), targetBuffer.getHeight());
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
         for (CacheIndex tileLocation : tileLocations) {

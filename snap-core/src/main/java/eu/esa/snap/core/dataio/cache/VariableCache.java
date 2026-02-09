@@ -6,6 +6,8 @@ import java.io.IOException;
 
 interface VariableCache {
 
+    void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker);
+
     ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException;
 
     long getSizeInBytes();

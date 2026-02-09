@@ -4,10 +4,12 @@ class CacheContext {
 
     private final VariableDescriptor variableDescriptor;
     private final CacheDataProvider dataProvider;
+    private final MemoryUsageTracker memoryUsageTracker;
 
-    CacheContext(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
+    CacheContext(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider, MemoryUsageTracker memoryUsageTracker) {
         this.variableDescriptor = variableDescriptor;
         this.dataProvider = dataProvider;
+        this.memoryUsageTracker = memoryUsageTracker;
     }
 
     VariableDescriptor getVariableDescriptor() {
@@ -16,5 +18,9 @@ class CacheContext {
 
     CacheDataProvider getDataProvider() {
         return dataProvider;
+    }
+
+    MemoryUsageTracker getMemoryUsageTracker() {
+        return memoryUsageTracker;
     }
 }

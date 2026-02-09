@@ -373,16 +373,19 @@ public class CacheData2DTest {
     @STTM("SNAP-4121")
     public void testEnsureData() throws IOException {
         final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
         final int[] offsets = new int[]{350, 200};
         final int[] shapes = new int[]{10, 10};
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
         cacheData2D.setCacheContext(cacheContext);
         assertNull(cacheData2D.getData());
 
         cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
         assertNotNull(cacheData2D.getData());
+
+        assertEquals(200, memoryUsageTracker.getAllocatedBytes());
     }
 
     @Test
@@ -397,7 +400,7 @@ public class CacheData2DTest {
 
         // trigger reading the buffer
         final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, new TestMemoryUsageTracker());
         cacheData2D.setCacheContext(cacheContext);
         cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
 

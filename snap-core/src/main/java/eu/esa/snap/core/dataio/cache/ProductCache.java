@@ -9,16 +9,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProductCache {
 
     private final ConcurrentHashMap<String, VariableCache> variableCacheMap;
-    private final CacheDataProvider dataProvider;
+    private  CacheDataProvider dataProvider;
+    private  MemoryUsageTracker memoryUsageTracker;
 
     public ProductCache(CacheDataProvider dataProvider) {
         this.dataProvider = dataProvider;
+        memoryUsageTracker = null;
         variableCacheMap = new ConcurrentHashMap<>();
     }
 
     public void dispose() {
         variableCacheMap.values().forEach(VariableCache::dispose);
         variableCacheMap.clear();
+        dataProvider = null;
+        memoryUsageTracker = null;
     }
 
     public ProductData read(String bandName, int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
@@ -46,5 +50,9 @@ public class ProductCache {
         }
 
         return sizeInBytes;
+    }
+
+    public void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
+        this.memoryUsageTracker = memoryUsageTracker;
     }
 }

@@ -110,5 +110,19 @@ public class DataBufferTest {
         assertEquals(5, DataBuffer.getSize(new int[] {5}));
         assertEquals(50, DataBuffer.getSize(new int[] {10, 5}));
         assertEquals(450, DataBuffer.getSize(new int[] {10, 5, 9}));
+
+        assertEquals(45, DataBuffer.getSize(new int[] {-1, 5, 9}));
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testGetSizeInBytes() {
+        ProductData productData = ProductData.createInstance(ProductData.TYPE_INT16, 3000);
+        DataBuffer dataBuffer = new DataBuffer(productData, new int[]{14, 100, 200}, new int[]{10, 20, 15});
+        assertEquals(3000 * 2, dataBuffer.getSizeInBytes());
+
+        productData = ProductData.createInstance(ProductData.TYPE_FLOAT32, 800);
+        dataBuffer = new DataBuffer(productData, new int[]{14, 100, 200}, new int[]{2, 20, 20});
+        assertEquals(800 * 4, dataBuffer.getSizeInBytes());
     }
 }

@@ -64,9 +64,17 @@ public class DataBuffer {
     static int getSize(int[] shapes) {
         int size = 1;
         for (int shape : shapes) {
-            size *= shape;
+            if (shape >= 0) {
+                // not used shape-dimensions are set to -1, ignore this here
+                size *= shape;
+            }
         }
         return size;
+    }
+
+    public int getSizeInBytes() {
+        final int numElements = getSize(shapes);
+        return numElements * getData().getElemSize();
     }
 
     private void assignCoordinates(int[] offsets, int[] shapes) {

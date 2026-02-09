@@ -17,9 +17,11 @@ public class CacheContextTest {
         final VariableDescriptor variableDescriptor = new VariableDescriptor();
         variableDescriptor.name = "nasenmann";
         final MockCacheDataProvider dataProvider = new MockCacheDataProvider();
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
 
-        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider);
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
         assertSame(variableDescriptor, cacheContext.getVariableDescriptor());
+        assertSame(memoryUsageTracker, cacheContext.getMemoryUsageTracker());
         assertSame(dataProvider, cacheContext.getDataProvider());
         assertEquals("nasenmann", cacheContext.getVariableDescriptor().name);
     }

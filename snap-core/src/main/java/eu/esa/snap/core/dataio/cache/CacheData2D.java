@@ -118,7 +118,16 @@ class CacheData2D implements CacheData {
                 final int[] shapes = {bounds.height, bounds.width};
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
+
+                trackAllocation();
             }
+        }
+    }
+
+    private void trackAllocation() {
+        final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
+        if (memoryUsageTracker != null) {
+            memoryUsageTracker.allocate(data.getSizeInBytes());
         }
     }
 
