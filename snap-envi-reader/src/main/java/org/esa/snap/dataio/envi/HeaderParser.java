@@ -14,7 +14,7 @@ import java.util.Set;
  * Parses a ENVI HDR header in key value pairs.
  * see http://www.exelisvis.com/docs/ENVIHeaderFiles.html
  */
-class HeaderParser {
+public class HeaderParser {
 
     private final Map<String, String> header;
     private final Map<String, String> history;
@@ -60,7 +60,7 @@ class HeaderParser {
         return header.containsKey(key);
     }
 
-    String getString(String key) {
+    public String getString(String key) {
         if (!contains(key)) {
             throw new IllegalArgumentException("Missing mandatory header key: " + key);
         }
@@ -71,7 +71,7 @@ class HeaderParser {
         return contains(key) ? getString(key) : defaultValue;
     }
 
-    String[] getStrings(String key) {
+    public String[] getStrings(String key) {
         String v = header.get(key);
         if (v == null) {
             return new String[0];

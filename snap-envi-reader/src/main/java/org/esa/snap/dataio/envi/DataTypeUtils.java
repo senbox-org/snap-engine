@@ -2,7 +2,7 @@ package org.esa.snap.dataio.envi;
 
 import org.esa.snap.core.datamodel.ProductData;
 
-class DataTypeUtils {
+public class DataTypeUtils {
 
     private DataTypeUtils() {
     }
@@ -26,7 +26,7 @@ class DataTypeUtils {
         return ProductData.TYPE_UNDEFINED;
     }
 
-    static int getSizeInBytes(int enviTypeId) {
+    public static int getSizeInBytes(int enviTypeId) {
         if (EnviConstants.TYPE_ID_BYTE == enviTypeId) {
             return 1;
         } else if (EnviConstants.TYPE_ID_INT16 == enviTypeId ||
