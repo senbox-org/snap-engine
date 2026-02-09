@@ -213,13 +213,14 @@ public class GeoTiffProductReaderTest {
     }
 
     @Test
-    @STTM("SNAP-3888")
+    @STTM("SNAP-3888,SNAP-4103")
     public void testGetFillValue() throws IOException {
         final GeoTiffImageReader reader = mock(GeoTiffImageReader.class);
         final TIFFImageMetadata imageMetadata = mock(TIFFImageMetadata.class);
 
         final TIFFField tiffField = mock(TIFFField.class);
         when(tiffField.getAsDouble(0)).thenReturn(-8.54);
+        when(tiffField.getAsString(0)).thenReturn("-8.54");
 
         when(imageMetadata.getTIFFField(42113)).thenReturn(tiffField);  // GDAL_NO_DATA id
         when(reader.getImageMetadata()).thenReturn(imageMetadata);
