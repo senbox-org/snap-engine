@@ -1,8 +1,6 @@
 package org.esa.snap.speclib.model;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 
 public class SpectralProfile {
@@ -10,32 +8,38 @@ public class SpectralProfile {
 
     private final UUID id;
     private final String name;
-    private final double[] wavelengths;
-    private final double[] values;
-    private final String unit;
+    private final SpectralSignature signature;
+    private final Map<String, AttributeValue> attributes;
+    private final SourceRef sourceRef; // optional
 
 
-    public SpectralProfile(UUID id, String name, double[] wavelengths, double[] values, String unit) {
+    public SpectralProfile(UUID id,
+                           String name,
+                           SpectralSignature signature,
+                           Map<String, AttributeValue> attributes,
+                           SourceRef sourceRef) {
         this.id = Objects.requireNonNull(id, "id must not be null");
         this.name = Objects.requireNonNull(name, "name must not be null");
-        this.unit = Objects.requireNonNull(unit, "unit must not be null");
-
-        Objects.requireNonNull(wavelengths, "wavelengths must not be null");
-        Objects.requireNonNull(values, "values must not be null");
-
-        if (wavelengths.length != values.length) {
-            throw new IllegalArgumentException("wavelengths and values must have the same length");
-        }
-        if (wavelengths.length == 0) {
-            throw new IllegalArgumentException("wavelengths/values must not be empty");
-        }
-
-        this.wavelengths = Arrays.copyOf(wavelengths, wavelengths.length);
-        this.values = Arrays.copyOf(values, values.length);
+        this.signature = Objects.requireNonNull(signature, "signature must not be null");
+        this.attributes = Collections.unmodifiableMap(new LinkedHashMap<>(Objects.requireNonNull(attributes, "attributes must not be null")));
+        this.sourceRef = sourceRef;
     }
 
-    public static SpectralProfile create(String name, double[] wavelengths, double[] values, String unit) {
-        return new SpectralProfile(UUID.randomUUID(), name, wavelengths, values, unit);
+
+    public static SpectralProfile create(String name, SpectralSignature signature) {
+        return new SpectralProfile(UUID.randomUUID(), name, signature, Map.of(), null);
+    }
+
+    public SpectralProfile withAttribute(String key, AttributeValue value) {
+        Objects.requireNonNull(key, "key must not be null");
+        Objects.requireNonNull(value, "value must not be null");
+        Map<String, AttributeValue> copy = new LinkedHashMap<>(this.attributes);
+        copy.put(key, value);
+        return new SpectralProfile(this.id, this.name, this.signature, copy, this.sourceRef);
+    }
+
+    public SpectralProfile withSourceRef(SourceRef ref) {
+        return new SpectralProfile(this.id, this.name, this.signature, this.attributes, ref);
     }
 
     public UUID getId() {
@@ -46,26 +50,33 @@ public class SpectralProfile {
         return name;
     }
 
-    public String getUnit() {
-        return unit;
+    public SpectralSignature getSignature() {
+        return signature;
     }
 
-    public double[] getWavelengths() {
-        return Arrays.copyOf(wavelengths, wavelengths.length);
+    public Map<String, AttributeValue> getAttributes() {
+        return attributes;
+    }
+    public Optional<AttributeValue> getAttribute(String key) {
+        return Optional.ofNullable(attributes.get(key));
     }
 
-    public double[] getValues() {
-        return Arrays.copyOf(values, values.length);
+    public Optional<SourceRef> getSourceRef() {
+        return Optional.ofNullable(sourceRef);
     }
 
     public int size() {
-        return values.length;
+        return signature.size();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SpectralProfile)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SpectralProfile)) {
+            return false;
+        }
         SpectralProfile that = (SpectralProfile) o;
         return id.equals(that.id);
     }
@@ -73,5 +84,36 @@ public class SpectralProfile {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    /** Optional link to where the profile came from (pixel extraction). */
+    public static final class SourceRef {
+        private final int x;
+        private final int y;
+        private final int level;
+        private final String productId;
+
+        public SourceRef(int x, int y, int level, String productId) {
+            this.x = x;
+            this.y = y;
+            this.level = level;
+            this.productId = productId;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public int getLevel() {
+            return level;
+        }
+
+        public Optional<String> getProductId() {
+            return Optional.ofNullable(productId);
+        }
     }
 }

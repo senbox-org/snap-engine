@@ -24,6 +24,17 @@
         </dependency>
 
         <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envi-reader</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

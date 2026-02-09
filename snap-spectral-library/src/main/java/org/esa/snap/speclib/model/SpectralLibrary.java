@@ -7,27 +7,38 @@ public class SpectralLibrary {
 
 
     private final UUID id;
-    private String name;
+    private final String name;
+    private final SpectralAxis axis;
+    private final String defaultYUnit;
     private final List<SpectralProfile> profiles;
+    private final AttributeSchema schema;
 
 
-    public SpectralLibrary(UUID id, String name, List<SpectralProfile> profiles) {
+    public SpectralLibrary(UUID id,
+                           String name,
+                           SpectralAxis axis,
+                           String defaultYUnit,
+                           List<SpectralProfile> profiles,
+                           AttributeSchema schema) {
         this.id = Objects.requireNonNull(id, "id must not be null");
         this.name = Objects.requireNonNull(name, "name must not be null");
+        this.axis = Objects.requireNonNull(axis, "axis must not be null");
+        this.defaultYUnit = defaultYUnit;
+        this.schema = Objects.requireNonNull(schema, "schema must not be null");
 
         Objects.requireNonNull(profiles, "profiles must not be null");
-        this.profiles = new ArrayList<>(profiles.size());
-        for (SpectralProfile p : profiles) {
-            addProfile(p);
+        this.profiles = Collections.unmodifiableList(new ArrayList<>(profiles));
+
+        for (SpectralProfile p : this.profiles) {
+            if (p.size() != axis.size()) {
+                throw new IllegalArgumentException("profile size does not match library axis: " + p.getName());
+            }
         }
     }
 
-    public SpectralLibrary(UUID id, String name) {
-        this(id, name, List.of());
-    }
 
-    public static SpectralLibrary create(String name) {
-        return new SpectralLibrary(UUID.randomUUID(), name);
+    public static SpectralLibrary create(String name, SpectralAxis axis, String defaultYUnit) {
+        return new SpectralLibrary(UUID.randomUUID(), name, axis, defaultYUnit, List.of(), new AttributeSchema());
     }
 
     public UUID getId() {
@@ -38,48 +49,64 @@ public class SpectralLibrary {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = Objects.requireNonNull(name, "name must not be null");
+    public SpectralAxis getAxis() {
+        return axis;
+    }
+
+    public Optional<String> getDefaultYUnit() {
+        return Optional.ofNullable(defaultYUnit);
     }
 
     public List<SpectralProfile> getProfiles() {
-        return Collections.unmodifiableList(profiles);
+        return profiles;
+    }
+
+    public AttributeSchema getSchema() {
+        return schema;
     }
 
     public int size() {
         return profiles.size();
     }
 
-    public void addProfile(SpectralProfile profile) {
+    public SpectralLibrary withName(String newName) {
+        return new SpectralLibrary(this.id, Objects.requireNonNull(newName), this.axis, this.defaultYUnit, this.profiles, this.schema);
+    }
+
+    public SpectralLibrary withProfileAdded(SpectralProfile profile) {
         Objects.requireNonNull(profile, "profile must not be null");
-        UUID pid = profile.getId();
-        if (containsProfile(pid)) {
-            throw new IllegalArgumentException("profile with id already exists: " + pid);
+        if (profile.size() != axis.size()) {
+            throw new IllegalArgumentException("profile size does not match library axis");
         }
-        profiles.add(profile);
-    }
-
-    public boolean removeProfile(UUID profileId) {
-        Objects.requireNonNull(profileId, "profileId must not be null");
-        return profiles.removeIf(p -> profileId.equals(p.getId()));
-    }
-
-    public boolean containsProfile(UUID profileId) {
-        Objects.requireNonNull(profileId, "profileId must not be null");
         for (SpectralProfile p : profiles) {
-            if (profileId.equals(p.getId())) {
-                return true;
+            if (p.getId().equals(profile.getId())) {
+                throw new IllegalArgumentException("profile with id already exists: " + profile.getId());
             }
         }
-        return false;
+        ArrayList<SpectralProfile> copy = new ArrayList<>(profiles);
+        copy.add(profile);
+
+        AttributeSchema newSchema = new AttributeSchema(schema.asMap());
+        newSchema.inferFromAttributes(profile.getAttributes());
+
+        return new SpectralLibrary(this.id, this.name, this.axis, this.defaultYUnit, copy, newSchema);
+    }
+
+    public SpectralLibrary withProfileRemoved(UUID profileId) {
+        Objects.requireNonNull(profileId, "profileId must not be null");
+        ArrayList<SpectralProfile> copy = new ArrayList<>(profiles);
+        boolean removed = copy.removeIf(p -> profileId.equals(p.getId()));
+        if (!removed) {
+            return this;
+        }
+
+        return new SpectralLibrary(this.id, this.name, this.axis, this.defaultYUnit, copy, this.schema);
     }
 
     public Optional<SpectralProfile> findProfile(UUID profileId) {
         Objects.requireNonNull(profileId, "profileId must not be null");
         for (SpectralProfile p : profiles) {
-            if (profileId.equals(p.getId())) {
-                return Optional.of(p);
-            }
+            if (profileId.equals(p.getId())) return Optional.of(p);
         }
         return Optional.empty();
     }

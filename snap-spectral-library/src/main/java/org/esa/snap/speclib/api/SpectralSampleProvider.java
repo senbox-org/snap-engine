@@ -2,11 +2,11 @@ package org.esa.snap.speclib.api;
 
 import org.esa.snap.core.datamodel.Band;
 
+import java.util.List;
+
 
 public interface SpectralSampleProvider {
 
 
-    double readSample(Band band, int x, int y, int level);
-    double noDataValue(Band band);
-    boolean isPixelValid(Band band, int x, int y, int level);
+    double[] readSamples(List<Band> bands, int x, int y, int level);
 }

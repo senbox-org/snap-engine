@@ -3,6 +3,7 @@ package org.esa.snap.speclib.model;
 import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -13,116 +14,92 @@ public class SpectralProfileTest {
 
     @Test
     @STTM("SNAP-4128")
-    public void test_createsValidProfile() {
+    public void test_ctorRejectsNulls() {
         UUID id = UUID.randomUUID();
-        double[] wl = {500.0, 600.0, 700.0};
-        double[] v = {0.1, 0.2, 0.3};
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
 
-        SpectralProfile p = new SpectralProfile(id, "p1", wl, v, "reflectance");
-
-        assertEquals(id, p.getId());
-        assertEquals("p1", p.getName());
-        assertEquals("reflectance", p.getUnit());
-        assertEquals(3, p.size());
-        assertArrayEquals(wl, p.getWavelengths(), 0.0);
-        assertArrayEquals(v, p.getValues(), 0.0);
+        assertThrows(NullPointerException.class, () -> new SpectralProfile(null, "n", sig, Map.of(), null));
+        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, null, sig, Map.of(), null));
+        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, "n", null, Map.of(), null));
+        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, "n", sig, null, null));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_rejectsNullArguments() {
-        UUID id = UUID.randomUUID();
-        double[] wl = {500.0};
-        double[] v = {0.1};
+    public void test_attributesAreUnmodifiableAndCopied() {
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
+        Map<String, AttributeValue> attrs = Map.of("a", AttributeValue.ofString("v"));
+        SpectralProfile p = new SpectralProfile(UUID.randomUUID(), "p", sig, attrs, null);
 
-        assertThrows(NullPointerException.class, () -> new SpectralProfile(null, "name", wl, v, "unit"));
-        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, null, wl, v, "unit"));
-        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, "name", null, v, "unit"));
-        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, "name", wl, null, "unit"));
-        assertThrows(NullPointerException.class, () -> new SpectralProfile(id, "name", wl, v, null));
+        assertThrows(UnsupportedOperationException.class, () -> p.getAttributes().put("x", AttributeValue.ofInt(1)));
+        assertEquals("v", p.getAttribute("a").orElseThrow().asString());
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_rejectsLengthMismatch() {
+    public void test_withAttributeReturnsNewInstanceKeepsId() {
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
         UUID id = UUID.randomUUID();
-        double[] wl = {500.0, 600.0};
-        double[] v = {0.1};
+        SpectralProfile p1 = new SpectralProfile(id, "p", sig, Map.of(), null);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> new SpectralProfile(id, "name", wl, v, "unit"));
-        assertTrue(ex.getMessage().toLowerCase().contains("same length"));
+        SpectralProfile p2 = p1.withAttribute("class", AttributeValue.ofString("veg"));
+        assertNotSame(p1, p2);
+        assertEquals(id, p2.getId());
+        assertTrue(p1.getAttribute("class").isEmpty());
+        assertEquals("veg", p2.getAttribute("class").orElseThrow().asString());
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_rejectsEmptyArrays() {
-        UUID id = UUID.randomUUID();
-        double[] wl = {};
-        double[] v = {};
+    public void test_sourceRefOptional() {
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
+        SpectralProfile.SourceRef ref = new SpectralProfile.SourceRef(1, 2, 0, "prod");
+        SpectralProfile p = new SpectralProfile(UUID.randomUUID(), "p", sig, Map.of(), ref);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> new SpectralProfile(id, "name", wl, v, "unit"));
-        assertTrue(ex.getMessage().toLowerCase().contains("must not be empty"));
+        assertTrue(p.getSourceRef().isPresent());
+        assertEquals(1, p.getSourceRef().orElseThrow().getX());
+        assertEquals("prod", p.getSourceRef().orElseThrow().getProductId().orElseThrow());
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_isDefensivelyCopiedOnConstruction() {
+    public void test_equalsAndHashCode_useIdOnly() {
         UUID id = UUID.randomUUID();
-        double[] wl = {500.0, 600.0};
-        double[] v = {0.1, 0.2};
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
 
-        SpectralProfile p = new SpectralProfile(id, "name", wl, v, "unit");
-
-        wl[0] = 999.0;
-        v[0] = 9.9;
-
-        assertArrayEquals(new double[]{500.0, 600.0}, p.getWavelengths(), 0.0);
-        assertArrayEquals(new double[]{0.1, 0.2}, p.getValues(), 0.0);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_gettersReturnDefensiveCopies() {
-        UUID id = UUID.randomUUID();
-        SpectralProfile p = new SpectralProfile(id, "name", new double[]{500.0, 600.0}, new double[]{0.1, 0.2}, "unit");
-
-        double[] wlCopy = p.getWavelengths();
-        double[] vCopy = p.getValues();
-
-        wlCopy[0] = 999.0;
-        vCopy[0] = 9.9;
-
-        assertArrayEquals(new double[]{500.0, 600.0}, p.getWavelengths(), 0.0);
-        assertArrayEquals(new double[]{0.1, 0.2}, p.getValues(), 0.0);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_createSpectralProfile() {
-        SpectralProfile sp1 = SpectralProfile.create("name", new double[]{500.0}, new double[]{0.1}, "unit");
-        SpectralProfile sp2 = SpectralProfile.create("name", new double[]{500.0}, new double[]{0.1}, "unit");
-
-        assertNotNull(sp1.getId());
-        assertNotNull(sp2.getId());
-        assertNotEquals(sp1.getId(), sp2.getId());
-
-        assertEquals("name", sp1.getName());
-        assertEquals("unit", sp1.getUnit());
-        assertArrayEquals(new double[]{500.0}, sp1.getWavelengths(), 0.0);
-        assertArrayEquals(new double[]{0.1}, sp1.getValues(), 0.0);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_equalsAndHashCodeAreBasedOnId() {
-        UUID id = UUID.randomUUID();
-
-        SpectralProfile a = new SpectralProfile(id, "name_1", new double[]{500.0}, new double[]{0.1}, "unit");
-        SpectralProfile b = new SpectralProfile(id, "name_2", new double[]{600.0}, new double[]{0.2}, "unit2");
+        SpectralProfile a = new SpectralProfile(id, "a", sig, Map.of(), null);
+        SpectralProfile b = new SpectralProfile(id, "b", sig, Map.of("x", AttributeValue.ofInt(1)), null);
 
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
+    }
+
+
+    @Test
+    @STTM("SNAP-4128")
+    public void test_getSignatureAndWithSourceRef_andSourceRefGetters() {
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
+        SpectralProfile p1 = new SpectralProfile(UUID.randomUUID(), "p", sig, Map.of(), null);
+
+        assertSame(sig, p1.getSignature());
+
+        SpectralProfile.SourceRef ref = new SpectralProfile.SourceRef(10, 20, 3, "prod");
+        SpectralProfile p2 = p1.withSourceRef(ref);
+
+        assertNotSame(p1, p2);
+        assertTrue(p2.getSourceRef().isPresent());
+        SpectralProfile.SourceRef r = p2.getSourceRef().orElseThrow();
+        assertEquals(20, r.getY());
+        assertEquals(3, r.getLevel());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void test_equalsCoversSameInstanceAndDifferentType() {
+        SpectralSignature sig = SpectralSignature.of(new double[]{1, 2});
+        SpectralProfile p = new SpectralProfile(UUID.randomUUID(), "p", sig, Map.of(), null);
+
+        assertTrue(p.equals(p));
+        assertFalse(p.equals("not a profile"));
     }
 }

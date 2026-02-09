@@ -2,94 +2,77 @@ package org.esa.snap.speclib.impl;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.speclib.api.SpectralProfileExtractor;
 import org.esa.snap.speclib.api.SpectralSampleProvider;
+import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralProfile;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 
 public class SpectralProfileExtractorImplTest {
 
 
-    private static Band band(float wavelength) {
-        Band b = mock(Band.class);
-        when(b.getSpectralWavelength()).thenReturn(wavelength);
-        return b;
+    @Test
+    @STTM("SNAP-4128")
+    public void test_ctorRejectsNull() {
+        try {
+            new SpectralProfileExtractorImpl(null);
+            fail("expected NullPointerException");
+        } catch (NullPointerException ignored) {}
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_extractsProfileForValidSamples() {
-        Band b1 = band(500f);
-        Band b2 = band(600f);
+    public void test_extractRejectsNulls() {
+        SpectralSampleProvider sp = Mockito.mock(SpectralSampleProvider.class);
+        SpectralProfileExtractorImpl ex = new SpectralProfileExtractorImpl(sp);
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        List<Band> bands = List.of(Mockito.mock(Band.class), Mockito.mock(Band.class));
 
-        SpectralSampleProvider p = mock(SpectralSampleProvider.class);
-        when(p.isPixelValid(any(), anyInt(), anyInt(), anyInt())).thenReturn(true);
-        when(p.noDataValue(any())).thenReturn(-9999d);
-        when(p.readSample(b1, 1, 2, 0)).thenReturn(0.1d);
-        when(p.readSample(b2, 1, 2, 0)).thenReturn(0.2d);
-
-        SpectralProfileExtractor ex = new SpectralProfileExtractorImpl(p);
-
-        Optional<SpectralProfile> out = ex.extract("p", List.of(b1, b2), 1, 2, 0, "unit");
-        assertTrue(out.isPresent());
-        assertArrayEquals(new double[]{500.0, 600.0}, out.get().getWavelengths(), 0.0);
-        assertArrayEquals(new double[]{0.1, 0.2}, out.get().getValues(), 0.0);
-        assertEquals("p", out.get().getName());
-        assertEquals("unit", out.get().getUnit());
+        assertThrows(NullPointerException.class, () -> ex.extract(null, axis, bands, 0, 0, 0, null, null));
+        assertThrows(NullPointerException.class, () -> ex.extract("n", null, bands, 0, 0, 0, null, null));
+        assertThrows(NullPointerException.class, () -> ex.extract("n", axis, null, 0, 0, 0, null, null));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_filtersNoDataAndInvalid() {
-        Band b1 = band(500f);
-        Band b2 = band(600f);
+    public void test_extractBandsSizeMismatchThrows() {
+        SpectralSampleProvider sp = Mockito.mock(SpectralSampleProvider.class);
+        SpectralProfileExtractorImpl ex = new SpectralProfileExtractorImpl(sp);
 
-        SpectralSampleProvider p = mock(SpectralSampleProvider.class);
-        when(p.noDataValue(any())).thenReturn(-9999d);
-        when(p.isPixelValid(b1, 0, 0, 0)).thenReturn(true);
-        when(p.isPixelValid(b2, 0, 0, 0)).thenReturn(false);
-        when(p.readSample(b1, 0, 0, 0)).thenReturn(-9999d);
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2, 3}, "nm");
+        List<Band> bands = List.of(Mockito.mock(Band.class));
 
-        SpectralProfileExtractor ex = new SpectralProfileExtractorImpl(p);
-
-        Optional<SpectralProfile> out = ex.extract("p", List.of(b1, b2), 0, 0, 0, "unit");
-        assertTrue(out.isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> ex.extract("n", axis, bands, 1, 2, 0, null, null));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_ignoresNonSpectralBands() {
-        Band nonSpectral = band(0f);
-        Band spectral = band(700f);
+    public void test_extractBuildsProfileWithSourceRef_andYUnitOptional() {
+        SpectralSampleProvider sp = Mockito.mock(SpectralSampleProvider.class);
+        SpectralProfileExtractorImpl ex = new SpectralProfileExtractorImpl(sp);
 
-        SpectralSampleProvider p = mock(SpectralSampleProvider.class);
-        when(p.isPixelValid(any(), anyInt(), anyInt(), anyInt())).thenReturn(true);
-        when(p.noDataValue(any())).thenReturn(-9999d);
-        when(p.readSample(spectral, 1, 1, 0)).thenReturn(1.23d);
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        List<Band> bands = List.of(Mockito.mock(Band.class), Mockito.mock(Band.class));
+        Mockito.when(sp.readSamples(bands, 10, 20, 3)).thenReturn(new double[]{0.1, 0.2});
 
-        SpectralProfileExtractor ex = new SpectralProfileExtractorImpl(p);
+        SpectralProfile p1 = ex.extract("p", axis, bands, 10, 20, 3, null, "prod").orElseThrow();
+        assertEquals("p", p1.getName());
+        assertEquals(2, p1.size());
+        assertNull(p1.getSignature().getYUnitOrNull());
+        assertTrue(p1.getSourceRef().isPresent());
+        assertEquals(20, p1.getSourceRef().orElseThrow().getY());
+        assertEquals(3, p1.getSourceRef().orElseThrow().getLevel());
+        assertEquals("prod", p1.getSourceRef().orElseThrow().getProductId().orElseThrow());
 
-        Optional<SpectralProfile> out = ex.extract("p", List.of(nonSpectral, spectral), 1, 1, 0, "unit");
-        assertTrue(out.isPresent());
-        assertArrayEquals(new double[]{700.0}, out.get().getWavelengths(), 0.0);
-        assertArrayEquals(new double[]{1.23}, out.get().getValues(), 0.0);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_rejectsNulls() {
-        SpectralSampleProvider p = mock(SpectralSampleProvider.class);
-        SpectralProfileExtractor ex = new SpectralProfileExtractorImpl(p);
-
-        assertThrows(NullPointerException.class, () -> ex.extract(null, List.of(), 0, 0, 0, "u"));
-        assertThrows(NullPointerException.class, () -> ex.extract("n", null, 0, 0, 0, "u"));
-        assertThrows(NullPointerException.class, () -> ex.extract("n", List.of(), 0, 0, 0, null));
+        SpectralProfile p2 = ex.extract("p2", axis, bands, 10, 20, 3, "reflectance", null).orElseThrow();
+        assertEquals("reflectance", p2.getSignature().getYUnitOrNull());
+        assertTrue(p2.getSourceRef().isPresent());
+        assertTrue(p2.getSourceRef().orElseThrow().getProductId().isEmpty());
     }
 }

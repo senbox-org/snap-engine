@@ -3,6 +3,7 @@ package org.esa.snap.speclib.impl;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.speclib.api.SpectralLibraryService;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
+import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralLibrary;
 import org.esa.snap.speclib.model.SpectralProfile;
 
@@ -18,7 +19,7 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
 
 
     public SpectralLibraryServiceImpl() {
-        this(new SpectralProfileExtractorImpl( new SpectralSampleProviderImpl()));
+        this(new SpectralProfileExtractorImpl(new SpectralSampleProviderImpl()));
     }
 
     public SpectralLibraryServiceImpl(SpectralProfileExtractor extractor) {
@@ -27,22 +28,23 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
 
 
     @Override
-    public SpectralLibrary createLibrary(String name) {
+    public SpectralLibrary createLibrary(String name, SpectralAxis axis, String defaultYUnit) {
         Objects.requireNonNull(name, "name must not be null");
-        SpectralLibrary lib = SpectralLibrary.create(name);
-        this.libraries.put(lib.getId(), lib);
+        Objects.requireNonNull(axis, "axis must not be null");
+        SpectralLibrary lib = SpectralLibrary.create(name, axis, defaultYUnit);
+        libraries.put(lib.getId(), lib);
         return lib;
     }
 
     @Override
     public Optional<SpectralLibrary> getLibrary(UUID libraryId) {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
-        return Optional.ofNullable(this.libraries.get(libraryId));
+        return Optional.ofNullable(libraries.get(libraryId));
     }
 
     @Override
     public List<SpectralLibrary> listLibraries() {
-        List<SpectralLibrary> snapshot = new ArrayList<>(this.libraries.values());
+        List<SpectralLibrary> snapshot = new ArrayList<>(libraries.values());
         snapshot.sort(Comparator
                 .comparing(SpectralLibrary::getName, Comparator.nullsFirst(String::compareTo))
                 .thenComparing(SpectralLibrary::getId));
@@ -52,7 +54,16 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
     @Override
     public boolean deleteLibrary(UUID libraryId) {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
-        return this.libraries.remove(libraryId) != null;
+        return libraries.remove(libraryId) != null;
+    }
+
+    @Override
+    public Optional<SpectralLibrary> renameLibrary(UUID libraryId, String newName) {
+        Objects.requireNonNull(libraryId, "libraryId must not be null");
+        Objects.requireNonNull(newName, "newName must not be null");
+
+        SpectralLibrary updated = libraries.computeIfPresent(libraryId, (id, lib) -> lib.withName(newName));
+        return Optional.ofNullable(updated);
     }
 
     @Override
@@ -60,13 +71,14 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
         Objects.requireNonNull(profile, "profile must not be null");
 
-        SpectralLibrary lib = this.libraries.get(libraryId);
-        if (lib == null) {
-            throw new NoSuchElementException("library not found: " + libraryId);
-        }
-        synchronized (lib) {
-            lib.addProfile(profile);
-        }
+        SpectralLibrary updated = libraries.compute(libraryId, (id, lib) -> {
+            if (lib == null) {
+                throw new NoSuchElementException("library not found: " + libraryId);
+            }
+            return lib.withProfileAdded(profile);
+        });
+
+        Objects.requireNonNull(updated);
     }
 
     @Override
@@ -74,13 +86,13 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
         Objects.requireNonNull(profileId, "profileId must not be null");
 
-        SpectralLibrary lib = this.libraries.get(libraryId);
-        if (lib == null) {
-            return false;
-        }
-        synchronized (lib) {
-            return lib.removeProfile(profileId);
-        }
+        final boolean[] removed = {false};
+        libraries.computeIfPresent(libraryId, (id, lib) -> {
+            SpectralLibrary next = lib.withProfileRemoved(profileId);
+            removed[0] = (next != lib);
+            return next;
+        });
+        return removed[0];
     }
 
     @Override
@@ -88,20 +100,22 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
         Objects.requireNonNull(profileId, "profileId must not be null");
 
-        SpectralLibrary lib = this.libraries.get(libraryId);
+        SpectralLibrary lib = libraries.get(libraryId);
         if (lib == null) {
             return Optional.empty();
         }
-        synchronized (lib) {
-            return lib.findProfile(profileId);
-        }
+        return lib.findProfile(profileId);
     }
 
     @Override
-    public Optional<SpectralProfile> extractProfile(String name, List<Band> bands, int x, int y, int level, String unit) {
-        Objects.requireNonNull(name, "name must not be null");
-        Objects.requireNonNull(bands, "bands must not be null");
-        Objects.requireNonNull(unit, "unit must not be null");
-        return this.extractor.extract(name, bands, x, y, level, unit);
+    public Optional<SpectralProfile> extractProfile(String name,
+                                                    SpectralAxis axis,
+                                                    List<Band> bands,
+                                                    int x,
+                                                    int y,
+                                                    int level,
+                                                    String yUnit,
+                                                    String productId) {
+        return extractor.extract(name, axis, bands, x, y, level, yUnit, productId);
     }
 }

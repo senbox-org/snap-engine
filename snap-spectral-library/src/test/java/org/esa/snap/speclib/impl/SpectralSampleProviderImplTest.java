@@ -5,16 +5,16 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
 import org.junit.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import javax.media.jai.PlanarImage;
-
+import java.awt.*;
 import java.awt.image.Raster;
+import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 
 public class SpectralSampleProviderImplTest {
@@ -22,27 +22,17 @@ public class SpectralSampleProviderImplTest {
 
     @Test
     @STTM("SNAP-4128")
-    public void test_readSample_delegatesToProductUtils() {
-        Band band = mock(Band.class);
+    public void test_readSamples_nullBandsListThrows() {
         SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
-
-        try (MockedStatic<ProductUtils> mocked = mockStatic(ProductUtils.class)) {
-            mocked.when(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 3, 4, 1))
-                    .thenReturn(42.0);
-
-            double v = p.readSample(band, 3, 4, 1);
-            assertEquals(42.0, v, 0.0);
-
-            mocked.verify(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 3, 4, 1));
-        }
+        try {
+            p.readSamples(null, 0, 0, 0);
+            fail("expected NullPointerException");
+        } catch (NullPointerException ignored) {}
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_noDataValue_delegatesToBand() {
-        Band band = mock(Band.class);
-        when(band.getGeophysicalNoDataValue()).thenReturn(-9999.0);
-
+    public void test_readSamples_nullBandYieldsNaN() {
         SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
         assertEquals(-9999.0, p.noDataValue(band), 0.0);
 
@@ -51,69 +41,101 @@ public class SpectralSampleProviderImplTest {
 
     @Test
     @STTM("SNAP-4128")
-    public void test_isPixelValid_returnsTrueIfNoValidMaskUsed() {
-        Band band = mock(Band.class);
-        when(band.isValidMaskUsed()).thenReturn(false);
+    public void test_readSamples_invalidMaskPixel_returnsNaN() {
+        Band band = Mockito.mock(Band.class);
+        Mockito.when(band.isValidMaskUsed()).thenReturn(true);
 
-        SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
-        assertTrue(p.isPixelValid(band, 10, 20, 0));
+        ImageManager mgr = Mockito.mock(ImageManager.class);
+        PlanarImage img = Mockito.mock(PlanarImage.class);
+        Raster raster = Mockito.mock(Raster.class);
 
-        verify(band).isValidMaskUsed();
-        verifyNoMoreInteractions(band);
-    }
+        Mockito.when(img.XToTileX(5)).thenReturn(0);
+        Mockito.when(img.YToTileY(6)).thenReturn(0);
+        Mockito.when(img.getTile(0, 0)).thenReturn(raster);
+        Mockito.when(raster.getSample(5, 6, 0)).thenReturn(0);
 
-    @Test
-    @STTM("SNAP-4128")
-    public void test_isPixelValid_usesValidMask_sampleNonZero_isTrue() {
-        Band band = mock(Band.class);
-        when(band.isValidMaskUsed()).thenReturn(true);
+        Mockito.when(mgr.getValidMaskImage(band, 0)).thenReturn(img);
 
-        ImageManager mgr = mock(ImageManager.class);
-        PlanarImage maskImg = mock(PlanarImage.class);
-        Raster tile = mock(Raster.class);
-
-        int x = 10, y = 20, level = 0;
-        when(mgr.getValidMaskImage(band, level)).thenReturn(maskImg);
-        when(maskImg.XToTileX(x)).thenReturn(1);
-        when(maskImg.YToTileY(y)).thenReturn(2);
-        when(maskImg.getTile(1, 2)).thenReturn(tile);
-        when(tile.getSample(x, y, 0)).thenReturn(1);
-
-        try (MockedStatic<ImageManager> mocked = mockStatic(ImageManager.class)) {
-            mocked.when(ImageManager::getInstance).thenReturn(mgr);
+        try (MockedStatic<ImageManager> im = Mockito.mockStatic(ImageManager.class)) {
+            im.when(ImageManager::getInstance).thenReturn(mgr);
 
             SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
-            assertTrue(p.isPixelValid(band, x, y, level));
+            double[] out = p.readSamples(List.of(band), 5, 6, 0);
 
-            mocked.verify(ImageManager::getInstance);
-            verify(mgr).getValidMaskImage(band, level);
-            verify(maskImg).getTile(1, 2);
-            verify(tile).getSample(x, y, 0);
+            assertTrue(Double.isNaN(out[0]));
         }
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_isPixelValid_usesValidMask_sampleZero_isFalse() {
-        Band band = mock(Band.class);
-        when(band.isValidMaskUsed()).thenReturn(true);
+    public void test_readSamples_nodata_isNaN() {
+        Band band = Mockito.mock(Band.class);
+        Mockito.when(band.isValidMaskUsed()).thenReturn(false);
+        Mockito.when(band.getGeophysicalNoDataValue()).thenReturn(-9999.0);
 
-        ImageManager mgr = mock(ImageManager.class);
-        PlanarImage maskImg = mock(PlanarImage.class);
-        Raster tile = mock(Raster.class);
-
-        int x = 10, y = 20, level = 0;
-        when(mgr.getValidMaskImage(band, level)).thenReturn(maskImg);
-        when(maskImg.XToTileX(x)).thenReturn(1);
-        when(maskImg.YToTileY(y)).thenReturn(2);
-        when(maskImg.getTile(1, 2)).thenReturn(tile);
-        when(tile.getSample(x, y, 0)).thenReturn(0);
-
-        try (MockedStatic<ImageManager> mocked = mockStatic(ImageManager.class)) {
-            mocked.when(ImageManager::getInstance).thenReturn(mgr);
+        try (MockedStatic<ProductUtils> pu = Mockito.mockStatic(ProductUtils.class)) {
+            pu.when(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 1, 1, 0)).thenReturn(-9999.0);
 
             SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
-            assertFalse(p.isPixelValid(band, x, y, level));
+            double[] out = p.readSamples(List.of(band), 1, 1, 0);
+
+            assertTrue(Double.isNaN(out[0]));
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void test_readSamples_nanOrInfinite_isNaN() {
+        Band band = Mockito.mock(Band.class);
+        Mockito.when(band.isValidMaskUsed()).thenReturn(false);
+        Mockito.when(band.getGeophysicalNoDataValue()).thenReturn(-9999.0);
+
+        SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
+
+        try (MockedStatic<ProductUtils> pu = Mockito.mockStatic(ProductUtils.class)) {
+            pu.when(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 1, 1, 0)).thenReturn(Double.NaN);
+            assertTrue(Double.isNaN(p.readSamples(List.of(band), 1, 1, 0)[0]));
+        }
+
+        try (MockedStatic<ProductUtils> pu = Mockito.mockStatic(ProductUtils.class)) {
+            pu.when(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 1, 1, 0)).thenReturn(Double.POSITIVE_INFINITY);
+            assertTrue(Double.isNaN(p.readSamples(List.of(band), 1, 1, 0)[0]));
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void test_readSamples_validMaskPixelValid_readsValue() {
+        Band band = Mockito.mock(Band.class);
+        Mockito.when(band.isValidMaskUsed()).thenReturn(true);
+        Mockito.when(band.getGeophysicalNoDataValue()).thenReturn(-9999.0);
+        Mockito.when(band.getRasterWidth()).thenReturn(10);
+        Mockito.when(band.getRasterHeight()).thenReturn(10);
+
+        ImageManager mgr = Mockito.mock(ImageManager.class);
+        PlanarImage img = Mockito.mock(PlanarImage.class);
+        Raster raster = Mockito.mock(Raster.class);
+        Rectangle bounds = Mockito.mock(Rectangle.class);
+
+        Mockito.when(img.XToTileX(7)).thenReturn(0);
+        Mockito.when(img.YToTileY(8)).thenReturn(0);
+        Mockito.when(img.getTile(0, 0)).thenReturn(raster);
+        Mockito.when(raster.getBounds()).thenReturn(bounds);
+        Mockito.when(bounds.contains(7,8)).thenReturn(true);
+        Mockito.when(raster.getSample(7, 8, 0)).thenReturn(1);
+
+        Mockito.when(mgr.getValidMaskImage(band, 0)).thenReturn(img);
+
+        try (MockedStatic<ImageManager> im = Mockito.mockStatic(ImageManager.class);
+             MockedStatic<ProductUtils> pu = Mockito.mockStatic(ProductUtils.class)) {
+
+            im.when(ImageManager::getInstance).thenReturn(mgr);
+            pu.when(() -> ProductUtils.getGeophysicalSampleAsDouble(band, 7, 8, 0)).thenReturn(1.23);
+
+            SpectralSampleProviderImpl p = new SpectralSampleProviderImpl();
+            double[] out = p.readSamples(List.of(band), 7, 8, 0);
+
+            assertEquals(1.23, out[0], 1e-12);
         }
     }
 }

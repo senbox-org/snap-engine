@@ -2,198 +2,115 @@ package org.esa.snap.speclib.impl;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.speclib.api.SpectralLibraryService;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
+import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralLibrary;
 import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 
 public class SpectralLibraryServiceImplTest {
 
 
-    private static SpectralProfile profile(UUID id, String name) {
-        return new SpectralProfile(id, name, new double[]{500.0}, new double[]{0.1}, "unit");
-    }
-
-
     @Test
     @STTM("SNAP-4128")
-    public void test_createAndGetLibrary() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
+    public void test_defaultConstructor_worksEndToEndWithMockedBands() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
 
-        SpectralLibrary lib = svc.createLibrary("lib");
-        assertNotNull(lib.getId());
-        assertEquals("lib", lib.getName());
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        SpectralLibrary lib = svc.createLibrary("L", axis, "reflectance");
+        assertNotNull(lib);
 
-        Optional<SpectralLibrary> loaded = svc.getLibrary(lib.getId());
-        assertTrue(loaded.isPresent());
-        assertSame(lib, loaded.get());
+        SpectralProfile p = SpectralProfile.create("p", SpectralSignature.of(new double[]{0.1, 0.2}));
+        svc.addProfile(lib.getId(), p);
+
+        assertTrue(svc.findProfile(lib.getId(), p.getId()).isPresent());
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_listLibrariesReturnsSnapshotAndIsUnmodifiable() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        SpectralLibrary a = svc.createLibrary("a");
-        SpectralLibrary b = svc.createLibrary("b");
+    public void test_createGetListDeleteRename() {
+        SpectralProfileExtractor extractor = Mockito.mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
 
-        List<SpectralLibrary> list = svc.listLibraries();
-        assertEquals(2, list.size());
-        assertThrows(UnsupportedOperationException.class, () -> list.add(a));
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        SpectralLibrary lib = svc.createLibrary("A", axis, "reflectance");
 
-        svc.createLibrary("c");
-        assertEquals(2, list.size());
-        assertEquals(3, svc.listLibraries().size());
+        assertTrue(svc.getLibrary(lib.getId()).isPresent());
+        assertEquals(1, svc.listLibraries().size());
 
-        assertEquals("a", svc.listLibraries().get(0).getName());
-        assertEquals("b", svc.listLibraries().get(1).getName());
-    }
+        assertTrue(svc.renameLibrary(lib.getId(), "B").isPresent());
+        assertEquals("B", svc.getLibrary(lib.getId()).orElseThrow().getName());
 
-    @Test
-    @STTM("SNAP-4128")
-    public void test_deleteLibraryReturnsTrueIfRemoved() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        SpectralLibrary lib = svc.createLibrary("lib");
+        assertTrue(svc.renameLibrary(UUID.randomUUID(), "X").isEmpty());
 
         assertTrue(svc.deleteLibrary(lib.getId()));
-        assertFalse(svc.deleteLibrary(lib.getId()));
         assertTrue(svc.getLibrary(lib.getId()).isEmpty());
+        assertFalse(svc.deleteLibrary(lib.getId()));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_addFindAndRemoveProfile() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        SpectralLibrary lib = svc.createLibrary("lib");
+    public void test_addFindRemoveProfile() {
+        SpectralProfileExtractor extractor = Mockito.mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
 
-        UUID pid = UUID.randomUUID();
-        SpectralProfile p = profile(pid, "p1");
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        SpectralLibrary lib = svc.createLibrary("L", axis, null);
+
+        SpectralProfile p = new SpectralProfile(UUID.randomUUID(), "p",
+                SpectralSignature.of(new double[]{0.1, 0.2}), Map.of(), null);
 
         svc.addProfile(lib.getId(), p);
 
-        Optional<SpectralProfile> found = svc.findProfile(lib.getId(), pid);
-        assertTrue(found.isPresent());
-        assertSame(p, found.get());
+        assertTrue(svc.findProfile(lib.getId(), p.getId()).isPresent());
+        assertTrue(svc.removeProfile(lib.getId(), p.getId()));
+        assertTrue(svc.findProfile(lib.getId(), p.getId()).isEmpty());
 
-        assertTrue(svc.removeProfile(lib.getId(), pid));
-        assertFalse(svc.removeProfile(lib.getId(), pid));
-        assertTrue(svc.findProfile(lib.getId(), pid).isEmpty());
+        assertFalse(svc.removeProfile(lib.getId(), p.getId()));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_addProfileThrowsIfLibraryMissing() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        UUID missingLib = UUID.randomUUID();
+    public void test_addProfile_unknownLibraryThrows() {
+        SpectralProfileExtractor extractor = Mockito.mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
 
-        assertThrows(NoSuchElementException.class,
-                () -> svc.addProfile(missingLib, profile(UUID.randomUUID(), "p")));
+        SpectralProfile p = SpectralProfile.create("p", SpectralSignature.of(new double[]{1, 2}));
+        assertThrows(NoSuchElementException.class, () -> svc.addProfile(UUID.randomUUID(), p));
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_findAndRemoveReturnEmptyFalseIfLibraryMissing() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        UUID missingLib = UUID.randomUUID();
-        UUID pid = UUID.randomUUID();
+    public void test_removeProfile_unknownLibraryReturnsFalse_findProfileUnknownLibraryEmpty() {
+        SpectralProfileExtractor extractor = Mockito.mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
 
-        assertTrue(svc.findProfile(missingLib, pid).isEmpty());
-        assertFalse(svc.removeProfile(missingLib, pid));
+        assertFalse(svc.removeProfile(UUID.randomUUID(), UUID.randomUUID()));
+        assertTrue(svc.findProfile(UUID.randomUUID(), UUID.randomUUID()).isEmpty());
     }
 
     @Test
     @STTM("SNAP-4128")
-    public void test_addProfileRejectsDuplicateProfileId() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        SpectralLibrary lib = svc.createLibrary("lib");
+    public void test_extractProfileDelegatesToExtractor() {
+        SpectralProfileExtractor extractor = Mockito.mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
 
-        UUID pid = UUID.randomUUID();
-        svc.addProfile(lib.getId(), profile(pid, "a"));
+        SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
+        List<Band> bands = List.of(Mockito.mock(Band.class), Mockito.mock(Band.class));
 
-        assertThrows(IllegalArgumentException.class,
-                () -> svc.addProfile(lib.getId(), profile(pid, "b")));
-    }
+        SpectralProfile expected = SpectralProfile.create("p", SpectralSignature.of(new double[]{1, 2}));
+        Mockito.when(extractor.extract("p", axis, bands, 1, 2, 0, "reflectance", "prod"))
+                .thenReturn(Optional.of(expected));
 
-    @Test
-    @STTM("SNAP-4128")
-    public void test_nullArgumentsAreRejected() {
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl();
-        SpectralLibrary lib = svc.createLibrary("lib");
-
-        assertThrows(NullPointerException.class, () -> svc.getLibrary(null));
-        assertThrows(NullPointerException.class, () -> svc.deleteLibrary(null));
-        assertThrows(NullPointerException.class, () -> svc.addProfile(null, profile(UUID.randomUUID(), "p")));
-        assertThrows(NullPointerException.class, () -> svc.addProfile(lib.getId(), null));
-        assertThrows(NullPointerException.class, () -> svc.removeProfile(null, UUID.randomUUID()));
-        assertThrows(NullPointerException.class, () -> svc.removeProfile(lib.getId(), null));
-        assertThrows(NullPointerException.class, () -> svc.findProfile(null, UUID.randomUUID()));
-        assertThrows(NullPointerException.class, () -> svc.findProfile(lib.getId(), null));
-    }
-
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_extractProfile_delegatesToExtractor_andReturnsProfile() {
-        SpectralProfileExtractor extractor = mock(SpectralProfileExtractor.class);
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl(extractor);
-
-        Band b1 = mock(Band.class);
-        Band b2 = mock(Band.class);
-        List<Band> bands = List.of(b1, b2);
-
-        SpectralProfile expected = SpectralProfile.create("p",
-                new double[]{500.0, 600.0},
-                new double[]{0.1, 0.2},
-                "unit");
-
-        when(extractor.extract("p", bands, 3, 4, 0, "unit")).thenReturn(Optional.of(expected));
-
-        Optional<SpectralProfile> out = svc.extractProfile("p", bands, 3, 4, 0, "unit");
-        assertTrue(out.isPresent());
-        assertSame(expected, out.get());
-
-        verify(extractor).extract("p", bands, 3, 4, 0, "unit");
-        verifyNoMoreInteractions(extractor);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_extractProfile_delegatesToExtractor_andReturnsEmpty() {
-        SpectralProfileExtractor extractor = mock(SpectralProfileExtractor.class);
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl(extractor);
-
-        Band b = mock(Band.class);
-        List<Band> bands = List.of(b);
-
-        when(extractor.extract("p", bands, 1, 2, 0, "unit")).thenReturn(Optional.empty());
-
-        Optional<SpectralProfile> out = svc.extractProfile("p", bands, 1, 2, 0, "unit");
-        assertTrue(out.isEmpty());
-
-        verify(extractor).extract("p", bands, 1, 2, 0, "unit");
-        verifyNoMoreInteractions(extractor);
-    }
-
-    @Test
-    @STTM("SNAP-4128")
-    public void test_extractProfile_rejectsNullArguments() {
-        SpectralProfileExtractor extractor = mock(SpectralProfileExtractor.class);
-        SpectralLibraryService svc = new SpectralLibraryServiceImpl(extractor);
-
-        Band b = mock(Band.class);
-        List<Band> bands = List.of(b);
-
-        assertThrows(NullPointerException.class, () -> svc.extractProfile(null, bands, 0, 0, 0, "u"));
-        assertThrows(NullPointerException.class, () -> svc.extractProfile("n", null, 0, 0, 0, "u"));
-        assertThrows(NullPointerException.class, () -> svc.extractProfile("n", bands, 0, 0, 0, null));
+        Optional<SpectralProfile> got = svc.extractProfile("p", axis, bands, 1, 2, 0, "reflectance", "prod");
+        assertTrue(got.isPresent());
+        assertEquals(expected.getId(), got.orElseThrow().getId());
     }
 }

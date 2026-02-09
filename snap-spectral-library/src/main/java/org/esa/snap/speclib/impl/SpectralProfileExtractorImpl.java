@@ -3,12 +3,11 @@ package org.esa.snap.speclib.impl;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
 import org.esa.snap.speclib.api.SpectralSampleProvider;
+import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.SpectralSignature;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 
 public class SpectralProfileExtractorImpl implements SpectralProfileExtractor {
@@ -23,51 +22,48 @@ public class SpectralProfileExtractorImpl implements SpectralProfileExtractor {
 
 
     @Override
-    public Optional<SpectralProfile> extract(String name, List<Band> bands, int x, int y, int level, String unit) {
+    public Optional<SpectralProfile> extract(String name,
+                                             SpectralAxis axis,
+                                             List<Band> bands,
+                                             int x,
+                                             int y,
+                                             int level,
+                                             String yUnit,
+                                             String productId) {
         Objects.requireNonNull(name, "name must not be null");
-        Objects.requireNonNull(unit, "unit must not be null");
+        Objects.requireNonNull(axis, "axis must not be null");
         Objects.requireNonNull(bands, "bands must not be null");
 
-        List<Double> wl = new ArrayList<>();
-        List<Double> vv = new ArrayList<>();
-
-        for (Band b : bands) {
-            if (b == null) {
-                continue;
-            }
-            final float wavelength = b.getSpectralWavelength();
-            if (wavelength <= 0.0f) {
-                continue;
-            }
-            if (!sampleProvider.isPixelValid(b, x, y, level)) {
-                continue;
-            }
-
-            final double value = sampleProvider.readSample(b, x, y, level);
-            final double noDataVal = sampleProvider.noDataValue(b);
-
-            if (Double.compare(value, noDataVal) == 0) {
-                continue;
-            }
-            if (Double.isNaN(value) || Double.isInfinite(value)) {
-                continue;
-            }
-
-            wl.add((double) wavelength);
-            vv.add(value);
+        if (bands.size() != axis.size()) {
+            throw new IllegalArgumentException("bands size must match axis size");
         }
 
-        if (wl.isEmpty()) {
+        double[] values = sampleProvider.readSamples(bands, x, y, level);
+
+        double nodataVal = Double.NaN;
+        for (int i = 0; i < values.length; i++) {
+            double v = values[i];
+            if (Double.isNaN(v) || Double.isInfinite(v)) {
+                values[i] = nodataVal;
+            }
+        }
+
+        boolean anyFinite = false;
+        for (double v : values) {
+            if (!Double.isNaN(v) && !Double.isInfinite(v)) {
+                anyFinite = true;
+                break;
+            }
+        }
+        if (!anyFinite) {
             return Optional.empty();
         }
 
-        double[] wavelengths = new double[wl.size()];
-        double[] values = new double[vv.size()];
-        for (int i = 0; i < wl.size(); i++) {
-            wavelengths[i] = wl.get(i);
-            values[i] = vv.get(i);
-        }
+        SpectralSignature sig = (yUnit == null)
+                ? SpectralSignature.of(values)
+                : SpectralSignature.of(values, yUnit);
 
-        return Optional.of(SpectralProfile.create(name, wavelengths, values, unit));
+        SpectralProfile.SourceRef ref = new SpectralProfile.SourceRef(x, y, level, productId);
+        return Optional.of(new SpectralProfile(UUID.randomUUID(), name, sig, Map.of(), ref));
     }
 }
