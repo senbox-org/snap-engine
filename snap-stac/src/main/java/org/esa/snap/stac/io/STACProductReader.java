@@ -17,6 +17,7 @@ package org.esa.snap.stac.io;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
@@ -24,15 +25,11 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.stac.StacItem;
 import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.SnapStacProduct;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.ImageLayout;
 import java.awt.*;
 import java.io.File;
@@ -40,23 +37,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * The product reader for SkyWatch products.
  */
 public class STACProductReader extends AbstractProductReader {
 
-    private final static GeoTiffProductReaderPlugIn geoTiffReaderPlugin = new GeoTiffProductReaderPlugIn();
-
     private final List<ProductReader> imageReaderList = new ArrayList<>();
     private final List<Product> bandProductList = new ArrayList<>();
-    private final Map<Band, ImageInputStream> bandInputStreams = new Hashtable<>();
-    private final Map<Band, File> bandDataFiles = new HashMap<>();
 
     /**
      * Constructs a new abstract product reader.
@@ -113,10 +104,13 @@ public class STACProductReader extends AbstractProductReader {
             final Map<String, Assets.Asset> imageAssets = stacItem.getImageAssets();
 
             for (Assets.Asset imageAsset : imageAssets.values()) {
-                final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href);
+                final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href.substring(imageAsset.href.lastIndexOf('/')));
                 if (imageFile.exists() && imageFile.length() > 0) {
 
-                    final ProductReader imageReader = geoTiffReaderPlugin.createReaderInstance();
+                    final ProductReader imageReader = createReaderInstance();
+                    if (imageReader == null) {
+                        throw new IOException("No reader found for " + imageFile);
+                    }
                     imageReaderList.add(imageReader);
 
                     Product bandProduct = imageReader.readProductNodes(imageFile, null);
@@ -126,12 +120,21 @@ public class STACProductReader extends AbstractProductReader {
                     final String bandDescription = imageAsset.title;
 
                     for (Band band : bandProduct.getBands()) {
-                        final Band trgBand;
+                        Band trgBand = null;
                         if (product.containsBand(bandName)) {
                             trgBand = product.getBand(bandName);
                             trgBand.setSourceImage(band.getSourceImage());
                         } else {
-                            trgBand = ProductUtils.copyBand(band.getName(), bandProduct, bandName, product, true);
+                            for(Band existingBand : product.getBands()) {
+                                if(!existingBand.isSourceImageSet()) {
+                                    existingBand.setSourceImage(band.getSourceImage());
+                                    trgBand = existingBand;
+                                    break;
+                                }
+                            }
+                            if(trgBand == null) {
+                                trgBand = ProductUtils.copyBand(band.getName(), bandProduct, bandName, product, true);
+                            }
                         }
                         trgBand.setDescription(bandDescription);
 
@@ -169,6 +172,14 @@ public class STACProductReader extends AbstractProductReader {
         }
     }
 
+    private ProductReader createReaderInstance() {
+        Iterator<ProductReaderPlugIn> it = ProductIOPlugInManager.getInstance().getReaderPlugIns("GDAL-GTiff-READER");
+        if (it.hasNext()) {
+            return it.next().createReaderInstance();
+        }
+        return null;
+    }
+
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY,
                                           int sourceWidth, int sourceHeight,
@@ -177,70 +188,6 @@ public class STACProductReader extends AbstractProductReader {
                                           int destOffsetX, int destOffsetY,
                                           int destWidth, int destHeight,
                                           ProductData destBuffer,
-                                          ProgressMonitor pm) throws IOException {
-        final int sourceMinX = sourceOffsetX;
-        final int sourceMinY = sourceOffsetY;
-        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
-        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-
-        final File dataFile = bandDataFiles.get(destBand);
-        final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
-        if (inputStream == null) {
-            return;
-        }
-
-        int destPos = 0;
-
-        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
-        // For each scan in the data source
-        try {
-            synchronized (inputStream) {
-                for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
-                    if (pm.isCanceled()) {
-                        break;
-                    }
-                    final long sourcePosY = (long) sourceY * destBand.getRasterWidth();
-                    if (sourceStepX == 1) {
-                        long inputPos = sourcePosY + sourceMinX;
-                        destBuffer.readFrom(destPos, destWidth, inputStream, inputPos);
-                        destPos += destWidth;
-                    } else {
-                        for (int sourceX = sourceMinX; sourceX <= sourceMaxX; sourceX += sourceStepX) {
-                            long inputPos = sourcePosY + sourceX;
-                            destBuffer.readFrom(destPos, 1, inputStream, inputPos);
-                            destPos++;
-                        }
-                    }
-                }
-                pm.worked(1);
-            }
-        } finally {
-            pm.done();
-        }
-    }
-
-    private ImageInputStream getOrCreateImageInputStream(Band band, File file) {
-        ImageInputStream inputStream = getImageInputStream(band);
-        if (inputStream == null) {
-            try {
-                inputStream = new FileImageInputStream(file);
-            } catch (IOException e) {
-                SystemUtils.LOG.log(Level.WARNING,
-                        "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",
-                        e);
-            }
-            if (inputStream == null) {
-                return null;
-            }
-            bandInputStreams.put(band, inputStream);
-        }
-        return inputStream;
-    }
-
-    private ImageInputStream getImageInputStream(Band band) {
-        if (bandInputStreams != null) {
-            return bandInputStreams.get(band);
-        }
-        return null;
+                                          ProgressMonitor pm) {
     }
 }
