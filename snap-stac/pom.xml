@@ -38,10 +38,23 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-geotiff</artifactId>
+            <artifactId>lib-gdal</artifactId>
+            <version>${snap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-writer</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
 
         <!--dependency>
             <groupId>org.orbisgis</groupId>
@@ -67,10 +80,27 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.*</publicPackage>
                     </publicPackages>
+                    <moduleDependencies>
+                        <dependency>
+                            <id>org.esa.snap:snap-gdal-reader</id>
+                            <type>spec</type>
+                            <explicitValue>org.esa.snap.snap.gdal.reader</explicitValue>
+                        </dependency>
+                        <dependency>
+                            <id>org.esa.snap:snap-gdal-writer</id>
+                            <type>spec</type>
+                            <explicitValue>org.esa.snap.snap.gdal.writer</explicitValue>
+                        </dependency>
+                        <dependency>
+                            <id>org.esa.snap:lib-gdal</id>
+                            <type>impl</type>
+                        </dependency>
+                    </moduleDependencies>
                 </configuration>
             </plugin>
             <plugin>
