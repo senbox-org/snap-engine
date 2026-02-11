@@ -137,4 +137,50 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
                     lib.getDefaultYUnit().orElse(null), newProfiles, newSchema);
         });
     }
+
+    @Override
+    public boolean renameProfile(UUID libraryId, UUID profileId, String newName) {
+        Objects.requireNonNull(libraryId); Objects.requireNonNull(profileId); Objects.requireNonNull(newName);
+        final boolean[] changed = {false};
+
+        libraries.computeIfPresent(libraryId, (id, lib) -> {
+            var copy = new ArrayList<>(lib.getProfiles());
+            for (int i=0;i<copy.size();i++) {
+                var p = copy.get(i);
+                if (profileId.equals(p.getId())) {
+                    if (!newName.equals(p.getName())) {
+                        copy.set(i, new SpectralProfile(p.getId(), newName, p.getSignature(), p.getAttributes(), p.getSourceRef().orElse(null)));
+                        changed[0] = true;
+                    }
+                    break;
+                }
+            }
+            return changed[0]
+                    ? new SpectralLibrary(lib.getId(), lib.getName(), lib.getAxis(), lib.getDefaultYUnit().orElse(null), copy, lib.getSchema())
+                    : lib;
+        });
+        return changed[0];
+    }
+
+    @Override
+    public boolean setProfileAttribute(UUID libraryId, UUID profileId, String key, AttributeValue value) {
+        Objects.requireNonNull(libraryId); Objects.requireNonNull(profileId); Objects.requireNonNull(key); Objects.requireNonNull(value);
+        final boolean[] changed = {false};
+
+        libraries.computeIfPresent(libraryId, (id, lib) -> {
+            var copy = new ArrayList<>(lib.getProfiles());
+            for (int i=0;i<copy.size();i++) {
+                var p = copy.get(i);
+                if (profileId.equals(p.getId())) {
+                    copy.set(i, p.withAttribute(key, value));
+                    changed[0] = true;
+                    break;
+                }
+            }
+            return changed[0]
+                    ? new SpectralLibrary(lib.getId(), lib.getName(), lib.getAxis(), lib.getDefaultYUnit().orElse(null), copy, lib.getSchema())
+                    : lib;
+        });
+        return changed[0];
+    }
 }

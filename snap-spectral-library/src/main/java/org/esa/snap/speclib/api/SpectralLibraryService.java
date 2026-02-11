@@ -32,4 +32,6 @@ public interface SpectralLibraryService {
     );
 
     void addAttributeToLibrary(UUID libraryId, AttributeDef def, AttributeValue valueForExistingProfilesIfMissing);
+    boolean renameProfile(UUID libraryId, UUID profileId, String newName);
+    boolean setProfileAttribute(UUID libraryId, UUID profileId, String key, AttributeValue value);
 }
