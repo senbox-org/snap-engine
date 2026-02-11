@@ -3,9 +3,7 @@ package org.esa.snap.speclib.impl;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.speclib.api.SpectralLibraryService;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
-import org.esa.snap.speclib.model.SpectralAxis;
-import org.esa.snap.speclib.model.SpectralLibrary;
-import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -117,5 +115,26 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
                                                     String yUnit,
                                                     String productId) {
         return extractor.extract(name, axis, bands, x, y, level, yUnit, productId);
+    }
+
+    @Override
+    public void addAttributeToLibrary(UUID libraryId, AttributeDef def, AttributeValue fillValue) {
+        Objects.requireNonNull(libraryId); Objects.requireNonNull(def); Objects.requireNonNull(fillValue);
+
+        libraries.compute(libraryId, (id, lib) -> {
+            if (lib == null) {
+                throw new NoSuchElementException("library not found: " + libraryId);
+            }
+
+            AttributeSchema newSchema = new AttributeSchema(lib.getSchema().asMap());
+            newSchema.put(def);
+
+            List<SpectralProfile> newProfiles = lib.getProfiles().stream()
+                    .map(p -> p.getAttribute(def.getKey()).isPresent() ? p : p.withAttribute(def.getKey(), fillValue))
+                    .toList();
+
+            return new SpectralLibrary(lib.getId(), lib.getName(), lib.getAxis(),
+                    lib.getDefaultYUnit().orElse(null), newProfiles, newSchema);
+        });
     }
 }
