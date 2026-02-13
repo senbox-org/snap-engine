@@ -17,6 +17,7 @@ package org.esa.snap.stac.io;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Band;
@@ -27,7 +28,6 @@ import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.stac.StacItem;
 import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.JsonUtils;
@@ -37,12 +37,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class STACProductWriter extends AbstractProductWriter {
-
-    private static final GeoTiffProductWriterPlugIn geoTiffProductWriterPlugIn = new GeoTiffProductWriterPlugIn();
 
     private final Map<Band, ProductWriter> bandWriterMap = new HashMap<>();
     private final Map<Band, Band> bandMap = new HashMap<>();
@@ -81,7 +80,10 @@ public class STACProductWriter extends AbstractProductWriter {
 
         if (singleBand) {
             for (Band srcBand : srcProduct.getBands()) {
-                ProductWriter bandWriter = geoTiffProductWriterPlugIn.createWriterInstance();
+                ProductWriter bandWriter = createWriterInstance();
+                if (bandWriter == null) {
+                    throw new IOException("No writer found for GDAL-GTiff-WRITER");
+                }
                 imageFile = new File(imageFile.getParentFile(), baseName + "_" + srcBand.getName() + STACProductReaderPlugIn.IMAGE_GEOTIFF_EXT);
 
                 Product trgProduct = new Product(srcProduct.getName(), srcProduct.getProductType(), srcProduct.getSceneRasterWidth(), srcProduct.getSceneRasterHeight());
@@ -107,7 +109,10 @@ public class STACProductWriter extends AbstractProductWriter {
                 bandMap.put(srcBand, trgBand);
             }
         } else {
-            ProductWriter bandWriter = geoTiffProductWriterPlugIn.createWriterInstance();
+            ProductWriter bandWriter = createWriterInstance();
+            if (bandWriter == null) {
+                throw new IOException("No writer found for GDAL-GTiff-WRITER");
+            }
             bandWriter.writeProductNodes(srcProduct, imageFile);
 
             stacItem.addAsset(Assets.raster, "Raster image", null,
@@ -120,6 +125,14 @@ public class STACProductWriter extends AbstractProductWriter {
         }
 
         writeProductMetadata(imageFile, stacItem);
+    }
+
+    private ProductWriter createWriterInstance() {
+        Iterator<ProductWriterPlugIn> it = ProductIOPlugInManager.getInstance().getWriterPlugIns("GDAL-GTiff-WRITER");
+        if (it.hasNext()) {
+            return it.next().createWriterInstance();
+        }
+        return null;
     }
 
     private void writeProductMetadata(final File imageFile, final StacItem stacItem) throws IOException {

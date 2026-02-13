@@ -310,7 +310,17 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
             TIFFImageMetadata imageMetadata = getImageMetadata();
             TIFFField field = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
             if (field != null) {
-                noDataValue = field.getAsDouble(0);
+                String strValue = field.getAsString(0);
+
+                if (strValue != null) {
+                    strValue = strValue.trim();
+
+                    if (strValue.equalsIgnoreCase("nan")) {
+                        noDataValue = Double.NaN;
+                    } else {
+                        noDataValue = Double.valueOf(strValue);
+                    }
+                }
             }
         } catch(IOException e) {}
         return noDataValue;
