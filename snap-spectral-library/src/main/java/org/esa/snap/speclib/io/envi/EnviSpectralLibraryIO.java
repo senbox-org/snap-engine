@@ -87,7 +87,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         String[] spectraNames = parser.getStrings(KEY_SPECTRA_NAMES);
         if (spectraNames.length == 0) {
             spectraNames = new String[lines];
-            for (int i = 0; i < lines; i++) spectraNames[i] = "Spectrum_" + (i + 1);
+            for (int i = 0; i < lines; i++) {
+                spectraNames[i] = "Spectrum_" + (i + 1);
+            }
         } else if (spectraNames.length != lines) {
             throw new IOException("Invalid SLI header: spectra names count must match lines");
         }
@@ -112,13 +114,17 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         List<SpectralProfile> profiles = new ArrayList<>(lines);
         try (ImageInputStream in = new FileImageInputStream(dataFile)) {
             in.setByteOrder(order);
-            if (offset > 0) in.seek(offset);
+            if (offset > 0) {
+                in.seek(offset);
+            }
 
             for (int y = 0; y < lines; y++) {
                 double[] values = new double[samples];
                 for (int x = 0; x < samples; x++) {
                     double v = readValueAsDouble(in, enviTypeId);
-                    if (Double.compare(v, nodataVal) == 0) v = Double.NaN;
+                    if (Double.compare(v, nodataVal) == 0) {
+                        v = Double.NaN;
+                    }
                     values[x] = v;
                 }
                 SpectralSignature sig = SpectralSignature.of(values);
@@ -128,7 +134,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         }
 
         String libName = stripExtension(hdrPath.getFileName().toString());
-        return new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, new AttributeSchema());
+        SpectralLibrary lib = new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, new AttributeSchema());
+
+        return EnviCsvSidecarSupport.mergeIfPresent(lib, hdrPath);
     }
 
     @Override
@@ -150,7 +158,6 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
 
         double nodataVal = DEFAULT_NODATA;
 
-        // write header
         try (BufferedWriter w = Files.newBufferedWriter(hdrPath, StandardCharsets.UTF_8)) {
             w.write(EnviConstants.FIRST_LINE);
             w.newLine();
@@ -189,11 +196,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
             }
             out.flush();
         }
+
+        EnviCsvSidecarSupport.writeIfNeeded(library, hdrPath);
     }
-
-
-
-    // ---------------- helpers ----------------
 
 
 
@@ -253,7 +258,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         for (int i = 0; i < values.length; i++) {
             w.write("  ");
             w.write(formatDouble(values[i]));
-            if (i < values.length - 1) w.write(",");
+            if (i < values.length - 1) {
+                w.write(",");
+            }
             if ((i + 1) % perLine == 0 || i == values.length - 1) {
                 w.newLine();
             }
@@ -270,7 +277,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         for (int i = 0; i < values.length; i++) {
             w.write("  ");
             w.write(values[i]);
-            if (i < values.length - 1) w.write(",");
+            if (i < values.length - 1) {
+                w.write(",");
+            }
             if ((i + 1) % perLine == 0 || i == values.length - 1) {
                 w.newLine();
             }
