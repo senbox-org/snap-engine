@@ -249,27 +249,142 @@ public class Graticule {
         }
 
 
-//        final GeoPos geoDelta = getGeoDelta(geoCoding, raster);
         boolean forceCheckForPolar = false;
         final GeoInfo geoInfo = new GeoInfo(geoCoding, raster, forceCheckForPolar);
 
-        boolean autoBoth = (latMajorStep == 0 && lonMajorStep == 0) ? true : false;
-        if (latMajorStep == 0) {
-            double tmpLatMajorStep =  geoInfo.latSpan / desiredNumGridLines;
 
-            latMajorStep = getSensibleDegreeIncrement(tmpLatMajorStep);
+        if (latMajorStep == 0 || lonMajorStep == 0) {
+
+            int numGridlinesLat = desiredNumGridLines;
+            int numGridlinesLon = desiredNumGridLines;
+
+            boolean globalLat = false;
+            boolean globalLon = false;
+            boolean halfGlobalLon = false;
+
+
+            if (geoInfo.latSpan >= 75) {
+                globalLat = true;
+            }
+
+            if (geoInfo.lonSpan >= 200) {
+                globalLon = true;
+            } else if (geoInfo.lonSpan >= 75) {
+                halfGlobalLon = true;
+            }
+
+
+            double MAX_LAT_MAJOR_STEP_DEFAULT = 30;
+            double MAX_LON_MAJOR_STEP_DEFAULT = 45;
+
+            double MAX_LAT_STEP_POLAR = 10;
+            double MAX_LON_STEP_POLAR = 15;
+
+
+            double LAT_STEP_GLOBAL_CYLINDRICAL = 30;
+            double LON_STEP_GLOBAL_CYLINDRICAL = 30;
+            double LON_STEP_HALF_GLOBAL_CYLINDRICAL = 30;
+
+
+
+            double LAT_STEP_GLOBAL = 15;
+            double LON_STEP_GLOBAL = 45;
+            double LON_STEP_HALF_GLOBAL = 15;
+
+            
+
+            if (latMajorStep == 0) {
+                if (globalLat) {
+                    if (geoInfo.cylindrical) {
+                        latMajorStep = LAT_STEP_GLOBAL_CYLINDRICAL;
+                    } else {
+                        latMajorStep = LAT_STEP_GLOBAL;
+                    }
+                } else {
+                    double tmpLatMajorStep = geoInfo.latSpan / numGridlinesLat;
+                    latMajorStep = getSensibleDegreeIncrement(tmpLatMajorStep);
+
+                    if (latMajorStep >= MAX_LAT_MAJOR_STEP_DEFAULT) {
+                        latMajorStep = MAX_LAT_MAJOR_STEP_DEFAULT;
+                    }
+                }
+
+                if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+                    if (latMajorStep > MAX_LAT_STEP_POLAR) {
+                        latMajorStep = MAX_LAT_STEP_POLAR;
+                    }
+                }
+
+            }
+
+
+            if (lonMajorStep == 0) {
+                if (globalLon) {
+                    if (geoInfo.cylindrical) {
+                        lonMajorStep = LON_STEP_GLOBAL_CYLINDRICAL;
+                    } else {
+                        lonMajorStep = LON_STEP_GLOBAL;
+                    }
+                } else if (halfGlobalLon) {
+                    if (geoInfo.cylindrical) {
+                        lonMajorStep = LON_STEP_HALF_GLOBAL_CYLINDRICAL;
+                    } else {
+                        lonMajorStep = LON_STEP_HALF_GLOBAL;
+                    }
+                } else {
+                    double tmpLonMajorStep = geoInfo.lonSpan / numGridlinesLon;
+                    lonMajorStep = getSensibleDegreeIncrement(tmpLonMajorStep);
+
+                    if (lonMajorStep >= MAX_LON_MAJOR_STEP_DEFAULT) {
+                        lonMajorStep = MAX_LON_MAJOR_STEP_DEFAULT;
+                    }
+
+                }
+
+                if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+                    if (lonMajorStep > MAX_LON_STEP_POLAR) {
+                        lonMajorStep = MAX_LON_STEP_POLAR;
+                    }
+                }
+
+
+            }
+
+
+            boolean matchLatLon = false;
+
+            if (latMajorStep == 0 && lonMajorStep == 0) {
+                if (!geoInfo.southPoleCrossed && !geoInfo.northPoleCrossed && !globalLon && !globalLat && !halfGlobalLon) {
+                    matchLatLon = true;
+                }
+            }
+
+
+            if (matchLatLon) {
+                double minMajorStep = Math.min(latMajorStep, lonMajorStep);
+                latMajorStep = minMajorStep;
+                lonMajorStep = minMajorStep;
+
+                if (latMajorStep > MAX_LAT_MAJOR_STEP_DEFAULT) {
+                    latMajorStep = MAX_LAT_MAJOR_STEP_DEFAULT;
+                }
+            }
+
+            // final sanity check because step sizes cannot be zero
+            if (latMajorStep == 0) {
+                latMajorStep = ONE_MINUTE;
+            }
+            if (lonMajorStep == 0) {
+                lonMajorStep = ONE_MINUTE;
+            }
+
         }
 
-        if (lonMajorStep == 0) {
-            double tmpLonMajorStep = geoInfo.lonSpan / desiredNumGridLines;
 
-            lonMajorStep = getSensibleDegreeIncrement(tmpLonMajorStep);
-        }
 
-        if (autoBoth) {
-            latMajorStep = Math.min(latMajorStep, lonMajorStep);
-            lonMajorStep = latMajorStep;
-        }
+
+
+
 
 //        final int desiredMinorSteps = getDesiredMinorSteps(raster);
 //        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
@@ -307,18 +422,12 @@ public class Graticule {
             tolerance = toleranceCylindrical;
             desiredMinorSteps = desiredMinorStepsCylindrical;
         } else if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
-            if (desiredMinorSteps < 256) {
-                desiredMinorSteps = 256;
-            }
-            tolerance = 0;
+            // todo TESTING
+//            if (desiredMinorSteps < 256) {
+//                desiredMinorSteps = 256;
+//            }
+//            tolerance = 0;
         }
-
-
-//        if (geoInfo.cylindrical) {
-//            // todo should this be 1?
-//            // todo also add option in GUI to enforce/disable this?
-//            desiredMinorSteps = 4;
-//        }
 
 
 
@@ -411,8 +520,11 @@ public class Graticule {
 
 
     static double getSensibleDegreeIncrement(double degreeIncrement) {
-        if (degreeIncrement > 30.0) {
-            return 30.0;
+        if (degreeIncrement >= 45) {
+            return 45.0;
+        } else if (degreeIncrement >= 15.0) {
+            // if each division is greater than 15 degrees then round to nearest 15 degrees
+            return 15.0 * Math.round((degreeIncrement / 15.0));
         } else if (degreeIncrement >= 5.0) {
             // if each division is greater than 5 degrees then round to nearest 5 degrees
             return 5.0 * Math.round((degreeIncrement / 5.0));
@@ -506,8 +618,9 @@ public class Graticule {
 
         double pixelX;
         double prevPixelX = -1;
-        boolean allowGap = false;  // todo Look more into this
+        boolean allowGap = false;  // todo Look more into this  level-2 files allow gaps the rest do not allow
         boolean allowSecondIdenticalParallel = true;
+        int NUM_NULL_STEPS_TO_TRIGGER_A_GAP = 2;  // max steps tested before gap is affirmed
 
 
 
@@ -526,122 +639,150 @@ public class Graticule {
         int parallelsCount = 0;
 
 
+
         for (double parallelLat : parellelsLatsArrayList) {
-            boolean twoFound = false;
 
-
-            List<Coord> parallel1 = new ArrayList<>();
+            List<Coord> parallel1a = new ArrayList<>();
             List<Coord> parallel1b = new ArrayList<>();
-            List<Coord> parallel2 = new ArrayList<>();
+            List<Coord> parallel2a = new ArrayList<>();
+            List<Coord> parallel2b = new ArrayList<>();
 
+            int gap1StepsCount = 0;
+            int gap2StepsCount = 0;
+            
             Coord[] coords;
 
-            boolean found = false;
-            boolean finished = false;
+            boolean foundParallel1a = false;
+            boolean finishedParallel1a = false;
 
-            boolean found_1b = false;
-            boolean finished_1b = false;
+
+            boolean foundParallel1b = false;
+            boolean finishedParallel1b = false;
+
+            boolean foundParallel2a = false;
+            boolean finishedParallel2a = false;
+
+            boolean foundParallel2b = false;
+            boolean finishedParallel2b = false;
+
 
             prevPixelX = -1;
+
 
             for (double step = 0; step <= minorSteps; step += 1.0) {
                 pixelX = (int) Math.floor((raster.getRasterWidth() - 1) * step / minorSteps);
                 if (pixelX != prevPixelX) {
 
                     coords = getCoordParallel(parallelLat, pixelX, raster, tolerance, interpolate);
-                    boolean currentIsTwo = false;
 
                     if (coords != null) {
-                        if (coords[0] != null && coords[1] != null) {
-                            twoFound = true;
-                            currentIsTwo = true;
-                        }
-
-                        if (twoFound && !currentIsTwo) {
-                            continue;
-                        }
-
-
+                        
                         if (coords[0] != null) {
 
-                            if (!found) {
-                                // need to look back for actual intersection
-                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
-                                if (pixelX > 0) {
-                                    for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
-                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                parallel1.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                            gap1StepsCount = 0;
+
+                            if (!foundParallel1a) {
+                                Coord leftEdgeCoord = findLeftEdgeCoord(0, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                if (leftEdgeCoord != null) {
+                                    parallel1a.add(leftEdgeCoord);
                                 }
-                                found = true;
-                            } else if (finished && !found_1b) {
-                                // need to look back for actual intersection
-                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
-                                if (pixelX > 0) {
-                                    for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
-                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                parallel1b.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                                foundParallel1a = true;
+                                
+                            } else if (finishedParallel1a && !foundParallel1b) {
+                                Coord leftEdgeCoord = findLeftEdgeCoord(0, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                if (leftEdgeCoord != null) {
+                                    parallel1b.add(leftEdgeCoord);
                                 }
-                                found_1b = true;
+                                foundParallel1b = true;
                             }
 
 
-                            if (!finished || allowGap) {
-                                parallel1.add(coords[0]);
-                            } else if (!finished_1b || allowGap) {
+                            if (!finishedParallel1a || allowGap) {
+                                parallel1a.add(coords[0]);
+                            } else if (!finishedParallel1b || allowGap) {
                                 parallel1b.add(coords[0]);
                             }
 
                         } else {
-                            if (found && !finished) {
-                                // need to look back for actual intersection
-                                // Start with current pixel and step backward until first valid geo pixel is found
-                                if (pixelX <= (raster.getRasterWidth() - 1)) {
-                                    for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
-                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                parallel1.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                            if (foundParallel1a && !finishedParallel1a) {
+                                Coord rightEdgeCoord = findRightEdgeCoord(0, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                if (rightEdgeCoord != null) {
+                                    parallel1a.add(rightEdgeCoord);
                                 }
 
-                                finished = true;
-                            } else if (found_1b && !finished_1b) {
-                                // need to look back for actual intersection
-                                // Start with current pixel and step backward until first valid geo pixel is found
-                                if (pixelX <= (raster.getRasterWidth() - 1)) {
-                                    for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
-                                        Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                parallel1b.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                                if (!allowGap && gap1StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                    finishedParallel1a = true;
+                                } else {
+                                    gap1StepsCount++;
                                 }
 
-                                finished_1b = true;
+                            } else if (foundParallel1b && !finishedParallel1b) {
+                                Coord rightEdgeCoord = findRightEdgeCoord(0, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                if (rightEdgeCoord != null) {
+                                    parallel1b.add(rightEdgeCoord);
+                                }
+
+                                if (!allowGap && gap1StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                    finishedParallel1b = true;
+                                } else {
+                                    gap1StepsCount++;
+                                }
                             }
                         }
 
 
-                        if (allowSecondIdenticalParallel && coords[1] != null) {
-                            parallel2.add(coords[1]);
+                        if (allowSecondIdenticalParallel) {
+                            if (coords[1] != null) {
+
+                                gap2StepsCount = 0;
+
+                                if (!foundParallel2a) {
+                                    Coord leftEdgeCoord = findLeftEdgeCoord(1, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                    if (leftEdgeCoord != null) {
+                                        parallel2a.add(leftEdgeCoord);
+                                    }
+                                    
+                                    foundParallel2a = true;
+                                } else if (finishedParallel2a && !foundParallel2b) {
+                                    Coord leftEdgeCoord = findLeftEdgeCoord(1, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                    if (leftEdgeCoord != null) {
+                                        parallel2b.add(leftEdgeCoord);
+                                    }
+                                    foundParallel2b = true;
+                                }
+
+                                if (!finishedParallel2a || allowGap) {
+                                    parallel2a.add(coords[1]);
+                                } else if (!finishedParallel2b || allowGap) {
+                                    parallel2b.add(coords[1]);
+                                }
+
+                            } else {
+                                if (foundParallel2a && !finishedParallel2a) {
+                                    Coord rightEdgeCoord = findRightEdgeCoord(1, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                    if (rightEdgeCoord != null) {
+                                        parallel2a.add(rightEdgeCoord);
+                                    }
+
+                                    if (!allowGap && gap2StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                        finishedParallel2a = true;
+                                    } else {
+                                        gap2StepsCount++;
+                                    }
+                                } else if (foundParallel2b && !finishedParallel2b) {
+                                    Coord rightEdgeCoord = findRightEdgeCoord(1, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
+                                    if (rightEdgeCoord != null) {
+                                        parallel2b.add(rightEdgeCoord);
+                                    }
+
+                                    if (!allowGap && gap2StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                        finishedParallel2b = true;
+                                    } else {
+                                        gap2StepsCount++;
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
@@ -649,17 +790,29 @@ public class Graticule {
                 prevPixelX = pixelX;
             }
 
-            
-            if (!parallel1.isEmpty()) {
-                parallelsList.add(parallel1);
+            // todo Determine if needed or if needs users option
+            double minPoints = Math.floor(0.1 *minorSteps);
+            if (minPoints < 4) {
+                minPoints = 4;
+            }
+            // todo TEMP
+            minPoints = 1;
+
+
+            if (!parallel1a.isEmpty() && parallel1a.size() > minPoints) {
+                parallelsList.add(parallel1a);
             }
 
-            if (!parallel1b.isEmpty()) {
+            if (!parallel1b.isEmpty() && parallel1b.size() > minPoints) {
                 parallelsList.add(parallel1b);
             }
 
-            if (!parallel2.isEmpty()) {
-                parallelsList.add(parallel2);
+            if (!parallel2a.isEmpty() && parallel2a.size() > minPoints) {
+                parallelsList.add(parallel2a);
+            }
+
+            if (!parallel2b.isEmpty() && parallel2b.size() > minPoints) {
+                parallelsList.add(parallel2b);
             }
 
             parallelsCount++;
@@ -674,6 +827,47 @@ public class Graticule {
     }
 
 
+
+
+    static Coord findLeftEdgeCoord(int index, double pixelX, double prevPixelX, double parallelLat, RasterDataNode raster, double tolerance, boolean interpolate) {
+
+        // need to look back for actual intersection
+        // Go back to previous pixel and step forward until first valid geo pixel encountered.
+        
+        if (pixelX > 0) {
+            for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
+                Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
+                if (coordsInner != null) {
+                    if (coordsInner[index] != null) {
+                        return coordsInner[index];
+                    }
+                }
+            }
+        }
+        
+        return null;
+
+    }
+
+    static Coord findRightEdgeCoord(int index, double pixelX, double prevPixelX, double parallelLat, RasterDataNode raster, double tolerance, boolean interpolate) {
+
+        // need to look back for actual intersection
+        // Start with current pixel and step backward until first valid geo pixel is found
+        
+         if (pixelX <= (raster.getRasterWidth() - 1)) {
+             
+            for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
+                Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
+                if (coordsInner != null) {
+                    if (coordsInner[index] != null) {
+                        return coordsInner[index];
+                    }
+                }
+            }
+        }
+         
+         return null;
+    }
 
 
     /**
@@ -895,9 +1089,9 @@ public class Graticule {
         }
 
         // todo this may be optional
-        if (max == 90 && !lat90Found) {
-            parellelsLatsArrayList.add(90.0);
-        }
+//        if (max == 90 && !lat90Found) {
+//            parellelsLatsArrayList.add(90.0);
+//        }
 
         // southern hemisphere
         if (min < 0) {
@@ -916,9 +1110,9 @@ public class Graticule {
         }
 
         // todo this may be optional
-        if (min == -90 && !latNeg90Found) {
-            parellelsLatsArrayList.add(-90.0);
-        }
+//        if (min == -90 && !latNeg90Found) {
+//            parellelsLatsArrayList.add(-90.0);
+//        }
 
 
         return parellelsLatsArrayList;
@@ -944,6 +1138,11 @@ public class Graticule {
         if (minorSteps > maxSteps) {
             minorSteps = maxSteps;
         }
+
+        boolean allowGap = false;  // todo Look more into this
+        boolean allowSecondIdenticalMeridian = true;
+        int NUM_NULL_STEPS_TO_TRIGGER_A_GAP = 2;  // max steps tested before gap is affirmed
+
 
 
         int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
@@ -1046,140 +1245,178 @@ public class Graticule {
         int meridiansCount = 0;
         for (double meridianLon : meridianLonsArrayList) {
 
-            List<Coord> meridian1 = new ArrayList<>();
+            List<Coord> meridian1a = new ArrayList<>();
             List<Coord> meridian1b = new ArrayList<>();
-            List<Coord> meridian2 = new ArrayList<>();
+            List<Coord> meridian2a = new ArrayList<>();
+            List<Coord> meridian2b = new ArrayList<>();
 
-            boolean twoFound = false;
-
+            int gap1StepsCount = 0;
+            int gap2StepsCount = 0;
+            
             Coord[] coords;
 
-            boolean found = false;
-            boolean finished = false;
+            boolean foundMeridian1a = false;
+            boolean finishedMeridian1a = false;
 
-            boolean found_1b = false;
-            boolean finished_1b = false;
+            boolean foundMeridian1b = false;
+            boolean finishedMeridian1b = false;
+            
+            boolean foundMeridian2a = false;
+            boolean finishedMeridian2a = false;
+
+            boolean foundMeridian2b = false;
+            boolean finishedMeridian2b = false;
 
             prevPixelY = -1;
-            boolean allowGap = false;  // todo Look more into this
-            boolean allowSecondIdenticalMeridian = true;
+
 
             for (double step = 0; step <= minorSteps; step += 1.0) {
 
                 pixelY = (int) Math.floor((raster.getRasterHeight() - 1) * step / minorSteps);
                 if (pixelY != prevPixelY) {
                     coords = getCoordMeridian(meridianLon, pixelY, raster, tolerance, interpolate);
-                    boolean currentIsTwo = false;
 
                     if (coords != null) {
                         if (coords[0] != null) {
 
-                            if (coords[0] != null && coords[1] != null) {
-                                twoFound = true;
-                                currentIsTwo = true;
-                            }
-
-                            if (twoFound && !currentIsTwo) {
-                                continue;
-                            }
-
-
-
-                            if (!found) {
-                                // need to look back for actual intersection
-                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
-                                if (pixelY > 0) {
-                                    for (double innerPixel = prevPixelY + 1; innerPixel < pixelY; innerPixel += 1.0) {
-                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                meridian1.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                            if (!foundMeridian1a) {
+                                Coord bottomEdgeCoord = findBottomEdgeCoord(0, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                if (bottomEdgeCoord != null) {
+                                    meridian1a.add(bottomEdgeCoord);
                                 }
-                                found = true;
-                            } else if (finished && !found_1b) {
-                                // need to look back for actual intersection
-                                // Go back to previous pixel and step forward until first valid geo pixel encountered.
-                                if (pixelY > 0) {
-                                    for (double innerPixel = prevPixelY + 1; innerPixel < pixelY; innerPixel += 1.0) {
-                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                meridian1b.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+
+                                foundMeridian1a = true;
+                            } else if (finishedMeridian1a && !foundMeridian1b) {
+                                Coord bottomEdgeCoord = findBottomEdgeCoord(0, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                if (bottomEdgeCoord != null) {
+                                    meridian1b.add(bottomEdgeCoord);
                                 }
-                                found_1b = true;
+                                
+                                foundMeridian1b = true;
                             }
 
 
-                            if (!finished || allowGap) {
-                                meridian1.add(coords[0]);
-                            } else if (!finished_1b || allowGap) {
+                            if (!finishedMeridian1a || allowGap) {
+                                meridian1a.add(coords[0]);
+                            } else if (!finishedMeridian1b || allowGap) {
                                 meridian1b.add(coords[0]);
                             }
 
 
                         } else {
-                            if (found && !finished) {
-                                // need to look back for actual intersection
-                                // Start with current pixel and step backward until first valid geo pixel is found
-                                if (pixelY <= (raster.getRasterHeight() - 1)) {
-                                    for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
-                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                meridian1.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                            if (foundMeridian1a && !finishedMeridian1a) {
+                                Coord topEdgeCoord = findTopEdgeCoord(0, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                if (topEdgeCoord != null) {
+                                    meridian1a.add(topEdgeCoord);
                                 }
 
-                                finished = true;
-                            } else if (found_1b && !finished_1b) {
-                                // need to look back for actual intersection
-                                // Start with current pixel and step backward until first valid geo pixel is found
-                                if (pixelY <= (raster.getRasterHeight() - 1)) {
-                                    for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
-                                        Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
-                                        if (coordsInner != null) {
-                                            if (coordsInner[0] != null) {
-                                                meridian1b.add(coordsInner[0]);
-                                                break;
-                                            }
-                                        }
-                                    }
+                                if (!allowGap && gap1StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                    finishedMeridian1a = true;
+                                } else {
+                                    gap1StepsCount++;
+                                }
+                                
+                            } else if (foundMeridian1b && !finishedMeridian1b) {
+                                Coord topEdgeCoord = findTopEdgeCoord(0, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                if (topEdgeCoord != null) {
+                                    meridian1b.add(topEdgeCoord);
                                 }
 
-                                finished_1b = true;
+                                if (!allowGap && gap1StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                    finishedMeridian1b = true;
+                                } else {
+                                    gap1StepsCount++;
+                                }
+                                
                             }
                         }
 
-                        if (allowSecondIdenticalMeridian && coords[1] != null) {
-                            meridian2.add(coords[1]);
+
+
+                        if (allowSecondIdenticalMeridian) {
+                            if (coords[1] != null) {
+
+                                gap2StepsCount = 0;
+
+                                if (!foundMeridian2a) {
+                                    Coord leftEdgeCoord = findBottomEdgeCoord(1, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                    if (leftEdgeCoord != null) {
+                                        meridian2a.add(leftEdgeCoord);
+                                    }
+
+                                    foundMeridian2a = true;
+                                } else if (finishedMeridian2a && !foundMeridian2b) {
+                                    Coord leftEdgeCoord = findBottomEdgeCoord(1, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                    if (leftEdgeCoord != null) {
+                                        meridian2b.add(leftEdgeCoord);
+                                    }
+                                    foundMeridian2b = true;
+                                }
+
+                                if (!finishedMeridian2a || allowGap) {
+                                    meridian2a.add(coords[1]);
+                                } else if (!finishedMeridian2b || allowGap) {
+                                    meridian2b.add(coords[1]);
+                                }
+
+                            } else {
+                                if (foundMeridian2a && !finishedMeridian2a) {
+                                    Coord rightEdgeCoord = findTopEdgeCoord(1, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                    if (rightEdgeCoord != null) {
+                                        meridian2a.add(rightEdgeCoord);
+                                    }
+
+                                    if (!allowGap && gap2StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                        finishedMeridian2a = true;
+                                    } else {
+                                        gap2StepsCount++;
+                                    }
+                                } else if (foundMeridian2b && !finishedMeridian2b) {
+                                    Coord rightEdgeCoord = findTopEdgeCoord(1, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
+                                    if (rightEdgeCoord != null) {
+                                        meridian2b.add(rightEdgeCoord);
+                                    }
+
+                                    if (!allowGap && gap2StepsCount >= NUM_NULL_STEPS_TO_TRIGGER_A_GAP) {
+                                        finishedMeridian2b = true;
+                                    } else {
+                                        gap2StepsCount++;
+                                    }
+                                }
+
+                            }
                         }
+                        
                     }
                 }
 
                 prevPixelY = pixelY;
             }
 
-            if (!meridian1.isEmpty()) {
-                meridiansList.add(meridian1);
+
+            // todo Determine if needed or if needs users option
+            double minPoints = Math.floor(0.1 *minorSteps);
+            if (minPoints < 4) {
+                minPoints = 4;
             }
 
-            if (!meridian1b.isEmpty()) {
-                meridiansList.add(meridian1b);
+
+            if (!meridian1a.isEmpty() && meridian1a.size() > minPoints) {
+                if (!containsExcessMeridianJumps(meridian1a, raster)) {
+                    meridiansList.add(meridian1a);
+                }
             }
 
-            if (!meridian2.isEmpty()) {
-                meridiansList.add(meridian2);
+            if (!meridian1b.isEmpty() && meridian1b.size() > minPoints) {
+                if (!containsExcessMeridianJumps(meridian1b, raster)) {
+                    meridiansList.add(meridian1b);
+                }
+            }
+
+            if (!meridian2a.isEmpty() && meridian2a.size() > minPoints) {
+                if (!containsExcessMeridianJumps(meridian2a, raster)) {
+                    meridiansList.add(meridian2a);
+                }
             }
 
             meridiansCount++;
@@ -1192,6 +1429,101 @@ public class Graticule {
 
 
         return meridiansList;
+    }
+
+    
+    
+    static Coord findBottomEdgeCoord(int index, double pixelY, double prevPixelY, double meridianLon, RasterDataNode raster, double tolerance, boolean interpolate) {
+
+        // need to look back for actual intersection
+        // Go back to previous pixel and step forward until first valid geo pixel encountered.
+
+        if (pixelY > 0) {
+            for (double innerPixel = prevPixelY + 1; innerPixel < pixelY; innerPixel += 1.0) {
+                Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                if (coordsInner != null) {
+                    if (coordsInner[index] != null) {
+                        return coordsInner[index];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+    
+
+    static Coord findTopEdgeCoord(int index, double pixelY, double prevPixelY, double meridianLon, RasterDataNode raster, double tolerance, boolean interpolate) {
+
+        // need to look back for actual intersection
+        // Start with current pixel and step backward until first valid geo pixel is found
+        
+        if (pixelY <= (raster.getRasterHeight() - 1)) {
+            for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
+                Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
+                if (coordsInner != null) {
+                    if (coordsInner[index] != null) {
+                        return coordsInner[index];
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    
+    
+
+    static boolean containsExcessMeridianJumps(List<Coord> meridian1, RasterDataNode raster) {
+
+        if (containsExcessMeridianJumps(meridian1, raster, 0,20)) {
+            return true;
+        }
+
+        if (containsExcessMeridianJumps(meridian1, raster, 2,5)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+
+    static boolean containsExcessMeridianJumps(List<Coord> meridian1, RasterDataNode raster, int maxJumps, double percentPixelsToSetJump) {
+
+        double prevPixelX = -1;
+        double currPixelX = -1;
+        DIRECTION currDirection = DIRECTION.NOT_SET;
+        DIRECTION prevDirection = DIRECTION.NOT_SET;
+        int jumpChangeDirectionCount = 0;
+        for (Coord coord : meridian1) {
+            currPixelX = coord.pixelPos.x;
+
+            if (currPixelX != -1 && prevPixelX != -1) {
+                double deltaX = currPixelX - prevPixelX;
+                double pixelJumpPercent = 100 * deltaX / (raster.getRasterWidth() - 1);
+
+                if (Math.abs(pixelJumpPercent) > percentPixelsToSetJump) {
+                    currDirection = (pixelJumpPercent > 0) ? DIRECTION.ASCENDING : DIRECTION.DESCENDING;
+
+                    if (currDirection != prevDirection) {
+                        jumpChangeDirectionCount++;
+
+                    }
+                    prevDirection = currDirection;
+                }
+
+
+            }
+            prevPixelX = currPixelX;
+        }
+
+        if (jumpChangeDirectionCount > maxJumps) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 

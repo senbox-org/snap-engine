@@ -500,10 +500,12 @@ public class GeoInfo {
             double latSpanCalculated = 0;
 
             if (latSpanCombined.northPoleCrossed) {
-                latSpanCalculated = Math.abs(90 - latSpanCombined.lastLat) + Math.abs(90 - latSpanCombined.firstLat);
+//                latSpanCalculated = Math.abs(90 - latSpanCombined.lastLat) + Math.abs(90 - latSpanCombined.firstLat);
+                latSpanCalculated = Math.abs(90 - latSpanCombined.minLat);
             } else if (latSpanCombined.southPoleCrossed) {
                 // todo fix
-                latSpanCalculated = Math.abs(-90 - latSpanCombined.lastLat) + Math.abs(-90 - latSpanCombined.firstLat);
+//                latSpanCalculated = Math.abs(-90 - latSpanCombined.lastLat) + Math.abs(-90 - latSpanCombined.firstLat);
+                latSpanCalculated = Math.abs(latSpanCombined.maxLat - (-90));
 
             } else {
                 if (latSpanCombined.ascending) {
@@ -717,9 +719,11 @@ public class GeoInfo {
         }
 
         if (northPoleCrossed) {
-            degreesSpanTotal = Math.abs(90 - lastLat) + Math.abs(90 - firstLat);
+//            degreesSpanTotal = Math.abs(90 - lastLat) + Math.abs(90 - firstLat);
+            degreesSpanTotal = Math.abs(90 - minLat);
         } else if (southPoleCrossed) {
-            degreesSpanTotal = Math.abs(-90 - lastLat) + Math.abs(-90 - firstLat);
+//            degreesSpanTotal = Math.abs(-90 - lastLat) + Math.abs(-90 - firstLat);
+            degreesSpanTotal = Math.abs(maxLat - (-90));
         } else {
             degreesSpanTotal = Math.abs(lastLat - firstLat);
         }
