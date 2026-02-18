@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public class PaceOCICachedProductReaderPlugin implements ProductReaderPlugIn {
 
-    private static final String FORMAT_NAME = "PaceOCI_L1B";
+    private static final String FORMAT_NAME = "PaceOCI_L1B caching";
     private static final String DEFAULT_FILE_EXTENSION = ".nc";
     private static final String READER_DESCRIPTION = "PACE OCI L1B Products caching reader";
 

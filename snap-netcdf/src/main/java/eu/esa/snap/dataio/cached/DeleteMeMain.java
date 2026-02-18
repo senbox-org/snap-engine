@@ -2,9 +2,7 @@ package eu.esa.snap.dataio.cached;
 
 import eu.esa.snap.core.dataio.cache.CacheManager;
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +15,10 @@ public class DeleteMeMain {
 
         final File input = new File("C:\\Satellite\\SNAP_test\\sensors_platforms\\PACE\\OCI\\PACE_OCI.20240514T094709.L1B.nc");
         try (Product product = deleteMeReader.readProductNodes(input, null)) {
+            GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+            GeoPos geoPos = sceneGeoCoding.getGeoPos(new PixelPos(0.5, 0.5), null);
+            System.out.println("geoPos = " + geoPos);
+
             System.out.println(cacheManager.getSizeInBytes());
 
             Band band = product.getBand("height");

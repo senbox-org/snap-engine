@@ -30,7 +30,7 @@ public class PaceOCICachedProductReaderPluginTest {
     public void testGetProductFileFilter() {
         final SnapFileFilter productFileFilter = plugin.getProductFileFilter();
 
-        assertEquals("PaceOCI_L1B", productFileFilter.getFormatName());
+        assertEquals("PaceOCI_L1B caching", productFileFilter.getFormatName());
         assertEquals(".nc", productFileFilter.getDefaultExtension());
         assertEquals("PACE OCI L1B Products caching reader (*.nc)", productFileFilter.getDescription());
     }
@@ -40,7 +40,7 @@ public class PaceOCICachedProductReaderPluginTest {
         final String[] formatNames = plugin.getFormatNames();
 
         assertEquals(1, formatNames.length);
-        assertEquals("PaceOCI_L1B", formatNames[0]);
+        assertEquals("PaceOCI_L1B caching", formatNames[0]);
     }
 
     @Test

@@ -1,14 +1,15 @@
 package eu.esa.snap.dataio.cached;
 
 import com.bc.ceres.core.ProgressMonitor;
+import eu.esa.snap.core.dataio.BandFlipY;
 import eu.esa.snap.core.dataio.cache.*;
 import eu.esa.snap.core.datamodel.band.BandUsingReaderDirectly;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
@@ -37,6 +38,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
     private NetcdfFile netcdfFile;
     private ProductCache productCache;
+    private GeoCoding geoCoding;
     private final Map<String, Variable> variablesMap;
 
     /**
@@ -49,6 +51,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         super(readerPlugIn);
 
         variablesMap = new HashMap<>();
+        geoCoding = null;
     }
 
     @Override
@@ -79,6 +82,32 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         product.setAutoGrouping("rhot_blue:rhot_red:rhot_SWIR:qual_blue:qual_red:qual_SWIR:Lt_blue:Lt_red:Lt_SWIR");
 
         return product;
+    }
+
+    @Override
+    public synchronized GeoCoding readGeoCoding(Product product) throws IOException {
+        if (geoCoding == null) {
+            final Band lonBand = product.getBand("longitude");
+            final Band latBand = product.getBand("latitude");
+
+            final int rasterWidth = lonBand.getRasterWidth();
+            final int rasterHeight = lonBand.getRasterHeight();
+            final int size = rasterWidth * rasterHeight;
+
+            final ProductData longitudes = ProductData.createInstance(new float[size]);
+            lonBand.readRasterData(0, 0, rasterWidth, rasterHeight, longitudes);
+           // lonBand.readPixels(0, 0, rasterWidth, rasterHeight, longitudes);
+
+            final ProductData latitudes = ProductData.createInstance(new float[size]);
+            latBand.readRasterData(0, 0, rasterWidth, rasterHeight, latitudes);
+
+            final double[] latitudesDbl = RasterUtils.toDouble((float[]) latitudes.getElems());
+            final double[] longitudesDbl = RasterUtils.toDouble((float[]) longitudes.getElems());
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latitudesDbl, longitudesDbl, rasterWidth, rasterHeight);
+
+            product.setSceneGeoCoding(geoCoding);
+        }
+        return geoCoding;
     }
 
     private void setProductDescription(Product product) {
@@ -217,9 +246,19 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
             rasterDataType = getRasterDataType(variable.getDataType(), false);
         }
 
-        final Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
+        Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
+        if (isGeolocationVariable(variable)) {
+            band = new BandFlipY(band);
+        }
         product.addBand(band);
+        band.setOwner(product);
         return new Band[]{band};
+    }
+
+    // @todo 1 tb write test 2026-02-13
+    static boolean isGeolocationVariable(Variable variable) {
+        final String shortName = variable.getShortName();
+        return shortName.equals("longitude") || shortName.equals("latitude");
     }
 
     private Band[] add3DVariable(Product product, Variable variable) {
