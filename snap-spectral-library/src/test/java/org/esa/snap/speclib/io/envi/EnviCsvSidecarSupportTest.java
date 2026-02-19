@@ -182,7 +182,7 @@ public class EnviCsvSidecarSupportTest {
 
     @Test
     @STTM("SNAP-4129")
-    public void test_mergeIfPresent_mergesAttributesByName_andKeepsMeta() throws Exception {
+    public void test_mergeIfPresent_mergesAttributesByIndex_andKeepsMeta() throws Exception {
         Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(hdr);
 
@@ -196,9 +196,7 @@ public class EnviCsvSidecarSupportTest {
 
         String csvContent = ""
                 + "spectra names,a\n"
-                + "P1,5\n"
-                + ",9\n"
-                + "P3,7\n";
+                + "P1,5\n";
         Files.writeString(csv, csvContent, StandardCharsets.UTF_8);
 
         SpectralLibrary merged = EnviCsvSidecarSupport.mergeIfPresent(enviLib, hdr);
@@ -221,6 +219,7 @@ public class EnviCsvSidecarSupportTest {
         assertEquals(5, mp1.getAttributes().get("a").asInt());
 
         assertTrue(mp2.getAttributes().isEmpty());
+
         assertTrue(merged.getSchema().find("a").isPresent());
     }
 

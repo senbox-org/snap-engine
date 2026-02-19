@@ -62,27 +62,31 @@ public class EnviCsvSidecarSupport {
 
         SpectralLibrary csvLib = new CsvSpectralLibraryIO().read(csvPath);
 
-        Map<String, SpectralProfile> byName = new HashMap<>();
-        for (SpectralProfile p : csvLib.getProfiles()) {
-            if (p != null && p.getName() != null) {
-                byName.put(p.getName(), p);
-            }
-        }
+        List<SpectralProfile> enviProfiles = enviLib.getProfiles();
+        List<SpectralProfile> csvProfiles = csvLib.getProfiles();
 
-        List<SpectralProfile> mergedProfiles = new ArrayList<>(enviLib.getProfiles().size());
+        List<SpectralProfile> mergedProfiles = new ArrayList<>(enviProfiles.size());
         AttributeSchema mergedSchema = new AttributeSchema(enviLib.getSchema().asMap());
 
+        int n = Math.min(enviProfiles.size(), csvProfiles.size());
+        for (int i = 0; i < n; i++) {
+            SpectralProfile pEnvi = enviProfiles.get(i);
+            SpectralProfile pCsv = csvProfiles.get(i);
 
-        for (SpectralProfile pEnvi : enviLib.getProfiles()) {
             SpectralProfile out = pEnvi;
-            SpectralProfile pCsv = byName.get(pEnvi.getName());
+
             if (pCsv != null && pCsv.getAttributes() != null && !pCsv.getAttributes().isEmpty()) {
                 for (var e : pCsv.getAttributes().entrySet()) {
                     out = out.withAttribute(e.getKey(), e.getValue());
                 }
                 mergedSchema.inferFromAttributes(pCsv.getAttributes());
             }
+
             mergedProfiles.add(out);
+        }
+
+        for (int i = n; i < enviProfiles.size(); i++) {
+            mergedProfiles.add(enviProfiles.get(i));
         }
 
         return new SpectralLibrary(
