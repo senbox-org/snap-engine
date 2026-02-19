@@ -152,18 +152,20 @@ public class CsvSpectralLibraryIOTest {
         new CsvSpectralLibraryIO().write(lib, p);
         CsvTable t = CsvUtils.read(p);
 
-        assertEquals(Arrays.asList("spectra names", "a", "bExtra", "zExtra"), t.header());
+        assertEquals(Arrays.asList("spectra names", "a", "bExtra", "zExtra", "wkt"), t.header());
         assertEquals(2, t.rows().size());
 
         assertEquals("P1", t.rows().get(0).get(0));
         assertEquals("1", t.rows().get(0).get(1));
         assertEquals("B", t.rows().get(0).get(2));
         assertEquals("Z", t.rows().get(0).get(3));
+        assertEquals("", t.rows().get(0).get(4));
 
         assertEquals("P2", t.rows().get(1).get(0));
         assertEquals("2", t.rows().get(1).get(1));
         assertEquals("", t.rows().get(1).get(2));
         assertEquals("", t.rows().get(1).get(3));
+        assertEquals("", t.rows().get(1).get(4));
     }
 
     @Test
@@ -179,11 +181,12 @@ public class CsvSpectralLibraryIOTest {
         new CsvSpectralLibraryIO().write(lib, p);
 
         CsvTable t = CsvUtils.read(p);
-        assertEquals(Arrays.asList("spectra names", "arr"), t.header());
+        assertEquals(Arrays.asList("spectra names", "arr", "wkt"), t.header());
         assertEquals(1, t.rows().size());
 
         assertEquals("P", t.rows().get(0).get(0));
         assertEquals("[1,2]", t.rows().get(0).get(1));
+        assertEquals("", t.rows().get(0).get(2));
     }
 
 
@@ -203,5 +206,34 @@ public class CsvSpectralLibraryIOTest {
         SpectralProfile sp = lib.getProfiles().get(0);
         assertEquals("P1", sp.getName());
         assertTrue(sp.getAttributes().isEmpty());
+    }
+
+
+    @Test
+    @STTM("SNAP-4129")
+    public void test_ensureWktInSchema_coversNullAlreadyPresentAndMissing() throws Exception {
+        var m = CsvSpectralLibraryIO.class.getDeclaredMethod("ensureWktInSchema", AttributeSchema.class);
+        m.setAccessible(true);
+
+        AttributeSchema outNull = (AttributeSchema) m.invoke(null, new Object[]{null});
+        assertNotNull(outNull);
+        assertTrue(outNull.asMap().isEmpty());
+        assertTrue(outNull.find(CsvSpectralLibraryIO.COL_WKT).isEmpty());
+
+        Map<String, AttributeDef> withWkt = new LinkedHashMap<>();
+        withWkt.put(CsvSpectralLibraryIO.COL_WKT, AttributeDef.optional(CsvSpectralLibraryIO.COL_WKT, AttributeType.STRING));
+        AttributeSchema hasWkt = new AttributeSchema(withWkt);
+
+        AttributeSchema outHasWkt = (AttributeSchema) m.invoke(null, hasWkt);
+        assertSame(hasWkt, outHasWkt);
+
+        AttributeSchema missingWkt = new AttributeSchema();
+        missingWkt.inferFromAttributes(Map.of("a", AttributeValue.ofInt(1)));
+        assertTrue(missingWkt.find(CsvSpectralLibraryIO.COL_WKT).isEmpty());
+
+        AttributeSchema outAdded = (AttributeSchema) m.invoke(null, missingWkt);
+        assertNotSame(missingWkt, outAdded);
+        assertTrue(outAdded.find("a").isPresent());
+        assertTrue(outAdded.find(CsvSpectralLibraryIO.COL_WKT).isPresent());
     }
 }

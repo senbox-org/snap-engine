@@ -2,9 +2,7 @@ package org.esa.snap.speclib.io.envi;
 
 import org.esa.snap.dataio.envi.EnviConstants;
 import org.esa.snap.speclib.io.csv.CsvSpectralLibraryIO;
-import org.esa.snap.speclib.model.AttributeSchema;
-import org.esa.snap.speclib.model.SpectralLibrary;
-import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -66,7 +64,14 @@ public class EnviCsvSidecarSupport {
         List<SpectralProfile> csvProfiles = csvLib.getProfiles();
 
         List<SpectralProfile> mergedProfiles = new ArrayList<>(enviProfiles.size());
-        AttributeSchema mergedSchema = new AttributeSchema(enviLib.getSchema().asMap());
+
+        Map<String, AttributeDef> mergedMap = new LinkedHashMap<>(enviLib.getSchema().asMap());
+
+        boolean csvHasWkt = csvLib.getSchema().find(CsvSpectralLibraryIO.COL_WKT).isPresent() || csvProfiles.stream().anyMatch(p -> p != null && p.getAttributes().containsKey(CsvSpectralLibraryIO.COL_WKT));
+        if (csvHasWkt && !mergedMap.containsKey(CsvSpectralLibraryIO.COL_WKT)) {
+            mergedMap.put(CsvSpectralLibraryIO.COL_WKT, AttributeDef.optional(CsvSpectralLibraryIO.COL_WKT, AttributeType.STRING));
+        }
+        AttributeSchema mergedSchema = new AttributeSchema(mergedMap);
 
         int n = Math.min(enviProfiles.size(), csvProfiles.size());
         for (int i = 0; i < n; i++) {

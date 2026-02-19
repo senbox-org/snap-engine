@@ -14,7 +14,7 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
 
 
     public static final String COL_SPECTRA_NAMES = "spectra names";
-
+    public static final String COL_WKT = "wkt";
 
     @Override
     public SpectralLibrary read(Path path) throws IOException {
@@ -35,6 +35,10 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
 
         List<SpectralProfile> profiles = new ArrayList<>();
         AttributeSchema schema = new AttributeSchema();
+
+        if (table.header().stream().anyMatch(h -> h != null && h.trim().equalsIgnoreCase(COL_WKT))) {
+            schema = ensureWktInSchema(schema);
+        }
 
         for (int r = 0; r < table.rows().size(); r++) {
             List<String> row = table.rows().get(r);
@@ -60,9 +64,14 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
                     continue;
                 }
 
-                AttributeType type = schema.find(key)
-                        .map(AttributeDef::getType)
-                        .orElseGet(() -> CsvAttributeTypeInference.inferType(raw));
+                AttributeType type;
+                if (COL_WKT.equalsIgnoreCase(key)) {
+                    type = AttributeType.STRING;
+                } else {
+                    type = schema.find(key)
+                            .map(AttributeDef::getType)
+                            .orElseGet(() -> CsvAttributeTypeInference.inferType(raw));
+                }
 
                 AttributeValue parsed = CsvAttributeCodec.tryParse(type, raw);
                 if (parsed != null) {
@@ -92,41 +101,33 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
         cols.add(COL_SPECTRA_NAMES);
 
         AttributeSchema schema = library.getSchema();
-        cols.addAll(schema.asMap().keySet());
+        Map<String, AttributeDef> schemaMap = schema.asMap();
+        cols.addAll(schemaMap.keySet());
 
         SortedSet<String> extra = new TreeSet<>();
         for (SpectralProfile p : library.getProfiles()) {
             for (String k : p.getAttributes().keySet()) {
-                if (!schema.asMap().containsKey(k)) {
+                if (!schemaMap.containsKey(k) && !COL_WKT.equalsIgnoreCase(k)) {
                     extra.add(k);
                 }
             }
         }
+
+        cols.remove(COL_WKT);
         cols.addAll(extra);
+        cols.add(COL_WKT);
 
         List<String> header = new ArrayList<>(cols);
         List<List<String>> rows = new ArrayList<>();
-
-        List<AttributeDef> defsForSidecar = new ArrayList<>();
-        for (int i = 1; i < header.size(); i++) {
-            String key = header.get(i);
-            AttributeDef def = schema.find(key).orElse(null);
-            if (def == null) {
-                AttributeType inferred = inferTypeFromProfiles(library.getProfiles(), key);
-                def = AttributeDef.optional(key, inferred);
-            }
-            defsForSidecar.add(def);
-        }
 
         for (SpectralProfile p : library.getProfiles()) {
             List<String> row = new ArrayList<>(header.size());
             for (String col : header) {
                 if (COL_SPECTRA_NAMES.equalsIgnoreCase(col.trim())) {
                     row.add(p.getName());
-                    continue;
+                } else {
+                    row.add(CsvAttributeCodec.format(p.getAttributes().get(col)));
                 }
-                AttributeValue v = p.getAttributes().get(col);
-                row.add(CsvAttributeCodec.format(v));
             }
             rows.add(row);
         }
@@ -134,6 +135,20 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
         CsvUtils.write(path, header, rows);
     }
 
+
+    private static AttributeSchema ensureWktInSchema(AttributeSchema schema) {
+        if (schema == null) {
+            return new AttributeSchema();
+        }
+        if (schema.find(COL_WKT).isPresent()) {
+            return schema;
+        }
+
+        Map<String, AttributeDef> m = new LinkedHashMap<>(schema.asMap());
+        m.put(COL_WKT, AttributeDef.optional(COL_WKT, AttributeType.STRING));
+
+        return new AttributeSchema(m);
+    }
 
 
     private static int findNameColumn(List<String> header) {
@@ -159,16 +174,6 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
         }
         String v = row.get(idx);
         return v == null ? "" : v;
-    }
-
-    private static AttributeType inferTypeFromProfiles(List<SpectralProfile> profiles, String key) {
-        for (SpectralProfile p : profiles) {
-            AttributeValue v = p.getAttributes().get(key);
-            if (v != null) {
-                return v.getType();
-            }
-        }
-        return AttributeType.STRING;
     }
 
     private static String stripExtension(String name) {
