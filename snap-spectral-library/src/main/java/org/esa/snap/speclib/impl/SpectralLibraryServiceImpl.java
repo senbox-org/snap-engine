@@ -1,6 +1,7 @@
 package org.esa.snap.speclib.impl;
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.speclib.api.SpectralLibraryService;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
 import org.esa.snap.speclib.model.*;
@@ -115,6 +116,47 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
                                                     String yUnit,
                                                     String productId) {
         return extractor.extract(name, axis, bands, x, y, level, yUnit, productId);
+    }
+
+    @Override
+    public List<SpectralProfile> extractProfiles(String baseName,
+                                                 SpectralAxis axis,
+                                                 List<Band> bands,
+                                                 List<PixelPos> pixels,
+                                                 int level,
+                                                 String yUnit,
+                                                 String productId) {
+
+        Objects.requireNonNull(baseName, "baseName must not be null");
+        Objects.requireNonNull(axis, "axis must not be null");
+        Objects.requireNonNull(bands, "bands must not be null");
+        Objects.requireNonNull(pixels, "pixels must not be null");
+        Objects.requireNonNull(yUnit, "yUnit must not be null");
+        Objects.requireNonNull(productId, "productId must not be null");
+
+        if (pixels.isEmpty() || bands.isEmpty()) {
+            return List.of();
+        }
+
+        List<SpectralProfile> out = new ArrayList<>(pixels.size());
+        int ii = 1;
+
+        for (PixelPos p : pixels) {
+            if (p == null) {
+                continue;
+            }
+
+            String name = baseName + "__" + ii;
+            int x = (int) p.x;
+            int y = (int) p.y;
+
+            extractor.extract(name, axis, bands, x, y, level, yUnit, productId)
+                    .ifPresent(out::add);
+
+            ii++;
+        }
+
+        return Collections.unmodifiableList(out);
     }
 
     @Override

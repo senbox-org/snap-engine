@@ -1,6 +1,7 @@
 package org.esa.snap.speclib.api;
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.speclib.model.*;
 
 import java.util.List;
@@ -26,6 +27,16 @@ public interface SpectralLibraryService {
             List<Band> bands,
             int x,
             int y,
+            int level,
+            String yUnit,
+            String productId
+    );
+
+    List<SpectralProfile> extractProfiles(
+            String baseName,
+            SpectralAxis axis,
+            List<Band> bands,
+            List<PixelPos> pixels,
             int level,
             String yUnit,
             String productId
