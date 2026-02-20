@@ -7,6 +7,7 @@ import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,14 @@ public class SpectralLibraryAttributeValueParserTest {
         assertEquals(7, SpectralLibraryAttributeValueParser.parseForType(AttributeType.INT, Integer.valueOf(7)).asInt());
         assertEquals(9L, SpectralLibraryAttributeValueParser.parseForType(AttributeType.LONG, Long.valueOf(9L)).asLong());
         assertEquals(0.5, SpectralLibraryAttributeValueParser.parseForType(AttributeType.DOUBLE, Double.valueOf(0.5)).asDouble(), 1e-12);
+        assertEquals(Instant.parse("2026-04-02T04:25:43Z"), SpectralLibraryAttributeValueParser.parseForType(AttributeType.INSTANT, Instant.parse("2026-04-02T04:25:43Z")).asInstant());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void test_parseForType_Instant() {
+        assertEquals(AttributeType.INSTANT, SpectralLibraryAttributeValueParser.parseForType(AttributeType.INSTANT, "2026-04-02T04:25:43Z").getType());
+        assertEquals(Instant.parse("2026-04-02T04:25:43Z"), SpectralLibraryAttributeValueParser.parseForType(AttributeType.INSTANT, "2026-04-02T04:25:43Z").asInstant());
     }
 
     @Test

@@ -7,6 +7,7 @@ public enum AttributeType {
     LONG,
     DOUBLE,
     BOOLEAN,
+    INSTANT,
     STRING_LIST,
     DOUBLE_ARRAY,
     INT_ARRAY,

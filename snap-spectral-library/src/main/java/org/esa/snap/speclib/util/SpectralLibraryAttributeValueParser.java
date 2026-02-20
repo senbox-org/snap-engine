@@ -3,6 +3,7 @@ package org.esa.snap.speclib.util;
 import org.esa.snap.speclib.model.AttributeType;
 import org.esa.snap.speclib.model.AttributeValue;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,9 @@ public class SpectralLibraryAttributeValueParser {
         }
         if (type == AttributeType.DOUBLE && aValue instanceof Double d) {
             return AttributeValue.ofDouble(d);
+        }
+        if (type == AttributeType.INSTANT && aValue instanceof Instant instant) {
+            return AttributeValue.ofInstant(instant);
         }
 
         String s = aValue == null ? "" : String.valueOf(aValue).trim();
@@ -68,6 +72,7 @@ public class SpectralLibraryAttributeValueParser {
                 }
                 throw new IllegalArgumentException("expected true/false");
             }
+            case INSTANT -> AttributeValue.ofInstant(Instant.parse(s));
             case STRING_LIST -> AttributeValue.ofStringList(parseStringList(s));
             case DOUBLE_ARRAY -> AttributeValue.ofDoubleArray(parseDoubleArray(s));
             case INT_ARRAY -> AttributeValue.ofIntArray(parseIntArray(s));
@@ -185,6 +190,7 @@ public class SpectralLibraryAttributeValueParser {
             case LONG -> String.valueOf(v.asLong());
             case DOUBLE -> String.valueOf(v.asDouble());
             case BOOLEAN -> String.valueOf(v.asBoolean());
+            case INSTANT -> String.valueOf(v.asInstant());
             case STRING_LIST -> String.join(",", v.asStringList());
             case DOUBLE_ARRAY -> joinDoubleArray(v.asDoubleArray());
             case INT_ARRAY -> joinIntArray(v.asIntArray());

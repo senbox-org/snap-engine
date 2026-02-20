@@ -3,6 +3,7 @@ package org.esa.snap.speclib.model;
 import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,9 @@ public class AttributeValueTest {
 
         assertEquals(AttributeType.BOOLEAN, AttributeValue.ofBoolean(true).getType());
         assertTrue(AttributeValue.ofBoolean(true).asBoolean());
+
+        assertEquals(AttributeType.INSTANT, AttributeValue.ofInstant(Instant.parse("2026-04-02T04:25:43Z")).getType());
+        assertEquals(Instant.parse("2026-05-02T04:25:43Z"), AttributeValue.ofInstant(Instant.parse("2026-05-02T04:25:43Z")).asInstant());
     }
 
     @Test
@@ -78,6 +82,7 @@ public class AttributeValueTest {
         assertThrows(NullPointerException.class, () -> AttributeValue.ofDoubleArray(null));
         assertThrows(NullPointerException.class, () -> AttributeValue.ofIntArray(null));
         assertThrows(NullPointerException.class, () -> AttributeValue.ofEmbeddedSpectrum(null));
+        assertThrows(NullPointerException.class, () -> AttributeValue.ofInstant(null));
     }
 
     @Test

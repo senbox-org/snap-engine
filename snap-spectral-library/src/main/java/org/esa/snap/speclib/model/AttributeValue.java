@@ -1,5 +1,6 @@
 package org.esa.snap.speclib.model;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,10 @@ public class AttributeValue {
 
     public static AttributeValue ofBoolean(boolean v) {
         return new AttributeValue(AttributeType.BOOLEAN, v);
+    }
+
+    public static AttributeValue ofInstant(Instant v) {
+        return new AttributeValue(AttributeType.INSTANT, v);
     }
 
     public static AttributeValue ofStringList(List<String> v) {
@@ -86,6 +91,9 @@ public class AttributeValue {
     }
     public boolean asBoolean() {
         return (Boolean) value;
+    }
+    public Instant asInstant() {
+        return (Instant) value;
     }
 
     @SuppressWarnings("unchecked")
