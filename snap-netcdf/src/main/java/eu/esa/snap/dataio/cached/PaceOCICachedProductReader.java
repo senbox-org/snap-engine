@@ -6,7 +6,6 @@ import eu.esa.snap.core.dataio.cache.*;
 import eu.esa.snap.core.datamodel.band.BandUsingReaderDirectly;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.*;
@@ -96,7 +95,7 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
 
             final ProductData longitudes = ProductData.createInstance(new float[size]);
             lonBand.readRasterData(0, 0, rasterWidth, rasterHeight, longitudes);
-           // lonBand.readPixels(0, 0, rasterWidth, rasterHeight, longitudes);
+            // lonBand.readPixels(0, 0, rasterWidth, rasterHeight, longitudes);
 
             final ProductData latitudes = ProductData.createInstance(new float[size]);
             latBand.readRasterData(0, 0, rasterWidth, rasterHeight, latitudes);
@@ -247,9 +246,8 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         }
 
         Band band = new BandUsingReaderDirectly(variable.getShortName(), rasterDataType, width, height);
-        if (isGeolocationVariable(variable)) {
-            band = new BandFlipY(band);
-        }
+        band = new BandFlipY(band);
+
         product.addBand(band);
         band.setOwner(product);
         return new Band[]{band};
@@ -297,7 +295,8 @@ public class PaceOCICachedProductReader extends AbstractProductReader implements
         for (int layer = 1; layer <= numLayers; layer++) {
             final String layer_ext = decimalFormat.format(layer);
             final String layeredVariableName = shortName + "_" + layer_ext;
-            final Band band = new BandUsingReaderDirectly(layeredVariableName, rasterDataType, width, height);
+            Band band = new BandUsingReaderDirectly(layeredVariableName, rasterDataType, width, height);
+            band = new BandFlipY(band);
             product.addBand(band);
             bandList.add(band);
         }

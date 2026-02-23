@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class BandFlipY extends Band {
 
-    private Band wrappedBand;
+    private final Band wrappedBand;
 
     public BandFlipY(Band original) {
         super(original.getName(),original.getDataType(), original.getRasterWidth(), original.getRasterHeight());
@@ -21,23 +21,24 @@ public class BandFlipY extends Band {
     @Override
     public void readRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData, ProgressMonitor pm) throws IOException {
         final int rasterHeight = getRasterHeight();
-        final int mappedMax = rasterHeight - offsetY - 1;
-        final int mappedMin = rasterHeight - (offsetY + height);
+
+        final int sourceMax = offsetY + height - 1;
+        final int targetMin = (rasterHeight - 1) - sourceMax;
+
         final ProductData lineBuffer = ProductData.createInstance(rasterData.getType(), width);
+        super.readRasterData(offsetX, targetMin, width, height, rasterData, pm);
 
-        super.readRasterData(offsetX, mappedMin, width, height, rasterData, pm);
-
-        final int halfHeight = height / 2;
         final Object rasterDataRawBuffer = rasterData.getElems();
-        final Object  lineBufferRawData = lineBuffer.getElems();
-        for (int y = 0; y < halfHeight; y++) {
-            final int srcOffset = offsetY + y * width;
+        final Object lineBufferRawData = lineBuffer.getElems();
+        int srcOffset = 0;
+        int targetOffset = (height - 1) * width;
+        final int halfHeight = height / 2;
+        for (int y = 0; y <= halfHeight; y++) {
             System.arraycopy(rasterDataRawBuffer, srcOffset, lineBufferRawData, 0, width);
-
-            final int dstOffset = (mappedMax - y) * width;
-            System.arraycopy(rasterDataRawBuffer, dstOffset, rasterDataRawBuffer, srcOffset, width);
-
-            System.arraycopy(lineBufferRawData, 0, rasterDataRawBuffer, dstOffset, width);
+            System.arraycopy(rasterDataRawBuffer, targetOffset, rasterDataRawBuffer, srcOffset, width);
+            System.arraycopy(lineBufferRawData, 0, rasterDataRawBuffer, targetOffset, width);
+            srcOffset += width;
+            targetOffset -= width;
         }
     }
 
