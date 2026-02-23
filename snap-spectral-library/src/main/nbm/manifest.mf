@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Implementation-Version: ${snap.nbmImplVersion}
+AutoUpdate-Show-In-Client: false
+AutoUpdate-Essential-Module: true
+OpenIDE-Module-Java-Dependencies: Java > 11
+OpenIDE-Module-Display-Category: SNAP Core
+OpenIDE-Module-Long-Description: <p>Implementation of a SNAP Spectral library tool.</p>
+ <p><b>Vendor:</b> Brockmann Consult GmbH</p>
+ <p><b>Contact address:</b> Chrysanderstr. 1, 21502 Geesthacht (Germany)</p>
+ <p><b>Copyright:</b> (C) 2020 by Brockmann Consult GmbH</p>
+ <p><b>License:</b> http://www.gnu.org/licenses/gpl.html</p>
