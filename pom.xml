@@ -123,6 +123,7 @@
         <module>snap-raster</module>
         <module>snap-rtp-codec</module>
         <module>snap-smart-configurator</module>
+        <module>snap-spectral-library</module>
         <module>snap-statistics</module>
         <module>snap-temporal-percentile</module>
         <module>snap-virtual-file-system</module>
