@@ -1084,6 +1084,7 @@ public class StringUtils {
      * @return a modified display name which has removed characters intended for the match criteria
      */
     static  public String cleanUpGroupName(String displayName) {
+
         if (displayName == null) {
             return null;
         }
