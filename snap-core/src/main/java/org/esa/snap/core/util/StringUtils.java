@@ -1075,6 +1075,14 @@ public class StringUtils {
     }
 
 
+    /**
+     * Creates a more user friendly folder name for the band group with the match criteria being removed.
+     * For example: if the band grouping was "^a_" (which would match a_442, a_460, etc.) then the returned
+     * displayName would be "a"
+     *
+     * @param displayName  current display name of the particular group
+     * @return a modified display name which has removed characters intended for the match criteria
+     */
     static  public String cleanUpGroupName(String displayName) {
         if (displayName == null) {
             return null;
@@ -1088,7 +1096,7 @@ public class StringUtils {
             }
         } else {
             if (displayName.startsWith("^")) {
-                displayName = displayName.substring(0);
+                displayName = displayName.substring(1);
             }
 
             if (displayName.endsWith("$")) {
@@ -1096,7 +1104,7 @@ public class StringUtils {
             }
 
             if (displayName.startsWith("*")) {
-                displayName = displayName.substring(0);
+                displayName = displayName.substring(1);
             }
 
             if (displayName.endsWith("*")) {
