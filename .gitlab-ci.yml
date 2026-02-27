@@ -47,6 +47,14 @@ variables:
     -Denable.long.tests=true
   RELEASE_REF: '/^v?[0-9]+\.[0-9]+\.[0-9]+(-RC[0-9]+)?$/'
   MAVEN_DEPENDENCY_CHECK_ARGS: "$MAVEN_DEPENDENCY_CHECK_ARGS -DnvdApiKey=$NVD_API_KEY"
+
+default:
+  cache:
+    key: maven-${CI_PROJECT_NAME}-${CI_RUNNER_TAGS}
+    paths:
+      - ${MAVEN_CFG_DIR}/repository
+    policy: pull-push
+
 mvn-build:
   artifacts:
     paths:
