@@ -1112,6 +1112,10 @@ public class StringUtils {
                 displayName = displayName.substring(0, displayName.length() - 1);
             }
 
+            if (displayName.startsWith("_")) {
+                displayName = displayName.substring(1);
+            }
+
             if (displayName.endsWith("_")) {
                 displayName = displayName.substring(0, displayName.length() - 1);
             }
