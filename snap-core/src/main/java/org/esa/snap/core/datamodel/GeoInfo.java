@@ -240,6 +240,9 @@ public class GeoInfo {
         double NULL_LON = -99999;
         double firstLon = NULL_LON;
         double lastLon = NULL_LON;
+        double firstPixel = NULL_LON;
+        double lastPixel = NULL_LON;
+
         boolean datelineCrossed = false;
         boolean datelineJustCrossedAscending = false;
         boolean datelineJustCrossedDescending = false;
@@ -271,9 +274,12 @@ public class GeoInfo {
                 if (firstLon == NULL_LON) {
                     firstLon = geoPosCurr.lon;
                     lastLon = firstLon;
+                    firstPixel = pixelXCurr;
+                    lastPixel = firstPixel;
                 } else {
                     if (pixelPosPrev != null && geoPosPrev != null && validLon(geoPosPrev.lon)) {
                         lastLon = geoPosCurr.lon;
+                        lastPixel = pixelXCurr;
 
                         datelineJustCrossedAscending = false;
                         datelineJustCrossedDescending = false;
@@ -373,6 +379,9 @@ public class GeoInfo {
 
         if (firstLon != NULL_LON && lastLon != NULL_LON) {
             GeoSpanLon geoSpanLon = new GeoSpanLon(firstLon, lastLon, degreesSpanTotal, datelineCrossed, northPoleCrossed, southPoleCrossed, ascending, descending);
+            geoSpanLon.firstPixel = firstPixel;  // todo maybe use this later to determine whether north/south labels should be set
+            geoSpanLon.lastPixel = lastPixel;   // todo maybe use this later to determine whether north/south labels should be set
+
             return geoSpanLon;
         } else {
             return null;
@@ -1144,6 +1153,8 @@ public class GeoInfo {
     public static class GeoSpanLon {
         double firstLon;
         double lastLon;
+        double firstPixel;
+        double lastPixel;
         double lonSpan;
         boolean datelineCrossed;
         boolean northPoleCrossed;
@@ -1155,6 +1166,8 @@ public class GeoInfo {
         public GeoSpanLon() {
             this.firstLon = NULL_LON;
             this.lastLon = NULL_LON;
+            this.firstPixel = NULL_LON;
+            this.lastPixel = NULL_LON;
             this.lonSpan = 0;
             this.datelineCrossed = false;
             this.northPoleCrossed = false;

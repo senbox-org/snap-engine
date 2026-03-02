@@ -101,18 +101,35 @@ public class GraticuleLayer extends Layer {
 
 
         if (graticule == null) {
-            graticule = Graticule.create(raster,
-                    getNumGridLines(),
-                    getNumMinorSteps(),
-                    getNumMinorStepsCylindrical(),
-                    getGridSpacingLat(),
-                    getGridSpacingLon(),
-                    isInterpolate(),
-                    getTolerance(),
-                    getToleranceCylindrical(),
-                    isLabelsSuffix(),
-                    isLabelsDecimal(),
-                    spacer);
+
+            Graticule.GraticuleParameters graticuleParameters = new Graticule.GraticuleParameters();
+
+            graticuleParameters.mode = getMode();
+
+            graticuleParameters.autoSpacingLatGlobal = getAutoSpacingLatGlobal();
+            graticuleParameters.autoSpacingLonGlobal = getAutoSpacingLonGlobal();
+            graticuleParameters.autoSpacingLatHemispherical = getAutoSpacingLatHemispherical();
+            graticuleParameters.autoSpacingLonHemispherical = getAutoSpacingLonHemispherical();
+            graticuleParameters.autoSpacingLatGlobalCylindrical = getAutoSpacingLatGlobalCylindrical();
+            graticuleParameters.autoSpacingLonGlobalCylindrical = getAutoSpacingLonGlobalCylindrical();
+
+            graticuleParameters.gridSpacingLat = getGridSpacingLat();
+            graticuleParameters.gridSpacingLon = getGridSpacingLon();
+
+            graticuleParameters.desiredNumGridLines = getNumGridLines();
+            graticuleParameters.desiredMinorSteps = getNumMinorSteps();
+            graticuleParameters.desiredMinorStepsCylindrical = getNumMinorStepsCylindrical();
+
+            graticuleParameters.interpolate = isInterpolate();
+            graticuleParameters.tolerance = getTolerance();
+            graticuleParameters.toleranceCylindrical = getToleranceCylindrical();
+            graticuleParameters.formatCompass = isLabelsSuffix();
+            graticuleParameters.decimalFormat = isLabelsDecimal();
+            graticuleParameters.spacer = getEdgeLabelsSpacer();
+
+
+            graticule = Graticule.create(raster, graticuleParameters);
+
         }
         if (graticule != null) {
 
@@ -941,6 +958,7 @@ public class GraticuleLayer extends Layer {
         if (
                 propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_MODE_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
@@ -957,6 +975,12 @@ public class GraticuleLayer extends Layer {
             getConfiguration().setValue(propertyName, event.getNewValue());
         }
         super.fireLayerPropertyChanged(event);
+    }
+
+
+    private String getMode() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_MODE_KEY,
+                GraticuleLayerType.PROPERTY_MODE_DEFAULT);
     }
 
 
@@ -999,6 +1023,45 @@ public class GraticuleLayer extends Layer {
         return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_KEY,
                 GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT);
     }
+
+
+    private double getAutoSpacingLatGlobal() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT);
+    }
+
+
+    private double getAutoSpacingLonGlobal() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT);
+    }
+
+
+    private double getAutoSpacingLatHemispherical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_DEFAULT);
+    }
+
+
+    private double getAutoSpacingLonHemispherical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_DEFAULT);
+    }
+
+
+    private double getAutoSpacingLatGlobalCylindrical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_DEFAULT);
+    }
+
+
+    private double getAutoSpacingLonGlobalCylindrical() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_KEY,
+                GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_DEFAULT);
+    }
+
+
+
 
 
 
@@ -1105,7 +1168,7 @@ public class GraticuleLayer extends Layer {
 //                ptsToPixelsMultiplier = (1 / PTS_PER_INCH) * (raster.getRasterWidth() / (PAPER_WIDTH));
 //            }
 
-            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2;
+            double averageSideSize = (raster.getRasterHeight() + raster.getRasterWidth()) / 2.0;
 //            double maxSideSize = Math.max(raster.getRasterHeight(), raster.getRasterWidth());
 
             ptsToPixelsMultiplier = averageSideSize * 0.001;
