@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.core.layer.GraticuleLayerType;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
@@ -221,28 +222,40 @@ public class Graticule {
      * Creates a graticule for the given product.
      *
      * @param raster              the product
-     * @param desiredNumGridLines the grid cell size in pixels
-     * @param latMajorStep        the grid cell size in meridional direction
-     * @param lonMajorStep        the grid cell size in parallel direction
+     * @param graticuleParameters input parameters
      * @return the graticule or null, if it could not be created
      */
     public static Graticule create(RasterDataNode raster,
-                                   int desiredNumGridLines,
-                                   int desiredMinorSteps,
-                                   int desiredMinorStepsCylindrical,
-                                   double latMajorStep,
-                                   double lonMajorStep,
-                                   boolean interpolate,
-                                   double tolerance,
-                                   double toleranceCylindrical,
-                                   boolean formatCompass,
-                                   boolean decimalFormat,
-                                   int spacer) {
+                                   GraticuleParameters graticuleParameters) {
+
+        if (graticuleParameters == null) {
+            return null;
+        }
+
+        String mode = graticuleParameters.mode;
+
+        int desiredNumGridLines = graticuleParameters.desiredNumGridLines;
+        int desiredMinorSteps = graticuleParameters.desiredMinorSteps;
+        int desiredMinorStepsCylindrical = graticuleParameters.desiredMinorStepsCylindrical;
+
+        double latMajorStep = graticuleParameters.gridSpacingLat;
+        double lonMajorStep = graticuleParameters.gridSpacingLon;
+
+        boolean interpolate = graticuleParameters.interpolate;
+        double tolerance = graticuleParameters.tolerance;
+        double toleranceCylindrical = graticuleParameters.toleranceCylindrical;
+        boolean formatCompass = graticuleParameters.formatCompass;
+        boolean decimalFormat = graticuleParameters.decimalFormat;
+        int spacer = graticuleParameters.spacer;
+
+
+
         Guardian.assertNotNull("product", raster);
         final GeoCoding geoCoding = raster.getGeoCoding();
         if (geoCoding == null || raster.getRasterWidth() < 16 || raster.getRasterHeight() < 16) {
             return null;
         }
+
 
         if (desiredNumGridLines <= 1) {
             desiredNumGridLines = 2;
@@ -262,43 +275,68 @@ public class Graticule {
             boolean globalLon = false;
             boolean halfGlobalLon = false;
 
+            
 
-            if (geoInfo.latSpan >= 75) {
+            // todo investigate mode
+
+            if (GraticuleLayerType.MODE_GLOBAL.equals(mode)
+                    || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
                 globalLat = true;
-            }
-
-            if (geoInfo.lonSpan >= 200) {
                 globalLon = true;
-            } else if (geoInfo.lonSpan >= 75) {
+            } else if (GraticuleLayerType.MODE_HEMISPHERICAL.equals(mode)) {
                 halfGlobalLon = true;
+            } else if (GraticuleLayerType.MODE_REGIONAL.equals(mode)) {
+                globalLat = false;
+                globalLon = false;
+                halfGlobalLon = false;
+            } else {
+
+                if (geoInfo.latSpan >= 75) {
+                    globalLat = true;
+                }
+
+                if (geoInfo.lonSpan >= 200) {
+                    globalLon = true;
+                } else if (geoInfo.lonSpan >= 75) {
+                    halfGlobalLon = true;
+                }
             }
 
-
-            double MAX_LAT_MAJOR_STEP_DEFAULT = 30;
-            double MAX_LON_MAJOR_STEP_DEFAULT = 45;
+//            double MAX_LAT_MAJOR_STEP_DEFAULT = 30;
+//            double MAX_LON_MAJOR_STEP_DEFAULT = 45;
+            double MAX_LAT_MAJOR_STEP_DEFAULT = 90;
+            double MAX_LON_MAJOR_STEP_DEFAULT = 180;
 
             double MAX_LAT_STEP_POLAR = 10;
             double MAX_LON_STEP_POLAR = 15;
 
 
-            double LAT_STEP_GLOBAL_CYLINDRICAL = 30;
-            double LON_STEP_GLOBAL_CYLINDRICAL = 30;
-            double LON_STEP_HALF_GLOBAL_CYLINDRICAL = 30;
+            double LAT_STEP_GLOBAL = graticuleParameters.autoSpacingLatGlobal;
+            double LON_STEP_GLOBAL = graticuleParameters.autoSpacingLonGlobal;
+            double LON_STEP_HALF_GLOBAL = graticuleParameters.autoSpacingLonHemispherical;
+            double LAT_STEP_HALF_GLOBAL = graticuleParameters.autoSpacingLatHemispherical;
+            double LAT_STEP_GLOBAL_CYLINDRICAL = graticuleParameters.autoSpacingLatGlobalCylindrical;
+            double LON_STEP_GLOBAL_CYLINDRICAL = graticuleParameters.autoSpacingLonGlobalCylindrical;
 
 
 
-            double LAT_STEP_GLOBAL = 15;
-            double LON_STEP_GLOBAL = 45;
-            double LON_STEP_HALF_GLOBAL = 15;
+            double LON_STEP_HALF_GLOBAL_CYLINDRICAL = LON_STEP_GLOBAL_CYLINDRICAL;
+            double LAT_STEP_HALF_GLOBAL_CYLINDRICAL = LAT_STEP_GLOBAL_CYLINDRICAL;
 
-            
+
 
             if (latMajorStep == 0) {
                 if (globalLat) {
-                    if (geoInfo.cylindrical) {
+                    if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
                         latMajorStep = LAT_STEP_GLOBAL_CYLINDRICAL;
                     } else {
                         latMajorStep = LAT_STEP_GLOBAL;
+                    }
+                } else if (halfGlobalLon) {
+                    if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
+                        latMajorStep = LAT_STEP_HALF_GLOBAL_CYLINDRICAL;
+                    } else {
+                        latMajorStep = LAT_STEP_HALF_GLOBAL;
                     }
                 } else {
                     double tmpLatMajorStep = geoInfo.latSpan / numGridlinesLat;
@@ -320,13 +358,13 @@ public class Graticule {
 
             if (lonMajorStep == 0) {
                 if (globalLon) {
-                    if (geoInfo.cylindrical) {
+                    if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
                         lonMajorStep = LON_STEP_GLOBAL_CYLINDRICAL;
                     } else {
                         lonMajorStep = LON_STEP_GLOBAL;
                     }
                 } else if (halfGlobalLon) {
-                    if (geoInfo.cylindrical) {
+                    if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
                         lonMajorStep = LON_STEP_HALF_GLOBAL_CYLINDRICAL;
                     } else {
                         lonMajorStep = LON_STEP_HALF_GLOBAL;
@@ -418,7 +456,7 @@ public class Graticule {
 
 
 
-        if (geoInfo.cylindrical) {
+        if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
             tolerance = toleranceCylindrical;
             desiredMinorSteps = desiredMinorStepsCylindrical;
         } else if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
@@ -520,8 +558,10 @@ public class Graticule {
 
 
     static double getSensibleDegreeIncrement(double degreeIncrement) {
-        if (degreeIncrement >= 45) {
-            return 45.0;
+        if (degreeIncrement >= 90) {
+            return 90;
+        } else if (degreeIncrement >= 45) {
+            return 45.0 * Math.round((degreeIncrement / 45.0));
         } else if (degreeIncrement >= 15.0) {
             // if each division is greater than 15 degrees then round to nearest 15 degrees
             return 15.0 * Math.round((degreeIncrement / 15.0));
@@ -3058,6 +3098,62 @@ public class Graticule {
 
 
 
+    static public class GraticuleParameters {
+
+        public String mode = GraticuleLayerType.PROPERTY_MODE_DEFAULT;
+
+        public double autoSpacingLatGlobal = GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT;
+        public double autoSpacingLonGlobal = GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT;
+        public double autoSpacingLatHemispherical = GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_DEFAULT;
+        public double autoSpacingLonHemispherical = GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_DEFAULT;
+        public double autoSpacingLatGlobalCylindrical = GraticuleLayerType.PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_DEFAULT;
+        public double autoSpacingLonGlobalCylindrical = GraticuleLayerType.PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_DEFAULT;
+
+        public double gridSpacingLat = GraticuleLayerType.PROPERTY_GRID_SPACING_LAT_DEFAULT;
+        public double gridSpacingLon = GraticuleLayerType.PROPERTY_GRID_SPACING_LON_DEFAULT;
+
+
+        public int desiredNumGridLines = GraticuleLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT;
+        public int desiredMinorSteps = GraticuleLayerType.PROPERTY_MINOR_STEPS_DEFAULT;
+        public int desiredMinorStepsCylindrical = GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT;
+
+
+
+        public boolean interpolate = GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT;
+        public double tolerance = GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT;
+        public double toleranceCylindrical = GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT;
+        public boolean formatCompass = GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT;
+        public  boolean decimalFormat = GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT;
+        public  int spacer = GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_DEFAULT;
+
+
+
+
+
+        public GraticuleParameters() {
+        }
+
+        public void setAutoSpacingLatGlobal(double autoSpacingLatGlobal) {
+            this.autoSpacingLatGlobal = autoSpacingLatGlobal;
+        }
+
+        public void setGridSpacingLat(double gridSpacingLat) {
+            this.gridSpacingLat = gridSpacingLat;
+        }
+
+        public double getAutoSpacingLatGlobal() {
+            return autoSpacingLatGlobal;
+        }
+
+        public double getGridSpacingLat() {
+            return gridSpacingLat;
+        }
+
+
+    }
+
+
+
 
 
 
@@ -3090,6 +3186,10 @@ public class Graticule {
             }
         }
     }
+
+
+
+
 
 //    private static double[] normalize(double x, double[] result) {
 //        final double exponent = (x == 0.0) ? 0.0 : Math.ceil(Math.log(Math.abs(x)) / Math.log(10.0));
