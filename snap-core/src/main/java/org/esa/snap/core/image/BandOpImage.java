@@ -69,9 +69,16 @@ public class BandOpImage extends RasterDataNodeOpImage {
             return;
         }
         if (getLevel() == 0) {
-            band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
-                                                       destRect.width, destRect.height,
-                                                       destData, ProgressMonitor.NULL);
+//            band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
+//                                                       destRect.width, destRect.height,
+//                                                       destData, ProgressMonitor.NULL);
+            if (band.isProductReaderDirectlyUsable()) {
+                band.readRasterData(destRect.x, destRect.y, destRect.width, destRect.height, destData, ProgressMonitor.NULL);
+            } else {
+                band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
+                        destRect.width, destRect.height,
+                        destData, ProgressMonitor.NULL);
+            }
         } else {
             readHigherLevelData(band, destData, destRect, getLevelImageSupport());
         }
