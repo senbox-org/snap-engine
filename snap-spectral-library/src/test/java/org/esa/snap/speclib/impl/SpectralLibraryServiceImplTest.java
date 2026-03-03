@@ -2,6 +2,7 @@ package org.esa.snap.speclib.impl;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
 import org.esa.snap.speclib.model.*;
 import org.junit.Test;
@@ -10,6 +11,8 @@ import org.mockito.Mockito;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 
 public class SpectralLibraryServiceImplTest {
@@ -323,5 +326,50 @@ public class SpectralLibraryServiceImplTest {
         assertThrows(NullPointerException.class, () -> svc.setProfileAttribute(anyId, null, "k", v));
         assertThrows(NullPointerException.class, () -> svc.setProfileAttribute(anyId, anyId, null, v));
         assertThrows(NullPointerException.class, () -> svc.setProfileAttribute(anyId, anyId, "k", null));
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void extractProfiles_emptyPixels_returnsEmpty_andDoesNotCallExtractor() {
+        SpectralProfileExtractor extractor = mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
+
+        SpectralAxis axis = mock(SpectralAxis.class);
+        when(axis.size()).thenReturn(1);
+
+        List<SpectralProfile> out = svc.extractProfiles(
+                "base", axis, List.of(mock(Band.class)), List.of(),
+                0, "unit", "prod"
+        );
+
+        assertNotNull(out);
+        assertTrue(out.isEmpty());
+        verify(extractor, never()).extractBulk(anyString(), any(), anyList(), anyList(), anyInt(), anyString(), anyString());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void extractProfiles_delegatesToExtractorBulk() {
+        SpectralProfileExtractor extractor = mock(SpectralProfileExtractor.class);
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl(extractor);
+
+        SpectralAxis axis = mock(SpectralAxis.class);
+        when(axis.size()).thenReturn(2);
+
+        Band b1 = mock(Band.class);
+        Band b2 = mock(Band.class);
+
+        List<PixelPos> pixels = List.of(new PixelPos(1, 2), new PixelPos(3, 4));
+
+        SpectralProfile p = Mockito.mock(SpectralProfile.class);
+        List<SpectralProfile> expected = List.of(p);
+
+        when(extractor.extractBulk(eq("base"), same(axis), eq(List.of(b1, b2)), eq(pixels), eq(1), eq("u"), eq("prod")))
+                .thenReturn(expected);
+
+        List<SpectralProfile> out = svc.extractProfiles("base", axis, List.of(b1, b2), pixels, 1, "u", "prod");
+
+        assertSame(expected, out);
+        verify(extractor, times(1)).extractBulk("base", axis, List.of(b1, b2), pixels, 1, "u", "prod");
     }
 }

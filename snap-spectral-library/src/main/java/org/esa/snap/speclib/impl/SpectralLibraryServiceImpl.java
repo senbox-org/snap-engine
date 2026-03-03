@@ -138,25 +138,7 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
             return List.of();
         }
 
-        List<SpectralProfile> out = new ArrayList<>(pixels.size());
-        int ii = 1;
-
-        for (PixelPos p : pixels) {
-            if (p == null) {
-                continue;
-            }
-
-            String name = baseName + "__" + ii;
-            int x = (int) p.x;
-            int y = (int) p.y;
-
-            extractor.extract(name, axis, bands, x, y, level, yUnit, productId)
-                    .ifPresent(out::add);
-
-            ii++;
-        }
-
-        return Collections.unmodifiableList(out);
+        return extractor.extractBulk(baseName, axis, bands, pixels, level, yUnit, productId);
     }
 
     @Override
