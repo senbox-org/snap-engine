@@ -81,6 +81,67 @@ public class SpectralLibraryServiceImpl implements SpectralLibraryService {
     }
 
     @Override
+    public BulkAddResult addProfiles(UUID libraryId, List<SpectralProfile> profiles) {
+        Objects.requireNonNull(libraryId, "libraryId must not be null");
+        Objects.requireNonNull(profiles, "profiles must not be null");
+
+        if (profiles.isEmpty()) {
+            return new BulkAddResult(0, 0);
+        }
+
+        final BulkAddResult[] res = { new BulkAddResult(0, 0) };
+
+        libraries.compute(libraryId, (id, lib) -> {
+            if (lib == null) {
+                throw new NoSuchElementException("library not found: " + libraryId);
+            }
+
+            int axisSize = lib.getAxis().size();
+            List<SpectralProfile> existing = lib.getProfiles();
+
+            HashSet<UUID> ids = new HashSet<>(Math.max(16, (int) ((existing.size() + profiles.size()) / 0.75f) + 1));
+            for (SpectralProfile p : existing) {
+                if (p != null) {
+                    ids.add(p.getId());
+                }
+            }
+
+            ArrayList<SpectralProfile> merged = new ArrayList<>(existing.size() + profiles.size());
+            merged.addAll(existing);
+
+            AttributeSchema newSchema = new AttributeSchema(lib.getSchema().asMap());
+
+            int added = 0;
+            int skipped = 0;
+
+            for (SpectralProfile p : profiles) {
+                if (p == null) continue;
+                if (p.size() != axisSize) {
+                    throw new IllegalArgumentException("profile size does not match library axis: " + p.getName());
+                }
+                UUID pid = p.getId();
+                if (!ids.add(pid)) {
+                    skipped++;
+                    continue;
+                }
+                merged.add(p);
+                newSchema.inferFromAttributes(p.getAttributes());
+                added++;
+            }
+
+            res[0] = new BulkAddResult(added, skipped);
+
+            if (added == 0) {
+                return lib;
+            }
+            return new SpectralLibrary(lib.getId(), lib.getName(), lib.getAxis(),
+                    lib.getDefaultYUnit().orElse(null), merged, newSchema);
+        });
+
+        return res[0];
+    }
+
+    @Override
     public boolean removeProfile(UUID libraryId, UUID profileId) {
         Objects.requireNonNull(libraryId, "libraryId must not be null");
         Objects.requireNonNull(profileId, "profileId must not be null");
