@@ -37,6 +37,8 @@ public class GeoInfo {
     public boolean latDescending = false;
 
     public boolean cylindrical = false;
+    public boolean meridianConstant = false;
+    public boolean parallelConstant = false;
     public boolean containsValidGeoCorners = false;
     public CoordsPolar coordsPolar = null;
 
@@ -87,6 +89,8 @@ public class GeoInfo {
 
 
                 cylindrical = isCylindrical(geoCoding, dataNode);
+                meridianConstant = isMeridianConstant(geoCoding, dataNode);
+                parallelConstant = isParallelConstant(geoCoding, dataNode);
                 containsValidGeoCorners = containsValidGeoCorners(geoCoding, dataNode);
 
                 if (northPoleCrossed || southPoleCrossed || forceCheckForPolar) {
@@ -142,6 +146,8 @@ public class GeoInfo {
         latDescending = false;
 
         cylindrical = false;
+        meridianConstant = false;
+        parallelConstant = false;
         containsValidGeoCorners = false;
         coordsPolar = null;
     }
@@ -921,9 +927,15 @@ public class GeoInfo {
 
     private static boolean isCylindrical(GeoCoding geoCoding, RasterDataNode dataNode) {
 
+        return (isParallelConstant(geoCoding, dataNode) && isMeridianConstant(geoCoding, dataNode));
+    }
+
+
+
+    private static boolean isParallelConstant(GeoCoding geoCoding, RasterDataNode dataNode) {
+
         EQUIDISTANT_CYLINDRICAL test;
         int parallelTrueCount = 0;
-        int meridianTrueCount = 0;
 
         double CIRCUMFERENCE_EARTH = 40075;  // km
         double toleranceMeters = 1;  // 1 meters
@@ -958,6 +970,28 @@ public class GeoInfo {
         }
 
 
+
+        if (parallelTrueCount > 1) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+
+
+    private static boolean isMeridianConstant(GeoCoding geoCoding, RasterDataNode dataNode) {
+
+        EQUIDISTANT_CYLINDRICAL test;
+
+        int meridianTrueCount = 0;
+
+        double CIRCUMFERENCE_EARTH = 40075;  // km
+        double toleranceMeters = 1;  // 1 meters
+        double toleranceDegrees = toleranceMeters*360/(1000*CIRCUMFERENCE_EARTH);
+
+
 //        int centerMeridian = (int) Math.floor(dataNode.getRasterWidth() / 2.0);
         int centerMeridian = (int) Math.floor((dataNode.getRasterWidth() - 1) * 0.5);
         test = isMeridianLineCylindrical(geoCoding, dataNode, centerMeridian, toleranceDegrees);
@@ -985,13 +1019,14 @@ public class GeoInfo {
             return false;
         }
 
-        if (parallelTrueCount > 1 && meridianTrueCount > 1) {
+        if (meridianTrueCount > 1) {
             return true;
         } else {
             return false;
         }
 
     }
+
 
 
     private static EQUIDISTANT_CYLINDRICAL isParallelLineCylindrical(GeoCoding geoCoding, RasterDataNode dataNode, int pixelYCurr, double toleranceDegrees) {
