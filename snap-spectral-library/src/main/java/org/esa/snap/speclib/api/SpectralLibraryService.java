@@ -18,10 +18,8 @@ public interface SpectralLibraryService {
     boolean deleteLibrary(UUID libraryId);
     Optional<SpectralLibrary> renameLibrary(UUID libraryId, String newName);
 
-    // TODO: test addProfiles for import, addAll, addSelected, then remove addProfile
     void addProfile(UUID libraryId, SpectralProfile profile);
     record BulkAddResult(int added, int skippedExisting) {}
-    // TODO write tests
     BulkAddResult addProfiles(UUID libraryId, List<SpectralProfile> profiles);
 
     boolean removeProfile(UUID libraryId, UUID profileId);

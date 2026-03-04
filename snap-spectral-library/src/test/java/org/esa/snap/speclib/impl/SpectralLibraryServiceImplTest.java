@@ -3,6 +3,7 @@ package org.esa.snap.speclib.impl;
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.speclib.api.SpectralLibraryService;
 import org.esa.snap.speclib.api.SpectralProfileExtractor;
 import org.esa.snap.speclib.model.*;
 import org.junit.Test;
@@ -371,5 +372,192 @@ public class SpectralLibraryServiceImplTest {
 
         assertSame(expected, out);
         verify(extractor, times(1)).extractBulk("base", axis, List.of(b1, b2), pixels, 1, "u", "prod");
+    }
+
+
+    @Test(expected = NullPointerException.class)
+    @STTM("SNAP-4128")
+    public void addProfiles_nullLibraryId_throws() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        svc.addProfiles(null, List.of());
+    }
+
+    @Test(expected = NullPointerException.class)
+    @STTM("SNAP-4128")
+    public void addProfiles_nullProfiles_throws() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        svc.addProfiles(lib.getId(), null);
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_emptyList_returns00_andDoesNotChangeLibrary() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        SpectralLibrary before = svc.getLibrary(id).orElseThrow();
+        SpectralLibraryService.BulkAddResult r = svc.addProfiles(id, List.of());
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+
+        assertEquals(0, r.added());
+        assertEquals(0, r.skippedExisting());
+        assertSame(before, after);
+        assertTrue(after.getProfiles().isEmpty());
+        assertTrue(after.getSchema().asMap().isEmpty());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    @STTM("SNAP-4128")
+    public void addProfiles_libraryNotFound_throws() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        svc.addProfiles(UUID.randomUUID(), List.of(profile(UUID.randomUUID(), "p", 3, Map.of())));
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_addsProfiles_preservesExistingOrder_andInfersSchema() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        UUID p0id = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        SpectralProfile existing = profile(p0id, "existing", 3, Map.of());
+        svc.addProfile(id, existing);
+
+        UUID p1id = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        UUID p2id = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
+        SpectralProfile p1 = profile(p1id, "p1", 3, Map.of("foo", AttributeValue.ofString("x")));
+        SpectralProfile p2 = profile(p2id, "p2", 3, Map.of("bar", AttributeValue.ofInt(7)));
+
+        SpectralLibraryService.BulkAddResult r = svc.addProfiles(id, List.of(p1, p2));
+
+        assertEquals(2, r.added());
+        assertEquals(0, r.skippedExisting());
+
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+        assertEquals(3, after.getProfiles().size());
+
+        assertEquals(p0id, after.getProfiles().get(0).getId());
+        assertEquals(p1id, after.getProfiles().get(1).getId());
+        assertEquals(p2id, after.getProfiles().get(2).getId());
+
+        assertTrue(after.getSchema().find("foo").isPresent());
+        assertEquals(AttributeType.STRING, after.getSchema().find("foo").get().getType());
+
+        assertTrue(after.getSchema().find("bar").isPresent());
+        assertEquals(AttributeType.INT, after.getSchema().find("bar").get().getType());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_skipsDuplicateIds_countsSkipped_andDoesNotAddDuplicate() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        UUID dupId = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        SpectralProfile existing = profile(dupId, "existing", 3, Map.of());
+        svc.addProfile(id, existing);
+
+        SpectralProfile dup = profile(dupId, "dup", 3, Map.of("x", AttributeValue.ofString("y")));
+        SpectralProfile fresh = profile(UUID.fromString("00000000-0000-0000-0000-000000000011"), "fresh", 3, Map.of());
+
+        SpectralLibraryService.BulkAddResult r = svc.addProfiles(id, List.of(dup, fresh));
+
+        assertEquals(1, r.added());
+        assertEquals(1, r.skippedExisting());
+
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+        assertEquals(2, after.getProfiles().size());
+        assertEquals(dupId, after.getProfiles().get(0).getId());
+        assertEquals(fresh.getId(), after.getProfiles().get(1).getId());
+
+        assertTrue(after.getSchema().find("x").isEmpty());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_ignoresNullElements() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        SpectralProfile p = profile(UUID.fromString("00000000-0000-0000-0000-000000000020"), "p", 3, Map.of());
+        List<SpectralProfile> nullList = new ArrayList<>();
+        nullList.add(null);
+        nullList.add(p);
+        nullList.add(null);
+        SpectralLibraryService.BulkAddResult r = svc.addProfiles(id, nullList);
+
+        assertEquals(1, r.added());
+        assertEquals(0, r.skippedExisting());
+
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+        assertEquals(1, after.getProfiles().size());
+        assertEquals(p.getId(), after.getProfiles().get(0).getId());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_axisMismatch_throws_andLibraryRemainsUnchanged() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        SpectralLibrary before = svc.getLibrary(id).orElseThrow();
+        SpectralProfile bad = profile(UUID.fromString("00000000-0000-0000-0000-000000000030"), "bad", 2, Map.of());
+
+        try {
+            svc.addProfiles(id, List.of(bad));
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+            // ok
+        }
+
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+        assertSame(before, after);
+        assertTrue(after.getProfiles().isEmpty());
+        assertTrue(after.getSchema().asMap().isEmpty());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void addProfiles_allAlreadyExist_returnsSameLibraryInstance() {
+        SpectralLibraryServiceImpl svc = new SpectralLibraryServiceImpl();
+        SpectralLibrary lib = svc.createLibrary("L", axis(3), "value");
+        UUID id = lib.getId();
+
+        UUID pid = UUID.fromString("00000000-0000-0000-0000-000000000040");
+        SpectralProfile p = profile(pid, "p", 3, Map.of());
+        svc.addProfile(id, p);
+
+        SpectralLibrary before = svc.getLibrary(id).orElseThrow();
+        SpectralLibraryService.BulkAddResult r = svc.addProfiles(id, List.of(p));
+        SpectralLibrary after = svc.getLibrary(id).orElseThrow();
+
+        assertEquals(0, r.added());
+        assertEquals(1, r.skippedExisting());
+        assertSame(before, after);
+        assertEquals(1, after.getProfiles().size());
+    }
+
+
+    private static SpectralAxis axis(int n) {
+        double[] wl = new double[n];
+        for (int i = 0; i < n; i++) {
+            wl[i] = 400.0 + i;
+        }
+        return new SpectralAxis(wl, "nm");
+    }
+
+    private static SpectralProfile profile(UUID id, String name, int size, Map<String, AttributeValue> attrs) {
+        double[] values = new double[size];
+        for (int i = 0; i < size; i++) {
+            values[i] = i + 1.0;
+        }
+        return new SpectralProfile(id, name, SpectralSignature.of(values), attrs, null);
     }
 }
