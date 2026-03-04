@@ -39,19 +39,28 @@ import java.awt.geom.AffineTransform;
 public class GraticuleLayerType extends LayerType {
 
 
-    public static final String MODE_AUTO = "Auto-Detect";
-    public static final String MODE_REGIONAL = "Regional";
-    public static final String MODE_HEMISPHERICAL = "Hemispherical";
-    public static final String MODE_GLOBAL = "Global";
-    public static final String MODE_GLOBAL_CYLINDRICAL = "Global Cylindrical";
+//    public static final String MODE_AUTO = "Auto-Detect";
+//    public static final String MODE_REGIONAL = "Regional";
+//    public static final String MODE_HEMISPHERICAL = "Hemispherical";
+//    public static final String MODE_GLOBAL = "Global";
+//    public static final String MODE_GLOBAL_CYLINDRICAL = "Global Cylindrical";
+
+    public static final String MODE_AUTO = "AUTO_DETECT";
+    public static final String MODE_REGIONAL = "REGIONAL";
+    public static final String MODE_HEMISPHERICAL = "HEMISPHERICAL";
+    public static final String MODE_GLOBAL = "GLOBAL";
+    public static final String MODE_GLOBAL_CYLINDRICAL = "GLOBAL_CYLINDRICAL";
 
 
-    public static final String PROPERTY_ROOT = "graticule.v9";
+    public static final String PROPERTY_ROOT = "graticule.map.gridlines";
 
 
-    public static final String PROPERTY_MODE_KEY = PROPERTY_ROOT + ".mode";
+    public static final String PROPERTY_MODE_KEY = PROPERTY_ROOT + ".mapping_mode";
     public static final String PROPERTY_MODE_LABEL = "Mode";
-    public static final String PROPERTY_MODE_TOOLTIP = "mode";
+    public static final String PROPERTY_MODE_TOOLTIP =
+            "<html>Mode governs certain default parameters based on type of mapped scene<br>" +
+                    "Mode governs which AUTO-SPACING default is used when Lat Spacing and/or Lon Spacing is set to 0.0<br>" +
+                    "See Preferences for AUTO-SPACING options</html>";
     private static final String PROPERTY_MODE_ALIAS = PROPERTY_ROOT + "Mode";
     public static final String PROPERTY_MODE_DEFAULT = MODE_AUTO;
     public static final Class<String> PROPERTY_MODE_TYPE = String.class;
@@ -92,46 +101,46 @@ public class GraticuleLayerType extends LayerType {
 
 
 
-
-    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_global";
-//    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "AUTO-SPACING (Global): Lat Spacing";
-    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "[AUTO-Global]: Lat Spacing";
-    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file lat span greater than 75</html>";
-    private static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobal";
-    public static final double PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT = 15;
-    public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_GLOBAL_TYPE = Double.class;
-
-    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_global";
-//    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "AUTO-SPACING (Global): Lon Spacing";
-    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "[AUTO-Global]: Lon Spacing";
-    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file lon span greater than 200</html>";
-    private static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLonGlobal";
-    public static final double PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT = 45;
-    public static final Class<Double> PROPERTY_AUTO_SPACING_LON_GLOBAL_TYPE = Double.class;
-
     public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_hemispherical";
-    public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_LABEL = "[AUTO-Hemispherical]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_LABEL = "[Mode=" + MODE_HEMISPHERICAL + "]: Lat Spacing";
     public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file lat span greater than 75</html>";
     private static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatHemispherical";
     public static final double PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_DEFAULT = 15;
     public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_TYPE = Double.class;
 
     public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_hemispherical";
-    public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_LABEL = "[AUTO-Hemispherical]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_LABEL = "[Mode=" + MODE_HEMISPHERICAL + "]: Lon Spacing";
     public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file lon span between 75 and 200</html>";
     private static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLonHemispherical";
     public static final double PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_DEFAULT = 15;
     public static final Class<Double> PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_TYPE = Double.class;
 
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_global";
+    //    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "AUTO-SPACING (Global): Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "[Mode=" + MODE_GLOBAL + "]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file lat span greater than 75</html>";
+    private static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobal";
+    public static final double PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT = 15;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_GLOBAL_TYPE = Double.class;
+
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_global";
+    //    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "AUTO-SPACING (Global): Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "[Mode=" + MODE_GLOBAL + "]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file lon span greater than 200</html>";
+    private static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLonGlobal";
+    public static final double PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT = 45;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LON_GLOBAL_TYPE = Double.class;
+
+
     public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_global_cylindrical";
-    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_LABEL = "[AUTO-GlobalCylindrical]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_LABEL = "[Mode=" + MODE_GLOBAL_CYLINDRICAL +"]: Lat Spacing";
     public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file is cylindrical projection and lat span greater than 75</html>";
     private static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobalCylindrical";
     public static final double PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_DEFAULT = 30;
     public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_TYPE = Double.class;
 
     public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_global_cylindrical";
-    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_LABEL = "[AUTO-GlobalCylindrical]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_LABEL = "[Mode=" + MODE_GLOBAL_CYLINDRICAL + "]: Lon Spacing";
     public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file is cylindrical projection and lon span greater than 75</html>";
     private static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobalCylindrical";
     public static final double PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_DEFAULT = 30;
@@ -477,7 +486,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_NUM_GRID_LINES_NAME = PROPERTY_ROOT + ".num.grid.lines";
     public static final int PROPERTY_NUM_GRID_LINES_DEFAULT = 4;
 //    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "AUTO-SPACING (Regional): Number of Gridlines";
-    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "[AUTO-Regional]: Number of Gridlines";
+    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "[Mode=" + MODE_REGIONAL +"]: Number of Gridlines";
     public static final String PROPERTY_NUM_GRID_LINES_TOOLTIP = "<html>Number of gridlines (approximate due to rounding) <br>to auto-generate if lat or lon spacing = 0<br>Not applicable to global scenes</html>";
     public static final String PROPERTY_NUM_GRID_LINES_ALIAS = PROPERTY_ROOT + "numGridLines";
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
@@ -506,15 +515,15 @@ public class GraticuleLayerType extends LayerType {
 
     public static final String PROPERTY_TOLERANCE_KEY = PROPERTY_ROOT + ".tolerance";
     public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.0;
-    public static final String PROPERTY_TOLERANCE_LABEL = "Edge Tolerance";
-    public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to force edge pixels onto gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_LABEL = "Edge Tolerance (Lat)";
+    public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto latitude gridline (fraction of pixel side size in geospace)";
     public static final String PROPERTY_TOLERANCE_ALIAS = PROPERTY_ROOT + "tolerance";
     public static final Class PROPERTY_TOLERANCE_TYPE = Double.class;
 
     public static final String PROPERTY_TOLERANCE_CYLINDRICAL_KEY = PROPERTY_ROOT + ".tolerance_cylindrical";
     public static final Double PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT = 1.0;
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_LABEL = "Edge Tolerance (Cylindrical)";
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_TOOLTIP = "Tolerance (if cylindrical projection) to force edge pixels onto gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_LABEL = "Edge Tolerance (Lon)";
+    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto longitude gridline (fraction of pixel side size in geospace)";
     public static final String PROPERTY_TOLERANCE_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "toleranceCylindrical";
     public static final Class PROPERTY_TOLERANCE_CYLINDRICAL_TYPE = Double.class;
 
