@@ -122,7 +122,7 @@ public class SpectralProfileExtractorImpl implements SpectralProfileExtractor {
 
     private static SpectralProfile createProfile(String baseName, int index, int x, int y, int level, String yUnit, String productId, double[] values) {
         SpectralSignature sig = (yUnit == null) ? SpectralSignature.of(values) : SpectralSignature.of(values, yUnit);
-        String name = baseName + "__" + index;
+        String name = baseName + index;
 
         SpectralProfile.SourceRef ref = new SpectralProfile.SourceRef(x, y, level, productId);
         return new SpectralProfile(UUID.randomUUID(), name, sig, Map.of(), ref);

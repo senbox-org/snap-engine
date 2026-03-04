@@ -103,8 +103,8 @@ public class SpectralProfileExtractorImplTest {
         List<SpectralProfile> out = ex.extractBulk("base", axis, bands, pixels, 0, "Y", "prod");
 
         assertEquals(2, out.size());
-        assertEquals("base__1", out.get(0).getName());
-        assertEquals("base__2", out.get(1).getName());
+        assertEquals("base1", out.get(0).getName());
+        assertEquals("base2", out.get(1).getName());
 
         assertArrayEquals(new double[]{1.0, 2.0}, out.get(0).getSignature().getValues(), 0.0);
         assertArrayEquals(new double[]{3.0, 4.0}, out.get(1).getSignature().getValues(), 0.0);
