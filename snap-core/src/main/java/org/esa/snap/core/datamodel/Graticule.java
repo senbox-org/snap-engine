@@ -455,22 +455,37 @@ public class Graticule {
 
 
 
+//
+//        if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
+////            tolerance = toleranceCylindrical;
+//            desiredMinorSteps = desiredMinorStepsCylindrical;
+//        } else if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+//            // todo TESTING
+////            if (desiredMinorSteps < 256) {
+////                desiredMinorSteps = 256;
+////            }
+////            tolerance = 0;
+//        }
 
-        if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
-            tolerance = toleranceCylindrical;
-            desiredMinorSteps = desiredMinorStepsCylindrical;
-        } else if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
-            // todo TESTING
-//            if (desiredMinorSteps < 256) {
-//                desiredMinorSteps = 256;
-//            }
-//            tolerance = 0;
+
+
+
+        int meridianSmoothingSteps = desiredMinorSteps;
+        int parallelSmoothingSteps = desiredMinorSteps;
+
+        if (geoInfo.parallelConstant) {
+            parallelSmoothingSteps = desiredMinorStepsCylindrical;
+        }
+
+        if (geoInfo.meridianConstant) {
+            meridianSmoothingSteps = desiredMinorStepsCylindrical;
         }
 
 
 
-        final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, desiredMinorSteps, raster, geoInfo, tolerance, interpolate);
-        final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, desiredMinorSteps, raster, geoInfo, tolerance, interpolate);
+
+        final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, meridianSmoothingSteps, raster, geoInfo, toleranceCylindrical, interpolate);
+        final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, parallelSmoothingSteps, raster, geoInfo, tolerance, interpolate);
 
 
 
