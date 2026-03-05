@@ -72,7 +72,7 @@ public class InputProductValidator {
     }
 
     public void checkIfCoregisteredStack() throws OperatorException {
-        if (!StackUtils.isCoregisteredStack(product)) {
+        if (!(StackUtils.isCoregisteredStack(product) || isCollocated())) {
             throw new OperatorException(SHOULD_BE_COREGISTERED);
         }
     }
