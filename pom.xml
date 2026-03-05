@@ -799,6 +799,19 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>seadas-repo-public</id>
+            <name>Public Maven Repository for SEADAS</name>
+            <url>https://seadas.gsfc.nasa.gov/mvn-seadas/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
     </repositories>
 
     <distributionManagement>
