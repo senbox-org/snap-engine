@@ -9,7 +9,7 @@ import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
 
 class CacheData2D implements CacheData {
 
-    private static final int SIZE_WITHOUT_BUFFER = 320;
+    private static final int SIZE_WITHOUT_BUFFER = 384;
 
     private final int xMin;
     private final int xMax;
@@ -19,6 +19,7 @@ class CacheData2D implements CacheData {
     private DataBuffer data;
     private Rectangle boundingRect;
     private CacheContext context;
+    private long lastAccessTime;
 
     CacheData2D(int[] offsets, int[] shapes) {
         this.xMin = offsets[1];
@@ -26,6 +27,14 @@ class CacheData2D implements CacheData {
         this.yMin = offsets[0];
         this.yMax = yMin + shapes[0] - 1;
         boundingRect = null;
+    }
+
+    long getLastAccessTime() {
+        return lastAccessTime;
+    }
+
+    void setLastAccessTime(long lastAccessTime) {
+        this.lastAccessTime = lastAccessTime;
     }
 
     void setCacheContext(CacheContext context) {
@@ -127,7 +136,7 @@ class CacheData2D implements CacheData {
     private void trackAllocation() {
         final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
         if (memoryUsageTracker != null) {
-            memoryUsageTracker.allocate(data.getSizeInBytes());
+            memoryUsageTracker.allocated(data.getSizeInBytes());
         }
     }
 

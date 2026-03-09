@@ -6,8 +6,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class VariableCache3DTest {
 
@@ -54,7 +53,10 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {6, 8, 10};
         final int[] productSizes = new int[]{50, 50, 65};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_UINT16);
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, new TestMemoryUsageTracker());
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
 
         final CacheData3D[][][] cacheData = cache.getCacheData();
         assertEquals(9, cacheData.length);
@@ -69,7 +71,10 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 180, 226};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_UINT16);
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, new TestMemoryUsageTracker());
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
 
         CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, 0, 0}, new int[]{10, 10, 10});
         assertEquals(1, affectedTileLocations.length);
@@ -104,7 +109,10 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {12, 12, 20};
         final int[] productSizes = new int[]{100, 100, 200};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_UINT16);
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, new TestMemoryUsageTracker());
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
 
         // front outside
         CacheIndex[] affectedTileLocations = cache.getAffectedCacheLocations(new int[]{0, -20, 0}, new int[]{10, 10, 10});
@@ -137,16 +145,60 @@ public class VariableCache3DTest {
         final int[] cacheSizes = {10, 10, 10};
         final int[] productSizes = new int[]{100, 100, 100};
         final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
-        final VariableCache3D cache = new VariableCache3D(descriptor, new MockProvider(ProductData.TYPE_UINT16));
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_UINT16);
 
-        assertEquals(384000, cache.getSizeInBytes());
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, new TestMemoryUsageTracker());
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
+
+        assertEquals(448000, cache.getSizeInBytes());
 
         // read fake data to memory
         final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_UINT16, new int[]{0, 0, 0}, new int[]{10, 10, 10});
         cache.read(new int[]{0, 0, 0}, new int[]{10, 10, 10}, dataBuffer);
         // default size plus 1000 * uint_16
-        assertEquals(386000, cache.getSizeInBytes());
+        assertEquals(450000, cache.getSizeInBytes());
     }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testMemoryAllocationTracking() throws IOException {
+        final int[] cacheSizes = {10, 10, 10};
+        final int[] productSizes = new int[]{100, 100, 100};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_INT32);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, memoryUsageTracker);
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
+
+        // the raw cahce data structure without product data allocated tb 2026-03-09
+        assertEquals(448000, memoryUsageTracker.getAllocatedBytes());
+
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT32, new int[]{0, 0, 0}, new int[]{10, 10, 10});
+        cache.read(new int[]{0, 0, 0}, new int[]{10, 10, 10}, dataBuffer);
+
+        assertEquals(452000, memoryUsageTracker.getAllocatedBytes());
+
+        cache.dispose();
+        assertEquals(0, memoryUsageTracker.getAllocatedBytes());
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testGetLastAccessTime()  {
+        final int[] cacheSizes = {10, 10, 10};
+        final int[] productSizes = new int[]{100, 100, 100};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_INT32);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, memoryUsageTracker);
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
+
+        final long currentTime = System.currentTimeMillis();
+        assertTrue(cache.getLastAccessTime() <= currentTime);
+    }
+
 
     static VariableDescriptor createDescriptor(int[] productSizes, int[] cacheSizes) {
         VariableDescriptor variableDescriptor = new VariableDescriptor();

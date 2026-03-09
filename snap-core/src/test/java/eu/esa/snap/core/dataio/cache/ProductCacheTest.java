@@ -14,6 +14,7 @@ public class ProductCacheTest {
     @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT32));
+        productCache.setMemoryUsageTracker(new TestMemoryUsageTracker());
 
         assertEquals(0, productCache.getSizeInBytes());
 
@@ -25,7 +26,7 @@ public class ProductCacheTest {
         DataBuffer dataBuffer = new DataBuffer(targetBuffer, offsets, shapes);
         productCache.read("whatever", offsets, shapes, dataBuffer);
 
-        assertEquals(2080, productCache.getSizeInBytes());
+        assertEquals(2336, productCache.getSizeInBytes());
 
         // trigger reading the lower right tile
         targetBuffer = ProductData.createInstance(ProductData.TYPE_INT32, 20);
@@ -34,7 +35,7 @@ public class ProductCacheTest {
         dataBuffer = new DataBuffer(targetBuffer, offsets, shapes);
         productCache.read("whatever", offsets, shapes, dataBuffer);
 
-        assertEquals(2880, productCache.getSizeInBytes());
+        assertEquals(3136, productCache.getSizeInBytes());
 
         productCache.dispose();
         assertEquals(0, productCache.getSizeInBytes());
@@ -44,6 +45,7 @@ public class ProductCacheTest {
     @STTM("SNAP-4121")
     public void testRead_3DTargetBuffer() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT64, new int[]{20, 100, 50}, new int[]{10, 20, 10}));
+        productCache.setMemoryUsageTracker(new TestMemoryUsageTracker());
 
         int[] offsets = new int[]{0, 0, 0};
         int[] shapes = new int[]{10, 20, 10};
@@ -58,6 +60,7 @@ public class ProductCacheTest {
     @STTM("SNAP-4121")
     public void testRead_2DTargetBuffer() throws IOException {
         final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_UINT8, new int[]{6, 100, 50}, new int[]{6, 20, 10}));
+        productCache.setMemoryUsageTracker(new TestMemoryUsageTracker());
 
         int[] bufferOffsets = new int[]{0, 0};
         int[] bufferShapes = new int[]{20, 10};

@@ -9,12 +9,12 @@ public class TestMemoryUsageTracker implements MemoryUsageTracker {
     }
 
     @Override
-    public void allocate(long numBytes) {
+    public void allocated(long numBytes) {
         allocatedBytes += numBytes;
     }
 
     @Override
-    public void free(long numBytes) {
+    public void released(long numBytes) {
         allocatedBytes -= numBytes;
     }
 

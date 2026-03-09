@@ -2,6 +2,6 @@ package eu.esa.snap.core.dataio.cache;
 
 public interface MemoryUsageTracker {
 
-    void allocate(long numBytes);
-    void free(long numBytes);
+    void allocated(long numBytes);
+    void released(long numBytes);
 }

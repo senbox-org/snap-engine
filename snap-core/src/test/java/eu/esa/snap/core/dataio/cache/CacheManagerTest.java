@@ -112,25 +112,25 @@ public class CacheManagerTest {
 
     @Test
     @STTM("SNAP-4121")
-    public void testGetAllocated_allocateAndDispose() {
+    public void testGetAllocated_allocatedAndDispose() {
         CacheManager cacheManager = CacheManager.getInstance();
 
-        cacheManager.allocate(1000);
+        cacheManager.allocated(1000);
         assertEquals(1000, cacheManager.getAllocatedMemory());
 
-        cacheManager.allocate(2500);
+        cacheManager.allocated(2500);
         assertEquals(3500, cacheManager.getAllocatedMemory());
 
-        cacheManager.free(800);
+        cacheManager.released(800);
         assertEquals(2700, cacheManager.getAllocatedMemory());
 
-        cacheManager.free(2700);
+        cacheManager.released(2700);
         assertEquals(0, cacheManager.getAllocatedMemory());
     }
 
     @Test
     @STTM("SNAP-4121")
-    public void testGetAllocated_allocateAndDispose_productAddsSize() {
+    public void testGetAllocated_allocatedAndDispose_productAddsSize() {
         final CacheManager cacheManager = CacheManager.getInstance();
 
         final ProductCache productCache = mock(ProductCache.class);

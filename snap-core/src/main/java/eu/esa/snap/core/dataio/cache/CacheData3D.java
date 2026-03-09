@@ -8,7 +8,7 @@ import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
 
 class CacheData3D implements CacheData {
 
-    private static final int SIZE_WITHOUT_BUFFER = 384;
+    private static final int SIZE_WITHOUT_BUFFER = 448;
 
     private final int xMin;
     private final int xMax;
@@ -20,7 +20,7 @@ class CacheData3D implements CacheData {
     private DataBuffer data;
     private CacheContext context;
     private Cuboid boundingCuboid;
-    long timeStamp;
+    private long lastAccessTime;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -29,7 +29,6 @@ class CacheData3D implements CacheData {
         yMax = yMin + shapes[1] - 1;
         zMin = offsets[0];
         zMax = zMin + shapes[0] - 1;
-        timeStamp = System.currentTimeMillis();
     }
 
     boolean intersects_z(int testMin, int testMax) {
@@ -68,8 +67,12 @@ class CacheData3D implements CacheData {
         return zMax;
     }
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getLastAccessTime() {
+        return lastAccessTime;
+    }
+
+    public void setLastAccessTime(long lastAccessTime) {
+        this.lastAccessTime = lastAccessTime;
     }
 
     boolean intersects(int[] offsets, int[] shapes) {
@@ -150,9 +153,6 @@ class CacheData3D implements CacheData {
         ensureData();
 
         copyDataBuffer(srcOffsets, data, destOffsets, intersectionShapes, targetData);
-
-        // @todo 2 tb maybe encapsulate and add a notify mechanism 2026-01-23
-        timeStamp = System.currentTimeMillis();
     }
 
     private void ensureData() throws IOException {
@@ -172,7 +172,7 @@ class CacheData3D implements CacheData {
     private void trackAllocation() {
         final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
         if (memoryUsageTracker != null) {
-            memoryUsageTracker.allocate(data.getSizeInBytes());
+            memoryUsageTracker.allocated(data.getSizeInBytes());
         }
     }
 }

@@ -358,7 +358,7 @@ public class CacheData3DTest {
         final int[] shapes = new int[]{10, 10, 20};
         final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
 
-        assertEquals(384, cacheData3D.getSizeInBytes());
+        assertEquals(448, cacheData3D.getSizeInBytes());
 
         // trigger reading the buffer
         final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
@@ -369,6 +369,17 @@ public class CacheData3DTest {
         cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{1, 0, 0}, new int[]{2, 5, 5}, dataBuffer);
 
         // default size plus 2000 longs (10x10x20)
-        assertEquals(16384, cacheData3D.getSizeInBytes());
+        assertEquals(16448, cacheData3D.getSizeInBytes());
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testSetGetLastAccessTime() {
+        final int[] offsets = new int[]{400, 350, 200};
+        final int[] shapes = new int[]{10, 10, 20};
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+
+        cacheData3D.setLastAccessTime(3200000);
+        assertEquals(3200000, cacheData3D.getLastAccessTime());
     }
 }

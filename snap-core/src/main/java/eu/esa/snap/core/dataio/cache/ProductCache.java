@@ -29,10 +29,11 @@ public class ProductCache {
         final VariableCache variableCache = variableCacheMap.computeIfAbsent(bandName, s -> {
             try {
                 final VariableDescriptor variableDescriptor = dataProvider.getVariableDescriptor(bandName);
+                final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
                 if (variableDescriptor.layers <= 1) {
-                    return new VariableCache2D(variableDescriptor, dataProvider);
+                    return new VariableCache2D(cacheContext);
                 } else {
-                    return new VariableCache3D(variableDescriptor, dataProvider);
+                    return new VariableCache3D(cacheContext);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -52,7 +53,23 @@ public class ProductCache {
         return sizeInBytes;
     }
 
-    public void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
+    void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
         this.memoryUsageTracker = memoryUsageTracker;
+    }
+
+    long getLastAccessTime() {
+        long lastAccessTime = Long.MIN_VALUE;
+        final Collection<VariableCache> variableCaches = variableCacheMap.values();
+        for (VariableCache variableCache : variableCaches) {
+            final long variableLastAccessTime = variableCache.getLastAccessTime();
+            if (variableLastAccessTime > lastAccessTime) {
+                lastAccessTime = variableLastAccessTime;
+            }
+        }
+        return lastAccessTime;
+    }
+
+    long release(long bytesToRelease) {
+        return 0;
     }
 }

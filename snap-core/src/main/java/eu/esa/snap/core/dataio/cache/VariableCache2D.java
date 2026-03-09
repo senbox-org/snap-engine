@@ -10,21 +10,20 @@ import java.util.Arrays;
 class VariableCache2D implements VariableCache {
 
     private final VariableDescriptor variableDescriptor;
-    private CacheDataProvider dataProvider;
-    private MemoryUsageTracker memoryUsageTracker;
+    private final CacheDataProvider dataProvider;
+    private final MemoryUsageTracker memoryUsageTracker;
     private CacheData2D[][] cacheData;
     private long lastAccessTime;
 
-    VariableCache2D(VariableDescriptor variableDescriptor, CacheDataProvider dataProvider) {
-        this.variableDescriptor = variableDescriptor;
-        this.dataProvider = dataProvider;
+    VariableCache2D(CacheContext cacheContext) {
+        variableDescriptor = cacheContext.getVariableDescriptor();
+        dataProvider = cacheContext.getDataProvider();
+        memoryUsageTracker = cacheContext.getMemoryUsageTracker();
         cacheData = initiateCache(variableDescriptor);
-        lastAccessTime = System.currentTimeMillis();
-    }
 
-    @Override
-    public void setMemoryUsageTracker(MemoryUsageTracker memoryUsageTracker) {
-        this.memoryUsageTracker = memoryUsageTracker;
+        final long sizeInBytes = getSizeInBytes();
+        memoryUsageTracker.allocated(sizeInBytes);
+        lastAccessTime = System.currentTimeMillis();
     }
 
     static CacheData2D[][] initiateCache(VariableDescriptor variableDescriptor) {
@@ -78,21 +77,23 @@ class VariableCache2D implements VariableCache {
     }
 
     public void dispose() {
-        for (CacheData2D[] Row : cacheData) {
-            final long sizeInBytes = getSizeInBytes();
-            Arrays.fill(Row, null);
-            if (memoryUsageTracker != null) {
-                memoryUsageTracker.free(sizeInBytes);
+        for (CacheData2D[] cacheRow : cacheData) {
+            long sizeInBytes = 0;
+            for (CacheData2D cacheData : cacheRow) {
+                sizeInBytes += cacheData.getSizeInBytes();
             }
+            Arrays.fill(cacheRow, null);
+            memoryUsageTracker.released(sizeInBytes);
         }
         cacheData = null;
-        dataProvider = null;
-        memoryUsageTracker = null;
     }
 
     public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
+        lastAccessTime = System.currentTimeMillis();
+
         final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
         final Rectangle targetRect = new Rectangle(targetBuffer.getOffsetX(), targetBuffer.getOffsetY(), targetBuffer.getWidth(), targetBuffer.getHeight());
+
         final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
         for (CacheIndex tileLocation : tileLocations) {
             final int row = tileLocation.getCacheRow();
@@ -111,9 +112,8 @@ class VariableCache2D implements VariableCache {
             final int[] destOffsets = new int[]{intersection.y - targetBuffer.getOffsetY(), intersection.x - targetBuffer.getOffsetX()};
             final int[] intersectionShapes = new int[]{intersection.height, intersection.width};
             cacheData2D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer.getWidth(), targetBuffer.getData());
+            cacheData2D.setLastAccessTime(lastAccessTime);
         }
-
-        lastAccessTime = System.currentTimeMillis();
 
         return targetBuffer.getData();
     }

@@ -396,7 +396,7 @@ public class CacheData2DTest {
         final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
 
         // size without having a buffer allocated
-        assertEquals(320, cacheData2D.getSizeInBytes());
+        assertEquals(384, cacheData2D.getSizeInBytes());
 
         // trigger reading the buffer
         final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
@@ -405,6 +405,17 @@ public class CacheData2DTest {
         cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
 
         // now with a data buffer - 100 times size of short added
-        assertEquals(520, cacheData2D.getSizeInBytes());
+        assertEquals(584, cacheData2D.getSizeInBytes());
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testSetGetLastAccessTime() {
+        final int[] offsets = new int[]{350, 200};
+        final int[] shapes = new int[]{10, 10};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+
+        cacheData2D.setLastAccessTime(400000);
+        assertEquals(400000, cacheData2D.getLastAccessTime());
     }
 }
