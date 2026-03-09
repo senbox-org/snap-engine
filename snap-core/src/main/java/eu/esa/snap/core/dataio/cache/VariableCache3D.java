@@ -5,6 +5,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 class VariableCache3D implements VariableCache {
 
@@ -43,6 +44,21 @@ class VariableCache3D implements VariableCache {
             memoryUsageTracker.released(sizeInBytes);
         }
         cacheData = null;
+    }
+
+    @Override
+    public long release(long bytesToRelease) {
+        long released = 0;
+        for (CacheData3D cacheData3D : getTimeOrderedList()) {
+            released += cacheData3D.release(bytesToRelease);
+            // update time stamp tb 2026-03-09
+            cacheData3D.setLastAccessTime(System.currentTimeMillis());
+            if (released >= bytesToRelease) {
+                break;
+            }
+        }
+
+        return released;
     }
 
     static CacheData3D[][][] initiateCache(VariableDescriptor descriptor) {
@@ -169,5 +185,18 @@ class VariableCache3D implements VariableCache {
         }
 
         return targetBuffer.getData();
+    }
+
+    ArrayList<CacheData3D> getTimeOrderedList() {
+        final ArrayList<CacheData3D> cacheDataList = new ArrayList<>(cacheData.length * cacheData[0].length * cacheData[0][0].length);
+        for (CacheData3D[][] cacheLayer : cacheData) {
+            for (CacheData3D[] cacheLine : cacheLayer) {
+                Collections.addAll(cacheDataList, cacheLine);
+            }
+        }
+
+        cacheDataList.sort(new CacheDataComparator());
+
+        return cacheDataList;
     }
 }

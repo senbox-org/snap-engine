@@ -13,4 +13,6 @@ interface VariableCache {
     long getLastAccessTime();
 
     void dispose();
+
+    long release(long bytesToRelease);
 }

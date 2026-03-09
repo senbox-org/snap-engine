@@ -5,9 +5,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.awt.*;
 import java.io.IOException;
 
-import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
-
-class CacheData2D implements CacheData {
+class CacheData2D extends AbstractCacheData {
 
     private static final int SIZE_WITHOUT_BUFFER = 384;
 
@@ -16,10 +14,7 @@ class CacheData2D implements CacheData {
     private final int yMin;
     private final int yMax;
 
-    private DataBuffer data;
     private Rectangle boundingRect;
-    private CacheContext context;
-    private long lastAccessTime;
 
     CacheData2D(int[] offsets, int[] shapes) {
         this.xMin = offsets[1];
@@ -27,18 +22,6 @@ class CacheData2D implements CacheData {
         this.yMin = offsets[0];
         this.yMax = yMin + shapes[0] - 1;
         boundingRect = null;
-    }
-
-    long getLastAccessTime() {
-        return lastAccessTime;
-    }
-
-    void setLastAccessTime(long lastAccessTime) {
-        this.lastAccessTime = lastAccessTime;
-    }
-
-    void setCacheContext(CacheContext context) {
-        this.context = context;
     }
 
     boolean intersects(int[] offsets, int[] shapes) {
@@ -75,14 +58,6 @@ class CacheData2D implements CacheData {
 
     int getyMax() {
         return yMax;
-    }
-
-    // only for testing tb 2025-12-09
-    ProductData getData() {
-        if (data == null) {
-            return null;
-        }
-        return data.getData();
     }
 
     void copyData(int[] offsets, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) throws IOException {

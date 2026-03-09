@@ -4,9 +4,7 @@ import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
 
-import static eu.esa.snap.core.dataio.cache.CacheData.intersectingRange;
-
-class CacheData3D implements CacheData {
+class CacheData3D extends AbstractCacheData {
 
     private static final int SIZE_WITHOUT_BUFFER = 448;
 
@@ -17,10 +15,7 @@ class CacheData3D implements CacheData {
     private final int zMin;
     private final int zMax;
 
-    private DataBuffer data;
-    private CacheContext context;
     private Cuboid boundingCuboid;
-    private long lastAccessTime;
 
     CacheData3D(int[] offsets, int[] shapes) {
         xMin = offsets[2];
@@ -65,14 +60,6 @@ class CacheData3D implements CacheData {
 
     public int getzMax() {
         return zMax;
-    }
-
-    public long getLastAccessTime() {
-        return lastAccessTime;
-    }
-
-    public void setLastAccessTime(long lastAccessTime) {
-        this.lastAccessTime = lastAccessTime;
     }
 
     boolean intersects(int[] offsets, int[] shapes) {
@@ -136,17 +123,6 @@ class CacheData3D implements CacheData {
             boundingCuboid = new Cuboid(offsets, shapes);
         }
         return boundingCuboid;
-    }
-
-    void setCacheContext(CacheContext context) {
-        this.context = context;
-    }
-
-    ProductData getData() {
-        if (data == null) {
-            return null;
-        }
-        return data.getData();
     }
 
     void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, DataBuffer targetData) throws IOException {

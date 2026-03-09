@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 class VariableCache2D implements VariableCache {
 
@@ -88,6 +89,23 @@ class VariableCache2D implements VariableCache {
         cacheData = null;
     }
 
+    @Override
+    public long release(long bytesToRelease) {
+        long released = 0;
+
+        final ArrayList<CacheData2D> timeOrderedList = getTimeOrderedList();
+        for (CacheData2D cacheData2D : timeOrderedList) {
+            released += cacheData2D.release(bytesToRelease);
+            // update time stamp tb 2026-03-09
+            cacheData2D.setLastAccessTime(System.currentTimeMillis());
+            if (released >= bytesToRelease) {
+                break;
+            }
+        }
+
+        return released;
+    }
+
     public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
         lastAccessTime = System.currentTimeMillis();
 
@@ -137,4 +155,16 @@ class VariableCache2D implements VariableCache {
 
         return cacheIndices.toArray(new CacheIndex[0]);
     }
+
+    ArrayList<CacheData2D> getTimeOrderedList() {
+        final ArrayList<CacheData2D> cacheDataList = new ArrayList<>(cacheData.length * cacheData[0].length);
+        for (CacheData2D[] cacheLine : cacheData) {
+            Collections.addAll(cacheDataList, cacheLine);
+        }
+
+        cacheDataList.sort(new CacheDataComparator());
+
+        return cacheDataList;
+    }
 }
+

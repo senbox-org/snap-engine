@@ -382,4 +382,41 @@ public class CacheData3DTest {
         cacheData3D.setLastAccessTime(3200000);
         assertEquals(3200000, cacheData3D.getLastAccessTime());
     }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease_nothingAllocated() {
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+
+        final int[] offsets = new int[]{400, 350, 200};
+        final int[] shapes = new int[]{10, 10, 20};
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        cacheData3D.setCacheContext(cacheContext);
+
+        final long released = cacheData3D.release(200000);
+        assertEquals(0, released);
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease() throws IOException {
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+
+        final int[] offsets = new int[]{400, 350, 200};
+        final int[] shapes = new int[]{10, 10, 20};
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+
+        // trigger reading the buffer
+        cacheData3D.setCacheContext(cacheContext);
+
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{1, 0, 0}, new int[]{2, 5, 5}, dataBuffer);
+
+        final long released = cacheData3D.release(200000);
+        assertEquals(16000, released);
+    }
 }

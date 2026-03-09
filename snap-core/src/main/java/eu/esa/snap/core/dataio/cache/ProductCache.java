@@ -70,6 +70,26 @@ public class ProductCache {
     }
 
     long release(long bytesToRelease) {
+        // get oldest variable, i.e. the one with the smallest lastAccessTime
+        long lastAccessTime = Long.MAX_VALUE;
+        VariableCache cacheToDispose = null;
+        final Collection<VariableCache> variableCaches = variableCacheMap.values();
+        for (VariableCache variableCache : variableCaches) {
+            final long variableLastAccessTime = variableCache.getLastAccessTime();
+            if (variableLastAccessTime < lastAccessTime) {
+                lastAccessTime = variableLastAccessTime;
+                cacheToDispose = variableCache;
+            }
+        }
+        if (cacheToDispose == null) {
+            return 0;
+        }
+
+        // let it drop the requested amount
+        long bytesRelease = cacheToDispose.release(bytesToRelease);
+        // if it can't fulfill all - continue with the next.
+
+        // return the number of bytes released
         return 0;
     }
 }

@@ -418,4 +418,43 @@ public class CacheData2DTest {
         cacheData2D.setLastAccessTime(400000);
         assertEquals(400000, cacheData2D.getLastAccessTime());
     }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease_nothingAllocated() {
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+
+        final int[] offsets = new int[]{350, 200};
+        final int[] shapes = new int[]{10, 10};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+        cacheData2D.setCacheContext(cacheContext);
+
+        final long released = cacheData2D.release(100000);
+        assertEquals(0, released);
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease() throws IOException {
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+
+        final int[] offsets = new int[]{350, 200};
+        final int[] shapes = new int[]{10, 10};
+        final CacheData2D cacheData2D = new CacheData2D(offsets, shapes);
+        cacheData2D.setCacheContext(cacheContext);
+
+        long released = cacheData2D.release(100000);
+        assertEquals(0, released);
+
+        // trigger reading from dataProviders
+        cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10, ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+        assertEquals(200, memoryUsageTracker.getAllocatedBytes());
+
+        released = cacheData2D.release(100000);
+        assertEquals(200, released);
+    }
 }
