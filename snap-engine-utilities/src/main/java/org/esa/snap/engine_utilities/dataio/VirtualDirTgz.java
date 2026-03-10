@@ -1,6 +1,8 @@
 package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.util.CleanUpState;
+import com.bc.ceres.util.CleanerRegistry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.engine_utilities.commons.FilePath;
@@ -35,14 +37,15 @@ public class VirtualDirTgz extends VirtualDirEx {
     private static final int TRANSFER_BUFFER_SIZE = 1024 * 1024;
 
     private final Path archiveFile;
-    private File extractDir;
-    private HashMap<String, File> locationMap;
+    private final VirtualDirTgzState state;
 
     public VirtualDirTgz(File tgz) {
         if (tgz == null) {
             throw new IllegalArgumentException("Input file shall not be null");
         }
         archiveFile = tgz.toPath();
+        state = new VirtualDirTgzState();
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     public VirtualDirTgz(Path tgz) {
@@ -50,6 +53,8 @@ public class VirtualDirTgz extends VirtualDirEx {
             throw new IllegalArgumentException("Input file shall not be null");
         }
         archiveFile = tgz;
+        state = new VirtualDirTgzState();
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     public static boolean isTgz(String filename) {
@@ -102,11 +107,11 @@ public class VirtualDirTgz extends VirtualDirEx {
     @Override
     public File getFile(String childRelativePath) throws IOException {
         ensureUnpacked(null);
-        File file = new File(extractDir, childRelativePath);
+        File file = new File(state.extractDir, childRelativePath);
         if (!(file.isFile() || file.isDirectory())) {
-            final File fileFromMapping = locationMap.get(childRelativePath);
+            final File fileFromMapping = state.locationMap.get(childRelativePath);
             if (fileFromMapping == null) {
-                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + extractDir.getAbsolutePath() + "'.");
+                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + state.extractDir.getAbsolutePath() + "'.");
             }
             return fileFromMapping;
         }
@@ -140,14 +145,7 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public void close() {
-        if (extractDir != null) {
-            FileUtils.deleteTree(extractDir);
-            extractDir = null;
-        }
-        if (locationMap != null) {
-            locationMap.clear();
-            locationMap = null;
-        }
+        CleanerRegistry.getInstance().cleanup(this);
     }
 
     @Override
@@ -161,30 +159,25 @@ public class VirtualDirTgz extends VirtualDirEx {
         return true;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        close();
-    }
 
     @Override
     public File getTempDir() {
-        return extractDir;
+        return state.extractDir;
     }
 
     @Override
     public Path makeLocalTempFolder() throws IOException {
-        if (extractDir == null) {
-            extractDir = VirtualDir.createUniqueTempDir();
+        if (state.extractDir == null) {
+            state.extractDir = VirtualDir.createUniqueTempDir();
         }
-        return extractDir.toPath();
+        return state.extractDir.toPath();
     }
 
     public void ensureUnpacked(File unpackFolder) throws IOException {
-        if (extractDir == null) {
-            extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
+        if (state.extractDir == null) {
+            state.extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
 
-            locationMap = new HashMap<>();
+            state.locationMap = new HashMap<>();
             try (TarArchiveInputStream tarStream = buildTarInputStream()) {
                 byte[] data = new byte[TRANSFER_BUFFER_SIZE];
                 TarArchiveEntry entry;
@@ -197,8 +190,8 @@ public class VirtualDirTgz extends VirtualDirEx {
                         longLink = null;
                     }
                     if (entry.isDirectory()) {
-                        File directory = new File(extractDir, entryName);
-                        ensureDirectory(directory, extractDir);
+                        File directory = new File(state.extractDir, entryName);
+                        ensureDirectory(directory, state.extractDir);
 
                         continue;
                     }
@@ -212,12 +205,12 @@ public class VirtualDirTgz extends VirtualDirEx {
 
                     File targetDir;
                     if (tarPath == null) {
-                        targetDir = extractDir;
+                        targetDir = state.extractDir;
                     } else {
-                        targetDir = new File(extractDir, tarPath);
+                        targetDir = new File(state.extractDir, tarPath);
                     }
 
-                    final File ensuredDirectory = ensureDirectory(targetDir, extractDir);
+                    final File ensuredDirectory = ensureDirectory(targetDir, state.extractDir);
                     final File targetFile = new File(ensuredDirectory, fileNameFromPath);
                     if (!entryIsLink && targetFile.isFile()) {
                         continue;
@@ -227,7 +220,7 @@ public class VirtualDirTgz extends VirtualDirEx {
                         throw new IOException("Unable to create file: " + targetFile.getAbsolutePath());
                     }
 
-                    locationMap.put(entryName, targetFile);
+                    state.locationMap.put(entryName, targetFile);
 
                     try (FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
                          BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
@@ -356,5 +349,23 @@ public class VirtualDirTgz extends VirtualDirEx {
             fileNames = new ArrayList<>();
         }
         return fileNames.toArray(new String[0]);
+    }
+
+
+    private static final class VirtualDirTgzState implements CleanUpState {
+        private File extractDir;
+        private HashMap<String, File> locationMap;
+
+        @Override
+        public synchronized void run() {
+            if (extractDir != null) {
+                FileUtils.deleteTree(extractDir);
+                extractDir = null;
+            }
+            if (locationMap != null) {
+                locationMap.clear();
+                locationMap = null;
+            }
+        }
     }
 }

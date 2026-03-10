@@ -41,13 +41,6 @@ public abstract class AbstractSubsetTileOpImage extends SourcelessOpImage {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-
-        dispose();
-    }
-
     protected final int getLevel() {
         return imageBoundsSupport.getLevel();
     }

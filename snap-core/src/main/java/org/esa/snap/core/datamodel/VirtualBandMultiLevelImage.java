@@ -78,14 +78,6 @@ class VirtualBandMultiLevelImage extends DefaultMultiLevelImage implements Produ
         super.dispose();
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (term != null) {
-            //System.out.printf("%s.finalize(): term = %s%n", getClass().getSimpleName(), term.toString());
-            dispose();
-        }
-    }
 
     @Override
     public void nodeDataChanged(ProductNodeEvent event) {

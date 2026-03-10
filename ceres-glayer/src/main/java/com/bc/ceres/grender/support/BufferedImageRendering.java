@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
 /**
  * A rendering which uses a buffered image as drawing surface.
  */
-public class BufferedImageRendering implements Rendering {
+public class BufferedImageRendering implements Rendering, AutoCloseable {
     private BufferedImage image;
     private Graphics2D graphics;
     private Viewport viewport;
@@ -80,8 +80,7 @@ public class BufferedImageRendering implements Rendering {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
+    public void close() {
         disposeGraphics();
     }
 

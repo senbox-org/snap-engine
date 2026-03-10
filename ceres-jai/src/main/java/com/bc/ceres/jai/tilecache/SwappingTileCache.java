@@ -48,7 +48,7 @@ import java.util.TreeSet;
  * @author Sun Microsystems
  * @author Norman Fomferra
  */
-public final class SwappingTileCache extends Observable implements TileCache, CacheDiagnostics {
+public final class SwappingTileCache extends Observable implements TileCache, CacheDiagnostics, AutoCloseable {
 
     /**
      * The default memory capacity of the cache (16 MB).
@@ -206,6 +206,17 @@ public final class SwappingTileCache extends Observable implements TileCache, Ca
         // try to get a prime number (more efficient?)
         // lower values of LOAD_FACTOR increase speed, decrease space efficiency
         cache = new Hashtable<Object, MemoryTile>(DEFAULT_HASHTABLE_CAPACITY, LOAD_FACTOR);
+    }
+
+    @Override
+    public synchronized void close() {
+        flush();
+        if (swapSpace instanceof AutoCloseable c) {
+            try {
+                c.close();
+            } catch (Exception ignore) {}
+        }
+        swapSpace = null;
     }
 
 
