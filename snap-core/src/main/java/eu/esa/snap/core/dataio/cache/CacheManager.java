@@ -8,8 +8,8 @@ public class CacheManager implements MemoryUsageTracker {
     private static CacheManager instance = null;
 
     private final List<ProductCache> productCaches;
-    // @todo 1 tb/tb make adjustable 2026-02-09
-    private final long memoryLimit = 1024L * 1024 * 1024 * 2;
+    // @todo 2 check if these are suitable default values
+    private long memoryLimit = 1024L * 1024 * 1024 * 2;
     private long disposeThreshold = 1024L * 1024;
     private long allocatedMemory;
 
@@ -31,6 +31,14 @@ public class CacheManager implements MemoryUsageTracker {
     CacheManager() {
         productCaches = new ArrayList<>();
         allocatedMemory = 0;
+    }
+
+    public void setMemoryLimit(long memoryLimit) {
+        this.memoryLimit = memoryLimit;
+    }
+
+    public void setDisposeThreshold(long disposeThreshold) {
+        this.disposeThreshold = disposeThreshold;
     }
 
     public void register(ProductCache productCache) {
@@ -78,6 +86,7 @@ public class CacheManager implements MemoryUsageTracker {
         for (final ProductCache productCache : productCaches) {
             productCache.dispose();
         }
+        productCaches.clear();
     }
 
     private synchronized void increaseAllocatedMemory(long size) {
@@ -88,24 +97,15 @@ public class CacheManager implements MemoryUsageTracker {
                 return;
             }
 
-            // @todo 1 Move to separate worker thread tb 2026-03-09
-            long lastAccessTime = Long.MIN_VALUE;
-            ProductCache oldestProduct = null;
+            long disposed = 0;
+            productCaches.sort(new ReverseTimeComparator());
             for (ProductCache productCache : productCaches) {
-                final long productLastAccessTime = productCache.getLastAccessTime();
-                if (productLastAccessTime > lastAccessTime) {
-                    oldestProduct = productCache;
+                disposed += productCache.release(toDispose - disposed);
+                if (disposed >= toDispose) {
+                    break;
                 }
             }
-
-            if (oldestProduct != null) {
-                final long released = oldestProduct.release(toDispose);
-
-                // @todo 1 tb check if released data is larger or equal than requested. If not
-                // continue with next product, until goal is reached. tb 2026-03-09
-                allocatedMemory -= released;
-            }
-
+            decreaseAllocatedMemory(disposed);
         }
     }
 

@@ -58,6 +58,8 @@ class VariableCache3D implements VariableCache {
             }
         }
 
+        lastAccessTime = System.currentTimeMillis();
+
         return released;
     }
 
@@ -195,7 +197,7 @@ class VariableCache3D implements VariableCache {
             }
         }
 
-        cacheDataList.sort(new CacheDataComparator());
+        cacheDataList.sort(new ReverseTimeComparator());
 
         return cacheDataList;
     }

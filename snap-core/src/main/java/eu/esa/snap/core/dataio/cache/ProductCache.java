@@ -1,16 +1,19 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.apache.commons.collections.comparators.ReverseComparator;
 import org.esa.snap.core.datamodel.ProductData;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProductCache {
+public class ProductCache implements TimeStamped {
 
     private final ConcurrentHashMap<String, VariableCache> variableCacheMap;
-    private  CacheDataProvider dataProvider;
-    private  MemoryUsageTracker memoryUsageTracker;
+    private CacheDataProvider dataProvider;
+    private MemoryUsageTracker memoryUsageTracker;
 
     public ProductCache(CacheDataProvider dataProvider) {
         this.dataProvider = dataProvider;
@@ -57,7 +60,7 @@ public class ProductCache {
         this.memoryUsageTracker = memoryUsageTracker;
     }
 
-    long getLastAccessTime() {
+    public long getLastAccessTime() {
         long lastAccessTime = Long.MIN_VALUE;
         final Collection<VariableCache> variableCaches = variableCacheMap.values();
         for (VariableCache variableCache : variableCaches) {
@@ -70,26 +73,22 @@ public class ProductCache {
     }
 
     long release(long bytesToRelease) {
-        // get oldest variable, i.e. the one with the smallest lastAccessTime
-        long lastAccessTime = Long.MAX_VALUE;
-        VariableCache cacheToDispose = null;
-        final Collection<VariableCache> variableCaches = variableCacheMap.values();
-        for (VariableCache variableCache : variableCaches) {
-            final long variableLastAccessTime = variableCache.getLastAccessTime();
-            if (variableLastAccessTime < lastAccessTime) {
-                lastAccessTime = variableLastAccessTime;
-                cacheToDispose = variableCache;
+        long bytesReleased = 0;
+
+        final ArrayList<VariableCache> timeOrderedList = getTimeOrderedList();
+
+        for (VariableCache variableCache : timeOrderedList) {
+            bytesReleased += variableCache.release(bytesToRelease);
+            if (bytesReleased >= bytesToRelease) {
+                return bytesReleased;
             }
         }
-        if (cacheToDispose == null) {
-            return 0;
-        }
+        return bytesReleased;
+    }
 
-        // let it drop the requested amount
-        long bytesRelease = cacheToDispose.release(bytesToRelease);
-        // if it can't fulfill all - continue with the next.
-
-        // return the number of bytes released
-        return 0;
+    private @NonNull ArrayList<VariableCache> getTimeOrderedList() {
+        final ArrayList<VariableCache> variableCaches = new ArrayList<>(variableCacheMap.values());
+        variableCaches.sort(new ReverseTimeComparator());
+        return variableCaches;
     }
 }

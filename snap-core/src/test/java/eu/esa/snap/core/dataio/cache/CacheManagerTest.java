@@ -1,8 +1,11 @@
 package eu.esa.snap.core.dataio.cache;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.After;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -42,7 +45,7 @@ public class CacheManagerTest {
         final CacheManager cacheManager = CacheManager.getInstance();
         assertEquals(0, cacheManager.getNumProductCaches());
 
-        final ProductCache productCache = new ProductCache(new TestCacheDataProvider());
+        final ProductCache productCache = new ProductCache(new TestCacheDataProvider(new int[] {20, 20}, new int[] {5, 10}, ProductData.TYPE_FLOAT64));
         cacheManager.register(productCache);
 
         assertEquals(1, cacheManager.getNumProductCaches());
@@ -139,5 +142,37 @@ public class CacheManagerTest {
         cacheManager.register(productCache);
 
         assertEquals(2698, cacheManager.getAllocatedMemory());
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease() throws IOException {
+        final CacheManager cacheManager = CacheManager.getInstance();
+        cacheManager.setMemoryLimit(30000);
+        cacheManager.setDisposeThreshold(1000);
+
+        final ProductCache productCache = new ProductCache(new TestCacheDataProvider(new int[] {40, 200}, new int[] {10, 20}, ProductData.TYPE_FLOAT32));
+        cacheManager.register(productCache);
+
+        // read to start cache filling
+        DataBuffer dataBuffer = new DataBuffer(ProductData.createInstance(ProductData.TYPE_FLOAT32, 2000), new int[]{0, 0}, new int[] {20, 100});
+        productCache.read("who_cares", new int[]{0,0}, new int[] {20, 100}, dataBuffer );
+
+        long sizeInBytes = cacheManager.getSizeInBytes();
+        assertEquals(23360, sizeInBytes);
+
+        // read at different location to trigger cache filling
+        dataBuffer = new DataBuffer(ProductData.createInstance(ProductData.TYPE_FLOAT32, 2000), new int[]{30, 70}, new int[] {20, 100});
+        productCache.read("who_cares", new int[]{30,70}, new int[] {20, 100}, dataBuffer );
+
+        sizeInBytes = cacheManager.getSizeInBytes();
+        assertEquals(28160, sizeInBytes);
+
+        // now trigger release 0peration, next allocation is 4k and will overshoot
+        dataBuffer = new DataBuffer(ProductData.createInstance(ProductData.TYPE_FLOAT32, 2000), new int[]{20, 80}, new int[] {20, 100});
+        productCache.read("who_cares", new int[]{20, 80}, new int[] {20, 100}, dataBuffer );
+
+        sizeInBytes = cacheManager.getSizeInBytes();
+        assertEquals(25760, sizeInBytes);
     }
 }

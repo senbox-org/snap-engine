@@ -2,7 +2,7 @@ package eu.esa.snap.core.dataio.cache;
 
 import org.esa.snap.core.datamodel.ProductData;
 
-public abstract class AbstractCacheData implements CacheData {
+public abstract class AbstractCacheData implements CacheData, TimeStamped {
 
     DataBuffer data;
     CacheContext context;
@@ -32,7 +32,7 @@ public abstract class AbstractCacheData implements CacheData {
         return size;
     }
 
-    long getLastAccessTime() {
+    public long getLastAccessTime() {
         return lastAccessTime;
     }
 

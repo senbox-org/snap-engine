@@ -2,6 +2,7 @@ package eu.esa.snap.core.dataio.cache;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
+import org.jspecify.annotations.NonNull;
 import org.junit.Test;
 
 import javax.xml.crypto.Data;
@@ -16,9 +17,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testIntersects_z() {
-        int[] offsets = new int[]{10, 200, 300};
-        int[] shapes = new int[]{20, 50, 50};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{10, 200, 300}, new int[]{20, 50, 50});
         // z ranges from 10 - 29
 
         // outside bottom
@@ -39,9 +38,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testIntersects_y() {
-        int[] offsets = new int[]{10, 200, 300};
-        int[] shapes = new int[]{20, 50, 50};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{10, 200, 300}, new int[]{20, 50, 50});
         // y ranges from 200 - 249
 
         // outside front
@@ -62,9 +59,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testIntersects_x() {
-        int[] offsets = new int[]{10, 200, 300};
-        int[] shapes = new int[]{20, 50, 50};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{10, 200, 300}, new int[]{20, 50, 50});
         // x ranges from 300 - 349
 
         // outside left
@@ -85,13 +80,11 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testIntersects() {
-        int[] offsets = new int[]{20, 50, 100};
-        int[] shapes = new int[]{20, 100, 100};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{20, 50, 100}, new int[]{20, 100, 100});
 
         // fully inside
-        offsets = new int[]{23, 55, 108};
-        shapes = new int[]{10, 10, 10};
+        int[] offsets = new int[]{23, 55, 108};
+        int[] shapes = new int[]{10, 10, 10};
         assertTrue(cacheData3D.intersects(offsets, shapes));
 
         // intersects front only
@@ -166,9 +159,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testGetBoundingCuboid() {
-        int[] offsets = new int[]{100, 2600, 1800};
-        int[] shapes = new int[]{50, 200, 300};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{100, 2600, 1800}, new int[]{50, 200, 300});
 
         final Cuboid bounds = cacheData3D.getBoundingCuboid();
         assertEquals(100, bounds.getZ());
@@ -334,14 +325,9 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testEnsureData() throws IOException {
-        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
         final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
-        final int[] offsets = new int[]{0, 0, 0};
-        final int[] shapes = new int[]{30, 40, 40};
+        final CacheData3D cacheData3D = createCacheDataWithContext(new int[]{0, 0, 0}, new int[]{30, 40, 40}, ProductData.TYPE_INT64, memoryUsageTracker);
 
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
-        cacheData3D.setCacheContext(cacheContext);
         assertNull(cacheData3D.getData());
 
         final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
@@ -354,17 +340,11 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
-        final int[] offsets = new int[]{400, 350, 200};
-        final int[] shapes = new int[]{10, 10, 20};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheDataWithContext(new int[]{400, 350, 200}, new int[]{10, 10, 20}, ProductData.TYPE_INT64);
 
         assertEquals(448, cacheData3D.getSizeInBytes());
 
         // trigger reading the buffer
-        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, new TestMemoryUsageTracker());
-        cacheData3D.setCacheContext(cacheContext);
-
         final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
         cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{1, 0, 0}, new int[]{2, 5, 5}, dataBuffer);
 
@@ -375,9 +355,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testSetGetLastAccessTime() {
-        final int[] offsets = new int[]{400, 350, 200};
-        final int[] shapes = new int[]{10, 10, 20};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheData3D cacheData3D = createCacheData(new int[]{400, 350, 200}, new int[]{10, 10, 20});
 
         cacheData3D.setLastAccessTime(3200000);
         assertEquals(3200000, cacheData3D.getLastAccessTime());
@@ -386,14 +364,7 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testRelease_nothingAllocated() {
-        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
-        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
-
-        final int[] offsets = new int[]{400, 350, 200};
-        final int[] shapes = new int[]{10, 10, 20};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
-        cacheData3D.setCacheContext(cacheContext);
+        final CacheData3D cacheData3D = createCacheDataWithContext(new int[]{400, 350, 200}, new int[]{10, 10, 20}, ProductData.TYPE_UINT16);
 
         final long released = cacheData3D.release(200000);
         assertEquals(0, released);
@@ -402,21 +373,33 @@ public class CacheData3DTest {
     @Test
     @STTM("SNAP-4121")
     public void testRelease() throws IOException {
-        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT64);
-        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
-        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
-
-        final int[] offsets = new int[]{400, 350, 200};
-        final int[] shapes = new int[]{10, 10, 20};
-        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
-
-        // trigger reading the buffer
-        cacheData3D.setCacheContext(cacheContext);
+        final CacheData3D cacheData3D = createCacheDataWithContext(new int[]{400, 350, 200}, new int[]{10, 10, 20}, ProductData.TYPE_INT64);
 
         final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT64, new int[]{0, 0, 0}, new int[]{4, 10, 10});
         cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{1, 0, 0}, new int[]{2, 5, 5}, dataBuffer);
 
         final long released = cacheData3D.release(200000);
         assertEquals(16000, released);
+    }
+
+    private static @NonNull CacheData3D createCacheData(int[] offsets, int[] shapes) {
+        return new CacheData3D(offsets, shapes);
+    }
+
+    private static @NonNull CacheData3D createCacheDataWithContext(int[] offsets, int[] shapes, int productType) {
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheDataProvider cacheDataProvider = new MockProvider(productType);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+        cacheData3D.setCacheContext(cacheContext);
+        return cacheData3D;
+    }
+
+    private static @NonNull CacheData3D createCacheDataWithContext(int[] offsets, int[] shapes, int productType, MemoryUsageTracker memoryUsageTracker) {
+        final CacheData3D cacheData3D = new CacheData3D(offsets, shapes);
+        final CacheDataProvider cacheDataProvider = new MockProvider(productType);
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+        cacheData3D.setCacheContext(cacheContext);
+        return cacheData3D;
     }
 }

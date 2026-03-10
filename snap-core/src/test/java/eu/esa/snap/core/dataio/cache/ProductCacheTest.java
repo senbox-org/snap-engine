@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ProductCacheTest {
 
@@ -71,5 +72,50 @@ public class ProductCacheTest {
         productCache.read("whatever", offsets, shapes, dataBuffer);
         assertEquals(1, dataBuffer.getData().getElemIntAt(1));
         assertEquals(27, dataBuffer.getData().getElemIntAt(27));
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRead_2DTargetBuffer_release() throws IOException {
+        final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT16, new int[]{6, 100, 50}, new int[]{6, 20, 10}));
+        productCache.setMemoryUsageTracker(new TestMemoryUsageTracker());
+
+        int[] bufferOffsets = new int[]{0, 0};
+        int[] bufferShapes = new int[]{20, 10};
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT16, bufferOffsets, bufferShapes);
+
+        int[] offsets = new int[]{0, 3, 3};
+        int[] shapes = new int[]{1, 20, 10};
+        productCache.read("whatever", offsets, shapes, dataBuffer);
+
+        assertEquals(13600, productCache.getSizeInBytes());
+
+        final long released = productCache.release(5000);
+        assertEquals(2400, released);
+
+        assertEquals(11200, productCache.getSizeInBytes());
+
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testGetLastAccessTime() throws IOException {
+        final ProductCache productCache = new ProductCache(new MockProvider(ProductData.TYPE_INT32, new int[]{6, 100, 50}, new int[]{6, 20, 10}));
+        productCache.setMemoryUsageTracker(new TestMemoryUsageTracker());
+
+        assertEquals(Long.MIN_VALUE, productCache.getLastAccessTime());
+
+        // read some data
+        int[] bufferOffsets = new int[]{0, 0};
+        int[] bufferShapes = new int[]{20, 10};
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT32, bufferOffsets, bufferShapes);
+
+        int[] offsets = new int[]{0, 3, 3};
+        int[] shapes = new int[]{1, 20, 10};
+        productCache.read("whatever", offsets, shapes, dataBuffer);
+
+        long lastAccessTime = productCache.getLastAccessTime();
+        assertTrue(lastAccessTime != Long.MIN_VALUE);
+        assertTrue(lastAccessTime <= System.currentTimeMillis());
     }
 }

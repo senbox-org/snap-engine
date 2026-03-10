@@ -103,6 +103,8 @@ class VariableCache2D implements VariableCache {
             }
         }
 
+        lastAccessTime = System.currentTimeMillis();
+
         return released;
     }
 
@@ -162,7 +164,7 @@ class VariableCache2D implements VariableCache {
             Collections.addAll(cacheDataList, cacheLine);
         }
 
-        cacheDataList.sort(new CacheDataComparator());
+        cacheDataList.sort(new ReverseTimeComparator());
 
         return cacheDataList;
     }

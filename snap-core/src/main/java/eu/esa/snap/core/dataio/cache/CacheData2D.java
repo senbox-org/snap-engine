@@ -102,10 +102,10 @@ class CacheData2D extends AbstractCacheData {
                 final int[] shapes = {bounds.height, bounds.width};
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
-
-                trackAllocation();
+                lastAccessTime = System.currentTimeMillis();
             }
         }
+        trackAllocation();
     }
 
     private void trackAllocation() {

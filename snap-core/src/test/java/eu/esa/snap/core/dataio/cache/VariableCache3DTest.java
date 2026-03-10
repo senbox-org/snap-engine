@@ -199,6 +199,43 @@ public class VariableCache3DTest {
         assertTrue(cache.getLastAccessTime() <= currentTime);
     }
 
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease() throws IOException {
+        final int[] cacheSizes = {10, 10, 10};
+        final int[] productSizes = new int[]{100, 100, 100};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_FLOAT64);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, memoryUsageTracker);
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
+
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT64, new int[]{0, 0, 0}, new int[]{25, 20, 20});
+        cache.read(new int[]{0, 0, 0}, new int[]{25, 20, 20}, dataBuffer);
+
+        assertEquals(544000, memoryUsageTracker.getAllocatedBytes());
+
+        long released = cache.release(250000);
+        assertEquals(96000, released);
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease_empty() {
+        final int[] cacheSizes = {10, 10, 10};
+        final int[] productSizes = new int[]{100, 100, 100};
+        final VariableDescriptor descriptor = createDescriptor(productSizes, cacheSizes);
+        final MockProvider dataProvider = new MockProvider(ProductData.TYPE_INT64);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(descriptor, dataProvider, memoryUsageTracker);
+        final VariableCache3D cache = new VariableCache3D(cacheContext);
+
+        long release = cache.release(100000);
+        assertEquals(0, release);
+    }
+
 
     static VariableDescriptor createDescriptor(int[] productSizes, int[] cacheSizes) {
         VariableDescriptor variableDescriptor = new VariableDescriptor();

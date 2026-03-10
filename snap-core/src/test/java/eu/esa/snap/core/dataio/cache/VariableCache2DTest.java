@@ -118,11 +118,11 @@ public class VariableCache2DTest {
 
         // read fake data to memory
         DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{0, 0}, new int[]{100, 50});
-        cache.read(new int[]{30, 30}, new int[] {100, 50}, dataBuffer);
+        cache.read(new int[]{30, 30}, new int[]{100, 50}, dataBuffer);
         assertEquals(30240, cache.getSizeInBytes());
 
-        dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{370, 30}, new int[] {100, 50});
-        cache.read(new int[]{370, 30}, new int[] {100, 50}, dataBuffer);
+        dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{370, 30}, new int[]{100, 50});
+        cache.read(new int[]{370, 30}, new int[]{100, 50}, dataBuffer);
         assertEquals(98240, cache.getSizeInBytes());
     }
 
@@ -136,11 +136,11 @@ public class VariableCache2DTest {
         final CacheContext cacheContext = new CacheContext(variableDescriptor, mockProvider, memoryUsageTracker);
         final VariableCache2D cache = new VariableCache2D(cacheContext);
 
-        // the raw cahce data structure without product data allocated tb 2026-03-09
+        // the raw cache data structure without product data allocated tb 2026-03-09
         assertEquals(3840, memoryUsageTracker.getAllocatedBytes());
 
-        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT8, new int[]{370, 30}, new int[] {100, 50});
-        cache.read(new int[]{370, 30}, new int[] {100, 50}, dataBuffer);
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_INT8, new int[]{370, 30}, new int[]{100, 50});
+        cache.read(new int[]{370, 30}, new int[]{100, 50}, dataBuffer);
 
         assertEquals(20840, memoryUsageTracker.getAllocatedBytes());
 
@@ -150,7 +150,7 @@ public class VariableCache2DTest {
 
     @Test
     @STTM("SNAP-4121")
-    public void testGetLastAccessTime()  {
+    public void testGetLastAccessTime() {
         final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
         final MockProvider mockProvider = new MockProvider(ProductData.TYPE_INT8);
         final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
@@ -160,6 +160,39 @@ public class VariableCache2DTest {
 
         final long currentTime = System.currentTimeMillis();
         assertTrue(cache.getLastAccessTime() <= currentTime);
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease() throws IOException {
+        final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
+        final MockProvider mockProvider = new MockProvider(ProductData.TYPE_FLOAT32);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, mockProvider, memoryUsageTracker);
+        final VariableCache2D cache = new VariableCache2D(cacheContext);
+
+        final DataBuffer dataBuffer = new DataBuffer(ProductData.TYPE_FLOAT32, new int[]{270, 20}, new int[]{100, 50});
+        cache.read(new int[]{270, 20}, new int[]{100, 50}, dataBuffer);
+
+        assertEquals(91840, memoryUsageTracker.getAllocatedBytes());
+
+        long release = cache.release(40000);
+        assertEquals(44000, release);
+    }
+
+    @Test
+    @STTM("SNAP-4121")
+    public void testRelease_empty() {
+        final VariableDescriptor variableDescriptor = createDescriptor(100, 500, 60, 110);
+        final MockProvider mockProvider = new MockProvider(ProductData.TYPE_FLOAT32);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, mockProvider, memoryUsageTracker);
+        final VariableCache2D cache = new VariableCache2D(cacheContext);
+
+        long release = cache.release(40000);
+        assertEquals(0, release);
     }
 
     private static VariableDescriptor createDescriptor(int width, int height, int tileWidth, int tileHeight) {

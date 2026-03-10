@@ -20,7 +20,7 @@ public class CacheDataComparatorTest {
         final CacheData2D two = new CacheData2D(offsets, shapes);
         two.setLastAccessTime(3000);
 
-        final CacheDataComparator cacheDataComparator = new CacheDataComparator();
+        final ReverseTimeComparator cacheDataComparator = new ReverseTimeComparator();
         assertEquals(-1, cacheDataComparator.compare(one, two));
         assertEquals(1, cacheDataComparator.compare(two, one));
 
