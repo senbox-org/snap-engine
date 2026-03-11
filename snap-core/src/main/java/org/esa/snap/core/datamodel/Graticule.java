@@ -36,50 +36,50 @@ import java.util.List;
 //JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
 
 
-    // todo
-    // Support level-2 files regarding bow-tie effect
-    // todo items
-    // support level2 MODIS files by having a bowTieSecondSample line (similar and in addition to the farther off second line 
-    //      but is distinguished by nearby proximity and conjunction with being in the same direction as the nearby line.
-    //      only test for this if GeoSceneInfo indicates presence of nearby repeated lat/lon pixels
-    
-    // add checkbox for whether to use auto-labels or to use a custom textfield label list
-    //       populate the list with the defaults when the checkbox is toggled "ON"
-    // write a method to determine precise pixel of north/south poles
-    // write a method to determine if projection is equidistant cylindrical  (check if edge and center lines have same geocding,
-    //      both in vertical and horizonal direction)
-    //      for equidistant cylidrical the smoothingCount can be reduced
+// todo
+// Support level-2 files regarding bow-tie effect
+// todo items
+// support level2 MODIS files by having a bowTieSecondSample line (similar and in addition to the farther off second line
+//      but is distinguished by nearby proximity and conjunction with being in the same direction as the nearby line.
+//      only test for this if GeoSceneInfo indicates presence of nearby repeated lat/lon pixels
 
-    // AQUA_MODIS.2002070420231001.L3m.CU_9km.wink2.nc has meridian issues with smoothing steps low
+// add checkbox for whether to use auto-labels or to use a custom textfield label list
+//       populate the list with the defaults when the checkbox is toggled "ON"
+// write a method to determine precise pixel of north/south poles
+// write a method to determine if projection is equidistant cylindrical  (check if edge and center lines have same geocding,
+//      both in vertical and horizonal direction)
+//      for equidistant cylidrical the smoothingCount can be reduced
 
-    // AQUA_MODIS.2002070420231001.L3m.CU_9km.wink2.nc has issues with tolerance high (for example tolarance=100)
+// AQUA_MODIS.2002070420231001.L3m.CU_9km.wink2.nc has meridian issues with smoothing steps low
 
-    // set north, south, east, west tolerance individually
-    //      Edge Tolerance (North)
-    //      Edge Tolerance (South)
-    //      Edge Tolerance (West)
-    //      Edge Tolerance (East)
+// AQUA_MODIS.2002070420231001.L3m.CU_9km.wink2.nc has issues with tolerance high (for example tolarance=100)
 
-    // enable meridian line and parallel lines individually
-    //      Show Gridlines (Meridians)
-    //      Show Gridlines (Parallels)
+// set north, south, east, west tolerance individually
+//      Edge Tolerance (North)
+//      Edge Tolerance (South)
+//      Edge Tolerance (West)
+//      Edge Tolerance (East)
 
-    // set smoothing steps for parallel and meridian lines individually
-    //      Smoothing Steps (Meridians)
-    //      Smoothing Steps (Parallels)
+// enable meridian line and parallel lines individually
+//      Show Gridlines (Meridians)
+//      Show Gridlines (Parallels)
 
-    // user configured lat and lon label list
-    //      Meridian Spacing (Longitudes)
-    //      Parallel Spacing (Latitudes)
-    //      0 = auto
-    //      number = spacing
-    //      list = specific locations
+// set smoothing steps for parallel and meridian lines individually
+//      Smoothing Steps (Meridians)
+//      Smoothing Steps (Parallels)
 
-    // lon lines may not reach edge for certain scenes when smoothing set low.
+// user configured lat and lon label list
+//      Meridian Spacing (Longitudes)
+//      Parallel Spacing (Latitudes)
+//      0 = auto
+//      number = spacing
+//      list = specific locations
 
-    // pole crossing determination needs possible improvements
+// lon lines may not reach edge for certain scenes when smoothing set low.
 
-    // variable name such PROPERTY_NAME change to PROPERTY_KEY
+// pole crossing determination needs possible improvements
+
+// variable name such PROPERTY_NAME change to PROPERTY_KEY
 
 
 public class Graticule {
@@ -99,6 +99,7 @@ public class Graticule {
     private final PixelPos[] _tickPointsSouth;
     private final PixelPos[] _tickPointsWest;
     private final PixelPos[] _tickPointsEast;
+    private final GeoInfo _geoInfo;
     private final boolean _flippedLons;
     private final boolean _flippedLats;
 
@@ -140,7 +141,8 @@ public class Graticule {
                       PixelPos[] tickPointsWest,
                       PixelPos[] tickPointsEast,
                       boolean flippedLats,
-                      boolean flippedLons
+                      boolean flippedLons,
+                      GeoInfo geoInfo
     ) {
         _meridiansLinePaths = meridiansLinePaths;
         _parallelsLinePaths = parallelsLinePaths;
@@ -156,6 +158,7 @@ public class Graticule {
         _tickPointsEast = tickPointsEast;
         _flippedLats = flippedLats;
         _flippedLons = flippedLons;
+        _geoInfo = geoInfo;
     }
 
 
@@ -174,8 +177,6 @@ public class Graticule {
     public boolean isFlippedLons() {
         return _flippedLons;
     }
-
-
 
 
     public TextGlyph[] getTextGlyphsNorth() {
@@ -218,6 +219,10 @@ public class Graticule {
         return _tickPointsEast;
     }
 
+    public GeoInfo getGeoInfo() {
+        return _geoInfo;
+    }
+
     /**
      * Creates a graticule for the given product.
      *
@@ -242,12 +247,11 @@ public class Graticule {
         double lonMajorStep = graticuleParameters.gridSpacingLon;
 
         boolean interpolate = graticuleParameters.interpolate;
-        double tolerance = graticuleParameters.tolerance;
-        double toleranceCylindrical = graticuleParameters.toleranceCylindrical;
+        double toleranceParallels = graticuleParameters.toleranceParallels;
+        double toleranceMeridians = graticuleParameters.toleranceMeridians;
         boolean formatCompass = graticuleParameters.formatCompass;
         boolean decimalFormat = graticuleParameters.decimalFormat;
         int spacer = graticuleParameters.spacer;
-
 
 
         Guardian.assertNotNull("product", raster);
@@ -275,7 +279,6 @@ public class Graticule {
             boolean globalLon = false;
             boolean halfGlobalLon = false;
 
-            
 
             // todo investigate mode
 
@@ -319,10 +322,8 @@ public class Graticule {
             double LON_STEP_GLOBAL_CYLINDRICAL = graticuleParameters.autoSpacingLonGlobalCylindrical;
 
 
-
             double LON_STEP_HALF_GLOBAL_CYLINDRICAL = LON_STEP_GLOBAL_CYLINDRICAL;
             double LAT_STEP_HALF_GLOBAL_CYLINDRICAL = LAT_STEP_GLOBAL_CYLINDRICAL;
-
 
 
             if (latMajorStep == 0) {
@@ -419,11 +420,6 @@ public class Graticule {
         }
 
 
-
-
-
-
-
 //        final int desiredMinorSteps = getDesiredMinorSteps(raster);
 //        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
 //        double latMinorStep = ratioLatMinor * geoDelta.lat;
@@ -453,8 +449,6 @@ public class Graticule {
 //        System.out.println("MaxY=" + latRange.getMax());
 
 
-
-
 //
 //        if (geoInfo.cylindrical || GraticuleLayerType.MODE_GLOBAL_CYLINDRICAL.equals(mode)) {
 ////            tolerance = toleranceCylindrical;
@@ -467,6 +461,11 @@ public class Graticule {
 ////            tolerance = 0;
 //        }
 
+        // todo TEMP look into this more   maybe added something in preferences
+        if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+            toleranceParallels = 0.0;
+            toleranceMeridians = 0.0;
+        }
 
 
 
@@ -482,11 +481,8 @@ public class Graticule {
         }
 
 
-
-
-        final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, meridianSmoothingSteps, raster, geoInfo, toleranceCylindrical, interpolate);
-        final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, parallelSmoothingSteps, raster, geoInfo, tolerance, interpolate);
-
+        final List<List<Coord>> meridiansList = computeMeridiansList(lonMajorStep, meridianSmoothingSteps, raster, geoInfo, toleranceMeridians, interpolate);
+        final List<List<Coord>> parallelsList = computeParallelsList(latMajorStep, parallelSmoothingSteps, raster, geoInfo, toleranceParallels, interpolate);
 
 
 //        final List<List<Coord>> meridianList = computeMeridianList(raster.getGeoCoding(), null, lonMajorStep, latMinorStep,
@@ -503,15 +499,39 @@ public class Graticule {
             final TextGlyph[] textGlyphsNorth = createTextGlyphs(parallelsList, meridiansList, TextLocation.NORTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer, geoInfo);
             final TextGlyph[] textGlyphsSouth = createTextGlyphs(parallelsList, meridiansList, TextLocation.SOUTH, formatCompass, decimalFormat, lonMajorStep, raster, spacer, geoInfo);
             final TextGlyph[] textGlyphsWest = createTextGlyphs(parallelsList, meridiansList, TextLocation.WEST, formatCompass, decimalFormat, latMajorStep, raster, spacer, geoInfo);
-            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelsList, meridiansList, TextLocation.EAST, formatCompass, decimalFormat,latMajorStep, raster, spacer, geoInfo);
+            final TextGlyph[] textGlyphsEast = createTextGlyphs(parallelsList, meridiansList, TextLocation.EAST, formatCompass, decimalFormat, latMajorStep, raster, spacer, geoInfo);
 
             final TextGlyph[] textGlyphsLatCorners = createLatCornerTextGlyphs(raster, formatCompass, decimalFormat);
             final TextGlyph[] textGlyphsLonCorners = createLonCornerTextGlyphs(raster, formatCompass, decimalFormat);
 
-            final PixelPos[] tickPointsNorth = createTickPoints(parallelsList, meridiansList, TextLocation.NORTH);
-            final PixelPos[] tickPointsSouth = createTickPoints(parallelsList, meridiansList, TextLocation.SOUTH);
-            final PixelPos[] tickPointsWest = createTickPoints(parallelsList, meridiansList, TextLocation.WEST);
-            final PixelPos[] tickPointsEast = createTickPoints(parallelsList, meridiansList, TextLocation.EAST);
+
+            final PixelPos[] tickPointsNorth = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsNorth, TextLocation.NORTH, geoInfo);
+            final PixelPos[] tickPointsSouth = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsSouth, TextLocation.SOUTH, geoInfo);
+            final PixelPos[] tickPointsWest = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsWest, TextLocation.WEST, geoInfo);
+            final PixelPos[] tickPointsEast = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsEast, TextLocation.EAST, geoInfo);
+
+            int buffer = 5;
+            for (int i=0; i < textGlyphsWest.length; i++) {
+                if (textGlyphsWest[i].getY() < (0 + buffer) || textGlyphsWest[i].getY() > (raster.getRasterHeight() - buffer)) {
+                    if (!geoInfo.containsValidGeoCorners && !geoInfo.northPoleCrossed && !geoInfo.southPoleCrossed) {
+                        if (textGlyphsWest[i].getX() > (0 + buffer)) {
+                            textGlyphsWest[i].x = textGlyphsWest[i].x - spacer;  // todo TEMP testing
+                        }
+
+                        if (textGlyphsEast[i].getX() > (raster.getRasterWidth() - buffer)) {
+                            textGlyphsEast[i].x = textGlyphsEast[i].x + spacer;  // todo TEMP testing
+                        }
+                    }
+
+                }
+            }
+
+
+//            final PixelPos[] tickPointsNorth = createTickPoints(parallelsList, meridiansList, TextLocation.NORTH, geoInfo);
+//            final PixelPos[] tickPointsSouth = createTickPoints(parallelsList, meridiansList, TextLocation.SOUTH, geoInfo);
+//            final PixelPos[] tickPointsWest = createTickPoints(parallelsList, meridiansList, TextLocation.WEST, geoInfo);
+//            final PixelPos[] tickPointsEast = createTickPoints(parallelsList, meridiansList, TextLocation.EAST, geoInfo);
+
 
             final boolean flippedLats = geoInfo.latDescending && !geoInfo.latAscending;
             final boolean flippedLons = geoInfo.lonDescending && !geoInfo.lonAscending;
@@ -529,7 +549,8 @@ public class Graticule {
                     tickPointsWest,
                     tickPointsEast,
                     flippedLats,
-                    flippedLons);
+                    flippedLons,
+                    geoInfo);
         } else {
             return new Graticule(null,
                     null,
@@ -544,7 +565,8 @@ public class Graticule {
                     null,
                     null,
                     false,
-                    false);
+                    false,
+                    null);
         }
     }
 
@@ -569,7 +591,6 @@ public class Graticule {
         }
         return desiredMinorSteps;
     }
-
 
 
     static double getSensibleDegreeIncrement(double degreeIncrement) {
@@ -617,11 +638,11 @@ public class Graticule {
     }
 
     private static List<List<Coord>> computeParallelListOld(final GeoCoding geoCoding,
-                                                         final GeoPos[] geoBoundary,
-                                                         final double latMajorStep,
-                                                         final double lonMinorStep,
-                                                         final double yMin,
-                                                         final double yMax) {
+                                                            final GeoPos[] geoBoundary,
+                                                            final double latMajorStep,
+                                                            final double lonMinorStep,
+                                                            final double yMin,
+                                                            final double yMax) {
         List<List<Coord>> parallelList = new ArrayList<>();
         ArrayList<GeoPos> intersectionList = new ArrayList<>();
         GeoPos geoPos, int1, int2;
@@ -678,7 +699,6 @@ public class Graticule {
         int NUM_NULL_STEPS_TO_TRIGGER_A_GAP = 2;  // max steps tested before gap is affirmed
 
 
-
         // todo decide whether this should be restricted
         double maxSteps = Math.floor((raster.getRasterWidth() - 1) / 4.0);
         if (minorSteps > maxSteps) {
@@ -694,7 +714,6 @@ public class Graticule {
         int parallelsCount = 0;
 
 
-
         for (double parallelLat : parellelsLatsArrayList) {
 
             List<Coord> parallel1a = new ArrayList<>();
@@ -704,7 +723,7 @@ public class Graticule {
 
             int gap1StepsCount = 0;
             int gap2StepsCount = 0;
-            
+
             Coord[] coords;
 
             boolean foundParallel1a = false;
@@ -731,7 +750,7 @@ public class Graticule {
                     coords = getCoordParallel(parallelLat, pixelX, raster, tolerance, interpolate);
 
                     if (coords != null) {
-                        
+
                         if (coords[0] != null) {
 
                             gap1StepsCount = 0;
@@ -742,7 +761,7 @@ public class Graticule {
                                     parallel1a.add(leftEdgeCoord);
                                 }
                                 foundParallel1a = true;
-                                
+
                             } else if (finishedParallel1a && !foundParallel1b) {
                                 Coord leftEdgeCoord = findLeftEdgeCoord(0, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
                                 if (leftEdgeCoord != null) {
@@ -796,7 +815,7 @@ public class Graticule {
                                     if (leftEdgeCoord != null) {
                                         parallel2a.add(leftEdgeCoord);
                                     }
-                                    
+
                                     foundParallel2a = true;
                                 } else if (finishedParallel2a && !foundParallel2b) {
                                     Coord leftEdgeCoord = findLeftEdgeCoord(1, pixelX, prevPixelX, parallelLat, raster, tolerance, interpolate);
@@ -846,7 +865,7 @@ public class Graticule {
             }
 
             // todo Determine if needed or if needs users option
-            double minPoints = Math.floor(0.1 *minorSteps);
+            double minPoints = Math.floor(0.1 * minorSteps);
             if (minPoints < 4) {
                 minPoints = 4;
             }
@@ -882,13 +901,11 @@ public class Graticule {
     }
 
 
-
-
     static Coord findLeftEdgeCoord(int index, double pixelX, double prevPixelX, double parallelLat, RasterDataNode raster, double tolerance, boolean interpolate) {
 
         // need to look back for actual intersection
         // Go back to previous pixel and step forward until first valid geo pixel encountered.
-        
+
         if (pixelX > 0) {
             for (double innerPixel = prevPixelX + 1; innerPixel < pixelX; innerPixel += 1.0) {
                 Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
@@ -899,7 +916,7 @@ public class Graticule {
                 }
             }
         }
-        
+
         return null;
 
     }
@@ -908,9 +925,9 @@ public class Graticule {
 
         // need to look back for actual intersection
         // Start with current pixel and step backward until first valid geo pixel is found
-        
-         if (pixelX <= (raster.getRasterWidth() - 1)) {
-             
+
+        if (pixelX <= (raster.getRasterWidth() - 1)) {
+
             for (double innerPixel = pixelX; innerPixel > prevPixelX; innerPixel -= 1.0) {
                 Coord[] coordsInner = getCoordParallel(parallelLat, innerPixel, raster, tolerance, interpolate);
                 if (coordsInner != null) {
@@ -920,22 +937,22 @@ public class Graticule {
                 }
             }
         }
-         
-         return null;
+
+        return null;
     }
 
 
     /**
      * Creates a list of longitudes to attempt to use as the gridlines.
      *
-     * @param geoSpan geoSpan of the scene
-     * @param lonMajorStep the grid cell size in longitudinal direction
+     * @param geoSpan             geoSpan of the scene
+     * @param lonMajorStep        the grid cell size in longitudinal direction
      * @param PARALLELS_COUNT_MAX maximum size of list
      * @return list of latitudes to attempt to use as the gridlines.
      */
-    private  static ArrayList<Double> getMeridiansLonsArrayList(GeoInfo geoSpan,
-                                                                double lonMajorStep,
-                                                                int PARALLELS_COUNT_MAX) {
+    private static ArrayList<Double> getMeridiansLonsArrayList(GeoInfo geoSpan,
+                                                               double lonMajorStep,
+                                                               int PARALLELS_COUNT_MAX) {
 
         ArrayList<Double> meridiansLonsArrayList = new ArrayList<Double>();
 
@@ -964,8 +981,6 @@ public class Graticule {
         }
 
 
-
-
         // increase min and max to add a slight buffer to be able to potentially add lines just outside the actual scene area.
         min = min - lonMajorStep;
         max = max + lonMajorStep;
@@ -979,7 +994,6 @@ public class Graticule {
         if (max > 180) {
             max = 180;
         }
-
 
 
         int parallelsAddedCount = 0;
@@ -1034,10 +1048,6 @@ public class Graticule {
         }
 
 
-
-
-
-
 //        ArrayList<Double> meridianLonsArrayList = new ArrayList<Double>();
 //        if (geoSpan.datelineCrossed) {
 //
@@ -1064,21 +1074,21 @@ public class Graticule {
 //        meridianLonsArrayList.add(-95.0);
 
 
-
         return meridiansLonsArrayList;
 
     }
+
     /**
      * Creates a list of latitudes to attempt to use as the gridlines.
      *
-     * @param geoSpan geoSpan of the scene
-     * @param latMajorStep the grid cell size in latitudinal direction
+     * @param geoSpan             geoSpan of the scene
+     * @param latMajorStep        the grid cell size in latitudinal direction
      * @param PARALLELS_COUNT_MAX maximum size of list
      * @return list of latitudes to attempt to use as the gridlines.
      */
-    private  static ArrayList<Double> getParallelsLatsArrayList(GeoInfo geoSpan,
-                                                                double latMajorStep,
-                                                                int PARALLELS_COUNT_MAX) {
+    private static ArrayList<Double> getParallelsLatsArrayList(GeoInfo geoSpan,
+                                                               double latMajorStep,
+                                                               int PARALLELS_COUNT_MAX) {
 
         ArrayList<Double> parellelsLatsArrayList = new ArrayList<Double>();
 
@@ -1123,8 +1133,6 @@ public class Graticule {
                 min = -90;
             }
         }
-
-
 
 
         // northern hemisphere
@@ -1175,8 +1183,6 @@ public class Graticule {
     }
 
 
-
-
     private static List<List<Coord>> computeMeridiansList(final double lonMajorStep,
                                                           double minorSteps,
                                                           RasterDataNode raster,
@@ -1197,7 +1203,6 @@ public class Graticule {
         boolean allowGap = false;  // todo Look more into this
         boolean allowSecondIdenticalMeridian = true;
         int NUM_NULL_STEPS_TO_TRIGGER_A_GAP = 2;  // max steps tested before gap is affirmed
-
 
 
         int MERIDIANS_COUNT_MAX = 200;  // just in case default is bad or too tight spacing
@@ -1307,7 +1312,7 @@ public class Graticule {
 
             int gap1StepsCount = 0;
             int gap2StepsCount = 0;
-            
+
             Coord[] coords;
 
             boolean foundMeridian1a = false;
@@ -1315,7 +1320,7 @@ public class Graticule {
 
             boolean foundMeridian1b = false;
             boolean finishedMeridian1b = false;
-            
+
             boolean foundMeridian2a = false;
             boolean finishedMeridian2a = false;
 
@@ -1346,7 +1351,7 @@ public class Graticule {
                                 if (bottomEdgeCoord != null) {
                                     meridian1b.add(bottomEdgeCoord);
                                 }
-                                
+
                                 foundMeridian1b = true;
                             }
 
@@ -1370,7 +1375,7 @@ public class Graticule {
                                 } else {
                                     gap1StepsCount++;
                                 }
-                                
+
                             } else if (foundMeridian1b && !finishedMeridian1b) {
                                 Coord topEdgeCoord = findTopEdgeCoord(0, pixelY, prevPixelY, meridianLon, raster, tolerance, interpolate);
                                 if (topEdgeCoord != null) {
@@ -1382,10 +1387,9 @@ public class Graticule {
                                 } else {
                                     gap1StepsCount++;
                                 }
-                                
+
                             }
                         }
-
 
 
                         if (allowSecondIdenticalMeridian) {
@@ -1441,7 +1445,7 @@ public class Graticule {
 
                             }
                         }
-                        
+
                     }
                 }
 
@@ -1450,7 +1454,7 @@ public class Graticule {
 
 
             // todo Determine if needed or if needs users option
-            double minPoints = Math.floor(0.1 *minorSteps);
+            double minPoints = Math.floor(0.1 * minorSteps);
             if (minPoints < 4) {
                 minPoints = 4;
             }
@@ -1482,12 +1486,10 @@ public class Graticule {
         }
 
 
-
         return meridiansList;
     }
 
-    
-    
+
     static Coord findBottomEdgeCoord(int index, double pixelY, double prevPixelY, double meridianLon, RasterDataNode raster, double tolerance, boolean interpolate) {
 
         // need to look back for actual intersection
@@ -1506,13 +1508,13 @@ public class Graticule {
 
         return null;
     }
-    
+
 
     static Coord findTopEdgeCoord(int index, double pixelY, double prevPixelY, double meridianLon, RasterDataNode raster, double tolerance, boolean interpolate) {
 
         // need to look back for actual intersection
         // Start with current pixel and step backward until first valid geo pixel is found
-        
+
         if (pixelY <= (raster.getRasterHeight() - 1)) {
             for (double innerPixel = pixelY; innerPixel > prevPixelY; innerPixel -= 1.0) {
                 Coord[] coordsInner = getCoordMeridian(meridianLon, innerPixel, raster, tolerance, interpolate);
@@ -1523,26 +1525,23 @@ public class Graticule {
                 }
             }
         }
-        
+
         return null;
     }
 
-    
-    
 
     static boolean containsExcessMeridianJumps(List<Coord> meridian1, RasterDataNode raster) {
 
-        if (containsExcessMeridianJumps(meridian1, raster, 0,20)) {
+        if (containsExcessMeridianJumps(meridian1, raster, 0, 20)) {
             return true;
         }
 
-        if (containsExcessMeridianJumps(meridian1, raster, 2,5)) {
+        if (containsExcessMeridianJumps(meridian1, raster, 2, 5)) {
             return true;
         }
 
         return false;
     }
-
 
 
     static boolean containsExcessMeridianJumps(List<Coord> meridian1, RasterDataNode raster, int maxJumps, double percentPixelsToSetJump) {
@@ -1582,13 +1581,11 @@ public class Graticule {
     }
 
 
-
     static Coord[] getCoordMeridian(double meridianLon,
                                     double pixelY,
                                     RasterDataNode raster,
                                     double tolerance,
                                     boolean interpolate) {
-
 
 
         Coord coord1 = null;
@@ -1679,7 +1676,7 @@ public class Graticule {
                     toleranceDegrees = Math.abs(tolerance * deltaPixel);
 
                     if (direction == DIRECTION.ASCENDING) {
-                    if (meridianLon >= (lonCurr - toleranceDegrees) && meridianLon <= (lonCurr)) {
+                        if (meridianLon >= (lonCurr - toleranceDegrees) && meridianLon <= (lonCurr)) {
                             matchFound = true;
                         }
                     } else {
@@ -1690,19 +1687,19 @@ public class Graticule {
 
 
                     if (matchFound) {
-                            PixelPos pixelPosNext = new PixelPos(pixelX + 1, pixelY);
-                            GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixelPosNext, null);
+                        PixelPos pixelPosNext = new PixelPos(pixelX + 1, pixelY);
+                        GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixelPosNext, null);
 
-                            Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
-                            Coord coordNext = new Coord(geoPosNext, pixelPosNext);
+                        Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
+                        Coord coordNext = new Coord(geoPosNext, pixelPosNext);
 
-                            Coord coordInterp;
-                            if (interpolate) {
-                                coordInterp = getCoordInterpolateToFixedLon(coordCurr, coordNext, meridianLon, false);
-                            } else {
-                                coordInterp = coordCurr;
-                            }
-                            coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
+                        Coord coordInterp;
+                        if (interpolate) {
+                            coordInterp = getCoordInterpolateToFixedLon(coordCurr, coordNext, meridianLon, false);
+                        } else {
+                            coordInterp = coordCurr;
+                        }
+                        coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
 
                         if (coord1 == null) {
                             coord1 = coordInterp;
@@ -1718,75 +1715,75 @@ public class Graticule {
 
                     if (pixelPosCurr.x < raster.getRasterWidth() - 1) {
 
-                    if ((direction == DIRECTION.ASCENDING && lonCurr > lonPrev)
-                    || (direction == DIRECTION.DESCENDING && lonCurr < lonPrev)) {
-                        // dateline not crossed
-                        if ((direction == DIRECTION.ASCENDING && meridianLon > lonPrev && meridianLon <= lonCurr) ||
-                                (direction == DIRECTION.DESCENDING && meridianLon < lonPrev && meridianLon >= lonCurr)) {
-                            Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
-                            Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
+                        if ((direction == DIRECTION.ASCENDING && lonCurr > lonPrev)
+                                || (direction == DIRECTION.DESCENDING && lonCurr < lonPrev)) {
+                            // dateline not crossed
+                            if ((direction == DIRECTION.ASCENDING && meridianLon > lonPrev && meridianLon <= lonCurr) ||
+                                    (direction == DIRECTION.DESCENDING && meridianLon < lonPrev && meridianLon >= lonCurr)) {
+                                Coord coordCurr = new Coord(geoPosCurr, pixelPosCurr);
+                                Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
 
-                            Coord coordInterp;
-                            if (interpolate) {
-                                coordInterp = getCoordInterpolateToFixedLon(coordPrev, coordCurr, meridianLon, true);
-                            } else {
-                                coordInterp = coordCurr;
-                            }
-                            coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
+                                Coord coordInterp;
+                                if (interpolate) {
+                                    coordInterp = getCoordInterpolateToFixedLon(coordPrev, coordCurr, meridianLon, true);
+                                } else {
+                                    coordInterp = coordCurr;
+                                }
+                                coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
 
 
-                            if (coord1 == null) {
-                                coord1 = coordInterp;
-                            } else if (coord2 == null) {
-                                // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-                                if (Math.abs(pixelPosCurr.x - coord1.pixelPos.x) > (raster.getRasterWidth() / 4.0)) {
-                                    coord2 = coordInterp;
+                                if (coord1 == null) {
+                                    coord1 = coordInterp;
+                                } else if (coord2 == null) {
+                                    // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
+                                    if (Math.abs(pixelPosCurr.x - coord1.pixelPos.x) > (raster.getRasterWidth() / 4.0)) {
+                                        coord2 = coordInterp;
+                                    }
                                 }
                             }
-                        }
 
-                    } else if (datelineJustCrossed) {
-                        // dateline just crossed
+                        } else if (datelineJustCrossed) {
+                            // dateline just crossed
 
-                        if (meridianLon == 180) {
-                            PixelPos pixelPosPrev2Back;
-                            if (direction == DIRECTION.ASCENDING) {
-                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
-                            } else {
-                                pixelPosPrev2Back = new PixelPos(pixelPosPrev.x + 1, pixelPosPrev.y);
-                            }
-                            GeoPos geoPosPrev2Back = raster.getGeoCoding().getGeoPos(pixelPosPrev2Back, null);
+                            if (meridianLon == 180) {
+                                PixelPos pixelPosPrev2Back;
+                                if (direction == DIRECTION.ASCENDING) {
+                                    pixelPosPrev2Back = new PixelPos(pixelPosPrev.x - 1, pixelPosPrev.y);
+                                } else {
+                                    pixelPosPrev2Back = new PixelPos(pixelPosPrev.x + 1, pixelPosPrev.y);
+                                }
+                                GeoPos geoPosPrev2Back = raster.getGeoCoding().getGeoPos(pixelPosPrev2Back, null);
 
-                            Coord coordPrev2Back = new Coord(geoPosPrev2Back, pixelPosPrev2Back);
-                            Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
+                                Coord coordPrev2Back = new Coord(geoPosPrev2Back, pixelPosPrev2Back);
+                                Coord coordPrev = new Coord(geoPosPrev, pixelPosPrev);
 
-                            Coord coordInterp;
-                            if (interpolate) {
-                                coordInterp = getCoordInterpolateToFixedLon(coordPrev2Back, coordPrev, meridianLon, false);
-                            } else {
-                                coordInterp = coordPrev;
-                            }
-                            coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
+                                Coord coordInterp;
+                                if (interpolate) {
+                                    coordInterp = getCoordInterpolateToFixedLon(coordPrev2Back, coordPrev, meridianLon, false);
+                                } else {
+                                    coordInterp = coordPrev;
+                                }
+                                coordInterp = getCoordShiftPixelX(coordInterp, shiftPixelX);
 
-                            if (coord1 == null) {
-                                coord1 = coordInterp;
-                            } else if (coord2 == null) {
-                                // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
-                                if (Math.abs(pixelPosCurr.x - coord1.pixelPos.x) > (raster.getRasterWidth() / 4.0)) {
-                                    coord2 = coordInterp;
+                                if (coord1 == null) {
+                                    coord1 = coordInterp;
+                                } else if (coord2 == null) {
+                                    // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
+                                    if (Math.abs(pixelPosCurr.x - coord1.pixelPos.x) > (raster.getRasterWidth() / 4.0)) {
+                                        coord2 = coordInterp;
+                                    }
                                 }
                             }
+                        } else {
+                            // ignore
                         }
-                    } else {
-                        // ignore
-                    }
 
                     } else {
                         // this is last pixel
                         toleranceDegrees = Math.abs(tolerance * deltaPixel);
 
                         if (direction == DIRECTION.ASCENDING) {
-                        if (meridianLon >= (lonCurr) && meridianLon <= (lonCurr + toleranceDegrees)) {
+                            if (meridianLon >= (lonCurr) && meridianLon <= (lonCurr + toleranceDegrees)) {
                                 matchFound = true;
                             }
                         } else {
@@ -1831,7 +1828,7 @@ public class Graticule {
                     toleranceDegrees = Math.abs(tolerance * deltaPixel);
 
                     if (direction == DIRECTION.ASCENDING) {
-                    if (meridianLon >= (lonPrev) && meridianLon <= (lonPrev + toleranceDegrees)) {
+                        if (meridianLon >= (lonPrev) && meridianLon <= (lonPrev + toleranceDegrees)) {
                             matchFound = true;
                         }
                     } else {
@@ -1924,7 +1921,7 @@ public class Graticule {
         double offset = 0.5;
 
         boolean matchFound = false;
-        for (double pixelY =  (raster.getRasterHeight() - 1); pixelY >= 0;  pixelY -= increment) {
+        for (double pixelY = (raster.getRasterHeight() - 1); pixelY >= 0; pixelY -= increment) {
             pixPosCurr = new PixelPos(pixelX, pixelY);
             geoPoxCurr = raster.getGeoCoding().getGeoPos(pixPosCurr, null);
             double latCurr = geoPoxCurr.lat;
@@ -1967,7 +1964,7 @@ public class Graticule {
 
                     if (direction == DIRECTION.ASCENDING) {
 
-                    if (parallelLat >= (latCurr - toleranceDegrees) && parallelLat <= (latCurr)) {
+                        if (parallelLat >= (latCurr - toleranceDegrees) && parallelLat <= (latCurr)) {
                             matchFound = true;
                         }
                     } else {
@@ -1977,19 +1974,19 @@ public class Graticule {
                     }
 
                     if (matchFound) {
-                            PixelPos pixPosNext = new PixelPos(pixelX, pixelY - 1);
-                            GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
+                        PixelPos pixPosNext = new PixelPos(pixelX, pixelY - 1);
+                        GeoPos geoPosNext = raster.getGeoCoding().getGeoPos(pixPosNext, null);
 
-                            Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
-                            Coord coordNext = new Coord(geoPosNext, pixPosNext);
+                        Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
+                        Coord coordNext = new Coord(geoPosNext, pixPosNext);
 
-                            Coord coordInterp;
-                            if (interpolate) {
-                                coordInterp = getCoordInterpolateToFixedLat(coordCurr, coordNext, parallelLat, false);
-                            } else {
-                                coordInterp = coordCurr;
-                            }
-                            coordInterp = getCoordShiftPixelY(coordInterp, offset);
+                        Coord coordInterp;
+                        if (interpolate) {
+                            coordInterp = getCoordInterpolateToFixedLat(coordCurr, coordNext, parallelLat, false);
+                        } else {
+                            coordInterp = coordCurr;
+                        }
+                        coordInterp = getCoordShiftPixelY(coordInterp, offset);
 
 
                         if (coord1 == null) {
@@ -2005,45 +2002,45 @@ public class Graticule {
                     }
                 } else {
 
-                    if (pixPosCurr.y > 0 ) {
-                    // this is not the first geo pixel and probably not the last (but could be the last)
-                    if (!directionChange) {
-                        if (direction == DIRECTION.ASCENDING) {
-                            if (parallelLat > latPrev && parallelLat <= latCurr) {
-                                matchFound = true;
+                    if (pixPosCurr.y > 0) {
+                        // this is not the first geo pixel and probably not the last (but could be the last)
+                        if (!directionChange) {
+                            if (direction == DIRECTION.ASCENDING) {
+                                if (parallelLat > latPrev && parallelLat <= latCurr) {
+                                    matchFound = true;
+                                }
+                            } else {
+                                if (parallelLat < latPrev && parallelLat >= latCurr) {
+                                    matchFound = true;
+                                }
                             }
                         } else {
-                            if (parallelLat < latPrev && parallelLat >= latCurr) {
-                                matchFound = true;
+                            // skipping initial direction change in case bow-tie effect or some other artifact
+                        }
+
+                        if (matchFound) {
+                            Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
+                            Coord coordPrev = new Coord(geoPosPrev, pixPosPrev);
+
+                            Coord coordInterp;
+                            if (interpolate) {
+                                coordInterp = getCoordInterpolateToFixedLat(coordPrev, coordCurr, parallelLat, true);
+                            } else {
+                                coordInterp = coordCurr;
                             }
-                        }
-                    } else {
-                        // skipping initial direction change in case bow-tie effect or some other artifact
-                    }
+                            coordInterp = getCoordShiftPixelY(coordInterp, offset);
 
-                    if (matchFound) {
-                        Coord coordCurr = new Coord(geoPoxCurr, pixPosCurr);
-                        Coord coordPrev = new Coord(geoPosPrev, pixPosPrev);
-
-                        Coord coordInterp;
-                        if (interpolate) {
-                            coordInterp = getCoordInterpolateToFixedLat(coordPrev, coordCurr, parallelLat, true);
-                        } else {
-                            coordInterp = coordCurr;
-                        }
-                        coordInterp = getCoordShiftPixelY(coordInterp, offset);
-
-                        if (coord1 == null) {
-                            coord1 = coordInterp;
+                            if (coord1 == null) {
+                                coord1 = coordInterp;
                                 directionFirst = direction;
-                        } else if (coord2 == null) {
-                            // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
+                            } else if (coord2 == null) {
+                                // avoid adding a duplicate gridlines caused by a nearby pixel geo fluctuation such a might occur in unmapped level-2 data
 //                            if (!restrictNearbyDuplicate ||  (Math.abs(pixPosCurr.y - coord1.pixelPos.y) > (raster.getRasterHeight() / 4.0))) {
                                 if (direction != directionFirst) {
-                                coord2 = coordInterp;
+                                    coord2 = coordInterp;
+                                }
                             }
                         }
-                    }
 
 
                     } else {
@@ -2051,7 +2048,7 @@ public class Graticule {
                         toleranceDegrees = Math.abs(tolerance * deltaLat);
 
                         if (direction == DIRECTION.ASCENDING) {
-                        if (parallelLat >= (latCurr) && parallelLat <= (latCurr + toleranceDegrees)) {
+                            if (parallelLat >= (latCurr) && parallelLat <= (latCurr + toleranceDegrees)) {
                                 matchFound = true;
                             }
                         } else {
@@ -2098,7 +2095,7 @@ public class Graticule {
                     toleranceDegrees = Math.abs(tolerance * deltaLat);
 
                     if (direction == DIRECTION.ASCENDING) {
-                    if (parallelLat >= (latPrev) && parallelLat <= (latPrev + toleranceDegrees)) {
+                        if (parallelLat >= (latPrev) && parallelLat <= (latPrev + toleranceDegrees)) {
                             matchFound = true;
                         }
                     } else {
@@ -2147,12 +2144,6 @@ public class Graticule {
     }
 
 
-
-
-
-
-
-
     static Coord getCoordInterpolateToFixedLon(Coord prevCoord, Coord currCoord, double lonDesired, boolean interpolate) {
 
         double lonCurr = adjustLon(currCoord.geoPos.lon);
@@ -2177,12 +2168,11 @@ public class Graticule {
         final double y = yPrev + interpolationWeight * (yCurr - yPrev);
 
         GeoPos desiredGeoPos = new GeoPos(latDesired, lonDesired);
-        PixelPos desiredPixelPos = new PixelPos(x,y);
+        PixelPos desiredPixelPos = new PixelPos(x, y);
         Coord desiredCoord = new Coord(desiredGeoPos, desiredPixelPos);
 
         return desiredCoord;
     }
-
 
 
     static Coord getCoordInterpolateToFixedLat(Coord prevCoord, Coord currCoord, double latDesired, boolean interpolate) {
@@ -2209,12 +2199,11 @@ public class Graticule {
         final double y = yPrev + interpolationWeight * (yCurr - yPrev);
 
         GeoPos desiredGeoPos = new GeoPos(latDesired, lonDesired);
-        PixelPos desiredPixelPos = new PixelPos(x,y);
+        PixelPos desiredPixelPos = new PixelPos(x, y);
         Coord desiredCoord = new Coord(desiredGeoPos, desiredPixelPos);
 
         return desiredCoord;
     }
-
 
 
     static Coord getCoordShiftPixelX(Coord coord, double shift) {
@@ -2236,8 +2225,6 @@ public class Graticule {
         return coordShifted;
 
     }
-
-
 
 
     static boolean validLon(double lon) {
@@ -2323,11 +2310,11 @@ public class Graticule {
             // todo test
 
             if (lonBoundaryCurr > 117.99 & lonBoundaryCurr < 118.01) {
-                int r=0;
+                int r = 0;
                 int t = r;
             }
             if (lonBoundaryCurr > 119.99 & lonBoundaryCurr < 120.01) {
-                int r=0;
+                int r = 0;
                 int t = r;
             }
 
@@ -2351,7 +2338,7 @@ public class Graticule {
                 if (lonBoundaryIsIncreasing) {
                     if (!lonBoundaryIncreasingFound && lonBoundaryCurr >= lon) {
                         useThis = true;
-                        lonBoundaryIncreasingFound =true;
+                        lonBoundaryIncreasingFound = true;
                     }
                 } else {
                     if (!lonBoundaryDecreasingFound && lonBoundaryCurr <= lon) {
@@ -2486,22 +2473,40 @@ public class Graticule {
 
     private static PixelPos[] createTickPoints(List<List<Coord>> latitudeGridLinePoints,
                                                List<List<Coord>> longitudeGridLinePoints,
-                                               TextLocation textLocation) {
+                                               TextLocation textLocation,
+                                               GeoInfo geoInfo) {
         final List<PixelPos> pixelPoses = new ArrayList<>();
 
-        switch (textLocation) {
-            case NORTH:
-                createNorthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
-                break;
-            case SOUTH:
-                createSouthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
-                break;
-            case WEST:
-                createWesternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
-                break;
-            case EAST:
-                createEasternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
-                break;
+        if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed) {
+            switch (textLocation) {
+                case NORTH:
+                    createNorthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+                    break;
+                case SOUTH:
+                    createSouthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+                    break;
+                case WEST:
+                    createWesternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+                    break;
+                case EAST:
+                    createEasternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+                    break;
+            }
+        } else {
+            switch (textLocation) {
+                case NORTH:
+                    createNorthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+                    break;
+                case SOUTH:
+                    createSouthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+                    break;
+                case WEST:
+                    createWesternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+                    break;
+                case EAST:
+                    createEasternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+                    break;
+            }
         }
 
         return pixelPoses.toArray(new PixelPos[0]);
@@ -2519,19 +2524,58 @@ public class Graticule {
                                                 GeoInfo geoSpan) {
         final List<TextGlyph> textGlyphs = new ArrayList<TextGlyph>();
 
-        switch (textLocation) {
-            case NORTH:
-                createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
-                break;
-            case SOUTH:
-                createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
-                break;
-            case WEST:
-                createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
-                break;
-            case EAST:
-                createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
-                break;
+        spacer = 0; //  todo TEMP
+
+        if (geoSpan.southPoleCrossed) { // todo TMP
+            switch (textLocation) {
+                case NORTH:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    createLatitudePolarEdgeTextGlyphs(latitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case SOUTH:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case WEST:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case EAST:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+            }
+        } else if (geoSpan.northPoleCrossed) {  // todo TMP
+            switch (textLocation) {
+                case NORTH:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    createLatitudePolarEdgeTextGlyphs(latitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case SOUTH:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case WEST:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+
+                    break;
+                case EAST:
+                    createLongitudePolarEdgeTextGlyphs(longitudeGridLinePoints, textLocation, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+
+                    break;
+            }
+
+        } else {
+            switch (textLocation) {
+                case NORTH:
+                    createNorthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case SOUTH:
+                    createSouthernLongitudeTextGlyphs(longitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, geoSpan);
+                    break;
+                case WEST:
+                    createWesternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
+                    break;
+                case EAST:
+                    createEasternLatitudeTextGlyphs(latitudeGridLinePoints, textGlyphs, formatCompass, formatDecimal, majorStep, raster, spacer, geoSpan);
+                    break;
+            }
         }
 
         return textGlyphs.toArray(new TextGlyph[0]);
@@ -2552,6 +2596,8 @@ public class Graticule {
             }
         }
     }
+
+
 
     private static void createWesternLatitudeTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
                                                         List<TextGlyph> textGlyphs,
@@ -2592,27 +2638,38 @@ public class Graticule {
 //                }
 
 
+
+
                 if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
                     onlyAllowLeftEdgeLabels = true;
                 } else {
                     onlyAllowLeftEdgeLabels = false;
                 }
 
-
                 if (onlyAllowLeftEdgeLabels) {
-                    int buffer = 3;
+                    int buffer = 5;
                     if (xPos > (0 + buffer)) {
                         allowLabel = false;
                     }
-                } else {
-                    if (yPos < 1 || yPos > (height - 1)) {
-                        if (xPos > 1) {
-                            if (spacer >= 0) {
-                                offsetX = -spacer;
-                            }
-                        }
-                    }
                 }
+
+                // older code
+//
+//
+//                if (onlyAllowLeftEdgeLabels) {
+//                    int buffer = 3;
+//                    if (xPos > (0 + buffer)) {
+//                        allowLabel = false;
+//                    }
+//                } else {
+//                    if (yPos < 1 || yPos > (height - 1)) {
+//                        if (xPos > 1) {
+//                            if (spacer >= 0) {
+//                                offsetX = -spacer;
+//                            }
+//                        }
+//                    }
+//                }
 
 
 
@@ -2651,6 +2708,120 @@ public class Graticule {
     }
 
 
+    private static void createWesternLatitudeTextGlyphsNew(List<List<Coord>> latitudeGridLinePoints,
+                                                        List<TextGlyph> textGlyphs,
+                                                        boolean formatCompass,
+                                                        boolean formatDecimal,
+                                                        double majorStep,
+                                                        RasterDataNode raster,
+                                                        int spacer,
+                                                        GeoInfo geoSpan) {
+
+        // Assumes that the line was drawn from west to east
+        // coord1 set to first point in order to anchor the text to the edge of the line
+        for (final List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
+
+            if (latitudeGridLinePoint.size() >= 2) {
+                int first = 0;
+                int second = 1;
+
+                Coord coord1 = latitudeGridLinePoint.get(first);
+                Coord coord2 = latitudeGridLinePoint.get(second);
+
+                PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() + 1), (float) coord1.pixelPos.getY());
+                coord2 = new Coord(coord1.geoPos, pixelPos2);
+
+                double yPos = (coord1.pixelPos.getY());
+                double xPos = (coord1.pixelPos.getX());
+                int height = raster.getRasterHeight();
+                int width = raster.getRasterWidth();
+
+                double offsetX = 0.0;
+
+
+                boolean allowLabel = true;
+                boolean onlyAllowLeftEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowLeftEdgeLabels = true;
+//                }
+
+
+                if (geoSpan.containsValidGeoCorners && (geoSpan.southPoleCrossed || geoSpan.northPoleCrossed)) {
+                    boolean edgeLabel = false;
+
+                    int buffer = 3;
+
+                    if (xPos <= (0 + buffer)) {
+                        edgeLabel = true;
+                    }
+
+                    if (edgeLabel) {
+                        allowLabel = false;
+                    } else {
+                        allowLabel = true;
+                    }
+
+                } else {
+
+                    if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
+                        onlyAllowLeftEdgeLabels = true;
+                    } else {
+                        onlyAllowLeftEdgeLabels = false;
+                    }
+
+
+                    if (onlyAllowLeftEdgeLabels) {
+                        int buffer = 3;
+                        if (xPos > (0 + buffer)) {
+                            allowLabel = false;
+                        }
+                    } else {
+                        if (yPos < 1 || yPos > (height - 1)) {
+                            if (xPos > 1) {
+                                if (spacer >= 0) {
+                                    offsetX = -spacer;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
+
+                    double lat = coord1.geoPos.lat;
+                    double latToUse = lat;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+//                    if (majorStep != Double.NaN && majorStep >= 1) {
+//                        for (double curr = -90; curr <= 90; curr += majorStep) {
+//                            // todo
+//                            if ((lat < (curr - majorStep)) || (lat > (curr + majorStep))) {
+//                                continue;
+//                            }
+//                            currDiff = Math.abs(lat - curr);
+//                            if (currDiff < lowestDiff) {
+//                                lowestDiff = currDiff;
+//                                latToUse = curr;
+//                            }
+//                        }
+//                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coord1, coord2, offsetX, 0);
+                    textGlyphs.add(textGlyph);
+
+
+//                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
+//                    textGlyphs.add(textGlyph);
+                }
+            }
+        }
+    }
+
+
     private static void createEasternLatitudeTickPoints(List<List<Coord>> latitudeGridLinePoints,
                                                         List<PixelPos> pixelPoses) {
 
@@ -2666,6 +2837,120 @@ public class Graticule {
             }
         }
     }
+
+    private static void createEasternLatitudeTextGlyphsNew(List<List<Coord>> latitudeGridLinePoints,
+                                                        List<TextGlyph> textGlyphs,
+                                                        boolean formatCompass,
+                                                        boolean formatDecimal,
+                                                        double majorStep,
+                                                        RasterDataNode raster,
+                                                        int spacer,
+                                                        GeoInfo geoSpan) {
+
+        // Assumes that the line was drawn from west to east
+        // coord1 set to last point in order to anchor the text to the edge of the line
+        // text will point backwards due to this so it will subsequently need to be rotated
+        for (final List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
+            if (latitudeGridLinePoint.size() >= 2) {
+
+                int last = latitudeGridLinePoint.size() - 1;
+                int nextToLast = last - 1;
+
+                Coord coord1 = latitudeGridLinePoint.get(last);
+                Coord coord2 = latitudeGridLinePoint.get(nextToLast);
+
+                PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() - 1), (float) coord1.pixelPos.getY());
+                coord2 = new Coord(coord1.geoPos, pixelPos2);
+
+
+                double yPos = (coord1.pixelPos.getY());
+                double xPos = (coord1.pixelPos.getX());
+                int height = raster.getRasterHeight();
+                int width = raster.getRasterWidth();
+
+                double offsetX = 0.0;
+
+
+                boolean allowLabel = true;
+                boolean onlyAllowRightEdgeLabels = false;
+                // todo improve logic or add uers option to control labels
+//                if (geoSpan.lonSpan < 180 && geoSpan.latSpan < 90) {
+//                    onlyAllowRightEdgeLabels = true;
+//                }
+
+
+                if (geoSpan.containsValidGeoCorners && (geoSpan.southPoleCrossed || geoSpan.northPoleCrossed)) {
+                    boolean edgeLabel = false;
+
+                    int buffer = 3;
+
+                    if (xPos >= (width - buffer)) {
+                        edgeLabel = true;
+                    }
+
+                    if (edgeLabel) {
+                        allowLabel = false;
+                    } else {
+                        allowLabel = true;
+                    }
+
+                } else {
+
+
+                    if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
+                        onlyAllowRightEdgeLabels = true;
+                    } else {
+                        onlyAllowRightEdgeLabels = false;
+                    }
+
+
+                    if (onlyAllowRightEdgeLabels) {
+                        int buffer = 3;
+                        if (xPos < (width - buffer)) {
+                            allowLabel = false;
+                        }
+                    } else {
+                        if (yPos < 1 || yPos > (height - 1)) {
+                            if (xPos < (width - 1)) {
+                                if (spacer >= 0) {
+                                    offsetX = spacer;
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+                if (isCoordPairValid(coord1, coord2) && allowLabel) {
+
+                    double lat = coord1.geoPos.lat;
+                    double latToUse = lat;
+                    double currDiff;
+                    double lowestDiff = 100000;
+
+//                    if (majorStep != Double.NaN && majorStep >= 1) {
+//                        for (int curr = -90; curr <= 90; curr += majorStep) {
+//                            // todo
+//                            if ((lat < (curr - majorStep)) || (lat > (curr + majorStep))) {
+//                                continue;
+//                            }
+//                            double currDouble = (double) curr;
+//                            currDiff = Math.abs(lat - currDouble);
+//                            if (currDiff < lowestDiff) {
+//                                lowestDiff = currDiff;
+//                                latToUse = currDouble;
+//                            }
+//                        }
+//                    }
+
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coord1, coord2, offsetX, 0);
+                    textGlyphs.add(textGlyph);
+                }
+            }
+        }
+    }
+
 
     private static void createEasternLatitudeTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
                                                         List<TextGlyph> textGlyphs,
@@ -2707,27 +2992,44 @@ public class Graticule {
 //                    onlyAllowRightEdgeLabels = true;
 //                }
 
+
+
                 if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
                     onlyAllowRightEdgeLabels = true;
                 } else {
                     onlyAllowRightEdgeLabels = false;
                 }
 
-
                 if (onlyAllowRightEdgeLabels) {
-                    int buffer = 3;
-                    if (xPos < (width - buffer)) {
+                    int buffer = 5;
+                    if (xPos < (width - 1 - buffer)) {
                         allowLabel = false;
                     }
-                } else {
-                    if (yPos < 1 || yPos > (height - 1)) {
-                        if (xPos < (width -1)) {
-                            if (spacer >= 0) {
-                                offsetX = spacer;
-                            }
-                        }
-                    }
                 }
+
+
+                // older  code
+//                if (geoSpan.containsValidGeoCorners && !geoSpan.northPoleCrossed && !geoSpan.southPoleCrossed) {
+//                    onlyAllowRightEdgeLabels = true;
+//                } else {
+//                    onlyAllowRightEdgeLabels = false;
+//                }
+//
+//
+//                if (onlyAllowRightEdgeLabels) {
+//                    int buffer = 3;
+//                    if (xPos < (width - buffer)) {
+//                        allowLabel = false;
+//                    }
+//                } else {
+//                    if (yPos < 1 || yPos > (height - 1)) {
+//                        if (xPos < (width -1)) {
+//                            if (spacer >= 0) {
+//                                offsetX = spacer;
+//                            }
+//                        }
+//                    }
+//                }
 
 
 
@@ -2759,6 +3061,89 @@ public class Graticule {
             }
         }
     }
+
+
+
+    private static void createTickPointsByGlyph(TextGlyph[] textGlyphArray,
+                                                List<PixelPos> pixelPoses) {
+
+        for (final TextGlyph textGlyph : textGlyphArray) {
+
+            PixelPos pixelPos = new PixelPos(textGlyph.getX(), textGlyph.getY());
+
+            if (pixelPos.isValid()) {
+                pixelPoses.add(pixelPos);
+            }
+        }
+    }
+
+
+
+
+    private static PixelPos[] createTickPointsByGlyph(List<List<Coord>> latitudeGridLinePoints,
+                                                      List<List<Coord>> longitudeGridLinePoints,
+                                                      TextGlyph[] textGlyph,
+                                               TextLocation textLocation,
+                                               GeoInfo geoInfo) {
+        final List<PixelPos> pixelPoses = new ArrayList<>();
+
+
+        switch (textLocation) {
+            case NORTH:
+                createTickPointsByGlyph(textGlyph, pixelPoses);
+                break;
+            case SOUTH:
+                createTickPointsByGlyph(textGlyph, pixelPoses);
+                break;
+            case WEST:
+                createTickPointsByGlyph(textGlyph, pixelPoses);
+                break;
+            case EAST:
+                createTickPointsByGlyph(textGlyph, pixelPoses);
+                break;
+
+        }
+
+        // older code
+//        if (geoInfo.southPoleCrossed || geoInfo.northPoleCrossed || 1 == 1) { // todo TEMP
+//            switch (textLocation) {
+//                case NORTH:
+//                    createNorthernLongitudeTickPointsByGlyph(textGlyph, pixelPoses);
+//                    break;
+//                case SOUTH:
+//                    createNorthernLongitudeTickPointsByGlyph(textGlyph, pixelPoses);
+//                    break;
+//                case WEST:
+//                    createNorthernLongitudeTickPointsByGlyph(textGlyph, pixelPoses);
+//                    break;
+//                case EAST:
+//                    createNorthernLongitudeTickPointsByGlyph(textGlyph, pixelPoses);
+//                    break;
+//            }
+//        } else {
+//            switch (textLocation) {
+//                case NORTH:
+//                    createNorthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+//                    break;
+//                case SOUTH:
+//                    createSouthernLongitudeTickPoints(longitudeGridLinePoints, pixelPoses);
+//                    break;
+//                case WEST:
+//                    createWesternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+//                    break;
+//                case EAST:
+//                    createEasternLatitudeTickPoints(latitudeGridLinePoints, pixelPoses);
+//                    break;
+//            }
+//        }
+
+
+
+        return pixelPoses.toArray(new PixelPos[0]);
+    }
+
+
+
 
     private static void createNorthernLongitudeTickPoints(List<List<Coord>> longitudeGridLinePoints,
                                                           List<PixelPos> pixelPoses) {
@@ -2816,7 +3201,7 @@ public class Graticule {
                 }
 
                 if (onlyAllowNorthEdgeLabels) {
-                    int buffer = 3;
+                    int buffer = 5;
                     if (yPos > (0 + buffer)) {
                         allowLabel = false;
                     }
@@ -2844,7 +3229,7 @@ public class Graticule {
 //                        }
 //                    }
 
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse,formatCompass, formatDecimal), coord1, coord2, 0, 0);
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse, formatCompass, formatDecimal), coord1, coord2, 0, 0);
                     textGlyphs.add(textGlyph);
                 }
             }
@@ -2905,13 +3290,11 @@ public class Graticule {
                 }
 
                 if (onlyAllowSouthEdgeLabels) {
-                    int buffer = 3;
-                    if (yPos < (height - buffer)) {
+                    int buffer = 5;
+                    if (yPos < (height - 1 - buffer)) {
                         allowLabel = false;
                     }
                 }
-
-
 
 
 //                System.out.println("Southern:  xPos=" + xPos + "  yPos=" + yPos + " width=" + width + " height=" + height);
@@ -2936,12 +3319,638 @@ public class Graticule {
 //                        }
 //                    }
 
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse,formatCompass, formatDecimal), coord1, coord2, 0, 0);
+                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(lonToUse, formatCompass, formatDecimal), coord1, coord2, 0, 0);
                     textGlyphs.add(textGlyph);
                 }
             }
         }
     }
+
+
+    private static void createLongitudePolarEdgeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
+                                                           TextLocation textLocation,
+                                                           List<TextGlyph> textGlyphs, boolean formatCompass,
+                                                           boolean formatDecimal,
+                                                           double majorStep,
+                                                           RasterDataNode raster,
+                                                           GeoInfo geoSpan) {
+
+
+        int height = raster.getRasterHeight();
+        int width = raster.getRasterWidth();
+
+        for (List<Coord> longitudeGridLinePoint : longitudeGridLinePoints) {
+
+            if (longitudeGridLinePoint.size() >= 2) {
+
+                int indexFirst = 0;
+                Coord coordFirst = longitudeGridLinePoint.get(indexFirst);
+                double yPosFirst = (coordFirst.pixelPos.getY());
+                double xPosFirst = (coordFirst.pixelPos.getX());
+                Coord coordFirstInner = null;
+
+                int indexSecond = 1;
+                Coord coordSecond = longitudeGridLinePoint.get(indexSecond);
+                double yPosSecond = (coordSecond.pixelPos.getY());
+                double xPosSecond = (coordSecond.pixelPos.getX());
+
+
+                int indexLast = longitudeGridLinePoint.size() - 1;
+                Coord coordLast = longitudeGridLinePoint.get(indexLast);
+                double yPosLast = (coordLast.pixelPos.getY());
+                double xPosLast = (coordLast.pixelPos.getX());
+                Coord coordLastInner = null;
+
+                int indexSecondToLast = longitudeGridLinePoint.size() - 2;
+                Coord coordSecondToLast = longitudeGridLinePoint.get(indexSecondToLast);
+                double yPosSecondToLast = (coordSecondToLast.pixelPos.getY());
+                double xPosSecondToLast = (coordSecondToLast.pixelPos.getX());
+
+
+                boolean allowLabel = false;
+                boolean onlyAllowEdgeLabels = false;
+
+                boolean allowLabelFirst = false;
+                boolean allowLabelLast = false;
+
+
+                if (geoSpan.containsValidGeoCorners) {
+                    onlyAllowEdgeLabels = true;
+                } else {
+                    onlyAllowEdgeLabels = false;
+                }
+
+                boolean crossesTopEdge = false;
+                boolean crossesBottomEdge = false;
+                boolean crossesLeftEdge = false;
+                boolean crossesRightEdge = false;
+
+                boolean firstCrossesEdge = false;
+                boolean lastCrossesEdge = false;
+
+                int buffer = 5;
+
+
+                if (onlyAllowEdgeLabels  && false) {  // todo TEMP
+
+
+                    switch (textLocation) {
+
+                        case NORTH: {
+                            if (yPosFirst <= (0 + buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelFirst = true;
+                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + 1));
+                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+                            }
+
+                            if (yPosLast <= (0 + buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelLast = true;
+                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + 1));
+                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+                            }
+                        }
+                        break;
+
+
+                        case SOUTH: {
+                            if (yPosFirst >= (height - buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelFirst = true;
+                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() - 1));
+                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+                            }
+
+                            if (yPosLast >= (height - buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelLast = true;
+                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() - 1));
+                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+                            }
+                        }
+                        break;
+
+
+
+                        case WEST: {
+                            if (xPosFirst <= (0 + buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelFirst = true;
+                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX() + 1), (float) coordFirst.pixelPos.getY());
+                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+                            }
+
+                            if (xPosLast <= (0 + buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelLast = true;
+                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX() + 1), (float) coordLast.pixelPos.getY());
+                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+                            }
+                        }
+                        break;
+
+
+
+                        case EAST: {
+                            if (xPosFirst >= (width - buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelFirst = true;
+                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX() - 1), (float) coordFirst.pixelPos.getY());
+                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+                            }
+
+                            if (xPosLast >= (width - buffer)) {
+                                crossesLeftEdge = true;
+                                allowLabelLast = true;
+                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX() - 1), (float) coordLast.pixelPos.getY());
+                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+                            }
+                        }
+                        break;
+
+                    }
+
+                } else {
+
+                    switch (textLocation) {
+
+                        case NORTH: {
+                            // the line starts at the top of the scene
+                            if (yPosFirst < yPosSecond) {
+                                PixelPos pixelPosAbove = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() - (1 + buffer)));
+                                GeoPos geoPosAbove = raster.getGeoCoding().getGeoPos(pixelPosAbove, null);
+                                if (!geoPosAbove.isValid()) {
+                                    PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + 1));
+                                    GeoPos geoPosFirstInner = raster.getGeoCoding().getGeoPos(pixelPosFirstInner, null);
+                                    coordFirstInner = new Coord(geoPosFirstInner, pixelPosFirstInner);
+                                    allowLabelFirst = true;
+                                }
+                            }
+
+
+                            // the line ends at the top of the scene
+                            if (yPosLast < yPosSecondToLast) {
+                                PixelPos pixelPosAbove = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() - (1 + buffer)));
+                                GeoPos geoPosAbove = raster.getGeoCoding().getGeoPos(pixelPosAbove, null);
+                                if (!geoPosAbove.isValid()) {
+                                    PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + 1));
+                                    GeoPos geoPosLastInner = raster.getGeoCoding().getGeoPos(pixelPosLastInner, null);
+                                    coordLastInner = new Coord(geoPosLastInner, pixelPosLastInner);
+                                    allowLabelLast = true;
+                                }
+                            }
+
+
+//                            if (yPosFirst <= (0 + buffer)) {
+//                                crossesLeftEdge = true;
+//                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + 1));
+//                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+//                            }
+//
+//                            if (yPosLast <= (0 + buffer)) {
+//                                crossesLeftEdge = true;
+//                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + 1));
+//                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+//                            }
+                        }
+                        break;
+
+
+                        case SOUTH: {
+                            // the line starts at the bottom of the scene
+                            if (yPosFirst > yPosSecond) {
+                                PixelPos pixelPosBelow = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + (1 + buffer)));
+                                GeoPos geoPosBelow = raster.getGeoCoding().getGeoPos(pixelPosBelow, null);
+                                if (!geoPosBelow.isValid()) {
+                                    PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() - 1));
+                                    GeoPos geoPosFirstInner = raster.getGeoCoding().getGeoPos(pixelPosFirstInner, null);
+                                    coordFirstInner = new Coord(geoPosFirstInner, pixelPosFirstInner);
+                                    allowLabelFirst = true;
+                                }
+                            }
+
+
+                            // the line ends at the bottom of the scene
+                            if (yPosLast > yPosSecondToLast) {
+                                PixelPos pixelPosBelow = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + (1 + buffer)));
+                                GeoPos geoPosBelow = raster.getGeoCoding().getGeoPos(pixelPosBelow, null);
+                                if (!geoPosBelow.isValid()) {
+                                    PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() - 1));
+                                    GeoPos geoPosLastInner = raster.getGeoCoding().getGeoPos(pixelPosLastInner, null);
+                                    coordLastInner = new Coord(geoPosLastInner, pixelPosLastInner);
+                                    allowLabelLast = true;
+                                }
+                            }
+
+
+
+
+//                            if (yPosFirst >= (height - buffer)) {
+//                                crossesLeftEdge = true;
+//                                PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() - 1));
+//                                coordFirstInner = new Coord(coordFirst.geoPos, pixelPosFirstInner);
+//                            }
+//
+//                            if (yPosLast >= (height - buffer)) {
+//                                crossesLeftEdge = true;
+//                                PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() - 1));
+//                                coordLastInner = new Coord(coordLast.geoPos, pixelPosLastInner);
+//                            }
+                        }
+                        break;
+
+
+
+                        case WEST: {
+                            // the line starts at the left of the scene
+                            if (xPosFirst < xPosSecond) {
+                                PixelPos pixelPosToLeft = new PixelPos((float) (coordFirst.pixelPos.getX() - (1 + buffer)), (float) coordFirst.pixelPos.getY());
+                                GeoPos geoPosToLeft = raster.getGeoCoding().getGeoPos(pixelPosToLeft, null);
+                                if (!geoPosToLeft.isValid()) {
+                                    PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX() + 1), (float) coordFirst.pixelPos.getY());
+                                    GeoPos geoPosFirstInner = raster.getGeoCoding().getGeoPos(pixelPosFirstInner, null);
+                                    coordFirstInner = new Coord(geoPosFirstInner, pixelPosFirstInner);
+                                    allowLabelFirst = true;
+                                }
+                            }
+
+                            // the line ends at the left of the scene
+                            if (xPosLast < xPosSecondToLast) {
+                                PixelPos pixelPosToLeft = new PixelPos((float) (coordLast.pixelPos.getX() - (1 + buffer)), (float) coordLast.pixelPos.getY());
+                                GeoPos geoPosToLeft = raster.getGeoCoding().getGeoPos(pixelPosToLeft, null);
+                                if (!geoPosToLeft.isValid()) {
+                                    PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX() + 1), (float) coordLast.pixelPos.getY());
+                                    GeoPos geoPosLastInner = raster.getGeoCoding().getGeoPos(pixelPosLastInner, null);
+                                    coordLastInner = new Coord(geoPosLastInner, pixelPosLastInner);
+                                    allowLabelLast = true;
+                                }
+                            }
+
+
+                        }
+                        break;
+
+
+
+                        case EAST: {
+                            // the line starts at the right of the scene
+                            if (xPosFirst > xPosSecond) {
+                                PixelPos pixelPosToRight = new PixelPos((float) (coordFirst.pixelPos.getX() + (1 + buffer)), (float) coordFirst.pixelPos.getY());
+                                GeoPos geoPosToRight = raster.getGeoCoding().getGeoPos(pixelPosToRight, null);
+                                if (!geoPosToRight.isValid()) {
+                                    PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX() - 1), (float) coordFirst.pixelPos.getY());
+                                    GeoPos geoPosFirstInner = raster.getGeoCoding().getGeoPos(pixelPosFirstInner, null);
+                                    coordFirstInner = new Coord(geoPosFirstInner, pixelPosFirstInner);
+                                    allowLabelFirst = true;
+                                }
+                            }
+
+
+                            // the line ends at the right of the scene
+                            if (xPosLast > xPosSecondToLast) {
+                                PixelPos pixelPosToRight = new PixelPos((float) (coordLast.pixelPos.getX() + (1 + buffer)), (float) coordLast.pixelPos.getY());
+                                GeoPos geoPosToRight = raster.getGeoCoding().getGeoPos(pixelPosToRight, null);
+                                if (!geoPosToRight.isValid()) {
+                                    PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX() - 1), (float) coordLast.pixelPos.getY());
+                                    GeoPos geoPosLastInner = raster.getGeoCoding().getGeoPos(pixelPosLastInner, null);
+                                    coordLastInner = new Coord(geoPosLastInner, pixelPosLastInner);
+                                    allowLabelLast = true;
+                                }
+                            }
+
+                        }
+                        break;
+
+                    }
+                }
+
+
+                // if onlyAllowEdgeLabels=true then restrict labels to only edge labels
+                if (onlyAllowEdgeLabels) {
+                    if (allowLabelFirst) {
+                        if (!crossesEdge(raster, coordFirst, textLocation, buffer)) {
+                            allowLabelFirst = false;
+                        }
+                    }
+
+                    if (allowLabelLast) {
+                        if (!crossesEdge(raster, coordLast, textLocation, buffer)) {
+                            allowLabelLast = false;
+                        }
+                    }
+                }
+
+
+//                if (onlyAllowEdgeLabels) {
+//                    if (crossesTopEdge || crossesBottomEdge || crossesLeftEdge || crossesRightEdge) {
+//                        allowLabel = true;
+//                    } else {
+//                        allowLabel = false;
+//                    }
+//                } else {
+//                    allowLabel = true;
+//                }
+
+
+                if (allowLabelFirst && coordFirst != null && coordFirstInner != null && isCoordPairValid(coordFirst, coordFirstInner)) {
+                    double lon = coordFirst.geoPos.lon;
+                    double lonToUse = lon;
+
+                    TextGlyph textGlyph = createTextGlyph(coordFirst.geoPos.getLonString(lonToUse, formatCompass, formatDecimal), coordFirst, coordFirstInner, 0, 0);
+                    textGlyphs.add(textGlyph);
+
+                }
+
+                if (allowLabelLast && coordLast != null && coordLastInner != null && isCoordPairValid(coordLast, coordLastInner)) {
+                    double lon = coordLast.geoPos.lon;
+                    double lonToUse = lon;
+
+                    TextGlyph textGlyph = createTextGlyph(coordLast.geoPos.getLonString(lonToUse, formatCompass, formatDecimal), coordLast, coordLastInner, 0, 0);
+                    textGlyphs.add(textGlyph);
+
+                }
+
+
+            }
+        }
+    }
+
+
+    private static boolean crossesAnyEdge( RasterDataNode raster, Coord coord, int buffer) {
+
+        boolean crossesEdge = false;
+
+        if (raster == null) {
+            return false;
+        }
+
+        if (crossesEdge(raster, coord, TextLocation.TOP, buffer)) {
+            crossesEdge = true;
+        }
+
+        if (crossesEdge(raster, coord, TextLocation.BOTTOM, buffer)) {
+            crossesEdge = true;
+        }
+
+        if (crossesEdge(raster, coord, TextLocation.LEFT, buffer)) {
+            crossesEdge = true;
+        }
+
+        if (crossesEdge(raster, coord, TextLocation.RIGHT, buffer)) {
+            crossesEdge = true;
+        }
+
+        return crossesEdge;
+
+    }
+
+
+
+    private static boolean crossesEdge( RasterDataNode raster, Coord coord, TextLocation textLocation, int buffer) {
+
+        boolean crossesEdge = false;
+
+        if (raster == null) {
+            return false;
+        }
+
+        int height = raster.getRasterHeight();
+        int width = raster.getRasterWidth();
+
+        double yPos = (coord.pixelPos.getY());
+        double xPos = (coord.pixelPos.getX());
+
+        switch (textLocation) {
+
+            case TOP, NORTH: {
+                if (yPos <= (0 + buffer)) {
+                    crossesEdge = true;
+                }
+            }
+            break;
+
+
+            case BOTTOM, SOUTH: {
+                if (yPos >= (height - (1 + buffer))) {
+                    crossesEdge = true;
+                }
+            }
+            break;
+
+
+            case LEFT, WEST: {
+                if (xPos <= (0 + buffer)) {
+                    crossesEdge = true;
+                }
+            }
+            break;
+
+
+            case RIGHT, EAST: {
+                if (xPos >= (width - (1 + buffer))) {
+                    crossesEdge = true;
+                }
+            }
+            break;
+
+        }
+
+
+        return crossesEdge;
+
+    }
+
+
+
+    private static void createLatitudePolarEdgeTextGlyphs(List<List<Coord>> latitudeGridLinePoints,
+                                                           TextLocation textLocation,
+                                                           List<TextGlyph> textGlyphs, boolean formatCompass,
+                                                           boolean formatDecimal,
+                                                           double majorStep,
+                                                           RasterDataNode raster,
+                                                           GeoInfo geoSpan) {
+
+
+        int height = raster.getRasterHeight();
+        int width = raster.getRasterWidth();
+
+        for (List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
+
+            if (latitudeGridLinePoint.size() >= 2) {
+
+                int indexFirst = 0;
+                Coord coordFirst = latitudeGridLinePoint.get(indexFirst);
+                double yPosFirst = (coordFirst.pixelPos.getY());
+                double xPosFirst = (coordFirst.pixelPos.getX());
+                Coord coordFirstInner = null;
+
+                int indexSecond = 1;
+                Coord coordSecond = latitudeGridLinePoint.get(indexSecond);
+                double yPosSecond = (coordSecond.pixelPos.getY());
+                double xPosSecond = (coordSecond.pixelPos.getX());
+
+
+                int indexLast = latitudeGridLinePoint.size() - 1;
+                Coord coordLast = latitudeGridLinePoint.get(indexLast);
+                double yPosLast = (coordLast.pixelPos.getY());
+                double xPosLast = (coordLast.pixelPos.getX());
+                Coord coordLastInner = null;
+
+                int indexSecondToLast = latitudeGridLinePoint.size() - 2;
+                Coord coordSecondToLast = latitudeGridLinePoint.get(indexSecondToLast);
+                double yPosSecondToLast = (coordSecondToLast.pixelPos.getY());
+                double xPosSecondToLast = (coordSecondToLast.pixelPos.getX());
+
+
+                boolean allowLabelFirst = false;
+                boolean allowLabelLast = false;
+
+
+                int buffer = 5;
+
+
+                switch (textLocation) {
+
+                    case NORTH: {
+                        // the line starts in a downward direction
+                        if (yPosFirst < yPosSecond) {
+                            PixelPos pixelPosFirstInner = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + 1));
+                            GeoPos geoPosFirstInner = raster.getGeoCoding().getGeoPos(pixelPosFirstInner, null);
+                            coordFirstInner = new Coord(geoPosFirstInner, pixelPosFirstInner);
+                            allowLabelFirst = true;
+                        }
+
+
+                        // the line ends in an upward direction
+                        if (yPosLast < yPosSecondToLast) {
+                            PixelPos pixelPosLastInner = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + 1));
+                            GeoPos geoPosLastInner = raster.getGeoCoding().getGeoPos(pixelPosLastInner, null);
+                            coordLastInner = new Coord(geoPosLastInner, pixelPosLastInner);
+                            allowLabelLast = true;
+                        }
+                    }
+                    break;
+
+
+                    case SOUTH: {
+                    }
+                    break;
+
+
+
+                    case WEST: {
+                    }
+                    break;
+
+
+
+                    case EAST: {
+                    }
+                    break;
+
+                }
+
+
+
+                boolean allowEdgeLabels = true;
+                boolean alignWithPole = false;
+
+                if (geoSpan.containsValidGeoCorners) {
+                    allowEdgeLabels = false;
+                    alignWithPole = true;
+                }
+
+
+
+                // if onlyAllowEdgeLabels=true then restrict labels to only edge labels
+                if (!allowEdgeLabels) {  // todo TEMP
+                    if (allowLabelFirst) {
+                        if (crossesAnyEdge(raster, coordFirst, buffer)) {
+                            allowLabelFirst = false;
+                        }
+                    }
+
+                    if (allowLabelLast) {
+                        if (crossesAnyEdge(raster, coordLast, buffer)) {
+                            allowLabelLast = false;
+                        }
+                    }
+                }
+
+
+
+
+                PixelPos polarCoord = null;
+                if (geoSpan.coordsPolar != null) {
+                    if (geoSpan.southPoleCrossed) {
+                        polarCoord = geoSpan.coordsPolar.southernmostPixelPos;
+                    } else {
+                        polarCoord = geoSpan.coordsPolar.northernmostPixelPos;
+                    }
+                }
+
+                double centerShiftExtra = height * .01;  // todo Temp this kinda works but could be revised to be handled outside of this method
+
+                if (allowLabelFirst && coordFirst != null && coordFirstInner != null && isCoordPairValid(coordFirst, coordFirstInner)) {
+
+                    double lat = coordFirst.geoPos.lat;
+                    double latToUse = lat;
+
+                    if (alignWithPole && polarCoord != null) {
+                        double deltaY = polarCoord.getY() - coordFirst.pixelPos.getY() + centerShiftExtra;
+
+                        PixelPos pixelPosFirstAlignWithPole = new PixelPos((float) (coordFirst.pixelPos.getX()), (float) (coordFirst.pixelPos.getY() + deltaY));
+                        GeoPos geoPosFirstAlignWithPole = raster.getGeoCoding().getGeoPos(pixelPosFirstAlignWithPole, null);
+                        Coord coordFirstAlignWithPole = new Coord(geoPosFirstAlignWithPole, pixelPosFirstAlignWithPole);
+
+                        PixelPos pixelPosFirstInnerAlignWithPole = new PixelPos((float) (coordFirstInner.pixelPos.getX()), (float) (coordFirstInner.pixelPos.getY() + deltaY));
+                        GeoPos geoPosFirstInnerAlignWithPole = raster.getGeoCoding().getGeoPos(pixelPosFirstInnerAlignWithPole, null);
+                        Coord coordFirstInnerAlignWithPole = new Coord(geoPosFirstInnerAlignWithPole, pixelPosFirstInnerAlignWithPole);
+
+                        TextGlyph textGlyph = createTextGlyph(coordFirst.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coordFirstAlignWithPole, coordFirstInnerAlignWithPole, 0, 0);
+                        textGlyphs.add(textGlyph);
+                    } else {
+                        TextGlyph textGlyph = createTextGlyph(coordFirst.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coordFirst, coordFirstInner, 0, 0);
+                        textGlyphs.add(textGlyph);
+                    }
+                }
+
+
+
+
+                if (allowLabelLast && coordLast != null && coordLastInner != null && isCoordPairValid(coordLast, coordLastInner)) {
+
+                    double lat = coordLast.geoPos.lat;
+                    double latToUse = lat;
+
+                    if (alignWithPole && polarCoord != null) {
+                        double deltaY = polarCoord.getY() - coordLast.pixelPos.getY() + centerShiftExtra;
+
+                        PixelPos pixelPosLastAlignWithPole = new PixelPos((float) (coordLast.pixelPos.getX()), (float) (coordLast.pixelPos.getY() + deltaY));
+                        GeoPos geoPosLastAlignWithPole = raster.getGeoCoding().getGeoPos(pixelPosLastAlignWithPole, null);
+                        Coord coordLastAlignWithPole = new Coord(geoPosLastAlignWithPole, pixelPosLastAlignWithPole);
+
+                        PixelPos pixelPosLastInnerAlignWithPole = new PixelPos((float) (coordLastInner.pixelPos.getX()), (float) (coordLastInner.pixelPos.getY() + deltaY));
+                        GeoPos geoPosLastInnerAlignWithPole = raster.getGeoCoding().getGeoPos(pixelPosLastInnerAlignWithPole, null);
+                        Coord coordLastInnerAlignWithPole = new Coord(geoPosLastInnerAlignWithPole, pixelPosLastInnerAlignWithPole);
+
+                        TextGlyph textGlyph = createTextGlyph(coordLast.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coordLastAlignWithPole, coordLastInnerAlignWithPole, 0, 0);
+                        textGlyphs.add(textGlyph);
+                    } else {
+                        TextGlyph textGlyph = createTextGlyph(coordLast.geoPos.getLatString(latToUse, formatCompass, formatDecimal), coordLast, coordLastInner, 0, 0);
+                        textGlyphs.add(textGlyph);
+                    }
+
+                }
+
+            }
+        }
+    }
+
+
+
+
 
     static TextGlyph getLonCornerTextGlyph(GeoCoding geoCoding, PixelPos pixelPos1, PixelPos pixelPos2, boolean formatCompass, boolean formatDecimal) {
         if (geoCoding == null) {
@@ -2998,7 +4007,6 @@ public class Graticule {
     }
 
 
-
     public static boolean containsValidGeoCorners(RasterDataNode dataNode) {
 
         final GeoCoding geoCoding = dataNode.getGeoCoding();
@@ -3011,23 +4019,6 @@ public class Graticule {
             return false;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 
 
     static GeoPos getGeoDelta(GeoCoding geoCoding, RasterDataNode dataNode) {
@@ -3050,6 +4041,9 @@ public class Graticule {
     }
 
     static boolean isCoordPairValid(Coord coord1, Coord coord2) {
+        if (coord1 == null || coord2 == null) {
+            return false;
+        }
         // @todo 1 tb/tb check if it may also be necessary to verify the geo-locations 2020-03-26
         return coord1.pixelPos.isValid() && coord2.pixelPos.isValid();
     }
@@ -3073,8 +4067,8 @@ public class Graticule {
     public static class TextGlyph {
 
         private final String text;
-        private final double x;
-        private final double y;
+        private double x;
+        private double y;
         private final double angle;
 
         TextGlyph(String text, double x, double y, double angle) {
@@ -3112,7 +4106,6 @@ public class Graticule {
     }
 
 
-
     static public class GraticuleParameters {
 
         public String mode = GraticuleLayerType.PROPERTY_MODE_DEFAULT;
@@ -3133,16 +4126,12 @@ public class Graticule {
         public int desiredMinorStepsCylindrical = GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT;
 
 
-
         public boolean interpolate = GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT;
-        public double tolerance = GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT;
-        public double toleranceCylindrical = GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT;
+        public double toleranceParallels = GraticuleLayerType.PROPERTY_TOLERANCE_PARALLELS_DEFAULT;
+        public double toleranceMeridians = GraticuleLayerType.PROPERTY_TOLERANCE_MERIDIANS_DEFAULT;
         public boolean formatCompass = GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT;
-        public  boolean decimalFormat = GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT;
-        public  int spacer = GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_DEFAULT;
-
-
-
+        public boolean decimalFormat = GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT;
+        public int spacer = GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_DEFAULT;
 
 
         public GraticuleParameters() {
@@ -3166,13 +4155,6 @@ public class Graticule {
 
 
     }
-
-
-
-
-
-
-
 
 
     static class GeoPosLatComparator extends GeoPosComparator {
@@ -3201,9 +4183,6 @@ public class Graticule {
             }
         }
     }
-
-
-
 
 
 //    private static double[] normalize(double x, double[] result) {

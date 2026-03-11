@@ -513,19 +513,19 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_INTERPOLATE_ALIAS = PROPERTY_ROOT + "interpolate";
     public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TOLERANCE_KEY = PROPERTY_ROOT + ".tolerance";
-    public static final Double PROPERTY_TOLERANCE_DEFAULT = 1.0;
-    public static final String PROPERTY_TOLERANCE_LABEL = "Edge Tolerance (Lat)";
-    public static final String PROPERTY_TOLERANCE_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto latitude gridline (fraction of pixel side size in geospace)";
-    public static final String PROPERTY_TOLERANCE_ALIAS = PROPERTY_ROOT + "tolerance";
-    public static final Class PROPERTY_TOLERANCE_TYPE = Double.class;
+    public static final String PROPERTY_TOLERANCE_PARALLELS_KEY = PROPERTY_ROOT + ".tolerance_parallels";
+    public static final Double PROPERTY_TOLERANCE_PARALLELS_DEFAULT = 1.0;
+    public static final String PROPERTY_TOLERANCE_PARALLELS_LABEL = "Edge Tolerance (Lat)";
+    public static final String PROPERTY_TOLERANCE_PARALLELS_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto latitude gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_PARALLELS_ALIAS = PROPERTY_ROOT + "toleranceParallels";
+    public static final Class PROPERTY_TOLERANCE_PARALLELS_TYPE = Double.class;
 
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_KEY = PROPERTY_ROOT + ".tolerance_cylindrical";
-    public static final Double PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT = 1.0;
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_LABEL = "Edge Tolerance (Lon)";
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto longitude gridline (fraction of pixel side size in geospace)";
-    public static final String PROPERTY_TOLERANCE_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "toleranceCylindrical";
-    public static final Class PROPERTY_TOLERANCE_CYLINDRICAL_TYPE = Double.class;
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_KEY = PROPERTY_ROOT + ".tolerance_meridians";
+    public static final Double PROPERTY_TOLERANCE_MERIDIANS_DEFAULT = 1.0;
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_LABEL = "Edge Tolerance (Lon)";
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto longitude gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_ALIAS = PROPERTY_ROOT + "toleranceMeridians";
+    public static final Class PROPERTY_TOLERANCE_MERIDIANS_TYPE = Double.class;
 
     // Property Setting: Restore Defaults
     public static final String PROPERTY_RESTORE_DEFAULTS_NAME = PROPERTY_ROOT + ".restoreDefaults";
@@ -594,13 +594,13 @@ public class GraticuleLayerType extends LayerType {
         interpolateModel.getDescriptor().setAlias(PROPERTY_INTERPOLATE_ALIAS);
         vc.addProperty(interpolateModel);
 
-        final Property toleranceModel = Property.create(PROPERTY_TOLERANCE_KEY, Double.class, PROPERTY_TOLERANCE_DEFAULT, true);
-        toleranceModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_ALIAS);
-        vc.addProperty(toleranceModel);
+        final Property toleranceParallelsModel = Property.create(PROPERTY_TOLERANCE_PARALLELS_KEY, Double.class, PROPERTY_TOLERANCE_PARALLELS_DEFAULT, true);
+        toleranceParallelsModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_PARALLELS_ALIAS);
+        vc.addProperty(toleranceParallelsModel);
 
-        final Property toleranceCylindricalModel = Property.create(PROPERTY_TOLERANCE_CYLINDRICAL_KEY, Double.class, PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT, true);
-        toleranceCylindricalModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_CYLINDRICAL_ALIAS);
-        vc.addProperty(toleranceCylindricalModel);
+        final Property toleranceMeridiansModel = Property.create(PROPERTY_TOLERANCE_MERIDIANS_KEY, Double.class, PROPERTY_TOLERANCE_MERIDIANS_DEFAULT, true);
+        toleranceMeridiansModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_MERIDIANS_ALIAS);
+        vc.addProperty(toleranceMeridiansModel);
 
 
         final Property autoSpacingLatGlobalModel = Property.create(PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY,
