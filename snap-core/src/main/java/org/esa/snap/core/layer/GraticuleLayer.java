@@ -121,8 +121,8 @@ public class GraticuleLayer extends Layer {
             graticuleParameters.desiredMinorStepsCylindrical = getNumMinorStepsCylindrical();
 
             graticuleParameters.interpolate = isInterpolate();
-            graticuleParameters.tolerance = getTolerance();
-            graticuleParameters.toleranceCylindrical = getToleranceCylindrical();
+            graticuleParameters.toleranceParallels = getToleranceParallels();
+            graticuleParameters.toleranceMeridians = getToleranceMeridians();
             graticuleParameters.formatCompass = isLabelsSuffix();
             graticuleParameters.decimalFormat = isLabelsDecimal();
             graticuleParameters.spacer = getEdgeLabelsSpacer();
@@ -171,6 +171,8 @@ public class GraticuleLayer extends Layer {
 
 
                 if (isLabelsNorth()) {
+                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+
                     final Graticule.TextGlyph[] textGlyphsNorth = graticule.getTextGlyphsNorth();
                     if (textGlyphsNorth != null) {
                         if (isTickmarksShow()) {
@@ -183,6 +185,8 @@ public class GraticuleLayer extends Layer {
                 }
 
                 if (isLabelsSouth()) {
+                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+
                     final Graticule.TextGlyph[] textGlyphsSouth = graticule.getTextGlyphsSouth();
                     if (textGlyphsSouth != null) {
 
@@ -194,6 +198,8 @@ public class GraticuleLayer extends Layer {
                 }
 
                 if (isLabelsWest()) {
+                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+
                     final Graticule.TextGlyph[] textGlyphsWest = graticule.getTextGlyphsWest();
                     if (textGlyphsWest != null) {
                         if (isTickmarksShow()) {
@@ -205,6 +211,8 @@ public class GraticuleLayer extends Layer {
 
 
                 if (isLabelsEast()) {
+                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+
                     final Graticule.TextGlyph[] textGlyphsEast = graticule.getTextGlyphsEast();
                     if (textGlyphsEast != null) {
                         if (isTickmarksShow()) {
@@ -964,8 +972,8 @@ public class GraticuleLayer extends Layer {
                         propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_INTERPOLATE_KEY) ||
-                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_KEY) ||
-                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_KEY) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_PARALLELS_KEY) ||
+                        propertyName.equals(GraticuleLayerType.PROPERTY_TOLERANCE_MERIDIANS_KEY) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(GraticuleLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
@@ -1014,14 +1022,14 @@ public class GraticuleLayer extends Layer {
                 GraticuleLayerType.PROPERTY_INTERPOLATE_DEFAULT);
     }
 
-    private double getTolerance() {
-        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_KEY,
-                GraticuleLayerType.PROPERTY_TOLERANCE_DEFAULT);
+    private double getToleranceParallels() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_PARALLELS_KEY,
+                GraticuleLayerType.PROPERTY_TOLERANCE_PARALLELS_DEFAULT);
     }
 
-    private double getToleranceCylindrical() {
-        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_KEY,
-                GraticuleLayerType.PROPERTY_TOLERANCE_CYLINDRICAL_DEFAULT);
+    private double getToleranceMeridians() {
+        return getConfigurationProperty(GraticuleLayerType.PROPERTY_TOLERANCE_MERIDIANS_KEY,
+                GraticuleLayerType.PROPERTY_TOLERANCE_MERIDIANS_DEFAULT);
     }
 
 
