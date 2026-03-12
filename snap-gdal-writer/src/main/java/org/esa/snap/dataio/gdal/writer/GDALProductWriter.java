@@ -19,33 +19,29 @@ package org.esa.snap.dataio.gdal.writer;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.lib.gdal.activator.GDALDriverInfo;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.dataio.gdal.GDALLoader;
-import org.esa.snap.dataio.gdal.drivers.Dataset;
-import org.esa.snap.dataio.gdal.drivers.Driver;
-import org.esa.snap.dataio.gdal.drivers.GDAL;
-import org.esa.snap.dataio.gdal.drivers.GDALConst;
-import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
+import org.esa.snap.dataio.gdal.drivers.*;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.runtime.Config;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -220,17 +216,20 @@ public class GDALProductWriter extends AbstractProductWriter {
         GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
         if (geoCoding == null) {
             this.gdalDataset.setProjection("");
-        } else {
+        } else if (geoCoding.getImageToMapTransform() instanceof AffineTransform2D) {
             this.gdalDataset.setProjection(geoCoding.getMapCRS().toWKT());
-            if (geoCoding.getImageToMapTransform() instanceof AffineTransform2D) {
-                AffineTransform2D transform = (AffineTransform2D) geoCoding.getImageToMapTransform();
-                double[] gdalGeoTransform = new double[6];
-                gdalGeoTransform[0] = transform.getTranslateX();
-                gdalGeoTransform[3] = transform.getTranslateY();
-                gdalGeoTransform[1] = transform.getScaleX();
-                gdalGeoTransform[5] = transform.getScaleY();
-                this.gdalDataset.setGeoTransform(gdalGeoTransform);
-            }
+            AffineTransform2D transform = (AffineTransform2D) geoCoding.getImageToMapTransform();
+            double[] gdalGeoTransform = new double[6];
+            gdalGeoTransform[0] = transform.getTranslateX();
+            gdalGeoTransform[1] = transform.getScaleX();
+            gdalGeoTransform[2] = transform.getShearX();
+            gdalGeoTransform[3] = transform.getTranslateY();
+            gdalGeoTransform[4] = transform.getShearY();
+            gdalGeoTransform[5] = transform.getScaleY();
+
+            this.gdalDataset.setGeoTransform(gdalGeoTransform);
+        } else if (geoCoding instanceof TiePointGeoCoding) {
+            writeGCPGeoCodingFromTiePointGridNodes(gdalDataset, geoCoding, sourceProduct);
         }
     }
 
@@ -322,8 +321,10 @@ public class GDALProductWriter extends AbstractProductWriter {
                 this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, Objects.requireNonNullElseGet(writeOptions, () -> new String[0]));//create the final output dataset file (the COG product) from temporary dataset file with options for write
                 tempDataset.delete();//close the temporary dataset file
             }
-            this.gdalDataset.delete();
-            this.gdalDataset = null;
+            if (this.gdalDataset != null) {
+                this.gdalDataset.delete();
+                this.gdalDataset = null;
+            }
         }
     }
 
@@ -347,5 +348,137 @@ public class GDALProductWriter extends AbstractProductWriter {
                 return masked <= 4 ? masked << 1 : masked;
             }
         }
+    }
+
+    /**
+     *  Writes GDAL GCP-based geocoding derived directly from the product's {@link TiePointGeoCoding} support grids.
+     *
+     * @param dataset the GDAL dataset being written
+     * @param geoCoding the source product geocoding (instance of {@link TiePointGeoCoding})
+     * @param product  the source product containing tie-point grids
+     */
+    private static void writeGCPGeoCodingFromTiePointGridNodes(Dataset dataset,
+                                     GeoCoding geoCoding, Product product) {
+
+        int sceneW = product.getSceneRasterWidth();
+        int sceneH = product.getSceneRasterHeight();
+
+        final int nbGCPsX = 10;
+        final int nbGCPsY = 10;
+
+        int stepX =  (int)Math.ceil((double)sceneW/nbGCPsX);  // grid across X
+        int stepY = (int)Math.ceil((double)sceneH/nbGCPsY);  // grid across Y
+
+        final java.util.LinkedHashMap<Long, GCP> uniqGCPs = new java.util.LinkedHashMap<>();
+
+        // ---- scene corners + edges ----
+        //corners
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, 0, 0);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - 1, 0);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, 0, sceneH - 1);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - 1, sceneH - 1);
+
+        // Sample full border
+        for (int x = 0; x < sceneW; x += stepX) {
+            addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, x, 0);
+            addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, x, sceneH - 1);
+        }
+        for (int y = 0; y < sceneH; y += stepY) {
+            addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, 0, y);
+            addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - 1, y);
+        }
+
+        //Sample grid center
+        int centerY = Math.round((sceneH-1)/2);
+        int centerX = Math.round((sceneW-1)/2);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, centerX, centerY);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, centerX, sceneH - centerY);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - centerX, centerY);
+        addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - centerX, sceneH - centerY);
+
+        // Sample interior grid
+        for (int y = 0; y < sceneH; y += stepY) {
+        for (int x = 0; x < sceneW; x += stepX) {
+                addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, x, y);
+            }
+        }
+
+        // If too few valid points, don't write broken geocoding
+        final ArrayList<GCP> gcpList = new ArrayList<>(uniqGCPs.values());
+
+        if (gcpList.size() < 4) {
+            dataset.setProjection("");
+            return;
+        }
+        String wkt = extractGeoCodingWkt(geoCoding);
+        dataset.setGCPs(gcpList, wkt);
+        dataset.setProjection(wkt);
+    }
+
+    /**
+     * Adds a GDAL {@link GCP} corresponding to a scene pixel position using the provided {@link GeoCoding}.
+     *
+     * @param gcpMap      map of unique GCPs keyed by quantized pixel position
+     * @param geoCoding the geocoding used to compute geographic coordinates
+     * @param x         pixel column index
+     * @param y         pixel row index
+     */
+    private static void addScenePixelGcpFromGeoCoding(java.util.Map<Long, GCP> gcpMap, GeoCoding geoCoding, int x, int y) {
+        final double px = x + 0.5;
+        final double py = y + 0.5;
+
+        GeoPos gp = geoCoding.getGeoPos(new PixelPos((float) px, (float) py), null);
+
+        if (gp == null || !gp.isValid()) return;
+
+        final double lat = gp.getLat();
+        final double lon = gp.getLon();
+
+        if (Double.isNaN(lat) || Double.isNaN(lon)) return;
+
+        if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) return;
+
+        final long key = createQuantizedPixelKey(px, py);
+        gcpMap.putIfAbsent(key, GCP.create(px, py, lon, lat, 0.0));
+    }
+
+    /**
+     * Creates a quantized 64-bit key for a pixel position.
+     *
+     * <p>Coordinates are quantized to 1/1000 pixel precision to suppress minor floating-point
+     * differences, then packed (X in upper 32 bits, Y in lower 32 bits). Used for unique pixel
+     * identification when generating GCP samples.</p>
+     *
+     * @param px pixel X coordinate
+     * @param py pixel Y coordinate
+     * @return packed key representing the quantized pixel position
+     */
+    private static long createQuantizedPixelKey(double px, double py) {
+        long x = Math.round(px * 1000.0);
+        long y = Math.round(py * 1000.0);
+
+        return (x << 32) | (y & 0xffffffffL);
+    }
+
+    /**
+     * Extract WKT from GeoCoding
+     * @param geoCoding
+     * @return
+     */
+    private static String extractGeoCodingWkt(GeoCoding geoCoding){
+        String wkt = null;
+        try {
+            final CoordinateReferenceSystem crs = geoCoding.getMapCRS();
+            if (crs != null) wkt = crs.toWKT();
+        } catch (Exception ignore) {}
+
+        if (wkt == null) {
+            try {
+                wkt = CRS.decode("EPSG:4326", true).toWKT();
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to create WKT for EPSG:4326", e);
+            }
+        }
+        return wkt;
     }
 }
