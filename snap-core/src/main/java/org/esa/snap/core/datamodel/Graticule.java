@@ -518,7 +518,7 @@ public class Graticule {
                             textGlyphsWest[i].x = textGlyphsWest[i].x - spacer;  // todo TEMP testing
                         }
 
-                        if (textGlyphsEast[i].getX() > (raster.getRasterWidth() - buffer)) {
+                        if (textGlyphsEast[i].getX() < (raster.getRasterWidth() - buffer)) {
                             textGlyphsEast[i].x = textGlyphsEast[i].x + spacer;  // todo TEMP testing
                         }
                     }
