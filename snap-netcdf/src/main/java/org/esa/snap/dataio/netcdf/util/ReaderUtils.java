@@ -150,6 +150,14 @@ public class ReaderUtils {
         return scaleArray(rawArray, scaleFactor, offset);
     }
 
+
+    public static boolean mustScale(Variable variable) {
+        final double scaleFactor = getScalingFactor(variable);
+        final double offset = getAddOffset(variable);
+
+        return mustScale(scaleFactor, offset);
+    }
+
     public static Array scaleArray(Array rawArray, double scaleFactor, double offset) {
         Array result;
         if (mustScale(scaleFactor, offset)) {

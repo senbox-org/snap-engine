@@ -40,13 +40,22 @@ public class GeoCodingFactory {
      * ground resolution is estimatesd from the geolocation data.
      * The ComponeneGeoDoding is returned is initialized and ready to use.
      *
-     * @param latBand              the Band containing the latitude data
-     * @param lonBand              the Band containing the longitude data
+     * @param latBand the Band containing the latitude data
+     * @param lonBand the Band containing the longitude data
      * @return a ready to use GeoCoding
      * @throws IOException on disk IO errors
      */
     public static ComponentGeoCoding createPixelGeoCoding(final Band latBand, final Band lonBand) throws IOException {
         final GeoRaster geoRaster = getGeoRaster(latBand, lonBand);
+
+        return createAndInitialize(geoRaster);
+    }
+
+    public static ComponentGeoCoding createPixelGeoCoding(double[] latitudes, double[] longitudes, int rasterWidth, int rasterHeight) throws IOException {
+        final double rasterResolutionInKm = estimateGroundResolutionInKm(latitudes, longitudes, rasterWidth, rasterHeight);
+
+        final GeoRaster geoRaster =  new GeoRaster(longitudes, latitudes, "longitude", "latitude",
+                rasterWidth, rasterHeight, rasterResolutionInKm);
 
         return createAndInitialize(geoRaster);
     }
@@ -144,8 +153,8 @@ public class GeoCodingFactory {
         measures[0] = distance.distance(longitudes[width], latitudes[width]);
 
         // center, measuring in x direction
-        final int yOff = height/2;
-        final int xOff = width/2 - 1;
+        final int yOff = height / 2;
+        final int xOff = width / 2 - 1;
         int pos = xOff + yOff * width;
         distance = new EllipsoidDistance(longitudes[pos], latitudes[pos], DefaultEllipsoid.WGS84);
         measures[1] = distance.distance(longitudes[pos + 1], latitudes[pos + 1]);
