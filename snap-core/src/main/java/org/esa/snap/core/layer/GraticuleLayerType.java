@@ -23,7 +23,6 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.awt.*;
@@ -40,7 +39,44 @@ import java.awt.geom.AffineTransform;
 public class GraticuleLayerType extends LayerType {
 
 
-    public static final String PROPERTY_ROOT = "graticule.v9";
+//    public static final String MODE_AUTO = "Auto-Detect";
+//    public static final String MODE_REGIONAL = "Regional";
+//    public static final String MODE_HEMISPHERICAL = "Hemispherical";
+//    public static final String MODE_GLOBAL = "Global";
+//    public static final String MODE_GLOBAL_CYLINDRICAL = "Global Cylindrical";
+
+    public static final String MODE_AUTO = "AUTO_DETECT";
+    public static final String MODE_REGIONAL = "REGIONAL";
+    public static final String MODE_HEMISPHERICAL = "HEMISPHERICAL";
+    public static final String MODE_GLOBAL = "GLOBAL";
+    public static final String MODE_GLOBAL_CYLINDRICAL = "GLOBAL_CYLINDRICAL";
+
+
+    public static final String PROPERTY_ROOT = "graticule.map.gridlines";
+
+
+    public static final String PROPERTY_MODE_KEY = PROPERTY_ROOT + ".mapping_mode";
+    public static final String PROPERTY_MODE_LABEL = "Mode";
+    public static final String PROPERTY_MODE_TOOLTIP =
+            "<html>Mode governs certain default parameters based on type of mapped scene<br>" +
+                    "Mode governs which AUTO-SPACING default is used when Lat Spacing and/or Lon Spacing is set to 0.0<br>" +
+                    "See Preferences for AUTO-SPACING options</html>";
+    private static final String PROPERTY_MODE_ALIAS = PROPERTY_ROOT + "Mode";
+    public static final String PROPERTY_MODE_DEFAULT = MODE_AUTO;
+    public static final Class<String> PROPERTY_MODE_TYPE = String.class;
+
+
+    public static String[] getModeOptionsArray() {
+        return  new String[]{
+                MODE_AUTO,
+                MODE_REGIONAL,
+                MODE_HEMISPHERICAL,
+                MODE_GLOBAL,
+                MODE_GLOBAL_CYLINDRICAL
+        };
+    }
+
+
 
     // Property Settings: Grid Spacing Section
 
@@ -50,18 +86,76 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRID_SPACING_SECTION_ALIAS = PROPERTY_ROOT + "GridSpacingSection";
 
     public static final String PROPERTY_GRID_SPACING_LAT_NAME = PROPERTY_ROOT + ".spacing.lat";
-    public static final String PROPERTY_GRID_SPACING_LAT_LABEL = "Latitude Spacing";
+    public static final String PROPERTY_GRID_SPACING_LAT_LABEL = "Lat Spacing";
     public static final String PROPERTY_GRID_SPACING_LAT_TOOLTIP = "Set latitude grid spacing in degrees (0=AUTOSPACING)";
     private static final String PROPERTY_GRID_SPACING_LAT_ALIAS = PROPERTY_ROOT + "SpacingLat";
-    public static final double PROPERTY_GRID_SPACING_LAT_DEFAULT = 0.0;
-    public static final Class PROPERTY_GRID_SPACING_LAT_TYPE = Double.class;
+    public static final double PROPERTY_GRID_SPACING_LAT_DEFAULT = 0;
+    public static final Class<Double> PROPERTY_GRID_SPACING_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_GRID_SPACING_LON_NAME = PROPERTY_ROOT + ".spacing.lon";
-    public static final String PROPERTY_GRID_SPACING_LON_LABEL = "Longitude Spacing";
+    public static final String PROPERTY_GRID_SPACING_LON_LABEL = "Lon Spacing";
     public static final String PROPERTY_GRID_SPACING_LON_TOOLTIP = "Set longitude grid spacing in degrees (0=AUTOSPACING)";
     private static final String PROPERTY_GRID_SPACING_LON_ALIAS = PROPERTY_ROOT + "SpacingLon";
-    public static final double PROPERTY_GRID_SPACING_LON_DEFAULT = 0.0;
+    public static final double PROPERTY_GRID_SPACING_LON_DEFAULT = 0;
     public static final Class PROPERTY_GRID_SPACING_LON_TYPE = Double.class;
+
+
+
+    public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_hemispherical";
+    public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_LABEL = "[Mode=" + MODE_HEMISPHERICAL + "]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file lat span greater than 75</html>";
+    private static final String PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatHemispherical";
+    public static final double PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_DEFAULT = 15;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_TYPE = Double.class;
+
+    public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_hemispherical";
+    public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_LABEL = "[Mode=" + MODE_HEMISPHERICAL + "]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file lon span between 75 and 200</html>";
+    private static final String PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLonHemispherical";
+    public static final double PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_DEFAULT = 15;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_TYPE = Double.class;
+
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_global";
+    //    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "AUTO-SPACING (Global): Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_LABEL = "[Mode=" + MODE_GLOBAL + "]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file lat span greater than 75</html>";
+    private static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobal";
+    public static final double PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT = 15;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_GLOBAL_TYPE = Double.class;
+
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_global";
+    //    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "AUTO-SPACING (Global): Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_LABEL = "[Mode=" + MODE_GLOBAL + "]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file lon span greater than 200</html>";
+    private static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLonGlobal";
+    public static final double PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT = 45;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LON_GLOBAL_TYPE = Double.class;
+
+
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lat_global_cylindrical";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_LABEL = "[Mode=" + MODE_GLOBAL_CYLINDRICAL +"]: Lat Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_TOOLTIP = "<html>The default lat spacing when the Lat Spacing field is set to 0<br>Used if file is cylindrical projection and lat span greater than 75</html>";
+    private static final String PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobalCylindrical";
+    public static final double PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_DEFAULT = 30;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_TYPE = Double.class;
+
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_KEY = PROPERTY_ROOT + ".auto_spacing.lon_global_cylindrical";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_LABEL = "[Mode=" + MODE_GLOBAL_CYLINDRICAL + "]: Lon Spacing";
+    public static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_TOOLTIP = "<html>The default lon spacing when the Lon Spacing field is set to 0<br>Used if file is cylindrical projection and lon span greater than 75</html>";
+    private static final String PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "AutoSpacingLatGlobalCylindrical";
+    public static final double PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_DEFAULT = 30;
+    public static final Class<Double> PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_TYPE = Double.class;
+
+
+    // Property Settings: Line Precision Section
+
+    public static final String PROPERTY_LINE_PRECISION_SECTION_KEY = PROPERTY_ROOT + ".line_precision.section";
+    public static final String PROPERTY_LINE_PRECISION_SECTION_LABEL = "Gridline Precision";
+    public static final String PROPERTY_LINE_PRECISION_SECTION_TOOLTIP = "Set precision of the drawn lines";
+    public static final String PROPERTY_LINE_PRECISION_SECTION_ALIAS = PROPERTY_ROOT + "LinePrecisionSection";
+
+    
+    
 
 
     // Property Settings: Labels Section
@@ -146,7 +240,7 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_LABELS_ROTATION_LAT_LABEL = "Labels Rotation (Latitude)";
     public static final String PROPERTY_LABELS_ROTATION_LAT_TOOLTIP = "Rotate latitude labels (0 degrees = perpendicular)";
     private static final String PROPERTY_LABELS_ROTATION_LAT_ALIAS = "labelsRotationLat";
-    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 90;
+    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 0;
     public static final Class PROPERTY_LABELS_ROTATION_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME = PROPERTY_ROOT + ".labels.font.name";
@@ -172,6 +266,17 @@ public class GraticuleLayerType extends LayerType {
     public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 70;
     public static final String PROPERTY_LABELS_SIZE_INTERVAL = "[" + GraticuleLayerType.PROPERTY_LABELS_SIZE_VALUE_MIN + "," + GraticuleLayerType.PROPERTY_LABELS_SIZE_VALUE_MAX + "]";
 
+    public static final String PROPERTY_EDGE_LABELS_SPACER_NAME = PROPERTY_ROOT + ".labels.spacer.edge";
+    public static final String PROPERTY_EDGE_LABELS_SPACER_LABEL = "Edge Labels Spacer";
+    public static final String PROPERTY_EDGE_LABELS_SPACER_TOOLTIP = "Sets a spacer for edge labels";
+    private static final String PROPERTY_EDGE_LABELS_SPACER_ALIAS = PROPERTY_ROOT + "LabelsEdge";
+    public static final int PROPERTY_EDGE_LABELS_SPACER_DEFAULT = 25;
+    public static final Class PROPERTY_EDGE_LABELS_SPACER_TYPE = Integer.class;
+    public static final int PROPERTY_EDGE_LABELS_SPACER_VALUE_MIN = -1;
+    public static final int PROPERTY_EDGE_LABELS_SPACER_VALUE_MAX = 200;
+    public static final String PROPERTY_EDGE_LABELS_SPACER_INTERVAL = "[" + GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_VALUE_MIN + "," + GraticuleLayerType.PROPERTY_EDGE_LABELS_SPACER_VALUE_MAX + "]";
+
+    
 
     public static final String PROPERTY_LABELS_COLOR_NAME = PROPERTY_ROOT + ".labels.color";
     public static final String PROPERTY_LABELS_COLOR_LABEL = "Labels Font Color";
@@ -199,14 +304,14 @@ public class GraticuleLayerType extends LayerType {
     public static final String PROPERTY_GRIDLINES_WIDTH_LABEL = "Gridline Width";
     public static final String PROPERTY_GRIDLINES_WIDTH_TOOLTIP = "Set width of gridlines";
     private static final String PROPERTY_GRIDLINES_WIDTH_ALIAS = PROPERTY_ROOT + "gridlinesWidth";
-    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1.5;
+    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 1;
     public static final Class PROPERTY_GRIDLINES_WIDTH_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_NAME = PROPERTY_ROOT + ".gridlines.dashed.phase";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_LABEL = "Gridline Dash Length";
     public static final String PROPERTY_GRIDLINES_DASHED_PHASE_TOOLTIP = "Set dash length of gridlines or solid gridlines (0=SOLID)";
     private static final String PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS = PROPERTY_ROOT + "GridlinesDashedPhase";
-    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 6;
+    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 0;
     public static final Class PROPERTY_GRIDLINES_DASHED_PHASE_TYPE = Double.class;
 
     public static final String PROPERTY_GRIDLINES_TRANSPARENCY_NAME = PROPERTY_ROOT + ".gridlines.transparency";
@@ -346,6 +451,33 @@ public class GraticuleLayerType extends LayerType {
     public static final double PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_DEFAULT = 0.3;
     public static final Class PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_TYPE = Double.class;
 
+
+
+    // Property Settings: Flip Warning Section
+
+    public static final String PROPERTY_FLIP_WARNING_SECTION_KEY = PROPERTY_ROOT + ".flip.warning.section";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_ALIAS = PROPERTY_ROOT + "flipWarningSection";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_LABEL = "Warnings for Inverted/Flipped Mappings";
+    public static final String PROPERTY_FLIP_WARNING_SECTION_TOOLTIP = "Alternate color to use when inverted/flipped mappings are detected";
+
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_KEY = PROPERTY_ROOT + ".flip.warning.enable";
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_LABEL = "Enable Flip Warning";
+    public static final String PROPERTY_FLIP_WARNING_ENABLE_TOOLTIP = "Use the color 'Flip Warning Color' when inverted/flipped mappings are detected";
+    private static final String PROPERTY_FLIP_WARNING_ENABLE_ALIAS = PROPERTY_ROOT + "flipWarningEnable";
+    public static final boolean PROPERTY_FLIP_WARNING_ENABLE_DEFAULT = true;
+    public static final Class PROPERTY_FLIP_WARNING_ENABLE_TYPE = Boolean.class;
+
+    public static final String PROPERTY_FLIP_WARNING_COLOR_KEY = PROPERTY_ROOT + ".flip.warning.color";
+    public static final String PROPERTY_FLIP_WARNING_COLOR_LABEL = "Flip Warning Color";
+    public static final String PROPERTY_FLIP_WARNING_COLOR_TOOLTIP = "Color to use when inverted/flipped mappings are detected";
+    private static final String PROPERTY_FLIP_WARNING_COLOR_ALIAS = PROPERTY_ROOT + "flipWarningColor";
+    public static final Color PROPERTY_FLIP_WARNING_COLOR_DEFAULT = new Color(180,0,0);
+    public static final Class PROPERTY_FLIP_WARNING_COLOR_TYPE = Color.class;
+
+    
+
+
+
     // ---------------------------------------------------------
 
     public static final String PROPERTY_NAME_RASTER = "raster";
@@ -353,18 +485,47 @@ public class GraticuleLayerType extends LayerType {
 
     public static final String PROPERTY_NUM_GRID_LINES_NAME = PROPERTY_ROOT + ".num.grid.lines";
     public static final int PROPERTY_NUM_GRID_LINES_DEFAULT = 4;
-    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "Number of Gridlines (auto-spacing)";
-    public static final String PROPERTY_NUM_GRID_LINES_TOOLTIP = "<html>Number of gridlines (approximate due to rounding) <br>to auto-generate if lat or lon spacing = 0</html>";
+//    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "AUTO-SPACING (Regional): Number of Gridlines";
+    public static final String PROPERTY_NUM_GRID_LINES_LABEL = "[Mode=" + MODE_REGIONAL +"]: Number of Gridlines";
+    public static final String PROPERTY_NUM_GRID_LINES_TOOLTIP = "<html>Number of gridlines (approximate due to rounding) <br>to auto-generate if lat or lon spacing = 0<br>Not applicable to global scenes</html>";
     public static final String PROPERTY_NUM_GRID_LINES_ALIAS = PROPERTY_ROOT + "numGridLines";
     public static final Class PROPERTY_NUM_GRID_LINES_TYPE = Integer.class;
 
-    public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".minor.steps";
-    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 10;
-    public static final String PROPERTY_MINOR_STEPS_LABEL = "Minor Steps Between Gridlines";
-    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of minor steps between gridlines";
+    public static final String PROPERTY_MINOR_STEPS_NAME = PROPERTY_ROOT + ".smoothing.steps";
+    public static final int PROPERTY_MINOR_STEPS_DEFAULT = 128;
+    public static final String PROPERTY_MINOR_STEPS_LABEL = "Smoothing Steps";
+    public static final String PROPERTY_MINOR_STEPS_TOOLTIP = "Number of steps across full image to use for generating the line";
     public static final String PROPERTY_MINOR_STEPS_ALIAS = PROPERTY_ROOT + "minorSteps";
     public static final Class PROPERTY_MINOR_STEPS_TYPE = Integer.class;
 
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME = PROPERTY_ROOT + ".smoothing.steps.cylindrical";
+    public static final int PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT = 4;
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_LABEL = "Smoothing Steps (Cylindrical)";
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_TOOLTIP = "Number of steps across full image to use for generating the line (Cylindrical Projection)";
+    public static final String PROPERTY_MINOR_STEPS_CYLINDRICAL_ALIAS = PROPERTY_ROOT + "minorStepsCylindrical";
+    public static final Class PROPERTY_MINOR_STEPS_CYLINDRICAL_TYPE = Integer.class;
+
+
+    public static final String PROPERTY_INTERPOLATE_KEY = PROPERTY_ROOT + ".interpolate";
+    public static final boolean PROPERTY_INTERPOLATE_DEFAULT = true;
+    public static final String PROPERTY_INTERPOLATE_LABEL = "Interpolate";
+    public static final String PROPERTY_INTERPOLATE_TOOLTIP = "Interpolate each pixel to sub pixel level";
+    public static final String PROPERTY_INTERPOLATE_ALIAS = PROPERTY_ROOT + "interpolate";
+    public static final Class PROPERTY_INTERPOLATE_TYPE = Boolean.class;
+
+    public static final String PROPERTY_TOLERANCE_PARALLELS_KEY = PROPERTY_ROOT + ".tolerance_parallels";
+    public static final Double PROPERTY_TOLERANCE_PARALLELS_DEFAULT = 1.0;
+    public static final String PROPERTY_TOLERANCE_PARALLELS_LABEL = "Edge Tolerance (Lat)";
+    public static final String PROPERTY_TOLERANCE_PARALLELS_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto latitude gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_PARALLELS_ALIAS = PROPERTY_ROOT + "toleranceParallels";
+    public static final Class PROPERTY_TOLERANCE_PARALLELS_TYPE = Double.class;
+
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_KEY = PROPERTY_ROOT + ".tolerance_meridians";
+    public static final Double PROPERTY_TOLERANCE_MERIDIANS_DEFAULT = 1.0;
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_LABEL = "Edge Tolerance (Lon)";
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_TOOLTIP = "Tolerance to extrapolate to force edge pixels onto longitude gridline (fraction of pixel side size in geospace)";
+    public static final String PROPERTY_TOLERANCE_MERIDIANS_ALIAS = PROPERTY_ROOT + "toleranceMeridians";
+    public static final Class PROPERTY_TOLERANCE_MERIDIANS_TYPE = Double.class;
 
     // Property Setting: Restore Defaults
     public static final String PROPERTY_RESTORE_DEFAULTS_NAME = PROPERTY_ROOT + ".restoreDefaults";
@@ -404,6 +565,12 @@ public class GraticuleLayerType extends LayerType {
         vc.addProperty(transformModel);
 
 
+
+        final Property modeModel = Property.create(PROPERTY_MODE_KEY, PROPERTY_MODE_TYPE, PROPERTY_MODE_DEFAULT, true);
+        modeModel.getDescriptor().setAlias(PROPERTY_MODE_ALIAS);
+        vc.addProperty(modeModel);
+
+
         // Grid Spacing Section
 
         final Property gridSpacingSectionModel = Property.create(PROPERTY_GRID_SPACING_SECTION_NAME, Boolean.class, true, true);
@@ -419,6 +586,61 @@ public class GraticuleLayerType extends LayerType {
         minorStepsModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_ALIAS);
         vc.addProperty(minorStepsModel);
 
+        final Property minorStepsCylindricalModel = Property.create(PROPERTY_MINOR_STEPS_CYLINDRICAL_NAME, Integer.class, PROPERTY_MINOR_STEPS_CYLINDRICAL_DEFAULT, true);
+        minorStepsCylindricalModel.getDescriptor().setAlias(PROPERTY_MINOR_STEPS_CYLINDRICAL_ALIAS);
+        vc.addProperty(minorStepsCylindricalModel);
+
+        final Property interpolateModel = Property.create(PROPERTY_INTERPOLATE_KEY, Boolean.class, PROPERTY_INTERPOLATE_DEFAULT, true);
+        interpolateModel.getDescriptor().setAlias(PROPERTY_INTERPOLATE_ALIAS);
+        vc.addProperty(interpolateModel);
+
+        final Property toleranceParallelsModel = Property.create(PROPERTY_TOLERANCE_PARALLELS_KEY, Double.class, PROPERTY_TOLERANCE_PARALLELS_DEFAULT, true);
+        toleranceParallelsModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_PARALLELS_ALIAS);
+        vc.addProperty(toleranceParallelsModel);
+
+        final Property toleranceMeridiansModel = Property.create(PROPERTY_TOLERANCE_MERIDIANS_KEY, Double.class, PROPERTY_TOLERANCE_MERIDIANS_DEFAULT, true);
+        toleranceMeridiansModel.getDescriptor().setAlias(PROPERTY_TOLERANCE_MERIDIANS_ALIAS);
+        vc.addProperty(toleranceMeridiansModel);
+
+
+        final Property autoSpacingLatGlobalModel = Property.create(PROPERTY_AUTO_SPACING_LAT_GLOBAL_KEY,
+                PROPERTY_AUTO_SPACING_LAT_GLOBAL_TYPE, PROPERTY_AUTO_SPACING_LAT_GLOBAL_DEFAULT, true);
+        autoSpacingLatGlobalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LAT_GLOBAL_ALIAS);
+        vc.addProperty(autoSpacingLatGlobalModel);
+
+
+        final Property autoSpacingLonGlobalModel = Property.create(PROPERTY_AUTO_SPACING_LON_GLOBAL_KEY,
+                PROPERTY_AUTO_SPACING_LON_GLOBAL_TYPE, PROPERTY_AUTO_SPACING_LON_GLOBAL_DEFAULT, true);
+        autoSpacingLonGlobalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LON_GLOBAL_ALIAS);
+        vc.addProperty(autoSpacingLonGlobalModel);
+
+
+        final Property autoSpacingLatHemisphericalModel = Property.create(PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_KEY,
+                PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_TYPE, PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_DEFAULT, true);
+        autoSpacingLatHemisphericalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LAT_HEMISPHERICAL_ALIAS);
+        vc.addProperty(autoSpacingLatHemisphericalModel);
+
+        final Property autoSpacingLonHemisphericalModel = Property.create(PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_KEY,
+                PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_TYPE, PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_DEFAULT, true);
+        autoSpacingLonHemisphericalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LON_HEMISPHERICAL_ALIAS);
+        vc.addProperty(autoSpacingLonHemisphericalModel);
+
+
+        final Property autoSpacingLatGlobalCylindricalModel = Property.create(PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_KEY,
+                PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_TYPE, PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_DEFAULT, true);
+        autoSpacingLatGlobalCylindricalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LAT_GLOBAL_CYLINDRICAL_ALIAS);
+        vc.addProperty(autoSpacingLatGlobalCylindricalModel);
+
+
+        final Property autoSpacingLonGlobalCylindricalModel = Property.create(PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_KEY,
+                PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_TYPE, PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_DEFAULT, true);
+        autoSpacingLonGlobalCylindricalModel.getDescriptor().setAlias(PROPERTY_AUTO_SPACING_LON_GLOBAL_CYLINDRICAL_ALIAS);
+        vc.addProperty(autoSpacingLonGlobalCylindricalModel);
+
+
+
+
+
         final Property gridSpacingLatModel = Property.create(PROPERTY_GRID_SPACING_LAT_NAME, PROPERTY_GRID_SPACING_LAT_TYPE, PROPERTY_GRID_SPACING_LAT_DEFAULT, true);
         gridSpacingLatModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LAT_ALIAS);
         vc.addProperty(gridSpacingLatModel);
@@ -427,6 +649,14 @@ public class GraticuleLayerType extends LayerType {
         gridSpacingLonModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LON_ALIAS);
         vc.addProperty(gridSpacingLonModel);
 
+
+
+
+        // Line Precision Section
+
+        final Property linePrecisionSectionModel = Property.create(PROPERTY_LINE_PRECISION_SECTION_KEY, Boolean.class, true, true);
+        linePrecisionSectionModel.getDescriptor().setAlias(PROPERTY_LINE_PRECISION_SECTION_ALIAS);
+        vc.addProperty(linePrecisionSectionModel);
 
 
 
@@ -491,6 +721,10 @@ public class GraticuleLayerType extends LayerType {
         final Property textFontSizeModel = Property.create(PROPERTY_LABELS_SIZE_NAME, Integer.class, PROPERTY_LABELS_SIZE_DEFAULT, true);
         textFontSizeModel.getDescriptor().setAlias(PROPERTY_LABELS_SIZE_ALIAS);
         vc.addProperty(textFontSizeModel);
+
+        final Property edgeLabelsSpacerModel = Property.create(PROPERTY_EDGE_LABELS_SPACER_NAME, Integer.class, PROPERTY_EDGE_LABELS_SPACER_DEFAULT, true);
+        edgeLabelsSpacerModel.getDescriptor().setAlias(PROPERTY_EDGE_LABELS_SPACER_ALIAS);
+        vc.addProperty(edgeLabelsSpacerModel);
 
 
         final Property textFontItalicModel = Property.create(PROPERTY_LABELS_ITALIC_NAME, Boolean.class, PROPERTY_LABELS_ITALIC_DEFAULT, true);
@@ -609,6 +843,20 @@ public class GraticuleLayerType extends LayerType {
         vc.addProperty(tickmarkColorModel);
 
 
+
+        // Flip Warning
+
+        final Property flipWarningSectionModel = Property.create(PROPERTY_FLIP_WARNING_SECTION_KEY, Boolean.class, true, true);
+        flipWarningSectionModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_SECTION_ALIAS);
+        vc.addProperty(flipWarningSectionModel);
+
+        final Property flipWarningEnableModel = Property.create(PROPERTY_FLIP_WARNING_ENABLE_KEY, Boolean.class, PROPERTY_FLIP_WARNING_ENABLE_DEFAULT, true);
+        flipWarningEnableModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_ENABLE_ALIAS);
+        vc.addProperty(flipWarningEnableModel);
+
+        final Property flipWarningColorModel = Property.create(PROPERTY_FLIP_WARNING_COLOR_KEY, Color.class, PROPERTY_FLIP_WARNING_COLOR_DEFAULT, true);
+        flipWarningColorModel.getDescriptor().setAlias(PROPERTY_FLIP_WARNING_COLOR_ALIAS);
+        vc.addProperty(flipWarningColorModel);
 
         return vc;
     }
