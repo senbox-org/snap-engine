@@ -20,12 +20,7 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import org.esa.snap.core.datamodel.Graticule;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNodeEvent;
-import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.*;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -198,10 +193,75 @@ public class GraticuleLayer extends Layer {
                 }
 
                 if (isLabelsWest()) {
-                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+                    GeoInfo geoInfo = graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
 
                     final Graticule.TextGlyph[] textGlyphsWest = graticule.getTextGlyphsWest();
                     if (textGlyphsWest != null) {
+
+                        if (!isLabelsInside()) {
+                            if (!geoInfo.containsValidGeoCorners && !geoInfo.northPoleCrossed && !geoInfo.southPoleCrossed) {
+
+                                PixelPos pixelPosTopOfLabel;
+                                GeoPos geoPosTopOfLabel;
+                                PixelPos pixelPosBottomOfLabel;
+                                GeoPos geoPosBottomOfLabel;
+
+                                double halfFontSize = Math.floor(0.35 * getFontSizePixels());  // todo maybe 0.5 is better but elsewhere spacing gets put in so using less here
+
+                                for (int i = 0; i < textGlyphsWest.length; i++) {
+                                    double x = textGlyphsWest[i].getX();
+                                    double yTop = textGlyphsWest[i].getY() - halfFontSize;
+                                    double yBottom = textGlyphsWest[i].getY() + halfFontSize;
+
+                                    while (x > 0) {
+                                        pixelPosTopOfLabel = new PixelPos(x, yTop);
+                                        if (pixelPosTopOfLabel.isValid()) {
+                                            geoPosTopOfLabel = raster.getGeoCoding().getGeoPos(pixelPosTopOfLabel, null);
+                                            if (!geoPosTopOfLabel.isValid()) {
+                                                break;
+                                            }
+                                        } else {
+                                            break;
+                                        }
+
+                                        x--;
+                                    }
+
+                                    while (x > 0) {
+                                        pixelPosBottomOfLabel = new PixelPos(x, yBottom);
+                                        if (pixelPosBottomOfLabel.isValid()) {
+                                            geoPosBottomOfLabel = raster.getGeoCoding().getGeoPos(pixelPosBottomOfLabel, null);
+                                            if (!geoPosBottomOfLabel.isValid()) {
+                                                break;
+                                            }
+                                        } else {
+                                            break;
+                                        }
+
+                                        x--;
+                                    }
+
+
+                                    if (x > 0) {
+                                        textGlyphsWest[i].x = x;
+                                    }
+
+
+                                    if (1 == 2) {
+
+                                        int bufferY = 5;
+                                        int bufferX = 5;
+                                        if (textGlyphsWest[i].getY() < (0 + bufferY) || textGlyphsWest[i].getY() > (raster.getRasterHeight() - bufferY)) {
+                                            if (textGlyphsWest[i].getX() > (0 + bufferX)) {
+                                                textGlyphsWest[i].x = textGlyphsWest[i].x - spacer;  // todo TEMP testing
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
                         if (isTickmarksShow()) {
                             drawTickMarks(g2d, graticule.getTickPointsWest(), Graticule.TextLocation.WEST, false, graticule.isFlippedLats());
                         }
@@ -211,10 +271,76 @@ public class GraticuleLayer extends Layer {
 
 
                 if (isLabelsEast()) {
-                    graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
+                    GeoInfo geoInfo = graticule.getGeoInfo(); // todo TEMP TEST ACCESS to this for possible label toggling of polar and flipped etc.
 
                     final Graticule.TextGlyph[] textGlyphsEast = graticule.getTextGlyphsEast();
                     if (textGlyphsEast != null) {
+
+                        if (!isLabelsInside()) {
+                            if (!geoInfo.containsValidGeoCorners && !geoInfo.northPoleCrossed && !geoInfo.southPoleCrossed) {
+
+                                PixelPos pixelPosTopOfLabel;
+                                GeoPos geoPosTopOfLabel;
+                                PixelPos pixelPosBottomOfLabel;
+                                GeoPos geoPosBottomOfLabel;
+
+                                double halfFontSize = Math.floor(0.35 * getFontSizePixels());  // todo maybe 0.5 is better but elsewhere spacing gets put in so using less here
+
+                                for (int i = 0; i < textGlyphsEast.length; i++) {
+                                    double x = textGlyphsEast[i].getX();
+                                    double yTop = textGlyphsEast[i].getY() - halfFontSize;
+                                    double yBottom = textGlyphsEast[i].getY() + halfFontSize;
+
+                                    while (x < raster.getRasterWidth()) {
+                                        pixelPosTopOfLabel = new PixelPos(x, yTop);
+                                        if (pixelPosTopOfLabel.isValid()) {
+                                            geoPosTopOfLabel = raster.getGeoCoding().getGeoPos(pixelPosTopOfLabel, null);
+                                            if (!geoPosTopOfLabel.isValid()) {
+                                                break;
+                                            }
+                                        } else {
+                                            break;
+                                        }
+
+                                        x++;
+                                    }
+
+                                    while (x < raster.getRasterWidth()) {
+                                        pixelPosBottomOfLabel = new PixelPos(x, yBottom);
+                                        if (pixelPosBottomOfLabel.isValid()) {
+                                            geoPosBottomOfLabel = raster.getGeoCoding().getGeoPos(pixelPosBottomOfLabel, null);
+                                            if (!geoPosBottomOfLabel.isValid()) {
+                                                break;
+                                            }
+                                        } else {
+                                            break;
+                                        }
+
+                                        x++;
+                                    }
+
+
+                                    if (x < raster.getRasterWidth()) {
+                                        textGlyphsEast[i].x = x;
+                                    }
+
+
+                                    if (1 == 2) {
+
+                                        int bufferY = 5;
+                                        int bufferX = 5;
+                                        if (textGlyphsEast[i].getY() < (0 + bufferY) || textGlyphsEast[i].getY() > (raster.getRasterHeight() - bufferY)) {
+                                            if (textGlyphsEast[i].getX() < (raster.getRasterWidth() - bufferX)) {
+                                                textGlyphsEast[i].x = textGlyphsEast[i].x + spacer;  // todo TEMP testing
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                            }
+                        }
+
                         if (isTickmarksShow()) {
                             drawTickMarks(g2d, graticule.getTickPointsEast(), Graticule.TextLocation.EAST, false, graticule.isFlippedLats());
                         }

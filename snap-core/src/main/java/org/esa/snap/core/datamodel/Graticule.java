@@ -510,22 +510,6 @@ public class Graticule {
             final PixelPos[] tickPointsWest = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsWest, TextLocation.WEST, geoInfo);
             final PixelPos[] tickPointsEast = createTickPointsByGlyph(parallelsList, meridiansList, textGlyphsEast, TextLocation.EAST, geoInfo);
 
-            int buffer = 5;
-            for (int i=0; i < textGlyphsWest.length; i++) {
-                if (textGlyphsWest[i].getY() < (0 + buffer) || textGlyphsWest[i].getY() > (raster.getRasterHeight() - buffer)) {
-                    if (!geoInfo.containsValidGeoCorners && !geoInfo.northPoleCrossed && !geoInfo.southPoleCrossed) {
-                        if (textGlyphsWest[i].getX() > (0 + buffer)) {
-                            textGlyphsWest[i].x = textGlyphsWest[i].x - spacer;  // todo TEMP testing
-                        }
-
-                        if (textGlyphsEast[i].getX() < (raster.getRasterWidth() - buffer)) {
-                            textGlyphsEast[i].x = textGlyphsEast[i].x + spacer;  // todo TEMP testing
-                        }
-                    }
-
-                }
-            }
-
 
 //            final PixelPos[] tickPointsNorth = createTickPoints(parallelsList, meridiansList, TextLocation.NORTH, geoInfo);
 //            final PixelPos[] tickPointsSouth = createTickPoints(parallelsList, meridiansList, TextLocation.SOUTH, geoInfo);
@@ -4067,8 +4051,8 @@ public class Graticule {
     public static class TextGlyph {
 
         private final String text;
-        private double x;
-        private double y;
+        public double x;
+        public double y;
         private final double angle;
 
         TextGlyph(String text, double x, double y, double angle) {
