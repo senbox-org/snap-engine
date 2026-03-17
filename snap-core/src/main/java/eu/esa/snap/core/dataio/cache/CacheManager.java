@@ -1,16 +1,19 @@
 package eu.esa.snap.core.dataio.cache;
 
+import org.esa.snap.runtime.Config;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CacheManager implements MemoryUsageTracker {
 
+    private static final long TwoGB = 1024L * 1024 * 1024 * 2;
+    private static final int OneMb = 1024 * 1024;
     private static CacheManager instance = null;
 
     private final List<ProductCache> productCaches;
-    // @todo 2 check if these are suitable default values
-    private long memoryLimit = 1024L * 1024 * 1024 * 2;
-    private long disposeThreshold = 1024L * 1024;
+    private long memoryLimit;
+    private long disposeThreshold;
     private long allocatedMemory;
 
 
@@ -31,6 +34,9 @@ public class CacheManager implements MemoryUsageTracker {
     CacheManager() {
         productCaches = new ArrayList<>();
         allocatedMemory = 0;
+
+        memoryLimit = Config.instance("snap").preferences().getLong("snap.dataio.cache.memoryLimit", TwoGB);
+        disposeThreshold = Config.instance("snap").preferences().getLong("snap.dataio.cache.disposeThreshold", OneMb);
     }
 
     public void setMemoryLimit(long memoryLimit) {
