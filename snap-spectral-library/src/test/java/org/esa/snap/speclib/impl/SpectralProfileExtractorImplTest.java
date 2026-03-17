@@ -2,6 +2,7 @@ package org.esa.snap.speclib.impl;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.speclib.api.SpectralSampleProvider;
 import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralProfile;
@@ -9,8 +10,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 
 public class SpectralProfileExtractorImplTest {
@@ -73,5 +77,62 @@ public class SpectralProfileExtractorImplTest {
         assertEquals("reflectance", p2.getSignature().getYUnitOrNull());
         assertTrue(p2.getSourceRef().isPresent());
         assertTrue(p2.getSourceRef().orElseThrow().getProductId().isEmpty());
+    }
+
+
+    @Test
+    @STTM("SNAP-4128")
+    public void extractBulk_skipsNullPixels_andUsesIndexInName() {
+        SpectralSampleProvider sp = mock(SpectralSampleProvider.class);
+        SpectralProfileExtractorImpl ex = new SpectralProfileExtractorImpl(sp);
+
+        Band b1 = mock(Band.class);
+        Band b2 = mock(Band.class);
+        List<Band> bands = List.of(b1, b2);
+
+        SpectralAxis axis = mock(SpectralAxis.class);
+        when(axis.size()).thenReturn(2);
+
+        List<PixelPos> pixels = List.of(new PixelPos(1, 1), new PixelPos(2, 2));
+        double[][] samples = new double[][]{
+                new double[]{1.0, 2.0},
+                new double[]{3.0, 4.0}
+        };
+        when(sp.readSamples(eq(bands), any(int[].class), any(int[].class), eq(0))).thenReturn(samples);
+
+        List<SpectralProfile> out = ex.extractBulk("base", axis, bands, pixels, 0, "Y", "prod");
+
+        assertEquals(2, out.size());
+        assertEquals("base1", out.get(0).getName());
+        assertEquals("base2", out.get(1).getName());
+
+        assertArrayEquals(new double[]{1.0, 2.0}, out.get(0).getSignature().getValues(), 0.0);
+        assertArrayEquals(new double[]{3.0, 4.0}, out.get(1).getSignature().getValues(), 0.0);
+
+        assertTrue(out.get(0).getSourceRef().isPresent());
+        assertEquals(1, out.get(0).getSourceRef().get().getX());
+        assertEquals(1, out.get(0).getSourceRef().get().getY());
+        assertEquals("prod", out.getFirst().getSourceRef().get().getProductId().get());
+
+        assertEquals(Map.of(), out.getFirst().getAttributes());
+    }
+
+    @Test
+    @STTM("SNAP-4128")
+    public void extractBulk_skipsAllNaNSignatures_andSanitizesInfinite() {
+        SpectralSampleProvider sp = mock(SpectralSampleProvider.class);
+        SpectralProfileExtractorImpl ex = new SpectralProfileExtractorImpl(sp);
+
+        List<Band> bands = List.of(mock(Band.class));
+        SpectralAxis axis = mock(SpectralAxis.class);
+        when(axis.size()).thenReturn(1);
+
+        List<PixelPos> pixels = List.of(new PixelPos(1, 1), new PixelPos(2, 2));
+
+        double[][] samples = new double[][]{new double[]{Double.POSITIVE_INFINITY}, new double[]{Double.NaN}};
+        when(sp.readSamples(eq(bands), any(int[].class), any(int[].class), eq(0))).thenReturn(samples);
+
+        List<SpectralProfile> out = ex.extractBulk("base", axis, bands, pixels, 0, null, "prod");
+        assertTrue(out.isEmpty());
     }
 }
