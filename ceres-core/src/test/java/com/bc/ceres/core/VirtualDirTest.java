@@ -16,6 +16,7 @@
 
 package com.bc.ceres.core;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 
 import java.io.File;
@@ -184,7 +185,7 @@ public class VirtualDirTest {
 
         assertTrue(tempDir.isDirectory());
 
-        virtualDir.finalize();
+        virtualDir.close();
 
         assertFalse(tempDir.isDirectory());
     }
@@ -200,9 +201,53 @@ public class VirtualDirTest {
 
         assertTrue(tempDir.isDirectory());
 
-        virtualDir.finalize();
+        virtualDir.close();
 
         assertFalse(tempDir.isDirectory());
+    }
+
+    @Test
+    @STTM("SNAP-4105")
+    public void testNio_closeCleansTempDir_andRegistrationIsAccepted() throws Exception {
+        Path sourceRoot = Files.createTempDirectory("virtualdir-nio-src");
+        Path sourceFile = sourceRoot.resolve("sample.txt");
+        Files.writeString(sourceFile, "hello");
+
+        VirtualDir virtualDir = null;
+        try {
+            Class<?> nioClass = Class.forName("com.bc.ceres.core.VirtualDir$NIO");
+            java.lang.reflect.Constructor<?> ctor =
+                    nioClass.getDeclaredConstructor(Path.class, String.class, boolean.class, boolean.class, boolean.class);
+            ctor.setAccessible(true);
+
+            virtualDir = (VirtualDir) ctor.newInstance(
+                    sourceRoot,
+                    sourceRoot.toString(),
+                    false,
+                    false,
+                    true
+            );
+
+            File localCopy = virtualDir.getFile("sample.txt");
+            assertTrue(localCopy.exists());
+
+            File tempDir = virtualDir.getTempDir();
+            assertNotNull(tempDir);
+            assertTrue(tempDir.isDirectory());
+
+            virtualDir.close();
+
+            assertFalse(tempDir.exists());
+        } finally {
+            if (virtualDir != null) {
+                try {
+                    virtualDir.close();
+                } catch (Exception ignored) {
+                }
+            }
+            Files.deleteIfExists(sourceFile);
+            Files.deleteIfExists(sourceRoot);
+        }
     }
 
     private static File getTestDataDir() {

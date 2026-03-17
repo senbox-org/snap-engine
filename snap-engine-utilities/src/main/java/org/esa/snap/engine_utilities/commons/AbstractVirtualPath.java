@@ -1,6 +1,8 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.util.CleanUpState;
+import com.bc.ceres.util.CleanerRegistry;
 import eu.esa.snap.core.lib.FileHelper;
 import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.engine_utilities.file.AbstractFile;
@@ -23,11 +25,12 @@ public abstract class AbstractVirtualPath extends VirtualDir {
     private static final Logger logger = Logger.getLogger(AbstractVirtualPath.class.getName());
 
     private final boolean copyFilesOnLocalDisk;
-
-    private File localTempDir;
+    private final AbstractVirtualPathState state;
 
     protected AbstractVirtualPath(boolean copyFilesOnLocalDisk) {
         this.copyFilesOnLocalDisk = copyFilesOnLocalDisk;
+        this.state = new AbstractVirtualPathState();
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     public abstract Path buildPath(String first, String... more);
@@ -44,35 +47,29 @@ public abstract class AbstractVirtualPath extends VirtualDir {
 
     @Override
     public void close() {
-        cleanup();
+        CleanerRegistry.getInstance().cleanup(this);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-
-        cleanup();
-    }
 
     @Override
     public File getTempDir() throws IOException {
-        return this.localTempDir;
+        return state.localTempDir;
     }
 
     public Path makeLocalTempFolder() throws IOException {
-        if (this.localTempDir == null) {
-            this.localTempDir = VirtualDir.createUniqueTempDir();
+        if (state.localTempDir == null) {
+            state.localTempDir = VirtualDir.createUniqueTempDir();
         }
-        return this.localTempDir.toPath();
+        return state.localTempDir.toPath();
     }
 
     protected final Path copyFileOnLocalDiskIfNeeded(Path entryPath, String childRelativePath) throws IOException {
         if (this.copyFilesOnLocalDisk && Files.isRegularFile(entryPath)) {
             // copy the file from the zip archive on the local disk
-            if (this.localTempDir == null) {
-                this.localTempDir = VirtualDir.createUniqueTempDir();
+            if (state.localTempDir == null) {
+                state.localTempDir = VirtualDir.createUniqueTempDir();
             }
-            Path localFilePath = this.localTempDir.toPath().resolve(childRelativePath);
+            Path localFilePath = state.localTempDir.toPath().resolve(childRelativePath);
             if (FileHelper.canCopyOrReplaceFile(entryPath, localFilePath)) {
                 Path parentFolder = localFilePath.getParent();
 
@@ -92,12 +89,6 @@ public abstract class AbstractVirtualPath extends VirtualDir {
         }
     }
 
-    private void cleanup() {
-        if (this.localTempDir != null) {
-            deleteFileTree(this.localTempDir);
-            this.localTempDir = null;
-        }
-    }
 
     protected static FilePathInputStream getBufferedInputStream(Path child, Closeable closeable) throws IOException {
         if (Files.isRegularFile(child)) {
@@ -146,6 +137,19 @@ public abstract class AbstractVirtualPath extends VirtualDir {
 
         Path getExistingChildPath() {
             return this.existingChildPath;
+        }
+    }
+
+
+    private static final class AbstractVirtualPathState implements CleanUpState {
+        private File localTempDir;
+
+        @Override
+        public synchronized void run() {
+            if (localTempDir != null) {
+                deleteFileTree(localTempDir);
+                localTempDir = null;
+            }
         }
     }
 }

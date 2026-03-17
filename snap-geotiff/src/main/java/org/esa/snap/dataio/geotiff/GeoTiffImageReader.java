@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.geotiff;
 
+import com.bc.ceres.util.CleanUpState;
+import com.bc.ceres.util.CleanerRegistry;
 import eu.esa.snap.core.lib.NotRegularFileException;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
@@ -72,6 +74,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
 
     private final TIFFImageReader imageReader;
     private final Closeable closeable;
+    private final GeoTiffImageReaderState state;
 
     private RenderedImage swappedSubsampledImage;
     private Rectangle rectangle;
@@ -83,49 +86,38 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         this.imageReader = findImageReader(imageInputStream);
         this.closeable = new NullCloseable();
         this.noDataValue = readNoDataValue();
+
+        this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     public GeoTiffImageReader(File file) throws IOException {
         this.imageReader = buildImageReader(file);
         this.closeable = new NullCloseable();
         this.noDataValue = readNoDataValue();
+
+        this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     public GeoTiffImageReader(InputStream inputStream, Closeable closeable) throws IOException {
         this.imageReader = buildImageReader(inputStream);
         this.closeable = closeable;
         this.noDataValue = readNoDataValue();
+
+        this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
+        CleanerRegistry.getInstance().register(this, state);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-
-        close();
-    }
 
     @Override
     public void close() {
-        try {
-            ImageInputStream imageInputStream = (ImageInputStream) this.imageReader.getInput();
-            try {
-                imageInputStream.close();
-            } catch (IOException ignore) {
-                // ignore
-            }
-            this.rectangle = null;
-            this.readParam = null;
-            this.swappedSubsampledImage = null;
-        } finally {
-                try {
-                    if(this.closeable != null) {
-                        this.closeable.close();
-                    }
-                } catch (IOException ignore) {
-                    // ignore
-                }
-            }
-        }
+        CleanerRegistry.getInstance().cleanup(this);
+        this.rectangle = null;
+        this.readParam = null;
+        this.swappedSubsampledImage = null;
+        this.noDataValue = null;
+    }
 
     public TIFFImageMetadata getImageMetadata() throws IOException {
         return (TIFFImageMetadata) this.imageReader.getImageMetadata(FIRST_IMAGE);
@@ -556,6 +548,42 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         @Override
         public void close() throws IOException {
 
+        }
+    }
+
+
+    private static final class GeoTiffImageReaderState implements CleanUpState {
+        private TIFFImageReader imageReader;
+        private Closeable closeable;
+
+        private GeoTiffImageReaderState(TIFFImageReader imageReader, Closeable closeable) {
+            this.imageReader = imageReader;
+            this.closeable = closeable;
+        }
+
+        @Override
+        public synchronized void run() {
+            try {
+                if (imageReader != null) {
+                    Object input = imageReader.getInput();
+                    if (input instanceof ImageInputStream imageInputStream) {
+                        try {
+                            imageInputStream.close();
+                        } catch (IOException ignore) {
+                        }
+                    }
+                    imageReader.dispose();
+                    imageReader = null;
+                }
+            } finally {
+                if (closeable != null) {
+                    try {
+                        closeable.close();
+                    } catch (IOException ignore) {
+                    }
+                    closeable = null;
+                }
+            }
         }
     }
 }
