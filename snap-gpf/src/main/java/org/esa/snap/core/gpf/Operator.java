@@ -98,6 +98,9 @@ public abstract class Operator {
      *
      * @throws Throwable The {@code Exception} raised by this method
      */
+    // TODO: BL - 11/03/2026 - finalize is deprecated but cleaner API (CleanerRegistry) approach is not suitable in this case
+    // TODO: When removing this, we have to make sure all operator workflows are always disposed correctly without finalize
+    // TODO: finalize will stay here for the time being but should be removed at some point
     @Override
     protected final void finalize() throws Throwable {
         context.dispose();

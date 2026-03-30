@@ -1658,21 +1658,21 @@ public class ProductUtils {
             return overlayBIm;
         }
 
-        final BufferedImageRendering imageRendering = new BufferedImageRendering(overlayBIm);
-
-        pm.beginTask("Creating masks ...", maskGroup.getNodeCount());
-        try {
-            final Mask[] masks = maskGroup.toArray(new Mask[maskGroup.getNodeCount()]);
-            for (Mask mask : masks) {
-                pm.setSubTaskName(String.format("Applying mask '%s'", mask.getName()));
-                final Layer layer = MaskLayerType.createLayer(raster, mask);
-                layer.render(imageRendering);
-                pm.worked(1);
+        try (final BufferedImageRendering imageRendering = new BufferedImageRendering(overlayBIm)) {
+            pm.beginTask("Creating masks ...", maskGroup.getNodeCount());
+            try {
+                final Mask[] masks = maskGroup.toArray(new Mask[maskGroup.getNodeCount()]);
+                for (Mask mask : masks) {
+                    pm.setSubTaskName(String.format("Applying mask '%s'", mask.getName()));
+                    final Layer layer = MaskLayerType.createLayer(raster, mask);
+                    layer.render(imageRendering);
+                    pm.worked(1);
+                }
+            } finally {
+                pm.done();
             }
-        } finally {
-            pm.done();
+            return imageRendering.getImage();
         }
-        return imageRendering.getImage();
     }
 
     public static GeoPos getCenterGeoPos(final Product product) {

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Norman Fomferra
  */
-public class DefaultSwapSpace implements SwapSpace {
+public class DefaultSwapSpace implements SwapSpace, AutoCloseable {
     private final File swapDir;
     private final Logger logger;
     private final Map<Object, SwappedTile> swappedTiles;
@@ -47,11 +47,14 @@ public class DefaultSwapSpace implements SwapSpace {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        for (Object key : swappedTiles.keySet()) {
-            swappedTiles.get(key).delete();
+    public synchronized void close() {
+        for (SwappedTile st : swappedTiles.values()) {
+            try {
+                st.delete();
+            } catch (Throwable ignore) {
+            }
         }
+        swappedTiles.clear();
     }
 
     public synchronized boolean storeTile(MemoryTile mt) {

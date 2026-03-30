@@ -34,6 +34,7 @@ public final class StatusProgressMonitor implements ProgressMonitor {
     private double totalWork;
     private boolean cancelRequested;
     private String text;
+    private boolean registered;
 
     public enum TYPE { DATA_TRANSFER, SUBTASK }
     private final TYPE taskType;
@@ -49,12 +50,6 @@ public final class StatusProgressMonitor implements ProgressMonitor {
         this.taskType = taskType;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        ProgressMonitorList.instance().remove(this);
-
-        super.finalize();
-    }
 
     /**
      * Notifies that the main task is beginning.  This must only be called once
@@ -74,7 +69,10 @@ public final class StatusProgressMonitor implements ProgressMonitor {
         this.totalWork = totalWork;
         this.cancelRequested = false;
         this.text = "";
-        ProgressMonitorList.instance().add(this);
+        if (!registered) {
+            ProgressMonitorList.instance().add(this);
+            this.registered = true;
+        }
     }
 
     /**
@@ -154,9 +152,13 @@ public final class StatusProgressMonitor implements ProgressMonitor {
      */
     @Override
     public void done() {
+        if (!registered) {
+            return;
+        }
         setText("");
         fireNotification(Notification.DONE);
         ProgressMonitorList.instance().remove(this);
+        registered = false;
     }
 
     private void setText(final String text) {

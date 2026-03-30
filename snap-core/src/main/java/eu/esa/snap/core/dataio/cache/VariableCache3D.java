@@ -1,0 +1,204 @@
+package eu.esa.snap.core.dataio.cache;
+
+import org.esa.snap.core.datamodel.ProductData;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+class VariableCache3D implements VariableCache {
+
+    private final VariableDescriptor variableDescriptor;
+    private final CacheDataProvider dataProvider;
+    private final MemoryUsageTracker memoryUsageTracker;
+    private CacheData3D[][][] cacheData;
+    private long lastAccessTime;
+
+    VariableCache3D(CacheContext cacheContext) {
+        dataProvider = cacheContext.getDataProvider();
+        variableDescriptor = cacheContext.getVariableDescriptor();
+        memoryUsageTracker = cacheContext.getMemoryUsageTracker();
+
+        cacheData = initiateCache(variableDescriptor);
+        final long sizeInBytes = getSizeInBytes();
+        memoryUsageTracker.allocated(sizeInBytes);
+
+        lastAccessTime = System.currentTimeMillis();
+    }
+
+    // only for testing tb 2025-12-18
+    CacheData3D[][][] getCacheData() {
+        return cacheData;
+    }
+
+    public void dispose() {
+        if (cacheData != null) {
+            final long sizeInBytes = getSizeInBytes();
+
+            for (CacheData3D[][] cacheLayer : cacheData) {
+                for (CacheData3D[] cacheLine : cacheLayer) {
+                    Arrays.fill(cacheLine, null);
+                }
+            }
+            memoryUsageTracker.released(sizeInBytes);
+        }
+        cacheData = null;
+    }
+
+    @Override
+    public long release(long bytesToRelease) {
+        long released = 0;
+        for (CacheData3D cacheData3D : getTimeOrderedList()) {
+            released += cacheData3D.release(bytesToRelease);
+            // update time stamp tb 2026-03-09
+            cacheData3D.setLastAccessTime(System.currentTimeMillis());
+            if (released >= bytesToRelease) {
+                break;
+            }
+        }
+
+        lastAccessTime = System.currentTimeMillis();
+
+        return released;
+    }
+
+    static CacheData3D[][][] initiateCache(VariableDescriptor descriptor) {
+        final int numTilesX = (int) Math.ceil((float) descriptor.width / descriptor.tileWidth);
+        final int numTilesY = (int) Math.ceil((float) descriptor.height / descriptor.tileHeight);
+        final int numTilesZ = (int) Math.ceil((float) descriptor.layers / descriptor.tileLayers);
+
+        int startZ = 0;
+        int startY = 0;
+        int startX = 0;
+
+        final CacheData3D[][][] cacheData3D = new CacheData3D[numTilesZ][numTilesY][numTilesX];
+        for (int k = 0; k < cacheData3D.length; k++) {
+            for (int j = 0; j < cacheData3D[0].length; j++) {
+                for (int i = 0; i < cacheData3D[0][0].length; i++) {
+                    int xMax = startX + descriptor.tileWidth - 1;
+                    if (xMax >= descriptor.width) {
+                        xMax = descriptor.width - 1;
+                    }
+
+                    int yMax = startY + descriptor.tileHeight - 1;
+                    if (yMax >= descriptor.height) {
+                        yMax = descriptor.height - 1;
+                    }
+
+                    int zMax = startZ + descriptor.tileLayers - 1;
+                    if (zMax >= descriptor.layers) {
+                        zMax = descriptor.layers - 1;
+                    }
+
+                    final int[] offsets = {startZ, startY, startX};
+                    final int[] shapes = {zMax - startZ + 1, yMax - startY + 1, xMax - startX + 1};
+                    cacheData3D[k][j][i] = new CacheData3D(offsets, shapes);
+                    startX += descriptor.tileWidth;
+                }
+                startX = 0;
+                startY += descriptor.tileHeight;
+            }
+            startY = 0;
+            startZ += descriptor.tileLayers;
+        }
+
+        return cacheData3D;
+    }
+
+    CacheIndex[] getAffectedCacheLocations(int[] offsets, int[] shapes) {
+        final ArrayList<CacheIndex> cacheIndices = new ArrayList<>();
+
+        for (int z = 0; z < cacheData.length; z++) {
+            for (int y = 0; y < cacheData[0].length; y++) {
+                for (int x = 0; x < cacheData[0][0].length; x++) {
+                    final CacheData3D current = cacheData[z][y][x];
+                    if (current.intersects(offsets, shapes)) {
+                        cacheIndices.add(new CacheIndex(z, y, x));
+                    }
+                }
+            }
+        }
+        return cacheIndices.toArray(new CacheIndex[0]);
+    }
+
+    @SuppressWarnings("ForLoopReplaceableByForEach")
+    public long getSizeInBytes() {
+        long sizeInBytes = 0;
+
+        for (int z = 0; z < cacheData.length; z++) {
+            for (int y = 0; y < cacheData[z].length; y++) {
+                for (int x = 0; x < cacheData[z][y].length; x++) {
+                    if (cacheData[z][y][x] != null) {
+                        sizeInBytes += cacheData[z][y][x].getSizeInBytes();
+                    }
+                }
+            }
+        }
+        return sizeInBytes;
+    }
+
+    @Override
+    public long getLastAccessTime() {
+        return lastAccessTime;
+    }
+
+    public ProductData read(int[] offsets, int[] shapes, DataBuffer targetBuffer) throws IOException {
+        lastAccessTime = System.currentTimeMillis();
+
+        final CacheContext cacheContext = new CacheContext(variableDescriptor, dataProvider, memoryUsageTracker);
+        final CacheIndex[] tileLocations = getAffectedCacheLocations(offsets, shapes);
+
+        final int[] target3dOffsets;
+        final int[] target3dShapes;
+        if (targetBuffer.getNumLayers() <= 1) {
+            target3dOffsets = new int[]{offsets[0], targetBuffer.getOffsetY(), targetBuffer.getOffsetX()};
+            target3dShapes = new int[]{1, targetBuffer.getHeight(), targetBuffer.getWidth()};
+        } else {
+            target3dOffsets = targetBuffer.getOffsets();
+            target3dShapes = targetBuffer.getShapes();
+        }
+
+        final Cuboid targetCuboid = new Cuboid(target3dOffsets, target3dShapes);
+        for (CacheIndex tileLocation : tileLocations) {
+            final int row = tileLocation.getCacheRow();
+            final int col = tileLocation.getCacheCol();
+            final int layer = tileLocation.getCacheLayer();
+            final CacheData3D cacheData3D = cacheData[layer][row][col];
+
+            // calculate intersection between cache-cube and target-cube
+            final Cuboid boundingCuboid = cacheData3D.getBoundingCuboid();
+            final Cuboid intersection = boundingCuboid.intersection(targetCuboid);
+            if (intersection.isEmpty()) {
+                continue;
+            }
+
+            cacheData3D.setCacheContext(cacheContext); // @todo 2 tb/tb bad design, think of something more clever 2025-12-19
+            final int[] srcOffsets = new int[]{intersection.getZ() - cacheData3D.getzMin(),
+                    intersection.getY() - cacheData3D.getyMin(),
+                    intersection.getX() - cacheData3D.getxMin()};
+            final int[] destOffsets = new int[]{intersection.getZ() - target3dOffsets[0],
+                    intersection.getY() - target3dOffsets[1],
+                    intersection.getX() - target3dOffsets[2]};
+            final int[] intersectionShapes = new int[]{intersection.getDepth(), intersection.getHeight(), intersection.getWidth()};
+
+            cacheData3D.copyData(srcOffsets, destOffsets, intersectionShapes, targetBuffer);
+            cacheData3D.setLastAccessTime(lastAccessTime);
+        }
+
+        return targetBuffer.getData();
+    }
+
+    ArrayList<CacheData3D> getTimeOrderedList() {
+        final ArrayList<CacheData3D> cacheDataList = new ArrayList<>(cacheData.length * cacheData[0].length * cacheData[0][0].length);
+        for (CacheData3D[][] cacheLayer : cacheData) {
+            for (CacheData3D[] cacheLine : cacheLayer) {
+                Collections.addAll(cacheDataList, cacheLine);
+            }
+        }
+
+        cacheDataList.sort(new ReverseTimeComparator());
+
+        return cacheDataList;
+    }
+}

@@ -20,6 +20,8 @@ import com.bc.ceres.binio.internal.DataContextImpl;
 import com.bc.ceres.binio.util.FileChannelIOHandler;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.util.CleanUpState;
+import com.bc.ceres.util.CleanerRegistry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,29 +73,25 @@ public class DataFormat {
         Assert.notNull(file, "file");
         Assert.notNull(mode, "mode");
         final RandomAccessFile raf = new RandomAccessFile(file, mode);
-        return new DataContextImpl(this, new RandomAccessFileIOHandler(raf)) {
+        final DataContextImpl ctx = new DataContextImpl(this, new RandomAccessFileIOHandler(raf)) {
             private boolean disposed;
 
             @Override
             public synchronized void dispose() {
-                super.dispose();
+                if (disposed) {
+                    return;
+                }
                 disposed = true;
                 try {
-                    raf.close();
-                } catch (IOException e) {
-                    // ignore
+                    super.dispose();
+                } finally {
+                    CleanerRegistry.getInstance().cleanup(this);
                 }
             }
-
-            @Override
-            protected void finalize() throws Throwable {
-                super.finalize();
-                if (!disposed) {
-                    dispose();
-                }
-            }
-
         };
+        CleanerRegistry.getInstance().register(ctx, new RandomAccessFileCleanupState(raf));
+
+        return ctx;
     }
 
     public DataContext createContext(RandomAccessFile raf) {
@@ -185,5 +183,24 @@ public class DataFormat {
     public Type removeTypeDef(String name) {
         Assert.notNull(name, "name");
         return typeDefMap.remove(name);
+    }
+
+    private static final class RandomAccessFileCleanupState implements CleanUpState {
+        private RandomAccessFile raf;
+
+        private RandomAccessFileCleanupState(RandomAccessFile raf) {
+            this.raf = raf;
+        }
+
+        @Override
+        public synchronized void run() {
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException ignore) {
+                }
+                raf = null;
+            }
+        }
     }
 }

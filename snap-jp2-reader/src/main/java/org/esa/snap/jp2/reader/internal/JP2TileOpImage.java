@@ -93,10 +93,12 @@ public class JP2TileOpImage extends SourcelessOpImage {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-
-        dispose();
+    public synchronized void dispose() {
+        this.bandSource = null;
+        this.bandData = null;
+        this.decompressedImageSupport = null;
+        this.tileFilePrefix = null;
+        super.dispose();
     }
 
     @Override

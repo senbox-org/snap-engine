@@ -1,5 +1,7 @@
 package org.esa.snap.engine_utilities.dataio;
 
+import com.bc.ceres.util.CleanUpState;
+import com.bc.ceres.util.CleanerRegistry;
 import org.esa.snap.engine_utilities.commons.AbstractVirtualPath;
 import org.esa.snap.engine_utilities.commons.FilePath;
 import org.esa.snap.engine_utilities.commons.FilePathInputStream;
@@ -15,6 +17,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static org.esa.snap.core.util.CollectionHelper.firstOrDefault;
@@ -32,12 +35,16 @@ import static org.esa.snap.core.util.CollectionHelper.firstOrDefault;
  */
 class VirtualDirWrapper extends VirtualDirEx {
 
-    private AbstractVirtualPath wrapped;
-    private Map<String, String> files;
+    private final AbstractVirtualPath wrapped;
+    private final Map<String, String> files;
+    private final VirtualDirWrapperState state;
 
     public VirtualDirWrapper(AbstractVirtualPath dir) {
+        Objects.requireNonNull(dir, "dir");
         this.wrapped = dir;
         this.files = new HashMap<>();
+        this.state = new VirtualDirWrapperState(dir);
+        CleanerRegistry.getInstance().register(this, state);
     }
 
     @Override
@@ -250,7 +257,7 @@ class VirtualDirWrapper extends VirtualDirEx {
 
     @Override
     public void close() {
-        this.wrapped.close();
+        CleanerRegistry.getInstance().cleanup(this);
     }
 
     @Override
@@ -273,12 +280,6 @@ class VirtualDirWrapper extends VirtualDirEx {
         return this.wrapped.makeLocalTempFolder();
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        this.wrapped = null;
-
-        super.finalize();
-    }
 
     @Override
     public String[] listAll(Pattern...patterns) {
@@ -322,5 +323,25 @@ class VirtualDirWrapper extends VirtualDirEx {
             }
         }
         return ret;
+    }
+
+
+    private static final class VirtualDirWrapperState implements CleanUpState {
+        private AbstractVirtualPath wrapped;
+
+        private VirtualDirWrapperState(AbstractVirtualPath wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public synchronized void run() {
+            if (wrapped != null) {
+                try {
+                    wrapped.close();
+                } finally {
+                    wrapped = null;
+                }
+            }
+        }
     }
 }

@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 
 public class SpectralSampleProviderImplTest {
@@ -138,5 +140,54 @@ public class SpectralSampleProviderImplTest {
 
             assertEquals(1.23, out[0], 1e-12);
         }
+    }
+
+
+    @Test
+    @STTM("SNAP-4128")
+    public void readSamples_readsBBoxOncePerBand_andMapsOnlyRequestedPixels() throws Exception {
+        SpectralSampleProviderImpl sp = new SpectralSampleProviderImpl();
+
+        Band b1 = mock(Band.class);
+        Band b2 = mock(Band.class);
+
+        when(b1.getRasterWidth()).thenReturn(1000);
+        when(b1.getRasterHeight()).thenReturn(1000);
+        when(b2.getRasterWidth()).thenReturn(1000);
+        when(b2.getRasterHeight()).thenReturn(1000);
+
+        when(b1.isValidMaskUsed()).thenReturn(false);
+        when(b2.isValidMaskUsed()).thenReturn(false);
+        when(b1.getGeophysicalNoDataValue()).thenReturn(Double.NaN);
+        when(b2.getGeophysicalNoDataValue()).thenReturn(Double.NaN);
+
+        int[] xs = {2, 4};
+        int[] ys = {3, 3};
+
+        doAnswer(inv -> {
+            int w = inv.getArgument(2);
+            int h = inv.getArgument(3);
+            double[] buf = inv.getArgument(4);
+            for (int i = 0; i < w * h; i++) buf[i] = 1000 + i;
+            return buf;
+        }).when(b1).readPixels(anyInt(), anyInt(), anyInt(), anyInt(), any(double[].class));
+
+        doAnswer(inv -> {
+            int w = inv.getArgument(2);
+            int h = inv.getArgument(3);
+            double[] buf = inv.getArgument(4);
+            for (int i = 0; i < w * h; i++) buf[i] = 2000 + i;
+            return buf;
+        }).when(b2).readPixels(anyInt(), anyInt(), anyInt(), anyInt(), any(double[].class));
+
+        double[][] out = sp.readSamples(List.of(b1, b2), xs, ys, 0);
+
+        assertEquals(1000.0, out[0][0], 0.0);
+        assertEquals(2000.0, out[0][1], 0.0);
+        assertEquals(1002.0, out[1][0], 0.0);
+        assertEquals(2002.0, out[1][1], 0.0);
+
+        verify(b1, times(1)).readPixels(eq(2), eq(3), eq(3), eq(1), any(double[].class));
+        verify(b2, times(1)).readPixels(eq(2), eq(3), eq(3), eq(1), any(double[].class));
     }
 }
