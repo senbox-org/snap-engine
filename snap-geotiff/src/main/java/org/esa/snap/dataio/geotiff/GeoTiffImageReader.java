@@ -30,8 +30,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.stream.FileCacheImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.RenderedOp;
@@ -227,23 +225,12 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
 
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
-        ImageInputStream imageInputStream;
+        ImageInputStream imageInputStream = ImageUtils.getImageInputStream(sourceImage);
         // ImageIO.createImageInputStream creates for some inputs a MemoryCacheImageInputStream.
         // This causes problems because the class MemoryCache in JDK has an issue.
         // At line 323 pos shouldn't be casted but only the result of the module operation.
         // This has been reported and accepted as issue: https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8252080
         // Using FileCacheImageInputStream explicitly works around this issue
-
-        if (sourceImage instanceof InputStream) {
-            // use system default cache dir, in tests SystemUtils.getCacheDir() seem not to be set correctly.
-            // At least on linux. However, it caused errors
-            File systemCacheDir = null;
-            imageInputStream = new FileCacheImageInputStream((InputStream) sourceImage, systemCacheDir);
-        } else if (sourceImage instanceof File) {
-            imageInputStream = new FileImageInputStream((File) sourceImage);
-        } else {
-            throw new IllegalArgumentException("sourceImage should be of type InputStream or File!");
-        }
 
         try {
             imageReader = findImageReader(imageInputStream);

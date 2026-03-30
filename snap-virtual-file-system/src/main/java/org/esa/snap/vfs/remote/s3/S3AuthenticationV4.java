@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.s3;
 
-import org.apache.commons.codec.binary.Hex;
 import org.esa.snap.vfs.preferences.model.Property;
 
 import javax.crypto.Mac;
@@ -11,12 +10,7 @@ import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * S3AuthenticationV4 class for S3 VFS.
@@ -117,7 +111,7 @@ class S3AuthenticationV4 {
     private static String hex(byte[] data) {
         String hex = "";
         if (data != null) {
-            hex = String.valueOf(Hex.encodeHex(data));
+            hex = HexFormat.of().formatHex(data);;
         }
         return hex;
     }
@@ -359,10 +353,7 @@ class S3AuthenticationV4 {
      * @return the special headers of S3 service
      */
     Map<String, String> getAwsHeaders(URL url) {
-        if (this.awsHeaders == null || this.lastAuthorizedURL == null || !url.toString().contentEquals(this.lastAuthorizedURL.toString())) {
-            throw new IllegalStateException("Unsigned AWS Headers. Request token before AWS Headers."); //prevent requesting AWS headers before signing it.
-        }
-        return this.awsHeaders;
+        return buildAwsHeaders(url);
     }
 
     private static final class PropertyCodePointSorter implements Comparator<Property> {

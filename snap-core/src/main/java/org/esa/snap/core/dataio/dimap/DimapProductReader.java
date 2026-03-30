@@ -24,21 +24,18 @@ import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeReader;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.util.Debug;
-import org.esa.snap.core.util.FeatureUtils;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.*;
 import org.esa.snap.core.util.io.FileUtils;
 import org.jdom2.Document;
 import org.jdom2.input.DOMBuilder;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -204,7 +201,7 @@ public class DimapProductReader extends AbstractProductReader {
             String dataFile = DimapProductHelpers.getTiePointDataFile(jDomDocument, tiePointGrid.getName());
             final int dataType = DimapProductHelpers.getTiePointDataType(jDomDocument.getRootElement(), tiePointGrid.getName());
             dataFile = FileUtils.exchangeExtension(dataFile, DimapProductConstants.IMAGE_FILE_EXTENSION);
-            final File inputFile = new File(inputDir, dataFile);
+            final File inputFile = inputDir.toPath().resolve(dataFile).toFile();
             tpgInfoMap.put(tiePointGrid, new TpgDomInfo(inputFile, dataType));
         }
         return tpgInfoMap;
@@ -216,9 +213,9 @@ public class DimapProductReader extends AbstractProductReader {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
             Debug.trace("DimapProductReader: about to open file '" + inputFile + "'..."); /*I18N*/
-            final InputStream is = new BufferedInputStream(new FileInputStream(inputFile), 256 * 1024);
-            dom = new DOMBuilder().build(builder.parse(is));
-            is.close();
+            try (InputStream is = new BufferedInputStream(getProductInputStream(inputFile), 256 * 1024)) {
+                dom = new DOMBuilder().build(builder.parse(is));
+            }
         } catch (Exception e) {
             throw new IOException("Failed to read DIMAP XML header.", e);
         }
@@ -280,7 +277,7 @@ public class DimapProductReader extends AbstractProductReader {
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
         // For each scan in the data source
         try {
-            try (ImageInputStream inputStream = new FileImageInputStream(dataFile)) {
+            try (ImageInputStream inputStream = ImageUtils.getImageInputStream(dataFile)) {
                 int destPos = 0;
                 final int type = destBuffer.getType();
                 final boolean longType = ProductData.TYPE_INT64 == type;
@@ -308,7 +305,7 @@ public class DimapProductReader extends AbstractProductReader {
     @Override
     public void readTiePointGridRasterData(TiePointGrid tpg, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
         final TpgDomInfo domInfo = tiePointGridInfoMap.get(tpg);
-        try (FileImageInputStream inputStream = new FileImageInputStream(domInfo.inputFile)) {
+        try (ImageInputStream inputStream = ImageUtils.getImageInputStream(domInfo.inputFile)) {
             final int gridWidth = tpg.getGridWidth();
             final float[] fullData = new float[gridWidth * tpg.getGridHeight()];
             inputStream.seek(0);
@@ -395,8 +392,8 @@ public class DimapProductReader extends AbstractProductReader {
     private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) {
         String dataDirName = FileUtils.getFilenameWithoutExtension(
                 inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
-        File dataDir = new File(inputDir, dataDirName);
-        File vectorDataDir = new File(dataDir, "vector_data");
+        File dataDir = inputDir.toPath().resolve(dataDirName).toFile();
+        File vectorDataDir = dataDir.toPath().resolve("vector_data").toFile();
         if (vectorDataDir.exists()) {
             File[] vectorFiles = getVectorDataFiles(vectorDataDir, onlyGCPs);
             for (File vectorFile : vectorFiles) {
@@ -406,7 +403,7 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) {
-        try (FileReader reader = new FileReader(vectorFile, StandardCharsets.UTF_8)) {
+        try (final Reader reader = Files.newBufferedReader(vectorFile.toPath())) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
                 public CoordinateReferenceSystem getFeatureCrs(Product product) {

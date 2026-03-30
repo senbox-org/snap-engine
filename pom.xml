@@ -253,6 +253,11 @@
                 <artifactId>snap-engine-utilities</artifactId>
                 <version>${snap.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-virtual-file-system</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
 
             <!-- SNAP Extension Modules -->
 

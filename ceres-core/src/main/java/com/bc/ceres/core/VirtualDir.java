@@ -22,7 +22,6 @@ import com.bc.ceres.util.CleanerRegistry;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,7 +31,6 @@ import java.io.Reader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -194,10 +192,11 @@ public abstract class VirtualDir {
 
         @Override
         public InputStream getInputStream(String path) throws IOException {
+            final InputStream inputStream = new BufferedInputStream(Files.newInputStream(getFile(path).toPath()));
             if (path.endsWith(".gz")) {
-                return new GZIPInputStream(new BufferedInputStream(new FileInputStream(getFile(path))));
+                return new GZIPInputStream(inputStream);
             }
-            return new BufferedInputStream(new FileInputStream(getFile(path)));
+            return inputStream;
         }
 
         @Override
@@ -217,13 +216,17 @@ public abstract class VirtualDir {
 
         @Override
         public boolean exists(String path) {
-            File child = new File(dir, path);
-            return child.exists();
+            try {
+                final File child = getFile(path);
+                return child.exists();
+            } catch (IOException e) {
+                return false;
+            }
         }
 
         @Override
         public String[] listAllFiles() throws IOException {
-            Path path = Paths.get(dir.getAbsolutePath());
+            Path path = dir.toPath();
             try (Stream<Path> pathStream = Files.walk(path)) {
                 Stream<Path> filteredstream = pathStream.filter(new Predicate<Path>() {
                     @Override

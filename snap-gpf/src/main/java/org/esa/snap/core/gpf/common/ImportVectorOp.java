@@ -35,6 +35,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.vfs.NioPaths;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
@@ -97,6 +98,7 @@ public class ImportVectorOp extends Operator {
             }
 
             if (vectorFile != null) {
+                this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
                 importGeometry(targetProduct, vectorFile);
             }
         } catch (Throwable e) {

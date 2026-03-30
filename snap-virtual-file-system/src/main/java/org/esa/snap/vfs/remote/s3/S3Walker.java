@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.s3;
 
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.vfs.remote.AbstractRemoteWalker;
 import org.esa.snap.vfs.remote.HttpUtils;
 import org.esa.snap.vfs.remote.IRemoteConnectionBuilder;
@@ -69,7 +68,7 @@ class S3Walker extends AbstractRemoteWalker {
         if (params.length() > 0) {
             params.append("&");
         }
-        params.append(name).append("=").append(URLEncoder.encode(value, "UTF8"));
+        params.append(name).append("=").append(URLEncoder.encode(value, "UTF8").replaceAll("\\+", "%20"));
     }
 
     /**
@@ -114,7 +113,7 @@ class S3Walker extends AbstractRemoteWalker {
                     Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                     Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                         try {
-                            return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                            return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                         } catch (IOException ignored) {
                         }
                         return "";
@@ -127,6 +126,9 @@ class S3Walker extends AbstractRemoteWalker {
             nextContinuationToken = handler.getNextContinuationToken();
         } while (handler.getIsTruncated());
 
+        if (!handler.isFound()) {
+            throw new IOException("file " + dir + " not found.");
+        }
         return items;
     }
 

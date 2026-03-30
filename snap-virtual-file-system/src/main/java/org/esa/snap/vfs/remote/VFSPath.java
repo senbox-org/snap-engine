@@ -94,10 +94,6 @@ public class VFSPath implements Path {
         this.fileSystem = fileSystem;
         this.absolute = absolute;
         String tempPath = replaceFileSeparator(path, this.fileSystem.getSeparator());
-        if (tempPath.endsWith(this.fileSystem.getSeparator())) {
-            int lastIndex = tempPath.length() - this.fileSystem.getSeparator().length();
-            tempPath = tempPath.substring(0, lastIndex);
-        }
         this.path = tempPath;
         this.fileAttributes = fileAttributes;
 
@@ -203,7 +199,7 @@ public class VFSPath implements Path {
             }
             urlAsString = buildPath(providerAddress, pathAsString, fileSystemSeparator);
         }
-        return new URL(urlAsString.replaceAll(" ", "%20"));
+        return new URL(urlAsString.replaceAll(" ", "%20").replaceAll("\\+","%2B"));
     }
 
     /**
@@ -357,10 +353,11 @@ public class VFSPath implements Path {
     public Path subpath(int beginIndex, int endIndex) {
         String[] subPath = Arrays.copyOfRange(this.names, beginIndex, endIndex);
         String subPathName = String.join(this.fileSystem.getSeparator(), subPath);
+        subPathName = endIndex < getNameCount() ? subPathName + this.fileSystem.getSeparator() : subPathName;
         return new VFSPath(this.fileSystem, beginIndex == 0 && this.absolute, subPathName, null);
     }
 
-    /**
+    /**conn
      * Tests if this path starts with the given path.
      *
      * <p> This path <em>starts</em> with the given path if this path's root component <em>starts</em> with the root component of the given path, and this path starts with the same name elements as the given path.

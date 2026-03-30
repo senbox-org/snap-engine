@@ -35,6 +35,7 @@ import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
+import org.esa.snap.vfs.NioPaths;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -57,7 +58,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.logging.Logger;
 
 /**
@@ -802,12 +803,13 @@ public class ResamplingOp extends Operator {
         }
 
         //if not found in manager, try to load it as a file
-        if(!Files.exists(Paths.get(resamplingPreset))) {
+        final Path resamplingPresetPath = NioPaths.get(resamplingPreset);
+        if (!Files.exists(resamplingPresetPath)) {
             return;
         }
 
         try {
-            selectedResamplingPreset = ResamplingPreset.loadResamplingPreset(Paths.get(resamplingPreset).toFile());
+            selectedResamplingPreset = ResamplingPreset.loadResamplingPreset(resamplingPresetPath.toFile());
         } catch (IOException e) {
             return;
         }

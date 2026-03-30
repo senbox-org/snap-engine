@@ -378,7 +378,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      */
     @Override
     public <V extends FileAttributeView> V getFileAttributeView(Path path, Class<V> type, LinkOption... linkOptions) {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     /**

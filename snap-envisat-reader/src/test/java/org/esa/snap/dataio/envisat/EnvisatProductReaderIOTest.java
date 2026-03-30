@@ -44,7 +44,7 @@ public class EnvisatProductReaderIOTest {
             assertNotNull(latGrid);
             assertNotNull(lonGrid);
 
-            final ProductFile productFile = reader.getProductFile();
+            final ProductFile productFile = reader.getEnvisatProductFile();
             assertTrue(productFile.storesPixelsInChronologicalOrder());
 
             final int colCount = 512;
@@ -92,7 +92,7 @@ public class EnvisatProductReaderIOTest {
             assertNotNull(latGrid);
             assertNotNull(lonGrid);
 
-            final ProductFile productFile = reader.getProductFile();
+            final ProductFile productFile = reader.getEnvisatProductFile();
             assertTrue(productFile.storesPixelsInChronologicalOrder());
 
             final int colCount = 512;

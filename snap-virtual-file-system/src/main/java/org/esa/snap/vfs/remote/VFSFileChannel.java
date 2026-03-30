@@ -1,7 +1,5 @@
 package org.esa.snap.vfs.remote;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +23,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedHashMap;
@@ -85,7 +84,7 @@ public class VFSFileChannel extends FileChannel {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                 Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                     try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                        return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                     } catch (IOException ignored) {
                     }
                     return "";

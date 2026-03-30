@@ -59,6 +59,10 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-metadata</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-virtual-file-system</artifactId>
+        </dependency>
 		<dependency>
 		    <groupId>org.jaitools</groupId>
 		    <artifactId>jt-vectorize</artifactId>

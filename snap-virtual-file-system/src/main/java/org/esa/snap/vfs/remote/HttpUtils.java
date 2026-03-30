@@ -1,13 +1,11 @@
 package org.esa.snap.vfs.remote;
 
-import org.apache.commons.io.IOUtils;
-import org.esa.snap.core.util.StringUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 /**
@@ -32,7 +30,7 @@ public class HttpUtils {
             if (HttpUtils.isValidResponseCode(responseCode)) {
                 String sizeString = connection.getHeaderField("content-length");
                 String lastModified = connection.getHeaderField("last-modified");
-                if (!StringUtils.isNotNullAndNotEmpty(sizeString) || !StringUtils.isNotNullAndNotEmpty(lastModified)) {
+                if (!HttpUtils.isNotNullAndNotEmpty(sizeString) || !HttpUtils.isNotNullAndNotEmpty(lastModified) || urlAddress.endsWith("/")) {
                     if (!connection.getURL().toString().contentEquals(urlAddress)) {
                         throw new IOException("Invalid VFS service.\nReason: Redirect from: " + urlAddress + " to: " + connection.getURL().toString());
                     }
@@ -41,14 +39,16 @@ public class HttpUtils {
                 long size = Long.parseLong(sizeString);
                 return new RegularFileMetadata(urlAddress, lastModified, size);
             } else {
-                Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
-                Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
-                    try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8");
-                    } catch (IOException ignored) {
-                    }
-                    return "";
-                });
+                if (responseCode != 404) {
+                    Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
+                    Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
+                        try {
+                            return HttpUtils.readString(connection.getErrorStream());
+                        } catch (IOException ignored) {
+                        }
+                        return "";
+                    });
+                }
                 throw new IOException(urlAddress + ": response code " + responseCode + ": " + connection.getResponseMessage());
             }
         } finally {
@@ -75,7 +75,7 @@ public class HttpUtils {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                 Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                     try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                        return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                     } catch (IOException ignored) {
                     }
                     return "";
@@ -86,4 +86,17 @@ public class HttpUtils {
             connection.disconnect();
         }
     }
+
+    public static String readString(InputStream inputStream) throws IOException {
+        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+    }
+
+    public static boolean isNotNullAndNotEmpty(String str) {
+        return str != null && !str.isEmpty();
+    }
+
+    public static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
 }

@@ -24,6 +24,7 @@ import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.gpf.graph.NodeSource;
+import org.esa.snap.vfs.NioPaths;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class ProductSetHandler {
         final List<String> toRemove = new ArrayList<>();
         final ValidProductFileFilter dirFilter = new ValidProductFileFilter();
         for(String path : psData.fileList) {
-            final File file = new File(path);
+            final File file = NioPaths.get(path).toFile();
             if(file.exists() && file.isDirectory()) {
                 toRemove.add(path);
 

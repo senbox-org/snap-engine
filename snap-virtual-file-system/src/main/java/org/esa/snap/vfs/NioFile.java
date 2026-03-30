@@ -69,8 +69,6 @@ public class NioFile extends File {
         String p = path.toString();
         if (!path.getFileSystem().getSeparator().equals("/"))
             p = p.replace(path.getFileSystem().getSeparator(), "/");
-        if (!p.startsWith("/"))
-            p = "/" + p;
         if (!p.endsWith("/") && isDirectory)
             p = p + "/";
         return p;
@@ -662,7 +660,7 @@ public class NioFile extends File {
      */
     @Override
     public File[] listFiles(FilenameFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(NioFile.this, new File(entry.toString()).getName()));
+        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(NioFile.this, new File(entry.toString()).getName()));
         return listFiles(newFilter);
     }
 
@@ -680,7 +678,7 @@ public class NioFile extends File {
      */
     @Override
     public File[] listFiles(FileFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(new File(entry.toString())));
+        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(entry.toFile()));
         return listFiles(newFilter);
     }
 

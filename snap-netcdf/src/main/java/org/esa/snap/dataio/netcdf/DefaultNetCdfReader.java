@@ -48,8 +48,8 @@ class DefaultNetCdfReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final AbstractNetCdfReaderPlugIn plugIn = getReaderPlugIn();
-        final File fileLocation = new File(getInput().toString());
-        netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
+        final File fileLocation = getProductFile();
+        netcdfFile = NetcdfFileOpener.open(fileLocation);
         if (netcdfFile == null) {
             throw new IOException("Failed to open file " + fileLocation.getPath());
         }
