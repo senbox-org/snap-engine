@@ -704,9 +704,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             }
         }
 
-        if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL3.getTermCountP()) {
-            return true;
-        } else if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
+        if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
             return true;
         } else if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL1.getTermCountP()) {
             return true;
@@ -755,9 +753,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
         int numTiePoints = tiePoints.length / 6;
 
         final GcpGeoCoding.Method method;
-        if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL3.getTermCountP()) {
+        /*if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL3.getTermCountP()) {
             method = GcpGeoCoding.Method.POLYNOMIAL3;
-        } else if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
+        } else*/if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
             method = GcpGeoCoding.Method.POLYNOMIAL2;
         } else if (numTiePoints >= GcpGeoCoding.Method.POLYNOMIAL1.getTermCountP()) {
             method = GcpGeoCoding.Method.POLYNOMIAL1;
