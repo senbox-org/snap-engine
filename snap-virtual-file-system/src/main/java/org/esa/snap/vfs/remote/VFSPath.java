@@ -94,10 +94,6 @@ public class VFSPath implements Path {
         this.fileSystem = fileSystem;
         this.absolute = absolute;
         String tempPath = replaceFileSeparator(path, this.fileSystem.getSeparator());
-        if (tempPath.endsWith(this.fileSystem.getSeparator())) {
-            int lastIndex = tempPath.length() - this.fileSystem.getSeparator().length();
-            tempPath = tempPath.substring(0, lastIndex);
-        }
         this.path = tempPath;
         this.fileAttributes = fileAttributes;
 
