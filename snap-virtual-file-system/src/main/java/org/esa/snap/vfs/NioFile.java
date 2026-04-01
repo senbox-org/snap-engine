@@ -69,8 +69,6 @@ public class NioFile extends File {
         String p = path.toString();
         if (!path.getFileSystem().getSeparator().equals("/"))
             p = p.replace(path.getFileSystem().getSeparator(), "/");
-        if (!p.startsWith("/"))
-            p = "/" + p;
         if (!p.endsWith("/") && isDirectory)
             p = p + "/";
         return p;
