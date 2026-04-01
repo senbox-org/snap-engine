@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.swift;
 
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.vfs.remote.AbstractRemoteWalker;
 import org.esa.snap.vfs.remote.HttpUtils;
 import org.esa.snap.vfs.remote.IRemoteConnectionBuilder;
@@ -112,7 +111,7 @@ class SwiftWalker extends AbstractRemoteWalker {
                     Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                     Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                         try {
-                            return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                            return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                         } catch (IOException ignored) {
                         }
                         return "";

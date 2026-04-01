@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote;
 
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -8,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 /**
@@ -44,7 +44,7 @@ public class HttpUtils {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                 Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                     try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8");
+                        return HttpUtils.readString(connection.getErrorStream());
                     } catch (IOException ignored) {
                     }
                     return "";
@@ -75,7 +75,7 @@ public class HttpUtils {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                 Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                     try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                        return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                     } catch (IOException ignored) {
                     }
                     return "";
@@ -85,5 +85,9 @@ public class HttpUtils {
         } finally {
             connection.disconnect();
         }
+    }
+
+    public static String readString(InputStream inputStream) throws IOException {
+        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 }
