@@ -1,7 +1,10 @@
 package org.esa.snap.vfs.remote;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Queue;
 
 /**
  * AbstractRemoteWalker for VFSWalker
@@ -12,6 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public abstract class AbstractRemoteWalker implements VFSWalker {
 
     protected final IRemoteConnectionBuilder remoteConnectionBuilder;
+    final static private Queue<String> dirsCache = new CircularFifoQueue<>(1000);
 
     protected AbstractRemoteWalker(IRemoteConnectionBuilder remoteConnectionBuilder) {
         this.remoteConnectionBuilder = remoteConnectionBuilder;
@@ -28,6 +32,9 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
         // check if the address represents a directory
         String address = path.buildURL().toString();
         String fileSystemRoot = path.getFileSystem().getRoot().getPath();
+        if (dirsCache.contains(address)) {
+            return VFSFileAttributes.newDir(path.toString());
+        }
         try {
             // the address can represent a file
             return readFileAttributes(address, path.toString(), fileSystemRoot);
@@ -37,6 +44,7 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
             }
             walk(path);
             // the address represents a directory
+            dirsCache.add(address);
             return VFSFileAttributes.newDir(path.toString());
         }
     }
