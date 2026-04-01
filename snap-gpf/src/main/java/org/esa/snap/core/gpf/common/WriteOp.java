@@ -340,6 +340,8 @@ public class WriteOp extends Operator {
             pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
+        }catch (Exception ex){
+            throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", ex);
         } finally {
             pm.done();
         }
