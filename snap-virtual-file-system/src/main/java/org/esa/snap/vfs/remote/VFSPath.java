@@ -353,6 +353,7 @@ public class VFSPath implements Path {
     public Path subpath(int beginIndex, int endIndex) {
         String[] subPath = Arrays.copyOfRange(this.names, beginIndex, endIndex);
         String subPathName = String.join(this.fileSystem.getSeparator(), subPath);
+        subPathName = endIndex < getNameCount() ? subPathName + this.fileSystem.getSeparator() : subPathName;
         return new VFSPath(this.fileSystem, beginIndex == 0 && this.absolute, subPathName, null);
     }
 
