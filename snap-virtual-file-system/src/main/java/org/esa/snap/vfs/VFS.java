@@ -137,6 +137,9 @@ public class VFS {
         if (path != null) {
             return path;
         }
+        if (first.contains(":") && first.startsWith("/")) {
+            first = first.substring(1);
+        }
         return FileSystems.getDefault().getPath(first, more);
     }
 
