@@ -228,20 +228,27 @@ class VFSByteChannel implements SeekableByteChannel {
      */
     private int readBytes(byte[] array, int offset, int length) throws IOException {
         createConnectionIfNeeded();
-        InputStream inputStream = this.connection.getInputStream();
 
         int bytesTransferred = 0;
+        int retries = 3;
         long available = this.contentLength;
-        while (length > 0 && available > 0 && this.position < this.contentLength) {
-            final int bytesReadNow = inputStream.read(array, offset, length);
-            if (bytesReadNow <= 0) {
-                break;
+        while (retries-- > 0) {
+            final InputStream inputStream = this.connection.getInputStream();
+            while (length > 0 && available > 0 && this.position < this.contentLength) {
+                final int bytesReadNow = inputStream.read(array, offset, length);
+                if (bytesReadNow <= 0) {
+                    this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position, "GET");
+                    break;
+                }
+                length -= bytesReadNow;
+                available -= bytesReadNow;
+                offset += bytesReadNow;
+                bytesTransferred += bytesReadNow;
+                this.position += bytesReadNow;
+                if (length < 1 || available <1 || this.position >= this.contentLength) {
+                    retries = 0;
+                }
             }
-            length -= bytesReadNow;
-            available -= bytesReadNow;
-            offset += bytesReadNow;
-            bytesTransferred += bytesReadNow;
-            this.position += bytesReadNow;
         }
         return bytesTransferred;
     }
