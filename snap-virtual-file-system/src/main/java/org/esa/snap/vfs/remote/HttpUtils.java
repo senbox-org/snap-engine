@@ -41,14 +41,16 @@ public class HttpUtils {
                 long size = Long.parseLong(sizeString);
                 return new RegularFileMetadata(urlAddress, lastModified, size);
             } else {
-                Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
-                Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
-                    try {
-                        return HttpUtils.readString(connection.getErrorStream());
-                    } catch (IOException ignored) {
-                    }
-                    return "";
-                });
+                if (responseCode != 404) {
+                    Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
+                    Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
+                        try {
+                            return HttpUtils.readString(connection.getErrorStream());
+                        } catch (IOException ignored) {
+                        }
+                        return "";
+                    });
+                }
                 throw new IOException(urlAddress + ": response code " + responseCode + ": " + connection.getResponseMessage());
             }
         } finally {
