@@ -231,12 +231,14 @@ class VFSByteChannel implements SeekableByteChannel {
         InputStream inputStream = this.connection.getInputStream();
 
         int bytesTransferred = 0;
-        while (length > 0) {
-            int bytesReadNow = inputStream.read(array, offset, length);
+        long available = this.contentLength;
+        while (length > 0 && available > 0 && this.position < this.contentLength) {
+            final int bytesReadNow = inputStream.read(array, offset, length);
             if (bytesReadNow <= 0) {
                 break;
             }
             length -= bytesReadNow;
+            available -= bytesReadNow;
             offset += bytesReadNow;
             bytesTransferred += bytesReadNow;
             this.position += bytesReadNow;
