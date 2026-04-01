@@ -199,7 +199,7 @@ public class VFSPath implements Path {
             }
             urlAsString = buildPath(providerAddress, pathAsString, fileSystemSeparator);
         }
-        return new URL(urlAsString.replaceAll(" ", "%20"));
+        return new URL(urlAsString.replaceAll(" ", "%20").replaceAll("\\+","%2B"));
     }
 
     /**
