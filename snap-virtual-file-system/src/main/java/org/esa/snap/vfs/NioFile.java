@@ -662,7 +662,7 @@ public class NioFile extends File {
      */
     @Override
     public File[] listFiles(FilenameFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(NioFile.this, entry.toFile().getName()));
+        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(NioFile.this, entry.toFile().getName()));
         return listFiles(newFilter);
     }
 
@@ -680,7 +680,7 @@ public class NioFile extends File {
      */
     @Override
     public File[] listFiles(FileFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(entry.toFile()));
+        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(entry.toFile()));
         return listFiles(newFilter);
     }
 
