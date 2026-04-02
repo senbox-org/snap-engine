@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.s3;
 
-import org.apache.commons.codec.binary.Hex;
 import org.esa.snap.vfs.preferences.model.Property;
 
 import javax.crypto.Mac;
@@ -17,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HexFormat;
 
 /**
  * S3AuthenticationV4 class for S3 VFS.
@@ -117,7 +117,7 @@ class S3AuthenticationV4 {
     private static String hex(byte[] data) {
         String hex = "";
         if (data != null) {
-            hex = String.valueOf(Hex.encodeHex(data));
+            hex = HexFormat.of().formatHex(data);;
         }
         return hex;
     }
