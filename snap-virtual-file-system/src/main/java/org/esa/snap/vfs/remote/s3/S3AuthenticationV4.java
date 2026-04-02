@@ -359,10 +359,7 @@ class S3AuthenticationV4 {
      * @return the special headers of S3 service
      */
     Map<String, String> getAwsHeaders(URL url) {
-        if (this.awsHeaders == null || this.lastAuthorizedURL == null || !url.toString().contentEquals(this.lastAuthorizedURL.toString())) {
-            throw new IllegalStateException("Unsigned AWS Headers. Request token before AWS Headers."); //prevent requesting AWS headers before signing it.
-        }
-        return this.awsHeaders;
+        return buildAwsHeaders(url);
     }
 
     private static final class PropertyCodePointSorter implements Comparator<Property> {
