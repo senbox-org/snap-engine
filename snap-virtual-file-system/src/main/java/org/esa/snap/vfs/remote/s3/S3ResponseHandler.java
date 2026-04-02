@@ -160,7 +160,7 @@ public class S3ResponseHandler extends DefaultHandler {
             if (currentElement != null && currentElement.equals(localName)) {
                 if (currentElement.equals(PREFIX_ELEMENT) && this.elementStack.size() == 2 && this.elementStack.get(1).equals(COMMON_PREFIXES_ELEMENT)) {
                     this.items.add(VFSFileAttributes.newDir(this.prefix + this.key));
-                } else if (currentElement.equals(CONTENTS_ELEMENT) && this.elementStack.size() == 1) {
+                } else if (currentElement.equals(CONTENTS_ELEMENT) && this.elementStack.size() == 1 && this.key != null) {
                     this.items.add(VFSFileAttributes.newFile(this.prefix + this.key, this.size, this.lastModified));
                 }
             }
@@ -187,8 +187,12 @@ public class S3ResponseHandler extends DefaultHandler {
             switch (currentElement) {
                 case KEY_ELEMENT:
                     this.key = getTextValue(ch, start, length);
-                    String[] keyParts = this.key.split(this.delimiter);
-                    this.key = this.key.endsWith(this.delimiter) ? keyParts[keyParts.length - 1] + this.delimiter : keyParts[keyParts.length - 1];
+                    if (key.equals(prefix)) {// evict the empty files with the same path as prefix
+                        this.key = null;
+                    } else {
+                        String[] keyParts = this.key.split(this.delimiter);
+                        this.key = this.key.endsWith(this.delimiter) ? keyParts[keyParts.length - 1] + this.delimiter : keyParts[keyParts.length - 1];
+                    }
                     break;
                 case SIZE_ELEMENT:
                     this.size = getLongValue(ch, start, length);
