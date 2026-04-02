@@ -198,10 +198,11 @@ public abstract class AbstractRemoteFileSystem extends FileSystem {
     public Path getPath(String first, String... more) {
         assertOpen();
         String pathName = first;
+        final String pathSeparator = getSeparator();
         if (more.length > 0) {
-            String pathSeparator = getSeparator();
             pathName += pathSeparator + String.join(pathSeparator, more);
         }
+        pathName = pathName.replace("\\", pathSeparator);
         return VFSPath.parsePath(this, pathName);
     }
 
