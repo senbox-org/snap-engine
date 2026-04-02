@@ -55,7 +55,7 @@ public class HttpFileSystemTest extends AbstractVFSTest {
         if (this.mockService != null) {
             return this.mockService.getMockServiceAddress();
         } else {
-            return getHTTPRepo().getAddress();
+            return getHTTPRepo().address();
         }
     }
 
@@ -65,12 +65,12 @@ public class HttpFileSystemTest extends AbstractVFSTest {
             VFSRemoteFileRepository httpRepo = getHTTPRepo();
             assumeNotNull(httpRepo);
             Path serviceRootPath = this.vfsTestsFolderPath.resolve(TEST_DIR);
-            this.mockService = new HttpMockService(new URL(httpRepo.getAddress()), serviceRootPath);
-            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(httpRepo.getScheme());
+            this.mockService = new HttpMockService(new URI(httpRepo.address()).toURL(), serviceRootPath);
+            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(httpRepo.scheme());
             assumeNotNull(fileSystemProvider);
             assumeTrue(fileSystemProvider instanceof AbstractRemoteFileSystemProvider);
             ((AbstractRemoteFileSystemProvider) fileSystemProvider).setConnectionData(httpRepo.getRoot(), this.mockService.getMockServiceAddress(), new LinkedHashMap<>());
-            URI uri = new URI(httpRepo.getScheme(), httpRepo.getRoot(), null);
+            URI uri = new URI(httpRepo.scheme(), httpRepo.getRoot(), null);
             FileSystem fs = fileSystemProvider.getFileSystem(uri);
             assumeNotNull(fs);
             this.httpFileSystem = (AbstractRemoteFileSystem) fs;
@@ -96,7 +96,7 @@ public class HttpFileSystemTest extends AbstractVFSTest {
     public void testScanner() throws Exception {
         VFSRemoteFileRepository httpRepo = getHTTPRepo();
 
-        HttpFileSystemProvider fileSystemProvider = (HttpFileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(httpRepo.getScheme());
+        HttpFileSystemProvider fileSystemProvider = (HttpFileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(httpRepo.scheme());
 
         List<BasicFileAttributes> items;
 
@@ -119,7 +119,7 @@ public class HttpFileSystemTest extends AbstractVFSTest {
         if (address.endsWith("/")) {
             address = address.substring(0, address.lastIndexOf('/'));
         }
-        URL url = new URL(address + "/rootDir1/dir1/file.jpg");
+        URL url = new URI(address + "/rootDir1/dir1/file.jpg").toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setDoInput(true);

@@ -1,11 +1,13 @@
 package org.esa.snap.vfs.remote.s3;
 
 import org.esa.snap.vfs.preferences.model.Property;
+import org.jspecify.annotations.NonNull;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -45,7 +47,7 @@ class S3AuthenticationV4 {
     private static final String SIGNED_HEADERS_NAME = "<SignedHeaders>";
     private static final String HASHED_PAYLOAD_NAME = "<HashedPayload>";
     private static final String CANONICAL_REQUEST_HASH_NAME = "<CanonicalRequest>";
-    private static final String CANONICAL_REQUEST_VALUE = "" + HTTP_VERB_NAME + "\n" + CANONICAL_URI_NAME + "\n" + CANONICAL_QUERY_STRING_NAME + "\n" + CANONICAL_HEADERS_NAME + "\n" + SIGNED_HEADERS_NAME + "\n" + HASHED_PAYLOAD_NAME;
+    private static final String CANONICAL_REQUEST_VALUE = HTTP_VERB_NAME + "\n" + CANONICAL_URI_NAME + "\n" + CANONICAL_QUERY_STRING_NAME + "\n" + CANONICAL_HEADERS_NAME + "\n" + SIGNED_HEADERS_NAME + "\n" + HASHED_PAYLOAD_NAME;
     private static final String AWS_SIGNATURE_ALGORITHM_NAME = "<Algorithm>";
     private static final String AWS_SIGNATURE_ALGORITHM_VALUE = "AWS4-HMAC-SHA256";
     private static final String TIMESTAMP_NAME = "<TimeStamp>";
@@ -117,7 +119,7 @@ class S3AuthenticationV4 {
     private static String hex(byte[] data) {
         String hex = "";
         if (data != null) {
-            hex = HexFormat.of().formatHex(data);;
+            hex = HexFormat.of().formatHex(data);
         }
         return hex;
     }
@@ -156,7 +158,7 @@ class S3AuthenticationV4 {
                 } else if (ch == '/') {
                     result.append(encodeSlash ? "%2F" : ch);
                 } else {
-                    result.append(URLEncoder.encode(String.valueOf(ch), "UTF8"));
+                    result.append(URLEncoder.encode(String.valueOf(ch), StandardCharsets.UTF_8));
                 }
             }
         } catch (Exception ignored) {
@@ -341,16 +343,20 @@ class S3AuthenticationV4 {
             String scope = buildScope();
             String signedHeaders = buildSignedHeaders();
             String signature = buildSignature(url);
-            String authorizationToken = AWS_AUTHORIZATION_TOKEN_VALUE;
-            authorizationToken = authorizationToken.replace(AWS_SIGNATURE_ALGORITHM_NAME, AWS_SIGNATURE_ALGORITHM_VALUE);
-            authorizationToken = authorizationToken.replace(AWS_ACCESS_KEY_ID_NAME, this.accessKeyId);
-            authorizationToken = authorizationToken.replace(SCOPE_NAME, scope);
-            authorizationToken = authorizationToken.replace(SIGNED_HEADERS_NAME, signedHeaders);
-            authorizationToken = authorizationToken.replace(AWS_SIGNATURE_NAME, signature);
-            this.lastAuthorizationToken = authorizationToken;
+            this.lastAuthorizationToken = buildAuthorizationToken(scope, signedHeaders, signature);
             this.lastAuthorizedURL = url;
         }
         return this.lastAuthorizationToken;
+    }
+
+    private @NonNull String buildAuthorizationToken(String scope, String signedHeaders, String signature) {
+        String authorizationToken = AWS_AUTHORIZATION_TOKEN_VALUE;
+        authorizationToken = authorizationToken.replace(AWS_SIGNATURE_ALGORITHM_NAME, AWS_SIGNATURE_ALGORITHM_VALUE);
+        authorizationToken = authorizationToken.replace(AWS_ACCESS_KEY_ID_NAME, this.accessKeyId);
+        authorizationToken = authorizationToken.replace(SCOPE_NAME, scope);
+        authorizationToken = authorizationToken.replace(SIGNED_HEADERS_NAME, signedHeaders);
+        authorizationToken = authorizationToken.replace(AWS_SIGNATURE_NAME, signature);
+        return authorizationToken;
     }
 
     /**

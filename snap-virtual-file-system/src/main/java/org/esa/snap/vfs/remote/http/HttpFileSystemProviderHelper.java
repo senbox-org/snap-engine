@@ -33,12 +33,12 @@ public class HttpFileSystemProviderHelper{
      */
     private static final String CREDENTIAL_PROPERTY_NAME = "password";
 
-    private String fileSystemRoot;
+    private final String fileSystemRoot;
 
     private String address;
     private String username;
     private String password;
-    private String delimiter;
+    private final String delimiter;
     private String authorizationToken;
 
     HttpFileSystemProviderHelper(String fileSystemRoot) {
@@ -71,7 +71,7 @@ public class HttpFileSystemProviderHelper{
         if (authorizationToken != null && !authorizationToken.isEmpty()) {
             connection.setRequestProperty("authorization", "Basic " + authorizationToken);
         }
-        if (requestProperties != null && requestProperties.size() > 0) {
+        if (requestProperties != null && !requestProperties.isEmpty()) {
             Set<Map.Entry<String, String>> requestPropertiesSet = requestProperties.entrySet();
             for (Map.Entry<String, String> requestProperty : requestPropertiesSet) {
                 connection.setRequestProperty(requestProperty.getKey(), requestProperty.getValue());

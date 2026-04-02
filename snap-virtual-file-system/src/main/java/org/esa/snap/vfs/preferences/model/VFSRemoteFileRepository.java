@@ -7,26 +7,17 @@ import java.util.List;
  *
  * @author Adrian Drăghici
  */
-public final class VFSRemoteFileRepository {
-
-    private String name;
-    private String scheme;
-    private String address;
-    private List<Property> properties;
+public record VFSRemoteFileRepository(String name, String scheme, String address, List<Property> properties) {
 
     /**
      * Creates a new VFS Remote File Repository data structure.
      *
      * @param name       The name of VFS Remote File Repository
-     * @param schema     The scheme of VFS Remote File Repository
+     * @param scheme     The scheme of VFS Remote File Repository
      * @param address    The address of VFS Remote File Repository
      * @param properties The properties of VFS Remote File Repository
      */
-    public VFSRemoteFileRepository(String name, String schema, String address, List<Property> properties) {
-        this.name = name;
-        this.scheme = schema;
-        this.address = address;
-        this.properties = properties;
+    public VFSRemoteFileRepository {
     }
 
     /**
@@ -34,7 +25,8 @@ public final class VFSRemoteFileRepository {
      *
      * @return The name of VFS Remote File Repository
      */
-    public String getName() {
+    @Override
+    public String name() {
         return this.name;
     }
 
@@ -52,7 +44,8 @@ public final class VFSRemoteFileRepository {
      *
      * @return The scheme of VFS Remote File Repository
      */
-    public String getScheme() {
+    @Override
+    public String scheme() {
         return this.scheme;
     }
 
@@ -61,7 +54,8 @@ public final class VFSRemoteFileRepository {
      *
      * @return The address of VFS Remote File Repository
      */
-    public String getAddress() {
+    @Override
+    public String address() {
         return this.address;
     }
 
@@ -70,7 +64,8 @@ public final class VFSRemoteFileRepository {
      *
      * @return The properties of VFS Remote File Repository
      */
-    public List<Property> getProperties() {
+    @Override
+    public List<Property> properties() {
         return this.properties;
     }
 }

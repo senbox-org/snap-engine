@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
@@ -25,7 +27,12 @@ public class HttpUtils {
     }
 
     public static RegularFileMetadata readRegularFileMetadata(String urlAddress, IRemoteConnectionBuilder remoteConnectionBuilder, String fileSystemRoot) throws IOException {
-        URL fileURL = new URL(urlAddress);
+        final URL fileURL;
+        try {
+            fileURL = new URI(urlAddress).toURL();
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
         HttpURLConnection connection = remoteConnectionBuilder.buildConnection(fileSystemRoot, fileURL, "GET", null);
         try {
             int responseCode = connection.getResponseCode();
@@ -59,7 +66,12 @@ public class HttpUtils {
     }
 
     public static String readResponse(String urlAddress, IRemoteConnectionBuilder remoteConnectionBuilder, String fileSystemRoot) throws IOException {
-        URL pageURL = new URL(urlAddress);
+        final URL pageURL;
+        try {
+            pageURL = new URI(urlAddress).toURL();
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
         HttpURLConnection connection = remoteConnectionBuilder.buildConnection(fileSystemRoot, pageURL, "GET", null);
         try {
             int responseCode = connection.getResponseCode();
@@ -71,7 +83,7 @@ public class HttpUtils {
                     while ((length = inputStream.read(buffer)) != -1) {
                         result.write(buffer, 0, length);
                     }
-                    return result.toString("UTF-8");
+                    return result.toString(StandardCharsets.UTF_8);
                 }
             } else {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");

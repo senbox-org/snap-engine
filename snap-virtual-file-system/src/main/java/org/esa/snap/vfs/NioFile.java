@@ -1,5 +1,7 @@
 package org.esa.snap.vfs;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
@@ -31,7 +33,7 @@ public class NioFile extends File {
 
     private static final String INVALID_FILE_PATH_ERROR_MESSAGE = "Invalid file path.";
 
-    private static Logger logger = Logger.getLogger(NioFile.class.getName());
+    private static final Logger logger = Logger.getLogger(NioFile.class.getName());
 
     /**
      * The Path object representing the file system path.
@@ -51,18 +53,6 @@ public class NioFile extends File {
         super(path.toString());
 
         this.path = path;
-    }
-
-
-    /* -- Constructors -- */
-
-    /**
-     * Creates a new File for VFS using the given path name
-     *
-     * @param pathname The VFS path name
-     */
-    public NioFile(String pathname) {
-        this(NioPaths.get(pathname));
     }
 
     private static String slashify(Path path, boolean isDirectory) {
@@ -95,6 +85,7 @@ public class NioFile extends File {
      * @return The name of the file or directory denoted by this abstract pathname, or the empty string if this pathname's name sequence is empty
      */
     @Override
+    @NotNull
     public String getName() {
         Object fileName = path.getFileName();
         String name = "";
@@ -139,7 +130,7 @@ public class NioFile extends File {
             try {
                 return new NioFile(p);
             } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Unable to get the parent file path of path: " + path.toString() + ". Details: " + ex.getMessage());
+                logger.log(Level.SEVERE, "Unable to get the parent file path of path: " + path + ". Details: " + ex.getMessage());
             }
         return null;
     }
@@ -150,6 +141,7 @@ public class NioFile extends File {
      * @return The string form of this abstract pathname
      */
     @Override
+    @NotNull
     public String getPath() {
         return path.toString();
     }
@@ -176,6 +168,7 @@ public class NioFile extends File {
      * @see java.io.File#isAbsolute()
      */
     @Override
+    @NotNull
     public String getAbsolutePath() {
         return path.resolve(path).toString();
     }
@@ -202,12 +195,14 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public File getAbsoluteFile() {
+    @NotNull
+    public File getAbsoluteFile()
+    {
         Path absPath = _getAbsolutePath();
         try {
             return new NioFile(absPath);
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Unable to get the absolute form of abstract pathname: " + absPath.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the absolute form of abstract pathname: " + absPath + ". Details: " + ex.getMessage());
             return new File(absPath.toString());
         }
     }
@@ -222,11 +217,12 @@ public class NioFile extends File {
      *
      * @return The canonical pathname string denoting the same file or directory as this abstract pathname
      * @throws IOException       If an I/O error occurs, which is possible because the construction of the canonical pathname may require filesystem queries
-     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead}</code> method denies read access to the file
+     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists, and it denies read access to the file
      * @see Path#toRealPath
      * @since JDK1.1
      */
     @Override
+    @NotNull
     public String getCanonicalPath() throws IOException {
         if (isInvalidPath()) {
             throw new IOException(INVALID_FILE_PATH_ERROR_MESSAGE);
@@ -244,7 +240,7 @@ public class NioFile extends File {
      *
      * @return The canonical path denoting the same file or directory as this abstract pathname
      * @throws IOException       If an I/O error occurs, which is possible because the construction of the canonical pathname may require filesystem queries
-     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead}</code> method denies read access to the file
+     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists, and it denies read access to the file
      * @see Path#toRealPath
      * @since JDK1.1
      */
@@ -261,17 +257,18 @@ public class NioFile extends File {
      *
      * @return The canonical pathname string denoting the same file or directory as this abstract pathname
      * @throws IOException       If an I/O error occurs, which is possible because the construction of the canonical pathname may require filesystem queries
-     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead}</code> method denies read access to the file
+     * @throws SecurityException If a required system property value cannot be accessed, or if a security manager exists, and it denies read access to the file
      * @see Path#toRealPath
      * @since 1.2
      */
     @Override
+    @NotNull
     public File getCanonicalFile() throws IOException {
         Path canonPath = getCanonicalPath0();
         try {
             return new NioFile(canonPath);
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Unable to get the canonical form of abstract pathname:" + canonPath.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the canonical form of abstract pathname:" + canonPath + ". Details: " + ex.getMessage());
             return new File(canonPath.toString());
         }
     }
@@ -321,6 +318,7 @@ public class NioFile extends File {
      * @since 1.4
      */
     @Override
+    @NotNull
     public URI toURI() {
         return this.path.getFileSystem().getPath(slashify(_getAbsolutePath(), isDirectory())).toUri();
     }
@@ -334,7 +332,7 @@ public class NioFile extends File {
      * {@code true} even though the file does not have read permissions.
      *
      * @return <code>true</code> if and only if the file specified by this abstract pathname exists <em>and</em> can be read by the application; <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      */
     @Override
     public boolean canRead() {
@@ -348,7 +346,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if and only if the file system actually contains a file denoted by this abstract pathname <em>and</em> the application is allowed to write to the file;
      * <code>false</code> otherwise.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      */
     @Override
     public boolean canWrite() {
@@ -359,7 +357,7 @@ public class NioFile extends File {
      * Tests whether the file or directory denoted by this abstract pathname exists.
      *
      * @return <code>true</code> if and only if the file or directory denoted by this abstract pathname exists; <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file or directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the file or directory
      */
     @Override
     public boolean exists() {
@@ -374,7 +372,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if and only if the file denoted by this abstract pathname exists <em>and</em> is a directory;
      * <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      */
     @Override
     public boolean isDirectory() {
@@ -389,7 +387,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if and only if the file denoted by this abstract pathname exists <em>and</em> is a normal file;
      * <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      */
     @Override
     public boolean isFile() {
@@ -401,7 +399,7 @@ public class NioFile extends File {
      * UNIX systems, a file is considered to be hidden if its name begins with a period character (<code>'.'</code>).  On Microsoft Windows systems, a file is considered to be hidden if it has been marked as such in the filesystem.
      *
      * @return <code>true</code> if and only if the file denoted by this abstract pathname is hidden according to the conventions of the underlying platform
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      * @since 1.2
      */
     @Override
@@ -409,7 +407,7 @@ public class NioFile extends File {
         try {
             return !isInvalidPath() && canRead() && Files.isHidden(path);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to check if path: " + path.toString() + " is hidden. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to check if path: " + path + " is hidden. Details: " + ex.getMessage());
             return false;
         }
     }
@@ -422,7 +420,7 @@ public class NioFile extends File {
      *
      * @return A <code>long</code> value representing the time the file was last modified, measured in milliseconds since the epoch
      * (00:00:00 GMT, January 1, 1970), or <code>0L</code> if the file does not exist or if an I/O error occurs
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      */
     @Override
     public long lastModified() {
@@ -435,7 +433,7 @@ public class NioFile extends File {
             }
             return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toMillis();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to get the time that the file denoted by path: " + path.toString() + " was last modified. Details: " + ex.getMessage(), ex);
+            logger.log(Level.SEVERE, "Unable to get the time that the file denoted by path: " + path + " was last modified. Details: " + ex.getMessage(), ex);
             return 0L;
         }
     }
@@ -448,7 +446,7 @@ public class NioFile extends File {
      * Files.readAttributes} method may be used.
      *
      * @return The length, in bytes, of the file denoted by this abstract pathname, or <code>0L</code> if the file does not exist.  Some operating systems may return <code>0L</code> for pathnames denoting system-dependent entities such as devices or pipes.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method denies read access to the file
+     * @throws SecurityException If a security manager exists, and it denies read access to the file
      */
     @Override
     public long length() {
@@ -461,7 +459,7 @@ public class NioFile extends File {
             }
             return Files.size(path);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to get the length of the file denoted by path: " + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the length of the file denoted by path: " + path + ". Details: " + ex.getMessage());
             return 0L;
         }
     }
@@ -477,7 +475,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if the named file does not exist and was successfully created; <code>false</code> if the named file already exists
      * @throws IOException       If an I/O error occurred
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.2
      */
     @Override
@@ -495,7 +493,7 @@ public class NioFile extends File {
      * <p> Note that the {@link java.nio.file.Files} class defines the {@link java.nio.file.Files#delete(Path) delete} method to throw an {@link IOException} when a file cannot be deleted. This is useful for error reporting and to diagnose why a file cannot be deleted.
      *
      * @return <code>true</code> if and only if the file or directory is successfully deleted; <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkDelete}</code> method denies delete access to the file
+     * @throws SecurityException If a security manager exists, and it denies delete access to the file
      */
     @Override
     public boolean delete() {
@@ -505,7 +503,7 @@ public class NioFile extends File {
         try {
             return canWrite() && Files.deleteIfExists(path);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to delete the file or directory denoted by path: " + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to delete the file or directory denoted by path: " + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -521,7 +519,7 @@ public class NioFile extends File {
      * Note: this method should <i>not</i> be used for file-locking, as the resulting protocol cannot be made to work reliably. The
      * {@link java.nio.channels.FileLock FileLock} facility should be used instead.
      *
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkDelete}</code> method denies delete access to the file
+     * @throws SecurityException If a security manager exists, and it denies delete access to the file
      * @see #delete
      * @since 1.2
      */
@@ -536,7 +534,7 @@ public class NioFile extends File {
      * @param filter A DirectoryStream.Filter<Path> filter
      * @return An array of strings naming the files and directories in the directory denoted by this abstract pathname that were accepted by the given {@code filter}.  The array will be empty if the directory is empty or if no names were accepted by the filter.
      * Returns {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @see java.nio.file.Files#newDirectoryStream(Path, String)
      */
     public String[] list(DirectoryStream.Filter<Path> filter) {
@@ -551,7 +549,7 @@ public class NioFile extends File {
                 }
                 return files.toArray(new String[0]);
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Unable to browse the path: " + path.toString() + " and get an array of strings naming the files and directories in the directory path. Details: " + ex.getMessage());
+                logger.log(Level.SEVERE, "Unable to browse the path: " + path + " and get an array of strings naming the files and directories in the directory path. Details: " + ex.getMessage());
             }
         }
         return new String[0];
@@ -569,8 +567,7 @@ public class NioFile extends File {
      *
      * @return An array of strings naming the files and directories in the directory denoted by this abstract pathname.  The array will be empty if the directory is empty.  Returns {@code null} if this abstract pathname does not denote a directory, or if an
      * I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      */
     @Override
     public String[] list() {
@@ -586,8 +583,7 @@ public class NioFile extends File {
      * @param filter A filename filter
      * @return An array of strings naming the files and directories in the directory denoted by this abstract pathname that were accepted by the given {@code filter}.  The array will be empty if the directory is empty or if no names were accepted by the filter.
      * Returns {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @see java.nio.file.Files#newDirectoryStream(Path, String)
      */
     @Override
@@ -603,8 +599,7 @@ public class NioFile extends File {
      * @return An array of abstract DirectoryStream.Filter<Path> denoting the files and directories in the directory denoted by this abstract pathname.
      * The array will be empty if the directory is empty.  Returns
      * {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @see java.nio.file.Files#newDirectoryStream(Path, java.nio.file.DirectoryStream.Filter)
      * @since 1.2
      */
@@ -617,7 +612,7 @@ public class NioFile extends File {
                 }
                 return files.toArray(new File[0]);
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Unable to browse the path: " + path.toString() + " and get an array of path names denoting the files and directories in the directory path. Details: " + ex.getMessage());
+                logger.log(Level.SEVERE, "Unable to browse the path: " + path + " and get an array of path names denoting the files and directories in the directory path. Details: " + ex.getMessage());
             }
         }
         return new File[0];
@@ -635,8 +630,7 @@ public class NioFile extends File {
      * @return An array of abstract pathnames denoting the files and directories in the directory denoted by this abstract pathname.
      * The array will be empty if the directory is empty.  Returns
      * {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @since 1.2
      */
     @Override
@@ -653,8 +647,7 @@ public class NioFile extends File {
      * @return An array of abstract pathnames denoting the files and directories in the directory denoted by this abstract pathname.
      * The array will be empty if the directory is empty.  Returns
      * {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @see java.nio.file.Files#newDirectoryStream(Path, String)
      * @since 1.2
      */
@@ -671,8 +664,7 @@ public class NioFile extends File {
      * @return An array of abstract pathnames denoting the files and directories in the directory denoted by this abstract pathname.
      * The array will be empty if the directory is empty.  Returns
      * {@code null} if this abstract pathname does not denote a directory, or if an I/O error occurs.
-     * @throws SecurityException If a security manager exists and its {@link
-     *                           SecurityManager#checkRead(String)} method denies read access to the directory
+     * @throws SecurityException If a security manager exists, and it denies read access to the directory
      * @see java.nio.file.Files#newDirectoryStream(Path, java.nio.file.DirectoryStream.Filter)
      * @since 1.2
      */
@@ -686,7 +678,7 @@ public class NioFile extends File {
      * Creates the directory named by this abstract pathname.
      *
      * @return <code>true</code> if and only if the directory was created; <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method does not permit the named directory to be created
+     * @throws SecurityException If a security manager exists, and it does not permit the named directory to be created
      */
     @Override
     public boolean mkdir() {
@@ -694,7 +686,7 @@ public class NioFile extends File {
             Files.createDirectory(path);
             return canRead();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to create the directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to create the directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -703,7 +695,7 @@ public class NioFile extends File {
      * Creates the directory named by this abstract pathname, including any necessary but nonexistent parent directories.  Note that if this operation fails it may have succeeded in creating some of the necessary parent directories.
      *
      * @return <code>true</code> if and only if the directory was created, along with all necessary parent directories; <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkRead(java.lang.String)}</code> method does not permit verification of the existence of the named directory and all necessary parent directories; or if the <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method does not permit the named directory and all necessary parent directories to be created
+     * @throws SecurityException If a security manager exists, and it does not permit verification of the existence of the named directory and all necessary parent directories; or if it does not permit the named directory and all necessary parent directories to be created
      */
     @Override
     public boolean mkdirs() {
@@ -717,7 +709,7 @@ public class NioFile extends File {
         try {
             canonFile = getCanonicalFile();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to create the directory named by abstract pathname:" + path.toString() + ", including any necessary but nonexistent parent directories. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to create the directory named by abstract pathname:" + path + ", including any necessary but nonexistent parent directories. Details: " + ex.getMessage());
             return false;
         }
 
@@ -736,7 +728,7 @@ public class NioFile extends File {
      * @param dest The new abstract pathname for the named file
      * @return <code>true</code> if and only if the renaming succeeded;
      * <code>false</code> otherwise
-     * @throws SecurityException    If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to either the old or new pathnames
+     * @throws SecurityException    If a security manager exists, and it denies write access to either the old or new pathnames
      * @throws NullPointerException If parameter <code>dest</code> is <code>null</code>
      */
     @Override
@@ -747,7 +739,7 @@ public class NioFile extends File {
         try {
             return !this.isInvalidPath() && !((NioFile) dest).isInvalidPath() && !Files.move(path, path.resolveSibling(dest.toPath())).toString().isEmpty();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to rename the directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to rename the directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -762,7 +754,7 @@ public class NioFile extends File {
      * @return <code>true</code> if and only if the operation succeeded;
      * <code>false</code> otherwise
      * @throws IllegalArgumentException If the argument is negative
-     * @throws SecurityException        If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the named file
+     * @throws SecurityException        If a security manager exists, and it denies write access to the named file
      * @since 1.2
      */
     @Override
@@ -772,7 +764,7 @@ public class NioFile extends File {
             Files.setLastModifiedTime(path, FileTime.fromMillis(time));
             return !isInvalidPath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to set last-modified time of the file or directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to set last-modified time of the file or directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -783,7 +775,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if and only if the operation succeeded;
      * <code>false</code> otherwise
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the named file
+     * @throws SecurityException If a security manager exists, and it denies write access to the named file
      * @since 1.2
      */
     @Override
@@ -796,7 +788,7 @@ public class NioFile extends File {
             Files.setPosixFilePermissions(path, perms);
             return !isInvalidPath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to mark the file or directory named by abstract pathname:" + path.toString() + ", so that only read operations are allowed. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to mark the file or directory named by abstract pathname:" + path + ", so that only read operations are allowed. Details: " + ex.getMessage());
             return false;
         }
     }
@@ -809,7 +801,7 @@ public class NioFile extends File {
      * @param writable  If <code>true</code>, sets the access permission to allow write operations; if <code>false</code> to disallow write operations
      * @param ownerOnly If <code>true</code>, the write permission applies only to the owner's write permission; otherwise, it applies to everybody.  If the underlying file system can not distinguish the owner's write permission from that of others, then the permission will apply to everybody, regardless of this value.
      * @return <code>true</code> if and only if the operation succeeded. The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the named file
+     * @throws SecurityException If a security manager exists, and it denies write access to the named file
      * @since 1.6
      */
     @Override
@@ -826,7 +818,7 @@ public class NioFile extends File {
             Files.setPosixFilePermissions(path, perms);
             return !isInvalidPath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable set the owner's or everybody's write permission for the file or directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable set the owner's or everybody's write permission for the file or directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -840,7 +832,7 @@ public class NioFile extends File {
      *
      * @param writable If <code>true</code>, sets the access permission to allow write operations; if <code>false</code> to disallow write operations
      * @return <code>true</code> if and only if the operation succeeded.  The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.6
      */
     @Override
@@ -857,7 +849,7 @@ public class NioFile extends File {
      * @param ownerOnly If <code>true</code>, the read permission applies only to the owner's read permission; otherwise, it applies to everybody.  If the underlying file system can not distinguish the owner's read permission from that of others, then the permission will apply to everybody, regardless of this value.
      * @return <code>true</code> if and only if the operation succeeded.  The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.  If
      * <code>readable</code> is <code>false</code> and the underlying file system does not implement a read permission, then the operation will fail.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.6
      */
     @Override
@@ -874,7 +866,7 @@ public class NioFile extends File {
             Files.setPosixFilePermissions(path, perms);
             return !isInvalidPath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable set the owner's or everybody's read permission for the file or directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable set the owner's or everybody's read permission for the file or directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -889,7 +881,7 @@ public class NioFile extends File {
      * @param readable If <code>true</code>, sets the access permission to allow read operations; if <code>false</code> to disallow read operations
      * @return <code>true</code> if and only if the operation succeeded.  The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.  If
      * <code>readable</code> is <code>false</code> and the underlying file system does not implement a read permission, then the operation will fail.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.6
      */
     @Override
@@ -907,7 +899,7 @@ public class NioFile extends File {
      *                   If the underlying file system can not distinguish the owner's execute permission from that of others, then the permission will apply to everybody, regardless of this value.
      * @return <code>true</code> if and only if the operation succeeded.  The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.  If
      * <code>executable</code> is <code>false</code> and the underlying file system does not implement an execute permission, then the operation will fail.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.6
      */
     @Override
@@ -924,7 +916,7 @@ public class NioFile extends File {
             Files.setPosixFilePermissions(path, perms);
             return !isInvalidPath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable set the owner's or everybody's execute permission for the file or directory named by abstract pathname:" + path.toString() + ". Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable set the owner's or everybody's execute permission for the file or directory named by abstract pathname:" + path + ". Details: " + ex.getMessage());
             return false;
         }
     }
@@ -939,7 +931,7 @@ public class NioFile extends File {
      * @param executable If <code>true</code>, sets the access permission to allow execute operations; if <code>false</code> to disallow execute operations
      * @return <code>true</code> if and only if the operation succeeded.  The operation will fail if the user does not have permission to change the access permissions of this abstract pathname.  If
      * <code>executable</code> is <code>false</code> and the underlying file system does not implement an execute permission, then the operation will fail.
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code> method denies write access to the file
+     * @throws SecurityException If a security manager exists, and it denies write access to the file
      * @since 1.6
      */
     @Override
@@ -954,7 +946,7 @@ public class NioFile extends File {
      *
      * @return <code>true</code> if and only if the abstract pathname exists
      * <em>and</em> the application is allowed to execute the file
-     * @throws SecurityException If a security manager exists and its <code>{@link java.lang.SecurityManager#checkExec(java.lang.String)}</code> method denies execute access to the file
+     * @throws SecurityException If a security manager exists, and it denies execute access to the file
      * @since 1.6
      */
     @Override
@@ -969,8 +961,7 @@ public class NioFile extends File {
      * Returns the size of the partition <a href="#partName">named</a> by this abstract pathname.
      *
      * @return The size, in bytes, of the partition or <tt>0L</tt> if this abstract pathname does not name a partition
-     * @throws SecurityException If a security manager has been installed and it denies
-     *                           {@link RuntimePermission}<tt>("getFileSystemAttributes")</tt> or its {@link SecurityManager#checkRead(String)} method denies read access to the file named by this abstract pathname
+     * @throws SecurityException If a security manager has been installed, and it denies read access to the file named by this abstract pathname
      * @since 1.6
      */
     @Override
@@ -981,7 +972,7 @@ public class NioFile extends File {
         try {
             return this.path.getFileSystem().provider().getFileStore(path).getTotalSpace();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to get the size of physical memory unit where file or directory named by abstract pathname:" + path.toString() + " exists. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the size of physical memory unit where file or directory named by abstract pathname:" + path + " exists. Details: " + ex.getMessage());
             return 0L;
         }
     }
@@ -995,8 +986,7 @@ public class NioFile extends File {
      * <p> The returned number of unallocated bytes is a hint, but not a guarantee, that it is possible to use most or any of these bytes.  The number of unallocated bytes is most likely to be accurate immediately after this call.  It is likely to be made inaccurate by any external I/O operations including those made on the system outside of this virtual machine.  This method makes no guarantee that write operations to this file system will succeed.
      *
      * @return The number of unallocated bytes on the partition or <tt>0L</tt> if the abstract pathname does not name a partition.  This value will be less than or equal to the total file system size returned by {@link #getTotalSpace}.
-     * @throws SecurityException If a security manager has been installed and it denies
-     *                           {@link RuntimePermission}<tt>("getFileSystemAttributes")</tt> or its {@link SecurityManager#checkRead(String)} method denies read access to the file named by this abstract pathname
+     * @throws SecurityException If a security manager has been installed, and it denies read access to the file named by this abstract pathname
      * @since 1.6
      */
     @Override
@@ -1007,7 +997,7 @@ public class NioFile extends File {
         try {
             return this.path.getFileSystem().provider().getFileStore(path).getUnallocatedSpace();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to get the number of unallocated bytes in the physical memory unit where file or directory named by abstract pathname:" + path.toString() + " exists. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the number of unallocated bytes in the physical memory unit where file or directory named by abstract pathname:" + path + " exists. Details: " + ex.getMessage());
             return 0L;
         }
     }
@@ -1020,8 +1010,7 @@ public class NioFile extends File {
      * I/O operations including those made on the system outside of this virtual machine.  This method makes no guarantee that write operations to this file system will succeed.
      *
      * @return The number of available bytes on the partition or <tt>0L</tt> if the abstract pathname does not name a partition.  On systems where this information is not available, this method will be equivalent to a call to {@link #getFreeSpace}.
-     * @throws SecurityException If a security manager has been installed and it denies
-     *                           {@link RuntimePermission}<tt>("getFileSystemAttributes")</tt> or its {@link SecurityManager#checkRead(String)} method denies read access to the file named by this abstract pathname
+     * @throws SecurityException If a security manager has been installed, and it denies read access to the file named by this abstract pathname
      * @since 1.6
      */
     @Override
@@ -1032,7 +1021,7 @@ public class NioFile extends File {
         try {
             return this.path.getFileSystem().provider().getFileStore(path).getUsableSpace();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Unable to get the number of bytes available to this virtual machine in the physical memory unit where file or directory named by abstract pathname:" + path.toString() + " exists. Details: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Unable to get the number of bytes available to this virtual machine in the physical memory unit where file or directory named by abstract pathname:" + path + " exists. Details: " + ex.getMessage());
             return 0L;
         }
     }
@@ -1099,6 +1088,7 @@ public class NioFile extends File {
      * @since 1.7
      */
     @Override
+    @NotNull
     public Path toPath() {
         return this.path;
     }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,22 +22,22 @@ import java.util.stream.Stream;
 
 class SwiftMockService {
 
-    private HttpServer mockServer;
-    private String mockServiceAddress;
+    private final HttpServer mockServer;
+    private final String mockServiceAddress;
 
     SwiftMockService(URL serviceAddress, Path serviceRootPath) throws IOException {
         this.mockServer = HttpServer.create(new InetSocketAddress(serviceAddress.getPort()), 0);
         int port = this.mockServer.getAddress().getPort();
-        this.mockServiceAddress = serviceAddress.toString().replaceAll(":([\\d]+)", ":" + port);
+        this.mockServiceAddress = serviceAddress.toString().replaceAll(":(\\d+)", ":" + port);
         this.mockServer.createContext(serviceAddress.getPath(), new SwiftMockServiceHandler(serviceRootPath));
     }
 
     public static void main(String[] args) {
         try {
-            SwiftMockService mockService = new SwiftMockService(new URL("http://localhost:0/mock-api/swift/v1/"), Paths.get(System.getProperty("swift.mock-service.root")));
+            SwiftMockService mockService = new SwiftMockService(new URI("http://localhost:0/mock-api/swift/v1/").toURL(), Paths.get(System.getProperty("swift.mock-service.root")));
             mockService.start();
             Logger.getLogger(SwiftMockService.class.getName()).info("Swift mock service started at: " + mockService.getMockServiceAddress());
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.getLogger(SwiftMockService.class.getName()).severe("Unable to start Swift mock service.\nReason: " + e.getMessage());
         }
     }
@@ -53,7 +54,7 @@ class SwiftMockService {
         return this.mockServiceAddress;
     }
 
-    private class SwiftMockServiceHandler implements HttpHandler {
+    private static class SwiftMockServiceHandler implements HttpHandler {
 
         private static final String CONTAINER_NAME = "%container_name%";
         private static final String CONTAINER_CONTENT = "%container_content%";
@@ -67,7 +68,7 @@ class SwiftMockService {
 
         private final SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
 
-        private Path serviceRootPath;
+        private final Path serviceRootPath;
 
         SwiftMockServiceHandler(Path serviceRootPath) {
             this.serviceRootPath = serviceRootPath;
@@ -80,7 +81,7 @@ class SwiftMockService {
             String contentType = "text/plain";
             try {
                 List<String> authHeader = httpExchange.getRequestHeaders().get("X-Auth-Token");
-                if (authHeader != null && SwiftAuthMockService.isValidToken(authHeader.get(0))) {
+                if (authHeader != null && SwiftAuthMockService.isValidToken(authHeader.getFirst())) {
                     String uriPath = httpExchange.getRequestURI().getPath();
                     uriPath = uriPath.replace(httpExchange.getHttpContext().getPath(), "");
                     uriPath = uriPath.replaceAll("^/", "").replaceAll("/{2,}", "/");
@@ -110,7 +111,7 @@ class SwiftMockService {
                     if(authHeader == null){
                         Logger.getLogger(SwiftMockService.class.getName()).severe("authHeader is missing. " );
                     }else {
-                        if (SwiftAuthMockService.isValidToken(authHeader.get(0))) {
+                        if (SwiftAuthMockService.isValidToken(authHeader.getFirst())) {
                             Logger.getLogger(SwiftMockService.class.getName()).severe("invalid token.. ");
                         }
                     }

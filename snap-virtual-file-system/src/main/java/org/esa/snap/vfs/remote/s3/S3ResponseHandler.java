@@ -64,18 +64,18 @@ public class S3ResponseHandler extends DefaultHandler {
      */
     private static final String PREFIX_ELEMENT = "Prefix";
 
-    private static Logger logger = Logger.getLogger(S3ResponseHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(S3ResponseHandler.class.getName());
 
-    private LinkedList<String> elementStack = new LinkedList<>();
-    private List<BasicFileAttributes> items;
+    private final LinkedList<String> elementStack = new LinkedList<>();
+    private final List<BasicFileAttributes> items;
 
     private String key;
     private long size;
     private String lastModified;
     private String nextContinuationToken;
     private boolean isTruncated;
-    private String prefix;
-    private String delimiter;
+    private final String prefix;
+    private final String delimiter;
     private boolean found = false;
 
     /**

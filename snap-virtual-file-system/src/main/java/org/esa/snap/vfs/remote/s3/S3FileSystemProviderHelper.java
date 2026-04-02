@@ -59,15 +59,15 @@ public class S3FileSystemProviderHelper {
      */
     private static final String AWS_BUCKET_SELF_CONTAINED_URL_REGEX_2 = "^https?://s3\\.[\\w\\-]*\\.?amazonaws\\.com/[\\w\\-.]+/?$";
 
-    private String fileSystemRoot;
+    private final String fileSystemRoot;
 
     private String address;
     private String bucket;
     private String region;
     private String accessKeyId;
     private String secretAccessKey;
-    private String delimiter;
-    private Map<String, String> customParameters;
+    private final String delimiter;
+    private final Map<String, String> customParameters;
     private S3AuthenticationV4 s3AuthenticationV4;
 
     S3FileSystemProviderHelper(String fileSystemRoot) {
@@ -91,13 +91,13 @@ public class S3FileSystemProviderHelper {
         }
         if (authorizationToken != null && !authorizationToken.isEmpty())
             connection.setRequestProperty("Authorization", authorizationToken);
-        if (requestProperties != null && requestProperties.size() > 0) {
+        if (requestProperties != null && !requestProperties.isEmpty()) {
             Set<Map.Entry<String, String>> requestPropertiesSet = requestProperties.entrySet();
             for (Map.Entry<String, String> requestProperty : requestPropertiesSet) {
                 connection.setRequestProperty(requestProperty.getKey(), requestProperty.getValue());
             }
         }
-        if (awsRequestProperties != null && awsRequestProperties.size() > 0) {
+        if (awsRequestProperties != null && !awsRequestProperties.isEmpty()) {
             Set<Map.Entry<String, String>> awsRequestPropertiesSet = awsRequestProperties.entrySet();
             for (Map.Entry<String, String> awsRequestProperty : awsRequestPropertiesSet) {
                 connection.setRequestProperty(awsRequestProperty.getKey(), awsRequestProperty.getValue());
@@ -118,7 +118,7 @@ public class S3FileSystemProviderHelper {
      */
     private void setupConnectionData(String address, String bucket, String region, String accessKeyId, String secretAccessKey) {
         this.address = address != null ? address : this.address;
-        this.bucket = !isBucketSelfContained() && bucket != null ? bucket : this.bucket;
+        this.bucket = isBucketSelfContained() || bucket == null ? this.bucket : bucket;
         this.region = region != null ? region : this.region;
         this.accessKeyId = accessKeyId != null ? accessKeyId : this.accessKeyId;
         this.secretAccessKey = secretAccessKey != null ? secretAccessKey : this.secretAccessKey;

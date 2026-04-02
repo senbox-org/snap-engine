@@ -89,10 +89,13 @@ class HttpWalker extends AbstractRemoteWalker {
         Set<BasicFileAttributes> items = new LinkedHashSet<>();
         Pattern p = Pattern.compile("<a href=\"(.*?)\">.*?</a>");
         Elements htmlTables = document.select("table");
-        if (htmlTables.isEmpty() || htmlTables.size() > 1) {
+        if (htmlTables.size() != 1) {
             throw new IllegalArgumentException("Unsupported HTTP VFS service.\nReason: invalid/unknown VFS structure.");
         }
         Element htmlTable = htmlTables.first();
+        if (htmlTable == null) {
+            return new ArrayList<>(items);
+        }
         Matcher m = p.matcher(htmlTable.html());
         boolean externalDirs = false;
         while (m.find()) {

@@ -78,23 +78,22 @@ public class VFS {
      */
     public void initRemoteInstalledProviders(List<VFSRemoteFileRepository> vfsRepositories) {
         for (FileSystemProvider fileSystemProvider : this.installedProviders) {
-            if (!(fileSystemProvider instanceof AbstractRemoteFileSystemProvider)) {
+            if (!(fileSystemProvider instanceof AbstractRemoteFileSystemProvider remoteFileSystemProvider)) {
                 continue;
             }
-            AbstractRemoteFileSystemProvider remoteFileSystemProvider = (AbstractRemoteFileSystemProvider) fileSystemProvider;
 
             for (VFSRemoteFileRepository repository : vfsRepositories) {
-                if (!repository.getScheme().equalsIgnoreCase(remoteFileSystemProvider.getScheme())) {
+                if (!repository.scheme().equalsIgnoreCase(remoteFileSystemProvider.getScheme())) {
                     continue;
                 }
                 Map<String, String> connectionData = new HashMap<>();
-                for (Property vfsRemoteFileRepositoryProperty : repository.getProperties()) {
+                for (Property vfsRemoteFileRepositoryProperty : repository.properties()) {
                     connectionData.put(vfsRemoteFileRepositoryProperty.getName(), vfsRemoteFileRepositoryProperty.getValue());
                 }
                 String fileSystemRoot = repository.getRoot();
-                remoteFileSystemProvider.setConnectionData(fileSystemRoot, repository.getAddress(), connectionData);
+                remoteFileSystemProvider.setConnectionData(fileSystemRoot, repository.address(), connectionData);
                 try {
-                    remoteFileSystemProvider.getFileSystemOrCreate(new URI(repository.getScheme(), fileSystemRoot, null), null);
+                    remoteFileSystemProvider.getFileSystemOrCreate(new URI(repository.scheme(), fileSystemRoot, null), null);
                 } catch (URISyntaxException e) {
                     throw new ExceptionInInitializerError("Unable to initialize VFS with scheme: " + remoteFileSystemProvider.getScheme());
                 }
@@ -152,8 +151,7 @@ public class VFS {
      */
     private Path getVirtualPath(String first, String... more) {
         for (FileSystemProvider provider : VFS.getInstance().getInstalledProviders()) {
-            if (provider instanceof AbstractRemoteFileSystemProvider) {
-                AbstractRemoteFileSystemProvider remoteFileSystemProvider = (AbstractRemoteFileSystemProvider) provider;
+            if (provider instanceof AbstractRemoteFileSystemProvider remoteFileSystemProvider) {
                 Path path = remoteFileSystemProvider.getPathIfFileSystemRootMatches(first, more);
                 if (path != null) {
                     return path;

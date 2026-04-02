@@ -1,5 +1,7 @@
 package org.esa.snap.vfs.remote;
 
+import org.jspecify.annotations.NonNull;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
@@ -163,7 +165,8 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @throws SecurityException           If a security manager is installed and it denies an unspecified permission.
      */
     @Override
-    public final Path getPath(URI uri) {
+    @NonNull
+    public final Path getPath(@NonNull URI uri) {
         validateScheme(uri);
         String fileSystemRoot = extractFileSystemRoot(uri);
         validateProviderAddress(fileSystemRoot);
@@ -184,9 +187,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @throws IllegalArgumentException      If the set contains an invalid combination of options
      * @throws UnsupportedOperationException If this provider that does not support creating file channels, or an unsupported open option or file attribute is specified
      * @throws IOException                   If an I/O error occurs
-     * @throws SecurityException             In the case of the default file system, the {@link
-     *                                       SecurityManager#checkRead(String)} method is invoked to check read access if the file is opened for reading. The {@link
-     *                                       SecurityManager#checkWrite(String)} method is invoked to check write access if the file is opened for writing
+     * @throws SecurityException             In the case of the default file system is invoked to check read access if the file is opened for reading or check write access if the file is opened for writing
      */
     @Override
     public FileChannel newFileChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) throws IOException {
@@ -208,9 +209,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      *                                       StandardOpenOption#CREATE_NEW CREATE_NEW} option is specified
      *                                       <i>(optional specific exception)</i>
      * @throws IOException                   if an I/O error occurs
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the path if the file is opened for reading. The {@link SecurityManager#checkWrite(String) checkWrite} method is invoked to check write access to the path if the file is opened for writing. The {@link
-     *                                       SecurityManager#checkDelete(String) checkDelete} method is invoked to check delete access if the file is opened with the
-     *                                       {@code DELETE_ON_CLOSE} option.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, it checks read access to the path if the file is opened for reading or checks write access to the path if the file is opened for writing or checks delete access if the file is opened with the {@code DELETE_ON_CLOSE} option.
      */
     @Override
     public VFSByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) throws IOException {
@@ -227,16 +226,16 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @return a new and open {@code DirectoryStream} object
      * @throws NotDirectoryException if the file could not otherwise be opened because it is not a directory <i>(optional specific exception)</i>
      * @throws IOException           if an I/O error occurs
-     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the directory.
+     * @throws SecurityException     In the case of the default provider, and a security manager is installed, checks read access to the directory.
      */
     @Override
     public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) throws IOException {
         VFSPath remoteDir = VFSPath.toRemotePath(dir);
         AbstractRemoteFileSystem fileSystem = remoteDir.getFileSystem();
         Iterable<Path> directories = fileSystem.walkDir(remoteDir, filter);
-        return new DirectoryStream<Path>() {
+        return new DirectoryStream<>() {
             @Override
-            public Iterator<Path> iterator() {
+            public @NonNull Iterator<Path> iterator() {
                 return directories.iterator();
             }
 
@@ -253,7 +252,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @param dir   the directory to create
      * @param attrs an optional list of file attributes to set atomically when creating the directory
      * @throws UnsupportedOperationException if the array contains an attribute that cannot be set atomically when creating the directory
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkWrite(String) checkWrite} method is invoked to check write access to the new directory.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, checks write access to the new directory.
      */
     @Override
     public void createDirectory(Path dir, FileAttribute<?>[] attrs) {
@@ -265,7 +264,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * {@link Files#delete} method.
      *
      * @param path the path to the file to delete
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkDelete(String)} method is invoked to check delete access to the file
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks delete access to the file
      */
     @Override
     public void delete(Path path) {
@@ -278,9 +277,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @param source  the path to the file to copy
      * @param target  the path to the target file
      * @param options options specifying how the copy should be done
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the source file, the
-     *                           {@link SecurityManager#checkWrite(String) checkWrite} is invoked to check write access to the target file. If a symbolic link is copied the security manager is invoked to check {@link
-     *                           LinkPermission}{@code ("symbolic")}.
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks read access to the source file, checks write access to the target file. If a symbolic link is copied the security manager is invoked to check {@link LinkPermission}{@code ("symbolic")}.
      */
     @Override
     public void copy(Path source, Path target, CopyOption... options) {
@@ -293,7 +290,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @param source  the path to the file to move
      * @param target  the path to the target file
      * @param options options specifying how the move should be done
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkWrite(String) checkWrite} method is invoked to check write access to both the source and target file.
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks write access to both the source and target file.
      */
     @Override
     public void move(Path source, Path target, CopyOption... options) {
@@ -306,7 +303,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @param path1  one path to the file
      * @param path2 the other path
      * @return {@code true} if, and only if, the two paths locate the same file
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to both files.
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks read access to both files.
      */
     @Override
     public boolean isSameFile(Path path1, Path path2) {
@@ -321,7 +318,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      *
      * @param path the path to the file to test
      * @return {@code true} if the file is considered hidden
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file.
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks read access to the file.
      */
     @Override
     public boolean isHidden(Path path) {
@@ -335,7 +332,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      *
      * @param path the path to the file
      * @return the file store where the file is stored
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file, and in addition it checks {@link RuntimePermission}<tt>
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks read access to the file, and in addition it checks {@link RuntimePermission}<tt>
      *                           ("getFileStoreAttributes")</tt>
      */
     @Override
@@ -350,7 +347,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @param accessModes The access modes to check; may have zero elements
      * @throws UnsupportedOperationException an implementation is required to support checking for
      *                                       {@code READ}, {@code WRITE}, and {@code EXECUTE} access. This exception is specified to allow for the {@code Access} enum to be extended in future releases.               if an I/O error occurs
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} is invoked when checking read access to the file or only the existence of the file, the {@link SecurityManager#checkWrite(String) checkWrite} is invoked when checking write access to the file, and {@link SecurityManager#checkExec(String) checkExec} is invoked when checking execute access.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, checks read access to the file or only the existence of the file, checks write access to the file, and checks execute access.
      */
     @Override
     public void checkAccess(Path path, AccessMode... accessModes) throws IOException {
@@ -391,7 +388,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @return the file attributes
      * @throws UnsupportedOperationException if an attributes of the given type are not supported
      * @throws IOException                   if an I/O error occurs
-     * @throws SecurityException             In the case of the default provider, a security manager is installed, its {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file
+     * @throws SecurityException             In the case of the default provider, a security manager is installed, checks read access to the file
      */
     @Override
     public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... linkOptions) throws IOException {
@@ -414,7 +411,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @return a map of the attributes returned; may be empty. The map's keys are the attribute names, its values are the attribute values
      * @throws UnsupportedOperationException if the attribute view is not available
      * @throws IllegalArgumentException      if no attributes are specified or an unrecognized attributes is specified
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, its {@link SecurityManager#checkRead(String) checkRead} method denies read access to the file. If this method is invoked to read security sensitive attributes then the security manager may be invoke to check for additional permissions.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, denies read access to the file. If this method is invoked to read security sensitive attributes then the security manager may be invoked to check for additional permissions.
      */
     @Override
     public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) {
@@ -431,7 +428,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
      * @throws UnsupportedOperationException if the attribute view is not available
      * @throws IllegalArgumentException      if the attribute name is not specified, or is not recognized, or the attribute value is of the correct type but has an inappropriate value
      * @throws ClassCastException            If the attribute value is not of the expected type or is a collection containing elements that are not of the expected type
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, its {@link SecurityManager#checkWrite(String) checkWrite} method denies write access to the file. If this method is invoked to set security sensitive attributes then the security manager may be invoked to check for additional permissions.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, denies write access to the file. If this method is invoked to set security sensitive attributes then the security manager may be invoked to check for additional permissions.
      */
     @Override
     public void setAttribute(Path path, String attribute, Object value, LinkOption... options) {
@@ -464,8 +461,11 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
     void unlinkFileSystem(AbstractRemoteFileSystem fileSystem) {
         for (Map.Entry<String, AbstractRemoteFileSystem> entry : this.fileSystems.entrySet()) {
             if (entry.getValue() == fileSystem) {
-                this.fileSystems.remove(entry.getKey());
-                return;
+                try (final AbstractRemoteFileSystem ignored = this.fileSystems.remove(entry.getKey())) {
+                    return;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

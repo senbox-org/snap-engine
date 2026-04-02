@@ -1,10 +1,11 @@
 package org.esa.snap.vfs.remote;
 
 import org.esa.snap.vfs.NioFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOError;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -93,8 +94,7 @@ public class VFSPath implements Path {
         }
         this.fileSystem = fileSystem;
         this.absolute = absolute;
-        String tempPath = replaceFileSeparator(path, this.fileSystem.getSeparator());
-        this.path = tempPath;
+        this.path = replaceFileSeparator(path, this.fileSystem.getSeparator());
         this.fileAttributes = fileAttributes;
 
         if (this.path.isEmpty()) {
@@ -182,10 +182,9 @@ public class VFSPath implements Path {
      *
      * @return The VFS file URL
      */
-    URL buildURL() throws MalformedURLException {
+    URL buildURL() throws IOException {
         String urlAsString = null;
-        if (this.fileAttributes instanceof VFSFileAttributes) {
-            VFSFileAttributes vfsFileAttributes = (VFSFileAttributes) this.fileAttributes;
+        if (this.fileAttributes instanceof VFSFileAttributes vfsFileAttributes) {
             urlAsString = vfsFileAttributes.fileURL();
         }
         if (urlAsString == null) {// the file don't have custom URL
@@ -199,7 +198,11 @@ public class VFSPath implements Path {
             }
             urlAsString = buildPath(providerAddress, pathAsString, fileSystemSeparator);
         }
-        return new URL(urlAsString.replaceAll(" ", "%20").replaceAll("\\+","%2B"));
+        try {
+            return new URI(urlAsString.replaceAll(" ", "%20").replaceAll("\\+","%2B")).toURL();
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -227,6 +230,7 @@ public class VFSPath implements Path {
      * @return the file system that created this object
      */
     @Override
+    @NotNull
     public AbstractRemoteFileSystem getFileSystem() {
         return this.fileSystem;
     }
@@ -334,6 +338,7 @@ public class VFSPath implements Path {
      * @throws IllegalArgumentException if {@code index} is negative, {@code index} is greater than or equal to the number of elements, or this path has zero name elements
      */
     @Override
+    @NotNull
     public Path getName(int index) {
         return new VFSPath(this.fileSystem, false, getNames()[index], null);
     }
@@ -350,6 +355,7 @@ public class VFSPath implements Path {
      * @throws IllegalArgumentException if {@code beginIndex} is negative, or greater than or equal to the number of elements. If {@code endIndex} is less than or equal to {@code beginIndex}, or larger than the number of elements.
      */
     @Override
+    @NotNull
     public Path subpath(int beginIndex, int endIndex) {
         String[] subPath = Arrays.copyOfRange(this.names, beginIndex, endIndex);
         String subPathName = String.join(this.fileSystem.getSeparator(), subPath);
@@ -372,7 +378,7 @@ public class VFSPath implements Path {
      * {@code false}
      */
     @Override
-    public boolean startsWith(Path other) {
+    public boolean startsWith(@NotNull Path other) {
         VFSPath remotePath = VFSPath.toRemotePath(other);
         return this.path.startsWith(remotePath.path);
     }
@@ -388,10 +394,7 @@ public class VFSPath implements Path {
      * @throws InvalidPathException If the path string cannot be converted to a Path.
      */
     @Override
-    public boolean startsWith(String other) {
-        if (other == null) {
-            throw new NullPointerException(OTHER_MISSING_ERROR_MESSAGE);
-        }
+    public boolean startsWith(@NotNull String other) {
         return startsWith(parsePath(other));
     }
 
@@ -409,7 +412,7 @@ public class VFSPath implements Path {
      * {@code false}
      */
     @Override
-    public boolean endsWith(Path other) {
+    public boolean endsWith(@NotNull Path other) {
         VFSPath remotePath = VFSPath.toRemotePath(other);
         return this.path.endsWith(remotePath.path);
     }
@@ -427,10 +430,7 @@ public class VFSPath implements Path {
      * @throws InvalidPathException If the path string cannot be converted to a Path.
      */
     @Override
-    public boolean endsWith(String other) {
-        if (other == null) {
-            throw new NullPointerException(OTHER_MISSING_ERROR_MESSAGE);
-        }
+    public boolean endsWith(@NotNull String other) {
         return endsWith(parsePath(other));
     }
 
@@ -447,6 +447,7 @@ public class VFSPath implements Path {
      * @see #toRealPath
      */
     @Override
+    @NotNull
     public Path normalize() {
         String separator = this.fileSystem.getSeparator();
         String currentDirectory = ".";
@@ -480,7 +481,7 @@ public class VFSPath implements Path {
     }
 
     private boolean isEmpty() {
-        return this.path.length() == 0;
+        return this.path.isEmpty();
     }
 
     /**
@@ -495,7 +496,8 @@ public class VFSPath implements Path {
      * @see #relativize
      */
     @Override
-    public Path resolve(Path other) {
+    @NotNull
+    public Path resolve(@NotNull Path other) {
         VFSPath remotePath = toRemotePath(other);
         if (remotePath.isEmpty()) {
             return this;
@@ -518,10 +520,8 @@ public class VFSPath implements Path {
      * @see FileSystem#getPath
      */
     @Override
-    public Path resolve(String other) {
-        if (other == null) {
-            throw new NullPointerException(OTHER_MISSING_ERROR_MESSAGE);
-        }
+    @NotNull
+    public Path resolve(@NotNull String other) {
         return resolve(parsePath(other));
     }
 
@@ -535,7 +535,8 @@ public class VFSPath implements Path {
      * @see #resolve(Path)
      */
     @Override
-    public Path resolveSibling(Path other) {
+    @NotNull
+    public Path resolveSibling(@NotNull Path other) {
         VFSPath remotePath = toRemotePath(other);
         if (remotePath.toString().isEmpty()) {
             return this;
@@ -556,10 +557,8 @@ public class VFSPath implements Path {
      * @see FileSystem#getPath
      */
     @Override
-    public Path resolveSibling(String other) {
-        if (other == null) {
-            throw new NullPointerException(OTHER_MISSING_ERROR_MESSAGE);
-        }
+    @NotNull
+    public Path resolveSibling(@NotNull String other) {
         return resolveSibling(parsePath(other));
     }
 
@@ -584,7 +583,8 @@ public class VFSPath implements Path {
      * @throws IllegalArgumentException if {@code other} is not a {@code Path} that can be relativized against this path
      */
     @Override
-    public Path relativize(Path other) {
+    @NotNull
+    public Path relativize(@NotNull Path other) {
         VFSPath remotePath = toRemotePath(other);
         if (isAbsolute() != remotePath.isAbsolute()) {
             throw new IllegalArgumentException(OTHER_MISSING_ERROR_MESSAGE);
@@ -625,6 +625,7 @@ public class VFSPath implements Path {
      * @throws SecurityException In the case of the default provider, and a security manager is installed, the {@link #toAbsolutePath toAbsolutePath} method throws a security exception.
      */
     @Override
+    @NotNull
     public URI toUri() {
         try {
             return new URI(this.fileSystem.provider().getScheme(), this.path, null);
@@ -640,9 +641,10 @@ public class VFSPath implements Path {
      *
      * @return a {@code Path} object representing the absolute path
      * @throws IOError           if an I/O error occurs
-     * @throws SecurityException In the case of the default provider, a security manager is installed, and this path is not absolute, then the security manager's {@link SecurityManager#checkPropertyAccess(String) checkPropertyAccess} method is invoked to check access to the system property {@code user.dir}
+     * @throws SecurityException In the case of the default provider, a security manager is installed, and this path is not absolute, then the security manager checks access to the system property {@code user.dir}
      */
     @Override
+    @NotNull
     public Path toAbsolutePath() {
         if (isAbsolute()) {
             return this;
@@ -665,10 +667,11 @@ public class VFSPath implements Path {
      *
      * @param options options indicating how symbolic links are handled
      * @return an absolute path represent the <em>real</em> path of the file located by this object
-     * @throws SecurityException In the case of the default provider, and a security manager is installed, its {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file, and where this path is not absolute, its {@link SecurityManager#checkPropertyAccess(String) checkPropertyAccess} method is invoked to check access to the system property {@code user.dir}
+     * @throws SecurityException In the case of the default provider, and a security manager is installed, checks read access to the file, and where this path is not absolute, its checks access to the system property {@code user.dir}
      */
     @Override
-    public Path toRealPath(LinkOption... options) {
+    @NotNull
+    public Path toRealPath(LinkOption @NotNull... options) {
         return toAbsolutePath();
     }
 
@@ -679,6 +682,7 @@ public class VFSPath implements Path {
      * @throws UnsupportedOperationException if this {@code Path} is not associated with the default provider
      */
     @Override
+    @NotNull
     public File toFile() {
         return new NioFile(this);
     }
@@ -693,10 +697,11 @@ public class VFSPath implements Path {
      * @throws UnsupportedOperationException if unsupported events or modifiers are specified
      * @throws IllegalArgumentException      if an invalid combination of events or modifiers is specified
      * @throws ClosedWatchServiceException   if the watch service is closed
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, checks read access to the file.
      */
     @Override
-    public WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) {
+    @NotNull
+    public WatchKey register(@NotNull WatchService watcher, WatchEvent.Kind<?> @NotNull [] events, WatchEvent.Modifier @NotNull ... modifiers) {
         throw new UnsupportedOperationException();
     }
 
@@ -709,10 +714,11 @@ public class VFSPath implements Path {
      * @throws UnsupportedOperationException If unsupported events are specified
      * @throws IllegalArgumentException      If an invalid combination of events is specified
      * @throws ClosedWatchServiceException   If the watch service is closed
-     * @throws SecurityException             In the case of the default provider, and a security manager is installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file.
+     * @throws SecurityException             In the case of the default provider, and a security manager is installed, checks read access to the file.
      */
     @Override
-    public WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events) {
+    @NotNull
+    public WatchKey register(@NotNull WatchService watcher, WatchEvent.Kind<?> @NotNull [] events) {
         throw new UnsupportedOperationException();
     }
 
@@ -725,6 +731,7 @@ public class VFSPath implements Path {
      * @return an iterator over the name elements of this path.
      */
     @Override
+    @NotNull
     public Iterator<Path> iterator() {
         ArrayList<Path> list = new ArrayList<>();
         int nameCount = getNameCount();
@@ -744,7 +751,7 @@ public class VFSPath implements Path {
      * @throws ClassCastException if the paths are associated with different providers
      */
     @Override
-    public int compareTo(Path other) {
+    public int compareTo(@NotNull Path other) {
         VFSPath remotePath = toRemotePath(other);
         int n = Math.min(getNameCount(), remotePath.getNameCount());
 
@@ -782,6 +789,7 @@ public class VFSPath implements Path {
      * @return a string representation of the object.
      */
     @Override
+    @NotNull
     public String toString() {
         return this.path;
     }

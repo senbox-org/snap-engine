@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -54,11 +55,11 @@ final class SwiftAuthenticationV3 {
 
     private LocalDateTime expirationDate;
 
-    private String authAddress;
-    private String domain;
-    private String projectId;
-    private String user;
-    private String password;
+    private final String authAddress;
+    private final String domain;
+    private final String projectId;
+    private final String user;
+    private final String password;
 
     private String authorizationToken;
 
@@ -93,7 +94,7 @@ final class SwiftAuthenticationV3 {
     private String requestNewAuthorizationToken() {
         HttpURLConnection connection = null;
         try {
-            URL authUrl = new URL(this.authAddress);
+            final URL authUrl = new URI(this.authAddress).toURL();
             connection = (HttpURLConnection) authUrl.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);

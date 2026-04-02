@@ -48,7 +48,7 @@ public class SwiftFileSystemProviderHelper {
      * The value of OpenStack Swift provider scheme.
      */
 
-    private String fileSystemRoot;
+    private final String fileSystemRoot;
 
     private String address;
     private String authAddress;
@@ -57,7 +57,7 @@ public class SwiftFileSystemProviderHelper {
     private String projectId;
     private String user;
     private String password;
-    private String delimiter;
+    private final String delimiter;
     private SwiftAuthenticationV3 swiftAuthenticationV3;
 
     SwiftFileSystemProviderHelper(String fileSystemRoot) {
@@ -83,7 +83,7 @@ public class SwiftFileSystemProviderHelper {
         if (authorizationToken != null && !authorizationToken.isEmpty()) {
             connection.setRequestProperty("X-Auth-Token", authorizationToken);
         }
-        if (requestProperties != null && requestProperties.size() > 0) {
+        if (requestProperties != null && !requestProperties.isEmpty()) {
             Set<Map.Entry<String, String>> requestPropertiesSet = requestProperties.entrySet();
             for (Map.Entry<String, String> requestProperty : requestPropertiesSet) {
                 connection.setRequestProperty(requestProperty.getKey(), requestProperty.getValue());
@@ -103,7 +103,7 @@ public class SwiftFileSystemProviderHelper {
      * @param projectId   The account ID/ Project/ Tenant name OpenStack Swift credential
      * @param user        The username OpenStack Swift credential
      * @param password    The password OpenStack Swift credential
-     * @link https://developer.openstack.org/api-ref/object-store/
+     * @link <a href="https://developer.openstack.org/api-ref/object-store/">https://developer.openstack.org/api-ref/object-store/</a>
      */
     private void setupConnectionData(String address, String authAddress, String container, String domain, String projectId, String user, String password) {
         this.address = address != null ? address : this.address;

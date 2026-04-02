@@ -41,10 +41,11 @@ public abstract class AbstractVFSTest {
         }
 
         this.vfsTestsFolderPath = testFolderPath.resolve("_virtual_file_system");
-        if (!Files.exists(this.vfsTestsFolderPath)) {
+        final boolean testDirectoryExists = Files.exists(this.vfsTestsFolderPath);
+        if (!testDirectoryExists) {
             Logger.getLogger(AbstractVFSTest.class.getName()).log(Level.WARNING, "The VFS test directory path {0} is not valid.", this.vfsTestsFolderPath);
-            assumeTrue(false);
         }
+        assumeTrue(testDirectoryExists);
     }
 
     private void initVFS() {
@@ -59,7 +60,7 @@ public abstract class AbstractVFSTest {
     }
 
     protected VFSRemoteFileRepository getHTTPRepo() {
-        return this.vfsRepositories.get(0);
+        return this.vfsRepositories.getFirst();
     }
 
     protected VFSRemoteFileRepository getS3Repo() {

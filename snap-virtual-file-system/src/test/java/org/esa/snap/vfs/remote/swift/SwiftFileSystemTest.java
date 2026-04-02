@@ -7,13 +7,16 @@ import org.esa.snap.vfs.remote.AbstractRemoteFileSystem;
 import org.esa.snap.vfs.remote.AbstractRemoteFileSystemProvider;
 import org.esa.snap.vfs.remote.AbstractVFSTest;
 import org.esa.snap.vfs.remote.VFSPath;
+import org.jspecify.annotations.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -57,15 +60,15 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
         if (this.mockService != null) {
             return this.mockService.getMockServiceAddress();
         } else {
-            return getSwiftRepo().getAddress();
+            return getSwiftRepo().address();
         }
     }
 
     private String getContainer() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String container = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            container = swiftRepo.getProperties().get(0).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            container = swiftRepo.properties().getFirst().getValue();
         }
         return container;
     }
@@ -73,8 +76,8 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     private String getAuthAddress() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String authAddress = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            authAddress = swiftRepo.getProperties().get(1).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            authAddress = swiftRepo.properties().get(1).getValue();
         }
         return authAddress;
     }
@@ -82,8 +85,8 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     private String getDomain() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String domain = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            domain = swiftRepo.getProperties().get(2).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            domain = swiftRepo.properties().get(2).getValue();
         }
         return domain;
     }
@@ -91,8 +94,8 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     private String getProjectId() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String projectId = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            projectId = swiftRepo.getProperties().get(3).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            projectId = swiftRepo.properties().get(3).getValue();
         }
         return projectId;
     }
@@ -100,8 +103,8 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     private String getUser() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String user = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            user = swiftRepo.getProperties().get(4).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            user = swiftRepo.properties().get(4).getValue();
         }
         return user;
     }
@@ -109,8 +112,8 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     private String getPassword() {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
         String password = "";
-        if (!swiftRepo.getProperties().isEmpty()) {
-            password = swiftRepo.getProperties().get(5).getValue();
+        if (!swiftRepo.properties().isEmpty()) {
+            password = swiftRepo.properties().get(5).getValue();
         }
         return password;
     }
@@ -121,15 +124,15 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
             VFSRemoteFileRepository swiftRepo = getSwiftRepo();
             assertNotNull(swiftRepo);
             Path serviceRootPath = this.vfsTestsFolderPath.resolve(TEST_DIR);
-            this.mockService = new SwiftMockService(new URL(swiftRepo.getAddress()), serviceRootPath);
-            this.authMockService = new SwiftAuthMockService(new URL(getAuthAddress()));
-            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(swiftRepo.getScheme());
+            this.mockService = new SwiftMockService(new URI(swiftRepo.address()).toURL(), serviceRootPath);
+            this.authMockService = new SwiftAuthMockService(new URI(getAuthAddress()).toURL());
+            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(swiftRepo.scheme());
             assertNotNull(fileSystemProvider);
             assumeTrue(fileSystemProvider instanceof AbstractRemoteFileSystemProvider);
             Map<String, String> connectionData = new LinkedHashMap<>();
             connectionData.put("authAddress", this.authMockService.getMockServiceAddress());//override 'authAddress' Swift property with Swift Auth Mock Service address
             ((AbstractRemoteFileSystemProvider) fileSystemProvider).setConnectionData(swiftRepo.getRoot(), this.mockService.getMockServiceAddress(), connectionData);
-            URI uri = new URI(swiftRepo.getScheme(), swiftRepo.getRoot(), null);
+            URI uri = new URI(swiftRepo.scheme(), swiftRepo.getRoot(), null);
             FileSystem fs = fileSystemProvider.getFileSystem(uri);
             assertNotNull(fs);
             this.swiftFileSystem = (AbstractRemoteFileSystem) fs;
@@ -159,7 +162,7 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
     public void testScanner() throws Exception {
         VFSRemoteFileRepository swiftRepo = getSwiftRepo();
 
-        SwiftFileSystemProvider fileSystemProvider = (SwiftFileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(swiftRepo.getScheme());
+        SwiftFileSystemProvider fileSystemProvider = (SwiftFileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(swiftRepo.scheme());
 
         List<BasicFileAttributes> items;
 
@@ -182,12 +185,7 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
         if (!address.endsWith("/")) {
             address = address.concat("/");
         }
-        URL url = new URL(address + getContainer() + "/rootDir1/dir1/file.jpg");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setDoInput(true);
-        SwiftAuthenticationV3 swiftAuthenticationV3 = new SwiftAuthenticationV3(this.authMockService.getMockServiceAddress(), getDomain(), getProjectId(), getUser(), getPassword());
-        connection.setRequestProperty("X-Auth-Token", swiftAuthenticationV3.getAuthorizationToken());
+        HttpURLConnection connection = buildHttpURLConnection(address);
 
         int responseCode = connection.getResponseCode();
         assertEquals(HttpURLConnection.HTTP_OK, responseCode);
@@ -199,6 +197,16 @@ public class SwiftFileSystemTest extends AbstractVFSTest {
         ReadableByteChannel channel = Channels.newChannel(stream);
         channel.close();
         connection.disconnect();
+    }
+
+    private @NonNull HttpURLConnection buildHttpURLConnection(String address) throws URISyntaxException, IOException {
+        URL url = new URI(address + getContainer() + "/rootDir1/dir1/file.jpg").toURL();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setDoInput(true);
+        SwiftAuthenticationV3 swiftAuthenticationV3 = new SwiftAuthenticationV3(this.authMockService.getMockServiceAddress(), getDomain(), getProjectId(), getUser(), getPassword());
+        connection.setRequestProperty("X-Auth-Token", swiftAuthenticationV3.getAuthorizationToken());
+        return connection;
     }
 
     @Test

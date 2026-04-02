@@ -110,7 +110,7 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertFalse(vfsRemoteFileRepositoriesController.isChanged());
 
         String newId = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
-        assertTrue(newId.matches("^([\\d]{13})$"));
+        assertTrue(newId.matches("^(\\d{13})$"));
         assertTrue(vfsRemoteFileRepositoriesController.isChanged());
     }
 
@@ -161,7 +161,7 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertTrue(reposIds.getValue().isEmpty());
 
         String newRepoId = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
-        assertTrue(newRepoId.matches("^([\\d]{13})$"));
+        assertTrue(newRepoId.matches("^(\\d{13})$"));
 
         reposIds = vfsRemoteFileRepositoriesController.getRemoteRepositoriesIds();
         assertNotNull(reposIds);
@@ -169,7 +169,7 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertEquals(newRepoId, reposIds.getValue());
 
         String newRepoId1 = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
-        assertTrue(newRepoId1.matches("^([\\d]{13})$"));
+        assertTrue(newRepoId1.matches("^(\\d{13})$"));
 
         reposIds = vfsRemoteFileRepositoriesController.getRemoteRepositoriesIds();
         assertNotNull(reposIds);
@@ -187,10 +187,10 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertTrue(reposIds.getValue().isEmpty());
 
         String newRepoId = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
-        assertTrue(newRepoId.matches("^([\\d]{13})$"));
+        assertTrue(newRepoId.matches("^(\\d{13})$"));
 
         String newRepoPropId = vfsRemoteFileRepositoriesController.registerNewRemoteRepositoryProperty(newRepoId);
-        assertTrue(newRepoPropId.matches("^([\\d]{13})$"));
+        assertTrue(newRepoPropId.matches("^(\\d{13})$"));
 
         Property repoPropsIds = vfsRemoteFileRepositoriesController.getRemoteRepositoryPropertiesIds(newRepoId);
         assertNotNull(repoPropsIds);
@@ -198,7 +198,7 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertEquals(newRepoPropId, repoPropsIds.getValue());
 
         String newRepoPropId1 = vfsRemoteFileRepositoriesController.registerNewRemoteRepositoryProperty(newRepoId);
-        assertTrue(newRepoPropId1.matches("^([\\d]{13})$"));
+        assertTrue(newRepoPropId1.matches("^(\\d{13})$"));
 
         repoPropsIds = vfsRemoteFileRepositoriesController.getRemoteRepositoryPropertiesIds(newRepoId);
         assertNotNull(repoPropsIds);
@@ -699,34 +699,34 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertFalse(reposList.isEmpty());
         assertEquals(3, reposList.size());
 
-        VFSRemoteFileRepository repo = reposList.get(0);
+        VFSRemoteFileRepository repo = reposList.getFirst();
         assertNotNull(repo);
-        assertNotNull(repo.getName());
-        assertEquals(REPO_1_NAME, repo.getName());
-        assertNotNull(repo.getScheme());
-        assertEquals(REPO_1_SCHEMA, repo.getScheme());
-        assertNotNull(repo.getAddress());
-        assertEquals(REPO_1_ADDRESS, repo.getAddress());
+        assertNotNull(repo.name());
+        assertEquals(REPO_1_NAME, repo.name());
+        assertNotNull(repo.scheme());
+        assertEquals(REPO_1_SCHEMA, repo.scheme());
+        assertNotNull(repo.address());
+        assertEquals(REPO_1_ADDRESS, repo.address());
 
-        List<Property> repoProps = repo.getProperties();
+        List<Property> repoProps = repo.properties();
         assertNotNull(repoProps);
         assertTrue(repoProps.isEmpty());
 
         repo = reposList.get(1);
         assertNotNull(repo);
-        assertNotNull(repo.getName());
-        assertEquals(REPO_2_NAME, repo.getName());
-        assertNotNull(repo.getScheme());
-        assertEquals(REPO_2_SCHEMA, repo.getScheme());
-        assertNotNull(repo.getAddress());
-        assertEquals(REPO_2_ADDRESS, repo.getAddress());
+        assertNotNull(repo.name());
+        assertEquals(REPO_2_NAME, repo.name());
+        assertNotNull(repo.scheme());
+        assertEquals(REPO_2_SCHEMA, repo.scheme());
+        assertNotNull(repo.address());
+        assertEquals(REPO_2_ADDRESS, repo.address());
 
-        repoProps = repo.getProperties();
+        repoProps = repo.properties();
         assertNotNull(repoProps);
         assertFalse(repoProps.isEmpty());
         assertEquals(4, repoProps.size());
 
-        Property repoProp = repoProps.get(0);
+        Property repoProp = repoProps.getFirst();
         assertNotNull(repoProp.getName());
         assertEquals(REPO_2_PROP_1_NAME, repoProp.getName());
         assertNotNull(repoProp.getValue());
@@ -752,19 +752,19 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
 
         repo = reposList.get(2);
         assertNotNull(repo);
-        assertNotNull(repo.getName());
-        assertEquals(REPO_3_NAME, repo.getName());
-        assertNotNull(repo.getScheme());
-        assertEquals(REPO_3_SCHEMA, repo.getScheme());
-        assertNotNull(repo.getAddress());
-        assertEquals(REPO_3_ADDRESS, repo.getAddress());
+        assertNotNull(repo.name());
+        assertEquals(REPO_3_NAME, repo.name());
+        assertNotNull(repo.scheme());
+        assertEquals(REPO_3_SCHEMA, repo.scheme());
+        assertNotNull(repo.address());
+        assertEquals(REPO_3_ADDRESS, repo.address());
 
-        repoProps = repo.getProperties();
+        repoProps = repo.properties();
         assertNotNull(repoProps);
         assertFalse(repoProps.isEmpty());
         assertEquals(6, repoProps.size());
 
-        repoProp = repoProps.get(0);
+        repoProp = repoProps.getFirst();
         assertNotNull(repoProp.getName());
         assertEquals(REPO_3_PROP_1_NAME, repoProp.getName());
         assertNotNull(repoProp.getValue());
@@ -811,7 +811,7 @@ public class VFSRemoteFileRepositoriesControllerTest extends AbstractVFSTest {
         assertTrue(reposIds.getValue().isEmpty());
 
         String newRepoId = vfsRemoteFileRepositoriesController.registerNewRemoteRepository();
-        assertTrue(newRepoId.matches("^([\\d]{13})$"));
+        assertTrue(newRepoId.matches("^(\\d{13})$"));
         vfsRemoteFileRepositoriesController.setRemoteRepositoryName(newRepoId, REPO_1_NAME);
         vfsRemoteFileRepositoriesController.setRemoteRepositoryAddress(newRepoId, REPO_1_ADDRESS);
         vfsRemoteFileRepositoriesController.setRemoteRepositorySchema(newRepoId, REPO_1_SCHEMA);

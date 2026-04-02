@@ -17,7 +17,7 @@ import java.nio.channels.SeekableByteChannel;
  * @author Norman Fomferra
  * @author Adrian Drăghici
  */
-class VFSByteChannel implements SeekableByteChannel {
+public class VFSByteChannel implements SeekableByteChannel {
 
     private final VFSPath path;
     private final long contentLength;
@@ -237,7 +237,7 @@ class VFSByteChannel implements SeekableByteChannel {
             while (length > 0 && available > 0 && this.position < this.contentLength) {
                 final int bytesReadNow = inputStream.read(array, offset, length);
                 if (bytesReadNow <= 0) {
-                    this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position, "GET");
+                    this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position);
                     break;
                 }
                 length -= bytesReadNow;
@@ -260,7 +260,7 @@ class VFSByteChannel implements SeekableByteChannel {
                 this.connection.disconnect();
                 this.connection = null;
             }
-            this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position, "GET");
+            this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position);
         }
     }
 }
