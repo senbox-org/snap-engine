@@ -68,7 +68,7 @@ class S3Walker extends AbstractRemoteWalker {
         if (params.length() > 0) {
             params.append("&");
         }
-        params.append(name).append("=").append(URLEncoder.encode(value, "UTF8"));
+        params.append(name).append("=").append(URLEncoder.encode(value, "UTF8").replaceAll("\\+", "%20"));
     }
 
     /**
