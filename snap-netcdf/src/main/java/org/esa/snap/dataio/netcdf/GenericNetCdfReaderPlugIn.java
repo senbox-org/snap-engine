@@ -65,7 +65,7 @@ public class GenericNetCdfReaderPlugIn implements ProductReaderPlugIn {
             final String[] extensionList = getDefaultFileExtensions();
             for (String extension : extensionList) {
                 if (inputPath.endsWith(extension)) {
-                    netcdfFile = NetcdfFileOpener.open(inputPath);
+                    netcdfFile = NetcdfFileOpener.open(input);
                     break;
                 }
             }

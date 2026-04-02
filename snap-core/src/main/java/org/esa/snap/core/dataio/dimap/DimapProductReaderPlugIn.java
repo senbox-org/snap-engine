@@ -20,9 +20,8 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -91,37 +90,21 @@ public class DimapProductReaderPlugIn implements ProductReaderPlugIn {
      * @return <code>true</code> if the given input is an object referencing a physical BEAM-DIMAP data source.
      */
     public DecodeQualification getDecodeQualification(Object object) {
-        File file = null;
-        if (object instanceof String) {
-            file = new File((String) object);
-        } else if (object instanceof File) {
-            file = (File) object;
-        }
-        if (file != null
-                && file.getPath().toLowerCase().endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION)
+        final File file = getProductFile(object);
+        if (file.getPath().toLowerCase().endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION)
                 && file.exists()
                 && file.isFile()) {
-            FileReader fr = null;
-            try {
+            try (final Reader fr = Files.newBufferedReader(file.toPath())){
                 // todo - URGENT: check this code!!! 80 charters are not enough, instead read until "<Dimap_Document" is found or EOF is reached or illegal text characters are detected
-                fr = new FileReader(file);
                 final char[] cbuf = new char[80];
                 if (fr.read(cbuf) != -1) {
                     final String s = new String(cbuf);
-                    fr.close();
                     if (s.contains("<Dimap_Document")) {
                         return DecodeQualification.INTENDED;
                     }
                 }
             } catch (IOException e) {
                 // ignore
-            }
-            if (fr != null) {
-                try {
-                    fr.close();
-                } catch (IOException e) {
-                    // ignore
-                }
             }
         }
         return DecodeQualification.UNABLE;

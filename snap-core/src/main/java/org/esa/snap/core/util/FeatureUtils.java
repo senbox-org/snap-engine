@@ -20,6 +20,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -107,7 +108,8 @@ public class FeatureUtils {
     }
 
     public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(File shapefile) throws IOException {
-        final URL shapefileUrl = shapefile.toURI().toURL();
+        final File cachedShapefile = getCachedVectorFile(shapefile);
+        final URL shapefileUrl = cachedShapefile.toURI().toURL();
 
         FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = null;
         try {
@@ -308,5 +310,22 @@ public class FeatureUtils {
             coordinates[coordinates.length - 1] = coordinates[0];
         }
         return gf.createPolygon(gf.createLinearRing(coordinates), null);
+    }
+
+
+    public static File getCachedVectorFile(File shapeFile){
+        if (shapeFile.getClass().getName().contains("vfs")) {
+            final File shpFile = FileUtils.getCachedFile(shapeFile);
+            final File dbfFile = FileUtils.exchangeExtension(shapeFile, ".dbf");
+            FileUtils.getCachedFile(dbfFile);
+            final File prjFile = FileUtils.exchangeExtension(shapeFile, ".prj");
+            FileUtils.getCachedFile(prjFile);
+            final File qpjFile = FileUtils.exchangeExtension(shapeFile, ".qpj");
+            FileUtils.getCachedFile(qpjFile);
+            final File shxFile = FileUtils.exchangeExtension(shapeFile, ".shx");
+            FileUtils.getCachedFile(shxFile);
+            return shpFile;
+        }
+        return shapeFile;
     }
 }

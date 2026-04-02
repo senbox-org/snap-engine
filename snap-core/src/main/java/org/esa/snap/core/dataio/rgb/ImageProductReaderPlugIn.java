@@ -49,24 +49,12 @@ public class ImageProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object object) {
-        File file = getFile(object);
-        if (file != null) {
-            String fileExt = FileUtils.getExtension(file);
-            if (fileExt != null && StringUtils.contains(getDefaultFileExtensions(), fileExt.toLowerCase())) {
-                return DecodeQualification.SUITABLE;
-            }
+        File file = getProductFile(object);
+        String fileExt = FileUtils.getExtension(file);
+        if (fileExt != null && StringUtils.contains(getDefaultFileExtensions(), fileExt.toLowerCase())) {
+            return DecodeQualification.SUITABLE;
         }
         return DecodeQualification.UNABLE;
-    }
-
-    static File getFile(Object object) {
-        File file = null;
-        if (object instanceof String) {
-            file = new File((String) object);
-        } else if (object instanceof File) {
-            file = (File) object;
-        }
-        return file;
     }
 
     @Override

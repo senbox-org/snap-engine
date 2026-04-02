@@ -136,19 +136,21 @@ public class DimapProductHelpers {
         }
         final List bandDataFiles = dataAccess.getChildren(DimapProductConstants.TAG_DATA_FILE);
         for (Object bandDataFile1 : bandDataFiles) {
-            final Element bandDataFile = (Element) bandDataFile1;
-            final String actualIndex = bandDataFile.getChildTextTrim(DimapProductConstants.TAG_BAND_INDEX);
+            final Element bandDataFileElement = (Element) bandDataFile1;
+            final String actualIndex = bandDataFileElement.getChildTextTrim(DimapProductConstants.TAG_BAND_INDEX);
             if (actualIndex != null) {
                 final String bandName = getBandName(rootElement, actualIndex);
                 final Band band = product.getBand(bandName);
                 if (band != null) {
-                    final Element filePathElement = bandDataFile.getChild(DimapProductConstants.TAG_DATA_FILE_PATH);
+                    final Element filePathElement = bandDataFileElement.getChild(DimapProductConstants.TAG_DATA_FILE_PATH);
                     final String bandHeaderFilePath = filePathElement.getAttributeValue(DimapProductConstants.ATTRIB_HREF);
                     if (bandHeaderFilePath != null && bandHeaderFilePath.length() > 0) {
                         final String localHeaderFilePath = SystemUtils.convertToLocalPath(bandHeaderFilePath);
                         final String bandDataFilePath = FileUtils.exchangeExtension(localHeaderFilePath,
                                 DimapProductConstants.IMAGE_FILE_EXTENSION);
-                        dataFilesMap.put(band, new File(inputDir, bandDataFilePath));
+                        final File bandDataFile = inputDir.toPath().resolve(bandDataFilePath).toFile();
+                        final File cachedBandDataFile = FileUtils.getCachedFile(bandDataFile);
+                        dataFilesMap.put(band, cachedBandDataFile);
                     }
                 }
             }

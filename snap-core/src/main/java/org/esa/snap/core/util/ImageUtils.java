@@ -27,6 +27,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
@@ -50,6 +52,8 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Vector;
 
 /**
@@ -500,6 +504,10 @@ public class ImageUtils {
         return new MyRenderedImage(raster, colorModel);
     }
 
+    public static ImageInputStream getImageInputStream(Object input) throws IOException {
+        final InputStream imageIOInput = ProductUtils.getProductInputStream(input);
+        return ImageIO.createImageInputStream(imageIOInput);
+    }
 
     private static class MyRenderedImage implements RenderedImage {
         private final WritableRaster raster;

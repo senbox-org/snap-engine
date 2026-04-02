@@ -22,12 +22,8 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.util.Debug;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.*;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Color;
 import java.io.File;
@@ -216,7 +212,7 @@ public abstract class ProductFile {
      * @throws java.io.IOException if an I/O error occurs
      */
     public static ProductFile open(File file) throws IOException {
-        return open(file, new FileImageInputStream(file));
+        return open(file, ImageUtils.getImageInputStream(file));
     }
 
     /**
@@ -282,7 +278,7 @@ public abstract class ProductFile {
         }
 
         try {
-            dataInputStream = new FileImageInputStream(file);
+            dataInputStream = ImageUtils.getImageInputStream(file);
             productType = getProductType(dataInputStream);
         } catch (IOException e) {
             Debug.trace(e);

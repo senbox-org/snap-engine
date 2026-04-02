@@ -54,7 +54,7 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
     public final DecodeQualification getDecodeQualification(Object input) {
         NetcdfFile netcdfFile = null;
         try {
-            netcdfFile = NetcdfFileOpener.open(input.toString());
+            netcdfFile = NetcdfFileOpener.open(input);
             if (netcdfFile == null) {
                 return DecodeQualification.UNABLE;
             }

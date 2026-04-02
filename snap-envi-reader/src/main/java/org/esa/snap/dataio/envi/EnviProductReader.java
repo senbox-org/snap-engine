@@ -13,6 +13,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.TreeNode;
 import org.esa.snap.core.util.io.FileUtils;
@@ -99,8 +100,7 @@ public class EnviProductReader extends AbstractProductReader {
     }
 
     private Product innerReadProductNodes() throws IOException {
-        final Object inputObject = getInput();
-        final File inputFile = EnviProductReaderPlugIn.getInputFile(inputObject);
+        final File inputFile = getProductFile();
 
         final BufferedReader headerReader = getHeaderReader(inputFile);
 
@@ -255,7 +255,7 @@ public class EnviProductReader extends AbstractProductReader {
     @Override
     public TreeNode<File> getProductComponents() {
         try {
-            final File headerFile = EnviProductReaderPlugIn.getInputFile(getInput());
+            final File headerFile = getProductFile();
             File parentDir = headerFile.getParentFile();
             final TreeNode<File> root = new TreeNode<>(parentDir.getCanonicalPath());
             root.setContent(parentDir);
@@ -360,7 +360,7 @@ public class EnviProductReader extends AbstractProductReader {
 
     private static ImageInputStream createImageStreamFromFile(final File file) throws IOException {
         final File imageFile = getEnviImageFile(file);
-        return new FileImageInputStream(imageFile);
+        return ImageUtils.getImageInputStream(imageFile);
     }
 
     protected void initGeoCoding(final Product product, final Header header) {
@@ -453,7 +453,7 @@ public class EnviProductReader extends AbstractProductReader {
             InputStream inputStream = zipFile.getInputStream(zipEntry);
             return new BufferedReader(new InputStreamReader(inputStream));
         } else {
-            return new BufferedReader(new FileReader(inputFile));
+            return Files.newBufferedReader(inputFile.toPath());
         }
     }
 

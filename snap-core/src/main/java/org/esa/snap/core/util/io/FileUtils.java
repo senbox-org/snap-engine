@@ -16,7 +16,10 @@
 package org.esa.snap.core.util.io;
 
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.core.VirtualDir;
+import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 
 import java.io.*;
@@ -31,9 +34,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.esa.snap.core.util.SystemUtils.LOG;
 
 /**
  * This class provides additional functionality in handling with files. All methods in this class dealing with
@@ -45,6 +51,8 @@ import java.util.stream.Stream;
  * @version $Revision$  $Date$
  */
 public class FileUtils {
+    private static String SNAP_CACHE_DIR = null;
+    private static final LinkedHashMap<String, String> LOCAL_FILES_CACHE = LinkedHashMap.newLinkedHashMap(100);
 
     /**
      * Gets the extension (which always includes a leading dot) of a file.
@@ -148,6 +156,39 @@ public class FileUtils {
     }
 
     /**
+     * Returns the file Path with the given new extension. If the given file Path have no extension, the given
+     * extension will be added.
+     * <p>
+     * Example1:
+     * <pre> "tie.point.grids\tpg1.hdr" </pre>
+     * results to
+     * <pre> "tie.point.grids\tpg1.raw" </pre>
+     * <p>
+     * Example2:
+     * <pre> "tie.point.grids\tpg1" </pre>
+     * results to
+     * <pre> "tie.point.grids\tpg1.raw" </pre>
+     *
+     * @param path      the Path to change the extension
+     * @param extension the new file extension including a leading dot (e.g. {@code ".raw"}).
+     * @throws java.lang.IllegalArgumentException if one of the given strings are null or empty.
+     */
+    public static Path exchangeExtension(Path path, String extension) {
+        Guardian.assertNotNull("path", path);
+        Guardian.assertNotNull("extension", extension);
+        if (!extension.isEmpty() && path.endsWith(extension)) {
+            return path;
+        }
+        final String filename = path.getFileName().toString();
+        final String filenameWithExchangedExtension = exchangeExtension(filename, extension);
+        if(path.getParent() != null) {
+            return path.getParent().resolve(filenameWithExchangedExtension);
+        } else {
+            return Path.of(filenameWithExchangedExtension);
+        }
+    }
+
+    /**
      * Returns a file with the given new extension. If the given file have no extension, the given extension will be
      * added.
      * <p>
@@ -171,7 +212,7 @@ public class FileUtils {
         if (path.endsWith(extension)) {
             return file;
         }
-        return new File(exchangeExtension(path, extension));
+        return exchangeExtension(file.toPath(), extension).toFile();
     }
 
     /**
@@ -542,5 +583,64 @@ public class FileUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public static File getCachedFile(File inputFile){
+        return new File(getCachedFilePath(inputFile));
+    }
+
+    public static String getCachedFilePath(File inputFile){
+        if (inputFile.getClass().getName().contains("vfs")) {
+            if (LOCAL_FILES_CACHE.containsKey(inputFile.getAbsolutePath())) {
+                return LOCAL_FILES_CACHE.get(inputFile.getAbsolutePath());
+            }
+            final String vfsRelativePath = extractVFSRelativePath(inputFile.toPath());
+            final Path tmp = Paths.get(getCacheFolder()).resolve(vfsRelativePath);
+            try {
+                if (!Files.exists(tmp)) {
+                    Files.createDirectories(tmp);
+                }
+                final InputStream inputStream = ProductUtils.getProductInputStream(inputFile);
+                Files.copy(inputStream, tmp, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                try {
+                    Files.deleteIfExists(tmp);
+                } catch (IOException ignore) {
+                }
+                if (!(e instanceof FileNotFoundException || e instanceof NotRegularFileException)) {
+                    throw new IllegalStateException(e);
+                }
+            }
+            LOCAL_FILES_CACHE.put(inputFile.getAbsolutePath(), tmp.toString());
+            return tmp.toString();
+        }
+        return inputFile.toString();
+    }
+
+    private static String extractVFSRelativePath(Path path){
+        return path.toString().replace(path.getRoot().toString() + "/", "");
+    }
+
+    private static String getCacheFolder() {
+        try {
+            if (SNAP_CACHE_DIR != null && Files.exists(Paths.get(SNAP_CACHE_DIR))) {
+                return SNAP_CACHE_DIR;
+            }
+            final File localTempFolder = VirtualDir.createUniqueTempDir();
+            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            SNAP_CACHE_DIR = localTempFolder.getAbsolutePath();
+        } catch (IOException e) {
+            final File localTempFolder = new File(System.getProperty("user.home", "."), ".snap/temp/snap_cache");
+            try {
+                Files.deleteIfExists(localTempFolder.toPath());
+            } catch (IOException ignore) {
+            }
+            if (localTempFolder.mkdirs()) {
+                LOG.fine("successfully created the SNAP cache dir: " + localTempFolder.getAbsolutePath());
+            }
+            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            SNAP_CACHE_DIR = localTempFolder.getAbsolutePath();
+        }
+        return SNAP_CACHE_DIR;
     }
 }

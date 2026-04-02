@@ -17,7 +17,9 @@
 package org.esa.snap.dataio.netcdf.util;
 
 import com.bc.ceres.core.VirtualDir;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.iosp.IOServiceProvider;
 import ucar.nc2.iosp.hdf4.H4iosp;
@@ -43,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
@@ -140,21 +143,11 @@ public class NetcdfFileOpener {
     }
 
     private static File getFile(Object input) {
-        if (input instanceof String) {
-            String inputString = (String) input;
-            String filePrefix = "file:";
-            if (inputString.startsWith(filePrefix)) {
-                inputString = inputString.substring(filePrefix.length());
-            }
-            return new File(inputString);
-        } else if (input instanceof File) {
-            return (File) input;
-        }
-        throw new IllegalArgumentException();
+        return ProductUtils.getProductPath(input).toFile();
     }
 
     private static void readMagicBytes(Object input, byte[] buffer) throws IOException {
-        if (input instanceof String || input instanceof File) {
+        if (input instanceof String || input instanceof File || input instanceof Path) {
             readMagicBytesFromFile(getFile(input), buffer);
         } else if (input instanceof ImageInputStream) {
             ImageInputStream imageInputStream = (ImageInputStream) input;
@@ -178,7 +171,7 @@ public class NetcdfFileOpener {
 
     private static InputStream openInputStream(File file) throws IOException {
         String fileName = file.getName().toLowerCase();
-        InputStream is = new BufferedInputStream(new FileInputStream(file));
+        InputStream is = ProductUtils.getProductInputStream(file);
         if (fileName.endsWith(".z")) {
             is = new UncompressInputStream(is);
         } else if (fileName.endsWith(".zip")) {
@@ -230,7 +223,10 @@ public class NetcdfFileOpener {
             return getRafFromFile(location);
         } else if (input instanceof File) {
             File file = (File) input;
-            return getRafFromFile(file.getAbsolutePath());
+            return getRafFromFile(FileUtils.getCachedFilePath(file));
+        } else if (input instanceof Path) {
+            File file = ((Path) input).toFile();
+            return getRafFromFile(FileUtils.getCachedFilePath(file));
         } else if (input instanceof ImageInputStream) {
             ImageInputStream imageInputStream = (ImageInputStream) input;
             return new ImageInputStreamRandomAccessFile(imageInputStream, imageInputStream.length());
