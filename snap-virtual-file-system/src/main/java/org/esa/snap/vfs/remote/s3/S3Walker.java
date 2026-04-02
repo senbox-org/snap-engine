@@ -126,6 +126,9 @@ class S3Walker extends AbstractRemoteWalker {
             nextContinuationToken = handler.getNextContinuationToken();
         } while (handler.getIsTruncated());
 
+        if (!handler.isFound()) {
+            throw new IOException("file " + dir + " not found.");
+        }
         return items;
     }
 

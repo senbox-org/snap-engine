@@ -76,6 +76,7 @@ public class S3ResponseHandler extends DefaultHandler {
     private boolean isTruncated;
     private String prefix;
     private String delimiter;
+    private boolean found = false;
 
     /**
      * Creates the new response handler for S3 VFS.
@@ -160,6 +161,7 @@ public class S3ResponseHandler extends DefaultHandler {
             if (currentElement != null && currentElement.equals(localName)) {
                 if (currentElement.equals(PREFIX_ELEMENT) && this.elementStack.size() == 2 && this.elementStack.get(1).equals(COMMON_PREFIXES_ELEMENT)) {
                     this.items.add(VFSFileAttributes.newDir(this.prefix + this.key));
+                    found = true;
                 } else if (currentElement.equals(CONTENTS_ELEMENT) && this.elementStack.size() == 1 && this.key != null) {
                     this.items.add(VFSFileAttributes.newFile(this.prefix + this.key, this.size, this.lastModified));
                 }
@@ -200,6 +202,7 @@ public class S3ResponseHandler extends DefaultHandler {
                         }
                         this.key = key.endsWith(this.delimiter) ? this.key + this.delimiter : this.key;
                     }
+                    found = true;
                     break;
                 case SIZE_ELEMENT:
                     this.size = getLongValue(ch, start, length);
@@ -227,6 +230,10 @@ public class S3ResponseHandler extends DefaultHandler {
             logger.log(Level.SEVERE, "Unable to create the S3 VFS path and file attributes. Details: " + ex.getMessage());
             throw new SAXException(ex);
         }
+    }
+
+    public boolean isFound() {
+        return found;
     }
 
     /**
