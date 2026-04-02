@@ -184,14 +184,21 @@ public class S3ResponseHandler extends DefaultHandler {
     public void characters(char[] ch, int start, int length) throws SAXException {
         try {
             String currentElement = this.elementStack.getLast();
+            final String key;
             switch (currentElement) {
                 case KEY_ELEMENT:
-                    this.key = getTextValue(ch, start, length);
+                    key = getTextValue(ch, start, length);
+                    final String prefix = this.prefix.replaceAll(".*?:/", "");
                     if (key.equals(prefix)) {// evict the empty files with the same path as prefix
                         this.key = null;
                     } else {
-                        String[] keyParts = this.key.split(this.delimiter);
-                        this.key = this.key.endsWith(this.delimiter) ? keyParts[keyParts.length - 1] + this.delimiter : keyParts[keyParts.length - 1];
+                        if (key.startsWith(prefix)) {
+                            final String[] keyParts = key.split(this.delimiter);
+                            this.key = keyParts[keyParts.length - 1];
+                        } else {// the current key is incomplete
+                            this.key = this.key + key;
+                        }
+                        this.key = key.endsWith(this.delimiter) ? this.key + this.delimiter : this.key;
                     }
                     break;
                 case SIZE_ELEMENT:
@@ -208,9 +215,10 @@ public class S3ResponseHandler extends DefaultHandler {
                     this.nextContinuationToken = getTextValue(ch, start, length);
                     break;
                 case PREFIX_ELEMENT:
-                    this.key = getTextValue(ch, start, length);
-                    keyParts = this.key.split(this.delimiter);
-                    this.key = this.key.endsWith(this.delimiter) ? keyParts[keyParts.length - 1] + this.delimiter : keyParts[keyParts.length - 1];
+                    key = getTextValue(ch, start, length);
+                    final String[] keyParts = key.split(this.delimiter);
+                    this.key = keyParts[keyParts.length - 1];
+                    this.key = key.endsWith(this.delimiter) ? this.key + this.delimiter : this.key;
                     break;
                 default:
                     break;
