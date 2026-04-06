@@ -323,7 +323,8 @@ public class ProductSubsetByPolygon {
 
     private static Polygon readPolygonFromKMZFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading KMZ file", 100);
-        try (ZipFile kmzFile = new ZipFile(file)) {
+        final File cachedKmzFile = FileUtils.getCachedFile(file);
+        try (ZipFile kmzFile = new ZipFile(cachedKmzFile)) {
             try (InputStream kmlInputStream = kmzFile.getInputStream(kmzFile.getEntry("overlay.kml"))) {
                 return readPolygonFromKMLInputStream(kmlInputStream, geoCoding, productDimension, pm);
             }
