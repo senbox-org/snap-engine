@@ -22,6 +22,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
+import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
@@ -49,7 +50,10 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -2482,6 +2486,21 @@ public class ProductUtils {
             }
         }
         return true;
+    }
+
+    public static InputStream getProductInputStream(Object input) throws IOException {
+        if (input instanceof InputStream inputStream) {
+            return inputStream;
+        } else {
+            final Path productPath = getProductPath(input);
+            if (!Files.exists(productPath)) {
+                throw new FileNotFoundException(productPath + " does not exists.");
+            }
+            if (!Files.isRegularFile(productPath)) {
+                throw new NotRegularFileException(productPath + " does not a file.");
+            }
+            return Files.newInputStream(productPath);
+        }
     }
 
     public static Path getProductPath(Object input){
