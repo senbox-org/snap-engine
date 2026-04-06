@@ -17,8 +17,10 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Classes implementing the {@code ProductReader} interface know how to create an in-memory representation of a
@@ -77,6 +79,10 @@ public interface ProductReader {
                                              int destWidth, int destHeight,
                                              ProductData destBuffer, ProgressMonitor pm) throws IOException {
         throw new IOException("readTiePointGridRasterData not implemented");
+    }
+
+    default Path getProductPath(Object input){
+        return ProductUtils.getProductPath(input);
     }
 
     /**
