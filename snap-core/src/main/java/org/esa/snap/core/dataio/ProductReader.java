@@ -19,6 +19,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ProductUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -79,6 +80,10 @@ public interface ProductReader {
                                              int destWidth, int destHeight,
                                              ProductData destBuffer, ProgressMonitor pm) throws IOException {
         throw new IOException("readTiePointGridRasterData not implemented");
+    }
+
+    default File getProductFile(){
+        return getProductPath().toFile();
     }
 
     default Path getProductPath(){
