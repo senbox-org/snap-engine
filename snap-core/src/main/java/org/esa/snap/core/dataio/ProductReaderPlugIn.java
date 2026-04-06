@@ -18,6 +18,7 @@ package org.esa.snap.core.dataio;
 import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.util.ProductUtils;
 
+import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -73,5 +74,9 @@ public interface ProductReaderPlugIn extends ProductIOPlugIn {
 
     default Path getProductPath(Object input){
         return ProductUtils.getProductPath(input);
+    }
+
+    default File getProductFile(Object input){
+        return getProductPath(input).toFile();
     }
 }
