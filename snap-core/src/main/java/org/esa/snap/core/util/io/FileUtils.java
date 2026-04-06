@@ -552,6 +552,10 @@ public class FileUtils {
         }
     }
 
+    public static File getCachedFile(File inputFile){
+        return new File(getCachedFilePath(inputFile));
+    }
+
     public static String getCachedFilePath(File inputFile){
         if (inputFile.getClass().getName().contains("vfs")) {
             if (LOCAL_FILES_CACHE.containsKey(inputFile.getAbsolutePath())) {
