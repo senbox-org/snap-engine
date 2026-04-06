@@ -21,6 +21,7 @@ import org.esa.snap.core.util.ProductUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -88,6 +89,10 @@ public interface ProductReader {
 
     default Path getProductPath(){
         return getProductPath(getInput());
+    }
+
+    default InputStream getProductInputStream(Object input) throws IOException {
+        return ProductUtils.getProductInputStream(input);
     }
 
     default Path getProductPath(Object input){
