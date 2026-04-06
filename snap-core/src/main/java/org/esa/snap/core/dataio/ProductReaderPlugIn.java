@@ -16,6 +16,9 @@
 package org.esa.snap.core.dataio;
 
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.util.ProductUtils;
+
+import java.nio.file.Path;
 
 /**
  * The <code>ProductReaderPlugIn</code> interface is implemented by data product reader plug-ins.
@@ -68,4 +71,7 @@ public interface ProductReaderPlugIn extends ProductIOPlugIn {
         return null;
     }
 
+    default Path getProductPath(Object input){
+        return ProductUtils.getProductPath(input);
+    }
 }
