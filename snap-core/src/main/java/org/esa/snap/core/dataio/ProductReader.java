@@ -83,6 +83,10 @@ public interface ProductReader {
         throw new IOException("readTiePointGridRasterData not implemented");
     }
 
+    default InputStream getProductInputStream() throws IOException {
+        return getProductInputStream(getInput());
+    }
+
     default File getProductFile(){
         return getProductPath().toFile();
     }
