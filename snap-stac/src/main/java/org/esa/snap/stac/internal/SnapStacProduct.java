@@ -22,6 +22,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.stac.StacItem;
@@ -54,7 +55,8 @@ public class SnapStacProduct implements Closeable {
     private final StacItem stacItem;
     private boolean includeMetadata = true;
 
-    private final static GeoTiffProductReaderPlugIn geoTiffReaderPlugin = new GeoTiffProductReaderPlugIn();
+    //private final static GeoTiffProductReaderPlugIn geoTiffReaderPlugin = new GeoTiffProductReaderPlugIn();
+    private static final GTiffDriverProductReaderPlugIn geoTiffReaderPlugin = new GTiffDriverProductReaderPlugIn();
     private final List<ProductReader> imageReaderList = new ArrayList<>();
     private final Map<Assets.Asset, Product> bandProductMap = new HashMap<>();
 
@@ -144,7 +146,7 @@ public class SnapStacProduct implements Closeable {
                     final JSONObject bandProperties = (JSONObject) bandObj;
                     String name = (String) bandProperties.get(EO.name);
 
-                    if (addedBandPropertiesList.contains(bandProperties)) {
+                    if (name == null || addedBandPropertiesList.contains(bandProperties)) {
                         continue;
                     }
 
@@ -236,25 +238,27 @@ public class SnapStacProduct implements Closeable {
             bandName = (String) bandProperties.get(EO.name);
         }
 
-        final Band trgBand;
-        if(bandProduct != null) {
-            Band band = bandProduct.containsBand(bandName) ? bandProduct.getBand(bandName) : bandProduct.getBandAt(bandCnt);
+        if (bandName != null) {
+            final Band trgBand;
+            if (bandProduct != null) {
+                Band band = bandProduct.containsBand(bandName) ? bandProduct.getBand(bandName) : bandProduct.getBandAt(bandCnt);
 
-            if (product.containsBand(bandName)) {
-                trgBand = product.getBand(bandName);
-                trgBand.setSourceImage(band.getSourceImage());
+                if (product.containsBand(bandName)) {
+                    trgBand = product.getBand(bandName);
+                    trgBand.setSourceImage(band.getSourceImage());
+                } else {
+                    trgBand = ProductUtils.copyBand(band.getName(), bandProduct, bandName, product, true);
+                }
             } else {
-                trgBand = ProductUtils.copyBand(band.getName(), bandProduct, bandName, product, true);
+                trgBand = new Band(bandName, ProductData.TYPE_INT16, product.getSceneRasterWidth(), product.getSceneRasterHeight());
+                trgBand.setNoDataValue(0.0);
+                trgBand.setNoDataValueUsed(true);
+                product.addBand(trgBand);
             }
-        } else {
-            trgBand = new Band(bandName, ProductData.TYPE_INT16, product.getSceneRasterWidth(), product.getSceneRasterHeight());
-            trgBand.setNoDataValue(0.0);
-            trgBand.setNoDataValueUsed(true);
-            product.addBand(trgBand);
-        }
 
-        trgBand.setDescription(bandProperties.containsKey("title") ? (String)bandProperties.get("title") : (String) bandProperties.get("file"));
-        setBandProperties(trgBand, stacItem, bandProperties);
+            trgBand.setDescription(bandProperties.containsKey("title") ? (String) bandProperties.get("title") : (String) bandProperties.get("file"));
+            setBandProperties(trgBand, stacItem, bandProperties);
+        }
 
         if (product.getSceneGeoCoding() == null && bandProduct != null &&
                 product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
@@ -278,20 +282,22 @@ public class SnapStacProduct implements Closeable {
         if (bandName == null) {
             bandName = (String) bandProperties.get(EO.name);
         }
-        int dataType = ProductData.TYPE_INT8;
-        if (bandProperties.containsKey(Raster.data_type)) {
-            dataType = ProductData.getType((String) bandProperties.get(Raster.data_type));
-        }
+        if (bandName != null) {
+            int dataType = ProductData.TYPE_INT8;
+            if (bandProperties.containsKey(Raster.data_type)) {
+                dataType = ProductData.getType((String) bandProperties.get(Raster.data_type));
+            }
 
-        Band trgBand = new Band(bandName, dataType, product.getSceneRasterWidth(), product.getSceneRasterHeight());
-        if (bandProperties.containsKey("file")) {
-            trgBand.setDescription((String) bandProperties.get("file"));
-        } else {
-            trgBand.setDescription((String) bandProperties.get(EO.description));
-        }
-        setBandProperties(trgBand, stacItem, bandProperties);
+            Band trgBand = new Band(bandName, dataType, product.getSceneRasterWidth(), product.getSceneRasterHeight());
+            if (bandProperties.containsKey("file")) {
+                trgBand.setDescription((String) bandProperties.get("file"));
+            } else {
+                trgBand.setDescription((String) bandProperties.get(EO.description));
+            }
+            setBandProperties(trgBand, stacItem, bandProperties);
 
-        product.addBand(trgBand);
+            product.addBand(trgBand);
+        }
     }
 
     private static void setBandProperties(final Band trgBand, final StacItem stacItem,
