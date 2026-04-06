@@ -108,7 +108,8 @@ public class FeatureUtils {
     }
 
     public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(File shapefile) throws IOException {
-        final URL shapefileUrl = shapefile.toURI().toURL();
+        final File cachedShapefile = getCachedVectorFile(shapefile);
+        final URL shapefileUrl = cachedShapefile.toURI().toURL();
 
         FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = null;
         try {
