@@ -27,6 +27,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -271,7 +272,7 @@ public class ProductSubsetByPolygon {
     private static Polygon readPolygonFromWKTFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading WKT file", 100);
         final StringBuilder wktInput = new StringBuilder();
-        try (final BufferedReader reader = Files.newReader(file, Charset.defaultCharset())) {
+        try (final BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
                 wktInput.append(line);
