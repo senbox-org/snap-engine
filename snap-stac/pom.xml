@@ -83,7 +83,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>org.esa.snap.*</publicPackage>
+                        <publicPackage>org.esa.snap.stac.*</publicPackage>
                     </publicPackages>
                     <moduleDependencies>
                         <dependency>
