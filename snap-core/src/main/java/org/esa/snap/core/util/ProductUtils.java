@@ -48,7 +48,10 @@ import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -2479,6 +2482,16 @@ public class ProductUtils {
             }
         }
         return true;
+    }
+
+    public static Path getProductPath(Object input){
+        if (input instanceof Path path) {
+            return path;
+        } else if (input instanceof File file) {
+            return file.toPath();
+        } else {
+            return Paths.get(input.toString());
+        }
     }
 
     private static VectorDataNode transferVectorDataNode(Product targetProduct, VectorDataNode sourceVectorDataNode, AffineTransform referenceImageToModelTransform) {
