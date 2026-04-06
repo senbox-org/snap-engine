@@ -34,9 +34,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -244,7 +244,7 @@ public class ProductSubsetByPolygon {
 
     private static Polygon readPolygonFromPlacemarkFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading placemark file", 100);
-        try (FileReader reader = new FileReader(file)) {
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
             final List<Placemark> placemarks = PlacemarkIO.readPlacemarks(reader, geoCoding, PinDescriptor.getInstance());
             if (placemarks.size() < 3) {
                 throw new IllegalArgumentException("Cannot create a polygon. 3 or more points are required.");
