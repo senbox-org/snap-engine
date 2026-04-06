@@ -8,6 +8,7 @@ import org.esa.snap.core.datamodel.PinDescriptor;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
@@ -217,7 +218,8 @@ public class ProductSubsetByPolygon {
     private static Polygon readPolygonFromShapeFile(File file, GeoCoding geoCoding, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading Shapefile", 100);
         try {
-            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(file);
+            final File cachedVectorFile = FeatureUtils.getCachedVectorFile(file);
+            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(cachedVectorFile);
             pm.worked(10);
             final SimpleFeatureCollection simpleFeatureCollection = fileDataStore.getFeatureSource().getFeatures();
             pm.worked(50);
