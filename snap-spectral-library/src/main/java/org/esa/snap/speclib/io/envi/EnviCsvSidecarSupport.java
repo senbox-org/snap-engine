@@ -1,7 +1,7 @@
 package org.esa.snap.speclib.io.envi;
 
 import org.esa.snap.dataio.envi.EnviConstants;
-import org.esa.snap.speclib.io.csv.CsvSpectralLibrarySidecarIO;
+import org.esa.snap.speclib.io.csv.sidecar.CsvSpectralLibrarySidecarIO;
 import org.esa.snap.speclib.model.*;
 
 import java.io.IOException;

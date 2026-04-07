@@ -1,4 +1,4 @@
-package org.esa.snap.speclib.io.csv;
+package org.esa.snap.speclib.io.csv.sidecar;
 
 import org.esa.snap.speclib.io.csv.util.*;
 import org.esa.snap.speclib.model.*;

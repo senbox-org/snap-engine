@@ -1,4 +1,4 @@
-package org.esa.snap.speclib.io.csv;
+package org.esa.snap.speclib.io.csv.sidecar;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
