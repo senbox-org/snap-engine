@@ -34,7 +34,7 @@ import java.util.UUID;
 public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
 
 
-    private static final List<String> EXTENSIONS = List.of("hdr", "sli");
+    private static final List<String> EXTENSIONS = List.of("sli", "hdr");
     private static final String FILE_TYPE_SLI = "ENVI Spectral Library";
     private static final String KEY_SPECTRA_NAMES = "spectra names";
     private static final double DEFAULT_NODATA = -9999.0;
