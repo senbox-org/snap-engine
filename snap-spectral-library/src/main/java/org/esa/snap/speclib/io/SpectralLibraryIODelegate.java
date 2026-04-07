@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-
-public interface SpectralLibraryIO {
+public interface SpectralLibraryIODelegate {
 
     SpectralLibrary read(Path path) throws IOException;
     void write(SpectralLibrary library, Path path) throws IOException;

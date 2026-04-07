@@ -16,6 +16,8 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -125,7 +127,7 @@ public class EnviSpectralLibraryIOTest {
                 "bands", "1",
                 "data type", String.valueOf(EnviConstants.TYPE_ID_FLOAT64),
                 "file type", FILE_TYPE_SLI,
-                "wavelength", "{1}", // mismatch
+                "wavelength", "{1}",
                 "wavelength units", "nm",
                 "spectra names", "{A}"
         );
@@ -351,7 +353,7 @@ public class EnviSpectralLibraryIOTest {
         Path hdr = dir.resolve("x.hdr");
         Files.writeString(hdr,
                 "ENVI\n" +
-                        "file type = ENVI\n" + // wrong
+                        "file type = ENVI\n" +
                         "samples = 1\nlines = 1\nbands = 1\n" +
                         "data type = 5\nbyte order = 0\nheader offset = 0\n" +
                         "wavelength = {1}\n" +
@@ -397,12 +399,45 @@ public class EnviSpectralLibraryIOTest {
                 .withProfileAdded(SpectralProfile.create("P", SpectralSignature.of(new double[]{1})));
 
         Path dir = Files.createTempDirectory("sli-pathsli");
-        Path sliPath = dir.resolve("x.sli"); // ends with .sli
+        Path sliPath = dir.resolve("x.sli");
 
         io.write(lib, sliPath);
 
         assertTrue(Files.exists(dir.resolve("x.hdr")));
         assertTrue(Files.exists(sliPath));
+    }
+
+
+    @Test
+    @STTM("SNAP-4177")
+    public void test_canRead() {
+        EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
+
+        assertTrue(io.canRead(Paths.get("library.hdr")));
+        assertTrue(io.canRead(Paths.get("library.sli")));
+        assertTrue(io.canRead(Paths.get("library.HDR")));
+        assertFalse(io.canRead(Paths.get("library.geojson")));
+    }
+
+    @Test
+    @STTM("SNAP-4177")
+    public void test_canWrite() {
+        EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
+
+        assertTrue(io.canWrite(Paths.get("library.hdr")));
+        assertTrue(io.canWrite(Paths.get("library.sli")));
+        assertTrue(io.canWrite(Paths.get("library.SLI")));
+        assertFalse(io.canWrite(Paths.get("library.geojson")));
+    }
+
+    @Test
+    @STTM("SNAP-4177")
+    public void test_getFileExtensions_containsHdrAndSli() {
+        EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
+        List<String> exts = io.getFileExtensions();
+
+        assertTrue(exts.contains("hdr"));
+        assertTrue(exts.contains("sli"));
     }
 
 
@@ -450,7 +485,9 @@ public class EnviSpectralLibraryIOTest {
 
         boolean hasFileType = false;
         for (int i = 0; i < kv.length; i += 2) {
-            if ("file type".equals(kv[i])) hasFileType = true;
+            if ("file type".equals(kv[i])) {
+                hasFileType = true;
+            }
         }
         if (!hasFileType) {
             sb.append("file type = ").append(FILE_TYPE_SLI).append("\n");

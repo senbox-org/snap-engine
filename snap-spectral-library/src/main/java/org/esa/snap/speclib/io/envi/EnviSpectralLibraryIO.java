@@ -5,7 +5,7 @@ import org.esa.snap.dataio.envi.EnviConstants;
 import org.esa.snap.dataio.envi.EnviProductReader;
 import org.esa.snap.dataio.envi.Header;
 import org.esa.snap.dataio.envi.HeaderParser;
-import org.esa.snap.speclib.io.SpectralLibraryIO;
+import org.esa.snap.speclib.io.SpectralLibraryIODelegate;
 import org.esa.snap.speclib.model.AttributeSchema;
 import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralLibrary;
@@ -31,9 +31,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 
-public class EnviSpectralLibraryIO implements SpectralLibraryIO {
+public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
 
 
+    private static final List<String> EXTENSIONS = List.of("hdr", "sli");
     private static final String FILE_TYPE_SLI = "ENVI Spectral Library";
     private static final String KEY_SPECTRA_NAMES = "spectra names";
     private static final double DEFAULT_NODATA = -9999.0;
@@ -200,7 +201,22 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIO {
         EnviCsvSidecarSupport.writeIfNeeded(library, hdrPath);
     }
 
+    @Override
+    public boolean canRead(Path path) {
+        String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
+        return name.endsWith(EXTENSIONS.getFirst()) || name.endsWith(EXTENSIONS.get(1));
+    }
 
+    @Override
+    public boolean canWrite(Path path) {
+        String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
+        return name.endsWith(EXTENSIONS.getFirst()) || name.endsWith(EXTENSIONS.get(1));
+    }
+
+    @Override
+    public List<String> getFileExtensions() {
+        return EXTENSIONS;
+    }
 
     private static Path resolveHdrPath(Path path) {
         String name = path.getFileName().toString();

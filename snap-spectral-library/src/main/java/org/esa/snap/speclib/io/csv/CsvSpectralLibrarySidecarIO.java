@@ -1,6 +1,5 @@
 package org.esa.snap.speclib.io.csv;
 
-import org.esa.snap.speclib.io.SpectralLibraryIO;
 import org.esa.snap.speclib.io.csv.util.*;
 import org.esa.snap.speclib.model.*;
 
@@ -10,13 +9,13 @@ import java.nio.file.Path;
 import java.util.*;
 
 
-public class CsvSpectralLibraryIO implements SpectralLibraryIO {
+public class CsvSpectralLibrarySidecarIO {
 
 
     public static final String COL_SPECTRA_NAMES = "spectra names";
     public static final String COL_WKT = "wkt";
 
-    @Override
+
     public SpectralLibrary read(Path path) throws IOException {
         Objects.requireNonNull(path, "path must not be null");
 
@@ -90,7 +89,6 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIO {
         return new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, schema);
     }
 
-    @Override
     public void write(SpectralLibrary library, Path path) throws IOException {
         Objects.requireNonNull(library, "library must not be null");
         Objects.requireNonNull(path, "path must not be null");
