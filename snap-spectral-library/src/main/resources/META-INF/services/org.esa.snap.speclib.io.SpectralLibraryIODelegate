@@ -1,1 +1,2 @@
 org.esa.snap.speclib.io.envi.EnviSpectralLibraryIO
+org.esa.snap.speclib.io.csv.CsvSpectralLibraryIO
