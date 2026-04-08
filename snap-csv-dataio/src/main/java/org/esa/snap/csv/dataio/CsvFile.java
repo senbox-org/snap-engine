@@ -21,6 +21,7 @@ import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.converters.JavaTypeConverter;
@@ -36,11 +37,9 @@ import org.opengis.feature.type.AttributeType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -72,7 +71,6 @@ public class CsvFile implements CsvSourceParser, CsvSource {
     private int headerByteSize;
     private int propertiesByteSize;
     private Converter<?>[] converters;
-    private RandomAccessFile randomAccessFile;
 
     private CsvFile(String csv) throws IOException {
         this(new File(csv), null);
@@ -82,12 +80,15 @@ public class CsvFile implements CsvSourceParser, CsvSource {
         this.csv = csv;
         ConverterRegistry.getInstance().setConverter(ProductData.UTC.class, new UTCConverter());
         this.crs = crs;
-        randomAccessFile = new RandomAccessFile(csv, "r");
-        stream = new FileImageInputStream(randomAccessFile);
+        stream = ImageUtils.getImageInputStream(csv);
     }
 
     public static CsvSourceParser createCsvSourceParser(String csv) throws IOException {
         return new CsvFile(csv);
+    }
+
+    public static CsvSourceParser createCsvSourceParser(File csv) throws IOException {
+        return new CsvFile(csv, null);
     }
 
     @Override
@@ -212,11 +213,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
         if (stream != null) {
             stream.close();
         }
-        if (randomAccessFile != null) {
-            randomAccessFile.close();
-        }
         stream = null;
-        randomAccessFile = null;
     }
 
     @Override
