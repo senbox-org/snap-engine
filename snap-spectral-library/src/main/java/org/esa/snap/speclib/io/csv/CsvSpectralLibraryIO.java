@@ -4,6 +4,7 @@ import org.esa.snap.speclib.io.SpectralLibraryIODelegate;
 import org.esa.snap.speclib.io.csv.util.CsvAttributeCodec;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.esa.snap.speclib.io.csv.util.CsvUtils;
+import org.esa.snap.speclib.io.util.IOUtils;
 import org.esa.snap.speclib.model.AttributeDef;
 import org.esa.snap.speclib.model.AttributeSchema;
 import org.esa.snap.speclib.model.AttributeType;
@@ -55,7 +56,7 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIODelegate {
 
     @Override
     public boolean canRead(Path path) {
-        if (!CsvUtils.hasExtension(path, "csv")) {
+        if (!IOUtils.hasExtension(path, "csv")) {
             return false;
         }
         return looksLikeSpectralCsv(path);
@@ -63,7 +64,7 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIODelegate {
 
     @Override
     public boolean canWrite(Path path) {
-        return CsvUtils.hasExtension(path, "csv");
+        return IOUtils.hasExtension(path, "csv");
     }
 
     @Override
@@ -136,7 +137,7 @@ public class CsvSpectralLibraryIO implements SpectralLibraryIODelegate {
             profiles.add(new SpectralProfile(UUID.randomUUID(), profileName, sig, attrs, null));
         }
 
-        String libName = CsvUtils.stripExtension(path.getFileName().toString());
+        String libName = IOUtils.stripExtension(path.getFileName().toString());
         return new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, schema);
     }
 

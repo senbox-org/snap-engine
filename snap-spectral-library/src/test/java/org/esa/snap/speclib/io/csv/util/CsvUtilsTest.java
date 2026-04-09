@@ -213,25 +213,6 @@ public class CsvUtilsTest {
 
     @Test
     @STTM("SNAP-4177")
-    public void test_hasExtension() {
-        assertTrue(CsvUtils.hasExtension(Paths.get("library.csv"), "csv"));
-        assertTrue(CsvUtils.hasExtension(Paths.get("library.CSV"), "csv"));
-        assertFalse(CsvUtils.hasExtension(Paths.get("library.geojson"), "csv"));
-        assertFalse(CsvUtils.hasExtension(null, "csv"));
-    }
-
-
-    @Test
-    @STTM("SNAP-4177")
-    public void test_stripExtension() {
-        assertEquals("library", CsvUtils.stripExtension("library.csv"));
-        assertEquals("library", CsvUtils.stripExtension("library"));
-        assertEquals(".hidden", CsvUtils.stripExtension(".hidden"));
-    }
-
-
-    @Test
-    @STTM("SNAP-4177")
     public void test_inferAttributeType() {
         assertEquals(AttributeType.INT, CsvUtils.inferAttributeType("count", "42"));
         assertEquals(AttributeType.DOUBLE, CsvUtils.inferAttributeType("score", "0.95"));

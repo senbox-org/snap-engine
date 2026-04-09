@@ -6,6 +6,7 @@ import org.esa.snap.dataio.envi.EnviProductReader;
 import org.esa.snap.dataio.envi.Header;
 import org.esa.snap.dataio.envi.HeaderParser;
 import org.esa.snap.speclib.io.SpectralLibraryIODelegate;
+import org.esa.snap.speclib.io.util.IOUtils;
 import org.esa.snap.speclib.model.AttributeSchema;
 import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralLibrary;
@@ -148,7 +149,7 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
             }
         }
 
-        String libName = stripExtension(hdrPath.getFileName().toString());
+        String libName = IOUtils.stripExtension(hdrPath.getFileName().toString());
         SpectralLibrary lib = new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, new AttributeSchema());
 
         return EnviCsvSidecarSupport.mergeIfPresent(lib, hdrPath);
@@ -237,12 +238,12 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
         if (name.toLowerCase(Locale.ROOT).endsWith(EnviConstants.HDR_EXTENSION)) {
             return path;
         }
-        return path.resolveSibling(stripExtension(name) + EnviConstants.HDR_EXTENSION);
+        return path.resolveSibling(IOUtils.stripExtension(name) + EnviConstants.HDR_EXTENSION);
     }
 
     private static Path resolveDataPath(Path path) {
         String name = path.getFileName().toString();
-        String base = stripExtension(name);
+        String base = IOUtils.stripExtension(name);
 
         if (name.toLowerCase(Locale.ROOT).endsWith(".sli")) {
             return path;
@@ -251,7 +252,7 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
     }
 
     private static File resolveDataFile(File hdrFile) throws IOException {
-        String base = stripExtension(hdrFile.getName());
+        String base = IOUtils.stripExtension(hdrFile.getName());
         File siblingSli = new File(hdrFile.getParentFile(), base + ".sli");
         if (siblingSli.exists()) {
             return siblingSli;
@@ -320,10 +321,5 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
 
     private static String formatDouble(double d) {
         return Double.toString(d);
-    }
-
-    private static String stripExtension(String name) {
-        int dot = name.lastIndexOf('.');
-        return dot > 0 ? name.substring(0, dot) : name;
     }
 }

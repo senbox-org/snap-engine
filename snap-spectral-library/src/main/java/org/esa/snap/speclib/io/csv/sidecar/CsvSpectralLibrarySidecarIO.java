@@ -1,6 +1,7 @@
 package org.esa.snap.speclib.io.csv.sidecar;
 
 import org.esa.snap.speclib.io.csv.util.*;
+import org.esa.snap.speclib.io.util.IOUtils;
 import org.esa.snap.speclib.model.*;
 
 import java.io.IOException;
@@ -85,7 +86,7 @@ public class CsvSpectralLibrarySidecarIO {
             profiles.add(p);
         }
 
-        String libName = stripExtension(path.getFileName().toString());
+        String libName = IOUtils.stripExtension(path.getFileName().toString());
         return new SpectralLibrary(UUID.randomUUID(), libName, axis, null, profiles, schema);
     }
 
@@ -172,10 +173,5 @@ public class CsvSpectralLibrarySidecarIO {
         }
         String v = row.get(idx);
         return v == null ? "" : v;
-    }
-
-    private static String stripExtension(String name) {
-        int dot = name.lastIndexOf('.');
-        return dot > 0 ? name.substring(0, dot) : name;
     }
 }
