@@ -31,6 +31,20 @@ import java.util.Objects;
 import java.util.UUID;
 
 
+/**
+ * ENVI Spectral Library implementation of {@link SpectralLibraryIODelegate}.
+ *
+ * <p>Reads and writes spectral libraries in the ENVI Spectral Library binary format,
+ * consisting of a binary data file ({@code .sli}) and an ASCII header ({@code .hdr}).
+ * All profiles share a common wavelength axis as required by the format.
+ *
+ * <p>Bad bands are represented as {@code NaN} internally and as the nodata value
+ * ({@code -9999.0} by default, or as specified in the header) on disk.
+ *
+ * <p>Custom attributes are stored in and read from a CSV sidecar file
+ * (same base name as the header, with {@code .csv} extension) via
+ * {@link EnviCsvSidecarSupport}.
+ */
 public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
 
 

@@ -28,29 +28,18 @@ import java.util.UUID;
 
 
 /**
- * Standalone CSV implementation of {@link SpectralLibraryIODelegate}.
+ * Spectral Library CSV implementation of {@link SpectralLibraryIODelegate}.
  *
  * <p>Reads and writes spectral libraries as CSV files, compatible with the
- * EcoSIS (Ecological Spectral Information System) format.
+ * EcoSIS (Ecological Spectral Information System) By-Row format.
+ * Columns with numeric headers are treated as wavelengths; all other columns
+ * are metadata attributes.
  *
- * <p><b>Format (By Row – export default):</b>
- * <pre>
- * spectra,wkt,class,490.0,560.0,665.0
- * Profile1,POINT(13.0 52.0),vegetation,95.0,118.0,109.0
- * Profile2,,urban,103.0,,93.0
- * </pre>
+ * <p>By-Column oriented files (first data column contains wavelength values)
+ * are automatically transposed on import. Export is always By-Row.
  *
- * <ul>
- *   <li>Columns with numeric headers are wavelengths (spectral data).</li>
- *   <li>Non-numeric columns are metadata attributes.</li>
- *   <li>The name column is recognised by the keys {@code spectra}, {@code name},
- *       or {@code spectra names} (case-insensitive). On export {@code spectra} is used.</li>
- *   <li>Empty cells in spectral columns become {@code NaN} (bad band).</li>
- *   <li>{@code xUnit} may appear as a non-numeric header and carries the wavelength unit.</li>
- * </ul>
- *
- * <p><b>By Column import:</b> If the first header token is numeric the table is
- * transposed before parsing, making By-Column EcoSIS files readable.
+ * <p>Bad bands are represented as {@code NaN} internally and as empty cells on disk.
+ * The wavelength unit is optionally stored in an {@code xUnit} column.
  */
 public class CsvSpectralLibraryIO implements SpectralLibraryIODelegate {
 

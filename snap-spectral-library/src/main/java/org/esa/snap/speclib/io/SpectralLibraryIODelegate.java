@@ -1,16 +1,12 @@
 package org.esa.snap.speclib.io;
 
-import org.esa.snap.speclib.model.SpectralLibrary;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-
-public interface SpectralLibraryIODelegate {
-
-    SpectralLibrary read(Path path) throws IOException;
-    void write(SpectralLibrary library, Path path) throws IOException;
-    boolean canRead(Path path);
-    boolean canWrite(Path path);
-    List<String> getFileExtensions();
-}
+/**
+ * SPI interface for individual spectral library format implementations.
+ *
+ * <p>Extends {@link SpectralLibraryIO} — a delegate is a full {@link SpectralLibraryIO}
+ * for a specific format. Register concrete implementations in
+ * {@code META-INF/services/org.esa.snap.speclib.io.SpectralLibraryIODelegate}.
+ * The {@link CompositeSpectralLibraryIO} discovers and delegates to them.
+ */
+public interface SpectralLibraryIODelegate extends SpectralLibraryIO { }
