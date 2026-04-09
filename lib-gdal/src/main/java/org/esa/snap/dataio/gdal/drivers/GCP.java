@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -7,12 +9,13 @@ import java.lang.invoke.MethodHandle;
  *
  * @author Adrian Drăghici
  */
-public class GCP extends GDALBase {
+public class GCP extends GDALBase implements Closeable {
 
     /**
      * The name of JNI GDAL GCP class
      */
     static final String CLASS_NAME = "org.gdal.gdal.GCP";
+    static final String GCP_ARRAY_CLASS_NAME = "[Lorg.gdal.gdal.GCP;";
     private static final Class<?> gcpClass;
 
     static {
@@ -25,6 +28,25 @@ public class GCP extends GDALBase {
     private final MethodHandle getGCPZHandle;
     private final MethodHandle getGCPPixelHandle;
     private final MethodHandle getGCPLineHandle;
+    private final MethodHandle deleteHandle;
+
+    /**
+     * Creates a new GDAL Ground Control Point (GCP) wrapper instance.
+     * @param pixel the raster pixel (column) coordinate associated with the GCP
+     * @param line  the raster line (row) coordinate associated with the GCP
+     * @param x     the geographic or projected X coordinate (longitude when using EPSG:4326)
+     * @param y     the geographic or projected Y coordinate (latitude when using EPSG:4326)
+     * @param z     the elevation value associated with the GCP (typically 0.0)
+     *
+     * @return a {@code GCP} wrapper containing the newly created GDAL JNI GCP instance
+     */
+    public static GCP create(double pixel, double line, double x, double y, double z) {
+        Object jni = GDALReflection.fetchGDALLibraryClassInstance(CLASS_NAME,
+                                                                    new Class[]{double.class, double.class, double.class, double.class, double.class},
+                                                                    new Object[]{x, y, z, pixel, line}
+                                                                );
+        return new GCP(jni);
+    }
 
     /**
      * Creates new instance for this driver
@@ -39,9 +61,18 @@ public class GCP extends GDALBase {
             getGCPZHandle = createHandle(gcpClass, "getGCPZ", double.class);
             getGCPPixelHandle = createHandle(gcpClass, "getGCPPixel", double.class);
             getGCPLineHandle = createHandle(gcpClass, "getGCPLine", double.class);
+            deleteHandle = createHandle(gcpClass, "delete", void.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Gets the JNI GDAL GCP class instance
+     * @return the JNI GCP instance
+     */
+    public Object getJniGCPInstance() {
+        return jniGCPInstance;
     }
 
     /**
@@ -89,4 +120,15 @@ public class GCP extends GDALBase {
         return (Double) invoke(getGCPLineHandle, this.jniGCPInstance);
     }
 
+    /**
+     * Calls the JNI GDAL Dataset class delete() method
+     */
+    public void delete() {
+        invoke(deleteHandle, this.jniGCPInstance);
+    }
+
+    @Override
+    public void close() throws IOException {
+        delete();
+    }
 }

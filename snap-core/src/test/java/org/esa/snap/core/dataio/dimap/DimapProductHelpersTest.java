@@ -813,6 +813,22 @@ public class DimapProductHelpersTest {
 
     }
 
+    @Test
+    public void testEscapeXml() {
+        String input = "Text with <, >, &, \" and ' characters";
+        String expected = "Text with &lt;, &gt;, &amp;, &quot; and &apos; characters";
+
+        String result = DimapProductHelpers.escapeXml(input);
+        assertEquals(expected, result);
+
+        // null input
+        assertEquals("", DimapProductHelpers.escapeXml(null));
+        // empty String
+        assertEquals("", DimapProductHelpers.escapeXml(""));
+        // no special characters
+        assertEquals("Hello World", DimapProductHelpers.escapeXml("Hello World"));
+    }
+
     private int[] withoutMandatoryLines(final int[] value) {
         return ArrayUtils.addArrays(_notMandatoryLines, value);
     }

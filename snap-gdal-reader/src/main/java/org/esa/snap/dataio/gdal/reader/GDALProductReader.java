@@ -150,9 +150,7 @@ public class GDALProductReader extends AbstractProductReader {
 
             int gcpCount = gdalDataset.getGCPCount();
             final GcpGeoCoding.Method method;
-            if (gcpCount >= GcpGeoCoding.Method.POLYNOMIAL3.getTermCountP()) {
-                method = GcpGeoCoding.Method.POLYNOMIAL3;
-            } else if (gcpCount >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
+            if (gcpCount >= GcpGeoCoding.Method.POLYNOMIAL2.getTermCountP()) {
                 method = GcpGeoCoding.Method.POLYNOMIAL2;
             } else if (gcpCount >= GcpGeoCoding.Method.POLYNOMIAL1.getTermCountP()) {
                 method = GcpGeoCoding.Method.POLYNOMIAL1;
