@@ -81,7 +81,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>org.esa.snap.*</publicPackage>
+                        <publicPackage>org.esa.snap.classification.*</publicPackage>
                         <publicPackage>net.sf.javaml.*</publicPackage>
                         <publicPackage>be.abeel.*</publicPackage>
                         <publicPackage>libsvm.*</publicPackage>
