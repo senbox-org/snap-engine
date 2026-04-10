@@ -8,14 +8,22 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PinDescriptor;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Placemark;
+import org.esa.snap.core.datamodel.PlainFeatureFactory;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geojson.geom.GeometryJSON;
+import org.geotools.geometry.DirectPosition2D;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -40,6 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipFile;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.operation.MathTransform;
 
 /**
  * This class provides the core components for the new subset feature, that is Polygon Subset.
@@ -183,24 +194,18 @@ public class ProductSubsetByPolygon {
         }
         final GeoCoding geoCoding = targetProductMetadata.getGeoCoding();
         final Dimension productDimension = new Dimension(targetProductMetadata.getProductWidth(), targetProductMetadata.getProductHeight());
-        switch (Files.getFileExtension(vectorFile.getName())) {
-            case SupportedVectorFilesFormat.SHAPEFILE:
-                return readPolygonFromShapeFile(vectorFile, geoCoding, pm);
-            case SupportedVectorFilesFormat.KML:
-                return readPolygonFromKMLFile(vectorFile, geoCoding, productDimension, pm);
-            case SupportedVectorFilesFormat.KMZ:
-                return readPolygonFromKMZFile(vectorFile, geoCoding, productDimension, pm);
-            case SupportedVectorFilesFormat.GEOJSON:
-                return readPolygonFromGeoJsonFile(vectorFile, geoCoding, productDimension, pm);
-            case SupportedVectorFilesFormat.TXT:
-            case SupportedVectorFilesFormat.WKT:
-                return readPolygonFromWKTFile(vectorFile, geoCoding, productDimension, pm);
-            case SupportedVectorFilesFormat.PLACEMARK_FILE:
-            case SupportedVectorFilesFormat.PNX:
-                return readPolygonFromPlacemarkFile(vectorFile, geoCoding, productDimension, pm);
-            default:
-                throw new IllegalArgumentException("Unsupported vector file.");
-        }
+        return switch (Files.getFileExtension(vectorFile.getName())) {
+            case SupportedVectorFilesFormat.SHAPEFILE -> readPolygonFromShapeFile(vectorFile, geoCoding, pm);
+            case SupportedVectorFilesFormat.KML -> readPolygonFromKMLFile(vectorFile, geoCoding, productDimension, pm);
+            case SupportedVectorFilesFormat.KMZ -> readPolygonFromKMZFile(vectorFile, geoCoding, productDimension, pm);
+            case SupportedVectorFilesFormat.GEOJSON ->
+                    readPolygonFromGeoJsonFile(vectorFile, geoCoding, productDimension, pm);
+            case SupportedVectorFilesFormat.TXT, SupportedVectorFilesFormat.WKT ->
+                    readPolygonFromWKTFile(vectorFile, geoCoding, productDimension, pm);
+            case SupportedVectorFilesFormat.PLACEMARK_FILE, SupportedVectorFilesFormat.PNX ->
+                    readPolygonFromPlacemarkFile(vectorFile, geoCoding, productDimension, pm);
+            default -> throw new IllegalArgumentException("Unsupported vector file.");
+        };
     }
 
     private static Polygon readPolygonFromWKTString(String wktString, boolean pixelCoordinates, MetadataInspector.Metadata targetProductMetadata, ProgressMonitor pm) throws Exception {
@@ -254,7 +259,7 @@ public class ProductSubsetByPolygon {
                 w += 40 / placemarks.size();
                 pm.worked(w);
             }
-            placemarkCoordinates.add(placemarkCoordinates.get(0));
+            placemarkCoordinates.add(placemarkCoordinates.getFirst());
             final Coordinate[] polygonCoordinates = placemarkCoordinates.toArray(new Coordinate[0]);
             pm.worked(50);
             return buildPolygonFromPixelCoordinates(polygonCoordinates, productDimension, pm);
@@ -370,41 +375,20 @@ public class ProductSubsetByPolygon {
     }
 
     private static Polygon buildPolygonFromGeoCoordinates(Coordinate[] geoCoordinates, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) {
-        final List<Coordinate> pixelCoordinates = new ArrayList<>();
-        for (Coordinate geoCoordinate : geoCoordinates) {
-            final GeoPos geoPos = new GeoPos(geoCoordinate.getY(), geoCoordinate.getX());
-            if (!geoPos.isValid()) {
-                throw new IllegalArgumentException("Coordinate: " + geoPos.getLonString() + "," + geoPos.getLatString() + " is not a valid Geo coordinate (Lat,Lon).");
-            }
-            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
-            pixelCoordinates.add(new Coordinate((int) pixelPos.getX(), (int) pixelPos.getY()));
-        }
-        if (!geoCoordinates[0].equals(geoCoordinates[geoCoordinates.length - 1])) {
-            pixelCoordinates.add(pixelCoordinates.get(0));
-        }
-        final Coordinate[] polygonCoordinates = pixelCoordinates.toArray(new Coordinate[0]);
+        GeometryNormalizer.validateGeoCoordinates(geoCoordinates);
+        final Polygon inputGeoPolygon = GeometryNormalizer.buildPolygonFromCoordinates(geoCoordinates);
+        final Polygon clippedGeoPolygon = PolygonClipper.clipGeoPolygonToProductBounds(inputGeoPolygon, geoCoding, productDimension);
+        final Coordinate[] polygonCoordinates = PolygonSubsetLoader.projectGeoCoordinatesToPixel(clippedGeoPolygon.getCoordinates(), geoCoding);
         pm.worked(55);
         return buildPolygonFromPixelCoordinates(polygonCoordinates, productDimension, pm);
     }
 
     private static Polygon buildPolygonFromPixelCoordinates(Coordinate[] polygonCoordinates, Dimension productDimension, ProgressMonitor pm) {
         pm.setSubTaskName("building polygon");
-        final GeometryFactory geometryFactory = new GeometryFactory();
-        final Polygon polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(polygonCoordinates), new LinearRing[0]);
-        int w = 50;
-        final Polygon productPolygon = buildProductPolygonFromDimension(productDimension);
-        for (Coordinate polygonCoordinate : polygonCoordinates) {
-            if (polygonCoordinate.getX() < 0 || polygonCoordinate.getX() > productDimension.getHeight() - 1 || polygonCoordinate.getY() < 0 || polygonCoordinate.getY() > productDimension.getHeight() - 1) {
-                final Polygon intersectionPolygon = (Polygon) productPolygon.intersection(polygon);
-                if (intersectionPolygon.isEmpty()) {
-                    throw new IllegalArgumentException("Intersection of the polygon with the product returns an empty polygon. Subseting by empty polygon is not supported.");
-                }
-                return intersectionPolygon;
-            }
-            w += 50 / polygonCoordinates.length;
-            pm.worked(w);
-        }
-        return polygon;
+        final Polygon polygon = GeometryNormalizer.buildPolygonFromCoordinates(polygonCoordinates);
+        final Polygon clippedPolygon = PolygonClipper.clipPixelPolygonToProductBounds(polygon, productDimension);
+        pm.worked(100);
+        return clippedPolygon;
     }
 
     private static Polygon buildProductPolygonFromDimension(Dimension productDimension) {
@@ -425,6 +409,117 @@ public class ProductSubsetByPolygon {
         }
         final GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPolygon(geometryFactory.createLinearRing(geoCoordinates.toArray(new Coordinate[0])), new LinearRing[0]);
+    }
+
+    private static class PolygonSubsetLoader {
+        private static Coordinate[] projectGeoCoordinatesToPixel(Coordinate[] geoCoordinates, GeoCoding geoCoding) {
+            try {
+                final MathTransform mapToImage = geoCoding.getImageToMapTransform().inverse();
+                final Coordinate[] pixelCoordinates = new Coordinate[geoCoordinates.length];
+                for (int i = 0; i < geoCoordinates.length; i++) {
+                    final DirectPosition2D geoPosition = new DirectPosition2D(geoCoordinates[i].getX(), geoCoordinates[i].getY());
+                    mapToImage.transform(geoPosition, geoPosition);
+                    if (!Double.isFinite(geoPosition.getX()) || !Double.isFinite(geoPosition.getY())) {
+                        throw new IllegalArgumentException("Cannot project polygon coordinate to product pixel space.");
+                    }
+                    pixelCoordinates[i] = new Coordinate(geoPosition.getX(), geoPosition.getY());
+                }
+                return pixelCoordinates;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Cannot project polygon to product pixel space.", e);
+            }
+        }
+    }
+
+    private static class GeometryNormalizer {
+        private static void validateGeoCoordinates(Coordinate[] geoCoordinates) {
+            for (Coordinate geoCoordinate : geoCoordinates) {
+                final GeoPos geoPos = new GeoPos(geoCoordinate.getY(), geoCoordinate.getX());
+                if (!geoPos.isValid()) {
+                    throw new IllegalArgumentException("Coordinate: " + geoPos.getLonString() + "," + geoPos.getLatString() + " is not a valid Geo coordinate (Lat,Lon).");
+                }
+            }
+        }
+
+        private static Polygon buildPolygonFromCoordinates(Coordinate[] polygonCoordinates) {
+            final GeometryFactory geometryFactory = new GeometryFactory();
+            Coordinate[] closedPolygonCoordinates = polygonCoordinates;
+            if (!polygonCoordinates[0].equals(polygonCoordinates[polygonCoordinates.length - 1])) {
+                closedPolygonCoordinates = new Coordinate[polygonCoordinates.length + 1];
+                System.arraycopy(polygonCoordinates, 0, closedPolygonCoordinates, 0, polygonCoordinates.length);
+                closedPolygonCoordinates[polygonCoordinates.length] = polygonCoordinates[0];
+            }
+            return geometryFactory.createPolygon(geometryFactory.createLinearRing(closedPolygonCoordinates), new LinearRing[0]);
+        }
+
+        private static Polygon singlePolygon(Geometry geometry) {
+            if (geometry.isEmpty()) {
+                throw new IllegalArgumentException("Intersection of the polygon with the product returns an empty polygon. Subsetting by empty polygon is not supported.");
+            }
+            if (geometry instanceof Polygon) {
+                return (Polygon) geometry;
+            }
+            if (geometry instanceof MultiPolygon multiPolygon) {
+                if (multiPolygon.getNumGeometries() > 1) {
+                    throw new IllegalArgumentException("Subsetting by multiple polygons is not supported.");
+                }
+                return (Polygon) multiPolygon.getGeometryN(0);
+            }
+            throw new IllegalArgumentException("Intersection with product bounds did not return a polygon.");
+        }
+    }
+
+    private static class PolygonClipper {
+        private static Polygon clipGeoPolygonToProductBounds(Polygon geoPolygon, GeoCoding geoCoding, Dimension productDimension) {
+            final Product product = createTemporaryProduct(geoCoding, productDimension);
+            final DefaultFeatureCollection sourceCollection = createFeatureCollectionFromGeometry(geoPolygon);
+            final DefaultFeatureCollection clippedCollection = FeatureUtils.clipFeatureCollectionToProductBounds(
+                    sourceCollection, product, null, ProgressMonitor.NULL);
+            if (clippedCollection.isEmpty()) {
+                throw new IllegalArgumentException("Intersection of the polygon with the product returns an empty polygon. Subsetting by empty polygon is not supported.");
+            }
+            final Geometry clippedGeometry;
+            try (FeatureIterator<SimpleFeature> iterator = clippedCollection.features()) {
+                if (!iterator.hasNext()) {
+                    throw new IllegalArgumentException("Intersection of the polygon with the product returns an empty polygon. Subsetting by empty polygon is not supported.");
+                }
+                clippedGeometry = (Geometry) iterator.next().getDefaultGeometry();
+            }
+            return GeometryNormalizer.singlePolygon(clippedGeometry);
+        }
+
+        private static Polygon clipPixelPolygonToProductBounds(Polygon polygon, Dimension productDimension) {
+            final Polygon productPixelPolygon = buildProductPolygonFromDimension(productDimension);
+            for (Coordinate coordinate : polygon.getCoordinates()) {
+                if (coordinate.getX() < 0 || coordinate.getX() > productDimension.getWidth() - 1 ||
+                        coordinate.getY() < 0 || coordinate.getY() > productDimension.getHeight() - 1) {
+                    final Geometry clippedGeometry = productPixelPolygon.intersection(polygon);
+                    return GeometryNormalizer.singlePolygon(clippedGeometry);
+                }
+            }
+            return polygon;
+        }
+
+        private static Product createTemporaryProduct(GeoCoding geoCoding, Dimension productDimension) {
+            final int width = (int) productDimension.getWidth();
+            final int height = (int) productDimension.getHeight();
+            final Product product = new Product("polygon-subset-temp", "POLYGON_SUBSET", width, height);
+            product.setSceneGeoCoding(geoCoding);
+            if (geoCoding.getMapCRS() != null) {
+                product.setSceneCRS(geoCoding.getMapCRS());
+            }
+            return product;
+        }
+
+        private static DefaultFeatureCollection createFeatureCollectionFromGeometry(Geometry geometry) {
+            final SimpleFeatureType featureType = PlainFeatureFactory.createDefaultFeatureType(DefaultGeographicCRS.WGS84);
+            final DefaultFeatureCollection collection = new DefaultFeatureCollection(null, featureType);
+            final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
+            final SimpleFeature feature = featureBuilder.buildFeature("ID0");
+            feature.setDefaultGeometry(geometry);
+            collection.add(feature);
+            return collection;
+        }
     }
 
     private static class SupportedVectorFilesFormat {
