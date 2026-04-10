@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
+import org.apache.commons.math3.util.FastMath;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import ucar.ma2.Array;
@@ -30,6 +31,8 @@ import java.util.List;
  * Provides some NetCDF related utility methods.
  */
 public class ReaderUtils {
+    private static final double LN10 = Math.log(10.0);
+
 
     public static ProductData createProductData(int productDataType, Array values) {
         Object data = values.getStorage();
@@ -159,6 +162,35 @@ public class ReaderUtils {
             result = rawArray;
         }
         return result;
+    }
+
+    /**
+     * Applies the inverse logarithmic scaling to the elements of the given array.
+     * This operation transforms logarithmic-scaled values back to their original scale using base-10 exponentiation.
+     *
+     * @param array the array whose elements are to be transformed. The array must have a storage type of float[] or double[],
+     *              or provide access to its values via the {@code array.getDouble(int)} and {@code array.setDouble(int, double)} methods.
+     */
+    public static void invLogScaling(Array array) {
+        final Object storage = array.getStorage();
+        // ca. 4x faster than Math.pow(10, value) and 2x faster than Math.exp(LN10 * value)
+        // as already stated in org.esa.snap.core.datamodel.Stx.Log10Scaling.scaleInverse
+        if (storage instanceof float[] values) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = (float) FastMath.exp(LN10 * values[i]);
+            }
+            return;
+        }
+        if (storage instanceof double[] values) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = FastMath.exp(LN10 * values[i]);
+            }
+            return;
+        }
+
+        for (int i = 0, n = (int) array.getSize(); i < n; i++) {
+            array.setDouble(i, FastMath.exp(LN10 * array.getDouble(i)));
+        }
     }
 }
 
