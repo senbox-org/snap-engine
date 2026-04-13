@@ -411,8 +411,8 @@ public class ProductSubsetByPolygon {
         return geometryFactory.createPolygon(geometryFactory.createLinearRing(geoCoordinates.toArray(new Coordinate[0])), new LinearRing[0]);
     }
 
-    private static class PolygonSubsetLoader {
-        private static Coordinate[] projectGeoCoordinatesToPixel(Coordinate[] geoCoordinates, GeoCoding geoCoding) {
+    public static class PolygonSubsetLoader {
+        public static Coordinate[] projectGeoCoordinatesToPixel(Coordinate[] geoCoordinates, GeoCoding geoCoding) {
             try {
                 final MathTransform mapToImage = geoCoding.getImageToMapTransform().inverse();
                 final Coordinate[] pixelCoordinates = new Coordinate[geoCoordinates.length];
@@ -431,8 +431,8 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static class GeometryNormalizer {
-        private static void validateGeoCoordinates(Coordinate[] geoCoordinates) {
+    public static class GeometryNormalizer {
+        public static void validateGeoCoordinates(Coordinate[] geoCoordinates) {
             for (Coordinate geoCoordinate : geoCoordinates) {
                 final GeoPos geoPos = new GeoPos(geoCoordinate.getY(), geoCoordinate.getX());
                 if (!geoPos.isValid()) {
@@ -441,7 +441,7 @@ public class ProductSubsetByPolygon {
             }
         }
 
-        private static Polygon buildPolygonFromCoordinates(Coordinate[] polygonCoordinates) {
+        public static Polygon buildPolygonFromCoordinates(Coordinate[] polygonCoordinates) {
             final GeometryFactory geometryFactory = new GeometryFactory();
             Coordinate[] closedPolygonCoordinates = polygonCoordinates;
             if (!polygonCoordinates[0].equals(polygonCoordinates[polygonCoordinates.length - 1])) {
@@ -452,7 +452,7 @@ public class ProductSubsetByPolygon {
             return geometryFactory.createPolygon(geometryFactory.createLinearRing(closedPolygonCoordinates), new LinearRing[0]);
         }
 
-        private static Polygon singlePolygon(Geometry geometry) {
+        public static Polygon singlePolygon(Geometry geometry) {
             if (geometry.isEmpty()) {
                 throw new IllegalArgumentException("Intersection of the polygon with the product returns an empty polygon. Subsetting by empty polygon is not supported.");
             }
@@ -469,8 +469,8 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static class PolygonClipper {
-        private static Polygon clipGeoPolygonToProductBounds(Polygon geoPolygon, GeoCoding geoCoding, Dimension productDimension) {
+    public static class PolygonClipper {
+        public static Polygon clipGeoPolygonToProductBounds(Polygon geoPolygon, GeoCoding geoCoding, Dimension productDimension) {
             final Product product = createTemporaryProduct(geoCoding, productDimension);
             final DefaultFeatureCollection sourceCollection = createFeatureCollectionFromGeometry(geoPolygon);
             final DefaultFeatureCollection clippedCollection = FeatureUtils.clipFeatureCollectionToProductBounds(
@@ -488,7 +488,7 @@ public class ProductSubsetByPolygon {
             return GeometryNormalizer.singlePolygon(clippedGeometry);
         }
 
-        private static Polygon clipPixelPolygonToProductBounds(Polygon polygon, Dimension productDimension) {
+        public static Polygon clipPixelPolygonToProductBounds(Polygon polygon, Dimension productDimension) {
             final Polygon productPixelPolygon = buildProductPolygonFromDimension(productDimension);
             for (Coordinate coordinate : polygon.getCoordinates()) {
                 if (coordinate.getX() < 0 || coordinate.getX() > productDimension.getWidth() - 1 ||
