@@ -82,8 +82,9 @@ public class Band extends AbstractBand {
     private float spectralBandwidth;
     private int dateBandIndex;
     private String date;
-    //    private float spectralBandwidth;
     private float solarFlux;
+
+    boolean isConstructing;
 
     /**
      * Constructs a new <code>Band</code>.
@@ -96,12 +97,12 @@ public class Band extends AbstractBand {
      */
     public Band(String name, int dataType, int width, int height) {
         super(name, dataType, width, height);
-        // By default a band is not a spectral band,
-        // so spectral band index must be -1
-        setAngularBandIndex(-1);
-        setAngularValue((float)(ANGULAR_VIEW_NULL_VALUE));
-        setSpectralBandIndex(-1);
-        setDateBandIndex(-1);
+
+        angularBandIndex = -1;
+        angularValue = ANGULAR_VIEW_NULL_VALUE;
+        spectralBandIndex = -1;
+        dateBandIndex = -1;
+
         setModified(false);
     }
 
@@ -176,8 +177,10 @@ public class Band extends AbstractBand {
     public void setAngularValue(float angularValue) {
         if (this.angularValue != angularValue) {
             this.angularValue = angularValue;
-            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_VALUE);
-            setModified(true);
+            if (!isConstructing) {
+                fireProductNodeChanged(PROPERTY_NAME_ANGULAR_VALUE);
+                setModified(true);
+            }
         }
     }
 
@@ -188,8 +191,10 @@ public class Band extends AbstractBand {
     public void setAngularBandIndex(int angularBandIndex) {
         if (this.angularBandIndex != angularBandIndex) {
             this.angularBandIndex = angularBandIndex;
-            fireProductNodeChanged(PROPERTY_NAME_ANGULAR_BAND_INDEX);
-            setModified(true);
+            if (!isConstructing) {
+                fireProductNodeChanged(PROPERTY_NAME_ANGULAR_BAND_INDEX);
+                setModified(true);
+            }
         }
     }
 
@@ -210,8 +215,10 @@ public class Band extends AbstractBand {
     public void setSpectralBandIndex(int spectralBandIndex) {
         if (this.spectralBandIndex != spectralBandIndex) {
             this.spectralBandIndex = spectralBandIndex;
-            fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_BAND_INDEX);
-            setModified(true);
+            if (!isConstructing) {
+                fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_BAND_INDEX);
+                setModified(true);
+            }
         }
     }
 
@@ -234,8 +241,10 @@ public class Band extends AbstractBand {
     public void setSpectralWavelength(float spectralWavelength) {
         if (this.spectralWavelength != spectralWavelength) {
             this.spectralWavelength = spectralWavelength;
-            fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_WAVELENGTH);
-            setModified(true);
+            if (!isConstructing) {
+                fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_WAVELENGTH);
+                setModified(true);
+            }
         }
     }
 
@@ -256,8 +265,10 @@ public class Band extends AbstractBand {
     public void setDateBandIndex(int dateBandIndex) {
         if (this.dateBandIndex != dateBandIndex) {
             this.dateBandIndex = dateBandIndex;
-            fireProductNodeChanged(PROPERTY_NAME_DATE_BAND_INDEX);
-            setModified(true);
+            if (!isConstructing) {
+                fireProductNodeChanged(PROPERTY_NAME_DATE_BAND_INDEX);
+                setModified(true);
+            }
         }
     }
 

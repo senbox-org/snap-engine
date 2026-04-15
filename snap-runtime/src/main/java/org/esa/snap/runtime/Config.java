@@ -57,7 +57,7 @@ public class Config {
     private final static Map<String, Config> INSTANCES = new HashMap<>();
     private final String name;
     private final EnginePreferences preferences;
-    private AtomicBoolean isLoaded = new AtomicBoolean(false);
+    private final AtomicBoolean isLoaded = new AtomicBoolean(false);
 
     private Config(String name) {
         this(name, new EnginePreferences((EnginePreferences) EngineConfig.instance().preferences(), name));
@@ -153,7 +153,7 @@ public class Config {
                 keyList.add(key);
             }
         }
-        return keyList.toArray(new String[keyList.size()]);
+        return keyList.toArray(new String[0]);
     }
 
     public Path storagePath() {
