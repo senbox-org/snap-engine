@@ -38,9 +38,21 @@ public final class AbstractMetadata extends AbstractMetadataBase implements Abst
     /**
      * Abstracted metadata generic to most EO products
      */
-    public static final String SLAVE_METADATA_ROOT = "Slave_Metadata";
-    public static final String MASTER_BANDS = "Master_bands";
-    public static final String SLAVE_BANDS = "Slave_bands";
+    public static final String SECONDARY_METADATA_ROOT = "Secondary_Metadata";
+    public static final String REFERENCE_BANDS = "Reference_bands";
+    public static final String SECONDARY_BANDS = "Secondary_bands";
+
+    // Legacy metadata names for backwards compatibility with old product files
+    public static final String LEGACY_SLAVE_METADATA_ROOT = "Slave_Metadata";
+    public static final String LEGACY_MASTER_BANDS = "Master_bands";
+    public static final String LEGACY_SLAVE_BANDS = "Slave_bands";
+
+    @Deprecated
+    public static final String SLAVE_METADATA_ROOT = SECONDARY_METADATA_ROOT;
+    @Deprecated
+    public static final String MASTER_BANDS = REFERENCE_BANDS;
+    @Deprecated
+    public static final String SLAVE_BANDS = SECONDARY_BANDS;
 
     public static final String product_name = "PRODUCT";
     public static final String product_type = "PRODUCT_TYPE";
@@ -242,14 +254,25 @@ public final class AbstractMetadata extends AbstractMetadataBase implements Abst
         return (abstractedMetadata != null);
     }
 
-    public static MetadataElement getSlaveMetadata(final Product product) {
+    public static MetadataElement getSecondaryMetadata(final Product product) {
         final MetadataElement targetRoot = product.getMetadataRoot();
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            targetRoot.addElement(targetSlaveMetadataRoot);
+        MetadataElement targetSecondaryMetadataRoot = targetRoot.getElement(SECONDARY_METADATA_ROOT);
+        if (targetSecondaryMetadataRoot == null) {
+            // Check for legacy name from old products
+            targetSecondaryMetadataRoot = targetRoot.getElement(LEGACY_SLAVE_METADATA_ROOT);
+            if (targetSecondaryMetadataRoot != null) {
+                targetSecondaryMetadataRoot.setName(SECONDARY_METADATA_ROOT);
+            } else {
+                targetSecondaryMetadataRoot = new MetadataElement(SECONDARY_METADATA_ROOT);
+                targetRoot.addElement(targetSecondaryMetadataRoot);
+            }
         }
-        return targetSlaveMetadataRoot;
+        return targetSecondaryMetadataRoot;
+    }
+
+    @Deprecated
+    public static MetadataElement getSlaveMetadata(final Product product) {
+        return getSecondaryMetadata(product);
     }
 
     /**

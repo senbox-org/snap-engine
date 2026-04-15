@@ -53,9 +53,21 @@ public final class AbstractMetadata {
     /**
      * Abstracted metadata generic to most EO products
      */
-    public static final String SLAVE_METADATA_ROOT = "Slave_Metadata";
-    public static final String MASTER_BANDS = "Master_bands";
-    public static final String SLAVE_BANDS = "Slave_bands";
+    public static final String SECONDARY_METADATA_ROOT = "Secondary_Metadata";
+    public static final String REFERENCE_BANDS = "Reference_bands";
+    public static final String SECONDARY_BANDS = "Secondary_bands";
+
+    // Legacy metadata names for backwards compatibility with old product files
+    public static final String LEGACY_SLAVE_METADATA_ROOT = "Slave_Metadata";
+    public static final String LEGACY_MASTER_BANDS = "Master_bands";
+    public static final String LEGACY_SLAVE_BANDS = "Slave_bands";
+
+    @Deprecated
+    public static final String SLAVE_METADATA_ROOT = SECONDARY_METADATA_ROOT;
+    @Deprecated
+    public static final String MASTER_BANDS = REFERENCE_BANDS;
+    @Deprecated
+    public static final String SLAVE_BANDS = SECONDARY_BANDS;
 
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
@@ -703,13 +715,50 @@ public final class AbstractMetadata {
         }
     }
 
-    public static MetadataElement getSlaveMetadata(final MetadataElement targetRoot) {
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            targetRoot.addElement(targetSlaveMetadataRoot);
+    public static MetadataElement getSecondaryMetadata(final MetadataElement targetRoot) {
+        MetadataElement targetSecondaryMetadataRoot = targetRoot.getElement(SECONDARY_METADATA_ROOT);
+        if (targetSecondaryMetadataRoot == null) {
+            // Check for legacy name from old products
+            targetSecondaryMetadataRoot = targetRoot.getElement(LEGACY_SLAVE_METADATA_ROOT);
+            if (targetSecondaryMetadataRoot != null) {
+                // Rename legacy element to new name
+                targetSecondaryMetadataRoot.setName(SECONDARY_METADATA_ROOT);
+                // Rename legacy attribute names within
+                renameLegacyMetadataAttributes(targetSecondaryMetadataRoot);
+            } else {
+                targetSecondaryMetadataRoot = new MetadataElement(SECONDARY_METADATA_ROOT);
+                targetRoot.addElement(targetSecondaryMetadataRoot);
+            }
         }
-        return targetSlaveMetadataRoot;
+        return targetSecondaryMetadataRoot;
+    }
+
+    /**
+     * Rename legacy Master_bands/Slave_bands attributes to Reference_bands/Secondary_bands
+     * within a secondary metadata element tree.
+     */
+    private static void renameLegacyMetadataAttributes(final MetadataElement secondaryRoot) {
+        // Rename at root level
+        renameAttribute(secondaryRoot, LEGACY_MASTER_BANDS, REFERENCE_BANDS);
+        renameAttribute(secondaryRoot, LEGACY_SLAVE_BANDS, SECONDARY_BANDS);
+        // Rename within child elements
+        for (MetadataElement child : secondaryRoot.getElements()) {
+            renameAttribute(child, LEGACY_MASTER_BANDS, REFERENCE_BANDS);
+            renameAttribute(child, LEGACY_SLAVE_BANDS, SECONDARY_BANDS);
+        }
+    }
+
+    private static void renameAttribute(final MetadataElement elem, final String oldName, final String newName) {
+        if (elem.containsAttribute(oldName) && !elem.containsAttribute(newName)) {
+            final String value = elem.getAttributeString(oldName, "");
+            elem.removeAttribute(elem.getAttribute(oldName));
+            elem.setAttributeString(newName, value);
+        }
+    }
+
+    @Deprecated
+    public static MetadataElement getSlaveMetadata(final MetadataElement targetRoot) {
+        return getSecondaryMetadata(targetRoot);
     }
 
     /**
