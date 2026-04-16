@@ -40,7 +40,7 @@ public class TestStacItemUnit {
     public void testCreateEmptyStacItem() throws Exception {
         StacItem item = new StacItem("my-test-id");
         assertEquals("my-test-id", item.getId());
-        assertEquals("1.0.0", item.getVersion());
+        assertEquals("1.1.0", item.getVersion());
         assertTrue(item.isStacItem());
         assertNotNull(item.getAssets());
         assertNotNull(item.getProperties());
