@@ -1,5 +1,7 @@
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.Assert;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Marco Peters
@@ -32,6 +35,7 @@ public class GcpGeoCodingTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
+    @STTM("SNAP-3518")
     public void testTransferGeoCoding() {
         Scene source = SceneFactory.createScene(new Band("source", ProductData.TYPE_INT8, 10, 10));
         Scene target = SceneFactory.createScene(new Band("target", ProductData.TYPE_INT8, 10, 10));
@@ -39,6 +43,7 @@ public class GcpGeoCodingTest {
         PixelPos pixelPos = gcpGeoCoding.getPixelPos(new GeoPos(4.0, 2.0), null);
         assertEquals(5.9, pixelPos.x, 1e-8);
         assertEquals(3.2, pixelPos.y, 1e-8);
+        assertNotNull("getDatum()", gcpGeoCoding.getDatum());
 
         boolean transferred = gcpGeoCoding.transferGeoCoding(source, target, null);
 
@@ -48,6 +53,7 @@ public class GcpGeoCodingTest {
         pixelPos = geoCoding.getPixelPos(new GeoPos(4.0, 2.0), null);
         assertEquals(5.9, pixelPos.x, 1e-8);
         assertEquals(3.2, pixelPos.y, 1e-8);
+        assertNotNull("getDatum()", geoCoding.getDatum());
 
     }
 
@@ -144,18 +150,21 @@ public class GcpGeoCodingTest {
     }
 
     @Test
+    @STTM("SNAP-3518")
     public void testClone() {
         final PixelPos pixelPos = new PixelPos(6.5, 2.5);
 
         GeoPos geoPos = gcpGeoCoding.getGeoPos(pixelPos, null);
         assertEquals(3.3333333333333326, geoPos.lon, 1e-8);
         assertEquals(5.555555555555558, geoPos.lat, 1e-8);
+        assertNotNull("getDatum()", gcpGeoCoding.getDatum());
 
         final GeoCoding clone = gcpGeoCoding.clone();
 
         geoPos = clone.getGeoPos(pixelPos, null);
         assertEquals(3.3333333333333326, geoPos.lon, 1e-8);
         assertEquals(5.555555555555558, geoPos.lat, 1e-8);
+        assertNotNull("getDatum()", clone.getDatum());
     }
 
     @Test
