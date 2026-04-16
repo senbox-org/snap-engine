@@ -58,7 +58,7 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class StacItem implements StacComponent {
 
-    private final static String LATEST_VERSION = "1.0.0";
+    private final static String LATEST_VERSION = "1.1.0";
 
     private JSONObject stacItemJSON;
 
