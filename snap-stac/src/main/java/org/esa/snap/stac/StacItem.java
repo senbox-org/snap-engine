@@ -265,6 +265,8 @@ public class StacItem implements StacComponent {
             return (String) propertiesJSON.get(SAR.product_type);
         } else if (propertiesJSON.containsKey(SNAP.product_type)) {
             return (String) propertiesJSON.get(SNAP.product_type);
+        } else if (propertiesJSON.containsKey("snap:product_type")) {
+            return (String) propertiesJSON.get("snap:product_type");
         } else if (propertiesJSON.containsKey("product_type")) {
             return (String) propertiesJSON.get("product_type");
         }
