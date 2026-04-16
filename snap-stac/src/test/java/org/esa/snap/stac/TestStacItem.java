@@ -79,7 +79,7 @@ public class TestStacItem {
         assertEquals("Thermal Radiance Band", asset.title);
         assertEquals("trad", asset.getId());
         assertEquals("LC09_L2SP_047028_20221031_20221102_02_T2_ST_TRAD.TIF", asset.getFileName());
-        assertEquals("data", asset.role);
+        assertTrue("data", asset.roles.contains("data"));
     }
 
     @Test
