@@ -1,7 +1,7 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
-import org.esa.lib.gdal.AbstractGDALTest;
+import org.esa.lib.gdal.GDALTestUtils;
 import org.esa.snap.jni.EnvironmentVariables;
 import org.junit.Test;
 
@@ -23,15 +23,15 @@ public class EnvironmentVariablesNativeLoaderTest {
     }
 
     private static String getExpectedEnvironmentVariablesDirectory() {
-        return GDAL_NATIVE_LIBRARIES_SRC + "/" + AbstractGDALTest.getExpectedDirectory() + "/" + getExpectedEnvironmentVariablesFileName();
+        return GDAL_NATIVE_LIBRARIES_SRC + "/" + GDALTestUtils.getExpectedDirectory() + "/" + getExpectedEnvironmentVariablesFileName();
     }
 
     static String getExpectedEnvironmentVariablesFileName() {
-        return AbstractGDALTest.getExpectedOSCategory().getOSSpecificEnvironmentVariablesFileName();
+        return GDALTestUtils.getExpectedOSCategory().getOSSpecificEnvironmentVariablesFileName();
     }
 
     static Path getExpectedEnvironmentVariablesFilePath() {
-        return AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedEnvironmentVariablesFileName());
+        return GDALTestUtils.getExpectedNativeLibrariesRootFolderPath().resolve(getExpectedEnvironmentVariablesFileName());
     }
 
 
@@ -40,7 +40,7 @@ public class EnvironmentVariablesNativeLoaderTest {
     public void testInitEnvironmentVariablesNativeLibrary() {
         EnvironmentVariablesNativeLoader.ensureEnvironmentVariablesNativeInitialised();
         assertTrue(Files.exists(EnvironmentVariablesNativeLoaderTest.getExpectedEnvironmentVariablesFilePath()));
-        assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
+        assertTrue(Files.exists(GDALTestUtils.getExpectedNativeLibrariesRootFolderPath()));
         assertFalse(EnvironmentVariables.getEnvironmentVariable("PATH").isEmpty());
     }
 
