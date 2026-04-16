@@ -15,17 +15,21 @@
  */
 package org.esa.snap.stac.extensions;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("unchecked")
 public class TestAssets {
 
     @Test
-    public void testAssets() {
+    public void testAddAssetAndRetrieve() {
         final JSONObject assetsJSON = new JSONObject();
 
         Assets.addAsset(assetsJSON, "name", "title", "description",
@@ -36,22 +40,197 @@ public class TestAssets {
         assertEquals("href", asset.get(Assets.href));
         assertEquals("role", asset.get(Assets.role));
         assertEquals("type", asset.get(Assets.type));
+    }
+
+    @Test
+    public void testGetImageAssetsFiltersNonImageTypes() {
+        final JSONObject assetsJSON = new JSONObject();
+        Assets.addAsset(assetsJSON, "name", "title", "description",
+                "href", "type", "role");
 
         Map<String, Assets.Asset> assetMap = Assets.getImageAssets(assetsJSON);
         assertEquals(0, assetMap.size());
+    }
 
-        Assets.addAsset(assetsJSON, "name2", "title2", "description2",
-                "href2", Assets.type_image_tiff, "role2");
+    @Test
+    public void testGetImageAssetsIncludesImageTypes() {
+        final JSONObject assetsJSON = new JSONObject();
 
-        assetMap = Assets.getImageAssets(assetsJSON);
+        Assets.addAsset(assetsJSON, "tiff", "TIFF", null,
+                "https://example.com/file.tif", Assets.type_image_tiff, "data");
+        Assets.addAsset(assetsJSON, "geotiff", "GeoTIFF", null,
+                "https://example.com/file.tif", Assets.type_image_geotiff, "data");
+        Assets.addAsset(assetsJSON, "cog", "COG", null,
+                "https://example.com/file.tif", Assets.type_image_cog, "data");
+        Assets.addAsset(assetsJSON, "jp2", "JP2", null,
+                "https://example.com/file.jp2", Assets.type_image_jp2, "data");
+        Assets.addAsset(assetsJSON, "hdf5", "HDF5", null,
+                "https://example.com/file.h5", Assets.type_hdf5, "data");
+
+        Map<String, Assets.Asset> assetMap = Assets.getImageAssets(assetsJSON);
+        assertEquals(5, assetMap.size());
+    }
+
+    @Test
+    public void testGetImageAssetsFiltersPreviews() {
+        final JSONObject assetsJSON = new JSONObject();
+        Assets.addAsset(assetsJSON, "preview", "Preview", null,
+                "https://example.com/preview.tif", Assets.type_image_geotiff, "data");
+        Assets.addAsset(assetsJSON, "overview_band", "Overview", null,
+                "https://example.com/overview.tif", Assets.type_image_geotiff, "data");
+        Assets.addAsset(assetsJSON, "thumbnail_small", "Thumb", null,
+                "https://example.com/thumb.tif", Assets.type_image_geotiff, "data");
+
+        Map<String, Assets.Asset> assetMap = Assets.getImageAssets(assetsJSON);
+        assertEquals(0, assetMap.size());
+    }
+
+    @Test
+    public void testGetImageAssetsFiltersAuxiliaryRoles() {
+        final JSONObject assetsJSON = new JSONObject();
+        Assets.addAsset(assetsJSON, "cloud_mask", "Cloud", null,
+                "https://example.com/cloud.tif", Assets.type_image_geotiff, "cloud");
+        Assets.addAsset(assetsJSON, "thumb", "Thumb", null,
+                "https://example.com/thumb.tif", Assets.type_image_geotiff, "thumbnail");
+        Assets.addAsset(assetsJSON, "overview", "OV", null,
+                "https://example.com/ov.tif", Assets.type_image_geotiff, "overview");
+
+        Map<String, Assets.Asset> assetMap = Assets.getImageAssets(assetsJSON);
+        assertEquals(0, assetMap.size());
+    }
+
+    @Test
+    public void testGetImageAssetsRetainsDataAssets() {
+        final JSONObject assetsJSON = new JSONObject();
+        Assets.addAsset(assetsJSON, "band1", "Band 1", null,
+                "https://example.com/b1.tif", Assets.type_image_geotiff, "data");
+        Assets.addAsset(assetsJSON, "metadata", "Meta", null,
+                "https://example.com/meta.json", Assets.type_json, "metadata");
+
+        Map<String, Assets.Asset> assetMap = Assets.getImageAssets(assetsJSON);
         assertEquals(1, assetMap.size());
+        assertTrue(assetMap.containsKey("band1"));
+    }
 
-        Assets.Asset asset2 = assetMap.get("name2");
-        assertEquals("name2", asset2.name);
-        assertEquals("title2", asset2.title);
-        assertEquals("description2", asset2.description);
-        assertEquals("href2", asset2.href);
-        assertEquals("role2", asset2.role);
-        assertEquals(Assets.type_image_tiff, asset2.type);
+    @Test
+    public void testAssetConstructorFromJSON() {
+        JSONObject json = new JSONObject();
+        json.put(Assets.href, "https://example.com/data/file.tif");
+        json.put(Assets.title, "My Asset");
+        json.put(Assets.description, "A test asset");
+        json.put(Assets.type, Assets.type_image_geotiff);
+        json.put(Assets.role, "data");
+
+        Assets.Asset asset = new Assets.Asset("my_asset", json);
+        assertEquals("my_asset", asset.name);
+        assertEquals("my_asset", asset.getId());
+        assertEquals("https://example.com/data/file.tif", asset.href);
+        assertEquals("https://example.com/data/file.tif", asset.getURL());
+        assertEquals("My Asset", asset.title);
+        assertEquals("A test asset", asset.description);
+        assertEquals(Assets.type_image_geotiff, asset.type);
+        assertEquals("data", asset.role);
+        assertEquals("file.tif", asset.getFileName());
+    }
+
+    @Test
+    public void testAssetConstructorFromJSONWithRoles() {
+        JSONObject json = new JSONObject();
+        json.put(Assets.href, "https://example.com/file.tif");
+        JSONArray roles = new JSONArray();
+        roles.add("data");
+        roles.add("reflectance");
+        json.put(Assets.roles, roles);
+
+        Assets.Asset asset = new Assets.Asset("band", json);
+        assertEquals("data", asset.role);
+    }
+
+    @Test
+    public void testAssetConstructorFromValues() {
+        Assets.Asset asset = new Assets.Asset("band1", "Red Band", "Red reflectance",
+                "https://example.com/red.tif", Assets.type_image_cog, "data");
+
+        assertEquals("band1", asset.name);
+        assertEquals("Red Band", asset.title);
+        assertEquals("Red reflectance", asset.description);
+        assertEquals("https://example.com/red.tif", asset.href);
+        assertEquals(Assets.type_image_cog, asset.type);
+        assertEquals("data", asset.role);
+        assertEquals("red.tif", asset.getFileName());
+    }
+
+    @Test
+    public void testAssetAddRasterBand() {
+        Assets.Asset asset = new Assets.Asset("band1", "Band 1", null,
+                "https://example.com/band.tif", Assets.type_image_geotiff, "data");
+
+        asset.addRasterBand("red", "uint16", "reflectance", 0, 1000, 2000);
+
+        JSONArray bands = asset.getBands();
+        assertNotNull(bands);
+        assertEquals(1, bands.size());
+
+        JSONObject band = (JSONObject) bands.get(0);
+        assertEquals("red", band.get(Raster.name));
+        assertEquals("uint16", band.get(Raster.data_type));
+        assertEquals("reflectance", band.get(Raster.unit));
+        assertEquals(0.0, (double) band.get(Raster.nodata), 1e-10);
+    }
+
+    @Test
+    public void testAssetAddRasterBandDuplicateNameUpdates() {
+        Assets.Asset asset = new Assets.Asset("band1", "Band 1", null,
+                "https://example.com/band.tif", Assets.type_image_geotiff, "data");
+
+        asset.addRasterBand("red", "uint16", "reflectance", 0, 1000, 2000);
+        asset.addRasterBand("red", "float32", "sr", -9999, 1000, 2000);
+
+        JSONArray bands = asset.getBands();
+        assertEquals(1, bands.size());
+
+        JSONObject band = (JSONObject) bands.get(0);
+        assertEquals("float32", band.get(Raster.data_type));
+        assertEquals("sr", band.get(Raster.unit));
+    }
+
+    @Test
+    public void testAssetGetBandsEmpty() {
+        Assets.Asset asset = new Assets.Asset("band1", "Band 1", null,
+                "https://example.com/band.tif", Assets.type_image_geotiff, "data");
+        JSONArray bands = asset.getBands();
+        assertNotNull(bands);
+        assertEquals(0, bands.size());
+    }
+
+    @Test
+    public void testAssetGetBandsFromEO() {
+        JSONObject json = new JSONObject();
+        json.put(Assets.href, "https://example.com/file.tif");
+        JSONArray eoBands = new JSONArray();
+        JSONObject band = new JSONObject();
+        band.put("name", "red");
+        eoBands.add(band);
+        json.put(EO.bands, eoBands);
+
+        Assets.Asset asset = new Assets.Asset("test", json);
+        JSONArray bands = asset.getBands();
+        assertEquals(1, bands.size());
+    }
+
+    @Test
+    public void testAssetConstructorMinimalJSON() {
+        JSONObject json = new JSONObject();
+        Assets.Asset asset = new Assets.Asset("minimal", json);
+        assertEquals("minimal", asset.name);
+        assertEquals("minimal", asset.getId());
+    }
+
+    @Test
+    public void testAssetNullType() {
+        Assets.Asset asset = new Assets.Asset("test", "Title", null,
+                "https://example.com/file.tif", null, null);
+        assertEquals("test", asset.name);
+        assertEquals("Title", asset.title);
     }
 }
