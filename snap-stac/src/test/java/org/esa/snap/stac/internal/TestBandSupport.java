@@ -15,6 +15,8 @@
  */
 package org.esa.snap.stac.internal;
 
+import org.esa.snap.stac.StacItem;
+import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.extensions.EO;
 import org.esa.snap.stac.extensions.Proj;
 import org.json.simple.JSONArray;
@@ -22,6 +24,7 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import java.awt.*;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,22 +34,22 @@ import static org.junit.Assert.assertNull;
 public class TestBandSupport {
 
     @Test
-    public void testGetMaxDimensionFromProjShape() {
-        JSONObject properties = new JSONObject();
+    public void testGetMaxDimensionFromProjShape() throws Exception {
+        StacItem item = createStacItem("proj-shape-test");
         JSONArray shape = new JSONArray();
         shape.add(7981L);  // height
         shape.add(7881L);  // width
-        properties.put(Proj.shape, shape);
+        item.getProperties().put(Proj.shape, shape);
 
-        Dimension dim = BandSupport.getMaxDimension(properties);
+        Dimension dim = BandSupport.getMaxDimension(item);
         assertNotNull(dim);
         assertEquals(7881, dim.width);
         assertEquals(7981, dim.height);
     }
 
     @Test
-    public void testGetMaxDimensionFromEOBands() {
-        JSONObject properties = new JSONObject();
+    public void testGetMaxDimensionFromEOBands() throws Exception {
+        StacItem item = createStacItem("eo-bands-test");
         JSONArray bandsArray = new JSONArray();
 
         JSONObject band1 = new JSONObject();
@@ -63,39 +66,60 @@ public class TestBandSupport {
         band2.put(Proj.shape, shape2);
         bandsArray.add(band2);
 
-        properties.put(EO.bands, bandsArray);
+        item.getProperties().put(EO.bands, bandsArray);
 
-        Dimension dim = BandSupport.getMaxDimension(properties);
+        Dimension dim = BandSupport.getMaxDimension(item);
         assertNotNull(dim);
         assertEquals(400, dim.width);
         assertEquals(300, dim.height);
     }
 
     @Test
-    public void testGetMaxDimensionEmptyProperties() {
-        JSONObject properties = new JSONObject();
-        Dimension dim = BandSupport.getMaxDimension(properties);
-        assertNull(dim);
-    }
+    public void testGetMaxDimensionFromAssets() throws Exception {
+        StacItem item = createStacItem("assets-test");
 
-    @Test
-    public void testGetMaxDimensionEmptyEOBands() {
-        JSONObject properties = new JSONObject();
-        properties.put(EO.bands, new JSONArray());
-
-        Dimension dim = BandSupport.getMaxDimension(properties);
-        assertNull(dim);
-    }
-
-    @Test
-    public void testGetMaxDimensionProjShapeTakesPrecedence() {
-        JSONObject properties = new JSONObject();
-
+        // Add an asset with proj:shape directly in its JSON
+        JSONObject assetJSON = new JSONObject();
+        assetJSON.put(Assets.href, "https://example.com/band.tif");
         JSONArray shape = new JSONArray();
         shape.add(500L);
         shape.add(600L);
-        properties.put(Proj.shape, shape);
+        assetJSON.put(Proj.shape, shape);
+        item.getAssets().put("band1", assetJSON);
 
+        Dimension dim = BandSupport.getMaxDimension(item);
+        assertNotNull(dim);
+        assertEquals(600, dim.width);
+        assertEquals(500, dim.height);
+    }
+
+    @Test
+    public void testGetMaxDimensionEmptyItem() throws Exception {
+        StacItem item = createStacItem("empty-test");
+        Dimension dim = BandSupport.getMaxDimension(item);
+        assertNull(dim);
+    }
+
+    @Test
+    public void testGetMaxDimensionEmptyEOBands() throws Exception {
+        StacItem item = createStacItem("empty-eo-test");
+        item.getProperties().put(EO.bands, new JSONArray());
+
+        Dimension dim = BandSupport.getMaxDimension(item);
+        assertNull(dim);
+    }
+
+    @Test
+    public void testGetMaxDimensionProjShapeTakesPrecedence() throws Exception {
+        StacItem item = createStacItem("precedence-test");
+
+        // Set proj:shape on properties (should be used)
+        JSONArray shape = new JSONArray();
+        shape.add(500L);
+        shape.add(600L);
+        item.getProperties().put(Proj.shape, shape);
+
+        // Also set EO bands with different dimensions (should be ignored)
         JSONArray bandsArray = new JSONArray();
         JSONObject band = new JSONObject();
         JSONArray bandShape = new JSONArray();
@@ -103,22 +127,26 @@ public class TestBandSupport {
         bandShape.add(200L);
         band.put(Proj.shape, bandShape);
         bandsArray.add(band);
-        properties.put(EO.bands, bandsArray);
+        item.getProperties().put(EO.bands, bandsArray);
 
-        Dimension dim = BandSupport.getMaxDimension(properties);
+        Dimension dim = BandSupport.getMaxDimension(item);
         assertNotNull(dim);
         assertEquals(600, dim.width);
         assertEquals(500, dim.height);
     }
 
     @Test
-    public void testGetMaxDimensionSingleElementShape() {
-        JSONObject properties = new JSONObject();
+    public void testGetMaxDimensionSingleElementShape() throws Exception {
+        StacItem item = createStacItem("single-shape-test");
         JSONArray shape = new JSONArray();
         shape.add(100L);
-        properties.put(Proj.shape, shape);
+        item.getProperties().put(Proj.shape, shape);
 
-        Dimension dim = BandSupport.getMaxDimension(properties);
+        Dimension dim = BandSupport.getMaxDimension(item);
         assertNull(dim);
+    }
+
+    private StacItem createStacItem(String id) throws IOException {
+        return new StacItem(id);
     }
 }

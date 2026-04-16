@@ -15,6 +15,7 @@
  */
 package org.esa.snap.stac.internal;
 
+import org.esa.snap.stac.StacItem;
 import org.esa.snap.stac.extensions.EO;
 import org.esa.snap.stac.extensions.Proj;
 import org.json.simple.JSONArray;
@@ -27,20 +28,18 @@ public class BandSupport {
     private BandSupport() {
     }
 
-    public static Dimension getMaxDimension(final JSONObject propertiesJSON) {
-        if (propertiesJSON.containsKey(Proj.shape)) {
-            JSONArray shape = (JSONArray)propertiesJSON.get(Proj.shape);
-            if(shape.size() > 1) {
-                return new Dimension(JsonUtils.getInt(shape.get(1)), JsonUtils.getInt(shape.get(0)));
-            }
-        }
+    public static Dimension getMaxDimension(final StacItem stacItem) {
+        final JSONObject propertiesJSON = stacItem.getProperties();
+        Dimension propDim = getProjShape(propertiesJSON);
+        if(propDim != null)
+            return propDim;
         if (propertiesJSON.containsKey(EO.bands)) {
             // find overall bands
             final JSONArray bandsArray = (JSONArray) propertiesJSON.get(EO.bands);
             int maxWidth = 0, maxHeight = 0;
             for (Object o : bandsArray) {
                 final JSONObject bandJSON = (JSONObject) o;
-                Dimension bandDim = getMaxDimension(bandJSON);
+                Dimension bandDim = getProjShape(bandJSON);
                 if(bandDim != null) {
                     if (bandDim.width > maxWidth) {
                         maxWidth = bandDim.width;
@@ -52,6 +51,35 @@ public class BandSupport {
             }
             if (maxWidth > 0 && maxHeight > 0) {
                 return new Dimension(maxWidth, maxHeight);
+            }
+        }
+
+        JSONObject assetsJSON = stacItem.getAssets();
+        int maxWidth = 0, maxHeight = 0;
+        for(Object obj : assetsJSON.values()) {
+            JSONObject asset = (JSONObject) obj;
+            Dimension bandDim = getProjShape(asset);
+            if(bandDim != null) {
+                if (bandDim.width > maxWidth) {
+                    maxWidth = bandDim.width;
+                }
+                if (bandDim.height > maxHeight) {
+                    maxHeight = bandDim.height;
+                }
+            }
+        }
+        if (maxWidth > 0 && maxHeight > 0) {
+            return new Dimension(maxWidth, maxHeight);
+        }
+
+        return null;
+    }
+
+    private static Dimension getProjShape(final JSONObject propertiesJSON) {
+        if (propertiesJSON.containsKey(Proj.shape)) {
+            JSONArray shape = (JSONArray)propertiesJSON.get(Proj.shape);
+            if(shape.size() > 1) {
+                return new Dimension(JsonUtils.getInt(shape.get(1)), JsonUtils.getInt(shape.get(0)));
             }
         }
         return null;

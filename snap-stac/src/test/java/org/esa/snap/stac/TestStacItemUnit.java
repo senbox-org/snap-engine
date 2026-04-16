@@ -208,12 +208,12 @@ public class TestStacItemUnit {
     public void testAddAsset() throws Exception {
         StacItem item = new StacItem("asset-test");
         Assets.Asset asset = item.addAsset("band1", "Band 1", "Red band",
-                "https://example.com/band1.tif", Assets.type_image_geotiff, "data");
+                "https://example.com/band1.tif", Assets.type_image_geotiff, new String[]{"data"});
 
         assertNotNull(asset);
         assertEquals("band1", asset.name);
         assertEquals("Band 1", asset.title);
-        assertEquals("data", asset.role);
+        assertTrue(asset.roles.contains("data"));
 
         // addAsset adds to the JSON but not the internal assetsById map,
         // so verify via the assets JSON directly
@@ -229,8 +229,8 @@ public class TestStacItemUnit {
     @Test
     public void testListAssetIds() throws Exception {
         StacItem item = new StacItem("asset-test");
-        item.addAsset("b_red", "Red", null, "https://example.com/red.tif", Assets.type_image_geotiff, "data");
-        item.addAsset("a_blue", "Blue", null, "https://example.com/blue.tif", Assets.type_image_geotiff, "data");
+        item.addAsset("b_red", "Red", null, "https://example.com/red.tif", Assets.type_image_geotiff, new String[]{"data"});
+        item.addAsset("a_blue", "Blue", null, "https://example.com/blue.tif", Assets.type_image_geotiff, new String[]{"data"});
 
         String[] ids = item.listAssetIds();
         assertEquals(2, ids.length);
@@ -242,9 +242,9 @@ public class TestStacItemUnit {
     public void testGetImageAssets() throws Exception {
         StacItem item = new StacItem("img-test");
         item.addAsset("band1", "Band 1", null,
-                "https://example.com/band1.tif", Assets.type_image_geotiff, "data");
+                "https://example.com/band1.tif", Assets.type_image_geotiff, new String[]{"data"});
         item.addAsset("metadata", "Metadata", null,
-                "https://example.com/meta.json", Assets.type_json, "metadata");
+                "https://example.com/meta.json", Assets.type_json, new String[]{"metadata"});
 
         Map<String, Assets.Asset> imageAssets = item.getImageAssets();
         assertEquals(1, imageAssets.size());
