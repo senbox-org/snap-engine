@@ -35,7 +35,11 @@ public interface StacComponent {
     String DESCRIPTION = "description";
     String TITLE = "title";
     String TYPE = "type";
-    String FEATURE = "feature";
+    String FEATURE = "Feature";
+
+    String STAC_EXTENSIONS = "stac_extensions";
+    String COLLECTION = "collection";
+    String KEYWORDS = "keywords";
 
     String BBOX = "bbox";
     String GEOMETRY = "geometry";

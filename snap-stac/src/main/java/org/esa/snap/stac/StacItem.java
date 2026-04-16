@@ -60,18 +60,6 @@ public class StacItem implements StacComponent {
 
     private final static String LATEST_VERSION = "1.0.0";
 
-    public final static String STAC_EXTENSIONS = "stac_extensions";
-
-    public final static String COLLECTION = "collection";
-    public final static String KEYWORDS = "keywords";
-
-    private final String DATAROLE = "data";
-    private final String PREVIEWROLE = "thumbnail";
-    private final String OVERVIEWROLE = "overview";
-    private final String METADATAROLE = "metadata";
-    private final String TILESROLE = "tiles";
-
-
     private JSONObject stacItemJSON;
 
     private String itemURL;
@@ -92,7 +80,7 @@ public class StacItem implements StacComponent {
      * Creates a new StacItem object from a given URL
      *
      * @param inputStr The URL of the StacItem
-     * @throws Exception
+     * @throws IOException
      */
     public StacItem(String inputStr) throws IOException {
         JSONObject json;
@@ -114,7 +102,7 @@ public class StacItem implements StacComponent {
      * Creates a new StacItem object from a given File
      *
      * @param productInputFile The file of the StacItem
-     * @throws Exception
+     * @throws IOException
      */
     public StacItem(File productInputFile) throws IOException {
         try {
@@ -129,7 +117,7 @@ public class StacItem implements StacComponent {
      * Creates a new StacItem object from a given JSONObject
      *
      * @param json The path of the StacItem
-     * @throws Exception
+     * @throws IOException
      */
     public StacItem(JSONObject json) throws IOException {
         initStacItem(json);
@@ -187,7 +175,7 @@ public class StacItem implements StacComponent {
             final Assets.Asset asset = new Assets.Asset((String)o, (JSONObject)assetsJSON.get(o));
             assetsById.put((String) o, asset);
 
-            if (asset.role != null && Objects.equals(METADATAROLE, asset.role)) {
+            if (asset.roles != null && asset.roles.contains(Assets.role_metadata)) {
                 metadataAssets.add(asset);
             } else {
                 dataAssets.add(asset);
@@ -430,8 +418,8 @@ public class StacItem implements StacComponent {
     }
 
     public Assets.Asset addAsset(final String name, final String titleValue, final String descriptionValue,
-                                 final String hrefValue, final String typeValue, final String roleValue) {
-        return Assets.addAsset(assetsJSON, name, titleValue, descriptionValue, hrefValue, typeValue, roleValue);
+                                 final String hrefValue, final String typeValue, final String[] roleValues) {
+        return Assets.addAsset(assetsJSON, name, titleValue, descriptionValue, hrefValue, typeValue, roleValues);
     }
 
     public Map<String, Assets.Asset> getImageAssets() {
