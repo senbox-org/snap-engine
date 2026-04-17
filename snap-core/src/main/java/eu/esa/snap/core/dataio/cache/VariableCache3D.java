@@ -197,7 +197,9 @@ class VariableCache3D implements VariableCache {
             }
         }
 
-        cacheDataList.sort(new ReverseTimeComparator());
+        // Snapshot access times so the sort is stable even if other threads update them
+        // concurrently while this sort runs (prevents TimSort contract violation).
+        cacheDataList.sort(new ReverseTimeComparator(cacheDataList));
 
         return cacheDataList;
     }
