@@ -21,7 +21,7 @@ public class SNAP implements StacExtension {
 
     public final static String snap = "snap";
 
-    public final static String product_type = "snap:product_type";
+    public final static String product_type = "product:type";
     public final static String quicklook_band_name = "snap:quicklook_band_name";
 
     public final static String virtual_band = "snap:virtual_band";

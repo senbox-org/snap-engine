@@ -1,9 +1,12 @@
 package org.esa.snap.speclib.io.csv.util;
 
+import org.esa.snap.speclib.model.AttributeType;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -129,5 +132,178 @@ public class CsvUtils {
         }
         String t = s.replace("\"", "\"\"");
         return "\"" + t + "\"";
+    }
+
+
+    /**
+     * Infers the attribute type, attempting ISO-8601 instant parsing for strings
+     * before falling back to {@link CsvAttributeTypeInference}.
+     */
+    public static AttributeType inferAttributeType(String key, String raw) {
+        AttributeType base = CsvAttributeTypeInference.inferType(raw);
+        if (base == AttributeType.STRING) {
+            try {
+                Instant.parse(raw.trim());
+                return AttributeType.INSTANT;
+            } catch (Exception ignored) {
+                // not an instant
+            }
+        }
+        return base;
+    }
+
+
+    public static boolean isNumeric(String s) {
+        if (s == null || s.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            Double.parseDouble(s.trim());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static String safeCell(List<String> row, int idx) {
+        if (row == null || idx < 0 || idx >= row.size()) {
+            return "";
+        }
+        String v = row.get(idx);
+        return v == null ? "" : v;
+    }
+
+    /**
+     * Returns true if the first header token is numeric, indicating By-Column orientation.
+     */
+    public static boolean isColumnOriented(CsvTable table) {
+        if (table.header().isEmpty() || table.rows().isEmpty()) {
+            return false;
+        }
+
+        for (List<String> row : table.rows()) {
+            String cell = safeCell(row, 0).trim();
+            if (!cell.isEmpty() && !isNumeric(cell)) {
+                return false;
+            }
+        }
+
+        for (List<String> row : table.rows()) {
+            if (isNumeric(safeCell(row, 0).trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Transposes a By-Column table into By-Row form.
+     *
+     * <p>By-Column layout (EcoSIS):
+     * <pre>
+     * spectra, Profile1, Profile2, ...
+     * 490.0,   95.0,     103.0,    ...
+     * 560.0,   118.0,    null,     ...
+     * </pre>
+     *
+     * After transpose becomes By-Row:
+     * <pre>
+     * spectra, 490.0, 560.0, ...
+     * Profile1, 95.0, 118.0, ...
+     * Profile2, 103.0, null, ...
+     * </pre>
+     */
+    public static CsvTable transpose(CsvTable table) {
+        int origCols = table.header().size();
+        List<String> newHeader = new ArrayList<>();
+        newHeader.add(table.header().getFirst());
+
+        for (List<String> row : table.rows()) {
+            newHeader.add(safeCell(row, 0));
+        }
+
+        List<List<String>> newRows = new ArrayList<>();
+        for (int c = 1; c < origCols; c++) {
+            List<String> newRow = new ArrayList<>();
+            newRow.add(table.header().get(c));
+
+            for (List<String> origRow : table.rows()) {
+                newRow.add(safeCell(origRow, c));
+            }
+            newRows.add(newRow);
+        }
+
+        return new CsvTable(newHeader, newRows);
+    }
+
+
+    public static int findColumn(List<String> header, String colName) {
+        for (int ii = 0; ii < header.size(); ii++) {
+            String h = header.get(ii);
+            if (h != null && h.trim().equalsIgnoreCase(colName)) {
+                return ii;
+            }
+        }
+        return -1;
+    }
+
+    public static List<Integer> findWavelengthColumns(List<String> header) {
+        List<Integer> cols = new ArrayList<>();
+        for (int ii = 0; ii < header.size(); ii++) {
+            if (CsvUtils.isNumeric(header.get(ii))) {
+                cols.add(ii);
+            }
+        }
+        return cols;
+    }
+
+    public static double[] extractWavelengths(List<String> header, List<Integer> waveCols) {
+        double[] wl = new double[waveCols.size()];
+        for (int ii = 0; ii < waveCols.size(); ii++) {
+            wl[ii] = Double.parseDouble(header.get(waveCols.get(ii)).trim());
+        }
+        return wl;
+    }
+
+    public static String formatWavelength(double wl) {
+        if (wl == Math.floor(wl) && !Double.isInfinite(wl)) {
+            return String.valueOf((long) wl);
+        }
+        return String.valueOf(wl);
+    }
+
+    public static boolean isWavelengthColumn(String col, double[] wavelengths) {
+        if (!isNumeric(col)) {
+            return false;
+        }
+        double v;
+
+        try {
+            v = Double.parseDouble(col.trim());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        for (double wl : wavelengths) {
+            if (Double.compare(wl, v) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int wavelengthIndex(String col, double[] wavelengths) {
+        try {
+            double v = Double.parseDouble(col.trim());
+
+            for (int ii = 0; ii < wavelengths.length; ii++) {
+                if (Double.compare(wavelengths[ii], v) == 0) {
+                    return ii;
+                }
+            }
+        } catch (NumberFormatException e) {
+            // not a wavelength column
+        }
+        return -1;
     }
 }
