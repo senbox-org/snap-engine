@@ -35,13 +35,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -312,19 +312,53 @@ public class GDALProductWriter extends AbstractProductWriter {
 
     @Override
     public void close() {
-        if (this.gdalDataset != null) {
-            if (this.writerDriver.getDriverName().contains("COG")) {
-                Driver cogDriver = GDAL.getDriverByName(this.writerDriver.getDriverName());//use the COG driver
-                String outputFile = getFileInput(getOutput()).toString();//use the real output file name
-                Dataset tempDataset = this.gdalDataset;
-                //create the final output dataset file (the COG product) from temporary dataset file without options for write
-                this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, Objects.requireNonNullElseGet(writeOptions, () -> new String[0]));//create the final output dataset file (the COG product) from temporary dataset file with options for write
-                tempDataset.delete();//close the temporary dataset file
-            }
+        RuntimeException failure = null;
+
+        try {
             if (this.gdalDataset != null) {
-                this.gdalDataset.delete();
-                this.gdalDataset = null;
+                if (this.writerDriver.getDriverName().contains("COG")) {
+                    try (Driver cogDriver = GDAL.getDriverByName(this.writerDriver.getDriverName())) {//use the COG driver
+                        String outputFile = getFileInput(getOutput()).toString();//use the real output file name
+                        Dataset tempDataset = this.gdalDataset;
+                        //create the final output dataset file (the COG product) from temporary dataset file without options for write
+                        this.gdalDataset = cogDriver.createCopy(outputFile, this.gdalDataset, Objects.requireNonNullElseGet(writeOptions, () -> new String[0]));//create the final output dataset file (the COG product) from temporary dataset file with options for write
+                        tempDataset.delete();//close the temporary dataset file
+                    } catch (IOException e) {
+                        failure = new RuntimeException(e);
+                    }
+                }
             }
+        } finally {
+            if (this.gdalDataset != null) {
+                try {
+                    this.gdalDataset.delete();
+                }catch (Exception e) {
+                    if (failure == null) {
+                        failure = new RuntimeException(e);
+                    }else {
+                        failure.addSuppressed(e);
+                    }
+                } finally {
+                    this.gdalDataset = null;
+                }
+            }
+            if (gdalDriver!= null){
+                try {
+                    gdalDriver.close();
+                } catch (IOException e) {
+                    if (failure == null) {
+                        failure = new RuntimeException(e);
+                    }else {
+                        failure.addSuppressed(e);
+                    }
+                } finally {
+                    this.gdalDriver = null;
+                }
+            }
+        }
+
+        if (failure != null) {
+            throw failure;
         }
     }
 
@@ -405,14 +439,17 @@ public class GDALProductWriter extends AbstractProductWriter {
 
         // If too few valid points, don't write broken geocoding
         final ArrayList<GCP> gcpList = new ArrayList<>(uniqGCPs.values());
-
-        if (gcpList.size() < 4) {
-            dataset.setProjection("");
-            return;
+        try {
+            if (gcpList.size() < 4) {
+                dataset.setProjection("");
+                return;
+            }
+            String wkt = extractGeoCodingWkt(geoCoding);
+            dataset.setGCPs(gcpList, wkt);
+            dataset.setProjection(wkt);
+        }finally {
+            closeGcps(gcpList);
         }
-        String wkt = extractGeoCodingWkt(geoCoding);
-        dataset.setGCPs(gcpList, wkt);
-        dataset.setProjection(wkt);
     }
 
     /**
@@ -439,7 +476,36 @@ public class GDALProductWriter extends AbstractProductWriter {
         if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) return;
 
         final long key = createQuantizedPixelKey(px, py);
-        gcpMap.putIfAbsent(key, GCP.create(px, py, lon, lat, 0.0));
+
+        if (!gcpMap.containsKey(key)) {
+            gcpMap.put(key, GCP.create(px, py, lon, lat, 0.0));
+        }
+    }
+
+    /**
+     * Closes the provided GDAL GCP wrappers.
+     *
+     * @param gcps the GCP wrappers to close; {@code null} entries are ignored
+     * @throws RuntimeException if closing any GCP fails
+     */
+    private static void closeGcps(Collection<GCP> gcps) {
+        RuntimeException failure = null;
+
+        for (GCP gcp : gcps) {
+            if (gcp != null) {
+                try {
+                    gcp.close();
+                } catch (IOException e) {
+                    if (failure == null) {
+                        failure = new RuntimeException("Failed to close GDAL GCP.", e);
+                    }
+                }
+            }
+        }
+
+        if (failure != null) {
+            throw failure;
+        }
     }
 
     /**

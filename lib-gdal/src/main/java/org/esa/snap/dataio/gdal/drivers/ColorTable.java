@@ -1,6 +1,8 @@
 package org.esa.snap.dataio.gdal.drivers;
 
 import java.awt.image.IndexColorModel;
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -8,7 +10,7 @@ import java.lang.invoke.MethodHandle;
  *
  * @author Adrian Drăghici
  */
-public class ColorTable extends GDALBase {
+public class ColorTable extends GDALBase implements Closeable {
 
     /**
      * The name of JNI GDAL ColorTable class
@@ -22,6 +24,7 @@ public class ColorTable extends GDALBase {
 
     private final Object jniColorTable;
     private final MethodHandle getIndexColorModelHandle;
+    private final MethodHandle deleteHandle;
 
     /**
      * Creates new instance for this driver
@@ -32,6 +35,7 @@ public class ColorTable extends GDALBase {
         this.jniColorTable = jniColorTable;
         try {
             getIndexColorModelHandle = createHandle(colorTableClass, "getIndexColorModel", IndexColorModel.class, int.class);
+            deleteHandle = createHandle(colorTableClass, "delete", IndexColorModel.class, int.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -45,5 +49,17 @@ public class ColorTable extends GDALBase {
      */
     public IndexColorModel getIndexColorModel(int bits) {
         return (IndexColorModel) invoke(getIndexColorModelHandle, this.jniColorTable, bits);
+    }
+
+    /**
+     * Calls the JNI GDAL Dataset class delete() method
+     */
+    public void delete() {
+        invoke(deleteHandle, this.jniColorTable);
+    }
+
+    @Override
+    public void close() throws IOException {
+        delete();
     }
 }
