@@ -156,6 +156,39 @@ public class FileUtils {
     }
 
     /**
+     * Returns the file Path with the given new extension. If the given file Path have no extension, the given
+     * extension will be added.
+     * <p>
+     * Example1:
+     * <pre> "tie.point.grids\tpg1.hdr" </pre>
+     * results to
+     * <pre> "tie.point.grids\tpg1.raw" </pre>
+     * <p>
+     * Example2:
+     * <pre> "tie.point.grids\tpg1" </pre>
+     * results to
+     * <pre> "tie.point.grids\tpg1.raw" </pre>
+     *
+     * @param path      the Path to change the extension
+     * @param extension the new file extension including a leading dot (e.g. {@code ".raw"}).
+     * @throws java.lang.IllegalArgumentException if one of the given strings are null or empty.
+     */
+    public static Path exchangeExtension(Path path, String extension) {
+        Guardian.assertNotNull("path", path);
+        Guardian.assertNotNull("extension", extension);
+        if (!extension.isEmpty() && path.endsWith(extension)) {
+            return path;
+        }
+        final String filename = path.getFileName().toString();
+        final String filenameWithExchangedExtension = exchangeExtension(filename, extension);
+        if(path.getParent() != null) {
+            return path.getParent().resolve(filenameWithExchangedExtension);
+        } else {
+            return Path.of(filenameWithExchangedExtension);
+        }
+    }
+
+    /**
      * Returns a file with the given new extension. If the given file have no extension, the given extension will be
      * added.
      * <p>
@@ -179,7 +212,7 @@ public class FileUtils {
         if (path.endsWith(extension)) {
             return file;
         }
-        return new File(exchangeExtension(path, extension));
+        return exchangeExtension(file.toPath(), extension).toFile();
     }
 
     /**
