@@ -312,9 +312,10 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                 if (parentPath.equals(dir)) {
                     return FileVisitResult.CONTINUE;
                 } else {
-                    String relativePath = parentPath.relativize(dir).toString();
-                    if (matchFilters(relativePath, filters)) {
-                        filesAndFolders.add(relativePath);
+                    final Path relativePath = parentPath.relativize(dir);
+                    final String relativeDirName = relativePath.getFileName().toString();
+                    if (matchFilters(relativeDirName, filters) || matchFilters(relativePath.toString(), filters)) {
+                        filesAndFolders.add(relativePath.toString());
                         return FileVisitResult.CONTINUE;
                     }
                     return FileVisitResult.SKIP_SUBTREE;
@@ -323,9 +324,10 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                String relativePath = parentPath.relativize(file).toString();
-                if (matchFilters(relativePath, filters)) {
-                    filesAndFolders.add(relativePath);
+                final Path relativePath = parentPath.relativize(file);
+                final String relativeFileName = relativePath.getFileName().toString();
+                if (matchFilters(relativeFileName, filters) || matchFilters(relativePath.toString(), filters)) {
+                    filesAndFolders.add(relativePath.toString());
                 }
                 return FileVisitResult.CONTINUE;
             }
