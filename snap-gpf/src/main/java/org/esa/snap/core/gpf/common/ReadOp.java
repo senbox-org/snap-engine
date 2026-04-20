@@ -209,6 +209,7 @@ public class ReadOp extends Operator {
                         if (this.polygonRegion != null) {
                             this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
                         } else {
+                            this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
                             this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
                         }
                         this.polygonRegion = this.productSubsetByPolygon.getSubsetPolygon();
