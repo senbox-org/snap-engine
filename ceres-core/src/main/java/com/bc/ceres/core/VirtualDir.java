@@ -32,7 +32,6 @@ import java.io.Reader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -223,7 +222,7 @@ public abstract class VirtualDir {
 
         @Override
         public String[] listAllFiles() throws IOException {
-            Path path = Paths.get(dir.getAbsolutePath());
+            Path path = dir.toPath();
             try (Stream<Path> pathStream = Files.walk(path)) {
                 Stream<Path> filteredstream = pathStream.filter(new Predicate<Path>() {
                     @Override
