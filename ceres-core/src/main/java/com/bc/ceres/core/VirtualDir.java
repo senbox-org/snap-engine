@@ -216,8 +216,12 @@ public abstract class VirtualDir {
 
         @Override
         public boolean exists(String path) {
-            File child = new File(dir, path);
-            return child.exists();
+            try {
+                final File child = getFile(path);
+                return child.exists();
+            } catch (IOException e) {
+                return false;
+            }
         }
 
         @Override
