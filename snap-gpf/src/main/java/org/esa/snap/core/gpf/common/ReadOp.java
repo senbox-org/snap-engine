@@ -40,6 +40,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.esa.snap.vfs.NioPaths;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 
@@ -131,6 +132,7 @@ public class ReadOp extends Operator {
         if (this.file == null) {
             throw new OperatorException("The 'file' parameter is not set");
         }
+        this.file = NioPaths.get(this.file.toString()).toFile();
         if (!this.file.exists()) {
             throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", this.file));
         }
