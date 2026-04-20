@@ -19,6 +19,7 @@ import org.esa.snap.core.util.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,20 +66,29 @@ public class Assets implements StacExtension {
     public static final String role_thumbnail = "thumbnail";
     public static final String role_overview = "overview";
     public static final String role_visual = "visual";
+    public static final String role_quicklook = "quicklook";
+    public static final String role_preview = "preview";
+
     public static final String role_data = "data";
+    public static final String role_auxdata = "auxdata";
+    public static final String role_mask = "mask";
+    public static final String role_cloud = "cloud";
+    public static final String role_dem = "dem";
+    public static final String role_landcover = "landcover";
+
     public static final String role_metadata = "metadata";
 
-    private static final String[] ANALTIC_IMAGE_TYPES = new String[] {type_image_tiff, type_image_geotiff,
+    private static final String[] ANALYTIC_IMAGE_TYPES = new String[] {type_image_tiff, type_image_geotiff,
             type_image_cog,type_image_jp2,type_hdf5};
 
-    private static final String[] PREVIEWS = new String[] {"preview", "overview", "thumbnail", "visual", "quicklook"};
-    private static final String[] AUX_ROLES = new String[] {"thumbnail", "overview", "visual", "quicklook","mask","cloud"};
+    private static final String[] PREVIEWS = new String[] {role_preview, role_overview, role_thumbnail, role_visual, role_quicklook};
+    private static final String[] AUX_ROLES = new String[] {role_auxdata, role_mask, role_cloud, role_dem, role_landcover};
 
     public static Asset addAsset(final JSONObject assetsJSON, final String name,
                                 final String titleValue, final String description, final String hrefValue,
-                                final String typeValue, final String roleValue) {
+                                final String typeValue, final String[] roleValues) {
 
-        final Asset asset = new Asset(name, titleValue, description, hrefValue, typeValue, roleValue);
+        final Asset asset = new Asset(name, titleValue, description, hrefValue, typeValue, roleValues);
         assetsJSON.put(name, asset.json);
 
         return asset;
@@ -88,12 +98,12 @@ public class Assets implements StacExtension {
         final Map<String, Asset> assetMap = new HashMap<>();
         for(Object key : assetsJSON.keySet()) {
             final Asset asset = new Asset((String)key, (JSONObject)assetsJSON.get(key));
-            if(asset.type != null && StringUtils.contains(ANALTIC_IMAGE_TYPES, asset.type)) {
+            if(asset.type != null && StringUtils.contains(ANALYTIC_IMAGE_TYPES, asset.type)) {
                 if(isPreview(asset.name)) {
-                  continue;
+                    continue;
                 }
-                if(asset.role != null && isAuxilaryRole(asset.role)) {
-                  continue;
+                if(asset.roles != null && isAuxiliaryRole(asset.roles)) {
+                    continue;
                 }
                 assetMap.put((String)key, asset);
             }
@@ -111,20 +121,23 @@ public class Assets implements StacExtension {
         return false;
     }
 
-    private static boolean isAuxilaryRole(String role) {
-        String r = role.toLowerCase();
-        for(String auxRole : AUX_ROLES) {
-            if(r.contains(auxRole)) {
-                return true;
+    private static boolean isAuxiliaryRole(JSONArray role) {
+        for(Object obj : role) {
+            String r = ((String) obj).toLowerCase();
+            for (String auxRole : AUX_ROLES) {
+                if (r.contains(auxRole)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     public static class Asset {
-        final JSONObject json;
+        public final JSONObject json;
         public final String name;
-        public String href, title, description, type, role;
+        public String href, title, description, type;
+        public JSONArray roles;
         private String fileName;
 
         public Asset(final String name, final JSONObject json) {
@@ -144,23 +157,24 @@ public class Assets implements StacExtension {
                 this.type = (String)json.get(Assets.type);
             }
             if(json.containsKey(Assets.role)) {
-                this.role = (String)json.get(Assets.role);
+                this.roles = new JSONArray();
+                this.roles.add(json.get(Assets.role));
             }
             if(json.containsKey(Assets.roles)) {
-                JSONArray rolesArray = (JSONArray) json.get(Assets.roles);
-                this.role = (String)rolesArray.get(0);
+                this.roles = (JSONArray) json.get(Assets.roles);
             }
         }
 
         public Asset(final String name, final String titleValue, final String descriptionValue, final String hrefValue,
-                     final String typeValue, final String roleValue) {
+                     final String typeValue, final String[] roleValues) {
             this.json = new JSONObject();
             this.name = name;
             this.href = hrefValue;
             this.title = titleValue;
             this.description = descriptionValue;
             this.type = typeValue;
-            this.role = roleValue;
+            this.roles = new JSONArray();
+            this.roles.addAll(Arrays.asList(roleValues));
             this.fileName = this.href.split("/")[this.href.split("/").length - 1];
 
             json.put(Assets.title, title);
@@ -171,8 +185,8 @@ public class Assets implements StacExtension {
             if(type != null) {
                 json.put(Assets.type, type);
             }
-            if(role != null) {
-                json.put(Assets.role, role);
+            if (roles != null) {
+                json.put(Assets.roles, roles);
             }
         }
 

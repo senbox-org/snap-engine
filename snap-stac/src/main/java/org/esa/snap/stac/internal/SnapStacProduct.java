@@ -86,7 +86,7 @@ public class SnapStacProduct implements Closeable {
 
     public Product createProduct(final boolean reverseHeightWidth) throws Exception {
         final JSONObject propertiesJSON = stacItem.getProperties();
-        final Dimension sceneDim = BandSupport.getMaxDimension(propertiesJSON);
+        final Dimension sceneDim = BandSupport.getMaxDimension(stacItem);
         final Product product;
         if (sceneDim != null) {
             if(reverseHeightWidth) {

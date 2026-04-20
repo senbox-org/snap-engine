@@ -22,6 +22,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class TestEO {
@@ -64,11 +66,86 @@ public class TestEO {
         band.setNoDataValue(-1);
         band.setUnit("unit");
 
-        final String expected = "{\"unit\":\"unit\",\"full_width_half_max\":0.0,\"center_wavelength\":0.0,\"name\":\"bandName\",\"data_type\":\"int16\",\"description\":\"description\",\"common_name\":\"bandName\"}";
+        JSONObject json = EO.writeBand(band);
+
+        assertEquals("bandName", json.get(EO.name));
+        assertEquals("bandName", json.get(EO.common_name));
+        assertEquals("description", json.get(EO.description));
+        assertEquals("int16", json.get(Raster.data_type));
+        assertEquals("unit", json.get(Raster.unit));
+        assertEquals(0.0, ((Number) json.get(EO.center_wavelength)).doubleValue(), 1e-10);
+        assertEquals(0.0, ((Number) json.get(EO.full_width_half_max)).doubleValue(), 1e-10);
+    }
+
+    @Test
+    public void testWriteBandWithNoDataUsed() throws Exception {
+        Band band = new Band("red", ProductData.TYPE_FLOAT32, 50, 50);
+        band.setNoDataValue(-9999);
+        band.setNoDataValueUsed(true);
+        band.setSpectralWavelength(665);
+        band.setSpectralBandwidth(30);
 
         JSONObject json = EO.writeBand(band);
 
-        System.out.println(json);
-       //assertTrue(JSON.equals(json, expected));
+        assertEquals("red", json.get(EO.name));
+        assertEquals(EO.red, json.get(EO.common_name));
+        assertEquals(-9999.0, ((Number) json.get(Raster.nodata)).doubleValue(), 1e-10);
+        assertEquals(0.665, ((Number) json.get(EO.center_wavelength)).doubleValue(), 1e-3);
+        assertEquals(0.03, ((Number) json.get(EO.full_width_half_max)).doubleValue(), 1e-3);
+    }
+
+    @Test
+    public void testWriteBandWithoutDescription() throws Exception {
+        Band band = new Band("nir", ProductData.TYPE_UINT16, 100, 100);
+        band.setSpectralWavelength(842);
+        band.setSpectralBandwidth(20);
+
+        JSONObject json = EO.writeBand(band);
+
+        assertEquals("nir", json.get(EO.name));
+        assertEquals(EO.nir, json.get(EO.common_name));
+        // description should be auto-generated from wavelength range
+        assertTrue(((String) json.get(EO.description)).contains("nir"));
+    }
+
+    @Test
+    public void testGetBandProperties() throws Exception {
+        Band band = new Band("test", ProductData.TYPE_FLOAT32, 100, 100);
+        JSONObject bandProperties = new JSONObject();
+        bandProperties.put(Raster.unit, "reflectance");
+        bandProperties.put(Raster.nodata, -9999.0);
+
+        EO.getBandProperties(band, bandProperties);
+
+        assertEquals("reflectance", band.getUnit());
+        assertEquals(-9999.0, band.getNoDataValue(), 1e-10);
+        assertTrue(band.isNoDataValueUsed());
+    }
+
+    @Test
+    public void testGetBandPropertiesNoUnit() throws Exception {
+        Band band = new Band("test", ProductData.TYPE_FLOAT32, 100, 100);
+        JSONObject bandProperties = new JSONObject();
+
+        EO.getBandProperties(band, bandProperties);
+
+        assertNull(band.getUnit());
+        assertFalse(band.isNoDataValueUsed());
+    }
+
+    @Test
+    public void testGetCommonNameRedEdgeVariants() {
+        assertEquals(EO.rededge, EO.getCommonName("red_edge"));
+    }
+
+    @Test
+    public void testGetCommonNameNIRVariants() {
+        assertEquals(EO.nir, EO.getCommonName("near_infrared"));
+    }
+
+    @Test
+    public void testGetCommonNameLWIRVariants() {
+        assertEquals(EO.lwir11, EO.getCommonName("lwir1"));
+        assertEquals(EO.lwir12, EO.getCommonName("lwir2"));
     }
 }

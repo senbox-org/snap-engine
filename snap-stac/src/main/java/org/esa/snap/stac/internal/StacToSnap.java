@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.SampleCoding;
@@ -31,6 +32,8 @@ import org.esa.snap.core.dataop.maptransf.Ellipsoid;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
+import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.stac.StacItem;
 import org.esa.snap.stac.extensions.Proj;
 import org.esa.snap.stac.extensions.SNAP;
@@ -275,9 +278,153 @@ class StacToSnap {
             if(geoCoding != null) {
                 product.setSceneGeoCoding(geoCoding);
             }
+        } else if (stacItem.getGeometry() != null) {
+            JSONArray bbox = getBoundingBox(stacItem.getGeometry());
+            GeoCodingSupport.addGeoCoding(product, bbox);
         } else if (stacItem.getBoundingBox() != null) {
             JSONArray bbox = stacItem.getBoundingBox();
             GeoCodingSupport.addGeoCoding(product, bbox);
+        }
+    }
+
+    public static JSONArray getBoundingBox(JSONObject geometry) {
+        String type = (String) geometry.get("type");
+
+        Double minLat = null, minLon = null, maxLat = null, maxLon = null;
+        if (type.equals("Point")) {
+            JSONArray coordinates = (JSONArray) geometry.get("coordinates");
+            double longitude = (Double) coordinates.get(0);
+            double latitude = (Double) coordinates.get(1);
+            JSONArray bbox = new JSONArray();
+            bbox.add(longitude);
+            bbox.add(latitude);
+            bbox.add(longitude);
+            bbox.add(latitude);
+            return bbox;
+        } else if (type.equals("LineString") || type.equals("MultiPoint")) {
+            JSONArray coordinatesArray = (JSONArray) geometry.get("coordinates");
+            if (coordinatesArray.isEmpty()) {
+                return new JSONArray(); // Empty bounding box for empty geometry
+            }
+
+            for (Object coordObj : coordinatesArray) {
+                JSONArray coordinate = (JSONArray) coordObj;
+                double longitude = (Double) coordinate.get(0);
+                double latitude = (Double) coordinate.get(1);
+
+                if (minLat == null) {
+                    minLon = maxLon = longitude;
+                    minLat = maxLat = latitude;
+                } else {
+                    minLon = Math.min(minLon, longitude);
+                    maxLon = Math.max(maxLon, longitude);
+                    minLat = Math.min(minLat, latitude);
+                    maxLat = Math.max(maxLat, latitude);
+                }
+            }
+            JSONArray bbox = new JSONArray();
+            bbox.add(minLon);
+            bbox.add(minLat);
+            bbox.add(maxLon);
+            bbox.add(maxLat);
+            return bbox;
+        } else if (type.equals("Polygon") || type.equals("MultiLineString")) {
+            JSONArray coordinatesArray = (JSONArray) geometry.get("coordinates");
+            if (coordinatesArray.isEmpty()) {
+                return new JSONArray(); // Empty bounding box for empty geometry
+            }
+
+            for (Object lineStringArrayObj : coordinatesArray) {
+                JSONArray lineStringArray = (JSONArray) lineStringArrayObj;
+                for (Object coordObj : lineStringArray) {
+                    JSONArray coordinate = (JSONArray) coordObj;
+                    double longitude = (Double) coordinate.get(0);
+                    double latitude = (Double) coordinate.get(1);
+
+                    if (minLat == null) {
+                        minLon = maxLon = longitude;
+                        minLat = maxLat = latitude;
+                    } else {
+                        minLon = Math.min(minLon, longitude);
+                        maxLon = Math.max(maxLon, longitude);
+                        minLat = Math.min(minLat, latitude);
+                        maxLat = Math.max(maxLat, latitude);
+                    }
+                }
+            }
+            JSONArray bbox = new JSONArray();
+            bbox.add(minLon);
+            bbox.add(minLat);
+            bbox.add(maxLon);
+            bbox.add(maxLat);
+            return bbox;
+        } else if (type.equals("MultiPolygon")) {
+            JSONArray coordinatesArray = (JSONArray) geometry.get("coordinates");
+            if (coordinatesArray.isEmpty()) {
+                return new JSONArray(); // Empty bounding box for empty geometry
+            }
+
+            for (Object polygonArrayObj : coordinatesArray) {
+                JSONArray polygonArray = (JSONArray) polygonArrayObj;
+                for (Object lineStringArrayObj : polygonArray) {
+                    JSONArray lineStringArray = (JSONArray) lineStringArrayObj;
+                    for (Object coordObj : lineStringArray) {
+                        JSONArray coordinate = (JSONArray) coordObj;
+                        double longitude = (Double) coordinate.get(0);
+                        double latitude = (Double) coordinate.get(1);
+
+                        if (minLat == null) {
+                            minLon = maxLon = longitude;
+                            minLat = maxLat = latitude;
+                        } else {
+                            minLon = Math.min(minLon, longitude);
+                            maxLon = Math.max(maxLon, longitude);
+                            minLat = Math.min(minLat, latitude);
+                            maxLat = Math.max(maxLat, latitude);
+                        }
+                    }
+                }
+            }
+            JSONArray bbox = new JSONArray();
+            bbox.add(minLon);
+            bbox.add(minLat);
+            bbox.add(maxLon);
+            bbox.add(maxLat);
+            return bbox;
+        } else if (type.equals("GeometryCollection")) {
+            JSONArray geometries = (JSONArray) geometry.get("geometries");
+            if (geometries.isEmpty()) {
+                return new JSONArray(); // Empty bounding box for empty collection
+            }
+
+            for (Object geomObj : geometries) {
+                JSONArray bbox = getBoundingBox((JSONObject) geomObj);
+                if (bbox != null && bbox.size() == 4) {
+
+                    if (minLat == null) {
+                        minLon = maxLon = (Double) bbox.get(0);
+                        minLat = maxLat = (Double) bbox.get(1);
+                    } else {
+                        minLon = Math.min(minLon, (Double) bbox.get(0));
+                        minLat = Math.min(minLat, (Double) bbox.get(1));
+                        maxLon = Math.max(maxLon, (Double) bbox.get(2));
+                        maxLat = Math.max(maxLat, (Double) bbox.get(3));
+                    }
+                }
+            }
+            // Handle the case where the GeometryCollection contains only empty geometries
+            if (minLat == null) {
+                return new JSONArray();
+            }
+            JSONArray bbox = new JSONArray();
+            bbox.add(minLon);
+            bbox.add(minLat);
+            bbox.add(maxLon);
+            bbox.add(maxLat);
+            return bbox;
+        } else {
+            // Unsupported geometry type
+            return null;
         }
     }
 
@@ -300,82 +447,6 @@ class StacToSnap {
         }
 
         return null;
-
-//        final JSONArray geoPosElems = (JSONArray)json.get(TAG_GEOCODINGS);
-//        List bandInfoElems = null;
-////        final Element imageInterpretationElement = null;//todo json.get(SkyWatchProductConstants.TAG_IMAGE_INTERPRETATION);
-////        if(imageInterpretationElement != null) {
-////            bandInfoElems = imageInterpretationElement.getChildren(SkyWatchProductConstants.TAG_SPECTRAL_BAND_INFO);
-////        }
-//        if (geoPosElems.size() > 0) {
-//            Map<String, GeoCoding> wktToCrsGeocodingMap = new HashMap<>();
-//            final GeoCoding[] geoCodings = new GeoCoding[geoPosElems.size()];
-//
-//            for (int i = 0; i < geoPosElems.size(); i++) {
-//                final JSONObject geoPosElem = (JSONObject) geoPosElems.get(i);
-//                final JSONObject geocodingJSON = (JSONObject) geoPosElem.get(TAG_GEOCODING);
-//                final JSONObject crsElem = (JSONObject) geoPosElem.get(TAG_COORDINATE_REFERENCE_SYSTEM);
-//
-//                final int bandIndex;
-//                if (geoPosElems.size() > 1) {
-//                    bandIndex = 0; //todo Integer.parseInt(geoPosElem.getChildText(SkyWatchProductConstants.TAG_BAND_INDEX));
-//                } else {
-//                    bandIndex = 0;
-//                }
-//                //Search corresponding bandInfo
-//                Element bandInfoElem = null;
-//                if(bandInfoElems != null) {
-//                    for(Object object : bandInfoElems) {
-//                        Element element = (Element) object;
-//                        try {
-//                            int index = 0; //todo Integer.parseInt(element.getChildText(SkyWatchProductConstants.TAG_BAND_INDEX));
-//                            if (index == bandIndex) {
-//                                bandInfoElem = element;
-//                                break;
-//                            }
-//                        } catch (Exception e) {
-//                            continue;
-//                        }
-//                    }
-//                }
-//                if (geocodingJSON != null && geocodingJSON.containsKey(TAG_FORWARD_CODING_KEY)) {
-//                    final GeoCoding crsGeoCoding = createComponentGeoCoding(product, geocodingJSON);
-//                    geoCodings[bandIndex] = crsGeoCoding;
-//                } else if (crsElem != null && crsElem.containsKey(TAG_WKT)) {
-//                    final String wkt = (String)crsElem.get(TAG_WKT);
-//                    final String key = wkt + " " + (String)geocodingJSON.get(TAG_IMAGE_TO_MODEL_TRANSFORM);
-//                    if (wktToCrsGeocodingMap.containsKey(key)) {
-//                        geoCodings[bandIndex] = wktToCrsGeocodingMap.get(key);
-//                    } else {
-//                        final GeoCoding crsGeoCoding = createCrsGeoCoding(product, geocodingJSON, wkt, bandInfoElem);
-//                        geoCodings[bandIndex] = crsGeoCoding;
-//                        wktToCrsGeocodingMap.put(key, crsGeoCoding);
-//                    }
-//                } else if (geocodingJSON.get(TAG_SIMPLIFIED_LOCATION_MODEL) != null &&
-//                        geocodingJSON.get(TAG_GEOPOSITION_INSERT) != null) {
-//                    geoCodings[bandIndex] = null;//todo createFXYGeoCoding(datum, geocodingJSON);
-//                } else if (geocodingJSON.get(TAG_SEARCH_RADIUS) != null &&
-//                        geocodingJSON.get(TAG_LATITUDE_BAND) != null) {
-//                    final Datum datum = createDatum(json);
-//                    geoCodings[bandIndex] = createPixelGeoCoding(product, datum, geocodingJSON);
-//                } else {
-//                    if (geocodingJSON.containsKey(TAG_GEOPOSITION_POINTS)) {
-//                        final Datum datum = createDatum(json);
-//                        geoCodings[bandIndex] = createGeoCodingFromGeoPositionPointsElement(product,
-//                                datum, (JSONObject)geocodingJSON.get(TAG_GEOPOSITION_POINTS));
-//                    } else {
-//                        throw new IOException("Unhandled GeoCoding");
-////                        final DimapPersistable persistable = DimapPersistence.getPersistable(geoPosElem);
-////                        if (persistable != null) {
-////                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product);
-////                        }
-//                    }
-//                }
-//            }
-//            return geoCodings;
-//        }
-//
-//        throw new IOException("Unhandled geocoding");
     }
 
     private static GeoCoding createGeoCodingFromGeoPositionPoints(final Product product, final Datum datum,
