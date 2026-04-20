@@ -223,7 +223,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
      */
     public String[] listAll(Pattern... patterns) {
         File baseFile = getBaseFile();
-        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath())) {
+        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath()) || VirtualDirEx.isGz(baseFile.getPath())) {
             return listAll();
         } else {
             List<String> filesAndFolders;
