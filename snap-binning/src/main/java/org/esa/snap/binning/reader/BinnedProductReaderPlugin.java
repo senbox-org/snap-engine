@@ -45,7 +45,7 @@ public class BinnedProductReaderPlugin implements ProductReaderPlugIn {
             try {
                 NetcdfFile netcdfFile = null;
                 try {
-                    netcdfFile = NetcdfFileOpener.open(path);
+                    netcdfFile = NetcdfFileOpener.open(input);
                     if (netcdfFile == null) {
                         return DecodeQualification.UNABLE;
                     }
