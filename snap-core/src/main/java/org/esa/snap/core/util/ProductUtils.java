@@ -20,6 +20,7 @@ package org.esa.snap.core.util;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.VirtualDir;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import eu.esa.snap.core.lib.NotRegularFileException;
@@ -28,6 +29,7 @@ import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.Range;
@@ -2486,6 +2488,23 @@ public class ProductUtils {
             }
         }
         return true;
+    }
+
+    public static VirtualDir getProductVirtualDir(Object input) {
+        File inputFile = getProductPath(input).toFile();
+        if (inputFile.isFile()) {
+            if (inputFile.getName().toLowerCase().endsWith(".zip")) {
+                final String cachedFilepath = FileUtils.getCachedFilePath(inputFile);
+                inputFile = new File(cachedFilepath);
+            } else {
+                final File absoluteFile = inputFile.getAbsoluteFile();
+                inputFile = absoluteFile.getParentFile();
+                if (inputFile == null) {
+                    return null;
+                }
+            }
+        }
+        return VirtualDir.create(inputFile);
     }
 
     public static InputStream getProductInputStream(Object input) throws IOException {
