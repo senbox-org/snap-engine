@@ -22,7 +22,6 @@ import com.bc.ceres.util.CleanerRegistry;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -193,10 +192,11 @@ public abstract class VirtualDir {
 
         @Override
         public InputStream getInputStream(String path) throws IOException {
+            final InputStream inputStream = new BufferedInputStream(Files.newInputStream(getFile(path).toPath()));
             if (path.endsWith(".gz")) {
-                return new GZIPInputStream(new BufferedInputStream(new FileInputStream(getFile(path))));
+                return new GZIPInputStream(inputStream);
             }
-            return new BufferedInputStream(new FileInputStream(getFile(path)));
+            return inputStream;
         }
 
         @Override
