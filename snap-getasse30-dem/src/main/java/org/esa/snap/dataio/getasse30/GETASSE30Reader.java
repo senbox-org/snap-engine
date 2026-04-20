@@ -27,11 +27,11 @@ import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class GETASSE30Reader extends AbstractProductReader {
                 _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir());
                 fileName = FileUtils.getFilenameWithoutExtension(entryName);
             } else {
-                _imageInputStream = new FileImageInputStream(dataFile);
+                _imageInputStream = ImageUtils.getImageInputStream(dataFile);
                 fileName = FileUtils.getFilenameWithoutExtension(dataFile);
             }
         } catch (IOException e) {
