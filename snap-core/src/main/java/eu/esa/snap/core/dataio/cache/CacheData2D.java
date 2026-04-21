@@ -61,16 +61,21 @@ class CacheData2D extends AbstractCacheData {
     }
 
     void copyData(int[] offsets, int[] targetOffsets, int[] targetShapes, int targetWidth, ProductData targetData) throws IOException {
-        ensureData();
+        // Capture the buffer reference under the same lock used by ensureData / release,
+        // so a concurrent release() can't null out `data` between ensureData and the copy.
+        final DataBuffer localData = ensureData();
 
-        copyDataBuffer(offsets, data, targetOffsets, targetShapes, targetWidth, targetData);
+        copyDataBuffer(offsets, localData, targetOffsets, targetShapes, targetWidth, targetData);
     }
 
     @Override
     public int getSizeInBytes() {
         int size = SIZE_WITHOUT_BUFFER;
-        if (data != null) {
-            final ProductData productData = data.getData();
+        // Snapshot the reference so a concurrent release() can't null it between
+        // the null check and the getData() call.
+        final DataBuffer snapshot = data;
+        if (snapshot != null) {
+            final ProductData productData = snapshot.getData();
             size += productData.getNumElems() * productData.getElemSize();
         }
         return size;
@@ -93,7 +98,8 @@ class CacheData2D extends AbstractCacheData {
         }
     }
 
-    private void ensureData() throws IOException {
+    private DataBuffer ensureData() throws IOException {
+        final DataBuffer localData;
         synchronized (this) {
             if (data == null) {
                 final String name = context.getVariableDescriptor().name;
@@ -104,14 +110,16 @@ class CacheData2D extends AbstractCacheData {
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
                 lastAccessTime = System.currentTimeMillis();
             }
+            localData = data;
         }
-        trackAllocation();
+        trackAllocation(localData);
+        return localData;
     }
 
-    private void trackAllocation() {
+    private void trackAllocation(DataBuffer localData) {
         final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
         if (memoryUsageTracker != null) {
-            memoryUsageTracker.allocated(data.getSizeInBytes());
+            memoryUsageTracker.allocated(localData.getSizeInBytes());
         }
     }
 
