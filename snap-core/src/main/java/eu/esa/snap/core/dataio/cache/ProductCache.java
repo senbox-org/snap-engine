@@ -88,7 +88,9 @@ public class ProductCache implements TimeStamped {
 
     private @NonNull ArrayList<VariableCache> getTimeOrderedList() {
         final ArrayList<VariableCache> variableCaches = new ArrayList<>(variableCacheMap.values());
-        variableCaches.sort(new ReverseTimeComparator());
+        // Snapshot access times so the sort is stable even if other threads update them
+        // concurrently while this sort runs (prevents TimSort contract violation).
+        variableCaches.sort(new ReverseTimeComparator(variableCaches));
         return variableCaches;
     }
 }
