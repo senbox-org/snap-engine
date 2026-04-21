@@ -1,5 +1,10 @@
 package org.esa.snap.speclib.util.resampling;
 
+/**
+ * Provides properties (name,...?) of sensors supported for Spectral Resampling.
+ *
+ * @author olafd
+ */
 public enum SpectralResamplingSensor {
 
     ENMAP("ENMAP"),
