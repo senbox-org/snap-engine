@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envi-reader</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

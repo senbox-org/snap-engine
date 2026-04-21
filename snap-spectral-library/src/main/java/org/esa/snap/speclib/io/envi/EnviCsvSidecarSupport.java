@@ -1,7 +1,7 @@
 package org.esa.snap.speclib.io.envi;
 
 import org.esa.snap.dataio.envi.EnviConstants;
-import org.esa.snap.speclib.io.csv.CsvSpectralLibraryIO;
+import org.esa.snap.speclib.io.csv.sidecar.CsvSpectralLibrarySidecarIO;
 import org.esa.snap.speclib.model.*;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class EnviCsvSidecarSupport {
         }
         Path csvPath = resolveCsvPath(enviPath);
         Files.createDirectories(csvPath.toAbsolutePath().getParent());
-        new CsvSpectralLibraryIO().write(lib, csvPath);
+        new CsvSpectralLibrarySidecarIO().write(lib, csvPath);
     }
 
     public static SpectralLibrary mergeIfPresent(SpectralLibrary enviLib, Path enviPath) throws IOException {
@@ -58,7 +58,7 @@ public class EnviCsvSidecarSupport {
             return enviLib;
         }
 
-        SpectralLibrary csvLib = new CsvSpectralLibraryIO().read(csvPath);
+        SpectralLibrary csvLib = new CsvSpectralLibrarySidecarIO().read(csvPath);
 
         List<SpectralProfile> enviProfiles = enviLib.getProfiles();
         List<SpectralProfile> csvProfiles = csvLib.getProfiles();
@@ -67,9 +67,9 @@ public class EnviCsvSidecarSupport {
 
         Map<String, AttributeDef> mergedMap = new LinkedHashMap<>(enviLib.getSchema().asMap());
 
-        boolean csvHasWkt = csvLib.getSchema().find(CsvSpectralLibraryIO.COL_WKT).isPresent() || csvProfiles.stream().anyMatch(p -> p != null && p.getAttributes().containsKey(CsvSpectralLibraryIO.COL_WKT));
-        if (csvHasWkt && !mergedMap.containsKey(CsvSpectralLibraryIO.COL_WKT)) {
-            mergedMap.put(CsvSpectralLibraryIO.COL_WKT, AttributeDef.optional(CsvSpectralLibraryIO.COL_WKT, AttributeType.STRING));
+        boolean csvHasWkt = csvLib.getSchema().find(CsvSpectralLibrarySidecarIO.COL_WKT).isPresent() || csvProfiles.stream().anyMatch(p -> p != null && p.getAttributes().containsKey(CsvSpectralLibrarySidecarIO.COL_WKT));
+        if (csvHasWkt && !mergedMap.containsKey(CsvSpectralLibrarySidecarIO.COL_WKT)) {
+            mergedMap.put(CsvSpectralLibrarySidecarIO.COL_WKT, AttributeDef.optional(CsvSpectralLibrarySidecarIO.COL_WKT, AttributeType.STRING));
         }
         AttributeSchema mergedSchema = new AttributeSchema(mergedMap);
 

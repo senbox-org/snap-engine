@@ -56,91 +56,98 @@ public class TestStackUtils {
     }
 
     @Test
-    public void testSaveMasterProductBandNames() throws Exception {
+    public void testSaveReferenceProductBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = new String[] {"band1","band2"};
-        StackUtils.saveMasterProductBandNames(product, bandNames);
+        StackUtils.saveReferenceProductBandNames(product, bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
-        assertNotNull(targetSlaveMetadataRoot);
-        String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
-        assertEquals("band1 band2", masterBands);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSecondaryMetadata(product.getMetadataRoot());
+        assertNotNull(targetSecondaryMetadataRoot);
+        String referenceBands = targetSecondaryMetadataRoot.getAttributeString(AbstractMetadata.REFERENCE_BANDS);
+        assertEquals("band1 band2", referenceBands);
     }
 
     @Test
-    public void testSaveSlaveProductBandNames_WrongProduct() throws Exception {
+    public void testSaveSecondaryProductBandNames_WrongProduct() throws Exception {
         final Product product = createStackProduct(4);
         String[] bandNames = new String[] {"band1","band2"};
 
         Exception exception = assertThrows(Exception.class,
-                ()->StackUtils.saveSlaveProductBandNames(product, "wrongProduct", bandNames));
+                ()->StackUtils.saveSecondaryProductBandNames(product, "wrongProduct", bandNames));
         System.out.println(exception.getMessage());
         assertTrue(exception.getMessage().contains("wrongProduct metadata not found"));
     }
 
     @Test
-    public void testSaveSlaveProductBandNames() throws Exception {
+    public void testSaveSecondaryProductBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = new String[] {"band1","band2"};
-        StackUtils.saveSlaveProductBandNames(product, "product2_01Feb21", bandNames);
+        StackUtils.saveSecondaryProductBandNames(product, "product2_01Feb21", bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
-        assertNotNull(targetSlaveMetadataRoot);
-        String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
-        assertEquals("band_mst1_01Jan21", masterBands);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSecondaryMetadata(product.getMetadataRoot());
+        assertNotNull(targetSecondaryMetadataRoot);
+        String referenceBands = targetSecondaryMetadataRoot.getAttributeString(AbstractMetadata.REFERENCE_BANDS);
+        assertEquals("band_ref1_01Jan21", referenceBands);
     }
 
     @Test
-    public void testFindOriginalSlaveProductName() throws Exception {
+    public void testFindOriginalSecondaryProductName() throws Exception {
         final Product product = createStackProduct(4);
 
-        assertEquals("product2_01Feb21", StackUtils.findOriginalSlaveProductName(product, product.getBandAt(2)));
+        assertEquals("product2_01Feb21", StackUtils.findOriginalSecondaryProductName(product, product.getBandAt(2)));
     }
 
     @Test
-    public void testGetSlaveBandNames() throws Exception {
+    public void testGetSecondaryBandNames() throws Exception {
         final Product product = createStackProduct(4);
 
-        String[] bandNames = StackUtils.getSlaveBandNames(product, "unknown");
-        assertArrayEquals(new String[] {"band_slv2_01Feb21", "band_slv3_01Feb21"}, bandNames);
+        String[] bandNames = StackUtils.getSecondaryBandNames(product, "unknown");
+        assertArrayEquals(new String[] {"band_sec2_01Feb21", "band_sec3_01Feb21"}, bandNames);
 
-        bandNames = StackUtils.getSlaveBandNames(product, "product2_01Feb21");
-        assertArrayEquals(new String[] {"band_slv2_01Feb21", "band_slv3_01Feb21"}, bandNames);
+        bandNames = StackUtils.getSecondaryBandNames(product, "product2_01Feb21");
+        assertArrayEquals(new String[] {"band_sec2_01Feb21", "band_sec3_01Feb21"}, bandNames);
     }
 
     @Test
-    public void testIsMasterBand() throws Exception {
+    public void testIsReferenceBand() throws Exception {
         final Product product = createStackProduct(4);
 
-        assertTrue(StackUtils.isMasterBand(product.getBandAt(0).getName(), product));
-        assertFalse(StackUtils.isMasterBand(product.getBandAt(1).getName(), product));
+        assertTrue(StackUtils.isReferenceBand(product.getBandAt(0).getName(), product));
+        assertFalse(StackUtils.isReferenceBand(product.getBandAt(1).getName(), product));
     }
 
     @Test
-    public void testIsSlaveBand() throws Exception {
+    public void testIsSecondaryBand() throws Exception {
         final Product product = createStackProduct(4);
 
-        assertFalse(StackUtils.isSlaveBand(product.getBandAt(0).getName(), product));
-        assertTrue(StackUtils.isSlaveBand(product.getBandAt(1).getName(), product));
+        assertFalse(StackUtils.isSecondaryBand(product.getBandAt(0).getName(), product));
+        assertTrue(StackUtils.isSecondaryBand(product.getBandAt(1).getName(), product));
     }
 
     @Test
-    public void testGetSlaveProductNames() throws Exception {
+    public void testGetSecondaryProductNames() throws Exception {
         final Product product = createStackProduct(4);
 
-        String[] productNames = StackUtils.getSlaveProductNames(product);
+        String[] productNames = StackUtils.getSecondaryProductNames(product);
         assertArrayEquals(new String[] {"product2_01Feb21"}, productNames);
     }
 
     @Test
     public void testGetBandNameWithoutDate() {
 
-        assertEquals("band", StackUtils.getBandNameWithoutDate("band_mst1_01Jan21"));
-        assertEquals("band", StackUtils.getBandNameWithoutDate("band_slv2_01Feb21"));
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_ref1_01Jan21"));
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_sec2_01Feb21"));
         assertEquals("band", StackUtils.getBandNameWithoutDate("band_01Feb21"));
         assertEquals("band", StackUtils.getBandNameWithoutDate("band"));
+    }
+
+    @Test
+    public void testGetBandNameWithoutDate_Legacy() {
+        // Backwards compatibility: legacy _mst/_slv naming should still work
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_mst1_01Jan21"));
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_slv2_01Feb21"));
     }
 
     @Test
@@ -148,7 +155,7 @@ public class TestStackUtils {
         final Product product = createStackProduct(4);
 
         String[] suffixes = StackUtils.getBandSuffixes(product.getBands());
-        assertArrayEquals(new String[] {"_mst1_01Jan21", "_slv2_01Feb21", "_slv3_01Feb21"}, suffixes);
+        assertArrayEquals(new String[] {"_ref1_01Jan21", "_sec2_01Feb21", "_sec3_01Feb21"}, suffixes);
     }
 
     @Test
@@ -162,10 +169,17 @@ public class TestStackUtils {
     @Test
     public void testGetBandSuffix() {
 
-        assertEquals("_mst1_01Jan21", StackUtils.getBandSuffix("band_mst1_01Jan21"));
-        assertEquals("_slv2_01Feb21", StackUtils.getBandSuffix("band_slv2_01Feb21"));
+        assertEquals("_ref1_01Jan21", StackUtils.getBandSuffix("band_ref1_01Jan21"));
+        assertEquals("_sec2_01Feb21", StackUtils.getBandSuffix("band_sec2_01Feb21"));
         assertEquals("_01Feb21", StackUtils.getBandSuffix("band_01Feb21"));
         assertEquals("band", StackUtils.getBandSuffix("band"));
+    }
+
+    @Test
+    public void testGetBandSuffix_Legacy() {
+        // Backwards compatibility: legacy _mst/_slv naming should still work
+        assertEquals("_mst1_01Jan21", StackUtils.getBandSuffix("band_mst1_01Jan21"));
+        assertEquals("_slv2_01Feb21", StackUtils.getBandSuffix("band_slv2_01Feb21"));
     }
 
     @Test
@@ -183,26 +197,85 @@ public class TestStackUtils {
         final Product product = createStackProduct(4);
 
         String[] bandNames = StackUtils.bandsToStringArray(product.getBands());
-        assertArrayEquals(new String[] {"band_mst1_01Jan21", "band_slv2_01Feb21", "band_slv3_01Feb21"}, bandNames);
+        assertArrayEquals(new String[] {"band_ref1_01Jan21", "band_sec2_01Feb21", "band_sec3_01Feb21"}, bandNames);
     }
 
     @Test
     @STTM("SNAP-3651")
-    public void testSaveSlaveProductBandNames_appendNames() throws Exception {
+    public void testSaveSecondaryProductBandNames_appendNames() throws Exception {
         final Product product = createStackProduct(4);
 
         String[] bandNames = new String[] {"band1","band2"};
-        StackUtils.saveSlaveProductBandNames(product, "product2_01Feb21", bandNames);
+        StackUtils.saveSecondaryProductBandNames(product, "product2_01Feb21", bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product.getMetadataRoot());
-        assertNotNull(targetSlaveMetadataRoot);
-        final String masterBands = targetSlaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS);
-        assertEquals("band_mst1_01Jan21", masterBands);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSecondaryMetadata(product.getMetadataRoot());
+        assertNotNull(targetSecondaryMetadataRoot);
+        final String referenceBands = targetSecondaryMetadataRoot.getAttributeString(AbstractMetadata.REFERENCE_BANDS);
+        assertEquals("band_ref1_01Jan21", referenceBands);
 
-        final MetadataElement slaveProductElem = targetSlaveMetadataRoot.getElement("product2_01Feb21");
-        assertNotNull(slaveProductElem);
-        final String slaveBands = slaveProductElem.getAttributeString(AbstractMetadata.SLAVE_BANDS);
-        assertEquals("band_slv2_01Feb21 band_slv3_01Feb21 band1 band2", slaveBands);
+        final MetadataElement secondaryProductElem = targetSecondaryMetadataRoot.getElement("product2_01Feb21");
+        assertNotNull(secondaryProductElem);
+        final String secondaryBands = secondaryProductElem.getAttributeString(AbstractMetadata.SECONDARY_BANDS);
+        assertEquals("band_sec2_01Feb21 band_sec3_01Feb21 band1 band2", secondaryBands);
+    }
+
+    @Test
+    public void testConvertLegacyBandName() {
+        assertEquals("band_ref1_01Jan21", StackUtils.convertLegacyBandName("band_mst1_01Jan21"));
+        assertEquals("band_sec2_01Feb21", StackUtils.convertLegacyBandName("band_slv2_01Feb21"));
+        assertEquals("band_01Feb21", StackUtils.convertLegacyBandName("band_01Feb21"));
+    }
+
+    @Test
+    public void testHasLegacyNaming() {
+        assertTrue(StackUtils.hasLegacyNaming("band_mst1_01Jan21"));
+        assertTrue(StackUtils.hasLegacyNaming("band_slv2_01Feb21"));
+        assertFalse(StackUtils.hasLegacyNaming("band_ref1_01Jan21"));
+        assertFalse(StackUtils.hasLegacyNaming("band_sec2_01Feb21"));
+        assertFalse(StackUtils.hasLegacyNaming("band_01Feb21"));
+    }
+
+    @Test
+    public void testRenameLegacyBands() throws Exception {
+        final Product product = createLegacyStackProduct(4);
+
+        // Verify bands have legacy naming
+        assertEquals("band_mst1_01Jan21", product.getBandAt(0).getName());
+        assertEquals("band_slv2_01Feb21", product.getBandAt(1).getName());
+
+        StackUtils.renameLegacyBands(product);
+
+        // Verify bands now have new naming
+        assertEquals("band_ref1_01Jan21", product.getBandAt(0).getName());
+        assertEquals("band_sec2_01Feb21", product.getBandAt(1).getName());
+        assertEquals("band_sec3_01Feb21", product.getBandAt(2).getName());
+    }
+
+    @Test
+    public void testLegacyProductBackwardsCompatibility() throws Exception {
+        // Test that a product with legacy _mst/_slv naming still works with all methods
+        final Product product = createLegacyStackProduct(4);
+
+        // getReferenceBandNames should find _mst bands via metadata
+        String[] refBands = StackUtils.getReferenceBandNames(product);
+        assertEquals(1, refBands.length);
+        assertEquals("band_mst1_01Jan21", refBands[0]);
+
+        // isReferenceBand should work with legacy naming
+        assertTrue(StackUtils.isReferenceBand("band_mst1_01Jan21", product));
+        assertFalse(StackUtils.isReferenceBand("band_slv2_01Feb21", product));
+
+        // isSecondaryBand should work with legacy naming
+        assertTrue(StackUtils.isSecondaryBand("band_slv2_01Feb21", product));
+        assertFalse(StackUtils.isSecondaryBand("band_mst1_01Jan21", product));
+
+        // getBandNameWithoutDate should work with legacy naming
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_mst1_01Jan21"));
+        assertEquals("band", StackUtils.getBandNameWithoutDate("band_slv2_01Feb21"));
+
+        // getBandSuffix should work with legacy naming
+        assertEquals("_mst1_01Jan21", StackUtils.getBandSuffix("band_mst1_01Jan21"));
+        assertEquals("_slv2_01Feb21", StackUtils.getBandSuffix("band_slv2_01Feb21"));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,18 +285,39 @@ public class TestStackUtils {
         final Product product = TestUtils.createProduct("type", w, h);
 
         String date = "_01Jan21";
-        Band mstBand = TestUtils.createBand(product, "band_mst" + 1 + date, w, h);
-        StackUtils.saveMasterProductBandNames(product, new String[] {mstBand.getName()});
+        Band refBand = TestUtils.createBand(product, "band_ref" + 1 + date, w, h);
+        StackUtils.saveReferenceProductBandNames(product, new String[] {refBand.getName()});
 
-        final List<String> slvBands = new ArrayList<>();
+        final List<String> secBands = new ArrayList<>();
+        date = "_01Feb21";
+        for(int i=2; i < numBands; ++i) {
+            Band band = TestUtils.createBand(product, "band_sec" + i + date, w, h);
+            secBands.add(band.getName());
+        }
+        String secProductName = "product2"+date;
+        addStackMetadata(product, secProductName);
+        StackUtils.saveSecondaryProductBandNames(product, secProductName, secBands.toArray(new String[0]));
+
+        return product;
+    }
+
+    private static Product createLegacyStackProduct(final int numBands) throws Exception {
+        final int w = 10, h = 10;
+        final Product product = TestUtils.createProduct("type", w, h);
+
+        String date = "_01Jan21";
+        Band refBand = TestUtils.createBand(product, "band_mst" + 1 + date, w, h);
+        StackUtils.saveReferenceProductBandNames(product, new String[] {refBand.getName()});
+
+        final List<String> secBands = new ArrayList<>();
         date = "_01Feb21";
         for(int i=2; i < numBands; ++i) {
             Band band = TestUtils.createBand(product, "band_slv" + i + date, w, h);
-            slvBands.add(band.getName());
+            secBands.add(band.getName());
         }
-        String slvProductName = "product2"+date;
-        addStackMetadata(product, slvProductName);
-        StackUtils.saveSlaveProductBandNames(product, slvProductName, slvBands.toArray(new String[0]));
+        String secProductName = "product2"+date;
+        addStackMetadata(product, secProductName);
+        StackUtils.saveSecondaryProductBandNames(product, secProductName, secBands.toArray(new String[0]));
 
         return product;
     }
@@ -234,17 +328,17 @@ public class TestStackUtils {
 
         absRoot.setAttributeInt(AbstractMetadata.coregistered_stack, 1);
 
-        final MetadataElement slv1Meta = absRoot.createDeepClone();
-        slv1Meta.setName(secondaryProductName);
-        slv1Meta.setAttributeString(AbstractMetadata.PRODUCT, secondaryProductName);
+        final MetadataElement sec1Meta = absRoot.createDeepClone();
+        sec1Meta.setName(secondaryProductName);
+        sec1Meta.setAttributeString(AbstractMetadata.PRODUCT, secondaryProductName);
 
-        MetadataElement slaveMetadata;
-        if(root.containsElement(AbstractMetadata.SLAVE_METADATA_ROOT)) {
-            slaveMetadata = root.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+        MetadataElement secondaryMetadata;
+        if(root.containsElement(AbstractMetadata.SECONDARY_METADATA_ROOT)) {
+            secondaryMetadata = root.getElement(AbstractMetadata.SECONDARY_METADATA_ROOT);
         } else {
-            slaveMetadata = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            root.addElement(slaveMetadata);
+            secondaryMetadata = new MetadataElement(AbstractMetadata.SECONDARY_METADATA_ROOT);
+            root.addElement(secondaryMetadata);
         }
-        slaveMetadata.addElement(slv1Meta);
+        secondaryMetadata.addElement(sec1Meta);
     }
 }

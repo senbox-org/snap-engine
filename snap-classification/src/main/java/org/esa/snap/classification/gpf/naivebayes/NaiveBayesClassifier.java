@@ -816,7 +816,7 @@ public class NaiveBayesClassifier {
         for (int i = 0; i < featureInfoList.length; i++) {
             final Band featureBand = featureInfoList[i].getFeatureBand();
             featureNames[i] = featureBand.getName();
-            if (featureNames[i].contains(StackUtils.MST) || featureNames[i].contains(StackUtils.SLV))
+            if (featureNames[i].contains(StackUtils.REF) || featureNames[i].contains(StackUtils.SEC))
                 featureNames[i] = StackUtils.getBandNameWithoutDate(featureNames[i]);
             featureMinValues[i] = featureBand.getStx().getMinimum();
             featureMaxValues[i] = featureBand.getStx().getMaximum();

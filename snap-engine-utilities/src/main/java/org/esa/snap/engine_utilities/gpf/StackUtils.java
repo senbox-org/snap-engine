@@ -30,8 +30,42 @@ import java.util.*;
  */
 public final class StackUtils {
 
+    // Current naming convention
+    public static final String REF = "_ref";
+    public static final String SEC = "_sec";
+
+    // Legacy naming convention (kept for backwards compatibility)
+    @Deprecated
     public static final String MST = "_mst";
+    @Deprecated
     public static final String SLV = "_slv";
+
+    /**
+     * Find the secondary metadata root element, checking new name first then legacy.
+     * Returns null if neither exists (does not create one).
+     */
+    public static MetadataElement findSecondaryMetadataRoot(final Product product) {
+        return findSecondaryMetadataRoot(product.getMetadataRoot());
+    }
+
+    public static MetadataElement findSecondaryMetadataRoot(final MetadataElement root) {
+        MetadataElement elem = root.getElement(AbstractMetadata.SECONDARY_METADATA_ROOT);
+        if (elem == null) {
+            elem = root.getElement(AbstractMetadata.LEGACY_SLAVE_METADATA_ROOT);
+        }
+        return elem;
+    }
+
+    /**
+     * Read a metadata attribute by new name, falling back to legacy name if not found.
+     */
+    private static String getMetadataAttribute(final MetadataElement elem, final String newName, final String legacyName) {
+        String value = elem.getAttributeString(newName, "");
+        if (value.isEmpty()) {
+            value = elem.getAttributeString(legacyName, "");
+        }
+        return value;
+    }
 
     public static boolean isCoregisteredStack(final Product product) {
         if(!AbstractMetadata.hasAbstractedMetadata(product))
@@ -57,24 +91,76 @@ public final class StackUtils {
         return "";
     }
 
-    public static void saveMasterProductBandNames(final Product targetProduct, final String[] masterProductBands) {
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct.getMetadataRoot());
-        final StringBuilder value = new StringBuilder(255);
-        for (String name : masterProductBands) {
-            value.append(name);
-            value.append(' ');
-        }
-        final String masterBandNames = value.toString().trim();
-        if (!masterBandNames.isEmpty()) {
-            targetSlaveMetadataRoot.setAttributeString(AbstractMetadata.MASTER_BANDS, masterBandNames);
+    /**
+     * Returns true if the band name contains a legacy naming suffix (_mst or _slv).
+     */
+    public static boolean hasLegacyNaming(final String bandName) {
+        final String lower = bandName.toLowerCase();
+        return lower.contains(MST) || lower.contains(SLV);
+    }
+
+    /**
+     * Returns true if the band name contains either the current or legacy reference/secondary naming.
+     */
+    private static boolean containsRef(final String bandName) {
+        final String lower = bandName.toLowerCase();
+        return lower.contains(REF) || lower.contains(MST);
+    }
+
+    private static boolean containsSec(final String bandName) {
+        final String lower = bandName.toLowerCase();
+        return lower.contains(SEC) || lower.contains(SLV);
+    }
+
+    /**
+     * Rename legacy band names in a product from _mst/_slv to _ref/_sec.
+     * This should be called by operators that want to ensure products use the current naming convention.
+     * @param product the product whose bands to rename
+     */
+    public static void renameLegacyBands(final Product product) {
+        for (Band band : product.getBands()) {
+            final String name = band.getName();
+            if (hasLegacyNaming(name)) {
+                final String newName = convertLegacyBandName(name);
+                if (!newName.equals(name)) {
+                    band.setName(newName);
+                }
+            }
         }
     }
 
-    public static void saveSlaveProductNames(final Product[] sourceProducts, final Product targetProduct,
-                                             final Product masterProduct, final Map<Band, Band> sourceRasterMap) throws Exception {
+    /**
+     * Convert a legacy band name from _mst/_slv convention to _ref/_sec.
+     * If the name does not use legacy naming, it is returned unchanged.
+     */
+    public static String convertLegacyBandName(final String bandName) {
+        // Replace _mst with _ref and _slv with _sec (case-sensitive, matching the constants)
+        return bandName.replace(MST, REF).replace(SLV, SEC);
+    }
+
+    public static void saveReferenceProductBandNames(final Product targetProduct, final String[] referenceProductBands) {
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSecondaryMetadata(targetProduct.getMetadataRoot());
+        final StringBuilder value = new StringBuilder(255);
+        for (String name : referenceProductBands) {
+            value.append(name);
+            value.append(' ');
+        }
+        final String referenceBandNames = value.toString().trim();
+        if (!referenceBandNames.isEmpty()) {
+            targetSecondaryMetadataRoot.setAttributeString(AbstractMetadata.REFERENCE_BANDS, referenceBandNames);
+        }
+    }
+
+    @Deprecated
+    public static void saveMasterProductBandNames(final Product targetProduct, final String[] masterProductBands) {
+        saveReferenceProductBandNames(targetProduct, masterProductBands);
+    }
+
+    public static void saveSecondaryProductNames(final Product[] sourceProducts, final Product targetProduct,
+                                             final Product referenceProduct, final Map<Band, Band> sourceRasterMap) throws Exception {
 
         for (Product prod : sourceProducts) {
-            if (prod != masterProduct) {
+            if (prod != referenceProduct) {
                 final String suffix = StackUtils.createBandTimeStamp(prod);
                 final List<String> bandNames = new ArrayList<>(10);
                 for (Band tgtBand : sourceRasterMap.keySet()) {
@@ -83,56 +169,54 @@ public final class StackUtils {
                     final Product srcProduct = srcBand.getProduct();
                     if (srcProduct == prod) {
                         bandNames.add(tgtBand.getName());
-                        //System.out.println("StackUtils: " + prod.getName() + ": " + tgtBand.getName());
                     }
                 }
 
                 // CompactPolStokesParametersOp.initialize() calls PolBandUtils.getSourceBands() which calls
-                // StackUtils.getSlaveBandNames() which gets the slave bands from the meta data of the stack product.
+                // StackUtils.getSecondaryBandNames() which gets the secondary bands from the meta data of the stack product.
                 // The bands are passed (in the order they appear in the metadata) to
                 // DualPolOpUtils.getMeanCovarianceMatrixC2().
-                // CreateStackOp.initialize() calls this method to get the slave bands to put in Slave_bands of
-                // Slave_Metadata. So make sure the slave band names are in the same order as how the bands appear in
+                // CreateStackOp.initialize() calls this method to get the secondary bands to put in Secondary_bands of
+                // Secondary_Metadata. So make sure the secondary band names are in the same order as how the bands appear in
                 // the stack product.
-                // In particular, compact pol C2 stack product slave bands must be in the order
+                // In particular, compact pol C2 stack product secondary bands must be in the order
                 // C11, C12_real, C12_imag, C22 because CompactPolStokesParametersOp() expects them to be in that
                 // order.
-                String[] slvBandNames = new String[bandNames.size()];
+                String[] secBandNames = new String[bandNames.size()];
                 Band[] tgtBands = targetProduct.getBands();
                 int cnt = 0;
                 for (Band tgtBand : tgtBands) {
-                    //System.out.println("StackUtils: tgt band i = " + i + " " + tgtBands[i].getName());
                     if (bandNames.contains(tgtBand.getName())) {
-                        slvBandNames[cnt++] = tgtBand.getName();
+                        secBandNames[cnt++] = tgtBand.getName();
                     }
 
-                    if (cnt >= slvBandNames.length) {
+                    if (cnt >= secBandNames.length) {
                         break;
                     }
                 }
-                /*
-                for (int i = 0; i < slvBandNames.length; i++) {
-                    System.out.println("StackUtils: " + prod.getName() + ": slv band = " + slvBandNames[i]);
-                }
-                */
 
                 final String prodName = prod.getName() + suffix;
-                //StackUtils.saveSlaveProductBandNames(targetProduct, prodName, bandNames.toArray(new String[bandNames.size()]));
-                StackUtils.saveSlaveProductBandNames(targetProduct, prodName, slvBandNames);
+                StackUtils.saveSecondaryProductBandNames(targetProduct, prodName, secBandNames);
             }
         }
     }
 
-    public static void saveSlaveProductBandNames(final Product targetProduct, final String slvProductName,
+    @Deprecated
+    public static void saveSlaveProductNames(final Product[] sourceProducts, final Product targetProduct,
+                                             final Product masterProduct, final Map<Band, Band> sourceRasterMap) throws Exception {
+        saveSecondaryProductNames(sourceProducts, targetProduct, masterProduct, sourceRasterMap);
+    }
+
+    public static void saveSecondaryProductBandNames(final Product targetProduct, final String secProductName,
                                                  final String[] bandNames) throws Exception {
         Guardian.assertNotNull("targetProduct", targetProduct);
-        Guardian.assertNotNull("slvProductName", slvProductName);
+        Guardian.assertNotNull("secProductName", secProductName);
         Guardian.assertNotNullOrEmpty("bandNames", bandNames);
 
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct.getMetadataRoot());
-        final MetadataElement elem = targetSlaveMetadataRoot.getElement(slvProductName);
+        final MetadataElement targetSecondaryMetadataRoot = AbstractMetadata.getSecondaryMetadata(targetProduct.getMetadataRoot());
+        final MetadataElement elem = targetSecondaryMetadataRoot.getElement(secProductName);
         if(elem == null) {
-            throw new Exception(slvProductName + " metadata not found");
+            throw new Exception(secProductName + " metadata not found");
         }
         StringBuilder value = new StringBuilder(255);
         for (String name : bandNames) {
@@ -140,33 +224,43 @@ public final class StackUtils {
             value.append(' ');
         }
 
-        String slaveBands = value.toString().trim();
-        if (elem.containsAttribute(AbstractMetadata.SLAVE_BANDS)) {
-            final String savedSlaveBands = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS);
-            final String[] savedSlaveBandArray = savedSlaveBands.split(" ");
+        String secondaryBands = value.toString().trim();
+        final boolean hasNewAttr = elem.containsAttribute(AbstractMetadata.SECONDARY_BANDS);
+        final boolean hasLegacyAttr = elem.containsAttribute(AbstractMetadata.LEGACY_SLAVE_BANDS);
+        if (hasNewAttr || hasLegacyAttr) {
+            final String savedSecondaryBands = hasNewAttr
+                    ? elem.getAttributeString(AbstractMetadata.SECONDARY_BANDS)
+                    : elem.getAttributeString(AbstractMetadata.LEGACY_SLAVE_BANDS);
+            final String[] savedSecondaryBandArray = savedSecondaryBands.split(" ");
             boolean allValid = true;
-            for (String slvBandName : savedSlaveBandArray) {
-                if (targetProduct.getBand(slvBandName) == null || slaveBands.contains(slvBandName)) {
+            for (String secBandName : savedSecondaryBandArray) {
+                if (targetProduct.getBand(secBandName) == null || secondaryBands.contains(secBandName)) {
                     allValid = false;
                     break;
                 }
             }
 
             if (allValid) {
-                slaveBands = savedSlaveBands + " " + slaveBands;
+                secondaryBands = savedSecondaryBands + " " + secondaryBands;
             }
         }
-        elem.setAttributeString(AbstractMetadata.SLAVE_BANDS, slaveBands);
+        elem.setAttributeString(AbstractMetadata.SECONDARY_BANDS, secondaryBands);
     }
 
-    public static String findOriginalSlaveProductName(final Product sourceProduct, final Band slvBand) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final String slvBandName = slvBand.getName();
-            for (MetadataElement elem : slaveMetadataRoot.getElements()) {
-                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-                if (slvBandNames.contains(slvBandName)) {
+    @Deprecated
+    public static void saveSlaveProductBandNames(final Product targetProduct, final String slvProductName,
+                                                 final String[] bandNames) throws Exception {
+        saveSecondaryProductBandNames(targetProduct, slvProductName, bandNames);
+    }
+
+    public static String findOriginalSecondaryProductName(final Product sourceProduct, final Band secBand) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            final String secBandName = secBand.getName();
+            for (MetadataElement elem : secondaryMetadataRoot.getElements()) {
+                final String secBandNames = getMetadataAttribute(elem,
+                        AbstractMetadata.SECONDARY_BANDS, AbstractMetadata.LEGACY_SLAVE_BANDS);
+                if (secBandNames.contains(secBandName)) {
                     return elem.getName();
                 }
             }
@@ -174,126 +268,172 @@ public final class StackUtils {
         return null;
     }
 
+    @Deprecated
+    public static String findOriginalSlaveProductName(final Product sourceProduct, final Band slvBand) {
+        return findOriginalSecondaryProductName(sourceProduct, slvBand);
+    }
+
     /**
-     * Returns only i and q master band names
+     * Returns only i and q reference band names
      * @param sourceProduct coregistered product
-     * @return master band names
+     * @return reference band names
      */
-    public static String[] getMasterBandNames(final Product sourceProduct) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final String mstBandNames = slaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS, "");
-            if(!mstBandNames.isEmpty()) {
-                return StringUtils.stringToArray(mstBandNames, " ");
+    public static String[] getReferenceBandNames(final Product sourceProduct) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            final String refBandNames = getMetadataAttribute(secondaryMetadataRoot,
+                    AbstractMetadata.REFERENCE_BANDS, AbstractMetadata.LEGACY_MASTER_BANDS);
+            if(!refBandNames.isEmpty()) {
+                return StringUtils.stringToArray(refBandNames, " ");
             }
         }
+        // Fallback: search for bands with _ref or legacy _mst suffix
         final List<String> bandNames = new ArrayList<>();
         for(String bandName : sourceProduct.getBandNames()) {
-            if(bandName.toLowerCase().contains(MST)) {
+            if(containsRef(bandName)) {
                 bandNames.add(bandName);
             }
         }
         return bandNames.toArray(new String[0]);
     }
 
-    public static MetadataElement getSlaveMetadata(final Product sourceProduct, final String slvProductName) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
+    @Deprecated
+    public static String[] getMasterBandNames(final Product sourceProduct) {
+        return getReferenceBandNames(sourceProduct);
+    }
+
+    public static MetadataElement getSecondaryMetadata(final Product sourceProduct, final String secProductName) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            final MetadataElement elem = secondaryMetadataRoot.getElement(secProductName);
             return elem.createDeepClone();
         }
         return null;
     }
 
-    public static String[] getSlaveBandNames(final Product sourceProduct, final String slvProductName) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
+    @Deprecated
+    public static MetadataElement getSlaveMetadata(final Product sourceProduct, final String slvProductName) {
+        return getSecondaryMetadata(sourceProduct, slvProductName);
+    }
+
+    public static String[] getSecondaryBandNames(final Product sourceProduct, final String secProductName) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            final MetadataElement elem = secondaryMetadataRoot.getElement(secProductName);
             if(elem != null) {
-                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-                if (!slvBandNames.isEmpty()) {
-                    return StringUtils.stringToArray(slvBandNames, " ");
+                final String secBandNames = getMetadataAttribute(elem,
+                        AbstractMetadata.SECONDARY_BANDS, AbstractMetadata.LEGACY_SLAVE_BANDS);
+                if (!secBandNames.isEmpty()) {
+                    return StringUtils.stringToArray(secBandNames, " ");
                 }
             }
         }
-        String dateSuffix = slvProductName.contains("_") ?
-                slvProductName.substring(slvProductName.lastIndexOf('_')).toLowerCase() : "";
+        // Fallback: search for bands with _sec or legacy _slv suffix
+        String dateSuffix = secProductName.contains("_") ?
+                secProductName.substring(secProductName.lastIndexOf('_')).toLowerCase() : "";
         final List<String> bandNames = new ArrayList<>();
         for(String bandName : sourceProduct.getBandNames()) {
             final String name = bandName.toLowerCase();
-            if(name.contains(SLV) && name.endsWith(dateSuffix)) {
+            if((name.contains(SEC) || name.contains(SLV)) && name.endsWith(dateSuffix)) {
                 bandNames.add(bandName);
             }
         }
         return bandNames.toArray(new String[0]);
     }
 
-    public static boolean isMasterBand(final String bandName, final Product sourceProduct) {
+    @Deprecated
+    public static String[] getSlaveBandNames(final Product sourceProduct, final String slvProductName) {
+        return getSecondaryBandNames(sourceProduct, slvProductName);
+    }
 
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
+    public static boolean isReferenceBand(final String bandName, final Product sourceProduct) {
 
-        if (slaveMetadataRoot != null) {
-            final String mstBandNames = slaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS, "");
-            return mstBandNames.contains(bandName);
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+
+        if (secondaryMetadataRoot != null) {
+            final String refBandNames = getMetadataAttribute(secondaryMetadataRoot,
+                    AbstractMetadata.REFERENCE_BANDS, AbstractMetadata.LEGACY_MASTER_BANDS);
+            return refBandNames.contains(bandName);
         }
 
+        // Fallback: check for _ref or legacy _mst in band names
         for(String srcBandName : sourceProduct.getBandNames()) {
-            if(srcBandName.toLowerCase().contains(MST) && srcBandName.contains(bandName)) {
+            if(containsRef(srcBandName) && srcBandName.contains(bandName)) {
                 return true;
             }
         }
         return false;
     }
 
+    @Deprecated
+    public static boolean isMasterBand(final String bandName, final Product sourceProduct) {
+        return isReferenceBand(bandName, sourceProduct);
+    }
+
+    public static boolean isSecondaryBand(final String bandName, final Product sourceProduct) {
+
+        final String[] secProductNames = StackUtils.getSecondaryProductNames(sourceProduct);
+        for (String secProductName : secProductNames) {
+            if (isSecondaryBand(bandName, sourceProduct, secProductName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Deprecated
     public static boolean isSlaveBand(final String bandName, final Product sourceProduct) {
-
-        final String[] slvProductNames = StackUtils.getSlaveProductNames(sourceProduct);
-        for (String slvProductName:slvProductNames) {
-            if (isSlaveBand(bandName, sourceProduct, slvProductName)) {
-                return true;
-            }
-        }
-        return false;
+        return isSecondaryBand(bandName, sourceProduct);
     }
 
-    public static boolean isSlaveBand(final String bandName, final Product sourceProduct, final String slvProductName) {
+    public static boolean isSecondaryBand(final String bandName, final Product sourceProduct, final String secProductName) {
 
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
 
-        if (slaveMetadataRoot != null) {
-            final MetadataElement elem = slaveMetadataRoot.getElement(slvProductName);
-            final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-            if(!slvBandNames.isEmpty()) {
-                return slvBandNames.contains(bandName);
+        if (secondaryMetadataRoot != null) {
+            final MetadataElement elem = secondaryMetadataRoot.getElement(secProductName);
+            final String secBandNames = getMetadataAttribute(elem,
+                    AbstractMetadata.SECONDARY_BANDS, AbstractMetadata.LEGACY_SLAVE_BANDS);
+            if(!secBandNames.isEmpty()) {
+                return secBandNames.contains(bandName);
             }
         }
 
-        String dateSuffix = slvProductName.substring(slvProductName.lastIndexOf('_')).toLowerCase();
+        // Fallback: check for _sec or legacy _slv in band names
+        String dateSuffix = secProductName.substring(secProductName.lastIndexOf('_')).toLowerCase();
         for(String srcBandName : sourceProduct.getBandNames()) {
             final String name = srcBandName.toLowerCase();
-            if(name.contains(SLV) && name.endsWith(dateSuffix) && srcBandName.contains(bandName)) {
+            if((name.contains(SEC) || name.contains(SLV)) && name.endsWith(dateSuffix) && srcBandName.contains(bandName)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static String[] getSlaveProductNames(final Product sourceProduct) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            return slaveMetadataRoot.getElementNames();
+    @Deprecated
+    public static boolean isSlaveBand(final String bandName, final Product sourceProduct, final String slvProductName) {
+        return isSecondaryBand(bandName, sourceProduct, slvProductName);
+    }
+
+    public static String[] getSecondaryProductNames(final Product sourceProduct) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            return secondaryMetadataRoot.getElementNames();
         }
         return new String[]{};
     }
 
+    @Deprecated
+    public static String[] getSlaveProductNames(final Product sourceProduct) {
+        return getSecondaryProductNames(sourceProduct);
+    }
+
     public static String getBandNameWithoutDate(final String bandName) {
-        if (bandName.contains(MST)) {
+        if (bandName.contains(REF)) {
+            return bandName.substring(0, bandName.lastIndexOf(REF));
+        } else if (bandName.contains(SEC)) {
+            return bandName.substring(0, bandName.lastIndexOf(SEC));
+        } else if (bandName.contains(MST)) {
             return bandName.substring(0, bandName.lastIndexOf(MST));
         } else if (bandName.contains(SLV)) {
             return bandName.substring(0, bandName.lastIndexOf(SLV));
@@ -323,7 +463,11 @@ public final class StackUtils {
 
     public static String getBandSuffix(final String bandName) {
         final String suffix;
-        if (bandName.contains(MST)) {
+        if (bandName.contains(REF)) {
+            suffix = bandName.substring(bandName.lastIndexOf(REF));
+        } else if (bandName.contains(SEC)) {
+            suffix = bandName.substring(bandName.lastIndexOf(SEC));
+        } else if (bandName.contains(MST)) {
             suffix = bandName.substring(bandName.lastIndexOf(MST));
         } else if (bandName.contains(SLV)) {
             suffix = bandName.substring(bandName.lastIndexOf(SLV));
@@ -335,28 +479,28 @@ public final class StackUtils {
         return suffix;
     }
 
-    public static String getSlaveProductName(final Product sourceProduct, final Band slvBand, final String mstPol) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                AbstractMetadata.SLAVE_METADATA_ROOT);
-        if (slaveMetadataRoot != null) {
-            final String slvBandName = slvBand.getName();
-            for (MetadataElement elem : slaveMetadataRoot.getElements()) {
-                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-                if (mstPol == null && slvBandNames.contains(slvBandName)) {
+    public static String getSecondaryProductName(final Product sourceProduct, final Band secBand, final String refPol) {
+        final MetadataElement secondaryMetadataRoot = findSecondaryMetadataRoot(sourceProduct);
+        if (secondaryMetadataRoot != null) {
+            final String secBandName = secBand.getName();
+            for (MetadataElement elem : secondaryMetadataRoot.getElements()) {
+                final String secBandNames = getMetadataAttribute(elem,
+                        AbstractMetadata.SECONDARY_BANDS, AbstractMetadata.LEGACY_SLAVE_BANDS);
+                if (refPol == null && secBandNames.contains(secBandName)) {
                     return elem.getName();
-                } else if (mstPol != null) {
-                    // find slave with same pol
-                    final String[] bandNames = StringUtils.toStringArray(slvBandNames, " ");
+                } else if (refPol != null) {
+                    // find secondary with same pol
+                    final String[] bandNames = StringUtils.toStringArray(secBandNames, " ");
                     boolean polExist = false;
-                    for (String slvName : bandNames) {
-                        final String slvPol = OperatorUtils.getPolarizationFromBandName(slvName);
-                        if (slvPol != null && slvPol.equalsIgnoreCase(mstPol)) {
+                    for (String secName : bandNames) {
+                        final String secPol = OperatorUtils.getPolarizationFromBandName(secName);
+                        if (secPol != null && secPol.equalsIgnoreCase(refPol)) {
                             polExist = true;
-                            if (slvName.equals(slvBandName))
+                            if (secName.equals(secBandName))
                                 return elem.getName();
                         }
                     }
-                    if (!polExist && slvBandNames.contains(slvBandName)) {
+                    if (!polExist && secBandNames.contains(secBandName)) {
                         return elem.getName();
                     }
                 }
@@ -365,18 +509,23 @@ public final class StackUtils {
         return null;
     }
 
+    @Deprecated
+    public static String getSlaveProductName(final Product sourceProduct, final Band secBand, final String refPol) {
+        return getSecondaryProductName(sourceProduct, secBand, refPol);
+    }
+
     public static ProductData.UTC[] getProductTimes(final Product sourceProduct) {
         final List<ProductData.UTC> utcList = new ArrayList<>();
-        // add master time
+        // add reference time
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         if (absRoot != null) {
             utcList.add(absRoot.getAttributeUTC(AbstractMetadata.first_line_time));
 
-            // add slave times
-            final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
-                    AbstractMetadata.SLAVE_METADATA_ROOT);
-            if (slaveMetadataRoot != null) {
-                for (MetadataElement elem : slaveMetadataRoot.getElements()) {
+            // add secondary times
+            final MetadataElement secondaryMetadataRoot = sourceProduct.getMetadataRoot().getElement(
+                    AbstractMetadata.SECONDARY_METADATA_ROOT);
+            if (secondaryMetadataRoot != null) {
+                for (MetadataElement elem : secondaryMetadataRoot.getElements()) {
                     utcList.add(elem.getAttributeUTC(AbstractMetadata.first_line_time));
                 }
             }

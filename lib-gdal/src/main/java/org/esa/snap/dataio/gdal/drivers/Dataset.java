@@ -3,7 +3,9 @@ package org.esa.snap.dataio.gdal.drivers;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Array;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -37,6 +39,7 @@ public class Dataset extends GDALBase implements Closeable {
     private final MethodHandle setProjectionHandle;
     private final MethodHandle setGeoTransformHandle;
     private final MethodHandle addBandHandle;
+    private final MethodHandle setGCPsHandle;
 
     static {
         datasetClass = GDALReflection.fetchGDALLibraryClass(CLASS_NAME);
@@ -71,6 +74,7 @@ public class Dataset extends GDALBase implements Closeable {
             setProjectionHandle = createHandle(datasetClass, "SetProjection", int.class, String.class);
             setGeoTransformHandle = createHandle(datasetClass, "SetGeoTransform", int.class, double[].class);
             addBandHandle = createHandle(datasetClass, "AddBand", int.class, int.class);
+            setGCPsHandle = createHandle(datasetClass, "SetGCPs", int.class,  GDALReflection.fetchGDALLibraryClass(GCP.GCP_ARRAY_CLASS_NAME), String.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -229,6 +233,23 @@ public class Dataset extends GDALBase implements Closeable {
 
     public Integer addBand(int dataType) {
         return (Integer) invoke(addBandHandle, this.jniDatasetInstance, dataType);
+    }
+
+    /**
+     * Calls the JNI GDAL Dataset class setGCPs(GCP[] gcpArray, java.lang.String GCPProjection) method
+     * @param gcps - list of GCP objects being assigned
+     * @param gcpProjectionWkt - the new OGC WKT coordinate system to assign for the GCP output coordinates
+     * @return gdalconst.CE_None on success, gdalconst.CE_Failure on failure (including if action is not supported for this format).
+     */
+    public Integer setGCPs(List<GCP> gcps , String gcpProjectionWkt) {
+        Class<?> jniGcpClass = GDALReflection.fetchGDALLibraryClass(GCP.CLASS_NAME);
+        Object gcpArray = java.lang.reflect.Array.newInstance(jniGcpClass, gcps.size());
+
+        for (int i = 0; i < gcps.size(); i++) {
+            Array.set(gcpArray, i, gcps.get(i).getJniGCPInstance());
+        }
+
+        return (Integer) invoke(setGCPsHandle, this.jniDatasetInstance, gcpArray, gcpProjectionWkt);
     }
 
     @Override

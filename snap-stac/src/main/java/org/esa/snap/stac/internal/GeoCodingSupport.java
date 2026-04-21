@@ -53,37 +53,58 @@ public class GeoCodingSupport {
 
     public static void addGeoCoding(final Product product, final JSONArray boundingBox) {
 
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null.");
+        }
+        if (boundingBox == null || boundingBox.isEmpty()) {
+            // Or log a warning and return, depending on desired behavior
+            throw new IllegalArgumentException("Bounding box JSON array cannot be null or empty.");
+        }
+
         double lonUL, latUL, lonUR, latUR, lonLL, latLL, lonLR, latLR;
-        if(boundingBox.get(0) instanceof JSONArray) {
-            JSONArray ul = (JSONArray) boundingBox.get(0);
-            lonUL = (Double) ul.get(0);
-            latUL = (Double) ul.get(1);
-            JSONArray lr = (JSONArray) boundingBox.get(1);
-            lonLR = (Double) lr.get(0);
-            latLR = (Double) lr.get(1);
+        if (boundingBox.get(0) instanceof JSONArray) {
+            // Handles format: [[lonUL, latUL], [lonLR, latLR]]
+            if (boundingBox.size() < 2) {
+                throw new IllegalArgumentException("Two-point bounding box requires 2 coordinate pairs.");
+            }
+            final JSONArray ul = (JSONArray) boundingBox.get(0);
+            final JSONArray lr = (JSONArray) boundingBox.get(1);
+            if (ul.size() < 2 || lr.size() < 2) {
+                throw new IllegalArgumentException("Bounding box coordinate pairs must have 2 values (lon, lat).");
+            }
+            lonUL = ((Number) ul.get(0)).doubleValue();
+            latUL = ((Number) ul.get(1)).doubleValue();
+            lonLR = ((Number) lr.get(0)).doubleValue();
+            latLR = ((Number) lr.get(1)).doubleValue();
+
             lonUR = lonLR;
             latUR = latUL;
             lonLL = lonUL;
             latLL = latLR;
         } else {
-            lonUL = (Double) boundingBox.get(0);
-            latUL = (Double) boundingBox.get(3);
-            lonUR = (Double) boundingBox.get(2);
-            latUR = (Double) boundingBox.get(3);
-            lonLL = (Double) boundingBox.get(0);
-            latLL = (Double) boundingBox.get(1);
-            lonLR = (Double) boundingBox.get(2);
-            latLR = (Double) boundingBox.get(1);
+            // Handles STAC format: [west, south, east, north]
+            if (boundingBox.size() < 4) {
+                throw new IllegalArgumentException("Flat bounding box requires at least 4 values.");
+            }
+            final double west = ((Number) boundingBox.get(0)).doubleValue();
+            final double south = ((Number) boundingBox.get(1)).doubleValue();
+            final double east = ((Number) boundingBox.get(2)).doubleValue();
+            final double north = ((Number) boundingBox.get(3)).doubleValue();
+
+            lonUL = west;
+            latUL = north;
+            lonUR = east;
+            latUR = north;
+            lonLL = west;
+            latLL = south;
+            lonLR = east;
+            latLR = south;
         }
 
         final double[] latCorners = new double[]{latUL, latUR, latLL, latLR};
         final double[] lonCorners = new double[]{lonUL, lonUR, lonLL, lonLR};
 
-        try{
-            ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
-        }catch(IllegalStateException e){
-            System.err.println(e.getMessage());
-        }
+        ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
     }
 
     public static String toWKT(final JSONObject geometry) {
