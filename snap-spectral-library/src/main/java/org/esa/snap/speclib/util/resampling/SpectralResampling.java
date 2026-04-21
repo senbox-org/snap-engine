@@ -50,8 +50,11 @@ public class SpectralResampling {
                 double sumWeights = 0.0;
                 for (int i = 0; i < indices.size(); i++) {
                     final int index = indices.get(i);
-                    sumWeightedSpectrum += (inputSpectrum[index] * weights.get(i));
-                    sumWeights += weights.get(i);
+                    final boolean valid = !Double.isNaN(inputSpectrum[index]) && !Double.isInfinite(inputSpectrum[index]);
+                    if (valid) {
+                        sumWeightedSpectrum += (inputSpectrum[index] * weights.get(i));
+                        sumWeights += weights.get(i);
+                    }
                 }
                 resampledSpectrumList.add(sumWeightedSpectrum / sumWeights);
             }
