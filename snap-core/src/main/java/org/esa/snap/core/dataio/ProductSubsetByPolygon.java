@@ -205,8 +205,7 @@ public class ProductSubsetByPolygon {
                     readPolygonFromWKTFile(vectorFile, geoCoding, productDimension, pm);
             case SupportedVectorFilesFormat.PLACEMARK_FILE, SupportedVectorFilesFormat.PNX ->
                     readPolygonFromPlacemarkFile(vectorFile, geoCoding, productDimension, pm);
-            case null:
-                return null;
+            case null -> null;
             default -> throw new IllegalArgumentException("Unsupported vector file.");
         };
     }
