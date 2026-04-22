@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static eu.esa.snap.core.dataio.cache.CacheTestUtil.createPreparedBuffer;
 import static org.junit.Assert.*;
@@ -413,6 +415,71 @@ public class CacheData2DTest {
 
         released = cacheData2D.release(100000);
         assertEquals(200, released);
+    }
+
+    @Test
+    @STTM("SNAP-4195")
+    public void testCopyData_concurrentRelease_doesNotThrow() throws InterruptedException {
+        // Regression: under JAI parallel tile computation, CacheManager's
+        // memory-pressure eviction could call release() on a CacheData2D while
+        // another thread was mid-copy. ensureData wrote `data` under lock but
+        // copyDataBuffer read `this.data` without holding it, and release()
+        // itself was unsynchronized — so `data` could be nulled between the
+        // two, producing NPE at copyDataBuffer.
+        //
+        // After the fix (ensureData returns a local captured inside the lock;
+        // release() synchronizes on the same monitor), this stress loop must
+        // run without any exception.
+        //
+        // Multiple readers + a tight releaser are needed to hit the narrow
+        // window reliably — with a single reader the race rarely triggered.
+        final CacheDataProvider provider = new MockProvider(ProductData.TYPE_UINT16);
+        final CacheContext context = new CacheContext(
+                new VariableDescriptor(), provider, new TestMemoryUsageTracker());
+
+        final CacheData2D cacheData2D = createCacheData(new int[]{0, 0}, new int[]{10, 10});
+        cacheData2D.setCacheContext(context);
+
+        final int iterations = 20000;
+        final int numReaders = 4;
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final AtomicBoolean stopReleaser = new AtomicBoolean(false);
+
+        final Thread[] readers = new Thread[numReaders];
+        for (int r = 0; r < numReaders; r++) {
+            readers[r] = new Thread(() -> {
+                try {
+                    for (int i = 0; i < iterations && failure.get() == null; i++) {
+                        cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10,
+                                ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+                        // Also exercise getSizeInBytes: same snapshot-vs-release race.
+                        cacheData2D.getSizeInBytes();
+                    }
+                } catch (Throwable t) {
+                    failure.compareAndSet(null, t);
+                }
+            }, "cache-reader-" + r);
+        }
+
+        final Thread releaser = new Thread(() -> {
+            try {
+                while (!stopReleaser.get()) {
+                    cacheData2D.release(Long.MAX_VALUE);
+                }
+            } catch (Throwable t) {
+                failure.compareAndSet(null, t);
+            }
+        }, "cache-releaser");
+
+        releaser.start();
+        for (Thread r : readers) r.start();
+        for (Thread r : readers) r.join();
+        stopReleaser.set(true);
+        releaser.join();
+
+        if (failure.get() != null) {
+            throw new AssertionError("concurrent copyData / release must not throw", failure.get());
+        }
     }
 
     private static @NonNull CacheData2D createCacheData(int[] offsets, int[] shapes) {

@@ -104,7 +104,9 @@ public class CacheManager implements MemoryUsageTracker {
             }
 
             long disposed = 0;
-            productCaches.sort(new ReverseTimeComparator());
+            // Snapshot access times so the sort is stable even if other threads update
+            // them concurrently while this sort runs (prevents TimSort contract violation).
+            productCaches.sort(new ReverseTimeComparator(productCaches));
             for (ProductCache productCache : productCaches) {
                 disposed += productCache.release(toDispose - disposed);
                 if (disposed >= toDispose) {

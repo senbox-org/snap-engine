@@ -23,13 +23,17 @@ public abstract class AbstractCacheData implements CacheData, TimeStamped {
 
     @Override
     public long release(long bytesToRelease) {
-        if (data == null) {
-            return 0;
+        // Synchronize on the same monitor used by ensureData so callers capturing
+        // the data reference under lock won't see it nulled mid-copy.
+        synchronized (this) {
+            if (data == null) {
+                return 0;
+            }
+            final ProductData productData = data.getData();
+            final long size = (long) productData.getNumElems() * productData.getElemSize();
+            data = null;
+            return size;
         }
-        final ProductData productData = data.getData();
-        final long size = (long) productData.getNumElems() * productData.getElemSize();
-        data = null;
-        return size;
     }
 
     public long getLastAccessTime() {
