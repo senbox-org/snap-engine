@@ -18,6 +18,7 @@
             </tocitem>
         </tocitem>
         <tocitem text="STAC" target="stacOverview">
+            <tocitem text="STAC Overview" target="stacOverview"/>
             <tocitem text="Using the StacClient" target="stacClient"/>
         </tocitem>
     </tocitem>
