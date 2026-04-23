@@ -877,7 +877,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
         return dataMaskExpression;
     }
 
-    private String createValidMaskExpressionForNoDataValue() {
+    public String createValidMaskExpressionForNoDataValue() {
         final String ref = BandArithmetic.createExternalName(getName());
         final double noDataValue = getGeophysicalNoDataValue();
         if (Double.isNaN(noDataValue)) {

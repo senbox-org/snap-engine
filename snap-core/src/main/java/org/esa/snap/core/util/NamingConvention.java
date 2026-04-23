@@ -8,8 +8,8 @@ public class NamingConvention extends NamingConventionSnap {
 
     // Uncomment the following for SeaDAS to override Snap naming convention :
 
-//    public static final String COLOR_UPPER_CASE = "COLOR";
-//    public static final String COLOR_MIXED_CASE = "Color";
-//    public static final String COLOR_LOWER_CASE = "color";
+    public static final String COLOR_UPPER_CASE = "COLOR";
+    public static final String COLOR_MIXED_CASE = "Color";
+    public static final String COLOR_LOWER_CASE = "color";
 
 }
