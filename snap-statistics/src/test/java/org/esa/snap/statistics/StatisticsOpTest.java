@@ -110,7 +110,8 @@ public class StatisticsOpTest {
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
         statisticsOp.shapefile = new File(uri.getPath());
-        statisticsOp.accuracy = 6;
+        int accuracy = 6;
+        statisticsOp.numBins = (int) Math.pow(10, accuracy);
 
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
@@ -141,7 +142,8 @@ public class StatisticsOpTest {
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
         statisticsOp.shapefile = new File(uri.getPath());
-        statisticsOp.accuracy = 6;
+        int accuracy = 6;
+        statisticsOp.numBins = (int) Math.pow(10, accuracy);
         statisticsOp.percentiles = null;
 
         final MyOutputter outputter = new MyOutputter();

@@ -12,7 +12,8 @@ import java.util.Map;
 
 public class TargetWriterFactoryAndMap {
 
-    private static final String MEASUREMENTS_FILE_NAME_PATTERN = "%s_%s_measurements.txt";
+//    private static final String MEASUREMENTS_FILE_NAME_PATTERN = "%s_%s_measurements.txt";
+    private static final String MEASUREMENTS_FILE_NAME_PATTERN = "%s_measurements.txt";
 
     private final Map<String, PrintWriter> writerMap;
     private final String filenamePrefix;
@@ -34,7 +35,8 @@ public class TargetWriterFactoryAndMap {
 
     public PrintWriter createWriterFor(Product product) throws IOException {
         String productType = product.getProductType();
-        final String fileName = String.format(MEASUREMENTS_FILE_NAME_PATTERN, filenamePrefix, productType);
+//        final String fileName = String.format(MEASUREMENTS_FILE_NAME_PATTERN, filenamePrefix, productType);
+        final String fileName = String.format(MEASUREMENTS_FILE_NAME_PATTERN, filenamePrefix);
         File coordinateFile = new File(outputDir, fileName);
         PrintWriter writer = new PrintWriter(new FileOutputStream(coordinateFile));
         writerMap.put(productType, writer);

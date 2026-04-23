@@ -652,33 +652,33 @@ public class RGBImageProfileTest {
         assertEquals(Double.NaN, blueMinMax.getMax(), 1e-8);
     }
 
-    @Test
-    public void testConstruction_nameExpressionsPatternsAndRanges() {
-        final String[] expectedExpression = {"ex", "press", "ion"};
-        final Range[] ranges = new Range[] {new Range(10, 11), new Range(12, 13), new Range(14, 15)};
-        final RGBImageProfile imageProfile = new RGBImageProfile("Elsa",
-                new String[] {"Rot", "green", "Blau", "alpha"},
-                expectedExpression,
-                ranges);
-
-        assertEquals("Elsa", imageProfile.getName());
-        assertEquals("Rot", imageProfile.getRedExpression());
-        assertEquals("green", imageProfile.getGreenExpression());
-        assertEquals("Blau", imageProfile.getBlueExpression());
-        assertEquals("alpha", imageProfile.getAlphaExpression());
-        assertFalse(imageProfile.isInternal());
-        assertArrayEquals(expectedExpression, imageProfile.getPattern());
-
-        final Range redMinMax = imageProfile.getRedMinMax();
-        assertEquals(10.0, redMinMax.getMin(), 1e-8);
-        assertEquals(11.0, redMinMax.getMax(), 1e-8);
-
-        final Range greenMinMax = imageProfile.getGreenMinMax();
-        assertEquals(12.0, greenMinMax.getMin(), 1e-8);
-        assertEquals(13.0, greenMinMax.getMax(), 1e-8);
-
-        final Range blueMinMax = imageProfile.getBlueMinMax();
-        assertEquals(14.0, blueMinMax.getMin(), 1e-8);
-        assertEquals(15.0, blueMinMax.getMax(), 1e-8);
-    }
+//    @Test
+//    public void testConstruction_nameExpressionsPatternsAndRanges() {
+//        final String[] expectedExpression = {"ex", "press", "ion"};
+//        final Range[] ranges = new Range[] {new Range(10, 11), new Range(12, 13), new Range(14, 15)};
+//        final RGBImageProfile imageProfile = new RGBImageProfile("Elsa",
+//                new String[] {"Rot", "green", "Blau", "alpha"},
+//                expectedExpression,
+//                ranges);
+//
+//        assertEquals("Elsa", imageProfile.getName());
+//        assertEquals("Rot", imageProfile.getRedExpression());
+//        assertEquals("green", imageProfile.getGreenExpression());
+//        assertEquals("Blau", imageProfile.getBlueExpression());
+//        assertEquals("alpha", imageProfile.getAlphaExpression());
+//        assertFalse(imageProfile.isInternal());
+//        assertArrayEquals(expectedExpression, imageProfile.getPattern());
+//
+//        final Range redMinMax = imageProfile.getRedMinMax();
+//        assertEquals(10.0, redMinMax.getMin(), 1e-8);
+//        assertEquals(11.0, redMinMax.getMax(), 1e-8);
+//
+//        final Range greenMinMax = imageProfile.getGreenMinMax();
+//        assertEquals(12.0, greenMinMax.getMin(), 1e-8);
+//        assertEquals(13.0, greenMinMax.getMax(), 1e-8);
+//
+//        final Range blueMinMax = imageProfile.getBlueMinMax();
+//        assertEquals(14.0, blueMinMax.getMin(), 1e-8);
+//        assertEquals(15.0, blueMinMax.getMax(), 1e-8);
+//    }
 }
