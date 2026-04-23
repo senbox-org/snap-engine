@@ -1,0 +1,250 @@
+<!--
+  ~ Copyright (C) 2026 by SkyWatch Space Applications Inc. http://www.skywatch.com
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>Sentinel Toolbox Help - Using the StacClient</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp; Using the StacClient</td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a></td>
+    </tr>
+</table>
+
+<h3>Using the StacClient</h3>
+
+<p>
+    <code>StacClient</code> is a small Java API in the <code>snap-stac</code> module for talking to a remote
+    <a href="StacOverview.html">STAC</a> service from inside the Toolbox or from your own code. It wraps the three
+    operations you typically need: inspect a Catalog's Collections, search for Items, and download (or stream) an
+    Item's assets. It is a pure-code entry point - there is no dialog for it in SNAP Desktop - so use it from the
+    <b>Tools &rarr; Plugins &rarr; Scripting</b> console, a Groovy/Jython script, or a plug-in that depends on
+    <code>snap-stac</code>.
+</p>
+
+<h4>Creating a client</h4>
+
+<p>Construct a client with the root URL of a STAC API:</p>
+
+<pre class="code">
+import org.esa.snap.stac.StacClient;
+import org.esa.snap.stac.StacCatalog;
+import org.esa.snap.stac.StacItem;
+
+StacClient client = new StacClient("https://planetarycomputer.microsoft.com/api/stac/v1");
+</pre>
+
+<p>
+    When the URL points at Microsoft's Planetary Computer the client auto-installs a signing modifier so that asset
+    downloads get a short-lived signed URL. For other catalogs that require signing, pass a
+    <code>DownloadModifier</code> explicitly:
+</p>
+
+<pre class="code">
+import org.esa.snap.stac.internal.DownloadModifier;
+import org.esa.snap.stac.internal.EstablishedModifiers;
+
+// built-in Planetary Computer modifier (equivalent to the auto default)
+StacClient pc = new StacClient(
+        "https://planetarycomputer.microsoft.com/api/stac/v1",
+        EstablishedModifiers.planetaryComputer());
+
+// custom modifier - rewrite each href before download
+DownloadModifier mine = input -&gt; input + "?token=" + token;
+StacClient custom = new StacClient("https://my.catalog/stac/v1", mine);
+</pre>
+
+<p>
+    If you already have a <code>StacItem</code> and want a client pointing at the Catalog it belongs to, use the
+    static factory:
+</p>
+
+<pre class="code">
+StacItem item = new StacItem("https://.../collections/landsat-c2-l2/items/LC09_...");
+StacClient client = StacClient.createClient(item);   // follows the "root" link
+</pre>
+
+<h4>Inspecting the Catalog</h4>
+
+<pre class="code">
+StacCatalog catalog = client.getCatalog();
+
+System.out.println("Catalog id      : " + catalog.getId());
+System.out.println("STAC version    : " + catalog.getVersion());
+System.out.println("Num collections : " + catalog.getNumCollections());
+
+for (String name : catalog.listCollections()) {
+    System.out.println("  " + name);
+}
+
+// drill into one Collection
+StacCollection col = catalog.getCollection("sentinel-2-l2a");
+</pre>
+
+<h4>Searching for Items</h4>
+
+<p>Three overloads cover the common cases. All return a <code>StacItem[]</code>; the client follows
+    <code>rel="next"</code> links transparently, so results from multi-page queries come back merged.</p>
+
+<p><b>By bounding box and optional datetime range</b></p>
+<pre class="code">
+// west, south, east, north (EPSG:4326, decimal degrees)
+double[] bbox = {-124.2751, 45.5469, -123.9613, 45.7458};
+
+// null datetime means "any time"; otherwise pass "start/end" or a single ISO-8601 instant
+StacItem[] items = client.search(
+        new String[]{"sentinel-2-l2a", "landsat-c2-l2"},
+        bbox,
+        "2022-05-01T00:00:00Z/2022-05-31T23:59:59Z");
+</pre>
+
+<p><b>By arbitrary GeoJSON geometry</b></p>
+<pre class="code">
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+JSONObject polygon = (JSONObject) new JSONParser().parse(
+        "{ \"type\": \"Polygon\", \"coordinates\": [[[-124,45],[-123,45],[-123,46],[-124,46],[-124,45]]] }");
+
+StacItem[] items = client.search(
+        new String[]{"sentinel-2-l2a"},
+        polygon,
+        null);
+</pre>
+
+<p><b>With arbitrary query parameters</b> - useful for catalog-specific filters:</p>
+<pre class="code">
+import java.util.HashMap;
+import java.util.Map;
+
+Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();
+params.put("bbox",     "20.22,43.69,29.63,48.22");
+params.put("datetime", "2022-05-01T00:00:00Z/2022-05-02T23:59:59Z");
+params.put("query",    "{\"eo:cloud_cover\":{\"lt\":10}}");   // URL-encode as needed
+
+StacItem[] items = client.search(new String[]{"sentinel-2-l2a"}, params);
+
+// paginated variant: page index (1-based) and page size
+StacItem[] firstPage = client.search(
+        new String[]{"sentinel-2-l2a"}, params, 1, 50);
+</pre>
+
+<p>
+    Collection names that are not present in the catalog are silently filtered out of the request. If none of the
+    requested collections exist, <code>search</code> returns an empty array.
+</p>
+
+<h4>Walking an Item's assets</h4>
+
+<pre class="code">
+import org.esa.snap.stac.extensions.Assets;
+
+for (StacItem item : items) {
+    System.out.println(item.getId() + "  " + item.getDateTime());
+
+    for (String assetId : item.listAssetIds()) {
+        Assets.Asset a = item.getAsset(assetId);
+        System.out.println("  " + assetId + "  " + a.getURL());
+    }
+}
+</pre>
+
+<h4>Downloading assets</h4>
+
+<p>
+    <code>downloadAsset</code> writes one asset to disk; <code>downloadItem</code> creates a sub-folder named after
+    the Item's id and writes every asset into it. Both honour the client's <code>DownloadModifier</code>, so URL
+    signing happens transparently.
+</p>
+
+<pre class="code">
+import java.io.File;
+
+File workDir = new File("C:/temp/stac-out");
+
+// single asset
+Assets.Asset asset = items[0].getAsset(items[0].listAssetIds()[0]);
+File savedFile = client.downloadAsset(asset, workDir);
+
+// entire item (one sub-folder per Item, one file per asset)
+File itemFolder = client.downloadItem(items[0], workDir);
+</pre>
+
+<p>
+    For very large rasters, prefer streaming over downloading the whole file. <code>streamAsset</code> opens an
+    <code>InputStream</code> at the asset's (signed) URL; pair it with a GDAL VSI path or <code>/vsicurl/</code>
+    reader if you want random access without first saving to disk.
+</p>
+
+<pre class="code">
+import java.io.InputStream;
+
+try (InputStream in = client.streamAsset(asset)) {
+    // consume, or hand off to a streaming parser
+}
+
+// just resolve the signed URL, without opening a stream:
+String signed = client.signURL(asset);
+</pre>
+
+<h4>Opening a downloaded Item in SNAP</h4>
+
+<p>
+    The files dropped by <code>downloadItem</code> include the Item's own JSON sidecar plus its raster assets. To
+    open that folder as a SNAP product, point the <a href="ImportSTAC.html">STAC reader</a> at the JSON file. When
+    using SNAP's <code>ProductIO</code> directly from the same JVM:
+</p>
+
+<pre class="code">
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Product;
+
+File jsonSidecar = new File(itemFolder, itemFolder.getName() + ".json");
+Product product = ProductIO.readProduct(jsonSidecar);
+</pre>
+
+<h4>Tips and gotchas</h4>
+<ul>
+    <li>
+        Signing via <code>EstablishedModifiers.planetaryComputer()</code> does a synchronous HTTP round-trip per
+        signed URL with exponential backoff on HTTP 429. Sign once, cache the result for the lifetime of the
+        download.
+    </li>
+    <li>
+        The <code>search</code> overloads that take an explicit <code>String</code> for the datetime forward it
+        into the STAC query without URL-encoding. Pre-encode values that contain characters outside
+        <code>A-Za-z0-9_.:/-</code> if your HTTP stack is strict.
+    </li>
+    <li>
+        Asset URLs may carry query strings (signed parameters, cache-busters). <code>downloadAsset</code> strips
+        any <code>?...</code> suffix from the output filename, so you get clean names on disk.
+    </li>
+    <li>
+        Pagination in the <code>search(..., int pageNumber, int pageSize)</code> overload kicks in only when
+        <b>both</b> arguments are positive.
+    </li>
+</ul>
+
+<hr>
+</body>
+</html>
