@@ -1,0 +1,87 @@
+<!--
+  ~ Copyright (C) 2026 by SkyWatch Space Applications Inc. http://www.skywatch.com
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>Sentinel Toolbox Help - Export STAC</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp; Export STAC</td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a></td>
+    </tr>
+</table>
+
+<h3>Export STAC Product</h3>
+
+<p>
+    This writes the current product as a <a href="StacOverview.html">STAC</a> Item. Two kinds of files are produced
+    side by side:
+</p>
+<ul>
+    <li>An Item JSON sidecar (<code>&lt;productName&gt;.json</code>) holding the Item metadata, extension fields
+        and the <code>assets</code> block.</li>
+    <li>One Cloud Optimized GeoTIFF (<code>.tif</code>) per band (or per group of bands), referenced from the
+        Item's <code>assets</code>.</li>
+</ul>
+
+<h4>How to export</h4>
+<ol>
+    <li>With a product selected, choose <b>File &rarr; Save Product As...</b> (or <b>File &rarr; Export Product</b>
+        when running from a graph) and pick the <b>STAC</b> format.</li>
+    <li>Select a target folder. The writer places the JSON sidecar and the GeoTIFF assets in that folder.</li>
+</ol>
+
+<p>
+    The writer is also available from GPF graphs and the <code>gpt</code> command line through the
+    <code>-f STAC</code> format selector.
+</p>
+
+<h4>What is written</h4>
+<ul>
+    <li>Geographic footprint as the Item's <code>geometry</code> / <code>bbox</code>.</li>
+    <li>Projection details (EPSG code when known, WKT otherwise, plus the affine transform and shape) under the
+        <code>proj</code> extension.</li>
+    <li>Band-level information (units, data type, no-data, scaling) under the <code>raster</code> extension, and
+        wavelengths under <code>eo:bands</code> when available.</li>
+    <li>Platform / instrument / SAR product fields from the product's abstracted metadata under the
+        <code>sat</code>, <code>instrument</code> and <code>sar</code> extensions.</li>
+    <li>SNAP-specific fields (product type, SNAP version, band unit strings that do not have a direct STAC
+        equivalent) under the <code>snap</code> extension so that a round-trip through the
+        <a href="ImportSTAC.html">STAC reader</a> preserves them.</li>
+</ul>
+
+<h4>Constraints</h4>
+<ul>
+    <li>Multi-size products cannot be written as a single Item. Resample the product to a single grid before
+        export.</li>
+    <li>Products without a <code>CrsGeoCoding</code> are written with only the geographic footprint; the
+        <code>proj</code> extension will be incomplete and some downstream STAC tooling may reject the Item.
+        Run a geocoding or reprojection step first for best interoperability.</li>
+    <li>Each output band is written as a separate Cloud Optimized GeoTIFF. Virtual bands are materialised into
+        regular rasters at write time.</li>
+    <li>The writer produces a single Item; generating a Collection or Catalog that groups multiple Items is
+        outside the scope of this operator and should be done with external STAC tooling.</li>
+</ul>
+
+<hr>
+</body>
+</html>

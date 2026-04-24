@@ -1033,9 +1033,17 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
         overlayMasks.removeAll();
         overlayMasks.clearRemovedList();
 
+        if (ancillaryBandRemover != null) {
+            Product product = getProduct();
+            if (product != null) {
+                product.removeProductNodeListener(ancillaryBandRemover);
+            }
+            ancillaryBandRemover = null;
+        }
+
         if (ancillaryVariables != null) {
-            ancillaryVariables.removeAll();
             ancillaryVariables.clearRemovedList();
+            ancillaryVariables = null;
         }
 
         super.dispose();

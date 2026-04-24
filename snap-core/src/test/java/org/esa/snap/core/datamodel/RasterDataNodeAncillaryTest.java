@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -163,6 +164,40 @@ public class RasterDataNodeAncillaryTest {
         String actual = Arrays.toString(an_anc_var.getAncillaryRelations());
         assertEquals(expected, actual);
     }
+
+    @Test
+    @STTM("SNAP-4171")
+    public void test_disposeWithAncillaryVariablesDoesNotThrow() {
+        a.addAncillaryVariable(a_unc, "uncertainty");
+        a.addAncillaryVariable(a_var, "variance");
+
+        a.dispose();
+    }
+
+    @Test
+    @STTM("SNAP-4171")
+    public void test_ancillaryBandRemoverDeregisteredAfterDispose() {
+        a.addAncillaryVariable(a_unc, "uncertainty");
+        a.dispose();
+
+        TracingPNL pnl = new TracingPNL();
+        product.addProductNodeListener(pnl);
+        product.removeBand(a_unc);
+
+        assertEquals("", pnl.simpleTrace);
+    }
+
+    @Test
+    @STTM("SNAP-4171")
+    public void test_disposeAfterPartialAncillaryRemovalDoesNotThrow() {
+        a.addAncillaryVariable(a_unc, "uncertainty");
+        a.addAncillaryVariable(a_var, "variance");
+
+        product.removeBand(a_unc);
+
+        a.dispose();
+    }
+
 
     private static class TracingPNL extends ProductNodeListenerAdapter {
 

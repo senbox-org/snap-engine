@@ -10,6 +10,9 @@ public class EntryImpl implements Entry {
 
     @Override
     public boolean matches(String name) {
+        if (name == null) {
+            return false;
+        }
         return name.contains(group);
     }
 }
