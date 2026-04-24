@@ -169,11 +169,14 @@ public class GDALProductReader extends AbstractProductReader {
                     productGeocoding = null;
                 }
                 for (Object gcpJNI : gcps) {
-                    GCP gcp = new GCP(gcpJNI);
-                    final PixelPos pixelPos = new PixelPos(gcp.getGCPPixel(), gcp.getGCPLine());
-                    final GeoPos geoPos = new GeoPos(gcp.getGCPY(), gcp.getGCPX());
-                    final Placemark gcpPlacemark = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i++, "", pixelPos, geoPos, productGeocoding);
-                    gcpPlacemarksList.add(gcpPlacemark);
+                    try (GCP gcp = new GCP(gcpJNI)) {
+                        final PixelPos pixelPos = new PixelPos(gcp.getGCPPixel(), gcp.getGCPLine());
+                        final GeoPos geoPos = new GeoPos(gcp.getGCPY(), gcp.getGCPX());
+                        final Placemark gcpPlacemark = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i++, "", pixelPos, geoPos, productGeocoding);
+                        gcpPlacemarksList.add(gcpPlacemark);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 final Placemark[] gcpPlacemarks = gcpPlacemarksList.toArray(new Placemark[0]);
                 final Datum datum = getDatum(gcpProjection);
@@ -204,11 +207,14 @@ public class GDALProductReader extends AbstractProductReader {
     }
 
     private static MetadataElement buildMetadataElement(Dataset gdalProduct) {
-        Driver hDriver = gdalProduct.getDriver();
         int imageWidth = gdalProduct.getRasterXSize();
         int imageHeight = gdalProduct.getRasterYSize();
         MetadataElement metadataElement = new MetadataElement("Image info");
-        metadataElement.setAttributeString("driver", hDriver.getShortName());
+        try(Driver hDriver = gdalProduct.getDriver()) {
+            metadataElement.setAttributeString("driver", hDriver.getShortName());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         metadataElement.setAttributeInt("width", imageWidth);
         metadataElement.setAttributeInt("height", imageHeight);
 
@@ -313,8 +319,11 @@ public class GDALProductReader extends AbstractProductReader {
             Product product = new Product(localFile.getFileName().toString(), this.getReaderPlugIn().getDescription(Locale.getDefault()),
                                           productBounds.width, productBounds.height, this);
 
-            Dimension readTileSize = new Dimension(gdalDataset.getRasterBand(1).getBlockXSize(),
-                                                   gdalDataset.getRasterBand(1).getBlockYSize());
+            Dimension readTileSize = null;
+            try (org.esa.snap.dataio.gdal.drivers.Band firstBand = gdalDataset.getRasterBand(1)) {
+                readTileSize = new Dimension(firstBand.getBlockXSize(), firstBand.getBlockYSize());
+            }
+
             product.setPreferredTileSize(readTileSize);
 
             MetadataElement metadataElement = null;
