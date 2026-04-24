@@ -18,7 +18,7 @@ package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import eu.esa.snap.core.dataio.cache.CacheManager;
-import eu.esa.snap.core.dataio.cache.DataBuffer;
+import eu.esa.snap.core.dataio.cache.CachedSubsamplingReader;
 import eu.esa.snap.core.dataio.cache.ProductCache;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
@@ -124,16 +124,10 @@ class DefaultNetCdfReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
-        final String bandName = destBand.getName();
-        if (sourceStepX != 1 || sourceStepY != 1) {
-            throw new UnsupportedOperationException("Should not be called with sourceStepX != 1 && sourceStepY != 1");
-        }
-
-        final int[] offsets = {sourceOffsetY, sourceOffsetX};
-        final int[] shapes = {destHeight, destWidth};
-        final DataBuffer target = new DataBuffer(destBuffer, offsets, shapes);
-
-        productCache.read(bandName, offsets, shapes, target);
+        CachedSubsamplingReader.read(productCache, destBand.getName(), destBand.getDataType(),
+                sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                sourceStepX, sourceStepY, destWidth, destHeight, destBuffer
+        );
     }
 
     @Override
