@@ -24,14 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NetcdfCacheDataProvider implements CacheDataProvider {
 
 
-    private final Object readLock;
     private final ConcurrentHashMap<String, VariableEntry> entries = new ConcurrentHashMap<>();
     private final HashMap<String, VariableDescriptor> descriptorMap = new HashMap<>();
 
 
-    public NetcdfCacheDataProvider(Object readLock) {
-        this.readLock = readLock;
-    }
+    public NetcdfCacheDataProvider() {}
 
 
     public void register(String bandName, Variable variable, int[] imageOrigin, boolean flipY, int dataType, ArrayConverter arrayConverter, java.awt.Dimension tileSize) {
@@ -175,7 +172,7 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
 
         origin[entry.yIndex] = fileOffsetY;
         origin[entry.xIndex] = fileOffsetX;
-        synchronized (readLock) {
+        synchronized (this) {
             try {
                 return variable.read(new Section(origin, shape));
             } catch (InvalidRangeException e) {

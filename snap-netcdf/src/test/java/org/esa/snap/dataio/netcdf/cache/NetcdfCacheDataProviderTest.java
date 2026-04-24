@@ -90,7 +90,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_getVariableDescriptor_returnsCorrectValues() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data"), new int[0], false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(2, 2));
 
@@ -106,7 +106,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_simpleRead() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data"), new int[0], false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 
@@ -118,7 +118,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_withFlipY() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data_flipped"), new int[0], true,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 
@@ -130,7 +130,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_shifted180_tileInLeftCanvasHalf() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data_shifted"), new int[0], false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 
@@ -142,7 +142,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_shifted180_tileInRightCanvasHalf() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data_shifted"), new int[0], false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 
@@ -154,7 +154,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_shifted180_tileCrossesBoundary() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data_shifted"), new int[0], false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 
@@ -166,7 +166,7 @@ public class NetcdfCacheDataProviderTest {
     @Test
     @STTM("SNAP-4190")
     public void test_readCacheBlock_3dVariable_withImageOrigin() throws IOException {
-        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider(netcdfFile);
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
         provider.register("band", netcdfFile.findVariable("data_3d"), new int[]{1}, false,
                 ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
 

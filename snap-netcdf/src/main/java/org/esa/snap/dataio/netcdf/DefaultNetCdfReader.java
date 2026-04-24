@@ -60,7 +60,7 @@ class DefaultNetCdfReader extends AbstractProductReader {
             throw new IOException("Failed to open file " + fileLocation.getPath());
         }
 
-        cacheDataProvider = new NetcdfCacheDataProvider(netcdfFile);
+        cacheDataProvider = new NetcdfCacheDataProvider();
         productCache = new ProductCache(cacheDataProvider);
         CacheManager.getInstance().register(this.productCache);
 
