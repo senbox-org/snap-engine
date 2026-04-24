@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -7,7 +9,7 @@ import java.lang.invoke.MethodHandle;
  *
  * @author Adrian Drăghici
  */
-public class Driver extends GDALBase {
+public class Driver extends GDALBase implements Closeable {
 
     /**
      * The name of JNI GDAL Driver class
@@ -26,6 +28,7 @@ public class Driver extends GDALBase {
     private final MethodHandle create2Handle;
     private final MethodHandle createCopyHandle;
     private final MethodHandle deleteHandle;
+    protected final MethodHandle delete2Handle;
 
     /**
      * Creates new instance for this driver
@@ -44,6 +47,7 @@ public class Driver extends GDALBase {
             createCopyHandle = createHandle(driverClass, "CreateCopy", GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME),
                                             String.class, GDALReflection.fetchGDALLibraryClass(Dataset.CLASS_NAME), String[].class);
             deleteHandle = createHandle(driverClass, "Delete", int.class, String.class);
+            delete2Handle = createHandle(driverClass, "delete", void.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -111,5 +115,19 @@ public class Driver extends GDALBase {
      */
     public Integer delete(String utf8_path){
         return (Integer) invoke(deleteHandle, this.jniDriverInstance, utf8_path);
+    }
+
+    /**
+     * Calls the JNI GDAL Dataset class delete() method
+     *
+     * @return the JNI GDAL Dataset class delete() method result
+     */
+    public Integer delete2(){
+        return (Integer) invoke(delete2Handle, this.jniDriverInstance);
+    }
+
+    @Override
+    public void close() throws IOException {
+        delete2();
     }
 }
