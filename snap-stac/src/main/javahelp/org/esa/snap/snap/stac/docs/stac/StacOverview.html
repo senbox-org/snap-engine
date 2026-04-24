@@ -1,0 +1,75 @@
+<!--
+  ~ Copyright (C) 2026 by SkyWatch Space Applications Inc. http://www.skywatch.com
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>Sentinel Toolbox Help - STAC</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp; SpatioTemporal Asset Catalog (STAC)</td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a></td>
+    </tr>
+</table>
+
+<h3>SpatioTemporal Asset Catalog (STAC)</h3>
+
+<p>
+    <a href="https://stacspec.org/">STAC</a> is an open specification that provides a common language for describing
+    geospatial information so it can be more easily worked across providers and tools. The Sentinel Toolbox can open
+    a STAC Item's referenced assets as a single product, and can also write a product out as a STAC Item with its
+    rasters saved as Cloud Optimized GeoTIFFs.
+</p>
+
+<p>A STAC Catalog is a hierarchy of three kinds of entities:</p>
+<ul>
+    <li><b>Catalog</b> - a top-level object that groups Collections and Items together.</li>
+    <li><b>Collection</b> - a group of related Items (for example, all scenes acquired by one sensor over one area).</li>
+    <li><b>Item</b> - a single footprint and time stamp pairing one or more raster <i>assets</i> (e.g. GeoTIFFs) with
+        a small JSON sidecar of metadata. A STAC Item is the basic unit the Toolbox reads and writes.</li>
+</ul>
+
+<p>
+    The STAC specification is extensible. The Toolbox understands several standard extensions when they are present
+    in the Item's JSON, including <code>eo</code>, <code>proj</code>, <code>sar</code>, <code>sat</code>,
+    <code>view</code>, <code>raster</code>, and the <code>snap</code> extension used for round-tripping
+    SNAP-specific metadata through the STAC writer.
+</p>
+
+<h4>Using STAC in the Toolbox</h4>
+<ul>
+    <li><a href="ImportSTAC.html">Import STAC</a> - open a STAC Item JSON file as a product.</li>
+    <li><a href="ExportSTAC.html">Export STAC</a> - save the current product as a STAC Item with COG assets.</li>
+    <li><a href="StacClient.html">Using the StacClient</a> - programmatic API to browse a remote STAC
+        catalog, search for Items and download their assets.</li>
+</ul>
+
+<p>For external documentation see:</p>
+<ul>
+    <li><a href="https://stacspec.org/">STAC Specification</a></li>
+    <li><a href="https://github.com/radiantearth/stac-spec">STAC specification on GitHub</a></li>
+    <li><a href="https://stacindex.org/">STAC Index - directory of public catalogs</a></li>
+</ul>
+
+<hr>
+</body>
+</html>

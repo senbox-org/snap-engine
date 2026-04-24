@@ -44,16 +44,19 @@ public class SpectralResampling {
             }
             if (indices.isEmpty()) {
                 logger.fine("Spectral Resampling: No input wavelengths covered by target wavelength '" + srf.getRefWvl() + "'");
-                resampledSpectrumList.add(0.0);
+                resampledSpectrumList.add(Double.NaN);
             } else {
                 double sumWeightedSpectrum = 0.0;
                 double sumWeights = 0.0;
                 for (int i = 0; i < indices.size(); i++) {
                     final int index = indices.get(i);
-                    sumWeightedSpectrum += (inputSpectrum[index] * weights.get(i));
-                    sumWeights += weights.get(i);
+                    final boolean valid = !Double.isNaN(inputSpectrum[index]) && !Double.isInfinite(inputSpectrum[index]);
+                    if (valid) {
+                        sumWeightedSpectrum += (inputSpectrum[index] * weights.get(i));
+                        sumWeights += weights.get(i);
+                    }
                 }
-                resampledSpectrumList.add(sumWeightedSpectrum / sumWeights);
+                resampledSpectrumList.add(sumWeights > 0.0 ? sumWeightedSpectrum / sumWeights : Double.NaN);
             }
         });
 

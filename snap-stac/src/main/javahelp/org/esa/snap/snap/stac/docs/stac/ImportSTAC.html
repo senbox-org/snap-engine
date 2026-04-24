@@ -1,0 +1,88 @@
+<!--
+  ~ Copyright (C) 2026 by SkyWatch Space Applications Inc. http://www.skywatch.com
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>Sentinel Toolbox Help - Import STAC</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp; Import STAC</td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a></td>
+    </tr>
+</table>
+
+<h3>Import STAC</h3>
+
+<p>
+    This command opens a <a href="StacOverview.html">STAC</a> Item as a product. The input is the Item's JSON
+    sidecar; the Toolbox loads the rasters referenced from its <code>assets</code> block (typically GeoTIFF / COG
+    files) and merges STAC metadata into the product's abstracted metadata.
+</p>
+
+<h4>How to open a STAC Item</h4>
+<ol>
+    <li>Choose <b>File &rarr; Import &rarr; Generic Formats &rarr; STAC</b>, or drag the Item JSON into the Product
+        Explorer.</li>
+    <li>Select the STAC Item JSON file (file extension <code>.json</code>).</li>
+</ol>
+
+<p>
+    The Toolbox recognises a JSON file as a STAC Item when its top-level object declares <code>"type": "Feature"</code>
+    and contains <code>stac_version</code> plus an <code>assets</code> block. Files that do not match are passed on to
+    other readers.
+</p>
+
+<h4>What is loaded</h4>
+<ul>
+    <li>Every <i>raster</i> asset referenced in the Item (local path or HTTP/HTTPS URL) becomes a band in the
+        target product. Non-raster assets (thumbnails, XML sidecars, ...) are skipped.</li>
+    <li>Asset roles, EO band identifiers and wavelengths from the <code>eo:bands</code> extension are used to name
+        bands and populate band metadata where available.</li>
+    <li>Geo-coding is taken from the <code>proj</code> extension when present (EPSG code, WKT, or the
+        transform / shape pair). Otherwise the geographic footprint from <code>geometry</code> / <code>bbox</code>
+        is used as a fallback.</li>
+    <li>SAR metadata from the <code>sar</code> extension (polarisations, product type, instrument mode) and
+        platform / instrument identifiers are mapped into the product's abstracted metadata so the rest of the
+        Toolbox can consume them.</li>
+</ul>
+
+<h4>Remote assets</h4>
+<p>
+    Asset <code>href</code> values may be absolute URLs (<code>http://</code>, <code>https://</code>). The reader
+    will stream those assets through GDAL's virtual file system if the environment can reach them. Authentication
+    and signed-URL support are delegated to GDAL - configure the usual environment variables
+    (<code>AWS_*</code>, <code>GDAL_HTTP_*</code>, ...) before launching SNAP if the catalog requires them.
+</p>
+
+<h4>Constraints</h4>
+<ul>
+    <li>Only STAC Items are opened directly. To browse a STAC Catalog or Collection, pick an Item from it first.</li>
+    <li>Assets with different resolutions are preserved as multi-size bands. Resample the product before running
+        operators that require a single raster grid.</li>
+    <li>STAC extensions that the reader does not understand are preserved verbatim in the product's
+        <i>Original Metadata</i> but are not otherwise interpreted.</li>
+</ul>
+
+<hr>
+</body>
+</html>

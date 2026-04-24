@@ -50,7 +50,7 @@ variables:
 
 default:
   cache:
-    key: maven-${CI_PROJECT_NAME}-${CI_RUNNER_TAGS}
+    key: maven-${CI_COMMIT_REF_SLUG}
     paths:
       - ${MAVEN_CFG_DIR}/repository
     policy: pull-push
