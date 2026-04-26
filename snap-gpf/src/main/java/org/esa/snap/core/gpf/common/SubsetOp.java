@@ -124,7 +124,7 @@ public class SubsetOp extends Operator {
                     "If not given, the geometryRegion or pixelRegion is used.")
     private Polygon polygonRegion;
 
-    @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
+    @Parameter(defaultValue = "true", description = "Whether to copy the metadata of the source product.")
     private boolean copyMetadata;
 
     private transient ProductReader subsetReader;
@@ -135,7 +135,7 @@ public class SubsetOp extends Operator {
         this.subSamplingX = 1;
         this.subSamplingY = 1;
         this.fullSwath = false;
-        this.copyMetadata = false;
+        this.copyMetadata = true;
     }
 
     public String[] getTiePointGridNames() {

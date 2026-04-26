@@ -2,6 +2,7 @@ package org.esa.snap.speclib.util.resampling;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
+import org.esa.snap.speclib.io.csv.util.CsvUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -120,7 +121,6 @@ public class SpectralResponseFunctionTest {
         assertEquals(2.564887f, fwhmList.get(12).getFwhm(), 1.E-1);
         assertEquals(1020.0f, fwhmList.getLast().getWvl(), 1.E-1);
         assertEquals(26.936745f, fwhmList.getLast().getFwhm(), 1.E-1);
-        // TODO
     }
 
     @Test
@@ -205,5 +205,29 @@ public class SpectralResponseFunctionTest {
 
         assertNotNull(fullSrfList);
         assertEquals(234, fullSrfList.size());
+    }
+
+    @Test
+    @STTM("SNAP-4174")
+    public void test_getFwhmTableAsArray() throws Exception {
+        SpectralResponseFunction srf = new SpectralResponseFunction("prisma");
+
+        final URL fwhmResource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
+        assertNotNull(fwhmResource);
+        final File fwhmCsvFile = new File(fwhmResource.toURI());
+        final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(fwhmCsvFile);
+
+        final double[][] fwhmTableColumnsAsArrays = SpectralResponseFunction.getFwhmTableColumnsAsArrays(fwhmTable);
+        assertNotNull(fwhmTableColumnsAsArrays);
+        assertEquals(2, fwhmTableColumnsAsArrays.length);
+        assertEquals(234, fwhmTableColumnsAsArrays[0].length);
+        assertEquals(234, fwhmTableColumnsAsArrays[1].length);
+
+        assertEquals(402.5f, fwhmTableColumnsAsArrays[0][0], 1.E-1);
+        assertEquals(11.4f, fwhmTableColumnsAsArrays[1][0], 1.E-1);
+        assertEquals(1626.8f, fwhmTableColumnsAsArrays[0][128], 1.E-1);
+        assertEquals(13.3f, fwhmTableColumnsAsArrays[1][128], 1.E-1);
+        assertEquals(2496.9f, fwhmTableColumnsAsArrays[0][233], 1.E-1);
+        assertEquals(9.5f, fwhmTableColumnsAsArrays[1][233], 1.E-1);
     }
 }

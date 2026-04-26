@@ -18,6 +18,8 @@ package com.bc.ceres.core;
 
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -53,6 +55,8 @@ import java.util.zip.ZipFile;
  * @since Ceres 0.11
  */
 public abstract class VirtualDir {
+
+    private static final Logger LOG = LoggerFactory.getLogger(VirtualDir.class);
 
     /**
      * @return The base path name of the directory.
@@ -623,11 +627,17 @@ public abstract class VirtualDir {
                 if (file.isDirectory()) {
                     deleteFileTree(file);
                 } else {
-                    file.delete();
+                    boolean deleted = file.delete();
+                    if (!deleted) {
+                        LOG.warn("Failed to delete file: {}", file);
+                    }
                 }
             }
         }
-        treeRoot.delete();
+        boolean rootDeleted = treeRoot.delete();
+        if (!rootDeleted) {
+            LOG.warn("Failed to delete dir: {}", treeRoot);
+        }
     }
 
     private static final int TEMP_DIR_ATTEMPTS = 10000;

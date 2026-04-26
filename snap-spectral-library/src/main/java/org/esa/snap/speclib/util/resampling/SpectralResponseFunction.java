@@ -1,6 +1,7 @@
 package org.esa.snap.speclib.util.resampling;
 
 import com.bc.ceres.core.Assert;
+import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.esa.snap.speclib.io.csv.util.CsvUtils;
 
@@ -96,6 +97,29 @@ public class SpectralResponseFunction {
     }
 
     /**
+     * Provides wavelengths and FWHM values from a CSV table as double arrays.
+     *
+     * @param fwhmCsvTable - CSV table
+     * @return double[][] : two double[] arrays, first is wavelengths, second is FWHM values
+     */
+    public static double[][] getFwhmTableColumnsAsArrays(CsvTable fwhmCsvTable) {
+        Assert.notNull(fwhmCsvTable);
+
+        List<Double> wvlList = new ArrayList<>();
+        List<Double> fwhmList = new ArrayList<>();
+        fwhmCsvTable.rows().iterator().forEachRemaining(row -> {
+            wvlList.add(Double.parseDouble(row.get(0)));
+            fwhmList.add(Double.parseDouble(row.get(1)));
+        });
+
+        final double[] wvlArray = ArrayUtils.toPrimitive(wvlList.toArray(new Double[wvlList.size()]));
+        final double[] fwhmArray = ArrayUtils.toPrimitive(fwhmList.toArray(new Double[fwhmList.size()]));
+
+        return new double[][]{wvlArray, fwhmArray};
+    }
+
+
+    /**
      * Fills spectral responses list with spectral responses from CsvTable
      *
      * @param fwhmCsvTable - wavelength/fwhm pairs
@@ -143,7 +167,6 @@ public class SpectralResponseFunction {
     public List<FWHM> getFwhmList() {
         return fwhmList;
     }
-
 
     /**
      * Object holding a spectral response function value of wavelength/weight.

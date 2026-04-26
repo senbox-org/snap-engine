@@ -104,16 +104,16 @@ public class SpectralResamplingTest {
         assertNotNull(resampledSpectrum);
         assertEquals(224, resampledSpectrum.length);
         assertEquals(115.17, resampledSpectrum[0], 1.E-2);
-        assertEquals(0.0, resampledSpectrum[1], 1.E-2);
+        assertTrue(Double.isNaN(resampledSpectrum[1]));
         assertEquals(114.32, resampledSpectrum[19], 1.E-2);
         assertEquals(114.59, resampledSpectrum[28], 1.E-2);
         assertEquals(133.63, resampledSpectrum[41], 1.E-2);
         assertEquals(122.11, resampledSpectrum[63], 1.E-2);
         assertEquals(95.75, resampledSpectrum[77], 1.E-2);
         assertEquals(20.55, resampledSpectrum[89], 1.E-2);
-        assertEquals(0.0, resampledSpectrum[100], 1.E-2);
+        assertTrue(Double.isNaN(resampledSpectrum[100]));
         assertEquals(81.01, resampledSpectrum[103], 1.E-2);
-        assertEquals(0.0, resampledSpectrum[223], 1.E-4);
+        assertTrue(Double.isNaN(resampledSpectrum[223]));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class SpectralResamplingTest {
         assertEquals(0.0140, resampledSpectrum[89], 1.E-4);
         assertEquals(0.0708, resampledSpectrum[100], 1.E-4);
         assertEquals(0.0624, resampledSpectrum[103], 1.E-4);
-        assertEquals(0.0, resampledSpectrum[223], 1.E-4);
+        assertTrue(Double.isNaN(resampledSpectrum[223]));
     }
 
     @Test
@@ -172,12 +172,12 @@ public class SpectralResamplingTest {
         assertEquals(0.0370, resampledSpectrum[77], 1.E-4);
         assertEquals(0.0477, resampledSpectrum[89], 1.E-4);
         assertEquals(0.0336, resampledSpectrum[100], 1.E-4);
-        assertEquals(0.0, resampledSpectrum[103], 1.E-4);
-        assertEquals(0.0, resampledSpectrum[233], 1.E-4);
+        assertTrue(Double.isNaN(resampledSpectrum[103]));
+        assertTrue(Double.isNaN(resampledSpectrum[233]));
     }
 
-    private List<SpectralResponseFunction> getFullSrfList(String olci) throws URISyntaxException, IOException {
-        SpectralResponseFunction srf = new SpectralResponseFunction(olci);
+    private List<SpectralResponseFunction> getFullSrfList(String sensorName) throws URISyntaxException, IOException {
+        SpectralResponseFunction srf = new SpectralResponseFunction(sensorName);
 
         final URL resource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(resource);

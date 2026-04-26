@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 public class EntryImplTest {
 
     @Test
-    @STTM("SNAP-3702")
+    @STTM("SNAP-3702,SNAP-4171")
     public void testMatches()  {
         final EntryImpl entry = new EntryImpl("groob");
 
@@ -17,5 +17,6 @@ public class EntryImplTest {
         assertTrue(entry.matches("groob_bandOne"));
 
         assertFalse(entry.matches("water_leaving_frog"));
+        assertFalse(entry.matches(null));
     }
 }
