@@ -5,8 +5,10 @@ import eu.esa.snap.core.dataio.cache.DataBuffer;
 import eu.esa.snap.core.dataio.cache.VariableDescriptor;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.util.ArrayConverter;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.Attribute;
@@ -86,7 +88,8 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
         }
 
         Array array = readFromVariable(entry, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight);
-        productData.setElems(array.copyTo1DJavaArray());
+        final DataType targetType = DataTypeUtils.getNetcdfDataType(productData.getType());
+        productData.setElems(array.get1DJavaArray(targetType));
         return new DataBuffer(productData, offsets, shapes);
     }
 
@@ -114,8 +117,11 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
             leftArr = leftArr.flip(0);
         }
 
-        Object rightElems = rightArr.copyTo1DJavaArray();
-        Object leftElems = leftArr.copyTo1DJavaArray();
+//        Object rightElems = rightArr.copyTo1DJavaArray();
+//        Object leftElems = leftArr.copyTo1DJavaArray();
+        final DataType targetType = DataTypeUtils.getNetcdfDataType(productData.getType());
+        Object rightElems = rightArr.get1DJavaArray(targetType);
+        Object leftElems = leftArr.get1DJavaArray(targetType);
         Object destElems = productData.getElems();
         for (int row = 0; row < sourceHeight; row++) {
             System.arraycopy(rightElems, row * rightWidth, destElems, row * sourceWidth, rightWidth);
