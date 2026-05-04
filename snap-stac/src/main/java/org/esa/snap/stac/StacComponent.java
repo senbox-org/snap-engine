@@ -22,7 +22,9 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -81,20 +83,66 @@ public interface StacComponent {
         return null;
     }
 
+    int HTTP_MAX_ATTEMPTS = 4;
+    int HTTP_CONNECT_TIMEOUT_MS = 15_000;
+    int HTTP_READ_TIMEOUT_MS = 30_000;
+
     static JSONObject getJSONFromURLStatic(final String jsonURL) {
+        final URL url;
         try {
-            URL url = new URL(jsonURL);
-            URLConnection request = url.openConnection();
-            request.connect();
-            String content = new String(
-                    ((InputStream) request.getContent()).readAllBytes(), StandardCharsets.UTF_8
-            );
-            JSONParser parser = new JSONParser();
-            return (JSONObject) parser.parse(content);
+            url = new URL(jsonURL);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+        }
+
+        IOException lastError = null;
+        for (int attempt = 1; attempt <= HTTP_MAX_ATTEMPTS; attempt++) {
+            HttpURLConnection conn = null;
+            try {
+                URLConnection raw = url.openConnection();
+                raw.setConnectTimeout(HTTP_CONNECT_TIMEOUT_MS);
+                raw.setReadTimeout(HTTP_READ_TIMEOUT_MS);
+                raw.setRequestProperty("Accept", "application/json");
+                if (raw instanceof HttpURLConnection) {
+                    conn = (HttpURLConnection) raw;
+                    int code = conn.getResponseCode();
+                    if (code == 408 || code == 429 || code >= 500) {
+                        lastError = new IOException("HTTP " + code + " for URL: " + jsonURL);
+                        sleepBeforeRetry(attempt);
+                        continue;
+                    }
+                }
+                try (InputStream in = (InputStream) raw.getContent()) {
+                    String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                    return (JSONObject) new JSONParser().parse(content);
+                }
+            } catch (SocketTimeoutException e) {
+                lastError = e;
+                sleepBeforeRetry(attempt);
+            } catch (IOException e) {
+                lastError = e;
+                sleepBeforeRetry(attempt);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+        }
+        throw new RuntimeException(lastError != null
+                ? lastError
+                : new IOException("Failed to fetch " + jsonURL));
+    }
+
+    static void sleepBeforeRetry(final int attempt) {
+        if (attempt >= HTTP_MAX_ATTEMPTS) {
+            return;
+        }
+        try {
+            Thread.sleep(1000L * (1L << (attempt - 1))); // 1s, 2s, 4s
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 
