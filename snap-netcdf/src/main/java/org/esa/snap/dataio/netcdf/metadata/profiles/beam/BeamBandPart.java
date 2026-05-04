@@ -15,7 +15,6 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import com.bc.ceres.multilevel.support.DefaultMultiLevelImage;
 import eu.esa.snap.core.datamodel.group.BandGroup;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
@@ -26,6 +25,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
+import org.esa.snap.dataio.netcdf.cache.NetcdfCacheDataProvider;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
@@ -49,7 +49,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -228,7 +227,10 @@ public class BeamBandPart extends ProfilePartIO {
         }
         CfBandPart.readCfBandAttributes(variable, band);
         readBeamBandAttributes(variable, band);
-        band.setSourceImage(new DefaultMultiLevelImage(new NetcdfMultiLevelSource(band, variable, ctx)));
+
+        final NetcdfCacheDataProvider cacheProvider = (NetcdfCacheDataProvider) ctx.getProperty(Constants.CACHE_DATA_PROVIDER_PROPERTY);
+        boolean flipY = Boolean.TRUE.equals(ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME));
+        cacheProvider.register(band.getName(), variable, new int[0], flipY, band.getDataType(), ArrayConverter.IDENTITY, ImageManager.getPreferredTileSize(p));
     }
 
     /**

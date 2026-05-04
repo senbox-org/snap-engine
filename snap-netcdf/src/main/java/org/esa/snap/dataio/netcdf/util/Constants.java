@@ -68,6 +68,7 @@ public interface Constants {
     String Y_FLIPPED_PROPERTY_NAME = "yFlipped";
     String CONVERT_LOGSCALED_BANDS_PROPERTY = "convertLogScaledBands";
     String PRODUCT_FILENAME_PROPERTY = "productName";
+    String CACHE_DATA_PROVIDER_PROPERTY = "cacheDataProvider";
 
 
     String RADIATION_WAVELENGTH = "radiation_wavelength"; // CF standard name

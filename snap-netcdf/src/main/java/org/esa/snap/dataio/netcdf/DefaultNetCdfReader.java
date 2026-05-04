@@ -17,11 +17,15 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import eu.esa.snap.core.dataio.cache.CacheManager;
+import eu.esa.snap.core.dataio.cache.CachedSubsamplingReader;
+import eu.esa.snap.core.dataio.cache.ProductCache;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.dataio.netcdf.cache.NetcdfCacheDataProvider;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.TimeUtils;
@@ -34,6 +38,8 @@ import java.io.IOException;
 class DefaultNetCdfReader extends AbstractProductReader {
 
     private NetcdfFile netcdfFile;
+    private NetcdfCacheDataProvider cacheDataProvider;
+    private ProductCache productCache;
 
     public DefaultNetCdfReader(AbstractNetCdfReaderPlugIn netCdfReaderPlugIn) {
         super(netCdfReaderPlugIn);
@@ -53,11 +59,17 @@ class DefaultNetCdfReader extends AbstractProductReader {
         if (netcdfFile == null) {
             throw new IOException("Failed to open file " + fileLocation.getPath());
         }
+
+        cacheDataProvider = new NetcdfCacheDataProvider();
+        productCache = new ProductCache(cacheDataProvider);
+        CacheManager.getInstance().register(this.productCache);
+
         final ProfileReadContext context = new ProfileReadContextImpl(netcdfFile);
-        String filename = extractProductName(fileLocation);
-        context.setProperty(Constants.PRODUCT_FILENAME_PROPERTY, filename);
+        context.setProperty(Constants.PRODUCT_FILENAME_PROPERTY, DefaultNetCdfReader.extractProductName(fileLocation));
+        context.setProperty(Constants.CACHE_DATA_PROVIDER_PROPERTY, cacheDataProvider);
+
         plugIn.initReadContext(context);
-        NetCdfReadProfile profile = new NetCdfReadProfile();
+        final NetCdfReadProfile profile = new NetCdfReadProfile();
         configureProfile(plugIn, profile);
         final Product product = profile.readProduct(context);
         product.setFileLocation(fileLocation);
@@ -65,7 +77,6 @@ class DefaultNetCdfReader extends AbstractProductReader {
         product.setModified(false);
         applyTimeCoverageAttributes(product);
         return product;
-
     }
 
     private void applyTimeCoverageAttributes(Product product) {
@@ -113,11 +124,19 @@ class DefaultNetCdfReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
-        throw new IllegalStateException("Data is provided by images");
+        CachedSubsamplingReader.read(productCache, destBand.getName(), destBand.getDataType(),
+                sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                sourceStepX, sourceStepY, destWidth, destHeight, destBuffer
+        );
     }
 
     @Override
     public void close() throws IOException {
+        if (productCache != null) {
+            CacheManager.getInstance().remove(this.productCache);
+            productCache = null;
+        }
+        cacheDataProvider = null;
         if (netcdfFile != null) {
             netcdfFile.close();
             netcdfFile = null;

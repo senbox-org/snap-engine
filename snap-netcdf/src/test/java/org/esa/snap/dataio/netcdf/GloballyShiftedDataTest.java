@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -194,6 +195,26 @@ public class GloballyShiftedDataTest {
 //            ImageIO.write(levelImage, "TIFF", imageFile);
         }
 
+    }
+
+    @Test
+    @STTM("SNAP-4190")
+    public void test_readingData_acrossBoundary() throws IOException {
+        Band band = product.getBandAt(0);
+        int startX = HALF_WIDTH - 5;
+        int readWidth = 10;
+
+        int[] actualValues = new int[readWidth * STEP_HEIGHT];
+        band.readPixels(startX, 0, readWidth, STEP_HEIGHT, actualValues);
+
+        int[] expected = new int[readWidth * STEP_HEIGHT];
+        for (int row = 0; row < STEP_HEIGHT; row++) {
+            for (int col = 0; col < readWidth; col++) {
+                expected[row * readWidth + col] = row * HALF_WIDTH + startX + col;
+            }
+        }
+
+        Assert.assertArrayEquals(expected, actualValues);
     }
 
     private static boolean isWindows() {
