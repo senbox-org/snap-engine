@@ -93,7 +93,7 @@ public class StacItem implements StacComponent {
                 json = createEmptyStacItem(inputStr);
             }
         } catch (Exception e) {
-            throw new IOException("Unable to parse JSON from given path");
+            throw new IOException("Unable to parse JSON from given path: " + inputStr, e);
         }
         initStacItem(json);
     }
@@ -109,7 +109,7 @@ public class StacItem implements StacComponent {
             jsonFile = productInputFile;
             initStacItem((JSONObject) new JSONParser().parse(new FileReader(productInputFile)));
         } catch (Exception e) {
-            throw new IOException("Unable to parse JSON from given local file.");
+            throw new IOException("Unable to parse JSON from given local file.", e);
         }
     }
 

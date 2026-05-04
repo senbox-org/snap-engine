@@ -24,6 +24,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -41,6 +42,9 @@ public class TestClient {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @Rule
+    public final TestRule skipOnExternalServiceFlake = new StacExternalServiceFlakeRule();
 
     @Before
     public void setup() {

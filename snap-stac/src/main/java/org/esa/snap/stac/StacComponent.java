@@ -83,9 +83,9 @@ public interface StacComponent {
         return null;
     }
 
-    int HTTP_MAX_ATTEMPTS = 4;
+    int HTTP_MAX_ATTEMPTS = 3;
     int HTTP_CONNECT_TIMEOUT_MS = 15_000;
-    int HTTP_READ_TIMEOUT_MS = 30_000;
+    int HTTP_READ_TIMEOUT_MS = 90_000;
 
     static JSONObject getJSONFromURLStatic(final String jsonURL) {
         final URL url;
@@ -117,8 +117,8 @@ public interface StacComponent {
                     return (JSONObject) new JSONParser().parse(content);
                 }
             } catch (SocketTimeoutException e) {
-                lastError = e;
-                sleepBeforeRetry(attempt);
+                // Server is genuinely slow, not flaky - retrying just multiplies the wait.
+                throw new RuntimeException(e);
             } catch (IOException e) {
                 lastError = e;
                 sleepBeforeRetry(attempt);
