@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.gdal.drivers;
 
+import java.awt.Color;
 import java.awt.image.IndexColorModel;
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,6 +25,8 @@ public class ColorTable extends GDALBase implements Closeable {
 
     private final Object jniColorTable;
     private final MethodHandle getIndexColorModelHandle;
+    private final MethodHandle getCountHandle;
+    private final MethodHandle getColorEntryHandle;
     private final MethodHandle deleteHandle;
 
     /**
@@ -35,7 +38,9 @@ public class ColorTable extends GDALBase implements Closeable {
         this.jniColorTable = jniColorTable;
         try {
             getIndexColorModelHandle = createHandle(colorTableClass, "getIndexColorModel", IndexColorModel.class, int.class);
-            deleteHandle = createHandle(colorTableClass, "delete", IndexColorModel.class, int.class);
+            getCountHandle = createHandle(colorTableClass, "GetCount", int.class);
+            getColorEntryHandle = createHandle(colorTableClass, "GetColorEntry", Color.class, int.class);
+            deleteHandle = createHandle(colorTableClass, "delete", void.class);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -49,6 +54,25 @@ public class ColorTable extends GDALBase implements Closeable {
      */
     public IndexColorModel getIndexColorModel(int bits) {
         return (IndexColorModel) invoke(getIndexColorModelHandle, this.jniColorTable, bits);
+    }
+
+    /**
+     * Calls the JNI GDAL ColorTable class GetCount() method
+     *
+     * @return the JNI GDAL ColorTable class GetCount() method result
+     */
+    public int getCount(){
+        return (int) invoke(getCountHandle, this.jniColorTable);
+    }
+
+    /**
+     * Calls the JNI GDAL ColorTable class GetColorEntry(int entry) method
+     *
+     * @param entry the JNI GDAL ColorTable class GetColorEntry(int entry) method 'entry' argument
+     * @return the JNI GDAL ColorTable class GetColorEntry(int entry) method result
+     */
+    public Color getColorEntry(int entry){
+        return (Color) invoke(getColorEntryHandle, jniColorTable, entry);
     }
 
     /**

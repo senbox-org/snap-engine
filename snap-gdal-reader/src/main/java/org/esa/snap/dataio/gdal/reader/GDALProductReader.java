@@ -10,15 +10,19 @@ import org.esa.snap.dataio.gdal.drivers.GCP;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConst;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
+import org.esa.snap.dataio.gdal.drivers.ColorTable;
 import org.esa.snap.engine_utilities.dataio.readers.BaseProductReaderPlugIn;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GcpDescriptor;
 import org.esa.snap.core.datamodel.GcpGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -446,6 +450,13 @@ public class GDALProductReader extends AbstractProductReader {
                             metadataElement.addElement(bandMetadataElement);
                         }
 
+                        if (colorInterpretationName.equals("Palette")) {
+                            final IndexedImageInfo indexedImageInfo = buildIndexedImageInfo(gdalBand);
+                            product.getIndexCodingGroup().add(indexedImageInfo.indexCoding());
+                            productBand.setSampleCoding(indexedImageInfo.indexCoding());
+                            productBand.setImageInfo(indexedImageInfo.imageInfo());
+                        }
+
                         product.addBand(productBand);
                         // add the mask
                         String maskName = computeMaskName(gdalBand, bandName);
@@ -470,6 +481,25 @@ public class GDALProductReader extends AbstractProductReader {
                 : bandName;
     }
 
+    private static IndexedImageInfo buildIndexedImageInfo(org.esa.snap.dataio.gdal.drivers.Band gdalBand) {
+        final ColorTable gdalColorTable = gdalBand.getRasterColorTable();
+        final int nrColors = gdalColorTable.getCount();
+        final ColorPaletteDef.Point[] palettePoints = new ColorPaletteDef.Point[nrColors];
+        final IndexCoding indexCoding = new IndexCoding("gdal_color_map");
+        for (int i = 0; i < nrColors; i++) {
+            final Color rgba = gdalColorTable.getColorEntry(i);
+            if (rgba == null) {
+                throw new IllegalStateException("Invalid color entry at index " + i);
+            }
+            final String name = String.format("I%3d", i);
+            palettePoints[i] = new ColorPaletteDef.Point(i, rgba, name);
+            indexCoding.addIndex(name, i, "");
+        }
+        final ColorPaletteDef palette = new ColorPaletteDef(palettePoints, nrColors);
+        final ImageInfo imageInfo = new ImageInfo(palette);
+        return new IndexedImageInfo(imageInfo, indexCoding);
+    }
+
     private void closeResources() {
         if (this.virtualFile != null) {
             this.virtualFile.close();
@@ -489,5 +519,8 @@ public class GDALProductReader extends AbstractProductReader {
             this.bandDataType = bandDataType;
             this.dataBufferType = dataBufferType;
         }
+    }
+
+    private record IndexedImageInfo(ImageInfo imageInfo, IndexCoding indexCoding) {
     }
 }
