@@ -352,12 +352,10 @@ public class GDALProductReader extends AbstractProductReader {
                 try (org.esa.snap.dataio.gdal.drivers.Band gdalBand = gdalDataset.getRasterBand(bandIndex + 1)) {
                     String bandName = computeBandName(gdalBand, bandIndex);
 
-                    /* Building overviews when reading the product it's not a good idea,
-                       especially when the product resides in a read-only storage.
-
-                        if (gdalBand.getOverviewCount() == 0) {
+                    if (gdalBand.getOverviewCount() == 0 && (long) defaultProductWidth * defaultProductHeight > 200_000_000L ) {
                         gdalDataset.buildOverviews("NEAREST", new int[]{2, 4, 8, 16, 32, 64, 128});
-                    }*/
+                        return readProduct(localFile);
+                    }
 
                     if (subsetDef == null || subsetDef.isNodeAccepted(bandName)) {
                         int gdalDataType = gdalBand.getDataType();
