@@ -287,28 +287,6 @@ public class NetcdfOpImage extends SingleBandedOpImage {
         }
     }
 
-    protected interface ArrayConverter {
-
-        ArrayConverter IDENTITY = array -> array;
-
-        ArrayConverter LSB = array -> {
-            final Array convertedArray = Array.factory(DataType.INT, array.getShape());
-            for (int i = 0; i < convertedArray.getSize(); i++) {
-                convertedArray.setInt(i, (int) (array.getLong(i) & 0x00000000FFFFFFFFL));
-            }
-            return convertedArray;
-        };
-
-        ArrayConverter MSB = array -> {
-            final Array convertedArray = Array.factory(DataType.INT, array.getShape());
-            for (int i = 0; i < convertedArray.getSize(); i++) {
-                convertedArray.setInt(i, (int) (array.getLong(i) >>> 32));
-            }
-            return convertedArray;
-        };
-
-        Array convert(Array array);
-    }
 
     private Rectangle getSourceRect(Rectangle rect) {
         int sourceX = getSourceX(rect.x);

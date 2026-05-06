@@ -17,9 +17,11 @@
                 <tocitem text="STAC" target="exportStacProduct"/>
             </tocitem>
         </tocitem>
-        <tocitem text="STAC" target="stacOverview">
-            <tocitem text="STAC Overview" target="stacOverview"/>
-            <tocitem text="Using the StacClient" target="stacClient"/>
+        <tocitem text="Tools">
+            <tocitem text="STAC" target="stacOverview">
+                <tocitem text="STAC Overview" target="stacOverview"/>
+                <tocitem text="Using the StacClient" target="stacClient"/>
+            </tocitem>
         </tocitem>
     </tocitem>
 </toc>

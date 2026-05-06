@@ -20,9 +20,11 @@ import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -40,6 +42,9 @@ public class TestClient {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @Rule
+    public final TestRule skipOnExternalServiceFlake = new StacExternalServiceFlakeRule();
 
     @Before
     public void setup() {
@@ -89,6 +94,7 @@ public class TestClient {
     }
 
     @Test
+    @Ignore("Can timeout")
     public void testStream() throws Exception {
         String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
         StacItem item = new StacItem(itemURL);
@@ -98,6 +104,7 @@ public class TestClient {
     }
 
     @Test
+    @Ignore("Can timeout")
     public void testDownloadAsset() throws Exception {
 
         String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
