@@ -20,13 +20,16 @@ package org.esa.snap.core.util;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.VirtualDir;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
+import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.Range;
@@ -48,7 +51,13 @@ import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -2479,6 +2488,48 @@ public class ProductUtils {
             }
         }
         return true;
+    }
+
+    public static VirtualDir getProductVirtualDir(Object input) {
+        File inputFile = getProductPath(input).toFile();
+        if (inputFile.isFile()) {
+            if (inputFile.getName().toLowerCase().endsWith(".zip")) {
+                final String cachedFilepath = FileUtils.getCachedFilePath(inputFile);
+                inputFile = new File(cachedFilepath);
+            } else {
+                final File absoluteFile = inputFile.getAbsoluteFile();
+                inputFile = absoluteFile.getParentFile();
+                if (inputFile == null) {
+                    return null;
+                }
+            }
+        }
+        return VirtualDir.create(inputFile);
+    }
+
+    public static InputStream getProductInputStream(Object input) throws IOException {
+        if (input instanceof InputStream inputStream) {
+            return inputStream;
+        } else {
+            final Path productPath = getProductPath(input);
+            if (!Files.exists(productPath)) {
+                throw new FileNotFoundException(productPath + " does not exists.");
+            }
+            if (!Files.isRegularFile(productPath)) {
+                throw new NotRegularFileException(productPath + " does not a file.");
+            }
+            return Files.newInputStream(productPath);
+        }
+    }
+
+    public static Path getProductPath(Object input){
+        if (input instanceof Path path) {
+            return path;
+        } else if (input instanceof File file) {
+            return file.toPath();
+        } else {
+            return Paths.get(input.toString());
+        }
     }
 
     private static VectorDataNode transferVectorDataNode(Product targetProduct, VectorDataNode sourceVectorDataNode, AffineTransform referenceImageToModelTransform) {

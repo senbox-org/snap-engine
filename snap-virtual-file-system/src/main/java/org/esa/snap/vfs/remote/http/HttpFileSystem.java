@@ -7,7 +7,7 @@ import org.esa.snap.vfs.remote.AbstractRemoteFileSystem;
  *
  * @author Jean Coravu
  */
-class HttpFileSystem extends AbstractRemoteFileSystem {
+public class HttpFileSystem extends AbstractRemoteFileSystem {
 
     private final String fileSystemRoot;
 

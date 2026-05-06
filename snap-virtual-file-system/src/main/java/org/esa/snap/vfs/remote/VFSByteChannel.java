@@ -17,7 +17,7 @@ import java.nio.channels.SeekableByteChannel;
  * @author Norman Fomferra
  * @author Adrian Drăghici
  */
-class VFSByteChannel implements SeekableByteChannel {
+public class VFSByteChannel implements SeekableByteChannel {
 
     private final VFSPath path;
     private final long contentLength;
@@ -228,18 +228,27 @@ class VFSByteChannel implements SeekableByteChannel {
      */
     private int readBytes(byte[] array, int offset, int length) throws IOException {
         createConnectionIfNeeded();
-        InputStream inputStream = this.connection.getInputStream();
 
         int bytesTransferred = 0;
-        while (length > 0) {
-            int bytesReadNow = inputStream.read(array, offset, length);
-            if (bytesReadNow <= 0) {
-                break;
+        int retries = 3;
+        long available = this.contentLength;
+        while (retries-- > 0) {
+            final InputStream inputStream = this.connection.getInputStream();
+            while (length > 0 && available > 0 && this.position < this.contentLength) {
+                final int bytesReadNow = inputStream.read(array, offset, length);
+                if (bytesReadNow <= 0) {
+                    this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position);
+                    break;
+                }
+                length -= bytesReadNow;
+                available -= bytesReadNow;
+                offset += bytesReadNow;
+                bytesTransferred += bytesReadNow;
+                this.position += bytesReadNow;
+                if (length < 1 || available <1 || this.position >= this.contentLength) {
+                    retries = 0;
+                }
             }
-            length -= bytesReadNow;
-            offset += bytesReadNow;
-            bytesTransferred += bytesReadNow;
-            this.position += bytesReadNow;
         }
         return bytesTransferred;
     }
@@ -251,7 +260,7 @@ class VFSByteChannel implements SeekableByteChannel {
                 this.connection.disconnect();
                 this.connection = null;
             }
-            this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position, "GET");
+            this.connection = VFSFileChannel.buildProviderConnectionChannel(this.path, this.position);
         }
     }
 }

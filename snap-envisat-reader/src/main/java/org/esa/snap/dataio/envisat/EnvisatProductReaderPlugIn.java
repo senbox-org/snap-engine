@@ -22,14 +22,13 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.RGBImageProfile;
 import org.esa.snap.core.datamodel.RGBImageProfileManager;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
-import org.esa.snap.core.util.math.Range;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -194,7 +193,8 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     private static InputStream createZIPInputStream(File file) throws IOException {
-        final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
+        final File cachedFile = FileUtils.getCachedFile(file);
+        final ZipFile productZip = new ZipFile(cachedFile, ZipFile.OPEN_READ);
         if (productZip.size() != 1) {
             throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
         }
@@ -207,7 +207,8 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     private static InputStream createGZIPInputStream(File file) throws IOException {
-        return new GZIPInputStream(new FileInputStream(file));
+        final InputStream inputStream = ProductUtils.getProductInputStream(file);
+        return new GZIPInputStream(inputStream);
     }
 
     private static void registerRGBProfiles() {

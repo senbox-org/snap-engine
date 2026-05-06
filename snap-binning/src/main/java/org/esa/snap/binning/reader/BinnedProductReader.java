@@ -76,8 +76,9 @@ public class BinnedProductReader extends AbstractProductReader {
      */
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final String path = getInput().toString();
-        netcdfFile = NetcdfFileOpener.open(path);
+        final File productFile = getProductFile();
+        final String path = productFile.getPath();
+        netcdfFile = NetcdfFileOpener.open(productFile);
         if (netcdfFile == null) {
             throw new IOException("Could not open NetCDF file " +  path);
         }

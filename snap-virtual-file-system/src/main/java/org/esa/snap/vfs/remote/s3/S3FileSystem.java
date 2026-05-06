@@ -8,7 +8,7 @@ import org.esa.snap.vfs.remote.AbstractRemoteFileSystemProvider;
  *
  * @author Jean Coravu
  */
-class S3FileSystem extends AbstractRemoteFileSystem {
+public class S3FileSystem extends AbstractRemoteFileSystem {
 
     private final String fileSystemRoot;
 

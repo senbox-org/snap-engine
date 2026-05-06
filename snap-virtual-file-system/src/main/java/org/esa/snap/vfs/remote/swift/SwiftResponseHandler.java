@@ -47,16 +47,16 @@ public class SwiftResponseHandler extends DefaultHandler {
      * The name of XML element for Container, used on parsing VFS service response XML.
      */
     private static final String CONTAINER_ELEMENT = "container";
-    private static Logger logger = Logger.getLogger(SwiftResponseHandler.class.getName());
-    private LinkedList<String> elementStack = new LinkedList<>();
-    private List<BasicFileAttributes> items;
+    private static final Logger logger = Logger.getLogger(SwiftResponseHandler.class.getName());
+    private final LinkedList<String> elementStack = new LinkedList<>();
+    private final List<BasicFileAttributes> items;
     private String name;
     private long size;
     private String lastModified;
     private String marker;
     private boolean isTruncated;
-    private String prefix;
-    private String delimiter;
+    private final String prefix;
+    private final String delimiter;
 
     /**
      * Creates the new response handler for OpenStack Swift VFS.

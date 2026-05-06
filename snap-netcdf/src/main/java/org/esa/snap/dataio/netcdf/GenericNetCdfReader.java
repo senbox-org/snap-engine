@@ -52,9 +52,9 @@ public class GenericNetCdfReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
 
-        final File fileLocation = new File(getInput().toString());
+        final File fileLocation = getProductFile();
         try {
-            netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
+            netcdfFile = NetcdfFileOpener.open(fileLocation);
             if (netcdfFile == null) {
                 throw new IOException("Failed to open file " + fileLocation.getPath());
             }

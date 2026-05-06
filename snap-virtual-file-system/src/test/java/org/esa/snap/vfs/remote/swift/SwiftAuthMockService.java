@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -20,8 +21,8 @@ class SwiftAuthMockService {
     private static final String TOKEN = "c4760e89c8d945cd9a6fbfc7b71d6cbc";
     private static LocalDateTime expirationDate;
 
-    private HttpServer mockAuthServer;
-    private String mockServiceAddress;
+    private final HttpServer mockAuthServer;
+    private final String mockServiceAddress;
 
 
     SwiftAuthMockService(URL serviceAddress) throws IOException {
@@ -33,10 +34,10 @@ class SwiftAuthMockService {
 
     public static void main(String[] args) {
         try {
-            SwiftAuthMockService mockService = new SwiftAuthMockService(new URL("http://localhost:0/mock-api/v3/auth/tokens"));
+            SwiftAuthMockService mockService = new SwiftAuthMockService(new URI("http://localhost:0/mock-api/v3/auth/tokens").toURL());
             mockService.start();
             Logger.getLogger(SwiftAuthMockService.class.getName()).info("Swift Auth mock service started at: " + mockService.getMockServiceAddress());
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.getLogger(SwiftAuthMockService.class.getName()).severe("Unable to start Swift Auth mock service.\nReason: " + e.getMessage());
         }
     }
@@ -60,7 +61,7 @@ class SwiftAuthMockService {
         return this.mockServiceAddress;
     }
 
-    private class SwiftAuthMockServiceHandler implements HttpHandler {
+    private static class SwiftAuthMockServiceHandler implements HttpHandler {
 
         private static final String DOMAIN = "cloud_14547";
         private static final String PROJECT_ID = "c4761f89c8d940cd9a6dbfa7b72d6cba";

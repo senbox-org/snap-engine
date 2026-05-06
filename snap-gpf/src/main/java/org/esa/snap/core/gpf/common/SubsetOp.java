@@ -45,6 +45,7 @@ import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.esa.snap.vfs.NioPaths;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 
@@ -215,6 +216,7 @@ public class SubsetOp extends Operator {
                 if (this.polygonRegion != null) {
                     this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
                 } else {
+                    this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
                     this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
                 }
                 if (referenceBand != null) {

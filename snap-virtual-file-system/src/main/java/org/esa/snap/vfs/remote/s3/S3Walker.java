@@ -1,6 +1,5 @@
 package org.esa.snap.vfs.remote.s3;
 
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.vfs.remote.AbstractRemoteWalker;
 import org.esa.snap.vfs.remote.HttpUtils;
 import org.esa.snap.vfs.remote.IRemoteConnectionBuilder;
@@ -18,6 +17,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +33,10 @@ import java.util.logging.Logger;
  */
 class S3Walker extends AbstractRemoteWalker {
 
-    private String address;
-    private String bucket;
-    private String delimiter;
-    private String root;
+    private final String address;
+    private final String bucket;
+    private final String delimiter;
+    private final String root;
 
     /**
      * Creates the new walker for S3  VFS
@@ -60,16 +62,15 @@ class S3Walker extends AbstractRemoteWalker {
      * @param params The request parameters builder
      * @param name   The name of new request parameter
      * @param value  The value of new request parameter
-     * @throws IOException If an I/O error occurs
      */
-    private static void addParam(StringBuilder params, String name, String value) throws IOException {
+    private static void addParam(StringBuilder params, String name, String value) {
         if (value == null || value.isEmpty()) {
             return;
         }
-        if (params.length() > 0) {
+        if (!params.isEmpty()) {
             params.append("&");
         }
-        params.append(name).append("=").append(URLEncoder.encode(value, "UTF8"));
+        params.append(name).append("=").append(URLEncoder.encode(value, StandardCharsets.UTF_8).replaceAll("\\+", "%20"));
     }
 
     /**
@@ -91,7 +92,12 @@ class S3Walker extends AbstractRemoteWalker {
         do {
             handler = new S3ResponseHandler(this.root + this.delimiter + s3Prefix, items, this.delimiter);
             String s3URL = buildS3URL(s3Prefix, nextContinuationToken);
-            URL url = new URL(s3URL);
+            final URL url;
+            try {
+                url = new URI(s3URL).toURL();
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
             HttpURLConnection connection = this.remoteConnectionBuilder.buildConnection(fileSystemRoot, url, "GET", null);
             try {
                 int responseCode = connection.getResponseCode();
@@ -114,12 +120,12 @@ class S3Walker extends AbstractRemoteWalker {
                     Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                     Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                         try {
-                            return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                            return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                         } catch (IOException ignored) {
                         }
                         return "";
                     });
-                    throw new IOException(url.toString() + ": response code " + responseCode + ": " + connection.getResponseMessage());
+                    throw new IOException(url + ": response code " + responseCode + ": " + connection.getResponseMessage());
                 }
             } finally {
                 connection.disconnect();
@@ -127,13 +133,10 @@ class S3Walker extends AbstractRemoteWalker {
             nextContinuationToken = handler.getNextContinuationToken();
         } while (handler.getIsTruncated());
 
+        if (!handler.isFound()) {
+            throw new IOException("file " + dir + " not found.");
+        }
         return items;
-    }
-
-    protected URL getDirectoryURL(VFSPath dir) throws IOException {
-        String dirPath = dir.toString();
-        String s3Prefix = buildPrefix(dirPath + (dirPath.endsWith("/") ? "" : "/"));
-        return new URL(buildS3URL(s3Prefix, ""));
     }
 
     private String buildPrefix(String prefix) {
@@ -142,7 +145,7 @@ class S3Walker extends AbstractRemoteWalker {
         return prefix;
     }
 
-    private String buildS3URL(String prefix, String nextContinuationToken) throws IOException {
+    private String buildS3URL(String prefix, String nextContinuationToken) {
         String currentBucket = this.bucket;
         currentBucket = (currentBucket != null && !currentBucket.isEmpty()) ? currentBucket + this.delimiter : "";
         StringBuilder paramBase = new StringBuilder();
@@ -151,7 +154,7 @@ class S3Walker extends AbstractRemoteWalker {
         StringBuilder params = new StringBuilder(paramBase);
         addParam(params, "marker", nextContinuationToken);
         String s3URL = this.address + (this.address.endsWith(this.delimiter) ? "" : this.delimiter) + currentBucket;
-        if (params.length() > 0) {
+        if (!params.isEmpty()) {
             s3URL += "?" + params;
         }
         return s3URL;

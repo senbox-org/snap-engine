@@ -3,10 +3,10 @@ package org.esa.snap.dataio.envi;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.io.File;
@@ -24,7 +24,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
         if (input instanceof ImageInputStream) {
             return checkDecodeQualificationOnStream((ImageInputStream) input);
         } else if(input != null){
-            return checkDecodeQualificationOnFile(new File(input.toString()));
+            return checkDecodeQualificationOnFile(getProductFile(input));
         }
         return DecodeQualification.UNABLE;
     }
@@ -132,7 +132,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
                 productZip.close();
             } else if (EnviConstants.HDR_EXTENSION.equalsIgnoreCase(FileUtils.getExtension(inputFile))) {
                 DecodeQualification result;
-                try (ImageInputStream headerStream = new FileImageInputStream(inputFile)) {
+                try (ImageInputStream headerStream = ImageUtils.getImageInputStream(inputFile)) {
                     result = checkDecodeQualificationOnStream(headerStream);
                 }
                 return result;

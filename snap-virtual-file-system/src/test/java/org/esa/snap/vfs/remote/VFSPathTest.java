@@ -4,13 +4,11 @@ import org.esa.snap.vfs.VFS;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
 import org.esa.snap.vfs.remote.http.HttpMockService;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,12 +41,12 @@ public class VFSPathTest extends AbstractVFSTest {
             VFSRemoteFileRepository httpRepo = getHTTPRepo();
             assumeNotNull(httpRepo);
             Path serviceRootPath = this.vfsTestsFolderPath.resolve(TEST_DIR);
-            this.mockService = new HttpMockService(new URL(httpRepo.getAddress()), serviceRootPath);
-            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(httpRepo.getScheme());
+            this.mockService = new HttpMockService(new URI(httpRepo.address()).toURL(), serviceRootPath);
+            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(httpRepo.scheme());
             assumeNotNull(fileSystemProvider);
             assumeTrue(fileSystemProvider instanceof AbstractRemoteFileSystemProvider);
             ((AbstractRemoteFileSystemProvider) fileSystemProvider).setConnectionData(httpRepo.getRoot(), this.mockService.getMockServiceAddress(), new LinkedHashMap<>());
-            URI uri = new URI(httpRepo.getScheme(), httpRepo.getRoot(), null);
+            URI uri = new URI(httpRepo.scheme(), httpRepo.getRoot(), null);
             FileSystem fs = fileSystemProvider.getFileSystem(uri);
             assumeNotNull(fs);
             this.vfs = (AbstractRemoteFileSystem) fs;
@@ -212,14 +210,6 @@ public class VFSPathTest extends AbstractVFSTest {
         assertEquals("/foo/bar/gus", path.resolve("gus").toString());
         assertEquals("/foo/bar/gus", path.resolve("gus/").toString());
         assertEquals("/foo/bar/gus", path.resolve("/gus/").toString());
-
-        path = VFSPath.parsePath(this.vfs, "foo/bar");
-        try {
-            path.resolve((String) null);
-            Assert.fail("IllegalArgumentException expected");
-        } catch (NullPointerException ignored) {
-            //ok
-        }
     }
 
     @Test

@@ -55,15 +55,15 @@ public class S3FileSystemTest extends AbstractVFSTest {
         if (this.mockService != null) {
             return this.mockService.getMockServiceAddress();
         } else {
-            return getS3Repo().getAddress();
+            return getS3Repo().address();
         }
     }
 
     private String getBucket() {
         VFSRemoteFileRepository s3Repo = getSwiftRepo();
         String bucket = "";
-        if (!s3Repo.getProperties().isEmpty()) {
-            bucket = s3Repo.getProperties().get(0).getValue();
+        if (!s3Repo.properties().isEmpty()) {
+            bucket = s3Repo.properties().getFirst().getValue();
         }
         return bucket;
     }
@@ -74,12 +74,12 @@ public class S3FileSystemTest extends AbstractVFSTest {
             VFSRemoteFileRepository s3Repo = getS3Repo();
             assertNotNull(s3Repo);
             Path serviceRootPath = this.vfsTestsFolderPath.resolve(TEST_DIR);
-            this.mockService = new S3MockService(new URL(s3Repo.getAddress()), serviceRootPath);
-            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(s3Repo.getScheme());
+            this.mockService = new S3MockService(new URI(s3Repo.address()).toURL(), serviceRootPath);
+            FileSystemProvider fileSystemProvider = VFS.getInstance().getFileSystemProviderByScheme(s3Repo.scheme());
             assertNotNull(fileSystemProvider);
             assumeTrue(fileSystemProvider instanceof AbstractRemoteFileSystemProvider);
             ((AbstractRemoteFileSystemProvider) fileSystemProvider).setConnectionData(s3Repo.getRoot(), this.mockService.getMockServiceAddress(), new LinkedHashMap<>());
-            URI uri = new URI(s3Repo.getScheme(), s3Repo.getRoot(), null);
+            URI uri = new URI(s3Repo.scheme(), s3Repo.getRoot(), null);
             FileSystem fs = fileSystemProvider.getFileSystem(uri);
             assertNotNull(fs);
             this.s3FileSystem = (AbstractRemoteFileSystem) fs;
@@ -105,7 +105,7 @@ public class S3FileSystemTest extends AbstractVFSTest {
     public void testScanner() throws Exception {
         VFSRemoteFileRepository s3Repo = getS3Repo();
 
-        S3FileSystemProvider fileSystemProvider = (S3FileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(s3Repo.getScheme());
+        S3FileSystemProvider fileSystemProvider = (S3FileSystemProvider) VFS.getInstance().getFileSystemProviderByScheme(s3Repo.scheme());
 
         List<BasicFileAttributes> items;
 
@@ -128,7 +128,7 @@ public class S3FileSystemTest extends AbstractVFSTest {
         if (!address.endsWith("/")) {
             address = address.concat("/");
         }
-        URL url = new URL(address + getBucket() + "/rootDir1/dir1/file.jpg");
+        URL url = new URI(address + getBucket() + "/rootDir1/dir1/file.jpg").toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setDoInput(true);
