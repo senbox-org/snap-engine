@@ -338,6 +338,35 @@ public class CacheData3DTest {
     }
 
     @Test
+    @STTM("SNAP-4122")
+    public void testCopyData_survivesReleaseTriggeredByAllocationTracking() throws IOException {
+        final CacheData3D cacheData3D = new CacheData3D(new int[]{0, 0, 0}, new int[]{4, 10, 10});
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_INT32);
+        final MemoryUsageTracker releasingTracker = new MemoryUsageTracker() {
+            @Override
+            public void allocated(long numBytes) {
+                cacheData3D.release(numBytes);
+            }
+
+            @Override
+            public void released(long numBytes) {
+            }
+        };
+        cacheData3D.setCacheContext(new CacheContext(new VariableDescriptor(), cacheDataProvider, releasingTracker));
+
+        final DataBuffer targetBuffer = new DataBuffer(ProductData.TYPE_INT32, new int[]{0, 0, 0}, new int[]{1, 2, 3});
+        cacheData3D.copyData(new int[]{0, 0, 0}, new int[]{0, 0, 0}, new int[]{1, 2, 3}, targetBuffer);
+
+        assertEquals(0, targetBuffer.getData().getElemIntAt(0));
+        assertEquals(1, targetBuffer.getData().getElemIntAt(1));
+        assertEquals(2, targetBuffer.getData().getElemIntAt(2));
+        assertEquals(10, targetBuffer.getData().getElemIntAt(3));
+        assertEquals(11, targetBuffer.getData().getElemIntAt(4));
+        assertEquals(12, targetBuffer.getData().getElemIntAt(5));
+        assertNull(cacheData3D.getData());
+    }
+
+    @Test
     @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
         final CacheData3D cacheData3D = createCacheDataWithContext(new int[]{400, 350, 200}, new int[]{10, 10, 20}, ProductData.TYPE_INT64);
