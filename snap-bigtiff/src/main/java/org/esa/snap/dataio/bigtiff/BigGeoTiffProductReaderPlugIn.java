@@ -5,6 +5,7 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.dataio.geotiff.Utils;
 
@@ -25,16 +26,7 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         try {
-            final Object imageIOInput;
-            if (input instanceof String) {
-                imageIOInput = new File((String) input);
-            } else if (input instanceof File || input instanceof InputStream) {
-                imageIOInput = input;
-            } else {
-                return DecodeQualification.UNABLE;
-            }
-
-            try (ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput)) {
+            try (ImageInputStream stream = ImageUtils.getImageInputStream(input)) {
                 return getDecodeQualificationImpl(stream);
             }
         } catch (Exception ignore) {

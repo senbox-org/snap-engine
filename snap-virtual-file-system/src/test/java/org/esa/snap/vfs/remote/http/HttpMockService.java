@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,22 +22,22 @@ import static org.junit.Assume.assumeTrue;
 
 public class HttpMockService {
 
-    private HttpServer mockServer;
-    private String mockServiceAddress;
+    private final HttpServer mockServer;
+    private final String mockServiceAddress;
 
     public HttpMockService(URL serviceAddress, Path serviceRootPath) throws IOException {
         this.mockServer = HttpServer.create(new InetSocketAddress(serviceAddress.getPort()), 0);
         int port = this.mockServer.getAddress().getPort();
-        this.mockServiceAddress = serviceAddress.toString().replaceAll(":([\\d]+)", ":" + port);
+        this.mockServiceAddress = serviceAddress.toString().replaceAll(":(\\d+)", ":" + port);
         this.mockServer.createContext(serviceAddress.getPath(), new HTTPMockServiceHandler(serviceRootPath));
     }
 
     public static void main(String[] args) {
         try {
-            HttpMockService mockService = new HttpMockService(new URL("http://localhost:0/mock-api/"), Paths.get(System.getProperty("http.mock-service.root")));
+            HttpMockService mockService = new HttpMockService(new URI("http://localhost:0/mock-api/").toURL(), Paths.get(System.getProperty("http.mock-service.root")));
             mockService.start();
             Logger.getLogger(HttpMockService.class.getName()).info("HTTP mock service started at: " + mockService.getMockServiceAddress());
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.getLogger(HttpMockService.class.getName()).severe("Unable to start HTTP mock service.\nReason: " + e.getMessage());
         }
     }
@@ -53,7 +54,7 @@ public class HttpMockService {
         return this.mockServiceAddress;
     }
 
-    private class HTTPMockServiceHandler implements HttpHandler {
+    private static class HTTPMockServiceHandler implements HttpHandler {
 
         private static final String PREFIX_CONTENT = "%prefix_content%";
         private static final String HTTP_CONTENT = "%bucket_content%";
@@ -67,7 +68,7 @@ public class HttpMockService {
 
         private final SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
 
-        private Path serviceRootPath;
+        private final Path serviceRootPath;
 
         HTTPMockServiceHandler(Path serviceRootPath) {
             assumeTrue(Files.exists(serviceRootPath));
@@ -134,13 +135,14 @@ public class HttpMockService {
                 paths.next();
                 while (paths.hasNext()) {
                     Path pathItem = paths.next();
+                    final String pathItemRelativePath = pathItem.toString().replace(path.toString(), "");
                     if (Files.isDirectory(pathItem)) {
-                        String directoryPath = pathItem.toString().replace(path.toString(), "").replace(path.getFileSystem().getSeparator(), "/").replaceAll("^/", "");
+                        String directoryPath = pathItemRelativePath.replace(path.getFileSystem().getSeparator(), "/").replaceAll("^/", "");
                         html.append(DIRECTORY_HTML.replaceAll(DIRECTORY_PATH, directoryPath + "/"));
                     } else {
                         long fileSize = Files.size(pathItem);
                         String fileDate = this.isoDateFormat.format(Files.getLastModifiedTime(pathItem).toMillis());
-                        String filePath = pathItem.toString().replace(path.toString(), "").replace(path.getFileSystem().getSeparator(), "/").replaceAll("^/", "");
+                        String filePath = pathItemRelativePath.replace(path.getFileSystem().getSeparator(), "/").replaceAll("^/", "");
                         html.append(FILE_HTML.replaceAll(FILE_PATH, filePath).replaceAll(FILE_SIZE, "" + fileSize).replaceAll(FILE_DATE, fileDate));
                     }
                 }

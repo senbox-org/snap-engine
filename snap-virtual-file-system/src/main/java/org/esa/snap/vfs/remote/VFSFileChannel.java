@@ -1,7 +1,5 @@
 package org.esa.snap.vfs.remote;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +65,7 @@ public class VFSFileChannel extends FileChannel {
         this.attrs = attrs;
     }
 
-    static HttpURLConnection buildProviderConnectionChannel(VFSPath path, long position, String httpMethod) throws IOException {
+    static HttpURLConnection buildProviderConnectionChannel(VFSPath path, long position) throws IOException {
         URL url = path.buildURL();
         Map<String, String> requestProperties = new LinkedHashMap<>();
         String rangeSpec = "bytes=" + position + "-";
@@ -75,7 +73,7 @@ public class VFSFileChannel extends FileChannel {
         AbstractRemoteFileSystemProvider fileSystemProvider = path.getFileSystem().provider();
         String fileSystemRoot = path.getFileSystem().getRoot().getPath();
         boolean success = true;
-        HttpURLConnection connection = fileSystemProvider.buildConnection(fileSystemRoot, url, httpMethod, requestProperties);
+        HttpURLConnection connection = fileSystemProvider.buildConnection(fileSystemRoot, url, "GET", requestProperties);
         try {
             int responseCode = connection.getResponseCode();
             if (HttpUtils.isValidResponseCode(responseCode)) {
@@ -85,7 +83,7 @@ public class VFSFileChannel extends FileChannel {
                 Logger.getLogger(HttpUtils.class.getName()).warning("HTTP error response:");
                 Logger.getLogger(HttpUtils.class.getName()).warning(() -> {
                     try {
-                        return IOUtils.toString(connection.getErrorStream(), "UTF-8").replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
+                        return HttpUtils.readString(connection.getErrorStream()).replaceAll("<AWSAccessKeyId>.*</AWSAccessKeyId>","<AWSAccessKeyId>***</AWSAccessKeyId>");
                     } catch (IOException ignored) {
                     }
                     return "";
@@ -258,8 +256,7 @@ public class VFSFileChannel extends FileChannel {
         }
         int maximumBufferSize = 1024 * 1024;
         long bytesTransferred = 0;
-        if (target instanceof FileChannel) {
-            FileChannel fileChannel = (FileChannel) target;
+        if (target instanceof FileChannel fileChannel) {
             while (bytesTransferred < count) {
                 bytesTransferred += transferToFileChannel(position + bytesTransferred, maximumBufferSize, fileChannel);
             }
@@ -273,7 +270,7 @@ public class VFSFileChannel extends FileChannel {
     }
 
     private long transferToByteChannel(long position, int maximumBufferSize, WritableByteChannel destinationByteChannel) throws IOException {
-        HttpURLConnection connection = buildProviderConnectionChannel(this.path, position, "GET");
+        HttpURLConnection connection = buildProviderConnectionChannel(this.path, position);
         try {
             try (InputStream inputStream = connection.getInputStream();
                  BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, maximumBufferSize);
@@ -314,7 +311,7 @@ public class VFSFileChannel extends FileChannel {
     }
 
     private long transferToFileChannel(long position, int maximumBufferSize, FileChannel destinationFileChannel) throws IOException {
-        HttpURLConnection connection = buildProviderConnectionChannel(this.path, position, "GET");
+        HttpURLConnection connection = buildProviderConnectionChannel(this.path, position);
         try {
             try (InputStream inputStream = connection.getInputStream();
                  BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, maximumBufferSize);

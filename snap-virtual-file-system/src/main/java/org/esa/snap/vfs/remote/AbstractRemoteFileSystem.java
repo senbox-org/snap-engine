@@ -1,5 +1,7 @@
 package org.esa.snap.vfs.remote;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.DirectoryStream;
@@ -195,13 +197,15 @@ public abstract class AbstractRemoteFileSystem extends FileSystem {
      * @throws InvalidPathException If the path string cannot be converted
      */
     @Override
-    public Path getPath(String first, String... more) {
+    @NotNull
+    public Path getPath(@NotNull String first, String... more) {
         assertOpen();
         String pathName = first;
+        final String pathSeparator = getSeparator();
         if (more.length > 0) {
-            String pathSeparator = getSeparator();
             pathName += pathSeparator + String.join(pathSeparator, more);
         }
+        pathName = pathName.replace("\\", pathSeparator);
         return VFSPath.parsePath(this, pathName);
     }
 

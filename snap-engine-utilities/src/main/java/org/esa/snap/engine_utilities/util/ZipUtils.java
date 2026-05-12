@@ -16,6 +16,7 @@
 package org.esa.snap.engine_utilities.util;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -70,7 +71,8 @@ public class ZipUtils {
 
     public static ZipEntry findInZip(final File file, final String prefix, final String suffix, final String contains) {
         try {
-            final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
+            final File cachedFile = FileUtils.getCachedFile(file);
+            final ZipFile productZip = new ZipFile(cachedFile, ZipFile.OPEN_READ);
 
             final Optional result = productZip.stream()
                     .filter(ze -> !ze.isDirectory())

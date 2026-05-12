@@ -109,8 +109,9 @@ class CacheData3D extends AbstractCacheData {
     @Override
     public int getSizeInBytes() {
         int size = SIZE_WITHOUT_BUFFER;
-        if (data != null) {
-            final ProductData productData = data.getData();
+        final DataBuffer snapshot = data;
+        if (snapshot != null) {
+            final ProductData productData = snapshot.getData();
             size += productData.getNumElems() * productData.getElemSize();
         }
         return size;
@@ -126,29 +127,44 @@ class CacheData3D extends AbstractCacheData {
     }
 
     void copyData(int[] srcOffsets, int[] destOffsets, int[] intersectionShapes, DataBuffer targetData) throws IOException {
-        ensureData();
-
-        copyDataBuffer(srcOffsets, data, destOffsets, intersectionShapes, targetData);
+        final DataBuffer localData = ensureData();
+        copyDataBuffer(srcOffsets, localData, destOffsets, intersectionShapes, targetData);
     }
 
-    private void ensureData() throws IOException {
+    private DataBuffer ensureData() throws IOException {
+        final DataBuffer localData;
+        final DataBuffer loadedData;
+
         synchronized (this) {
             if (data == null) {
                 final String name = context.getVariableDescriptor().name;
                 final int[] offsets = {zMin, yMin, xMin};
                 final Cuboid bounds = getBoundingCuboid();
                 final int[] shapes = {bounds.getDepth(), bounds.getHeight(), bounds.getWidth()};
+
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
-                trackAllocation();
+
+                if (data == null) {
+                    throw new IOException("Cache data provider returned no data for variable '" + name + "'");
+                }
+                loadedData = data;
+            } else {
+                loadedData = null;
             }
+            localData = data;
         }
+
+        if (loadedData != null) {
+            trackAllocation(loadedData);
+        }
+        return localData;
     }
 
-    private void trackAllocation() {
+    private void trackAllocation(DataBuffer localData) {
         final MemoryUsageTracker memoryUsageTracker = context.getMemoryUsageTracker();
         if (memoryUsageTracker != null) {
-            memoryUsageTracker.allocated(data.getSizeInBytes());
+            memoryUsageTracker.allocated(localData.getSizeInBytes());
         }
     }
 }

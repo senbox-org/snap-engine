@@ -1,7 +1,6 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.google.common.io.Files;
 import org.esa.snap.core.dataio.placemark.PlacemarkIO;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -13,6 +12,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.GeoUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -34,6 +34,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -41,9 +42,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -89,7 +90,7 @@ public class ProductSubsetByPolygon {
      * @return the filter used by SNAP File Chooser to show only the supported vector files from which the polygon can be loaded
      */
     public SnapFileFilter getVectorFileFilter() {
-        return new SnapFileFilter("Vector File", new String[]{"." + SupportedVectorFilesFormat.SHAPEFILE, "." + SupportedVectorFilesFormat.KML, "." + SupportedVectorFilesFormat.KMZ, "." + SupportedVectorFilesFormat.GEOJSON, "." + SupportedVectorFilesFormat.TXT, "." + SupportedVectorFilesFormat.WKT, "." + SupportedVectorFilesFormat.PLACEMARK_FILE, "." + SupportedVectorFilesFormat.PNX}, "Vector Files");
+        return new SnapFileFilter("Vector File", new String[]{SupportedVectorFilesFormat.SHAPEFILE, SupportedVectorFilesFormat.KML, SupportedVectorFilesFormat.KMZ, SupportedVectorFilesFormat.GEOJSON, SupportedVectorFilesFormat.TXT, SupportedVectorFilesFormat.WKT, SupportedVectorFilesFormat.PLACEMARK_FILE, SupportedVectorFilesFormat.PNX}, "Vector Files");
     }
 
     /**
@@ -194,7 +195,7 @@ public class ProductSubsetByPolygon {
         }
         final GeoCoding geoCoding = targetProductMetadata.getGeoCoding();
         final Dimension productDimension = new Dimension(targetProductMetadata.getProductWidth(), targetProductMetadata.getProductHeight());
-        return switch (Files.getFileExtension(vectorFile.getName())) {
+        return switch (FileUtils.getExtension(vectorFile.toString())) {
             case SupportedVectorFilesFormat.SHAPEFILE -> readPolygonFromShapeFile(vectorFile, geoCoding, pm);
             case SupportedVectorFilesFormat.KML -> readPolygonFromKMLFile(vectorFile, geoCoding, productDimension, pm);
             case SupportedVectorFilesFormat.KMZ -> readPolygonFromKMZFile(vectorFile, geoCoding, productDimension, pm);
@@ -204,6 +205,7 @@ public class ProductSubsetByPolygon {
                     readPolygonFromWKTFile(vectorFile, geoCoding, productDimension, pm);
             case SupportedVectorFilesFormat.PLACEMARK_FILE, SupportedVectorFilesFormat.PNX ->
                     readPolygonFromPlacemarkFile(vectorFile, geoCoding, productDimension, pm);
+            case null -> null;
             default -> throw new IllegalArgumentException("Unsupported vector file.");
         };
     }
@@ -220,7 +222,8 @@ public class ProductSubsetByPolygon {
     private static Polygon readPolygonFromShapeFile(File file, GeoCoding geoCoding, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading Shapefile", 100);
         try {
-            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(file);
+            final File cachedVectorFile = FeatureUtils.getCachedVectorFile(file);
+            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(cachedVectorFile);
             pm.worked(10);
             final SimpleFeatureCollection simpleFeatureCollection = fileDataStore.getFeatureSource().getFeatures();
             pm.worked(50);
@@ -245,7 +248,7 @@ public class ProductSubsetByPolygon {
 
     private static Polygon readPolygonFromPlacemarkFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading placemark file", 100);
-        try (FileReader reader = new FileReader(file)) {
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
             final List<Placemark> placemarks = PlacemarkIO.readPlacemarks(reader, geoCoding, PinDescriptor.getInstance());
             if (placemarks.size() < 3) {
                 throw new IllegalArgumentException("Cannot create a polygon. 3 or more points are required.");
@@ -272,7 +275,7 @@ public class ProductSubsetByPolygon {
     private static Polygon readPolygonFromWKTFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading WKT file", 100);
         final StringBuilder wktInput = new StringBuilder();
-        try (final BufferedReader reader = Files.newReader(file, Charset.defaultCharset())) {
+        try (final BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
                 wktInput.append(line);
@@ -297,7 +300,7 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static Coordinate[] extractCoordinatesFromWKT(String wkt) throws org.locationtech.jts.io.ParseException {
+    private static Coordinate[] extractCoordinatesFromWKT(String wkt) throws ParseException {
         final Geometry wktInputGeometry = new WKTReader().read(wkt);
         if (wktInputGeometry.getNumPoints() < 3) {
             throw new IllegalArgumentException("Cannot create a polygon. 3 or more points are required.");
@@ -313,7 +316,7 @@ public class ProductSubsetByPolygon {
 
     private static Polygon readPolygonFromKMLFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading KML file", 100);
-        try (InputStream kmlInputStream = java.nio.file.Files.newInputStream(file.toPath())) {
+        try (InputStream kmlInputStream = Files.newInputStream(file.toPath())) {
             return readPolygonFromKMLInputStream(kmlInputStream, geoCoding, productDimension, pm);
         } finally {
             pm.worked(100);
@@ -323,7 +326,8 @@ public class ProductSubsetByPolygon {
 
     private static Polygon readPolygonFromKMZFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading KMZ file", 100);
-        try (ZipFile kmzFile = new ZipFile(file)) {
+        final File cachedKmzFile = FileUtils.getCachedFile(file);
+        try (ZipFile kmzFile = new ZipFile(cachedKmzFile)) {
             try (InputStream kmlInputStream = kmzFile.getInputStream(kmzFile.getEntry("overlay.kml"))) {
                 return readPolygonFromKMLInputStream(kmlInputStream, geoCoding, productDimension, pm);
             }
@@ -337,7 +341,7 @@ public class ProductSubsetByPolygon {
         pm.beginTask("Loading GeoJSON file", 100);
         final GeometryJSON gJson = new GeometryJSON();
         final Polygon vectorFileContent;
-        try (InputStream geoJsonInputStream = java.nio.file.Files.newInputStream(file.toPath())) {
+        try (InputStream geoJsonInputStream = Files.newInputStream(file.toPath())) {
             final MultiPolygon multiPolygon = gJson.readMultiPolygon(geoJsonInputStream);
             pm.worked(40);
             if (multiPolygon.getNumGeometries() > 1) {
@@ -523,13 +527,13 @@ public class ProductSubsetByPolygon {
     }
 
     private static class SupportedVectorFilesFormat {
-        private static final String SHAPEFILE = "shp";
-        private static final String KMZ = "kmz";
-        private static final String KML = "kml";
-        private static final String GEOJSON = "json";
-        private static final String WKT = "wkt";
-        private static final String TXT = "txt";
-        private static final String PLACEMARK_FILE = "placemark";
-        private static final String PNX = "pnx";
+        private static final String SHAPEFILE = ".shp";
+        private static final String KMZ = ".kmz";
+        private static final String KML = ".kml";
+        private static final String GEOJSON = ".json";
+        private static final String WKT = ".wkt";
+        private static final String TXT = ".txt";
+        private static final String PLACEMARK_FILE = ".placemark";
+        private static final String PNX = ".pnx";
     }
 }

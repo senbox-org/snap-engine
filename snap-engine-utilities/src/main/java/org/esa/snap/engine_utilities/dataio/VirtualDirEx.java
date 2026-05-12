@@ -19,6 +19,7 @@ package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.commons.*;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
@@ -77,10 +78,11 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
             if (isPackedFile(path)) {
                 // the path represents an archive
                 String fileName = path.getFileName().toString();
-                if (VirtualDirTgz.isTgz(fileName) || VirtualDirEx.isTar(fileName)) {
+                if (VirtualDirTgz.isTgz(fileName) || VirtualDirEx.isTar(fileName) || VirtualDirEx.isGz(fileName)) {
                     return new VirtualDirTgz(path);
                 } else {
                     // check if the file represents a zip archive
+                    path = FileUtils.getCachedFile(path.toFile()).toPath();
                     boolean zipFile;
                     try {
                         zipFile = FileSystemUtils.isZipFile(path);
@@ -142,6 +144,17 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
     public static boolean isTar(String filename) {
         final String lcName = filename.toLowerCase();
         return lcName.endsWith(".tar");
+    }
+
+    /**
+     * Checks if the file name belongs to a GZ file.
+     *
+     * @param filename The name of the file to be tested.
+     * @return {@code true} if the file is a GZ file, <code>false</code> otherwise
+     */
+    public static boolean isGz(String filename) {
+        final String lcName = filename.toLowerCase();
+        return lcName.endsWith(".gz") && !lcName.endsWith(".tar.gz");
     }
 
     public abstract Path buildPath(String first, String... more);
@@ -210,7 +223,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
      */
     public String[] listAll(Pattern... patterns) {
         File baseFile = getBaseFile();
-        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath())) {
+        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath()) || VirtualDirEx.isGz(baseFile.getPath())) {
             return listAll();
         } else {
             List<String> filesAndFolders;
@@ -299,9 +312,10 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                 if (parentPath.equals(dir)) {
                     return FileVisitResult.CONTINUE;
                 } else {
-                    String relativePath = parentPath.relativize(dir).toString();
-                    if (matchFilters(relativePath, filters)) {
-                        filesAndFolders.add(relativePath);
+                    final Path relativePath = parentPath.relativize(dir);
+                    final String relativeDirName = relativePath.getFileName().toString();
+                    if (matchFilters(relativeDirName, filters) || matchFilters(relativePath.toString(), filters)) {
+                        filesAndFolders.add(relativePath.toString());
                         return FileVisitResult.CONTINUE;
                     }
                     return FileVisitResult.SKIP_SUBTREE;
@@ -310,9 +324,10 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                String relativePath = parentPath.relativize(file).toString();
-                if (matchFilters(relativePath, filters)) {
-                    filesAndFolders.add(relativePath);
+                final Path relativePath = parentPath.relativize(file);
+                final String relativeFileName = relativePath.getFileName().toString();
+                if (matchFilters(relativeFileName, filters) || matchFilters(relativePath.toString(), filters)) {
+                    filesAndFolders.add(relativePath.toString());
                 }
                 return FileVisitResult.CONTINUE;
             }

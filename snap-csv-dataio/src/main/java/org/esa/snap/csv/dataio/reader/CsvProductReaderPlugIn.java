@@ -42,7 +42,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        final File file = new File(input.toString());
+        final File file = getProductFile(input);
         if (!isFileExtensionValid(file)) {
             return DecodeQualification.UNABLE;
         }
@@ -50,7 +50,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
         DecodeQualification decodeQualification = DecodeQualification.SUITABLE;
         CsvSourceParser csvFile = null;
         try {
-            csvFile = CsvFile.createCsvSourceParser(input.toString());
+            csvFile = CsvFile.createCsvSourceParser(file);
             csvFile.parseMetadata();
             csvFile.checkReadingFirstRecord();
         } catch (Exception e) {
