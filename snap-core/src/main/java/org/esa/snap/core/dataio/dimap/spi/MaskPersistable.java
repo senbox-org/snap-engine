@@ -81,8 +81,11 @@ public abstract class MaskPersistable extends RasterDataNodePersistable {
         final Element root = new Element(TAG_MASK);
         root.setAttribute(ATTRIB_TYPE, mask.getImageType().getName());
         root.addContent(createValueAttributeElement(TAG_NAME, mask.getName()));
-        root.addContent(createValueAttributeElement(TAG_MASK_RASTER_WIDTH, String.valueOf(mask.getRasterWidth())));
-        root.addContent(createValueAttributeElement(TAG_MASK_RASTER_HEIGHT, String.valueOf(mask.getRasterHeight())));
+        // todo Removed write of TAG_MASK_RASTER_WIDTH and TAG_MASK_RASTER_HEIGHT but this could be added in preferences ... this is removed because resultant exported mask
+        // was restricted to file dimensions and for the majority of
+        // masking that users will do they wont be masking on X and Y of the raster.
+//        root.addContent(createValueAttributeElement(TAG_MASK_RASTER_WIDTH, String.valueOf(mask.getRasterWidth())));
+//        root.addContent(createValueAttributeElement(TAG_MASK_RASTER_HEIGHT, String.valueOf(mask.getRasterHeight())));
         root.addContent(createValueAttributeElement(TAG_DESCRIPTION, mask.getDescription()));
         addAncillaryElements(root, mask);
         addImageConfigElements(root, mask);

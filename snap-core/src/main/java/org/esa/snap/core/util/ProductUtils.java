@@ -843,6 +843,9 @@ public class ProductUtils {
         final boolean logHist = sourceStx.isLogHistogram();
         final double low  = srcHist.getLowValue(0);
         final double high = srcHist.getHighValue(0);
+        final double medianRaster = sourceStx.getMedianRaster();
+        final boolean includesMedianRaster = sourceStx.includesMedianRaster();
+
 
         WrappedHistogram wrapped = new WrappedHistogram(binCount, low, high, intHist, logHist);
 
@@ -862,6 +865,8 @@ public class ProductUtils {
                 sourceStx.getStandardDeviation(),
                 sourceStx.getCoefficientOfVariation(),
                 sourceStx.getEquivalentNumberOfLooks(),
+                medianRaster,
+                includesMedianRaster,
                 logHist,
                 intHist,
                 wrapped,
