@@ -101,7 +101,18 @@ public class CommonReaders {
             return "ENVISAT";
         } else if ((filename.startsWith("tsx") || filename.startsWith("tdx")) && filename.endsWith("xml")) {
             return "TerraSarX";
+        } else if (filename.endsWith(".attribs.xml")) {
+            if (filename.startsWith("csk_") || filename.startsWith("csg_")) {
+                return "CosmoSkymedGDAL";
+            }
         } else if (filename.endsWith("tif")) {
+            // COSMO-SkyMed CSK/CSG GeoTIFF products carry their metadata in a
+            // sidecar .attribs.xml — they must go through the COSMO-specific
+            // reader, not the generic GeoTIFF reader, to get a populated
+            // metadata root (start/end times, orbit vectors, etc.).
+            if (filename.startsWith("csk_") || filename.startsWith("csg_")) {
+                return "CosmoSkymedGDAL";
+            }
             return "GeoTIFF";
         } else if (filename.endsWith("dbl")) {
             return "SMOS-DBL";
