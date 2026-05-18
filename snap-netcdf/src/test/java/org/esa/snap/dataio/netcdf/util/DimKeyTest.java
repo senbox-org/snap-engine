@@ -3,6 +3,8 @@ package org.esa.snap.dataio.netcdf.util;
 import org.junit.Test;
 import ucar.nc2.Dimension;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 /**
@@ -46,5 +48,43 @@ public class DimKeyTest {
 
         assertSame(xDim, dimKey.getDimensionX());
         assertSame(yDim, dimKey.getDimensionY());
+    }
+
+    @Test
+    public void testFlexL1c2DDimensions() {
+        final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
+        final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
+
+        final DimKey dimKey = new DimKey(yDim, xDim);
+
+        assertSame(xDim, dimKey.getDimensionX());
+        assertSame(yDim, dimKey.getDimensionY());
+        assertEquals(536, dimKey.getDimensionX().getLength());
+        assertEquals(3640, dimKey.getDimensionY().getLength());
+    }
+
+    @Test
+    public void testFlexL1c3DDimensions() {
+        final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
+        final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
+        final Dimension spectralDim = new Dimension("number_of_floris_spectral_channels", 580);
+
+        final DimKey dimKey = new DimKey(yDim, xDim, spectralDim);
+
+        assertEquals(1, dimKey.findXDimensionIndex());
+        assertEquals(0, dimKey.findYDimensionIndex());
+        assertSame(xDim, dimKey.getDimensionX());
+        assertSame(yDim, dimKey.getDimensionY());
+    }
+
+    @Test
+    public void testFindStartIndexOfBandVariables_flex3D() {
+        final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
+        final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
+        final Dimension spectralDim = new Dimension("number_of_floris_spectral_channels", 580);
+
+        int startIndex = DimKey.findStartIndexOfBandVariables(Arrays.asList(yDim, xDim, spectralDim));
+
+        assertEquals(2, startIndex);
     }
 }
