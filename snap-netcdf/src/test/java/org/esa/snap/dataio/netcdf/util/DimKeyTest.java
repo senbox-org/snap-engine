@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.util;
 
+import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 import ucar.nc2.Dimension;
 
@@ -51,6 +52,7 @@ public class DimKeyTest {
     }
 
     @Test
+    @STTM("SNAP-4126")
     public void testFlexL1c2DDimensions() {
         final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
         final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
@@ -64,6 +66,7 @@ public class DimKeyTest {
     }
 
     @Test
+    @STTM("SNAP-4126")
     public void testFlexL1c3DDimensions() {
         final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
         final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
@@ -78,6 +81,7 @@ public class DimKeyTest {
     }
 
     @Test
+    @STTM("SNAP-4126")
     public void testFindStartIndexOfBandVariables_flex3D() {
         final Dimension yDim = new Dimension("number_of_along_track_samples", 3640);
         final Dimension xDim = new Dimension("number_of_across_track_samples", 536);
