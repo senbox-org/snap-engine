@@ -84,19 +84,19 @@ public class SystemUtils {
 
     public static final String REMOTE_VERSION_FILE_URL_PROPERTY_KEY = ".remote.version.url";
     //        public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://step.esa.int/downloads" + "/" + VERSION_FILE_NAME;
-    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/downloads" + "/" + VERSION_FILE_NAME;
+    public static final String REMOTE_VERSION_FILE_URL_PROPERTY_DEFAULT = "https://oceandata.sci.gsfc.nasa.gov/seadas-downloads" + "/" + VERSION_FILE_NAME;
 
     public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_KEY = ".homepage.url";
     //    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int";
-    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov";
+    public static final String APPLICATION_HOMEPAGE_URL_PROPERTY_DEFAULT = "https://www.earthdata.nasa.gov/data/tools/seadas";
 
     public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_KEY = ".report.issue.url";
     //    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://step.esa.int/main/community/issue-reporting";
-    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/help/issue-reporting";
+    public static final String REPORT_ISSUE_PAGE_URL_PROPERTY_DEFAULT = "https://oceancolor.gsfc.nasa.gov/forum/oceancolor/forum_show.pl";
 
     public static final String RELEASE_NOTES_URL_PROPERTY_KEY = ".release.notes.url";
     //    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://senbox.atlassian.net/issues/?filter=-4&jql=project%20%3D%20SNAP%20AND%20fixVersion%20%3D%20";
-    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://seadas.gsfc.nasa.gov/release-notes";
+    public static final String RELEASE_NOTES_URL_PROPERTY_DEFAULT = "https://www.earthdata.nasa.gov/data/tools/seadas/release-notes";
 
     public static final String MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_KEY = ".mainframe.title.include.version";
     //    public static final boolean MAINFRAME_TITLE_INCLUDE_VERSION_PROPERTY_DEFAULT = false;
