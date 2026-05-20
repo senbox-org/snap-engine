@@ -1,8 +1,8 @@
 # SeNtinel Application Platform
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20284489.svg)](https://doi.org/10.5281/zenodo.20284489)
-[![Build Status](https://travis-ci.org/senbox-org/snap-engine.svg?branch=master)](https://travis-ci.org/senbox-org/snap-engine)
-[![Coverity Scan Status](https://scan.coverity.com/projects/7219/badge.svg)](https://scan.coverity.com/projects/senbox-org-snap-engine)
+[![Build Status](https://gitlab.com/senbox-org/snap-engine/badges/master/pipeline.svg)](https://gitlab.com/senbox-org/snap-engine)
+[![Coverity Scan Status](https://gitlab.com/senbox-org/snap-engine/badges/master/coverage.svg)](https://gitlab.com/senbox-org/snap-engine)
 [![Quality Gate Status](https://sonarqube.snap-ci.ovh/api/project_badges/measure?project=snap-engine&metric=alert_status&token=sqb_44a03974834fcdd28a2ecc27d8c906722fbc5148)](https://sonarqube.snap-ci.ovh/dashboard?id=org.esa.snap%3Asnap-engine)
 
 SNAP is the common software platform for the three Sentinel Toolboxes which are developed
