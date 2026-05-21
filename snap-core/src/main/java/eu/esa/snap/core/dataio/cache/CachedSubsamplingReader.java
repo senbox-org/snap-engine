@@ -63,4 +63,35 @@ public class CachedSubsamplingReader {
             }
         }
     }
+
+    public static void readLayer(ProductCache cache,
+                                 String cacheKey,
+                                 int layer,
+                                 int dataType,
+                                 int sourceOffsetX, int sourceOffsetY,
+                                 int sourceWidth, int sourceHeight,
+                                 int sourceStepX, int sourceStepY,
+                                 int destWidth, int destHeight,
+                                 ProductData destBuffer) throws IOException {
+
+        final int[] offsets = {layer, sourceOffsetY, sourceOffsetX};
+
+        if (sourceStepX == 1 && sourceStepY == 1) {
+            final int[] shapes = {1, destHeight, destWidth};
+            cache.read(cacheKey, offsets, shapes, new DataBuffer(destBuffer, offsets, shapes));
+        } else {
+            final int[] shapes = {1, sourceHeight, sourceWidth};
+            final ProductData tempData = ProductData.createInstance(dataType, sourceWidth * sourceHeight);
+
+            cache.read(cacheKey, offsets, shapes, new DataBuffer(tempData, offsets, shapes));
+
+            for (int destY = 0; destY < destHeight; destY++) {
+                for (int destX = 0; destX < destWidth; destX++) {
+                    final int srcIdx = (destY * sourceStepY) * sourceWidth + (destX * sourceStepX);
+                    final int destIdx = destY * destWidth + destX;
+                    destBuffer.setElemDoubleAt(destIdx, tempData.getElemDoubleAt(srcIdx));
+                }
+            }
+        }
+    }
 }
