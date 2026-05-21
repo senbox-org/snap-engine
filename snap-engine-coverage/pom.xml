@@ -316,7 +316,6 @@
                 </outputDirectory>
                 <excludes>
                     <exclude>**/gdal-*.zip</exclude>
-                    <exclude>org/gdal/**</exclude>
                 </excludes>
             </configuration>
         </plugin>
