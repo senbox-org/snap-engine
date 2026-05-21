@@ -1021,6 +1021,7 @@
                             <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
                         <argLine>
+                            ${argLine}
                             -Xmx1024M -Dfile.encoding=UTF-8
                             --add-exports java.desktop/sun.awt=ALL-UNNAMED
                             --add-exports java.desktop/sun.awt.image=ALL-UNNAMED
