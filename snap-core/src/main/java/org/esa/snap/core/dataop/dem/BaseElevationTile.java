@@ -32,6 +32,7 @@ public class BaseElevationTile implements ElevationTile {
     protected final float noDataValue;
     private float[][] objectArray;
     private final boolean useDEMGravitationalModel;
+    private volatile boolean disposed;
 
     public BaseElevationTile(final ElevationModel demModel, final Product product) {
         this.demModel = demModel;
@@ -77,6 +78,12 @@ public class BaseElevationTile implements ElevationTile {
             product.dispose();
             product = null;
         }
+        disposed = true;
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return disposed;
     }
 
     protected void addGravitationalModel(final int index, final float[] line) throws Exception {

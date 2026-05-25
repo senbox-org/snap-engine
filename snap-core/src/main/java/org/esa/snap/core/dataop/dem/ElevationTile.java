@@ -25,4 +25,15 @@ public interface ElevationTile {
     float getSample(int pixelX, int pixelY) throws Exception;
 
     void clearCache();
+
+    /**
+     * Whether {@link #dispose()} has been called on this tile.
+     * Owners (e.g. {@link ElevationFile}) must check this and discard their
+     * cached reference rather than handing out a half-disposed tile, since
+     * LRU eviction in {@link BaseElevationModel#updateCache} disposes tiles
+     * while the {@link ElevationFile} still holds a reference to them.
+     */
+    default boolean isDisposed() {
+        return false;
+    }
 }
