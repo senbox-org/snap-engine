@@ -79,7 +79,12 @@ public abstract class ElevationFile {
     }
 
     public final ElevationTile getTile() throws IOException {
-        if (tile == null) {
+        // A tile may have been disposed by BaseElevationModel#updateCache's LRU
+        // eviction while this ElevationFile still holds a reference to it. Treat
+        // the disposed reference as absent and reload, otherwise getSample() reads
+        // through a Band whose backing Product is gone — yielding garbage.
+        if (tile == null || tile.isDisposed()) {
+            tile = null;
             if (!remoteFileExists && !localFileExists)
                 return null;
             getFile();
