@@ -45,13 +45,14 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
         boolean shifted = isGlobalShifted180(variable);
 
         final boolean is3DVariable = variable.getRank() > 2 && startIndexToCopy >= 0;
-        int layerIndex = is3DVariable ? startIndexToCopy : -1;
-        int baseLayer = imageOrigin.length > 0 ? imageOrigin[0] : 0;
-        int layers = is3DVariable ? dims.get(layerIndex).getLength() : 1;
+        int[] layerIndices = is3DVariable ? createLayerIndices(variable.getRank(), startIndexToCopy) : new int[0];
+        int[] layerShape = is3DVariable ? createLayerShape(dims, layerIndices) : new int[0];
+        int baseLayer = imageOrigin.length > 0 ? flattenLayerIndex(imageOrigin, layerShape) : 0;
+        int layers = is3DVariable ? getNumLayers(layerShape) : 1;
 
         VariableEntry varEntry = new VariableEntry(variable, imageOrigin.clone(), flipY,
                 dataType, arrayConverter, xIndex, yIndex, startIndexToCopy,
-                width, height, shifted, layerIndex, baseLayer);
+                width, height, shifted, layerIndices, layerShape, baseLayer);
 
         entries.put(bandName, varEntry);
 
@@ -208,9 +209,12 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
         shape[entry.yIndex] = height;
         shape[entry.xIndex] = width;
 
-        if (entry.layerIndex >= 0) {
-            origin[entry.layerIndex] = sourceLayer;
-            shape[entry.layerIndex] = layers;
+        if (entry.hasLayers()) {
+            int[] layerOrigin = unflattenLayerIndex(sourceLayer, entry.layerShape);
+            for (int i = 0; i < entry.layerIndices.length; i++) {
+                origin[entry.layerIndices[i]] = layerOrigin[i];
+                shape[entry.layerIndices[i]] = layers;
+            }
         } else {
             System.arraycopy(entry.imageOrigin, 0, origin, entry.startIndexToCopy, entry.imageOrigin.length);
         }
@@ -225,6 +229,57 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
                 throw new IOException("Invalid range reading variable: " + variable.getFullName(), e);
             }
         }
+    }
+
+    private static int[] createLayerIndices(int rank, int startIndexToCopy) {
+        int[] layerIndices = new int[rank - 2];
+        for (int i = 0; i < layerIndices.length; i++) {
+            layerIndices[i] = startIndexToCopy + i;
+        }
+        return layerIndices;
+    }
+
+    private static int[] createLayerShape(List<Dimension> dims, int[] layerIndices) {
+        int[] layerShape = new int[layerIndices.length];
+        for (int i = 0; i < layerIndices.length; i++) {
+            layerShape[i] = dims.get(layerIndices[i]).getLength();
+        }
+        return layerShape;
+    }
+
+    private static int getNumLayers(int[] layerShape) {
+        int layers = 1;
+        for (int size : layerShape) {
+            layers *= size;
+        }
+        return layers;
+    }
+
+    private static int flattenLayerIndex(int[] origin, int[] layerShape) {
+        if (origin.length == 0 || layerShape.length == 0) {
+            return 0;
+        }
+        int layer = 0;
+        int length = Math.min(origin.length, layerShape.length);
+        for (int i = 0; i < length; i++) {
+            layer *= layerShape[i];
+            layer += origin[i];
+        }
+        return layer;
+    }
+
+    private static int[] unflattenLayerIndex(int layer, int[] layerShape) throws IOException {
+        int layerCount = getNumLayers(layerShape);
+        if (layer < 0 || layer >= layerCount) {
+            throw new IOException("Layer index out of range: " + layer + " (layers: " + layerCount + ")");
+        }
+
+        int[] origin = new int[layerShape.length];
+        for (int i = layerShape.length - 1; i >= 0; i--) {
+            origin[i] = layer % layerShape[i];
+            layer /= layerShape[i];
+        }
+        return origin;
     }
 
     private static boolean isGlobalShifted180(Variable variable) {
@@ -259,12 +314,13 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
         final int sourceWidth;
         final int sourceHeight;
         final boolean globallyShifted180;
-        final int layerIndex;
+        final int[] layerIndices;
+        final int[] layerShape;
         final int baseLayer;
 
         VariableEntry(Variable variable, int[] imageOrigin, boolean flipY, int dataType, ArrayConverter arrayConverter,
                       int xIndex, int yIndex, int startIndexToCopy, int sourceWidth, int sourceHeight, boolean globallyShifted180,
-                      int layerIndex, int baseLayer) {
+                      int[] layerIndices, int[] layerShape, int baseLayer) {
             this.variable = variable;
             this.imageOrigin = imageOrigin;
             this.flipY = flipY;
@@ -276,8 +332,13 @@ public class NetcdfCacheDataProvider implements CacheDataProvider {
             this.sourceWidth = sourceWidth;
             this.sourceHeight = sourceHeight;
             this.globallyShifted180 = globallyShifted180;
-            this.layerIndex = layerIndex;
+            this.layerIndices = layerIndices;
+            this.layerShape = layerShape;
             this.baseLayer = baseLayer;
+        }
+
+        boolean hasLayers() {
+            return layerIndices.length > 0;
         }
     }
 }

@@ -22,6 +22,7 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.cache.NetcdfCacheDataProvider;
+import org.esa.snap.dataio.netcdf.cache.NetcdfCacheLayerMapper;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
@@ -138,11 +139,13 @@ public class CfBandPart extends ProfilePartIO {
     }
 
     private static void addBand(ProfileReadContext ctx, Product p, Variable variable, int[] origin,
-                                String bandBasename) {
+                                String bandBasename, int layer) {
         final int rasterDataType = getRasterDataType(variable, dataTypeWorkarounds);
         final NetcdfCacheDataProvider cacheProvider = (NetcdfCacheDataProvider) ctx.getProperty(Constants.CACHE_DATA_PROVIDER_PROPERTY);
         final boolean flipY = Boolean.TRUE.equals(ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME));
         final java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
+        final boolean usesLayerCache = layer >= 0;
+        final int[] cacheOrigin = usesLayerCache ? new int[0] : origin;
 
         if (variable.getDataType() == DataType.LONG) {
             final Band lowerBand = p.addBand(bandBasename + "_lsb", rasterDataType);
@@ -151,7 +154,11 @@ public class CfBandPart extends ProfilePartIO {
                 lowerBand.setDescription(lowerBand.getDescription() + "(least significant bytes)");
             }
 
-            cacheProvider.register(lowerBand.getName(), variable, origin, flipY, lowerBand.getDataType(), ArrayConverter.LSB, tileSize);
+            final String lowerCacheKey = usesLayerCache ? variable.getFullName() + "_lsb" : lowerBand.getName();
+            cacheProvider.register(lowerCacheKey, variable, cacheOrigin, flipY, lowerBand.getDataType(), ArrayConverter.LSB, tileSize);
+            if (usesLayerCache) {
+                NetcdfCacheLayerMapper.mapBand(ctx, lowerBand.getName(), lowerCacheKey, layer);
+            }
             addSampleCodingOrMasksIfApplicable(p, lowerBand, variable, variable.getFullName() + "_lsb", false);
 
             final Band upperBand = p.addBand(bandBasename + "_msb", rasterDataType);
@@ -160,7 +167,11 @@ public class CfBandPart extends ProfilePartIO {
                 upperBand.setDescription(upperBand.getDescription() + "(most significant bytes)");
             }
 
-            cacheProvider.register(upperBand.getName(), variable, origin, flipY, upperBand.getDataType(), ArrayConverter.MSB, tileSize);
+            final String upperCacheKey = usesLayerCache ? variable.getFullName() + "_msb" : upperBand.getName();
+            cacheProvider.register(upperCacheKey, variable, cacheOrigin, flipY, upperBand.getDataType(), ArrayConverter.MSB, tileSize);
+            if (usesLayerCache) {
+                NetcdfCacheLayerMapper.mapBand(ctx, upperBand.getName(), upperCacheKey, layer);
+            }
             addSampleCodingOrMasksIfApplicable(p, upperBand, variable, variable.getFullName() + "_msb", true);
         } else {
             final Band band;
@@ -171,7 +182,11 @@ public class CfBandPart extends ProfilePartIO {
             }
             readCfBandAttributes(variable, band);
 
-            cacheProvider.register(band.getName(), variable, origin, flipY, band.getDataType(), ArrayConverter.IDENTITY, tileSize);
+            final String cacheKey = usesLayerCache ? variable.getFullName() : band.getName();
+            cacheProvider.register(cacheKey, variable, cacheOrigin, flipY, band.getDataType(), ArrayConverter.IDENTITY, tileSize);
+            if (usesLayerCache) {
+                NetcdfCacheLayerMapper.mapBand(ctx, band.getName(), cacheKey, layer);
+            }
             addSampleCodingOrMasksIfApplicable(p, band, variable, variable.getFullName(), false);
         }
     }
@@ -413,8 +428,8 @@ public class CfBandPart extends ProfilePartIO {
         }
 
         if (latitude != null && longitude != null) {
-            addBand(ctx, p, longitude, new int[0], longitude.getShortName());
-            addBand(ctx, p, latitude, new int[0], latitude.getShortName());
+            addBand(ctx, p, longitude, new int[0], longitude.getShortName(), -1);
+            addBand(ctx, p, latitude, new int[0], latitude.getShortName(), -1);
         }
     }
 
@@ -429,7 +444,7 @@ public class CfBandPart extends ProfilePartIO {
             final String bandBasename = variableName;
 
             if (rank == 2) {
-                addBand(ctx, p, variable, new int[]{}, bandBasename);
+                addBand(ctx, p, variable, new int[]{}, bandBasename, -1);
             } else {
                 final int[] sizeArray = new int[rank - 2];
                 final int startIndexToCopy = DimKey.findStartIndexOfBandVariables(dimensions);
@@ -454,11 +469,20 @@ public class CfBandPart extends ProfilePartIO {
                         }
 
                     }
-                    addBand(ctx, p, variable, indexes, bandNameBuilder.toString());
+                    addBand(ctx, p, variable, indexes, bandNameBuilder.toString(), flattenLayerIndex(indexes, sizes));
                 });
             }
         }
         p.setAutoGrouping(getAutoGrouping(ctx));
+    }
+
+    private static int flattenLayerIndex(int[] indexes, int[] sizes) {
+        int layer = 0;
+        for (int i = 0; i < sizes.length; i++) {
+            layer *= sizes[i];
+            layer += indexes[i];
+        }
+        return layer;
     }
 
     @Override
