@@ -167,7 +167,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>edu.ucar.netcdfAll</publicPackage>
+                        <!-- <publicPackage>edu.ucar.netcdfAll</publicPackage> -->
                         <publicPackage>ucar.ma2</publicPackage>
                         <publicPackage>ucar.nc2</publicPackage>
                         <publicPackage>ucar.nc2.constants</publicPackage>
