@@ -232,10 +232,6 @@ public class CfBandPart extends ProfilePartIO {
         return rasterDataType;
     }
 
-    private static boolean isUnsigned(DataNode dataNode) {
-        return ProductData.isUIntType(dataNode.getDataType());
-    }
-
     private static void addSampleCodingOrMasksIfApplicable(Product p, Band band, Variable variable,
                                                            String sampleCodingName,
                                                            boolean msb) {
@@ -396,7 +392,7 @@ public class CfBandPart extends ProfilePartIO {
     }
 
     @Override
-    public void preDecode(ProfileReadContext ctx, Product p) throws IOException {
+    public void preDecode(ProfileReadContext ctx, Product p) {
         final Variable[] rasterVariables = ctx.getRasterDigest().getRasterVariables();
         Variable longitude = null;
         Variable latitude = null;
@@ -421,7 +417,13 @@ public class CfBandPart extends ProfilePartIO {
     @Override
     public void decode(final ProfileReadContext ctx, final Product p) throws IOException {
         for (final Variable variable : ctx.getRasterDigest().getRasterVariables()) {
-            String variableName = variable.getShortName();
+            final String variableName = variable.getShortName();
+            if (isLongitudeVarName(variableName) || isLatitudeVarName(variableName)) {
+                // some of the test products contain lat AND latitude variables. Make sure to keep them both. tb 2026-06-04
+                if (p.containsBand(variableName)) {
+                    continue;
+                }
+            }
 
             UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
