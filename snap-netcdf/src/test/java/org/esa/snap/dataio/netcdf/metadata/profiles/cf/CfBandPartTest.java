@@ -10,11 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.AttributeContainerMutable;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
-
-import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -63,13 +60,13 @@ public class CfBandPartTest {
     }
 
     @Test
-    public void testDecodeSpectralWavelength_noWavelengthAtt() throws IOException {
+    public void testDecodeSpectralWavelength_noWavelengthAtt() {
         assertThat(CfBandPart.getSpectralWavelength(variable), is(0.0f));
     }
 
     @Test
     @STTM("SNAP-3601")
-    public void testDecodeSpectralWavelength_emptyWavelengthAtt() throws IOException {
+    public void testDecodeSpectralWavelength_emptyWavelengthAtt() {
         final Variable mockVar = mock(Variable.class);
 
         final Attribute attribute = mock(Attribute.class);
@@ -81,14 +78,14 @@ public class CfBandPartTest {
     }
 
     @Test
-    public void testDecodeSpectralWavelength_onlyWavelengthAtt() throws IOException {
+    public void testDecodeSpectralWavelength_onlyWavelengthAtt() {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH, 23.4f));
 
         assertThat(CfBandPart.getSpectralWavelength(variable), is(23.4f));
     }
 
     @Test
-    public void testDecodeSpectralWavelength_WavelengthAndUnitAttribute() throws IOException {
+    public void testDecodeSpectralWavelength_WavelengthAndUnitAttribute() {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH, 23.4f));
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH_UNIT, "nm"));
 
@@ -96,7 +93,7 @@ public class CfBandPartTest {
     }
 
     @Test
-    public void testDecodeSpectralWavelength_WavelengthConversionFromMicroMeter() throws IOException {
+    public void testDecodeSpectralWavelength_WavelengthConversionFromMicroMeter() {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH, 0.0234f));
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH_UNIT, "um"));
 
@@ -104,7 +101,7 @@ public class CfBandPartTest {
     }
 
     @Test
-    public void testDecodeSpectralWavelength_WavelengthConversionFromPicoMeter() throws IOException {
+    public void testDecodeSpectralWavelength_WavelengthConversionFromPicoMeter() {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH, 23400.0f));
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH_UNIT, "pm"));
 
@@ -112,7 +109,7 @@ public class CfBandPartTest {
     }
 
     @Test
-    public void testDecodeSpectralWavelength_unconvertableUnit() throws IOException {
+    public void testDecodeSpectralWavelength_unconvertableUnit() {
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH, 23.4f));
         variable.addAttribute(new Attribute(Constants.RADIATION_WAVELENGTH_UNIT, "~m"));
 
@@ -121,7 +118,7 @@ public class CfBandPartTest {
 
     @Test
     @STTM("SNAP-3886")
-    public void testIsLogitudeVariablename() {
+    public void testIsLongitudeVariableName() {
         assertTrue(CfBandPart.isLongitudeVarName("lon_intern"));
         assertTrue(CfBandPart.isLongitudeVarName("longitude"));
         assertTrue(CfBandPart.isLongitudeVarName("lon"));
@@ -132,7 +129,7 @@ public class CfBandPartTest {
 
     @Test
     @STTM("SNAP-3886")
-    public void testIsLatitudeVariablename() {
+    public void testIsLatitudeVariableName() {
         assertTrue(CfBandPart.isLatitudeVarName("lat_intern"));
         assertTrue(CfBandPart.isLatitudeVarName("latitude"));
         assertTrue(CfBandPart.isLatitudeVarName("lat"));
