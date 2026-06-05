@@ -89,6 +89,7 @@ public class Product extends ProductNode implements Closeable {
     public static final String PROPERTY_NAME_SCENE_TIME_CODING = "sceneTimeCoding";
     public static final String PROPERTY_NAME_PRODUCT_TYPE = "productType";
     public static final String PROPERTY_NAME_FILE_LOCATION = "fileLocation";
+    public static final String PROPERTY_NAME_SPECTRAL_AXES = "spectralAxes";
 
     public static final String GEOMETRY_FEATURE_TYPE_NAME = PlainFeatureFactory.DEFAULT_TYPE_NAME;
     /**
@@ -174,6 +175,7 @@ public class Product extends ProductNode implements Closeable {
     private String quicklookBandName;
     private Dimension preferredTileSize;
     private BandGroup autoGrouping;
+    private List<ProductSpectralAxis> spectralAxes;
     private Map<String, WeakReference<MultiLevelImage>> maskCache;
     /**
      * The maximum number of resolution levels common to all band images.
@@ -2490,6 +2492,62 @@ public class Product extends ProductNode implements Closeable {
             this.autoGrouping = autoGrouping;
             fireProductNodeChanged("autoGrouping", old, this.autoGrouping);
         }
+    }
+
+    /**
+     * Gets the product's explicitly configured spectral axes, or a default axis built from all non-flag bands with a
+     * positive spectral wavelength if no axes have been configured.
+     *
+     * @return an immutable list of spectral axes, possibly empty
+     */
+    public List<ProductSpectralAxis> getSpectralAxes() {
+        if (spectralAxes != null) {
+            return spectralAxes;
+        }
+        return createDefaultSpectralAxes();
+    }
+
+    /**
+     * Sets product-specific spectral axes. Passing {@code null} or an empty list clears the explicit axes, so
+     * {@link #getSpectralAxes()} falls back to its default axis computation.
+     *
+     * @param spectralAxes the explicit spectral axes, or {@code null}
+     */
+    public void setSpectralAxes(List<ProductSpectralAxis> spectralAxes) {
+        List<ProductSpectralAxis> old = this.spectralAxes;
+        List<ProductSpectralAxis> newValue;
+        if (spectralAxes == null || spectralAxes.isEmpty()) {
+            newValue = null;
+        } else {
+            newValue = List.copyOf(spectralAxes);
+        }
+        if (!ObjectUtils.equalObjects(old, newValue)) {
+            this.spectralAxes = newValue;
+            fireProductNodeChanged(PROPERTY_NAME_SPECTRAL_AXES, old, this.spectralAxes);
+        }
+    }
+
+    private List<ProductSpectralAxis> createDefaultSpectralAxes() {
+        List<Band> spectralBands = new ArrayList<>();
+        for (Band band : getBands()) {
+            if (band != null && !band.isFlagBand() && band.getSpectralWavelength() > 0.0f) {
+                spectralBands.add(band);
+            }
+        }
+        if (spectralBands.isEmpty()) {
+            return Collections.emptyList();
+        }
+        spectralBands.sort(Comparator.comparingDouble(Band::getSpectralWavelength)
+                .thenComparing(Band::getName, Comparator.nullsLast(String::compareTo)));
+        List<String> bandNames = new ArrayList<>();
+        for (Band band : spectralBands) {
+            if (band.getName() != null) {
+                bandNames.add(band.getName());
+            }
+        }
+        return Collections.singletonList(new ProductSpectralAxis(ProductSpectralAxis.DEFAULT_ID,
+                                                                 ProductSpectralAxis.DEFAULT_NAME,
+                                                                 bandNames));
     }
 
     /**
