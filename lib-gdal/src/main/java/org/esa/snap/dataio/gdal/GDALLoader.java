@@ -30,8 +30,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -94,7 +96,8 @@ public final class GDALLoader {
             try {
                 this.gdalVersion = GDALVersion.getGDALVersion();
                 gdalDirectoryLocker = new DirectoryLocker(this.gdalVersion.getNativeLibrariesFolderPath().getParent());
-                while (!gdalDirectoryLocker.tryLockDirectory());
+                gdalDirectoryLocker.tryLockDirectory(Duration.ofMinutes(1), Duration.ofMillis(250));
+
                 GDALDistributionInstaller.setupDistribution(this.gdalVersion);
                 String libraryRoot = NativeLibraryTools.GDAL_NATIVE_LIBRARIES_ROOT;
                 this.gdalVersionLoader = new NativeLibraryClassLoader(new URL[]{this.gdalVersion.getJNILibraryFilePath().toUri().toURL(), NativeLibraryTools.getLoaderLibraryFilePath(libraryRoot).toUri().toURL()}, this.gdalVersion.getGDALNativeLibraryFilesPath());
@@ -241,25 +244,42 @@ public final class GDALLoader {
     private class DirectoryLocker{
         private static final String LOCK_FILE_NAME = ".lock";
         private final Path lockFilePath;
+        private boolean lockAcquired;
 
-        public DirectoryLocker(Path directoryPath) throws IOException {
+        DirectoryLocker(Path directoryPath) throws IOException {
             // Ensure the directory
             FileIOUtils.ensureExists(directoryPath.getParent());
 
             // Create the lock file within the directory
-            this.lockFilePath = directoryPath.getParent().resolve(directoryPath.getFileName() +  LOCK_FILE_NAME);
+            this.lockFilePath = directoryPath.getParent().resolve(directoryPath.getFileName() + LOCK_FILE_NAME);
         }
 
-        public synchronized boolean tryLockDirectory() throws IOException {
-            if(Files.exists(lockFilePath))
-                return false;
+        void tryLockDirectory(Duration timeout, Duration retryDelay) throws IOException, InterruptedException {
+            final long deadlineNanos = System.nanoTime() + timeout.toNanos();
 
-            return Files.createFile(this.lockFilePath) != null;
+            while (true) {
+                try {
+                    Files.createFile(this.lockFilePath);
+                    this.lockAcquired = true;
+                    return;
+                } catch (FileAlreadyExistsException ignored) {
+                    if (System.nanoTime() >= deadlineNanos) {
+                        throw new IOException("Timed out waiting for GDAL lock file to be released: " + this.lockFilePath);
+                    }
+                    Thread.sleep(retryDelay.toMillis());
+                }
+            }
         }
 
-        public synchronized void unlockDirectory() {
-            if(lockFilePath != null && Files.exists(lockFilePath)) {
-                this.lockFilePath.toFile().delete();
+        public void unlockDirectory() {
+            if (this.lockAcquired) {
+                try {
+                    Files.deleteIfExists(this.lockFilePath);
+                } catch (IOException e) {
+                    logger.log(Level.WARNING, "Failed to delete GDAL lock file: " + this.lockFilePath, e);
+                } finally {
+                    this.lockAcquired = false;
+                }
             }
         }
     }
