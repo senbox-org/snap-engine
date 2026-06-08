@@ -15,3 +15,4 @@ org.esa.snap.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.SNAPTiffDriverProductReaderPlugIn
