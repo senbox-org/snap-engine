@@ -14,7 +14,7 @@ public class GDALDistributionInstallerTest {
 
     private void testInstallBundleDistribution() {
         try {
-            final GDALVersion gdalVersion = GDALVersion.GDAL_372_FULL;
+            final GDALVersion gdalVersion = GDALVersion.GDAL_3121_FULL;
             GDALDistributionInstaller.setupDistribution(gdalVersion);
             assertTrue(Files.exists(AbstractGDALTest.getExpectedNativeLibrariesRootFolderPath()));
             assertTrue(Files.exists(GDALVersionTest.getExpectedGDALVersionLocation(gdalVersion)));

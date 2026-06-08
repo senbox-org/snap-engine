@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public enum GDALVersion {
 
-    GDAL_372_FULL("3.7.2", "3-7-2", true, new String[]{"gdalalljni"});
+    GDAL_3121_FULL("3.12.1", "3-12-1", true, new String[]{"gdalalljni"});
 
     static final String VERSION_NAME = "{version}";
     static final String DIR_NAME = "gdal-" + VERSION_NAME;
@@ -72,7 +72,7 @@ public enum GDALVersion {
      */
     public static GDALVersion getInternalVersion() {
         if (INTERNAL_VERSION == null) {
-            INTERNAL_VERSION = GDAL_372_FULL;
+            INTERNAL_VERSION = GDAL_3121_FULL;
         }
         return INTERNAL_VERSION;
     }
