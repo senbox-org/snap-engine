@@ -1,44 +1,49 @@
-package org.esa.snap.remote.products.repository.download;
+package org.esa.snap.remote.products.repository.cdse;
 
-import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.SensorType;
 import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * The implementation class for a remote repository product.
- *
- * Created by jcoravu on 28/8/2019.
- */
-public class RemoteRepositoryProductImpl implements RepositoryProduct {
+class CdseRepositoryProduct implements RepositoryProduct {
 
     private final String id;
     private final String name;
+    private final String downloadUrl;
     private final RemoteMission remoteMission;
-    private final String downloadURL;
     private final AbstractGeometry2D polygon;
     private final LocalDateTime acquisitionDate;
-
-    private String metadataMission;
-    private List<Attribute> remoteAttributes;
-    private List<Attribute> localAttributes;
     private long approximateSize;
+    private List<Attribute> remoteAttributes = Collections.emptyList();
+    private List<Attribute> localAttributes = Collections.emptyList();
     private BufferedImage quickLookImage;
-    private SensorType sensorType;
-    private DataFormatType dataFormatType;
     private PixelType pixelType;
-    private String downloadQuickLookImageURL;
+    private DataFormatType dataFormatType;
+    private SensorType sensorType;
+    private String metadataMission;
+    private String downloadQuickLookImageUrl;
 
-    RemoteRepositoryProductImpl(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, LocalDateTime acquisitionDate, long approximateSize) {
+    CdseRepositoryProduct(String id, String name, String downloadUrl, RemoteMission remoteMission,
+                          AbstractGeometry2D polygon, LocalDateTime acquisitionDate, long approximateSize) {
         this.id = id;
         this.name = name;
+        this.downloadUrl = downloadUrl;
         this.remoteMission = remoteMission;
-        this.downloadURL = downloadURL;
         this.polygon = polygon;
         this.acquisitionDate = acquisitionDate;
         this.approximateSize = approximateSize;
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -53,17 +58,22 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
 
     @Override
     public List<Attribute> getLocalAttributes() {
-        return this.localAttributes;
+        return localAttributes;
+    }
+
+    @Override
+    public void setLocalAttributes(List<Attribute> localAttributes) {
+        this.localAttributes = localAttributes;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
     public long getApproximateSize() {
-        return this.approximateSize;
+        return approximateSize;
     }
 
     @Override
@@ -73,22 +83,17 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
 
     @Override
     public String getDownloadQuickLookImageURL() {
-        return this.downloadQuickLookImageURL;
+        return downloadQuickLookImageUrl;
     }
 
     @Override
     public String getURL() {
-        return this.downloadURL;
+        return downloadUrl;
     }
 
     @Override
     public LocalDateTime getAcquisitionDate() {
-        return this.acquisitionDate;
-    }
-
-    @Override
-    public BufferedImage getQuickLookImage() {
-        return this.quickLookImage;
+        return acquisitionDate;
     }
 
     @Override
@@ -97,23 +102,28 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
     }
 
     @Override
+    public BufferedImage getQuickLookImage() {
+        return quickLookImage;
+    }
+
+    @Override
     public PixelType getPixelType() {
-        return this.pixelType;
+        return pixelType;
     }
 
     @Override
     public DataFormatType getDataFormatType() {
-        return this.dataFormatType;
+        return dataFormatType;
     }
 
     @Override
     public SensorType getSensorType() {
-        return this.sensorType;
+        return sensorType;
     }
 
     @Override
     public RemoteMission getRemoteMission() {
-        return this.remoteMission;
+        return remoteMission;
     }
 
     @Override
@@ -126,32 +136,23 @@ public class RemoteRepositoryProductImpl implements RepositoryProduct {
         this.metadataMission = metadataMission;
     }
 
-    @Override
-    public void setLocalAttributes(List<Attribute> localAttributes) {
-        this.localAttributes = localAttributes;
-    }
-
-    void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {
-        this.downloadQuickLookImageURL = downloadQuickLookImageURL;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    void setRemoteAttributes(List<Attribute> attributes) {
-        this.remoteAttributes = attributes;
-    }
-
-    void setDataFormatType(DataFormatType dataFormatType) {
-        this.dataFormatType = dataFormatType;
+    void setRemoteAttributes(List<Attribute> remoteAttributes) {
+        this.remoteAttributes = remoteAttributes;
     }
 
     void setPixelType(PixelType pixelType) {
         this.pixelType = pixelType;
     }
 
+    void setDataFormatType(DataFormatType dataFormatType) {
+        this.dataFormatType = dataFormatType;
+    }
+
     void setSensorType(SensorType sensorType) {
         this.sensorType = sensorType;
+    }
+
+    void setDownloadQuickLookImageUrl(String downloadQuickLookImageUrl) {
+        this.downloadQuickLookImageUrl = downloadQuickLookImageUrl;
     }
 }
