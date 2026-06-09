@@ -24,6 +24,8 @@ import java.util.Map;
 public class CdseProductsRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     public static final String REPOSITORY_NAME = "Copernicus DataSpace";
+    private static final String SENTINEL_1 = "Sentinel1";
+    private static final String SENTINEL_2 = "Sentinel2";
     private static final String SENTINEL_3 = "Sentinel3";
     private static final String DOWNLOAD_PRODUCTS_URL = "https://download.dataspace.copernicus.eu/odata/v1/Products";
     private static final CdseProductsRepositoryProvider INSTANCE = new CdseProductsRepositoryProvider();
@@ -63,14 +65,55 @@ public class CdseProductsRepositoryProvider implements RemoteProductsRepositoryP
 
     @Override
     public String[] getAvailableMissions() {
-        return new String[]{SENTINEL_3};
+        return new String[]{SENTINEL_1, SENTINEL_2, SENTINEL_3};
     }
 
     @Override
     public List<RepositoryQueryParameter> getMissionParameters(String mission) {
-        if (!SENTINEL_3.equals(mission)) {
-            return Collections.emptyList();
+        if (SENTINEL_1.equals(mission)) {
+            return sentinel1Parameters();
         }
+        if (SENTINEL_2.equals(mission)) {
+            return sentinel2Parameters();
+        }
+        if (SENTINEL_3.equals(mission)) {
+            return sentinel3Parameters();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<RepositoryQueryParameter> sentinel1Parameters() {
+        return List.of(
+                new RepositoryQueryParameter("platform", String.class, "Platform", null, false, new Object[]{"S1A", "S1B", "S1C"}),
+                new RepositoryQueryParameter("operationalMode", String.class, "Sensor Mode", "IW", false, new Object[]{"IW", "EW", "SM", "WV"}),
+                new RepositoryQueryParameter("productType", String.class, "Product Type", "IW_GRDH_1S", false, new Object[]{
+                        "IW_GRDH_1S", "IW_GRDM_1S", "IW_SLC__1S", "IW_OCN__2S",
+                        "EW_GRDH_1S", "EW_GRDM_1S", "EW_SLC__1S", "EW_OCN__2S",
+                        "SM_GRDH_1S", "SM_GRDM_1S", "SM_SLC__1S",
+                        "WV_SLC__1S", "WV_OCN__2S"
+                }),
+                new RepositoryQueryParameter("polarisationChannels", String.class, "Polarisation", null, false, new Object[]{"VV", "HH", "VV VH", "HH HV"}),
+                new RepositoryQueryParameter(RepositoryQueryParameter.START_DATE, LocalDateTime.class, "Start Date", null, false, null),
+                new RepositoryQueryParameter(RepositoryQueryParameter.END_DATE, LocalDateTime.class, "End Date", null, false, null),
+                new RepositoryQueryParameter(RepositoryQueryParameter.FOOTPRINT, Rectangle2D.class, "Area of Interest", null, false, null),
+                new RepositoryQueryParameter("productIdentifier", String.class, "Product Name", null, false, null)
+        );
+    }
+
+    private List<RepositoryQueryParameter> sentinel2Parameters() {
+        return List.of(
+                new RepositoryQueryParameter("platform", String.class, "Platform", null, false, new Object[]{"S2A", "S2B", "S2C"}),
+                new RepositoryQueryParameter("productType", String.class, "Product Type", "S2MSI2A", false, new Object[]{"S2MSI1C", "S2MSI2A", "S2MSI2B"}),
+                new RepositoryQueryParameter("processingLevel", String.class, "Processing Level", null, false, new Object[]{"Level-1C", "Level-2A"}),
+                new RepositoryQueryParameter("cloudCover", Double.class, "Max Cloud Cover (%)", null, false, null),
+                new RepositoryQueryParameter(RepositoryQueryParameter.START_DATE, LocalDateTime.class, "Start Date", null, false, null),
+                new RepositoryQueryParameter(RepositoryQueryParameter.END_DATE, LocalDateTime.class, "End Date", null, false, null),
+                new RepositoryQueryParameter(RepositoryQueryParameter.FOOTPRINT, Rectangle2D.class, "Area of Interest", null, false, null),
+                new RepositoryQueryParameter("productIdentifier", String.class, "Product Name", null, false, null)
+        );
+    }
+
+    private List<RepositoryQueryParameter> sentinel3Parameters() {
         return List.of(
                 new RepositoryQueryParameter("platformName", String.class, "Platform", "SENTINEL-3", true, new Object[]{"SENTINEL-3"}),
                 new RepositoryQueryParameter("platformSerialIdentifier", String.class, "Platform Identifier S3(A/B)", null, false, new Object[]{"A", "B"}),

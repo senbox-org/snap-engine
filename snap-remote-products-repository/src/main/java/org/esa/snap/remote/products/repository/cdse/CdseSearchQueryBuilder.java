@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,48 +35,61 @@ class CdseSearchQueryBuilder {
     }
 
     static String buildFilter(String mission, Map<String, Object> parameters) {
-        if (!"Sentinel3".equals(mission)) {
-            throw new IllegalArgumentException("CDSE catalogue currently supports mission Sentinel3 only.");
-        }
+        Map<String, Object> safeParameters = parameters == null ? Collections.emptyMap() : parameters;
         List<String> clauses = new ArrayList<>();
-        clauses.add("Collection/Name eq 'SENTINEL-3'");
+        clauses.add("Collection/Name eq '" + collectionName(mission) + "'");
 
-        String instrument = stringValue(parameters.get("instrument"));
+        String instrument = stringValue(safeParameters.get("instrument"));
         if (instrument != null) {
             clauses.add(stringAttributeEquals("instrumentShortName", instrument));
         }
 
-        String productType = stringValue(parameters.get("productType"));
+        String productType = stringValue(safeParameters.get("productType"));
         if (productType != null) {
-            clauses.add("contains(Name,'" + escapeLiteral(productType) + "')");
+            clauses.add(stringAttributeEquals("productType", productType));
         }
 
-        String processingLevel = stringValue(parameters.get("processingLevel"));
+        String processingLevel = stringValue(safeParameters.get("processingLevel"));
         if (processingLevel != null) {
             clauses.add(stringAttributeEquals("processingLevel", processingLevel));
         }
 
-        String platform = platform(parameters);
+        String operationalMode = firstStringValue(safeParameters, "operationalMode", "sensorMode");
+        if (operationalMode != null) {
+            clauses.add(stringAttributeEquals("operationalMode", operationalMode));
+        }
+
+        String polarisationChannels = stringValue(safeParameters.get("polarisationChannels"));
+        if (polarisationChannels != null) {
+            clauses.add(stringAttributeEquals("polarisationChannels", polarisationChannels));
+        }
+
+        Double cloudCover = doubleValue(safeParameters.get("cloudCover"));
+        if (cloudCover != null) {
+            clauses.add(doubleAttributeLessOrEqual("cloudCover", cloudCover));
+        }
+
+        String platform = platform(mission, safeParameters);
         if (platform != null) {
             clauses.add("contains(Name,'" + escapeLiteral(platform) + "')");
         }
 
-        String productIdentifier = stringValue(parameters.get("productIdentifier"));
+        String productIdentifier = stringValue(safeParameters.get("productIdentifier"));
         if (productIdentifier != null) {
             clauses.add("contains(Name,'" + escapeLiteral(productIdentifier) + "')");
         }
 
-        Object startDate = parameters.get(RepositoryQueryParameter.START_DATE);
+        Object startDate = safeParameters.get(RepositoryQueryParameter.START_DATE);
         if (startDate != null) {
             clauses.add("ContentDate/Start ge " + formatDate(startDate));
         }
 
-        Object endDate = parameters.get(RepositoryQueryParameter.END_DATE);
+        Object endDate = safeParameters.get(RepositoryQueryParameter.END_DATE);
         if (endDate != null) {
             clauses.add("ContentDate/End le " + formatDate(endDate));
         }
 
-        Object footprint = parameters.get(RepositoryQueryParameter.FOOTPRINT);
+        Object footprint = safeParameters.get(RepositoryQueryParameter.FOOTPRINT);
         if (footprint instanceof Rectangle2D) {
             clauses.add("OData.CSC.Intersects(area=geography'SRID=4326;" + rectangleToWkt((Rectangle2D) footprint) + "')");
         }
@@ -83,19 +97,63 @@ class CdseSearchQueryBuilder {
         return String.join(" and ", clauses);
     }
 
+    private static String collectionName(String mission) {
+        if ("Sentinel1".equals(mission)) {
+            return "SENTINEL-1";
+        }
+        if ("Sentinel2".equals(mission)) {
+            return "SENTINEL-2";
+        }
+        if ("Sentinel3".equals(mission)) {
+            return "SENTINEL-3";
+        }
+        throw new IllegalArgumentException("CDSE catalogue currently supports missions Sentinel1, Sentinel2 and Sentinel3 only.");
+    }
+
     private static String stringAttributeEquals(String name, String value) {
         return "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq '" + name
                 + "' and att/OData.CSC.StringAttribute/Value eq '" + escapeLiteral(value) + "')";
     }
 
-    private static String platform(Map<String, Object> parameters) {
+    private static String doubleAttributeLessOrEqual(String name, double value) {
+        return "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq '" + name
+                + "' and att/OData.CSC.DoubleAttribute/Value le " + value + ")";
+    }
+
+    private static String platform(String mission, Map<String, Object> parameters) {
         String platform = stringValue(parameters.get("platform"));
         if (platform != null) {
+            if (platform.length() == 1) {
+                return platformPrefix(mission) + platform.toUpperCase();
+            }
             return platform;
         }
         String platformSerialIdentifier = stringValue(parameters.get("platformSerialIdentifier"));
         if (platformSerialIdentifier != null && platformSerialIdentifier.length() == 1) {
-            return "S3" + platformSerialIdentifier.toUpperCase();
+            return platformPrefix(mission) + platformSerialIdentifier.toUpperCase();
+        }
+        return null;
+    }
+
+    private static String platformPrefix(String mission) {
+        if ("Sentinel1".equals(mission)) {
+            return "S1";
+        }
+        if ("Sentinel2".equals(mission)) {
+            return "S2";
+        }
+        if ("Sentinel3".equals(mission)) {
+            return "S3";
+        }
+        return "";
+    }
+
+    private static String firstStringValue(Map<String, Object> parameters, String... names) {
+        for (String name : names) {
+            String value = stringValue(parameters.get(name));
+            if (value != null) {
+                return value;
+            }
         }
         return null;
     }
@@ -106,6 +164,17 @@ class CdseSearchQueryBuilder {
         }
         String stringValue = value.toString().trim();
         return stringValue.isEmpty() ? null : stringValue;
+    }
+
+    private static Double doubleValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        String text = stringValue(value);
+        return text == null ? null : Double.parseDouble(text);
     }
 
     private static String formatDate(Object value) {

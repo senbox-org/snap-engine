@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class RemoteProductsRepositoryProviderApiTest {
@@ -24,7 +25,7 @@ public class RemoteProductsRepositoryProviderApiTest {
         RemoteProductsRepositoryProvider provider = RemoteProductsRepositoryProvider.getRemoteProductsRepositoryProvider(CdseProductsRepositoryProvider.REPOSITORY_NAME);
 
         assertEquals(CdseProductsRepositoryProvider.REPOSITORY_NAME, provider.getRepositoryName());
-        assertEquals("Sentinel3", provider.getAvailableMissions()[0]);
+        assertArrayEquals(new String[]{"Sentinel1", "Sentinel2", "Sentinel3"}, provider.getAvailableMissions());
     }
 
     @Test
