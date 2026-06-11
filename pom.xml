@@ -38,7 +38,7 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <snap.version>${project.version}</snap.version>
-        <snap-help-system.version>1.0.2</snap-help-system.version>
+        <snap-help-system.version>1.0.3</snap-help-system.version>
         <javahelp.version>2.0.05</javahelp.version>
 
         <apache.httpclient.version>4.5.14</apache.httpclient.version>
