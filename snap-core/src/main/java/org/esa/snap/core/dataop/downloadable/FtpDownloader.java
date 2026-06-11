@@ -15,11 +15,13 @@
  */
 package org.esa.snap.core.dataop.downloadable;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.esa.snap.core.datamodel.ProgressListenerList;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.SystemUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Content;
@@ -31,6 +33,7 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 
 public final class FtpDownloader {
@@ -92,10 +95,17 @@ public final class FtpDownloader {
     }
 
     public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws Exception {
+        return retrieveFile(remotePath, localFile, fileSize, ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize,
+                                 ProgressMonitor progressMonitor) throws Exception {
         BufferedOutputStream fos = null;
         InputStream fis = null;
+        boolean canceled = false;
         try {
             SystemUtils.LOG.info("ftp retrieving " + remotePath);
+            ProgressMonitorContext.checkCanceled(progressMonitor);
 
             fis = ftpClient.retrieveFileStream(remotePath);
             if (fis == null) {
@@ -121,7 +131,9 @@ public final class FtpDownloader {
             final byte[] buf = new byte[size];
             int n;
             int total = 0;
+            ProgressMonitorContext.checkCanceled(progressMonitor);
             while ((n = fis.read(buf, 0, size)) > -1) {
+                ProgressMonitorContext.checkCanceled(progressMonitor);
                 fos.write(buf, 0, n);
                 if (fileSize != null) {
                     total += n;
@@ -137,6 +149,10 @@ public final class FtpDownloader {
             SystemUtils.LOG.severe(e.getMessage());
             connect();
             throw new SocketException(e.getMessage() + "\nPlease verify that FTP is not blocked by your firewall.");
+        } catch (CancellationException e) {
+            SystemUtils.LOG.info(e.getMessage());
+            canceled = true;
+            throw e;
         } catch (Exception e) {
             SystemUtils.LOG.severe(e.getMessage());
             connect();
@@ -151,6 +167,9 @@ public final class FtpDownloader {
                 }
             } catch (IOException e) {
                 SystemUtils.LOG.severe("Unable to close input stream " + e.getMessage());
+            }
+            if (canceled) {
+                localFile.delete();
             }
         }
     }

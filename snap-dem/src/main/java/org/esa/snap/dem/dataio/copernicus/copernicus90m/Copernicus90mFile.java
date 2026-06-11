@@ -1,7 +1,7 @@
 package org.esa.snap.dem.dataio.copernicus.copernicus90m;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.multilevel.MultiLevelImage;
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -13,13 +13,14 @@ import java.awt.image.Raster;
 import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.gpf.common.SubsetOp;
-import org.esa.snap.core.gpf.common.resample.ResamplingOp;
 import org.esa.snap.core.gpf.internal.TileImpl;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+
+import java.util.concurrent.CancellationException;
 
 public class Copernicus90mFile extends ElevationFile {
 
@@ -82,6 +83,11 @@ public class Copernicus90mFile extends ElevationFile {
 
     @Override
     protected Boolean getRemoteFile() {
+        return getRemoteFile(ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    @Override
+    protected Boolean getRemoteFile(ProgressMonitor progressMonitor) {
         try {
             String [] fileNameSplit = localFile.getName().split("_");
             System.out.println(localFile.getName());
@@ -98,7 +104,9 @@ public class Copernicus90mFile extends ElevationFile {
 
             CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParentFile());
 
-            return downloader.downloadTiles(lat, lon, 90);
+            return downloader.downloadTiles(lat, lon, 90, progressMonitor);
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             //e.printStackTrace();
             remoteFileExists = false;

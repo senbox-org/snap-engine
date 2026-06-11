@@ -52,6 +52,7 @@ import java.util.ServiceLoader;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -666,6 +667,13 @@ public class SystemUtils {
         @Override
         public boolean errorOccurred(String message, Throwable thrown, Object where,
                                      boolean isRetryable) throws RuntimeException {
+            if (isCancellation(thrown)) {
+                if (thrown instanceof RuntimeException && !(where instanceof OperationRegistry)) {
+                    throw (RuntimeException) thrown;
+                }
+                return false;
+            }
+
             // This is the same code as in the PR https://github.com/geotools/geotools/pull/2462
             String logMsg = String.format("JAI error occurred: '%s' at %s", message, where);
             if (message.contains("Continuing in pure Java mode")) {
@@ -679,6 +687,16 @@ public class SystemUtils {
                     return false;
                 }
             }
+        }
+
+        private static boolean isCancellation(Throwable throwable) {
+            while (throwable != null) {
+                if (throwable instanceof CancellationException) {
+                    return true;
+                }
+                throwable = throwable.getCause();
+            }
+            return false;
         }
     }
 

@@ -23,6 +23,7 @@ import org.esa.snap.engine_utilities.util.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
 
 /**
  * Holds information about a dem file.
@@ -60,9 +61,13 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
                 found = getRemoteHttpFile(remoteHTTP1);
             }
             return found;
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             try {
                 return getRemoteHttpFile(remoteHTTP1);
+            } catch (CancellationException e2) {
+                throw e2;
             } catch (Exception e2) {
                 return false;
             }

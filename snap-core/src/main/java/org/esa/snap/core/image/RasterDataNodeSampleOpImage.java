@@ -2,6 +2,7 @@ package org.esa.snap.core.image;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -29,8 +30,12 @@ public abstract class RasterDataNodeSampleOpImage extends RasterDataNodeOpImage 
         final int[] sourceYs = getSourceCoords(sourceHeight, targetHeight);
         int elemIndex = 0;
         for (int j = 0; j < targetHeight; j++) {
+            ProgressMonitorContext.checkCanceled();
             final int sourceY = sourceY0 + sourceYs[j];
             for (int i = 0; i < targetWidth; i++) {
+                if ((i & 63) == 0) {
+                    ProgressMonitorContext.checkCanceled();
+                }
                 productData.setElemDoubleAt(elemIndex, computeSample(sourceX0 + sourceXs[i], sourceY));
                 elemIndex++;
             }

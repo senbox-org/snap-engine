@@ -20,11 +20,13 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.CachingObjectArray;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 class FileElevationTile {
 
@@ -48,7 +50,10 @@ class FileElevationTile {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final float[] line;
         try {
+            ProgressMonitorContext.checkCanceled();
             line = (float[]) linesCache.getObject(pixelY);
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
@@ -74,7 +79,9 @@ class FileElevationTile {
         return new CachingObjectArray.ObjectFactory() {
             public Object createObject(final int pixelY) throws Exception {
                 updateCache(pixelY);
-                float[] line = band.readPixels(0, pixelY, width, 1, new float[width], ProgressMonitor.NULL);
+                ProgressMonitorContext.checkCanceled();
+                float[] line = band.readPixels(0, pixelY, width, 1, new float[width],
+                                               ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL));
                 if (useDEMGravitationalModel) {
                     addGravitationalModel(pixelY, line);
                 }

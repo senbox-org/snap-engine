@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dem.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -25,12 +26,14 @@ import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.gpf.OperatorException;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 /**
  * DEM Handling
@@ -148,6 +151,20 @@ public class DEMFactory {
                                       final Product sourceProduct,
                                       final boolean nodataValueAtSea,
                                       final double[][] localDEM) throws Exception {
+        return getLocalDEM(dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, tileWidth, tileHeight,
+                           sourceProduct, nodataValueAtSea, localDEM,
+                           ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    public static boolean getLocalDEM(final ElevationModel dem, final double demNoDataValue,
+                                      final String demResamplingMethod,
+                                      final TileGeoreferencing tileGeoRef,
+                                      final int x0, final int y0,
+                                      final int tileWidth, final int tileHeight,
+                                      final Product sourceProduct,
+                                      final boolean nodataValueAtSea,
+                                      final double[][] localDEM,
+                                      ProgressMonitor progressMonitor) throws Exception {
 
         if (demResamplingMethod != null && demResamplingMethod.equals(DELAUNAY_INTERPOLATION)) {
             //return getLocalDEMUsingDelaunayInterpolation(
@@ -161,13 +178,17 @@ public class DEMFactory {
         final int maxX = x0 + tileWidth + 1;
         final GeoPos geoPos = new GeoPos();
 
-        try {
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
             Double alt;
             boolean valid = false;
             final double[][] v = new double[4][4];
             for (int y = y0 - 1; y < maxY; y++) {
+                ProgressMonitorContext.checkCanceled(progressMonitor);
                 final int yy = y - y0 + 1;
                 for (int x = x0 - 1; x < maxX; x++) {
+                    if (((x - x0 + 1) & 63) == 0) {
+                        ProgressMonitorContext.checkCanceled(progressMonitor);
+                    }
                     tileGeoRef.getGeoPos(x, y, geoPos);
                 /*if(!geoPos.isValid()) {
                     localDEM[yy][x - x0 + 1] = demNoDataValue;
@@ -193,6 +214,8 @@ public class DEMFactory {
                 }
             }
             return valid;
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             return false;
         }
