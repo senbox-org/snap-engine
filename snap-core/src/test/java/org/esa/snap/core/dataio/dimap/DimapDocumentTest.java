@@ -185,7 +185,7 @@ public class DimapDocumentTest {
 
     private Product createProductFromXML(String code) throws IOException {
         final Document dom = createDom(code);
-        Product product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null);
+        Product product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, (Dimension) null);
         GeoCoding[] geocodings = DimapProductHelpers.createGeoCoding(dom, product);
         if (geocodings != null && geocodings.length > 0) {
             final GeoCoding geoCoding = geocodings[0];

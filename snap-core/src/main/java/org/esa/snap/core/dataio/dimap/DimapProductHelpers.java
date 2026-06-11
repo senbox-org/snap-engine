@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
@@ -91,16 +92,20 @@ public class DimapProductHelpers {
     private static final JdomLanguageSupport languageSupport = new JdomLanguageSupport();
 
     /**
-     * Creates a in-memory data product represenation from the given DOM (BEAM-DIMAP format).
+     * Creates a in-memory data product representation from the given DOM (BEAM-DIMAP format).
      *
      * @param dom                the DOM in BEAM-DIMAP format
      * @param defaultProductType the product type
      * @param regionRasterSize   the region size to be displayed
      *
-     * @return an in-memory data product represenation
+     * @return an in-memory data product representation
      */
     public static Product createProduct(Document dom, String defaultProductType, Dimension regionRasterSize) {
         return new ProductBuilder(dom).createProduct(defaultProductType, regionRasterSize);
+    }
+
+    public static Product createProduct(Document dom, String defaultProductType, ProductSubsetDef subsetDef) {
+        return new ProductBuilder(dom).withSubset(subsetDef).createProduct(defaultProductType, null);
     }
 
     /**
@@ -1116,16 +1121,23 @@ public class DimapProductHelpers {
 
     private static class ProductBuilder {
 
-        private final Document _dom;
+        private final Document dom;
         private HashMap<RasterDataNode, List<String>> ancillaryVariables;
         private Product product;
+        private ProductSubsetDef subsetDef;
 
         private ProductBuilder(Document dom) {
-            _dom = dom;
+            this.dom = dom;
+            subsetDef = null;
+        }
+
+        private ProductBuilder withSubset(ProductSubsetDef subsetDef) {
+            this.subsetDef = subsetDef;
+            return this;
         }
 
         private Document getDom() {
-            return _dom;
+            return dom;
         }
 
         private Product createProduct(String defaultProductType, Dimension regionRasterSize) {
@@ -1167,6 +1179,10 @@ public class DimapProductHelpers {
         }
 
         private void addAnnotationDataset() {
+            if (subsetDef != null && subsetDef.isIgnoreMetadata()) {
+                return;
+            }
+
             final MetadataElement mdElem = product.getMetadataRoot();
             if (mdElem == null) {
                 return;
