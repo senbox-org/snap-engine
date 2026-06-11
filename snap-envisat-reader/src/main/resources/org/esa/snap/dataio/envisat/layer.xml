@@ -44,11 +44,14 @@
             <folder name="Import">
                 <folder name="Optical Sensors">
                     <folder name="Envisat">
+                        <attr name="position" intvalue="7"/>
                         <file name="org-esa-snap-dataio-envisat-ImportEnvisatProduct.shadow">
+                            <attr name="position" intvalue="3"/>
                             <attr name="originalFile"
                                   stringvalue="Actions/Readers/org-esa-snap-dataio-envisat-ImportEnvisatProduct.instance"/>
                         </file>
                         <file name="org-esa-snap-dataio-envisat-ImportERSProduct.shadow">
+                            <attr name="position" intvalue="4"/>
                             <attr name="originalFile"
                                   stringvalue="Actions/Readers/org-esa-snap-dataio-envisat-ImportERSProduct.instance"/>
                         </file>
