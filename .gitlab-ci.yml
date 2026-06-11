@@ -59,7 +59,7 @@ mvn-build:
   artifacts:
     paths:
       - "${MAVEN_PROJECT_DIR}/**/target/*.jar"
-      - "${MAVEN_PROJECT_DIR}/**/target/classes"
+      #- "${MAVEN_PROJECT_DIR}/**/target/classes"
       - "${MAVEN_PROJECT_DIR}/**/target/*.nbm"
       #- "${MAVEN_PROJECT_DIR}/**/target/site/jacoco/jacoco.csv"
       - "${MAVEN_PROJECT_DIR}/**/target/site"
