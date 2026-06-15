@@ -30,6 +30,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.dataio.DEMFactory;
 import org.esa.snap.dem.dataio.FileElevationModel;
@@ -41,6 +42,7 @@ import org.esa.snap.engine_utilities.gpf.TileIndex;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
 
 /**
  * CreateElevationBandOp adds an elevation band to a product
@@ -169,7 +171,7 @@ public class AddElevationOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         pm.beginTask("Writing tile", 1);
-        try {
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(pm)) {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final int x0 = targetRectangle.x;
             final int y0 = targetRectangle.y;
@@ -182,7 +184,7 @@ public class AddElevationOp extends Operator {
 
             final boolean valid = DEMFactory.getLocalDEM(
                     dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, w, h,
-                    sourceProduct, true, localDEM);
+                    sourceProduct, true, localDEM, pm);
 
             final TileIndex tgtIndex = new TileIndex(targetTile);
             final int maxX = x0 + w;
@@ -190,6 +192,7 @@ public class AddElevationOp extends Operator {
 
             if (valid) {
                 for (int y = y0; y < maxY; ++y) {
+                    ProgressMonitorContext.checkCanceled(pm);
                     final int yy = y - y0 + 1;
                     tgtIndex.calculateStride(y);
                     for (int x = x0; x < maxX; ++x) {
@@ -199,6 +202,7 @@ public class AddElevationOp extends Operator {
                 }
             } else {
                 for (int y = y0; y < maxY; ++y) {
+                    ProgressMonitorContext.checkCanceled(pm);
                     tgtIndex.calculateStride(y);
                     for (int x = x0; x < maxX; ++x) {
                         tgtData.setElemDoubleAt(tgtIndex.getIndex(x), demNoDataValue);
@@ -206,6 +210,8 @@ public class AddElevationOp extends Operator {
                 }
             }
             pm.worked(1);
+        } catch (CancellationException e) {
+            throw e;
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {

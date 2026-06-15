@@ -20,6 +20,7 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public double getElevation(final GeoPos geoPos) throws Exception {
+        ProgressMonitorContext.checkCanceled();
         if (geoPos.lon > 180) {
             geoPos.lon -= 360;
         }
@@ -143,9 +145,10 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public final double getSample(final double pixelX, final double pixelY) throws Exception {
+        ProgressMonitorContext.checkCanceled();
         final int tileXIndex = (int) (pixelX * NUM_PIXELS_PER_TILE_X_inv);
         final int tileYIndex = (int) (pixelY * NUM_PIXELS_PER_TILE_Y_inv);
-        final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
+        final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile(ProgressMonitorContext.getCurrentProgressMonitor());
         if (tile == null) {
             return Double.NaN;
         }
@@ -159,14 +162,18 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         boolean allValid = true;
         int i = 0;
         for (int y : yArray) {
+            ProgressMonitorContext.checkCanceled();
             final int tileYIndex = (int) (y * NUM_PIXELS_PER_TILE_Y_inv);
             final int pixelY = y - tileYIndex * NUM_PIXELS_PER_TILE_Y;
 
             int j = 0;
             for (int x : xArray) {
+                if ((j & 63) == 0) {
+                    ProgressMonitorContext.checkCanceled();
+                }
                 final int tileXIndex = (int) (x * NUM_PIXELS_PER_TILE_X_inv);
 
-                final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
+                final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile(ProgressMonitorContext.getCurrentProgressMonitor());
                 if (tile == null) {
                     samples[i][j] = Double.NaN;
                     allValid = false;

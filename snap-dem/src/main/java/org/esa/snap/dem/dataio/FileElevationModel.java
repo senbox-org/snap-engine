@@ -23,11 +23,13 @@ import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.eo.Constants;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
 
 public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
@@ -89,6 +91,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
     public synchronized double getElevation(final GeoPos geoPos) throws Exception {
         try {
+            ProgressMonitorContext.checkCanceled();
             final PixelPos pix = tileGeocoding.getPixelPos(geoPos, null);
             if (!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x >= RASTER_WIDTH || pix.y >= RASTER_HEIGHT)
                 return noDataValue;
@@ -101,6 +104,8 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
                 return noDataValue;
             }
             return elevation;
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             throw new Exception("Problem reading DEM: " + e.getMessage());
         }
@@ -116,6 +121,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
     public double getSample(double pixelX, double pixelY) throws IOException {
 
+        ProgressMonitorContext.checkCanceled();
         final double sample = fileElevationTile.getSample((int) pixelX, (int) pixelY);
         if (noDataValue.equals(sample)) {
             return Double.NaN;
@@ -134,7 +140,11 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
     public boolean getSamples(final int[] x, final int[] y, final double[][] samples) throws IOException {
         boolean allValid = true;
         for (int i = 0; i < y.length; i++) {
+            ProgressMonitorContext.checkCanceled();
             for (int j = 0; j < x.length; j++) {
+                if ((j & 63) == 0) {
+                    ProgressMonitorContext.checkCanceled();
+                }
                 samples[i][j] = fileElevationTile.getSample(x[j], y[i]);
                 if (noDataValue.equals(samples[i][j])) {
                     samples[i][j] = Double.NaN;
