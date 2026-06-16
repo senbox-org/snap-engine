@@ -54,9 +54,12 @@ public class CachedSubsamplingReader {
             cache.read(bandName, offsets, shapes, new DataBuffer(tempData, offsets, shapes));
 
             for (int dest_yy = 0; dest_yy < destHeight; dest_yy++) {
+                final int srcRowOffset = dest_yy * sourceStepY * sourceWidth;
+                final int destRowOffset = dest_yy * destWidth;
+
                 for (int dest_xx = 0; dest_xx < destWidth; dest_xx++) {
-                    final int srcIdx = (dest_yy * sourceStepY) * sourceWidth + (dest_xx * sourceStepX);
-                    final int destIdx = dest_yy * destWidth + dest_xx;
+                    final int srcIdx = srcRowOffset + (dest_xx * sourceStepX);
+                    final int destIdx = destRowOffset + dest_xx;
 
                     destBuffer.setElemDoubleAt(destIdx, tempData.getElemDoubleAt(srcIdx));
                 }
@@ -86,9 +89,12 @@ public class CachedSubsamplingReader {
             cache.read(cacheKey, offsets, shapes, new DataBuffer(tempData, offsets, shapes));
 
             for (int destY = 0; destY < destHeight; destY++) {
+                final int srcRowOffset = destY * sourceStepY * sourceWidth;
+                final int destRowOffset = destY * destWidth;
+
                 for (int destX = 0; destX < destWidth; destX++) {
-                    final int srcIdx = (destY * sourceStepY) * sourceWidth + (destX * sourceStepX);
-                    final int destIdx = destY * destWidth + destX;
+                    final int srcIdx = srcRowOffset + (destX * sourceStepX);
+                    final int destIdx = destRowOffset + destX;
                     destBuffer.setElemDoubleAt(destIdx, tempData.getElemDoubleAt(srcIdx));
                 }
             }
