@@ -20,12 +20,14 @@ import com.bc.ceres.core.ProgressMonitor;
 import eu.esa.snap.core.dataio.cache.CacheManager;
 import eu.esa.snap.core.dataio.cache.CachedSubsamplingReader;
 import eu.esa.snap.core.dataio.cache.ProductCache;
+import eu.esa.snap.core.dataio.cache.VariableDescriptor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.cache.NetcdfCacheDataProvider;
+import org.esa.snap.dataio.netcdf.cache.NetcdfCacheLayerMapper;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.TimeUtils;
@@ -34,12 +36,15 @@ import ucar.nc2.NetcdfFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 class DefaultNetCdfReader extends AbstractProductReader {
 
     private NetcdfFile netcdfFile;
     private NetcdfCacheDataProvider cacheDataProvider;
     private ProductCache productCache;
+    private Map<String, NetcdfCacheLayerMapper.LayerReference> cacheLayerMappings = Collections.emptyMap();
 
     public DefaultNetCdfReader(AbstractNetCdfReaderPlugIn netCdfReaderPlugIn) {
         super(netCdfReaderPlugIn);
@@ -72,6 +77,7 @@ class DefaultNetCdfReader extends AbstractProductReader {
         final NetCdfReadProfile profile = new NetCdfReadProfile();
         configureProfile(plugIn, profile);
         final Product product = profile.readProduct(context);
+        cacheLayerMappings = NetcdfCacheLayerMapper.getMappings(context);
         product.setFileLocation(fileLocation);
         product.setProductReader(this);
         product.setModified(false);
@@ -124,6 +130,33 @@ class DefaultNetCdfReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
+        NetcdfCacheLayerMapper.LayerReference layerReference = cacheLayerMappings.get(destBand.getName());
+        if (layerReference != null) {
+            final String cacheKey = layerReference.getCacheKey();
+            final VariableDescriptor descriptor = cacheDataProvider.getVariableDescriptor(cacheKey);
+            if (descriptor == null) {
+                throw new IOException("No cache descriptor registered for variable: " + cacheKey);
+            }
+            if (descriptor.layers == 1) {
+                if (layerReference.getLayer() != 0) {
+                    throw new IOException("Layer index out of range: " + layerReference.getLayer() + " (layers: 1)");
+                }
+                CachedSubsamplingReader.read(productCache, cacheKey, destBand.getDataType(),
+                        sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                        sourceStepX, sourceStepY, destWidth, destHeight, destBuffer
+                );
+                return;
+            }
+            if (descriptor.layers < 1) {
+                throw new IOException("Invalid cache layer count for variable '" + cacheKey + "': " + descriptor.layers);
+            }
+            CachedSubsamplingReader.readLayer(productCache, cacheKey, layerReference.getLayer(), destBand.getDataType(),
+                    sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                    sourceStepX, sourceStepY, destWidth, destHeight, destBuffer
+            );
+            return;
+        }
+
         CachedSubsamplingReader.read(productCache, destBand.getName(), destBand.getDataType(),
                 sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
                 sourceStepX, sourceStepY, destWidth, destHeight, destBuffer
@@ -136,6 +169,7 @@ class DefaultNetCdfReader extends AbstractProductReader {
             CacheManager.getInstance().remove(this.productCache);
             productCache = null;
         }
+        cacheLayerMappings = Collections.emptyMap();
         cacheDataProvider = null;
         if (netcdfFile != null) {
             netcdfFile.close();

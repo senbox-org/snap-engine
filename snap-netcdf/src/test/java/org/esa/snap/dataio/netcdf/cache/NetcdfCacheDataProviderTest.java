@@ -1,7 +1,10 @@
 package org.esa.snap.dataio.netcdf.cache;
 
 import com.bc.ceres.annotation.STTM;
+import eu.esa.snap.core.dataio.cache.CacheManager;
+import eu.esa.snap.core.dataio.cache.CachedSubsamplingReader;
 import eu.esa.snap.core.dataio.cache.DataBuffer;
+import eu.esa.snap.core.dataio.cache.ProductCache;
 import eu.esa.snap.core.dataio.cache.VariableDescriptor;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.util.ArrayConverter;
@@ -43,12 +46,14 @@ public class NetcdfCacheDataProviderTest {
         writer.addDimension("lat", HEIGHT);
         writer.addDimension("lon", WIDTH);
         writer.addDimension("time", 2);
+        writer.addDimension("level", 3);
 
         Variable varData     = writer.addVariable("data", DataType.INT, "lat lon");
         Variable varShifted  = writer.addVariable("data_shifted", DataType.INT, "lat lon");
         varShifted.addAttribute(new Attribute("LONGITUDE_SHIFTED_180", 1));
         Variable varFlipped  = writer.addVariable("data_flipped", DataType.INT, "lat lon");
         Variable var3d       = writer.addVariable("data_3d", DataType.INT, "time lat lon");
+        Variable var4d       = writer.addVariable("data_4d", DataType.INT, "level time lat lon");
 
         writer.create();
 
@@ -69,6 +74,18 @@ public class NetcdfCacheDataProviderTest {
             writer.write(varFlipped, arr2d);
             writer.write(var3d, new int[]{0, 0, 0}, Array.factory(DataType.INT, new int[]{1, HEIGHT, WIDTH}, flat));
             writer.write(var3d, new int[]{1, 0, 0}, Array.factory(DataType.INT, new int[]{1, HEIGHT, WIDTH}, t1));
+
+            int[] flat4d = new int[3 * 2 * HEIGHT * WIDTH];
+            int index = 0;
+            for (int level = 0; level < 3; level++) {
+                for (int time = 0; time < 2; time++) {
+                    int layerValue = (level * 2 + time) * 100;
+                    for (int pixel = 0; pixel < HEIGHT * WIDTH; pixel++) {
+                        flat4d[index++] = layerValue + pixel;
+                    }
+                }
+            }
+            writer.write(var4d, Array.factory(DataType.INT, new int[]{3, 2, HEIGHT, WIDTH}, flat4d));
         } catch (InvalidRangeException e) {
             throw new IOException(e);
         }
@@ -173,5 +190,47 @@ public class NetcdfCacheDataProviderTest {
         DataBuffer result = provider.readCacheBlock("band", new int[]{0, 0}, new int[]{2, 3}, null);
 
         assertArrayEquals(new int[]{24, 25, 26, 30, 31, 32}, (int[]) result.getData().getElems());
+    }
+
+    @Test
+    @STTM("SNAP-4190")
+    public void test_readLayer_rank3Variable_throughProductCache() throws IOException {
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
+        provider.register("band", netcdfFile.findVariable("data_3d"), new int[0], false,
+                ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
+        ProductCache cache = new ProductCache(provider);
+        CacheManager.getInstance().register(cache);
+
+        ProductData dest = ProductData.createInstance(ProductData.TYPE_INT32, 6);
+        try {
+            CachedSubsamplingReader.readLayer(cache, "band", 1, ProductData.TYPE_INT32,
+                    0, 0, 3, 2,
+                    1, 1, 3, 2, dest);
+        } finally {
+            CacheManager.getInstance().remove(cache);
+        }
+
+        assertArrayEquals(new int[]{24, 25, 26, 30, 31, 32}, (int[]) dest.getElems());
+    }
+
+    @Test
+    @STTM("SNAP-4190")
+    public void test_readLayer_rank4Variable_usesFlattenedLayerIndex() throws IOException {
+        NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
+        provider.register("band", netcdfFile.findVariable("data_4d"), new int[0], false,
+                ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(WIDTH, HEIGHT));
+        ProductCache cache = new ProductCache(provider);
+        CacheManager.getInstance().register(cache);
+
+        ProductData dest = ProductData.createInstance(ProductData.TYPE_INT32, 6);
+        try {
+            CachedSubsamplingReader.readLayer(cache, "band", 4, ProductData.TYPE_INT32,
+                    0, 0, 3, 2,
+                    1, 1, 3, 2, dest);
+        } finally {
+            CacheManager.getInstance().remove(cache);
+        }
+
+        assertArrayEquals(new int[]{400, 401, 402, 406, 407, 408}, (int[]) dest.getElems());
     }
 }

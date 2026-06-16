@@ -26,6 +26,7 @@ import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.cache.NetcdfCacheDataProvider;
+import org.esa.snap.dataio.netcdf.cache.NetcdfCacheLayerMapper;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
@@ -203,10 +204,11 @@ public class BeamBandPart extends ProfilePartIO {
     }
 
     private void addBandToProduct(ProfileReadContext ctx, Product p, Variable variable) throws IOException {
-        final int yDimIndex = 0;
-        final int xDimIndex = 1;
         final int rasterDataType = DataTypeUtils.getRasterDataType(variable);
         List<Dimension> dimensions = variable.getDimensions();
+        final DimKey rasterDim = new DimKey(dimensions.toArray(new Dimension[0]));
+        final int yDimIndex = rasterDim.findYDimensionIndex();
+        final int xDimIndex = rasterDim.findXDimensionIndex();
         final int width = dimensions.get(xDimIndex).getLength();
         final int height = dimensions.get(yDimIndex).getLength();
         Band band;
@@ -230,7 +232,12 @@ public class BeamBandPart extends ProfilePartIO {
 
         final NetcdfCacheDataProvider cacheProvider = (NetcdfCacheDataProvider) ctx.getProperty(Constants.CACHE_DATA_PROVIDER_PROPERTY);
         boolean flipY = Boolean.TRUE.equals(ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME));
-        cacheProvider.register(band.getName(), variable, new int[0], flipY, band.getDataType(), ArrayConverter.IDENTITY, ImageManager.getPreferredTileSize(p));
+        final boolean usesLayerCache = variable.getRank() > 2;
+        final String cacheKey = usesLayerCache ? variable.getFullName() : band.getName();
+        cacheProvider.register(cacheKey, variable, new int[0], flipY, band.getDataType(), ArrayConverter.IDENTITY, ImageManager.getPreferredTileSize(p));
+        if (usesLayerCache) {
+            NetcdfCacheLayerMapper.mapBand(ctx, band.getName(), cacheKey, 0);
+        }
     }
 
     /**

@@ -20,12 +20,14 @@ import com.bc.ceres.core.VirtualDir;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.iosp.IOServiceProvider;
 import ucar.nc2.iosp.hdf4.H4iosp;
 import ucar.nc2.iosp.hdf5.H5header;
 import ucar.nc2.iosp.hdf5.H5iosp;
 import ucar.nc2.iosp.netcdf3.N3raf;
+import ucar.nc2.jni.netcdf.Nc4Iosp;
 import ucar.nc2.util.DiskCache;
 import ucar.unidata.io.RandomAccessFile;
 import ucar.unidata.io.UncompressInputStream;
@@ -138,6 +140,21 @@ public class NetcdfFileOpener {
             throw ioe;
         } catch (Throwable t) {
             throw new IOException("Error while opening netcdf file", t);
+        }
+        return null;
+    }
+
+    public static NetcdfFile openNativeNc4(Object input) throws IOException {
+        try {
+            NetCdfActivator.activate();
+            final RandomAccessFile raf = getRaf(input);
+            if (raf != null) {
+                return new DummyNetcdfFile(new Nc4Iosp(), raf, raf.getLocation());
+            }
+        } catch (IOException ioe) {
+            throw ioe;
+        } catch (Throwable t) {
+            throw new IOException("Error while opening native netcdf4 file", t);
         }
         return null;
     }
