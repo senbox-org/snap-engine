@@ -56,6 +56,7 @@ import org.esa.snap.core.gpf.graph.GraphOp;
 import org.esa.snap.core.gpf.monitor.TileComputationEvent;
 import org.esa.snap.core.gpf.monitor.TileComputationObserver;
 import org.esa.snap.core.util.ModuleMetadata;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.runtime.Config;
@@ -827,7 +828,7 @@ public class OperatorContext {
                                 Band targetBand = getTargetBand();
                                 tile.setRect(targetBand.getGeophysicalImage().getData(destRect));
                                 TileImpl targetTile = new TileImpl(targetBand, tile, destRect, false);
-                                operator.computeTile(targetBand, targetTile, ProgressMonitor.NULL);
+                                operator.computeTile(targetBand, targetTile, ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL));
                             }
                         });
                     }

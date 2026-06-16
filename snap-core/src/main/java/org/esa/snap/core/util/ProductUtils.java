@@ -2496,6 +2496,8 @@ public class ProductUtils {
             if (inputFile.getName().toLowerCase().endsWith(".zip")) {
                 final String cachedFilepath = FileUtils.getCachedFilePath(inputFile);
                 inputFile = new File(cachedFilepath);
+            } else if (inputFile.getName().toLowerCase().matches(".*\\.(tar\\.gz|tgz|tar\\.bz|tbz|tar\\.bz2|tbz2|tar)")) {
+                return null;
             } else {
                 final File absoluteFile = inputFile.getAbsoluteFile();
                 inputFile = absoluteFile.getParentFile();

@@ -727,7 +727,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             is = new ByteArrayInputStream(field.getAsString(0).trim().getBytes());
             final Document document = new DOMBuilder().build(builder.parse(is));
-            final Product product = DimapProductHelpers.createProduct(document, BigGeoTiffProductReaderPlugIn.FORMAT_NAME, null);
+            final Product product = DimapProductHelpers.createProduct(document, BigGeoTiffProductReaderPlugIn.FORMAT_NAME, (Dimension) null);
             removeGeoCodingAndTiePointGrids(product);
             setPreferredTiling(product);
             initBandsMap(product);
