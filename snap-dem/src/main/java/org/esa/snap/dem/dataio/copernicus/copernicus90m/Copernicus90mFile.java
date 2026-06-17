@@ -19,6 +19,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+import org.esa.snap.dem.dataio.copernicus.CopernicusNoDataElevationTile;
 
 import java.util.concurrent.CancellationException;
 
@@ -90,7 +91,6 @@ public class Copernicus90mFile extends ElevationFile {
     protected Boolean getRemoteFile(ProgressMonitor progressMonitor) {
         try {
             String [] fileNameSplit = localFile.getName().split("_");
-            System.out.println(localFile.getName());
             String north = fileNameSplit[4];
             String east =  fileNameSplit[6];
             int lat = Integer.parseInt(north.substring(1));
@@ -102,15 +102,31 @@ public class Copernicus90mFile extends ElevationFile {
                 lat *= -1;
             }
 
-            CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParentFile());
-
-            return downloader.downloadTiles(lat, lon, 90, progressMonitor);
+            boolean downloaded = downloadTiles(lat, lon, 90, progressMonitor);
+            if (!downloaded) {
+                cacheNoDataTile();
+            }
+            return downloaded;
         } catch (CancellationException e) {
             throw e;
         } catch (Exception e) {
             //e.printStackTrace();
-            remoteFileExists = false;
+            cacheNoDataTile();
             return false;
         }
+    }
+
+    protected boolean downloadTiles(int lat, int lon, int resolution, ProgressMonitor progressMonitor) throws Exception {
+        CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParentFile());
+        return downloader.downloadTiles(lat, lon, resolution, progressMonitor);
+    }
+
+    protected ElevationTile createNoDataTile() {
+        return new CopernicusNoDataElevationTile(demModel.getDescriptor().getNoDataValue());
+    }
+
+    private void cacheNoDataTile() {
+        remoteFileExists = false;
+        tile = createNoDataTile();
     }
 }
