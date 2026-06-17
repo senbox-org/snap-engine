@@ -16,10 +16,14 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.internal.TileImpl;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDownloader;
+import org.esa.snap.dem.dataio.copernicus.CopernicusDirectElevationTile;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
+import org.esa.snap.dem.dataio.copernicus.GeoTiffCopernicusTileSource;
 import org.esa.snap.dem.dataio.copernicus.CopernicusNoDataElevationTile;
+import org.esa.snap.runtime.Config;
 
 import java.util.concurrent.CancellationException;
 
@@ -30,6 +34,38 @@ public class Copernicus30mFile extends ElevationFile {
     public Copernicus30mFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) {
         super(localFile, reader);
         demModel = copernicusElevationModel;
+    }
+
+    @Override
+    protected void getLocalFile() throws IOException {
+        if (Config.instance().preferences().getBoolean("snap.dem.copernicus.directReader", true) && localFile.exists()) {
+            try {
+                tile = createDirectTile(localFile);
+                demModel.updateCache(tile);
+                return;
+            } catch (IOException e) {
+                SystemUtils.LOG.fine("Falling back to ProductReader for " + localFile.getName() + ": " + e.getMessage());
+            }
+        }
+        super.getLocalFile();
+    }
+
+    private ElevationTile createDirectTile(final File file) throws IOException {
+        final int[] tileIndices = getTileIndices(file);
+        return new CopernicusDirectElevationTile(demModel, new GeoTiffCopernicusTileSource(file),
+                                                 3600, 3600, tileIndices[0], tileIndices[1]);
+    }
+
+    private static int[] getTileIndices(final File file) {
+        final String[] fileNameSplit = file.getName().split("_");
+        final int minLat = parseSignedTileCoordinate(fileNameSplit[4]);
+        final int minLon = parseSignedTileCoordinate(fileNameSplit[6]);
+        return new int[]{minLon + 180, 89 - minLat};
+    }
+
+    private static int parseSignedTileCoordinate(final String token) {
+        final int value = Integer.parseInt(token.substring(1));
+        return token.startsWith("S") || token.startsWith("W") ? -value : value;
     }
 
     @Override
