@@ -37,7 +37,6 @@ import org.esa.snap.dem.dataio.FileElevationModel;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
-import org.esa.snap.engine_utilities.gpf.TileIndex;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -178,37 +177,8 @@ public class AddElevationOp extends Operator {
             final int w = targetRectangle.width;
             final int h = targetRectangle.height;
 
-            final ProductData tgtData = targetTile.getDataBuffer();
             final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
-            final double[][] localDEM = new double[h + 2][w + 2];
-
-            final boolean valid = DEMFactory.getLocalDEM(
-                    dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, w, h,
-                    sourceProduct, true, localDEM, pm);
-
-            final TileIndex tgtIndex = new TileIndex(targetTile);
-            final int maxX = x0 + w;
-            final int maxY = y0 + h;
-
-            if (valid) {
-                for (int y = y0; y < maxY; ++y) {
-                    ProgressMonitorContext.checkCanceled(pm);
-                    final int yy = y - y0 + 1;
-                    tgtIndex.calculateStride(y);
-                    for (int x = x0; x < maxX; ++x) {
-                        tgtData.setElemDoubleAt(tgtIndex.getIndex(x), localDEM[yy][x - x0 + 1]);
-                    }
-
-                }
-            } else {
-                for (int y = y0; y < maxY; ++y) {
-                    ProgressMonitorContext.checkCanceled(pm);
-                    tgtIndex.calculateStride(y);
-                    for (int x = x0; x < maxX; ++x) {
-                        tgtData.setElemDoubleAt(tgtIndex.getIndex(x), demNoDataValue);
-                    }
-                }
-            }
+            DEMFactory.fillElevationTile(dem, demNoDataValue, tileGeoRef, targetTile, true, pm);
             pm.worked(1);
         } catch (CancellationException e) {
             throw e;

@@ -20,15 +20,19 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.OperatorException;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
+import org.esa.snap.engine_utilities.gpf.TileIndex;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,6 +131,114 @@ public class DEMFactory {
         if (descriptor.canBeDownloaded())
             return descriptor.getName() + AUTODEM;
         return descriptor.getName();
+    }
+
+    public static boolean fillElevationTile(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Tile targetTile,
+                                            final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        final ProductData targetData = targetTile.getDataBuffer();
+        final TileIndex targetIndex = new TileIndex(targetTile);
+        return fillElevation(dem, demNoDataValue, tileGeoRef, targetTile.getRectangle(), nodataValueAtSea,
+                             progressMonitor, new ElevationWriter() {
+                    @Override
+                    public void beginRow(int y) {
+                        targetIndex.calculateStride(y);
+                    }
+
+                    @Override
+                    public void write(int x, int y, double value) {
+                        setElemDouble(targetData, targetIndex.getIndex(x), value);
+                    }
+                });
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevation(dem, demNoDataValue, tileGeoRef, targetRectangle, nodataValueAtSea,
+                             progressMonitor, new ElevationWriter() {
+                    private int rowOffset;
+
+                    @Override
+                    public void beginRow(int y) {
+                        rowOffset = (y - targetRectangle.y) * targetRectangle.width;
+                    }
+
+                    @Override
+                    public void write(int x, int y, double value) {
+                        setElemDouble(targetData, rowOffset + x - targetRectangle.x, value);
+                    }
+                });
+    }
+
+    private static boolean fillElevation(final ElevationModel dem, final double demNoDataValue,
+                                         final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
+                                         final boolean nodataValueAtSea, final ProgressMonitor progressMonitor,
+                                         final ElevationWriter writer) throws Exception {
+        final int maxY = targetRectangle.y + targetRectangle.height;
+        final int maxX = targetRectangle.x + targetRectangle.width;
+        final GeoPos geoPos = new GeoPos();
+        final double[][] egmWorkspace = new double[4][4];
+
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
+            boolean valid = false;
+            for (int y = targetRectangle.y; y < maxY; y++) {
+                ProgressMonitorContext.checkCanceled(progressMonitor);
+                writer.beginRow(y);
+                for (int x = targetRectangle.x; x < maxX; x++) {
+                    if (((x - targetRectangle.x) & 63) == 0) {
+                        ProgressMonitorContext.checkCanceled(progressMonitor);
+                    }
+                    tileGeoRef.getGeoPos(x, y, geoPos);
+                    Double alt = dem.getElevation(geoPos);
+                    if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
+                        alt = (double) EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, egmWorkspace);
+                    }
+                    if (!valid && !alt.equals(demNoDataValue)) {
+                        valid = true;
+                    }
+                    writer.write(x, y, alt);
+                }
+            }
+            return valid;
+        } catch (CancellationException e) {
+            throw e;
+        } catch (Exception e) {
+            fillElevationNoData(targetRectangle, writer, demNoDataValue, progressMonitor);
+            return false;
+        }
+    }
+
+    private static void fillElevationNoData(final Rectangle targetRectangle, final ElevationWriter writer,
+                                            final double noDataValue, final ProgressMonitor progressMonitor) {
+        final int maxY = targetRectangle.y + targetRectangle.height;
+        final int maxX = targetRectangle.x + targetRectangle.width;
+        for (int y = targetRectangle.y; y < maxY; y++) {
+            ProgressMonitorContext.checkCanceled(progressMonitor);
+            writer.beginRow(y);
+            for (int x = targetRectangle.x; x < maxX; x++) {
+                writer.write(x, y, noDataValue);
+            }
+        }
+    }
+
+    private static void setElemDouble(final ProductData targetData, final int index, final double value) {
+        final Object elements = targetData.getElems();
+        if (elements instanceof float[]) {
+            ((float[]) elements)[index] = (float) value;
+        } else if (elements instanceof double[]) {
+            ((double[]) elements)[index] = value;
+        } else {
+            targetData.setElemDoubleAt(index, value);
+        }
+    }
+
+    private interface ElevationWriter {
+        void beginRow(int y);
+
+        void write(int x, int y, double value);
     }
 
     /**
