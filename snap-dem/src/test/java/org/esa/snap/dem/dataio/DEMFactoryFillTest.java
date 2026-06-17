@@ -6,21 +6,29 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.util.TestUtils;
+import org.esa.snap.runtime.Config;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
+import java.util.prefs.Preferences;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
 public class DEMFactoryFillTest {
+
+    private static final String ADD_ELEVATION_TILE_SIZE_KEY = "snap.dem.addElevationTileSize";
+    private static final String MAX_DEGREES_PER_ELEVATION_TILE_KEY = "snap.dem.maxDegreesPerElevationTile";
 
 
     @Test
@@ -47,6 +55,60 @@ public class DEMFactoryFillTest {
                 assertEquals(elevationFor(expectedGeoPos), targetData.getElemDoubleAt(index), 1.0e-4);
                 index++;
             }
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4213")
+    public void addElevationTileSizeUsesConfiguredPixelLimit() {
+        Preferences preferences = Config.instance().preferences();
+        String previousTileSize = preferences.get(ADD_ELEVATION_TILE_SIZE_KEY, null);
+        String previousMaxDegrees = preferences.get(MAX_DEGREES_PER_ELEVATION_TILE_KEY, null);
+        try {
+            preferences.putInt(ADD_ELEVATION_TILE_SIZE_KEY, 64);
+            preferences.putDouble(MAX_DEGREES_PER_ELEVATION_TILE_KEY, 2.0);
+
+            Dimension tileSize = DEMFactory.getAddElevationTileSize(TestUtils.createProduct("test", 200, 150));
+
+            assertEquals(new Dimension(64, 64), tileSize);
+        } finally {
+            restorePreference(preferences, ADD_ELEVATION_TILE_SIZE_KEY, previousTileSize);
+            restorePreference(preferences, MAX_DEGREES_PER_ELEVATION_TILE_KEY, previousMaxDegrees);
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4213")
+    public void addElevationTileSizeLimitsGeographicExtent() throws Exception {
+        Preferences preferences = Config.instance().preferences();
+        String previousTileSize = preferences.get(ADD_ELEVATION_TILE_SIZE_KEY, null);
+        String previousMaxDegrees = preferences.get(MAX_DEGREES_PER_ELEVATION_TILE_KEY, null);
+        try {
+            preferences.putInt(ADD_ELEVATION_TILE_SIZE_KEY, 128);
+            preferences.putDouble(MAX_DEGREES_PER_ELEVATION_TILE_KEY, 2.0);
+
+            Product product = TestUtils.createProduct("test", 100, 100);
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                       product.getSceneRasterWidth(),
+                                                       product.getSceneRasterHeight(),
+                                                       10.0, 50.0,
+                                                       0.1, -0.2,
+                                                       0.0, 0.0));
+
+            Dimension tileSize = DEMFactory.getAddElevationTileSize(product);
+
+            assertEquals(new Dimension(20, 10), tileSize);
+        } finally {
+            restorePreference(preferences, ADD_ELEVATION_TILE_SIZE_KEY, previousTileSize);
+            restorePreference(preferences, MAX_DEGREES_PER_ELEVATION_TILE_KEY, previousMaxDegrees);
+        }
+    }
+
+    private static void restorePreference(Preferences preferences, String key, String value) {
+        if (value == null) {
+            preferences.remove(key);
+        } else {
+            preferences.put(key, value);
         }
     }
 

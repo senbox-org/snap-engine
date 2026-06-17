@@ -31,7 +31,9 @@ import org.esa.snap.core.gpf.OperatorException;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
+import org.esa.snap.runtime.Config;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,6 +127,41 @@ public class DEMFactory {
         for (double[] row : localDEM) {
             Arrays.fill(row, alt);
         }
+    }
+
+    public static Dimension getAddElevationTileSize(final Product product) {
+        final int configuredSize = Math.max(1, Config.instance().preferences().getInt("snap.dem.addElevationTileSize", 128));
+        int tileWidth = Math.min(configuredSize, product.getSceneRasterWidth());
+        int tileHeight = Math.min(configuredSize, product.getSceneRasterHeight());
+
+        final double maxDegrees = Config.instance().preferences().getDouble("snap.dem.maxDegreesPerElevationTile", 2.0);
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        if (geoCoding != null && maxDegrees > 0.0) {
+            final int width = product.getSceneRasterWidth();
+            final int height = product.getSceneRasterHeight();
+            final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
+            final GeoPos upperRight = geoCoding.getGeoPos(new PixelPos(width - 1, 0), null);
+            final GeoPos lowerLeft = geoCoding.getGeoPos(new PixelPos(0, height - 1), null);
+
+            final double lonDegreesPerPixel = normalizedLonDistance(upperLeft.lon, upperRight.lon) / Math.max(1, width - 1);
+            final double latDegreesPerPixel = Math.abs(upperLeft.lat - lowerLeft.lat) / Math.max(1, height - 1);
+            if (lonDegreesPerPixel > 0.0 && !Double.isNaN(lonDegreesPerPixel)) {
+                tileWidth = Math.max(1, Math.min(tileWidth, (int) Math.floor(maxDegrees / lonDegreesPerPixel)));
+            }
+            if (latDegreesPerPixel > 0.0 && !Double.isNaN(latDegreesPerPixel)) {
+                tileHeight = Math.max(1, Math.min(tileHeight, (int) Math.floor(maxDegrees / latDegreesPerPixel)));
+            }
+        }
+
+        return new Dimension(tileWidth, tileHeight);
+    }
+
+    private static double normalizedLonDistance(final double lon1, final double lon2) {
+        double distance = Math.abs(lon1 - lon2);
+        if (distance > 180.0) {
+            distance = 360.0 - distance;
+        }
+        return distance;
     }
 
     public static String getDEMDisplayName(ElevationModelDescriptor descriptor) {

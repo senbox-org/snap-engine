@@ -137,6 +137,7 @@ public class AddElevationOp extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+        targetProduct.setPreferredTileSize(DEMFactory.getAddElevationTileSize(sourceProduct));
 
         for (Band band : sourceProduct.getBands()) {
             if (band.getName().equalsIgnoreCase(elevationBandName))
