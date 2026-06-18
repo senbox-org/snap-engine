@@ -176,7 +176,7 @@ public class DEMFactory {
                                             final ProgressMonitor progressMonitor) throws Exception {
         final ProductData targetData = targetTile.getDataBuffer();
         final TileIndex targetIndex = new TileIndex(targetTile);
-        return fillElevation(dem, demNoDataValue, tileGeoRef, targetTile.getRectangle(), nodataValueAtSea,
+        return fillElevation(dem, demNoDataValue, tileGeoRef::getGeoPos, targetTile.getRectangle(), nodataValueAtSea,
                              progressMonitor, new ElevationWriter() {
                     @Override
                     public void beginRow(int y) {
@@ -194,7 +194,16 @@ public class DEMFactory {
                                             final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
                                             final ProductData targetData, final boolean nodataValueAtSea,
                                             final ProgressMonitor progressMonitor) throws Exception {
-        return fillElevation(dem, demNoDataValue, tileGeoRef, targetRectangle, nodataValueAtSea,
+        return fillElevationData(dem, demNoDataValue, tileGeoRef::getGeoPos, targetRectangle, targetData,
+                                 nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final ElevationGeoPosProvider geoPosProvider,
+                                            final Rectangle targetRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevation(dem, demNoDataValue, geoPosProvider, targetRectangle, nodataValueAtSea,
                              progressMonitor, new ElevationWriter() {
                     private int rowOffset;
 
@@ -210,8 +219,14 @@ public class DEMFactory {
                 });
     }
 
+    @FunctionalInterface
+    public interface ElevationGeoPosProvider {
+        void getGeoPos(int x, int y, GeoPos geoPos);
+    }
+
     private static boolean fillElevation(final ElevationModel dem, final double demNoDataValue,
-                                         final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
+                                         final ElevationGeoPosProvider geoPosProvider,
+                                         final Rectangle targetRectangle,
                                          final boolean nodataValueAtSea, final ProgressMonitor progressMonitor,
                                          final ElevationWriter writer) throws Exception {
         final int maxY = targetRectangle.y + targetRectangle.height;
@@ -228,7 +243,7 @@ public class DEMFactory {
                     if (((x - targetRectangle.x) & 63) == 0) {
                         ProgressMonitorContext.checkCanceled(progressMonitor);
                     }
-                    tileGeoRef.getGeoPos(x, y, geoPos);
+                    geoPosProvider.getGeoPos(x, y, geoPos);
                     Double alt = dem.getElevation(geoPos);
                     if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
                         alt = (double) EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, egmWorkspace);
