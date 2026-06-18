@@ -22,6 +22,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 import org.esa.snap.core.image.ImageManager;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
@@ -79,7 +80,7 @@ public class OperatorImage extends SourcelessOpImage {
         operatorContext.startWatch();
         // computeTile() may have been deactivated
         if (targetTile != null && operatorContext.getOperator().canComputeTile()) {
-            operatorContext.getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitor.NULL);
+            operatorContext.getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL));
         }
         operatorContext.stopWatch();
 //        long nettoNanos = operatorContext.getNettoTime();

@@ -5,6 +5,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.jai.NoDataRaster;
 import org.esa.snap.core.image.ImageManager;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.runtime.Config;
 
 import javax.media.jai.Histogram;
@@ -309,10 +310,11 @@ public class StxFactory {
         final PixelAccessor dataAccessor = new PixelAccessor(dataImage.getSampleModel(), null);
         final PixelAccessor maskAccessor = maskImage != null ? new PixelAccessor(maskImage.getSampleModel(), null) : null;
 
-        try {
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(pm)) {
             pm.beginTask("Computing " + op.getName(), dataImage.getNumXTiles() * dataImage.getNumYTiles());
 
-            if (Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true)) {
+            if (Config.instance("snap").preferences().getBoolean("snap.jai.prefetchTiles", true)
+                    && !ProgressMonitorContext.isRealProgressMonitor(pm)) {
                 prefetchTiles(dataImage, dataImage.getBounds());
                 if (maskImage != null) {
                     prefetchTiles(maskImage, maskImage.getBounds());
@@ -321,7 +323,7 @@ public class StxFactory {
 
             for (int tileY = dataImage.getMinTileY(); tileY <= dataImage.getMaxTileY(); tileY++) {
                 for (int tileX = dataImage.getMinTileX(); tileX <= dataImage.getMaxTileX(); tileX++) {
-                    if (pm.isCanceled()) {
+                    if (ProgressMonitorContext.isCancellationRequested(pm)) {
                         throw new CancellationException("Process terminated by user."); /*I18N*/
                     }
                     boolean tileContainsData = true;

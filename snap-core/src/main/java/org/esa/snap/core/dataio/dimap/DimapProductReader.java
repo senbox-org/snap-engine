@@ -120,7 +120,10 @@ public class DimapProductReader extends AbstractProductReader {
         initInput();
         Document dom = readDom();
 
-        product = existingProduct == null ? DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null) : existingProduct;
+        if (existingProduct == null) {
+            product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, getSubsetDef());
+        }
+        else product = existingProduct;
         product.setProductReader(this);
 
         if (existingProduct == null) {

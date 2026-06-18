@@ -22,6 +22,7 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.runtime.Config;
 
 import java.awt.Point;
@@ -69,15 +70,16 @@ public class BandOpImage extends RasterDataNodeOpImage {
             return;
         }
         if (getLevel() == 0) {
+            ProgressMonitor progressMonitor = ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL);
 //            band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
 //                                                       destRect.width, destRect.height,
 //                                                       destData, ProgressMonitor.NULL);
             if (band.isProductReaderDirectlyUsable()) {
-                band.readRasterData(destRect.x, destRect.y, destRect.width, destRect.height, destData, ProgressMonitor.NULL);
+                band.readRasterData(destRect.x, destRect.y, destRect.width, destRect.height, destData, progressMonitor);
             } else {
                 band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
                         destRect.width, destRect.height,
-                        destData, ProgressMonitor.NULL);
+                        destData, progressMonitor);
             }
         } else {
             readHigherLevelData(band, destData, destRect, getLevelImageSupport());
@@ -105,11 +107,13 @@ public class BandOpImage extends RasterDataNodeOpImage {
         Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
         Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
+        ProgressMonitor progressMonitor = ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL);
         Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-        if (prefetchTiles) {
+        if (prefetchTiles && !ProgressMonitorContext.isRealProgressMonitor(progressMonitor)) {
             img.prefetchTiles(tileIndices);
         }
         for (Point tileIndex : tileIndices) {
+            ProgressMonitorContext.checkCanceled(progressMonitor);
             final int xTileIdx = tileIndex.x;
             final int yTileIdx = tileIndex.y;
             final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
@@ -122,7 +126,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
                 continue;
             }
             final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
-            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
+            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, progressMonitor);
 
             for (PositionCouple yPos : yPositions) {
                 final int ySrc = yPos.srcPos;

@@ -43,7 +43,9 @@
                 </folder>
                 <folder name="Optical Sensors">
                     <folder name="Hico">
+                        <attr name="position" intvalue="9"/>
                         <file name="org-esa-snap-dataio-hico-ImportHicoProduct.shadow">
+                            <attr name="position" intvalue="1"/>
                             <attr name="originalFile"
                                   stringvalue="Actions/Readers/org-esa-snap-dataio-hico-ImportHicoProduct.instance"/>
                         </file>

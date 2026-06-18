@@ -22,6 +22,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 
 import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
@@ -119,7 +120,7 @@ public class OperatorImageTileStack extends OperatorImage {
         }
 
         operatorContext.startWatch();
-        operatorContext.getOperator().computeTileStack(targetTiles, destRect, ProgressMonitor.NULL);
+        operatorContext.getOperator().computeTileStack(targetTiles, destRect, ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL));
         operatorContext.stopWatch();
 //        long nettoNanos = operatorContext.getNettoTime();
 

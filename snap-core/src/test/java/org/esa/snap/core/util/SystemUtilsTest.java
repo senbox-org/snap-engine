@@ -19,7 +19,15 @@ package org.esa.snap.core.util;
 import org.junit.Test;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import javax.media.jai.util.ImagingListener;
 
 import static org.junit.Assert.*;
 
@@ -103,6 +111,62 @@ public class SystemUtilsTest {
         String s = File.separator;
         String expected = s + "a" + s + "b" + s + "cdef" + s + "g";
         assertEquals(expected, SystemUtils.convertToLocalPath("/a/b/cdef/g"));
+    }
+
+    @Test
+    public void testSnapImagingListenerDoesNotLogCancellationAsSevere() throws Exception {
+        RecordingHandler handler = new RecordingHandler();
+        SystemUtils.LOG.addHandler(handler);
+        try {
+            ImagingListener listener = createSnapImagingListener();
+            CancellationException cancellationException = new CancellationException("Process terminated by user.");
+
+            try {
+                listener.errorOccurred("Problem occurs when computing a tile by the owner.",
+                                       cancellationException, new Object(), false);
+                fail("CancellationException expected");
+            } catch (CancellationException actual) {
+                assertSame(cancellationException, actual);
+            }
+
+            assertFalse(handler.hasSevereLogRecord());
+        } finally {
+            SystemUtils.LOG.removeHandler(handler);
+        }
+    }
+
+    private static ImagingListener createSnapImagingListener() throws Exception {
+        Class<?> listenerClass = Class.forName("org.esa.snap.core.util.SystemUtils$SnapImagingListener");
+        Constructor<?> constructor = listenerClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return (ImagingListener) constructor.newInstance();
+    }
+
+    private static class RecordingHandler extends Handler {
+
+        private final List<LogRecord> records = new ArrayList<>();
+
+        @Override
+        public void publish(LogRecord record) {
+            records.add(record);
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() {
+        }
+
+        private boolean hasSevereLogRecord() {
+            for (LogRecord record : records) {
+                if (record.getLevel().intValue() >= Level.SEVERE.intValue()) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 }

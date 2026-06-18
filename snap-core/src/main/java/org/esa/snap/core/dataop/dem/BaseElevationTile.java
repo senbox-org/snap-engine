@@ -18,9 +18,8 @@ package org.esa.snap.core.dataop.dem;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.runtime.Config;
-
-import java.util.Arrays;
 
 public class BaseElevationTile implements ElevationTile {
 
@@ -57,13 +56,14 @@ public class BaseElevationTile implements ElevationTile {
     }
 
     public final float getSample(final int pixelX, final int pixelY) throws Exception {
+        ProgressMonitorContext.checkCanceled();
         if (objectArray == null) {
             objectArray = new float[bandHeight + 1][];
         }
 
         float[] line = objectArray[pixelY];
         if (line == null) {
-            line = band.readPixels(0, pixelY, bandWidth, 1, new float[bandWidth], ProgressMonitor.NULL);
+            line = band.readPixels(0, pixelY, bandWidth, 1, new float[bandWidth], ProgressMonitorContext.getCurrentProgressMonitorOrDefault(ProgressMonitor.NULL));
             if (useDEMGravitationalModel) {
                 addGravitationalModel(pixelY, line);
             }

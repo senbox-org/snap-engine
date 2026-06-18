@@ -15,12 +15,14 @@
  */
 package org.esa.snap.core.dataop.dem;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.downloadable.DownloadStatusManager;
 import org.esa.snap.core.dataop.downloadable.SSLUtil;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.dataop.downloadable.FtpDownloader;
+import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
@@ -36,6 +38,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -79,17 +82,24 @@ public abstract class ElevationFile {
     }
 
     public final ElevationTile getTile() throws IOException {
+        return getTile(ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    public final ElevationTile getTile(ProgressMonitor progressMonitor) throws IOException {
         // A tile may have been disposed by BaseElevationModel#updateCache's LRU
         // eviction while this ElevationFile still holds a reference to it. Treat
         // the disposed reference as absent and reload, otherwise getSample() reads
         // through a Band whose backing Product is gone — yielding garbage.
-        if (tile == null || tile.isDisposed()) {
-            tile = null;
-            if (!remoteFileExists && !localFileExists)
-                return null;
-            getFile();
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
+            ProgressMonitorContext.checkCanceled(progressMonitor);
+            if (tile == null || tile.isDisposed()) {
+                tile = null;
+                if (!remoteFileExists && !localFileExists)
+                    return null;
+                getFile(progressMonitor);
+            }
+            return tile;
         }
-        return tile;
     }
 
     protected ElevationTile createTile(final Product product) throws IOException {
@@ -100,16 +110,17 @@ public abstract class ElevationFile {
         return (localFile.exists() && localFile.isFile()) || (localZipFile.exists() && localZipFile.isFile());
     }
 
-    private synchronized void getFile() throws IOException {
+    private synchronized void getFile(ProgressMonitor progressMonitor) throws IOException {
         try {
             if (tile != null) return;
             if (!localFileExists && !errorInLocalFile) {
                 localFileExists = findLocalFile();
             }
+            ProgressMonitorContext.checkCanceled(progressMonitor);
             if (localFileExists) {
                 getLocalFile();
             } else if (remoteFileExists) {
-                if (getRemoteFile()) {
+                if (getRemoteFile(progressMonitor)) {
                     getLocalFile();
                 }
             }
@@ -152,17 +163,27 @@ public abstract class ElevationFile {
 
     protected abstract Boolean getRemoteFile() throws IOException;
 
+    protected Boolean getRemoteFile(ProgressMonitor progressMonitor) throws IOException {
+        return getRemoteFile();
+    }
+
     protected Boolean getRemoteHttpFile(final String baseUrl) throws IOException {
+        return getRemoteHttpFile(baseUrl, ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    protected Boolean getRemoteHttpFile(final String baseUrl, ProgressMonitor progressMonitor) throws IOException {
         final String remotePath = baseUrl + localZipFile.getName();
         SystemUtils.LOG.info("http retrieving " + remotePath);
         try {
-            downloadFile(new URL(remotePath), localZipFile);
+            downloadFile(new URL(remotePath), localZipFile, progressMonitor);
 
             return true;
         } catch (FileNotFoundException e) {
             // no need to alarm the user. Tiles may not be found because they are in the ocean or outside valid areas
             SystemUtils.LOG.warning("http error:" + e.getMessage() + " on " + remotePath);
             remoteFileExists = false;
+        } catch (CancellationException e) {
+            throw e;
         } catch (Exception e) {
             throw e;
         }
@@ -179,47 +200,55 @@ public abstract class ElevationFile {
      * @throws IOException if an I/O error occurs
      */
     private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
+        return downloadFile(fileUrl, localZipFile, ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    private static File downloadFile(final URL fileUrl, final File localZipFile, ProgressMonitor progressMonitor) throws IOException {
         SSLUtil sslUtil = new SSLUtil();
         sslUtil.disableSSLCertificateCheck();
 
         final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
         final URLConnection urlConnection = fileUrl.openConnection();
+        urlConnection.setConnectTimeout(30000);
+        urlConnection.setReadTimeout(60000);
         final int contentLength = urlConnection.getContentLength();
 
         DownloadStatusManager statusManager = DownloadStatusManager.getInstance();
         statusManager.setDownloading(true, localZipFile.getName());
 
-        try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength)) {
-            try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
-                try (final OutputStream os = new BufferedOutputStream(fileOS)) {
+        final StatusProgressMonitor status = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
+        status.beginTask("Downloading " + localZipFile.getName() + "... ",
+                         contentLength > 0 ? contentLength : ProgressMonitor.UNKNOWN);
 
-                    try {
-                        final StatusProgressMonitor status = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
-                        status.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
+        boolean deleteOutputFile = false;
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
+            ProgressMonitorContext.checkCanceled(progressMonitor);
+            try (final InputStream is = new BufferedInputStream(urlConnection.getInputStream())) {
+                try (final FileOutputStream fileOS = new FileOutputStream(outputFile)) {
+                    try (final OutputStream os = new BufferedOutputStream(fileOS)) {
 
                         final int size = 32768;
                         final byte[] buf = new byte[size];
                         int n;
+                        ProgressMonitorContext.checkCanceled(progressMonitor);
                         while ((n = is.read(buf, 0, size)) > -1) {
+                            ProgressMonitorContext.checkCanceled(progressMonitor);
                             os.write(buf, 0, n);
-                            status.worked(n);
-                        }
-                        status.done();
-
-                        while (true) {
-                            final int b = is.read();
-                            if (b == -1) {
-                                break;
+                            if (contentLength > 0) {
+                                status.worked(n);
                             }
-                            os.write(b);
                         }
-                    } catch (IOException e) {
-                        outputFile.delete();
-                        throw e;
                     }
                 }
             }
+        } catch (IOException | RuntimeException e) {
+            deleteOutputFile = true;
+            throw e;
         } finally {
+            if (deleteOutputFile) {
+                outputFile.delete();
+            }
+            status.done();
             sslUtil.enableSSLCertificateCheck();
             statusManager.setDownloading(false, "");
         }
@@ -227,6 +256,10 @@ public abstract class ElevationFile {
     }
 
     protected Boolean getRemoteFTPFile(final String remoteFTP, final String remotePath) throws IOException {
+        return getRemoteFTPFile(remoteFTP, remotePath, ProgressMonitorContext.getCurrentProgressMonitor());
+    }
+
+    protected Boolean getRemoteFTPFile(final String remoteFTP, final String remotePath, ProgressMonitor progressMonitor) throws IOException {
         try {
             if (ftp == null) {
                 ftp = new FtpDownloader(remoteFTP);
@@ -236,7 +269,7 @@ public abstract class ElevationFile {
             final String remoteFileName = localZipFile.getName();
             final Long fileSize = fileSizeMap.get(remoteFileName);
 
-            final FtpDownloader.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize);
+            final FtpDownloader.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize, progressMonitor);
             if (result == FtpDownloader.FTPError.OK) {
                 return true;
             } else {
@@ -250,6 +283,9 @@ public abstract class ElevationFile {
             return false;
         } catch (SocketException e) {
             unrecoverableError = true;
+            throw e;
+        } catch (CancellationException e) {
+            localZipFile.delete();
             throw e;
         } catch (Exception e) {
             SystemUtils.LOG.info(e.getMessage());
