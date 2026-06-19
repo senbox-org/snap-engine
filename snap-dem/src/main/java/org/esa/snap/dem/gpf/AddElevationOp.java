@@ -38,6 +38,7 @@ import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -137,7 +138,7 @@ public class AddElevationOp extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-        targetProduct.setPreferredTileSize(DEMFactory.getAddElevationTileSize(sourceProduct));
+        ProductUtils.copyPreferredTileSize(sourceProduct, targetProduct);
 
         for (Band band : sourceProduct.getBands()) {
             if (band.getName().equalsIgnoreCase(elevationBandName))
@@ -170,17 +171,29 @@ public class AddElevationOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        pm.beginTask("Writing tile", 1);
+        final Rectangle targetRectangle = targetTile.getRectangle();
+        final Dimension chunkSize = DEMFactory.getAddElevationTileSize(sourceProduct);
+        final int tileCount = getChunkCount(targetRectangle, chunkSize);
+        pm.beginTask("Writing tile", tileCount);
         try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(pm)) {
-            final Rectangle targetRectangle = targetTile.getRectangle();
             final int x0 = targetRectangle.x;
             final int y0 = targetRectangle.y;
             final int w = targetRectangle.width;
             final int h = targetRectangle.height;
 
             final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
-            DEMFactory.fillElevationTile(dem, demNoDataValue, tileGeoRef, targetTile, true, pm);
-            pm.worked(1);
+            final ProductData targetData = targetTile.getDataBuffer();
+            forEachChunk(targetRectangle, chunkSize, computeRectangle -> {
+                try {
+                    DEMFactory.fillElevationData(dem, demNoDataValue, tileGeoRef, targetRectangle,
+                                                 computeRectangle, targetData, true, pm);
+                    pm.worked(1);
+                } catch (CancellationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new OperatorException(e);
+                }
+            });
         } catch (CancellationException e) {
             throw e;
         } catch (Throwable e) {
@@ -188,6 +201,29 @@ public class AddElevationOp extends Operator {
         } finally {
             pm.done();
         }
+    }
+
+    private static void forEachChunk(Rectangle rectangle, Dimension chunkSize, ChunkConsumer consumer) {
+        final int maxY = rectangle.y + rectangle.height;
+        final int maxX = rectangle.x + rectangle.width;
+        for (int y = rectangle.y; y < maxY; y += chunkSize.height) {
+            final int height = Math.min(chunkSize.height, maxY - y);
+            for (int x = rectangle.x; x < maxX; x += chunkSize.width) {
+                final int width = Math.min(chunkSize.width, maxX - x);
+                consumer.accept(new Rectangle(x, y, width, height));
+            }
+        }
+    }
+
+    private static int getChunkCount(Rectangle rectangle, Dimension chunkSize) {
+        final int xCount = (rectangle.width + chunkSize.width - 1) / chunkSize.width;
+        final int yCount = (rectangle.height + chunkSize.height - 1) / chunkSize.height;
+        return xCount * yCount;
+    }
+
+    @FunctionalInterface
+    private interface ChunkConsumer {
+        void accept(Rectangle rectangle);
     }
 
     private void initElevationModel() throws IOException {
