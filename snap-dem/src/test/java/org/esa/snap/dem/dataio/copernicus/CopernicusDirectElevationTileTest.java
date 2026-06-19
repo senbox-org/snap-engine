@@ -1,8 +1,10 @@
 package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.annotation.STTM;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -54,6 +56,35 @@ public class CopernicusDirectElevationTileTest {
         assertEquals(0.5f, tile.getSample(1, 0), 0.0f);
         assertEquals(1.0f, tile.getSample(2, 0), 0.0f);
         assertEquals(1.0f, tile.getSample(3, 0), 0.0f);
+
+        assertEquals(1, source.readCount);
+    }
+
+    @Test
+    @STTM("SNAP-4213")
+    public void coarsePreferenceReadsOverviewSourceOnly() throws Exception {
+        CountingSource baseSource = new CountingSource(4, 4);
+        CountingSource overviewSource = new CountingSource(2, 2);
+        FakeCopernicusElevationModel model = new FakeCopernicusElevationModel();
+        CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(model,
+                new CopernicusTileSource[]{baseSource, overviewSource}, 4, 4, 0, 0, 0, 1, false);
+
+        try (AutoCloseable ignored = model.usePreferredSourceSize(2)) {
+            assertEquals(5.5f, tile.getSample(1, 1), 0.0f);
+        }
+
+        assertEquals(0, baseSource.readCount);
+        assertEquals(1, overviewSource.readCount);
+    }
+
+    @Test
+    @STTM("SNAP-4213")
+    public void overviewSourceIsResampledInBothDirections() throws Exception {
+        CountingSource source = new CountingSource(2, 2);
+        CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(new FakeElevationModel(),
+                source, 4, 4, 0, 0, 0, 1, false);
+
+        assertEquals(5.5f, tile.getSample(1, 1), 0.0f);
 
         assertEquals(1, source.readCount);
     }
@@ -135,6 +166,26 @@ public class CopernicusDirectElevationTileTest {
 
         @Override
         public void dispose() {
+        }
+    }
+
+    private static final class FakeCopernicusElevationModel extends CopernicusElevationModel {
+        private FakeCopernicusElevationModel() {
+            super(new FakeDescriptor(), Resampling.NEAREST_NEIGHBOUR);
+        }
+
+        @Override
+        protected void createElevationFile(ElevationFile[][] elevationFiles, int x, int y, File demInstallDir) {
+        }
+
+        @Override
+        protected ElevationFile createElevationFile(CopernicusElevationModel model, File localFile, ProductReader reader) {
+            return null;
+        }
+
+        @Override
+        protected int getResolution() {
+            return 90;
         }
     }
 

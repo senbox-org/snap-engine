@@ -14,9 +14,27 @@ import java.io.File;
 public abstract class CopernicusElevationModel extends BaseElevationModel {
 
     private final static GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
+    private final ThreadLocal<Integer> preferredSourceSize = new ThreadLocal<>();
 
     public CopernicusElevationModel(final ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
+    }
+
+    public AutoCloseable usePreferredSourceSize(final int sourceSize) {
+        final Integer previousValue = preferredSourceSize.get();
+        preferredSourceSize.set(sourceSize);
+        return () -> {
+            if (previousValue == null) {
+                preferredSourceSize.remove();
+            } else {
+                preferredSourceSize.set(previousValue);
+            }
+        };
+    }
+
+    public int getPreferredSourceSize() {
+        final Integer value = preferredSourceSize.get();
+        return value != null ? value : NUM_PIXELS_PER_TILE_X;
     }
 
     @Override

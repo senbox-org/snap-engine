@@ -16,9 +16,25 @@ public final class GeoTiffCopernicusTileSource implements CopernicusTileSource {
 
 
     public GeoTiffCopernicusTileSource(final File file) throws IOException {
-        reader = new GeoTiffImageReader(file);
+        this(file, 0);
+    }
+
+    public GeoTiffCopernicusTileSource(final File file, final int imageIndex) throws IOException {
+        reader = new GeoTiffImageReader(file, imageIndex);
         width = reader.getImageWidth();
         height = reader.getImageHeight();
+    }
+
+    public static CopernicusTileSource[] createSources(final File file) throws IOException {
+        final int imageCount;
+        try (GeoTiffImageReader reader = new GeoTiffImageReader(file)) {
+            imageCount = Math.max(1, reader.getImageCount());
+        }
+        final CopernicusTileSource[] sources = new CopernicusTileSource[imageCount];
+        for (int imageIndex = 0; imageIndex < imageCount; imageIndex++) {
+            sources[imageIndex] = new GeoTiffCopernicusTileSource(file, imageIndex);
+        }
+        return sources;
     }
 
     @Override

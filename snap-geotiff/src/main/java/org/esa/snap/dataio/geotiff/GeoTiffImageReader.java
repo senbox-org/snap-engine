@@ -68,11 +68,12 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     private static final Logger logger = Logger.getLogger(GeoTiffImageReader.class.getName());
 
     private static final int BUFFER_SIZE = 1024 * 1024;
-    private static final byte FIRST_IMAGE = 0;
+    private static final int FIRST_IMAGE = 0;
 
     private final TIFFImageReader imageReader;
     private final Closeable closeable;
     private final GeoTiffImageReaderState state;
+    private final int imageIndex;
 
     private RenderedImage swappedSubsampledImage;
     private Rectangle rectangle;
@@ -81,8 +82,13 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     private Double noDataValue;
 
     public GeoTiffImageReader(ImageInputStream imageInputStream) {
+        this(imageInputStream, FIRST_IMAGE);
+    }
+
+    public GeoTiffImageReader(ImageInputStream imageInputStream, int imageIndex) {
         this.imageReader = findImageReader(imageInputStream);
         this.closeable = new NullCloseable();
+        this.imageIndex = imageIndex;
         this.noDataValue = readNoDataValue();
 
         this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
@@ -90,8 +96,13 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     public GeoTiffImageReader(File file) throws IOException {
+        this(file, FIRST_IMAGE);
+    }
+
+    public GeoTiffImageReader(File file, int imageIndex) throws IOException {
         this.imageReader = buildImageReader(file);
         this.closeable = new NullCloseable();
+        this.imageIndex = imageIndex;
         this.noDataValue = readNoDataValue();
 
         this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
@@ -99,8 +110,13 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     public GeoTiffImageReader(InputStream inputStream, Closeable closeable) throws IOException {
+        this(inputStream, closeable, FIRST_IMAGE);
+    }
+
+    public GeoTiffImageReader(InputStream inputStream, Closeable closeable, int imageIndex) throws IOException {
         this.imageReader = buildImageReader(inputStream);
         this.closeable = closeable;
+        this.imageIndex = imageIndex;
         this.noDataValue = readNoDataValue();
 
         this.state = new GeoTiffImageReaderState(this.imageReader, this.closeable);
@@ -118,7 +134,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     public TIFFImageMetadata getImageMetadata() throws IOException {
-        return (TIFFImageMetadata) this.imageReader.getImageMetadata(FIRST_IMAGE);
+        return (TIFFImageMetadata) this.imageReader.getImageMetadata(imageIndex);
     }
 
     @Override
@@ -135,7 +151,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         int subsamplingXOffset = sourceOffsetX % sourceStepX;
         int subsamplingYOffset = sourceOffsetY % sourceStepY;
         this.readParam.setSourceSubsampling(sourceStepX, sourceStepY, subsamplingXOffset, subsamplingYOffset);
-        RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(FIRST_IMAGE, this.readParam);
+        RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(imageIndex, this.readParam);
         try {
             this.rectangle.setBounds(destOffsetX, destOffsetY, destWidth, destHeight);
             if (isGlobalShifted180) {
@@ -153,30 +169,34 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     public int getImageWidth() throws IOException {
-        return this.imageReader.getWidth(FIRST_IMAGE);
+        return this.imageReader.getWidth(imageIndex);
     }
 
     public int getImageHeight() throws IOException {
-        return this.imageReader.getHeight(FIRST_IMAGE);
+        return this.imageReader.getHeight(imageIndex);
+    }
+
+    public int getImageCount() throws IOException {
+        return this.imageReader.getNumImages(true);
     }
 
     public int getTileHeight() throws IOException {
-        return this.imageReader.getTileHeight(FIRST_IMAGE);
+        return this.imageReader.getTileHeight(imageIndex);
     }
 
     public int getTileWidth() throws IOException {
-        return this.imageReader.getTileWidth(FIRST_IMAGE);
+        return this.imageReader.getTileWidth(imageIndex);
     }
 
     public SampleModel getSampleModel() throws IOException {
-        Iterator<ImageTypeSpecifier> iter = this.imageReader.getImageTypes(FIRST_IMAGE);
+        Iterator<ImageTypeSpecifier> iter = this.imageReader.getImageTypes(imageIndex);
         ImageTypeSpecifier its = iter.next();
         return its.getSampleModel();
     }
 
     public TIFFRenderedImage getBaseImage() throws IOException {
         ImageReadParam readParam = this.imageReader.getDefaultReadParam();
-        return (TIFFRenderedImage) this.imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
+        return (TIFFRenderedImage) this.imageReader.readAsRenderedImage(imageIndex, readParam);
     }
 
     public Dimension computePreferredTiling(int rasterWidth, int rasterHeight) throws IOException {

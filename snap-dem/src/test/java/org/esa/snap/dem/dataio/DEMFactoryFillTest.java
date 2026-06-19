@@ -7,9 +7,12 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.esa.snap.runtime.Config;
@@ -159,6 +162,28 @@ public class DEMFactoryFillTest {
         }
     }
 
+    @Test
+    @STTM("SNAP-4213")
+    public void fillElevationDataSetsCopernicusSourcePreferenceFromTargetResolution() throws Exception {
+        Product product = TestUtils.createProduct("test", 25, 25);
+        product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                0.0, 10.0, 1.0 / 24.0, -1.0 / 24.0, 0.0, 0.0));
+        Rectangle rectangle = new Rectangle(0, 0, 25, 25);
+        TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, rectangle.x, rectangle.y,
+                                                               rectangle.width, rectangle.height);
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_FLOAT32,
+                                                            rectangle.width * rectangle.height);
+        RecordingCopernicusElevationModel dem = new RecordingCopernicusElevationModel();
+
+        boolean valid = DEMFactory.fillElevationData(dem, dem.getDescriptor().getNoDataValue(), tileGeoRef,
+                                                     rectangle, targetData, true, ProgressMonitor.NULL);
+
+        assertTrue(valid);
+        assertEquals(192, dem.observedPreferredSourceSize);
+        assertEquals(1200, dem.getPreferredSourceSize());
+    }
+
     private static void restorePreference(Preferences preferences, String key, String value) {
         if (value == null) {
             preferences.remove(key);
@@ -220,6 +245,81 @@ public class DEMFactoryFillTest {
 
         @Override
         public void dispose() {
+        }
+    }
+
+    private static final class RecordingCopernicusElevationModel extends CopernicusElevationModel {
+        private int observedPreferredSourceSize;
+
+        private RecordingCopernicusElevationModel() {
+            super(new CopernicusTestDescriptor(), Resampling.NEAREST_NEIGHBOUR);
+        }
+
+        @Override
+        public double getElevation(GeoPos geoPos) {
+            observedPreferredSourceSize = getPreferredSourceSize();
+            return 10.0;
+        }
+
+        @Override
+        protected void createElevationFile(ElevationFile[][] elevationFiles, int x, int y, File demInstallDir) {
+        }
+
+        @Override
+        protected ElevationFile createElevationFile(CopernicusElevationModel model, File localFile, ProductReader reader) {
+            return null;
+        }
+
+        @Override
+        protected int getResolution() {
+            return 90;
+        }
+    }
+
+    private static final class CopernicusTestDescriptor implements ElevationModelDescriptor {
+        @Override
+        public String getName() {
+            return "Fake Copernicus";
+        }
+        @Override
+        public float getNoDataValue() {
+            return -999.0f;
+        }
+        @Override
+        public int getRasterWidth() {
+            return 1200;
+        }
+        @Override
+        public int getRasterHeight() {
+            return 1200;
+        }
+        @Override
+        public int getTileWidthInDegrees() {
+            return 1;
+        }
+        @Override
+        public int getTileWidth() {
+            return 1200;
+        }
+        @Override
+        public int getNumXTiles() {
+            return 1;
+        }
+        @Override
+        public int getNumYTiles() {
+            return 1;
+        }
+        @Override
+        public ElevationModel createDem(Resampling resampling) {
+            return null;
+        }
+        @Override
+        public boolean canBeDownloaded() {
+            return false;
+        }
+        @Override
+        public File getDemInstallDir() {
+            return new File(".");
         }
     }
 

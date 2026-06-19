@@ -31,6 +31,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.runtime.Config;
 
 import java.awt.Dimension;
@@ -57,6 +58,7 @@ public class DEMFactory {
     private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_TILE = 2.0;
     private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE = 24.0;
     private static final long DEFAULT_ELEVATION_BAND_TILE_CACHE_SIZE_BYTES = 268435456L;
+    private static final double COPERNICUS_OVERVIEW_OVERSAMPLING = 8.0;
 
     private static final ElevationModelDescriptor[] descriptors = ElevationModelRegistry.getInstance().getAllDescriptors();
     private static final String[] demNameList;
@@ -278,6 +280,22 @@ public class DEMFactory {
                                          final Rectangle targetRectangle,
                                          final boolean nodataValueAtSea, final ProgressMonitor progressMonitor,
                                          final ElevationWriter writer) throws Exception {
+        if (dem instanceof CopernicusElevationModel) {
+            final int preferredSourceSize = getPreferredCopernicusSourceSize(geoPosProvider, targetRectangle);
+            try (AutoCloseable ignored = ((CopernicusElevationModel) dem).usePreferredSourceSize(preferredSourceSize)) {
+                return fillElevationCore(dem, demNoDataValue, geoPosProvider, targetRectangle,
+                                         nodataValueAtSea, progressMonitor, writer);
+            }
+        }
+        return fillElevationCore(dem, demNoDataValue, geoPosProvider, targetRectangle,
+                                 nodataValueAtSea, progressMonitor, writer);
+    }
+
+    private static boolean fillElevationCore(final ElevationModel dem, final double demNoDataValue,
+                                             final ElevationGeoPosProvider geoPosProvider,
+                                             final Rectangle targetRectangle,
+                                             final boolean nodataValueAtSea, final ProgressMonitor progressMonitor,
+                                             final ElevationWriter writer) throws Exception {
         final int maxY = targetRectangle.y + targetRectangle.height;
         final int maxX = targetRectangle.x + targetRectangle.width;
         final GeoPos geoPos = new GeoPos();
@@ -310,6 +328,59 @@ public class DEMFactory {
             fillElevationNoData(targetRectangle, writer, demNoDataValue, progressMonitor);
             return false;
         }
+    }
+
+    private static int getPreferredCopernicusSourceSize(final ElevationGeoPosProvider geoPosProvider,
+                                                        final Rectangle targetRectangle) {
+        final double lonPixelsPerDegree = getLonPixelsPerDegree(geoPosProvider, targetRectangle);
+        final double latPixelsPerDegree = getLatPixelsPerDegree(geoPosProvider, targetRectangle);
+        final double pixelsPerDegree = maxPositive(lonPixelsPerDegree, latPixelsPerDegree);
+        if (!isPositiveFinite(pixelsPerDegree)) {
+            return Integer.MAX_VALUE;
+        }
+        return Math.max(1, (int) Math.ceil(pixelsPerDegree * COPERNICUS_OVERVIEW_OVERSAMPLING - 1.0e-9));
+    }
+
+    private static double getLonPixelsPerDegree(final ElevationGeoPosProvider geoPosProvider,
+                                                final Rectangle targetRectangle) {
+        if (targetRectangle.width < 2) {
+            return Double.NaN;
+        }
+        final GeoPos left = new GeoPos();
+        final GeoPos right = new GeoPos();
+        final int y = targetRectangle.y + targetRectangle.height / 2;
+        geoPosProvider.getGeoPos(targetRectangle.x, y, left);
+        geoPosProvider.getGeoPos(targetRectangle.x + targetRectangle.width - 1, y, right);
+        final double lonDistance = normalizedLonDistance(left.lon, right.lon);
+        return isPositiveFinite(lonDistance) ? (targetRectangle.width - 1) / lonDistance : Double.NaN;
+    }
+
+    private static double getLatPixelsPerDegree(final ElevationGeoPosProvider geoPosProvider,
+                                                final Rectangle targetRectangle) {
+        if (targetRectangle.height < 2) {
+            return Double.NaN;
+        }
+        final GeoPos upper = new GeoPos();
+        final GeoPos lower = new GeoPos();
+        final int x = targetRectangle.x + targetRectangle.width / 2;
+        geoPosProvider.getGeoPos(x, targetRectangle.y, upper);
+        geoPosProvider.getGeoPos(x, targetRectangle.y + targetRectangle.height - 1, lower);
+        final double latDistance = Math.abs(upper.lat - lower.lat);
+        return isPositiveFinite(latDistance) ? (targetRectangle.height - 1) / latDistance : Double.NaN;
+    }
+
+    private static boolean isPositiveFinite(final double value) {
+        return value > 0.0 && !Double.isNaN(value) && !Double.isInfinite(value);
+    }
+
+    private static double maxPositive(final double value1, final double value2) {
+        if (!isPositiveFinite(value1)) {
+            return value2;
+        }
+        if (!isPositiveFinite(value2)) {
+            return value1;
+        }
+        return Math.max(value1, value2);
     }
 
     private static void fillElevationNoData(final Rectangle targetRectangle, final ElevationWriter writer,

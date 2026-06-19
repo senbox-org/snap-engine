@@ -52,7 +52,7 @@ public class Copernicus30mFile extends ElevationFile {
 
     private ElevationTile createDirectTile(final File file) throws IOException {
         final int[] tileIndices = getTileIndices(file);
-        return new CopernicusDirectElevationTile(demModel, new GeoTiffCopernicusTileSource(file),
+        return new CopernicusDirectElevationTile(demModel, GeoTiffCopernicusTileSource.createSources(file),
                                                  3600, 3600, tileIndices[0], tileIndices[1]);
     }
 
