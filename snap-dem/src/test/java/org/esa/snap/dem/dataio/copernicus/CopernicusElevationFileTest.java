@@ -40,7 +40,7 @@ public class CopernicusElevationFileTest {
 
     @Test
     @STTM("SNAP-4213")
-    public void test90mMissingRemoteTileIsCachedAsNoDataTile() throws Exception {
+    public void test90mKnownMissingRemoteTileIsCachedAsNoDataTileWithoutDownload() throws Exception {
         File localFile = new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_30_N03_00_W080_00_DEM.tif");
         CountingCopernicus90mFile file = new CountingCopernicus90mFile(localFile);
 
@@ -50,7 +50,20 @@ public class CopernicusElevationFileTest {
         assertNotNull(firstTile);
         assertSame(firstTile, secondTile);
         assertEquals(0.0f, firstTile.getSample(0, 0), 0.0f);
-        assertEquals(1, file.downloadCount);
+        assertEquals(0, file.downloadCount);
+    }
+
+    @Test
+    @STTM("SNAP-4213")
+    public void test90mKnownMissingTileSkipsRemoteLookup() throws Exception {
+        File localFile = new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_30_N00_00_W160_00_DEM.tif");
+        CountingCopernicus90mFile file = new CountingCopernicus90mFile(localFile);
+
+        ElevationTile tile = file.getTile(ProgressMonitor.NULL);
+
+        assertNotNull(tile);
+        assertEquals(0.0f, tile.getSample(0, 0), 0.0f);
+        assertEquals(0, file.downloadCount);
     }
 
     private static class CountingCopernicus30mFile extends Copernicus30mFile {

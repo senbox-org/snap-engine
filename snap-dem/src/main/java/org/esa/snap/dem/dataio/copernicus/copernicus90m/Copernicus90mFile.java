@@ -129,6 +129,10 @@ public class Copernicus90mFile extends ElevationFile {
             String [] fileNameSplit = localFile.getName().split("_");
             String north = fileNameSplit[4];
             String east =  fileNameSplit[6];
+            if (Copernicus90mMissingTileIndex.isMissing(north, east)) {
+                cacheNoDataTile();
+                return false;
+            }
             int lat = Integer.parseInt(north.substring(1));
             int lon = Integer.parseInt(east.substring(1));
             if(east.startsWith("W")){
