@@ -49,6 +49,14 @@ public class DEMFactory {
     public static final String LAST_EXTERNAL_DEM_DIR_KEY = "snap.externalDEMDir";
     public static final String AUTODEM = " (Auto Download)";
     public static final String DELAUNAY_INTERPOLATION = "DELAUNAY_INTERPOLATION";
+    private static final String ADD_ELEVATION_TILE_SIZE_KEY = "snap.dem.addElevationTileSize";
+    private static final String MAX_DEGREES_PER_ELEVATION_TILE_KEY = "snap.dem.maxDegreesPerElevationTile";
+    private static final String MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE_KEY = "snap.dem.maxDegreesPerElevationOverviewTile";
+    private static final String ELEVATION_BAND_TILE_CACHE_SIZE_KEY = "snap.dem.elevationBandTileCacheSizeBytes";
+    private static final int DEFAULT_ADD_ELEVATION_TILE_SIZE = 128;
+    private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_TILE = 2.0;
+    private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE = 24.0;
+    private static final long DEFAULT_ELEVATION_BAND_TILE_CACHE_SIZE_BYTES = 268435456L;
 
     private static final ElevationModelDescriptor[] descriptors = ElevationModelRegistry.getInstance().getAllDescriptors();
     private static final String[] demNameList;
@@ -130,11 +138,25 @@ public class DEMFactory {
     }
 
     public static Dimension getAddElevationTileSize(final Product product) {
-        final int configuredSize = Math.max(1, Config.instance().preferences().getInt("snap.dem.addElevationTileSize", 128));
+        final int configuredSize = Math.max(1, Config.instance().preferences().getInt(ADD_ELEVATION_TILE_SIZE_KEY, DEFAULT_ADD_ELEVATION_TILE_SIZE));
+        final double maxDegrees = Config.instance().preferences().getDouble(MAX_DEGREES_PER_ELEVATION_TILE_KEY, DEFAULT_MAX_DEGREES_PER_ELEVATION_TILE);
+        return getElevationTileSize(product, configuredSize, maxDegrees);
+    }
+
+    public static Dimension getAddElevationOverviewTileSize(final Product product) {
+        final int configuredSize = Math.max(1, Config.instance().preferences().getInt(ADD_ELEVATION_TILE_SIZE_KEY, DEFAULT_ADD_ELEVATION_TILE_SIZE));
+        final double maxDegrees = Config.instance().preferences().getDouble(MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE_KEY, DEFAULT_MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE);
+        return getElevationTileSize(product, configuredSize, maxDegrees);
+    }
+
+    public static long getElevationBandTileCacheSizeBytes() {
+        return Config.instance().preferences().getLong(ELEVATION_BAND_TILE_CACHE_SIZE_KEY, DEFAULT_ELEVATION_BAND_TILE_CACHE_SIZE_BYTES);
+    }
+
+    private static Dimension getElevationTileSize(final Product product, final int configuredSize, final double maxDegrees) {
         int tileWidth = Math.min(configuredSize, product.getSceneRasterWidth());
         int tileHeight = Math.min(configuredSize, product.getSceneRasterHeight());
 
-        final double maxDegrees = Config.instance().preferences().getDouble("snap.dem.maxDegreesPerElevationTile", 2.0);
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         if (geoCoding != null && maxDegrees > 0.0) {
             final int width = product.getSceneRasterWidth();
@@ -194,8 +216,15 @@ public class DEMFactory {
                                             final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
                                             final ProductData targetData, final boolean nodataValueAtSea,
                                             final ProgressMonitor progressMonitor) throws Exception {
-        return fillElevationData(dem, demNoDataValue, tileGeoRef::getGeoPos, targetRectangle, targetData,
-                                 nodataValueAtSea, progressMonitor);
+        return fillElevationData(dem, demNoDataValue, tileGeoRef, targetRectangle, targetRectangle, targetData, nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Rectangle dataRectangle,
+                                            final Rectangle computeRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevationData(dem, demNoDataValue, tileGeoRef::getGeoPos, dataRectangle, computeRectangle, targetData, nodataValueAtSea, progressMonitor);
     }
 
     public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
@@ -203,18 +232,28 @@ public class DEMFactory {
                                             final Rectangle targetRectangle,
                                             final ProductData targetData, final boolean nodataValueAtSea,
                                             final ProgressMonitor progressMonitor) throws Exception {
-        return fillElevation(dem, demNoDataValue, geoPosProvider, targetRectangle, nodataValueAtSea,
+        return fillElevationData(dem, demNoDataValue, geoPosProvider, targetRectangle, targetRectangle, targetData, nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final ElevationGeoPosProvider geoPosProvider,
+                                            final Rectangle dataRectangle,
+                                            final Rectangle computeRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        ensureComputeRectangleWithinDataRectangle(dataRectangle, computeRectangle);
+        return fillElevation(dem, demNoDataValue, geoPosProvider, computeRectangle, nodataValueAtSea,
                              progressMonitor, new ElevationWriter() {
                     private int rowOffset;
 
                     @Override
                     public void beginRow(int y) {
-                        rowOffset = (y - targetRectangle.y) * targetRectangle.width;
+                        rowOffset = (y - dataRectangle.y) * dataRectangle.width;
                     }
 
                     @Override
                     public void write(int x, int y, double value) {
-                        setElemDouble(targetData, rowOffset + x - targetRectangle.x, value);
+                        setElemDouble(targetData, rowOffset + x - dataRectangle.x, value);
                     }
                 });
     }
@@ -222,6 +261,16 @@ public class DEMFactory {
     @FunctionalInterface
     public interface ElevationGeoPosProvider {
         void getGeoPos(int x, int y, GeoPos geoPos);
+    }
+
+    private static void ensureComputeRectangleWithinDataRectangle(final Rectangle dataRectangle,
+                                                                  final Rectangle computeRectangle) {
+        if (computeRectangle.x < dataRectangle.x ||
+                computeRectangle.y < dataRectangle.y ||
+                computeRectangle.x + computeRectangle.width > dataRectangle.x + dataRectangle.width ||
+                computeRectangle.y + computeRectangle.height > dataRectangle.y + dataRectangle.height) {
+            throw new IllegalArgumentException("computeRectangle must be contained in dataRectangle");
+        }
     }
 
     private static boolean fillElevation(final ElevationModel dem, final double demNoDataValue,

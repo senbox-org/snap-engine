@@ -60,6 +60,40 @@ public class DEMFactoryFillTest {
 
     @Test
     @STTM("SNAP-4213")
+    public void fillElevationDataWritesOnlyRequestedSubRectangleIntoTargetBuffer() throws Exception {
+        Product product = TestUtils.createProduct("test", 12, 10);
+        Rectangle dataRectangle = new Rectangle(1, 2, 5, 4);
+        Rectangle computeRectangle = new Rectangle(3, 3, 2, 2);
+        TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, dataRectangle.x, dataRectangle.y, dataRectangle.width, dataRectangle.height);
+
+        ProductData targetData = ProductData.createInstance(ProductData.TYPE_FLOAT32, dataRectangle.width * dataRectangle.height);
+        final double sentinel = -12345.0;
+        for (int i = 0; i < targetData.getNumElems(); i++) {
+            targetData.setElemDoubleAt(i, sentinel);
+        }
+
+        FakeElevationModel dem = new FakeElevationModel(-999.0f);
+        boolean valid = DEMFactory.fillElevationData(dem, dem.getDescriptor().getNoDataValue(), tileGeoRef,
+                dataRectangle, computeRectangle, targetData, true, ProgressMonitor.NULL);
+
+        assertTrue(valid);
+
+        GeoPos expectedGeoPos = new GeoPos();
+        for (int y = dataRectangle.y; y < dataRectangle.y + dataRectangle.height; y++) {
+            for (int x = dataRectangle.x; x < dataRectangle.x + dataRectangle.width; x++) {
+                int index = (y - dataRectangle.y) * dataRectangle.width + x - dataRectangle.x;
+                if (computeRectangle.contains(x, y)) {
+                    tileGeoRef.getGeoPos(x, y, expectedGeoPos);
+                    assertEquals(elevationFor(expectedGeoPos), targetData.getElemDoubleAt(index), 1.0e-4);
+                } else {
+                    assertEquals(sentinel, targetData.getElemDoubleAt(index), 0.0);
+                }
+            }
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4213")
     public void addElevationTileSizeUsesConfiguredPixelLimit() {
         Preferences preferences = Config.instance().preferences();
         String previousTileSize = preferences.get(ADD_ELEVATION_TILE_SIZE_KEY, null);
@@ -79,6 +113,30 @@ public class DEMFactoryFillTest {
 
     @Test
     @STTM("SNAP-4213")
+    public void addElevationOverviewTileSizeUsesConfiguredGeographicLimit() throws Exception {
+        Preferences preferences = Config.instance().preferences();
+        String previousTileSize = preferences.get(ADD_ELEVATION_TILE_SIZE_KEY, null);
+        String previousMaxDegrees = preferences.get("snap.dem.maxDegreesPerElevationOverviewTile", null);
+        try {
+            preferences.putInt(ADD_ELEVATION_TILE_SIZE_KEY, 128);
+            preferences.putDouble("snap.dem.maxDegreesPerElevationOverviewTile", 24.0);
+
+            Product product = TestUtils.createProduct("test", 200, 200);
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                    product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                    10.0, 50.0, 0.1, -0.25, 0.0, 0.0));
+
+            Dimension tileSize = DEMFactory.getAddElevationOverviewTileSize(product);
+
+            assertEquals(new Dimension(128, 96), tileSize);
+        } finally {
+            restorePreference(preferences, ADD_ELEVATION_TILE_SIZE_KEY, previousTileSize);
+            restorePreference(preferences, "snap.dem.maxDegreesPerElevationOverviewTile", previousMaxDegrees);
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4213")
     public void addElevationTileSizeLimitsGeographicExtent() throws Exception {
         Preferences preferences = Config.instance().preferences();
         String previousTileSize = preferences.get(ADD_ELEVATION_TILE_SIZE_KEY, null);
@@ -89,11 +147,8 @@ public class DEMFactoryFillTest {
 
             Product product = TestUtils.createProduct("test", 100, 100);
             product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                                       product.getSceneRasterWidth(),
-                                                       product.getSceneRasterHeight(),
-                                                       10.0, 50.0,
-                                                       0.1, -0.2,
-                                                       0.0, 0.0));
+                    product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                    10.0, 50.0, 0.1, -0.2, 0.0, 0.0));
 
             Dimension tileSize = DEMFactory.getAddElevationTileSize(product);
 

@@ -1,7 +1,5 @@
 package org.esa.snap.dem.dataio.copernicus;
 
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.dem.dataio.EarthGravitationalModel96;
@@ -139,11 +137,13 @@ public final class CopernicusDirectElevationTile implements ElevationTile {
     private void addGravitationalModel(final int localY, final float[] targetRows, final int targetOffset) throws Exception {
         final EarthGravitationalModel96 egm = EarthGravitationalModel96.instance();
         final double[][] workspace = new double[4][4];
+        final double noDataValue = demModel.getDescriptor().getNoDataValue();
+        final double lat = 90.0 - tileYIndex - (double) localY / (double) targetHeight;
+        final double lon0 = tileXIndex - 180.0;
+        final double lonStep = 1.0 / (double) targetWidth;
         for (int x = 0; x < targetWidth; x++) {
-            if (targetRows[targetOffset + x] != demModel.getDescriptor().getNoDataValue()) {
-                final GeoPos geoPos = demModel.getGeoPos(new PixelPos(tileXIndex * targetWidth + x,
-                                                                       tileYIndex * targetHeight + localY));
-                targetRows[targetOffset + x] += egm.getEGM(geoPos.lat, geoPos.lon, workspace);
+            if (targetRows[targetOffset + x] != noDataValue) {
+                targetRows[targetOffset + x] += egm.getEGM(lat, lon0 + x * lonStep, workspace);
             }
         }
     }
