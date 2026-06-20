@@ -310,8 +310,18 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
 
     /**
      * Gets the singleton instance of this class.
-     * @return the singlton instance
+     *
+     * @return the singleton instance
+     *
+     * @deprecated This class is <b>not</b> stateless: {@link #readProduct(Object) readProduct} and
+     * {@link #readOrbitData()} mutate the per-product fields {@code _productFile}, {@code dataRecords}
+     * and {@code recordTimes}, which {@link #getOrbitVector(double)} then reads back. Sharing a single
+     * instance across products (e.g. the scenes of an InSAR stack) lets concurrent threads overwrite
+     * each other's orbit data, so {@code getOrbitVector} may interpolate one product's geometry from
+     * another product's state vectors. This produces non-deterministic, slightly-shifted coregistration
+     * output. Construct a private instance with {@code new EnvisatOrbitReader()} per product instead.
      */
+    @Deprecated
     public static EnvisatOrbitReader getInstance() {
         return Holder.instance;
     }
