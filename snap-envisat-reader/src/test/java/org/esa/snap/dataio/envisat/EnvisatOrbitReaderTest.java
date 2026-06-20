@@ -16,10 +16,15 @@
 
 package org.esa.snap.dataio.envisat;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -99,6 +104,52 @@ public class EnvisatOrbitReaderTest {
         assertEquals(2436.6730959241404, orb.xVel, 1.0e-8);
         assertEquals(-1513.6396683722035, orb.yVel, 1.0e-8);
         assertEquals(6984.008122409866, orb.zVel, 1.0e-8);
+    }
+
+    /**
+     * Regression guard for the EnvisatOrbitReader shared-state race (see DorisOrbitFile):
+     * the reader holds per-product mutable state (_productFile, dataRecords, recordTimes), so each
+     * product must use its own instance. This test loads two different orbit files into two
+     * independently-constructed readers and hammers both concurrently, asserting that neither ever
+     * returns the other's data. It would fail if the reader were changed to keep that state in
+     * shared/static fields again.
+     */
+    @Test
+    @STTM("SNAP-4217")
+    public void testConcurrentReadersAreIsolated() throws Exception {
+
+        final EnvisatOrbitReader porReader = new EnvisatOrbitReader();
+        porReader.readProduct(doris_por_orbit);
+        porReader.readOrbitData();
+
+        final EnvisatOrbitReader vorReader = new EnvisatOrbitReader();
+        vorReader.readProduct(doris_vor_orbit);
+        vorReader.readOrbitData();
+
+        // first-record X positions captured from testPOROrbitFiles / testVOROrbitFiles
+        final double porExpectedXPos = -3300453.451;
+        final double vorExpectedXPos = 6494931.106;
+
+        final int iterations = 1000;
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            final Future<?> porTask = executor.submit(() -> {
+                for (int i = 0; i < iterations; i++) {
+                    assertEquals(porExpectedXPos, porReader.getOrbitVector(0).xPos, 1.0e-8);
+                }
+            });
+            final Future<?> vorTask = executor.submit(() -> {
+                for (int i = 0; i < iterations; i++) {
+                    assertEquals(vorExpectedXPos, vorReader.getOrbitVector(0).xPos, 1.0e-8);
+                }
+            });
+            // surfaces any assertion failure thrown on a worker thread
+            porTask.get();
+            vorTask.get();
+        } finally {
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(30, TimeUnit.SECONDS));
+        }
     }
 
     static EnvisatOrbitReader.OrbitVector getOrbitData(final EnvisatOrbitReader reader) throws IOException {
