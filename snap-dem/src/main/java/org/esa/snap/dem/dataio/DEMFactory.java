@@ -20,15 +20,21 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.OperatorException;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
+import org.esa.snap.engine_utilities.gpf.TileIndex;
+import org.esa.snap.runtime.Config;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +49,14 @@ public class DEMFactory {
     public static final String LAST_EXTERNAL_DEM_DIR_KEY = "snap.externalDEMDir";
     public static final String AUTODEM = " (Auto Download)";
     public static final String DELAUNAY_INTERPOLATION = "DELAUNAY_INTERPOLATION";
+    private static final String ADD_ELEVATION_TILE_SIZE_KEY = "snap.dem.addElevationTileSize";
+    private static final String MAX_DEGREES_PER_ELEVATION_TILE_KEY = "snap.dem.maxDegreesPerElevationTile";
+    private static final String MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE_KEY = "snap.dem.maxDegreesPerElevationOverviewTile";
+    private static final String ELEVATION_BAND_TILE_CACHE_SIZE_KEY = "snap.dem.elevationBandTileCacheSizeBytes";
+    private static final int DEFAULT_ADD_ELEVATION_TILE_SIZE = 128;
+    private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_TILE = 2.0;
+    private static final double DEFAULT_MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE = 24.0;
+    private static final long DEFAULT_ELEVATION_BAND_TILE_CACHE_SIZE_BYTES = 268435456L;
 
     private static final ElevationModelDescriptor[] descriptors = ElevationModelRegistry.getInstance().getAllDescriptors();
     private static final String[] demNameList;
@@ -123,10 +137,209 @@ public class DEMFactory {
         }
     }
 
+    public static Dimension getAddElevationTileSize(final Product product) {
+        final int configuredSize = Math.max(1, Config.instance().preferences().getInt(ADD_ELEVATION_TILE_SIZE_KEY, DEFAULT_ADD_ELEVATION_TILE_SIZE));
+        final double maxDegrees = Config.instance().preferences().getDouble(MAX_DEGREES_PER_ELEVATION_TILE_KEY, DEFAULT_MAX_DEGREES_PER_ELEVATION_TILE);
+        return getElevationTileSize(product, configuredSize, maxDegrees);
+    }
+
+    public static Dimension getAddElevationOverviewTileSize(final Product product) {
+        final int configuredSize = Math.max(1, Config.instance().preferences().getInt(ADD_ELEVATION_TILE_SIZE_KEY, DEFAULT_ADD_ELEVATION_TILE_SIZE));
+        final double maxDegrees = Config.instance().preferences().getDouble(MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE_KEY, DEFAULT_MAX_DEGREES_PER_ELEVATION_OVERVIEW_TILE);
+        return getElevationTileSize(product, configuredSize, maxDegrees);
+    }
+
+    public static long getElevationBandTileCacheSizeBytes() {
+        return Config.instance().preferences().getLong(ELEVATION_BAND_TILE_CACHE_SIZE_KEY, DEFAULT_ELEVATION_BAND_TILE_CACHE_SIZE_BYTES);
+    }
+
+    private static Dimension getElevationTileSize(final Product product, final int configuredSize, final double maxDegrees) {
+        int tileWidth = Math.min(configuredSize, product.getSceneRasterWidth());
+        int tileHeight = Math.min(configuredSize, product.getSceneRasterHeight());
+
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+        if (geoCoding != null && maxDegrees > 0.0) {
+            final int width = product.getSceneRasterWidth();
+            final int height = product.getSceneRasterHeight();
+            final GeoPos upperLeft = geoCoding.getGeoPos(new PixelPos(0, 0), null);
+            final GeoPos upperRight = geoCoding.getGeoPos(new PixelPos(width - 1, 0), null);
+            final GeoPos lowerLeft = geoCoding.getGeoPos(new PixelPos(0, height - 1), null);
+
+            final double lonDegreesPerPixel = normalizedLonDistance(upperLeft.lon, upperRight.lon) / Math.max(1, width - 1);
+            final double latDegreesPerPixel = Math.abs(upperLeft.lat - lowerLeft.lat) / Math.max(1, height - 1);
+            if (lonDegreesPerPixel > 0.0 && !Double.isNaN(lonDegreesPerPixel)) {
+                tileWidth = Math.max(1, Math.min(tileWidth, (int) Math.floor(maxDegrees / lonDegreesPerPixel)));
+            }
+            if (latDegreesPerPixel > 0.0 && !Double.isNaN(latDegreesPerPixel)) {
+                tileHeight = Math.max(1, Math.min(tileHeight, (int) Math.floor(maxDegrees / latDegreesPerPixel)));
+            }
+        }
+
+        return new Dimension(tileWidth, tileHeight);
+    }
+
+    private static double normalizedLonDistance(final double lon1, final double lon2) {
+        double distance = Math.abs(lon1 - lon2);
+        if (distance > 180.0) {
+            distance = 360.0 - distance;
+        }
+        return distance;
+    }
+
     public static String getDEMDisplayName(ElevationModelDescriptor descriptor) {
         if (descriptor.canBeDownloaded())
             return descriptor.getName() + AUTODEM;
         return descriptor.getName();
+    }
+
+    public static boolean fillElevationTile(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Tile targetTile,
+                                            final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        final ProductData targetData = targetTile.getDataBuffer();
+        final TileIndex targetIndex = new TileIndex(targetTile);
+        return fillElevation(dem, demNoDataValue, tileGeoRef::getGeoPos, targetTile.getRectangle(), nodataValueAtSea,
+                             progressMonitor, new ElevationWriter() {
+                    @Override
+                    public void beginRow(int y) {
+                        targetIndex.calculateStride(y);
+                    }
+
+                    @Override
+                    public void write(int x, int y, double value) {
+                        setElemDouble(targetData, targetIndex.getIndex(x), value);
+                    }
+                });
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Rectangle targetRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevationData(dem, demNoDataValue, tileGeoRef, targetRectangle, targetRectangle, targetData, nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final TileGeoreferencing tileGeoRef, final Rectangle dataRectangle,
+                                            final Rectangle computeRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevationData(dem, demNoDataValue, tileGeoRef::getGeoPos, dataRectangle, computeRectangle, targetData, nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final ElevationGeoPosProvider geoPosProvider,
+                                            final Rectangle targetRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        return fillElevationData(dem, demNoDataValue, geoPosProvider, targetRectangle, targetRectangle, targetData, nodataValueAtSea, progressMonitor);
+    }
+
+    public static boolean fillElevationData(final ElevationModel dem, final double demNoDataValue,
+                                            final ElevationGeoPosProvider geoPosProvider,
+                                            final Rectangle dataRectangle,
+                                            final Rectangle computeRectangle,
+                                            final ProductData targetData, final boolean nodataValueAtSea,
+                                            final ProgressMonitor progressMonitor) throws Exception {
+        ensureComputeRectangleWithinDataRectangle(dataRectangle, computeRectangle);
+        return fillElevation(dem, demNoDataValue, geoPosProvider, computeRectangle, nodataValueAtSea,
+                             progressMonitor, new ElevationWriter() {
+                    private int rowOffset;
+
+                    @Override
+                    public void beginRow(int y) {
+                        rowOffset = (y - dataRectangle.y) * dataRectangle.width;
+                    }
+
+                    @Override
+                    public void write(int x, int y, double value) {
+                        setElemDouble(targetData, rowOffset + x - dataRectangle.x, value);
+                    }
+                });
+    }
+
+    @FunctionalInterface
+    public interface ElevationGeoPosProvider {
+        void getGeoPos(int x, int y, GeoPos geoPos);
+    }
+
+    private static void ensureComputeRectangleWithinDataRectangle(final Rectangle dataRectangle,
+                                                                  final Rectangle computeRectangle) {
+        if (computeRectangle.x < dataRectangle.x ||
+                computeRectangle.y < dataRectangle.y ||
+                computeRectangle.x + computeRectangle.width > dataRectangle.x + dataRectangle.width ||
+                computeRectangle.y + computeRectangle.height > dataRectangle.y + dataRectangle.height) {
+            throw new IllegalArgumentException("computeRectangle must be contained in dataRectangle");
+        }
+    }
+
+    private static boolean fillElevation(final ElevationModel dem, final double demNoDataValue,
+                                         final ElevationGeoPosProvider geoPosProvider,
+                                         final Rectangle targetRectangle,
+                                         final boolean nodataValueAtSea, final ProgressMonitor progressMonitor,
+                                         final ElevationWriter writer) throws Exception {
+        final int maxY = targetRectangle.y + targetRectangle.height;
+        final int maxX = targetRectangle.x + targetRectangle.width;
+        final GeoPos geoPos = new GeoPos();
+        final double[][] egmWorkspace = new double[4][4];
+
+        try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
+            boolean valid = false;
+            for (int y = targetRectangle.y; y < maxY; y++) {
+                ProgressMonitorContext.checkCanceled(progressMonitor);
+                writer.beginRow(y);
+                for (int x = targetRectangle.x; x < maxX; x++) {
+                    if (((x - targetRectangle.x) & 63) == 0) {
+                        ProgressMonitorContext.checkCanceled(progressMonitor);
+                    }
+                    geoPosProvider.getGeoPos(x, y, geoPos);
+                    Double alt = dem.getElevation(geoPos);
+                    if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
+                        alt = (double) EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, egmWorkspace);
+                    }
+                    if (!valid && !alt.equals(demNoDataValue)) {
+                        valid = true;
+                    }
+                    writer.write(x, y, alt);
+                }
+            }
+            return valid;
+        } catch (CancellationException e) {
+            throw e;
+        } catch (Exception e) {
+            fillElevationNoData(targetRectangle, writer, demNoDataValue, progressMonitor);
+            return false;
+        }
+    }
+
+    private static void fillElevationNoData(final Rectangle targetRectangle, final ElevationWriter writer,
+                                            final double noDataValue, final ProgressMonitor progressMonitor) {
+        final int maxY = targetRectangle.y + targetRectangle.height;
+        final int maxX = targetRectangle.x + targetRectangle.width;
+        for (int y = targetRectangle.y; y < maxY; y++) {
+            ProgressMonitorContext.checkCanceled(progressMonitor);
+            writer.beginRow(y);
+            for (int x = targetRectangle.x; x < maxX; x++) {
+                writer.write(x, y, noDataValue);
+            }
+        }
+    }
+
+    private static void setElemDouble(final ProductData targetData, final int index, final double value) {
+        final Object elements = targetData.getElems();
+        if (elements instanceof float[]) {
+            ((float[]) elements)[index] = (float) value;
+        } else if (elements instanceof double[]) {
+            ((double[]) elements)[index] = value;
+        } else {
+            targetData.setElemDoubleAt(index, value);
+        }
+    }
+
+    private interface ElevationWriter {
+        void beginRow(int y);
+
+        void write(int x, int y, double value);
     }
 
     /**
