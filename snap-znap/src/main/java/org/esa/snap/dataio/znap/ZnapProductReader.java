@@ -142,7 +142,7 @@ import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VALID_PIXEL_EXPRESS
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.VIRTUAL_BAND_EXPRESSION;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.WAVELENGTH;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.cast;
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
+import static org.esa.snap.core.dataio.ProductReaderUtils.convertToPath;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.getSnapDataType;
 import static ucar.nc2.constants.ACDD.TIME_END;
 import static ucar.nc2.constants.ACDD.TIME_START;
