@@ -183,6 +183,11 @@ public class GDALProductReader extends AbstractProductReader {
                     }
                 }
                 final Placemark[] gcpPlacemarks = gcpPlacemarksList.toArray(new Placemark[0]);
+
+                if (product != null) {
+                    //add GCPs to product
+                    for (Placemark gcpPlacemark : gcpPlacemarks) product.getGcpGroup().add(gcpPlacemark);
+                }
                 final Datum datum = getDatum(gcpProjection);
                 final int productWidth = gdalDataset.getRasterXSize();
                 final int productHeight = gdalDataset.getRasterYSize();
