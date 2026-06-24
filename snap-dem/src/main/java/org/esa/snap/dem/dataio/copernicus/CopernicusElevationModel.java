@@ -37,7 +37,7 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
     }
 
     @Override
-    public synchronized double getElevation(final GeoPos geoPos) throws Exception {
+    public double getElevation(final GeoPos geoPos) throws Exception {
 
         if (geoPos.lon > 180) {
             geoPos.lon -= 360;
