@@ -240,7 +240,7 @@ public class DateTimeUtils {
                     stringData = stringData.substring(0, stringData.lastIndexOf("."));
                     dateFormat = dateFormat.substring(0, dateFormat.lastIndexOf("."));
                 }
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
                 simpleDateFormat.setCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                 Date date = simpleDateFormat.parse(stringData);
                 parsedDate = ProductData.UTC.create(date, microseconds);
