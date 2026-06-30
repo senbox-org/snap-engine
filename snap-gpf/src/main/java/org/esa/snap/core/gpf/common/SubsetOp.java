@@ -200,6 +200,9 @@ public class SubsetOp extends Operator {
         } else {
             subsetDef.addNodeNames(sourceProduct.getBandNames());
         }
+        if (referenceBand != null && !subsetDef.containsNodeName(referenceBand)) {
+            subsetDef.addNodeName(referenceBand);
+        }
         String[] nodeNames = subsetDef.getNodeNames();
         if (nodeNames != null) {
             final ArrayList<String> referencedNodeNames = new ArrayList<>();
