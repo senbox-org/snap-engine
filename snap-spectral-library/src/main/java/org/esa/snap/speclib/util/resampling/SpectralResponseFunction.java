@@ -6,9 +6,14 @@ import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.esa.snap.speclib.io.csv.util.CsvUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -52,6 +57,28 @@ public class SpectralResponseFunction {
      */
     public static CsvTable readFwhmFromCsv(File csvFile) throws IOException {
         return CsvUtils.read(csvFile.toPath());
+    }
+
+    /**
+     * Reads a bundled FWHM CSV resource for the given target sensor.
+     *
+     * @param targetSensorName sensor identifier, case-insensitive
+     * @return parsed FWHM table
+     */
+    public static CsvTable readBundledFwhmFromCsv(String targetSensorName) throws IOException {
+        if (targetSensorName == null || targetSensorName.isBlank()) {
+            throw new FileNotFoundException("No target sensor specified for bundled FWHM CSV.");
+        }
+
+        String resourceName = "fwhm_" + targetSensorName.trim().toLowerCase(Locale.ROOT) + ".csv";
+        InputStream stream = SpectralResponseFunction.class.getResourceAsStream(resourceName);
+        if (stream == null) {
+            throw new FileNotFoundException("Bundled FWHM CSV not found: " + resourceName);
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            return CsvUtils.read(reader, resourceName);
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +63,17 @@ public class CsvUtilsTest {
         assertNotNull(t);
         assertTrue(t.header().isEmpty());
         assertTrue(t.rows().isEmpty());
+    }
+
+    @Test
+    @STTM("SNAP-4174")
+    public void test_read_reader_parsesLikePathReader() throws Exception {
+        CsvTable t = CsvUtils.read(new StringReader("h1,h2\n1,2\n\"x,y\",z\n"), "memory.csv");
+
+        assertEquals(List.of("h1", "h2"), t.header());
+        assertEquals(2, t.rows().size());
+        assertEquals(List.of("1", "2"), t.rows().get(0));
+        assertEquals(List.of("x,y", "z"), t.rows().get(1));
     }
 
     @Test

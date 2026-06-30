@@ -17,6 +17,18 @@ public class CsvUtils {
         Objects.requireNonNull(path, "path must not be null");
 
         try (BufferedReader r = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            return read(r, path.toString());
+        }
+    }
+
+    public static CsvTable read(Reader reader, String sourceName) throws IOException {
+        Objects.requireNonNull(reader, "reader must not be null");
+
+        String source = (sourceName == null || sourceName.isBlank()) ? "<reader>" : sourceName;
+
+        try (BufferedReader r = reader instanceof BufferedReader
+                ? (BufferedReader) reader
+                : new BufferedReader(reader)) {
             List<List<String>> rows = new ArrayList<>();
 
             StringBuilder sb = new StringBuilder();
@@ -77,7 +89,7 @@ public class CsvUtils {
             }
 
             if (inQuotes) {
-                throw new IOException("Unclosed quote in CSV: " + path);
+                throw new IOException("Unclosed quote in CSV: " + source);
             }
             if (!sb.isEmpty() || !currentRow.isEmpty()) {
                 currentRow.add(sb.toString());

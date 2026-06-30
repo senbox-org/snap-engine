@@ -125,6 +125,22 @@ public class SpectralResponseFunctionTest {
 
     @Test
     @STTM("SNAP-4174")
+    public void test_readBundledFwhmFromCsv_acceptsUppercaseSensorNames() throws Exception {
+        assertBundledFwhm("ENMAP", 224, List.of("418.24", "6.99561"));
+        assertBundledFwhm("PRISMA", 234, List.of("402.5", "11.4"));
+        assertBundledFwhm("OLCI", 21, List.of("400.0", "14.128492"));
+    }
+
+    @Test
+    @STTM("SNAP-4174")
+    public void test_readBundledFwhmFromCsv_acceptsLowercaseSensorNames() throws Exception {
+        assertBundledFwhm("enmap", 224, List.of("418.24", "6.99561"));
+        assertBundledFwhm("prisma", 234, List.of("402.5", "11.4"));
+        assertBundledFwhm("olci", 21, List.of("400.0", "14.128492"));
+    }
+
+    @Test
+    @STTM("SNAP-4174")
     public void test_getFullyDefinedSrf_olci() throws Exception {
         SpectralResponseFunction srf = new SpectralResponseFunction("olci");
 
@@ -229,5 +245,14 @@ public class SpectralResponseFunctionTest {
         assertEquals(13.3f, fwhmTableColumnsAsArrays[1][128], 1.E-1);
         assertEquals(2496.9f, fwhmTableColumnsAsArrays[0][233], 1.E-1);
         assertEquals(9.5f, fwhmTableColumnsAsArrays[1][233], 1.E-1);
+    }
+
+    private static void assertBundledFwhm(String sensorName, int expectedRows, List<String> expectedFirstRow)
+            throws Exception {
+        CsvTable fwhmTable = SpectralResponseFunction.readBundledFwhmFromCsv(sensorName);
+
+        assertEquals(List.of("wavelength", "fwhm"), fwhmTable.header());
+        assertEquals(expectedRows, fwhmTable.rows().size());
+        assertEquals(expectedFirstRow, fwhmTable.rows().getFirst());
     }
 }
