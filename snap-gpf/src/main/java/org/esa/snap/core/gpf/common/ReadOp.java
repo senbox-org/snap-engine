@@ -21,11 +21,8 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetByPolygon;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -33,6 +30,8 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.jexp.ParseException;
+import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.GeometrySubsetRegion;
@@ -47,7 +46,11 @@ import org.locationtech.jts.geom.Polygon;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Reads the specified file as product. This operator may serve as a source node in processing graphs,
@@ -221,22 +224,60 @@ public class ReadOp extends Operator {
                 }
                 this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
                 if (subsetDef != null) {
+                    List<Band> currentBands = List.of(this.targetProduct.getBandGroup().toArray(new Band[0]));
+                    List<Band> targetBands = new ArrayList<>();
+                    List<Mask> currentMasks = List.of(this.targetProduct.getMaskGroup().toArray(new Mask[0]));
+                    List<Mask> targetMasks = new ArrayList<>();
+
+                    List<String> targetNodeNames = new ArrayList<>();
+                    final ArrayList<String> referencedNodeNames = new ArrayList<>();
+
                     if (this.bandNames != null && this.bandNames.length > 0) {
-                        java.util.List<String> targetBandNames = Arrays.asList(this.bandNames);
-                        Band[] currentBands = this.targetProduct.getBandGroup().toArray(new Band[0]);
-                        this.targetProduct.getBandGroup().removeAll();
+                        targetNodeNames.addAll(Arrays.asList(this.bandNames));
                         for (Band band : currentBands) {
-                            if (targetBandNames.contains(band.getName())) {
-                                this.targetProduct.getBandGroup().add(band);
+                            if (targetNodeNames.contains(band.getName())) {
+                                targetBands.add(band);
                             }
                         }
                     }
                     if (this.maskNames != null && this.maskNames.length > 0) {
-                        java.util.List<String> targetMaskNames = Arrays.asList(this.maskNames);
-                        Mask[] currentBands = this.targetProduct.getMaskGroup().toArray(new Mask[0]);
+                        targetNodeNames.addAll( Arrays.asList(this.maskNames));
+                        for (Mask mask : currentMasks) {
+                            if (targetNodeNames.contains(mask.getName())) {
+                                targetMasks.add(mask);
+                            }
+                        }
+                    } else if (!targetBands.isEmpty()) {
+                        //add all masks
+                        targetMasks.addAll(currentMasks);
+                    }
+
+                    //get the list of referenced nodes
+                    if (!targetNodeNames.isEmpty()) {
+                        for (String nodeName : targetNodeNames) {
+                            collectReferencedRasters(nodeName, referencedNodeNames,this.targetProduct);
+                        }
+                        for (String nodeName: referencedNodeNames){
+                            RasterDataNode node = this.targetProduct.getRasterDataNode(nodeName);
+                            if (node instanceof Mask && !targetMasks.contains(node)){
+                                targetMasks.add((Mask)node);
+                            }else if (node instanceof Band && !targetBands.contains(node)){
+                                targetBands.add((Band)node);
+                            }
+                        };
+                    }
+                    if (!targetBands.isEmpty()){
+                        this.targetProduct.getBandGroup().removeAll();
+                        for (Band band : targetBands) {
+                            if (targetNodeNames.contains(band.getName()) || referencedNodeNames.contains(band.getName())) {
+                                this.targetProduct.getBandGroup().add(band);
+                            }
+                        }
+                    }
+                    if (!targetMasks.isEmpty()){
                         this.targetProduct.getMaskGroup().removeAll();
-                        for (Mask mask : currentBands) {
-                            if (targetMaskNames.contains(mask.getName())) {
+                        for (Mask mask : targetMasks) {
+                            if (!targetProduct.getMaskGroup().contains(mask.getName()) && mask.getImageType().canTransferMask(mask, this.targetProduct)) {
                                 this.targetProduct.getMaskGroup().add(mask);
                             }
                         }
@@ -269,6 +310,38 @@ public class ReadOp extends Operator {
             }
         }
         return null;
+    }
+
+    private void collectReferencedRasters(String nodeName, ArrayList<String> referencedNodeNames, Product openedProduct) {
+        RasterDataNode rasterDataNode = openedProduct.getRasterDataNode(nodeName);
+        if (rasterDataNode == null) {
+            throw new OperatorException(String.format("Source product does not contain a raster named '%s'.", nodeName));
+        }
+        final String validPixelExpression = rasterDataNode.getValidPixelExpression();
+        collectReferencedRastersInExpression(validPixelExpression, referencedNodeNames, openedProduct);
+        if (rasterDataNode instanceof VirtualBand) {
+            VirtualBand vBand = (VirtualBand) rasterDataNode;
+            collectReferencedRastersInExpression(vBand.getExpression(), referencedNodeNames, openedProduct);
+        }
+    }
+
+    private void collectReferencedRastersInExpression(String expression, ArrayList<String> referencedNodeNames, Product openedProduct) {
+        if (expression == null || expression.trim().isEmpty()) {
+            return;
+        }
+        try {
+            final Term term = openedProduct.parseExpression(expression);
+            final RasterDataNode[] refRasters = BandArithmetic.getRefRasters(term);
+            for (RasterDataNode refRaster : refRasters) {
+                final String refNodeName = refRaster.getName();
+                if (!referencedNodeNames.contains(refNodeName)) {
+                    referencedNodeNames.add(refNodeName);
+                    collectReferencedRastersInExpression(refNodeName, referencedNodeNames, openedProduct);
+                }
+            }
+        } catch (ParseException e) {
+            getLogger().log(Level.WARNING, e.getMessage(), e);
+        }
     }
 
     public static class Spi extends OperatorSpi {
