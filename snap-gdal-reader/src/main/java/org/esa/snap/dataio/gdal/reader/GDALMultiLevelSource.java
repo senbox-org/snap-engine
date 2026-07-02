@@ -45,6 +45,17 @@ public class GDALMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource i
             throw new RuntimeException(ex);
         }
     }
+
+    public static Dimension readBandImageSize(Path fromFile, int bandIndex) throws IOException {
+        try (Dataset dataset = GDAL.open(fromFile.toString(), GDALConst.gaReadonly())) {
+            if (dataset == null) {
+                throw new IOException("Cannot open " + fromFile);
+            }
+            try (org.esa.snap.dataio.gdal.drivers.Band gdalBand = dataset.getRasterBand(bandIndex + 1)) {
+                return new Dimension(gdalBand.getXSize(), gdalBand.getYSize());
+            }
+        }
+    }
     /**
      * Constructor to be used when the internal tile size is handled (i.e., read) by GDAL
      */
