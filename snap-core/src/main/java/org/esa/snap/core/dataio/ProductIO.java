@@ -517,10 +517,13 @@ public class ProductIO {
             throws IOException {
         final int numThreads = Config.instance().load().preferences()
                 .getInt("snap.parallelism", Runtime.getRuntime().availableProcessors());
+        final int tileCount = countTilesToWrite(bandsToWrite);
         final ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         // Start thread one after the other, otherwise the shutdown from ExecutorService can expire.
         // So the last thread is only started shortly before the shutdown process starts
         Semaphore semaphore = new Semaphore(numThreads + 5); // Already have 5 more in the queue
+        ProgressMonitor subPm = SubProgressMonitor.createSynchronized(pm, bandsToWrite.size());
+        subPm.beginTask("Writing raster data...", tileCount);
         try {
             Rectangle minMaxTileIndices = calculateMinMaxTileIndices(bandsToWrite);
             for (int y = minMaxTileIndices.y; y <= minMaxTileIndices.height; y++) {
@@ -529,25 +532,52 @@ public class ProductIO {
                         if (pm.isCanceled()) {
                             break;
                         }
-                        int finalX = x;
-                        int finalY = y;
+                        MultiLevelImage sourceImage = band.getSourceImage();
+                        Point tileIndex = new Point(x, y);
+                        if (!isTileWithinBounds(sourceImage, tileIndex)) {
+                            continue;
+                        }
                         semaphore.acquireUninterruptibly();
                         executorService.submit(() -> {
                             try {
-                                processTileForBand(band, finalX, finalY);
+                                writeTile(sourceImage, tileIndex, band);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             } finally {
-                                semaphore.release();
+                                try {
+                                    subPm.worked(1);
+                                } finally {
+                                    semaphore.release();
+                                }
                             }
                         });
                     }
                 }
             }
         } finally {
-            shutdownExecutor(executorService, pm);
-            pm.worked(bandsToWrite.size());
+            try {
+                shutdownExecutor(executorService, pm);
+            } finally {
+                subPm.done();
+            }
         }
+    }
+
+    private static int countTilesToWrite(ArrayList<Band> bandsToWrite) throws IOException {
+        int tileCount = 0;
+        for (Band band : bandsToWrite) {
+            if (band.hasRasterData()) {
+                throw new IOException(String.format("Band '%s' should have been written before", band.getName()));
+            }
+
+            final PlanarImage sourceImage = band.getSourceImage();
+            Point[] tileIndices = sourceImage.getTileIndices(
+                    new Rectangle(0, 0, sourceImage.getWidth(), sourceImage.getHeight()));
+            if (tileIndices != null) {
+                tileCount += tileIndices.length;
+            }
+        }
+        return tileCount;
     }
 
     private static Rectangle calculateMinMaxTileIndices(ArrayList<Band> bandsToWrite) throws IOException {
@@ -568,14 +598,6 @@ public class ProductIO {
             minMaxTileIndices.add(tileIndices[tileIndices.length - 1].x, tileIndices[tileIndices.length - 1].y);
         }
         return minMaxTileIndices;
-    }
-
-    private static void processTileForBand(Band band, int x, int y) throws IOException {
-        MultiLevelImage sourceImage = band.getSourceImage();
-        Point tileIndex = new Point(x, y);
-        if (isTileWithinBounds(sourceImage, tileIndex)) {
-            writeTile(sourceImage, tileIndex, band);
-        }
     }
 
     private static boolean isTileWithinBounds(MultiLevelImage sourceImage, Point tileIndex) {
