@@ -298,6 +298,62 @@ public class BandArithmetic {
         return sb.toString();
     }
 
+
+    /*
+      This is just a copy of getValidMaskExpression method but implements only the NoData part
+      These methods could be merged in the future if desired
+     */
+    public static String getValidMaskExpressionNoDataOnly(String expression,
+                                                Product[] products,
+                                                int contextProductIndex,
+                                                String validMaskExpression) throws ParseException {
+
+        final RasterDataNode[] rasters = getRefRasters(expression, products, contextProductIndex);
+        if (rasters.length == 0) {
+            return validMaskExpression;
+        }
+        final Product contextProduct = products[contextProductIndex];
+        if (StringUtils.isNullOrEmpty(validMaskExpression) && rasters.length == 1 && contextProduct == rasters[0].getProduct()) {
+            return rasters[0].createValidMaskExpressionForNoDataValue();
+        }
+
+        final List<String> vmes = new ArrayList<>(rasters.length);
+        for (RasterDataNode raster : rasters) {
+            String vme = raster.createValidMaskExpressionForNoDataValue();
+            if (vme != null) {
+                if (raster.getProduct() != contextProduct) {
+                    final int productIndex = getProductIndex(products, raster);
+                    Assert.state(productIndex >= 0, "productIndex >= 0");
+                    vme = createUnambiguousExpression(vme, products, productIndex);
+                }
+                if (!vmes.contains(vme)) {
+                    vmes.add(vme);
+                }
+            }
+        }
+
+        if (vmes.isEmpty()) {
+            return validMaskExpression;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotNullAndNotEmpty(validMaskExpression)) {
+            sb.append("(");
+            sb.append(validMaskExpression);
+            sb.append(")");
+        }
+        for (String vme : vmes) {
+            if (sb.length() > 0) {
+                sb.append(" && ");
+            }
+            sb.append("(");
+            sb.append(vme);
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
+
     /**
      * Create an external name from the given name.
      * If the given name contains character which are not valid in an external name
