@@ -13,7 +13,7 @@ public class BandGroupingPath {
 
         // Default for SNAP and SeaDAS differs here, SeaDAS uses 'true', SNAP uses 'false'
         // Ideally this would be defined in preferences
-        boolean useStartsWithInsteadOfContains = false;
+        boolean useStartsWithInsteadOfContains = true;
 
         for (int i = 0; i < groups.length; i++) {
             final String groupPattern = groups[i];
