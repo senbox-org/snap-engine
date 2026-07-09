@@ -137,7 +137,6 @@ public class PropertyPane {
     }
 
 
-
     private boolean isInvisible(PropertyDescriptor descriptor) {
         return Boolean.FALSE.equals(descriptor.getAttribute("visible")) || descriptor.isDeprecated();
     }
@@ -188,7 +187,7 @@ public class PropertyPane {
             layout.setCellWeightX(rowIndex, 0, 0.0);
             panel.add(components[1], cell(rowIndex, 0));
             layout.setCellWeightX(rowIndex, 1, 1.0);
-            if(components[0] instanceof JScrollPane) {
+            if (components[0] instanceof JScrollPane) {
                 layout.setRowWeightY(rowIndex, 1.0);
                 layout.setRowFill(rowIndex, TableLayout.Fill.BOTH);
             }
@@ -203,7 +202,7 @@ public class PropertyPane {
             if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX) || descriptor.getName().endsWith(PROPERTY_SUBSECTIONBREAK_NAME_SUFFIX)) {
                 if (descriptor.getDisplayName() != null && descriptor.getDisplayName().length() > 0) {
                     JLabel sectionLabel;
-            if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)) {
+                    if (descriptor.getName().endsWith(PROPERTY_SECTIONBREAK_NAME_SUFFIX)) {
                         sectionLabel = new JLabel(DASHES + " " + descriptor.getDisplayName() + " " + DASHES);
 
 //                        sectionLabel = new JLabel("• " + descriptor.getDisplayName() + " •");
