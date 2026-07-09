@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.common.reproject;
 
+import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import com.bc.ceres.multilevel.MultiLevelModel;
 import com.bc.ceres.multilevel.support.AbstractMultiLevelSource;
@@ -48,6 +49,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.util.Debug;
@@ -72,6 +74,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -210,6 +213,19 @@ public class ReprojectionOp extends Operator {
             defaultValue = "false")
     private boolean addDeltaBands;
 
+    @Parameter(description = "Apply the valid pixel expression to determine whether a source pixel gets used",
+            defaultValue = "true")
+    private boolean applyValidPixelExpression;
+
+    @Parameter(description = "Copy source valid pixel expression(s) to the corresponding bands of the reprojected file",
+            defaultValue = "true")
+    private boolean retainValidPixelExpression;
+
+
+    @Parameter(description = "Logical expression of masks and/or bands to apply to determine whether a source pixel gets used",
+            defaultValue = "")
+    private String maskExpression;
+
     private ReprojectionSettingsProvider reprojectionSettingsProvider;
 
     private ElevationModel elevationModel;
@@ -301,6 +317,36 @@ public class ReprojectionOp extends Operator {
         ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
 
+        // todo Danny added these metadata lines
+        String operatorName = "Reproject";
+
+        OperatorDescriptor operatorDescriptor = null;
+        OperatorParameterSupport parameterSupport = null;
+
+        ProductUtils.setMapProjectionMetaDataFields(targetProduct);
+        ProductUtils.setResolutionMetaDataField(targetProduct, true);
+        ProductUtils.prependHistoryMetaDataField(targetProduct, operatorName);
+        ProductUtils.markProductMetaDataFieldAsDerivedFrom(targetProduct);
+
+        final Map<String, Object> parameterMap = new HashMap<>();
+        updateParameterMap(parameterMap);
+
+        operatorDescriptor = getSpi().getOperatorDescriptor();
+        parameterSupport = new OperatorParameterSupport(operatorDescriptor, null, parameterMap, null);
+
+        String parameterXml = "";
+        try {
+            DomElement domElement = parameterSupport.toDomElement();
+            parameterXml = domElement.toXml();
+        } catch (Exception e) {
+        }
+
+        if (parameterXml != null) {
+            ProductUtils.setMetaDataField(targetProduct, operatorName + "_gpt_parameters", parameterXml.toString().replaceAll("\n", "").replaceAll(" ", ""));
+        }
+
+        // todo end Danny additions
+
         if (addDeltaBands) {
             addDeltaBands();
         }
@@ -346,6 +392,37 @@ public class ReprojectionOp extends Operator {
     }
 
     private void reprojectSourceRaster(RasterDataNode sourceRaster) {
+        boolean validPixelExpressionSet = false;
+
+        String validPixelExpressionOriginal = sourceRaster.getValidPixelExpression();
+        String validPixelExpression = (applyValidPixelExpression) ? validPixelExpressionOriginal: "";
+
+        String bandDescriptionOriginal = sourceRaster.getDescription();
+        String bandDescription = bandDescriptionOriginal;
+
+        if (maskExpression != null && maskExpression.length() > 0) {
+            if (validPixelExpression != null && validPixelExpression.length() > 0) {
+                validPixelExpression = "(" + validPixelExpression + ") && " + maskExpression;
+            } else {
+                validPixelExpression = maskExpression;
+            }
+        }
+
+        if (validPixelExpression != null && validPixelExpression.length() > 0) {
+            if (validPixelExpression.equals(validPixelExpressionOriginal)) {
+                bandDescription = bandDescription + "\n[Reprojected with source validPixelExpression applied:\nexpression=" + validPixelExpressionOriginal +"]";
+            } else {
+                bandDescription = bandDescription + "\n[Reprojected with source masking criteria:\nexpression=" + validPixelExpression +"]";
+                sourceRaster.setValidPixelExpression(validPixelExpression);
+                validPixelExpressionSet = true;
+            }
+
+        } else {
+            bandDescription = bandDescription + " [Reprojected with no source masking criteria]";
+            sourceRaster.setValidPixelExpression("");
+            validPixelExpressionSet = true;
+        }
+
         final ReprojectionSettings reprojectionSettings = reprojectionSettingsProvider.getReprojectionSettings(sourceRaster);
         final int targetDataType;
         MultiLevelImage sourceImage;
@@ -375,6 +452,16 @@ public class ReprojectionOp extends Operator {
         if (exp != null) {
             sourceImage = createNoDataReplacedImage(sourceRaster, targetNoDataValue);
         }
+
+        if (retainValidPixelExpression && validPixelExpressionOriginal != null && validPixelExpressionOriginal.length() > 0) {
+            targetBand.setValidPixelExpression(validPixelExpressionOriginal);
+        }
+
+        if (validPixelExpressionSet) {
+            sourceRaster.setValidPixelExpression(validPixelExpressionOriginal);
+        }
+
+
 
         final Interpolation resampling = getResampling(targetBand);
         MultiLevelModel targetModel = reprojectionSettings.getTargetModel();
@@ -919,4 +1006,25 @@ public class ReprojectionOp extends Operator {
 
     }
 
+    void updateParameterMap(Map<String, Object> parameterMap) {
+        parameterMap.clear();
+        parameterMap.put("resampling", resamplingName);
+        parameterMap.put("includeTiePointGrids", includeTiePointGrids);
+        parameterMap.put("addDeltaBands", addDeltaBands);
+        parameterMap.put("noDataValue", noDataValue);
+        parameterMap.put("crs", crs);
+        parameterMap.put("orthorectify", orthorectify);
+        parameterMap.put("elevationModelName", elevationModelName);
+        parameterMap.put("referencePixelX", referencePixelX);
+        parameterMap.put("referencePixelY", referencePixelY);
+        parameterMap.put("easting", easting);
+        parameterMap.put("northing", northing);
+        parameterMap.put("orientation", orientation);
+        parameterMap.put("pixelSizeX", pixelSizeX);
+        parameterMap.put("pixelSizeY", pixelSizeY);
+        parameterMap.put("width", width);
+        parameterMap.put("height", height);
+        parameterMap.put("tileSizeX", tileSizeX);
+        parameterMap.put("tileSizeY", tileSizeY);
+    }
 }
