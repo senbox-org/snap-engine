@@ -5,13 +5,13 @@ public class GeoInfo {
     public static final double NULL_LON = -99999;
     public static final double NULL_LAT = -99999;
 
-    public enum DIRECTION {
+    public static enum DIRECTION {
         NOT_SET,
         ASCENDING,
         DESCENDING
     }
 
-    public enum EQUIDISTANT_CYLINDRICAL {
+    public static enum EQUIDISTANT_CYLINDRICAL {
         TRUE,
         FALSE,
         UNABLE_TO_DETERMINE
