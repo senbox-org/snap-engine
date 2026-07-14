@@ -63,6 +63,9 @@ public class LandCoverFactory {
         if (landcover == null) {
             throw new OperatorException("The land cover '" + name + "' has not been installed.");
         }
+        if (landcover instanceof FileLandCoverModel) {
+            ((FileLandCoverModel) landcover).ensureLoaded();
+        }
         return landcover;
     }
 

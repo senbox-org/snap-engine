@@ -55,6 +55,9 @@ public class FileLandCoverModel implements LandCoverModel {
     }
 
     public void dispose() {
+        if (tileList == null) {
+            return;
+        }
         for (FileLandCoverTile tile : tileList) {
             if (tile != null)
                 tile.dispose();
@@ -75,6 +78,8 @@ public class FileLandCoverModel implements LandCoverModel {
                 loadProducts();
             }
             for (FileLandCoverTile tile : tileList) {
+                if (tile == null)
+                    continue;
                 if (tile.getTileGeocoding() == null)
                     continue;
 
@@ -90,18 +95,47 @@ public class FileLandCoverModel implements LandCoverModel {
                 }
                 return value;
             }
-            return tileList[0].getNoDataValue();
+            for (FileLandCoverTile tile : tileList) {
+                if (tile != null) {
+                    return tile.getNoDataValue();
+                }
+            }
+            return descriptor.getNoDataValue();
         } catch (Exception e) {
             throw new Exception("Problem reading : " + e.getMessage());
         }
+    }
+
+    public synchronized void ensureLoaded() throws IOException {
+        try {
+            if (tileList == null) {
+                loadProducts();
+            }
+            for (FileLandCoverTile tile : tileList) {
+                if (tile != null && tile.getTileGeocoding() != null && tile.getWidth() > 0 && tile.getHeight() > 0) {
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            throw new IOException(createLoadErrorMessage(), e);
+        }
+        throw new IOException(createLoadErrorMessage());
+    }
+
+    private String createLoadErrorMessage() {
+        return "Unable to load land cover model '" + descriptor.getName() +
+                "'. Required auxiliary data could not be read or downloaded.";
     }
 
     private void loadProducts() throws Exception {
         tileList = new FileLandCoverTile[fileList.length];
         for (int i = 0; i < fileList.length; ++i) {
             try {
-                String ext = FileUtils.getExtension(fileList[i]).toLowerCase();
-                if (ext != null && ext.contains("tif") || ext.contains("zip")) {
+                String ext = FileUtils.getExtension(fileList[i]);
+                if (ext != null) {
+                    ext = ext.toLowerCase();
+                }
+                if (ext != null && (ext.contains("tif") || ext.contains("zip"))) {
                     tileList[i] = new FileLandCoverTile(this, fileList[i],
                                                         productReaderPlugIn.createReaderInstance(), archiveExt);
                 } else {

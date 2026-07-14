@@ -39,6 +39,7 @@ import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
+import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.FileLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverFactory;
 import org.esa.snap.landcover.dataio.LandCoverModel;
@@ -232,6 +233,9 @@ public final class AddLandCoverOp extends Operator {
             }
             final LandCoverModelDescriptor descriptor = entry.getValue();
             final LandCoverModel landcover = descriptor.createLandCoverModel(resampling);
+            if (landcover instanceof FileLandCoverModel) {
+                ((FileLandCoverModel) landcover).ensureLoaded();
+            }
             final Band band = paramsToBand.get(param);
             landcover.setAOIGeoCoding(band.getGeoCoding(), band.getRasterSize());
             band.setSourceImage(createLandCoverSourceImage(landcover, band));
