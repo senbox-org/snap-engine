@@ -15,6 +15,7 @@
  */
 package org.esa.snap.landcover.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class FileLandCoverModelTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
-
+    @STTM("SNAP-4227")
     public void ensureLoadedFailsForMissingAuxdata() throws Exception {
         final File missingFile = new File(temporaryFolder.getRoot(), "missing-land-cover.zip");
         final MissingAuxdataDescriptor descriptor = new MissingAuxdataDescriptor(missingFile);
