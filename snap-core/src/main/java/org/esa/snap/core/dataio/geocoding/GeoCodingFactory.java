@@ -150,7 +150,7 @@ public class GeoCodingFactory {
         final double[] measures = new double[3];
         // upper left, measure in y direction
         EllipsoidDistance distance = new EllipsoidDistance(longitudes[0], latitudes[0], DefaultEllipsoid.WGS84);
-        measures[0] = distance.distance(longitudes[width], latitudes[height]);
+        measures[0] = distance.distance(longitudes[width], latitudes[width]);
 
         // center, measuring in x direction
         final int yOff = height / 2;
