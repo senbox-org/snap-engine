@@ -296,11 +296,18 @@ public class ProductManager {
     }
 
     private void fireEvent(Product sourceProduct, int eventId) {
-        if (hasListeners()) {
-            Event event = new Event(sourceProduct);
-            for (Listener listener : listeners) {
-                fireEvent(eventId, listener, event);
+        final List<Listener> listenerSnapshot;
+
+        synchronized (this) {
+            if (!hasListeners()) {
+                return;
             }
+            listenerSnapshot = new ArrayList<>(listeners);
+        }
+
+        Event event = new Event(sourceProduct);
+        for (Listener listener : listenerSnapshot) {
+            fireEvent(eventId, listener, event);
         }
     }
 
