@@ -25,13 +25,14 @@ import org.esa.snap.core.datamodel.ImageInfo;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.Debug;
@@ -612,6 +613,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         copyAcceptedIndexCodings(product);
 
         ProductUtils.copyVectorData(sourceProduct, product);
+        copyVectorMasks(sourceProduct, product);
         ProductUtils.copyOverlayMasks(sourceProduct, product);
         ProductUtils.copyPreferredTileSize(sourceProduct, product);
         setSceneRasterStartAndStopTime(product);
@@ -624,6 +626,25 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         product.setAutoGrouping(sourceProduct.getAutoGrouping());
 
         return product;
+    }
+
+    private static void copyVectorMasks(Product sourceProduct, Product targetProduct) {
+        for (int i = 0; i < sourceProduct.getMaskGroup().getNodeCount(); i++) {
+            Mask sourceMask = sourceProduct.getMaskGroup().get(i);
+            if (sourceMask.getImageType() != Mask.VectorDataType.INSTANCE || targetProduct.getMaskGroup().contains(sourceMask.getName())) {
+                continue;
+            }
+
+            VectorDataNode sourceVectorDataNode = Mask.VectorDataType.getVectorData(sourceMask);
+            if (sourceVectorDataNode == null) {
+                continue;
+            }
+            VectorDataNode targetVectorDataNode = targetProduct.getVectorDataGroup().get(sourceVectorDataNode.getName());
+            if (targetVectorDataNode != null) {
+                targetProduct.addMask(sourceMask.getName(), targetVectorDataNode, sourceMask.getDescription(),
+                                      sourceMask.getImageColor(), sourceMask.getImageTransparency());
+            }
+        }
     }
 
     private void setSceneRasterStartAndStopTime(Product product) {

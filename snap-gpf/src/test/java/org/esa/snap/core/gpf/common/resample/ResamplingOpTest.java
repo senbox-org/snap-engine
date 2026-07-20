@@ -1,16 +1,19 @@
 package org.esa.snap.core.gpf.common.resample;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.LineTimeCoding;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.DummyProductBuilder;
 import org.junit.Test;
 
+import java.awt.Color;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +24,24 @@ import static org.junit.Assert.*;
  * @author Tonio Fincke
  */
 public class ResamplingOpTest {
+
+
+    @Test
+    @STTM("SNAP-4232")
+    public void testVectorMasksArePreserved() {
+        Product product = new Product("source", "type", 4, 4);
+        product.addBand("B4", ProductData.TYPE_FLOAT32);
+        VectorDataNode vectorDataNode = new VectorDataNode("detector_footprint-B04-09",
+                                                            org.esa.snap.core.datamodel.Placemark.createGeometryFeatureType());
+        product.getVectorDataGroup().add(vectorDataNode);
+        product.addMask("detector_footprint-B04-09", vectorDataNode, "test mask", Color.RED, 0.5);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("referenceBand", "B4");
+        Product resampledProduct = GPF.createProduct("Resample", parameters, product);
+
+        assertNotNull(resampledProduct.getMaskGroup().get("detector_footprint-B04-09"));
+    }
 
     @Test
     public void testTimeInformationIsPreserved() {

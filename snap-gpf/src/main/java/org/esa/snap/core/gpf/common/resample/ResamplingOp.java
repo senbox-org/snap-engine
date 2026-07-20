@@ -175,8 +175,8 @@ public class ResamplingOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTimeInformation(sourceProduct, targetProduct);
         transferGeoCoding(targetProduct);
-        copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
+        copyMasks(sourceProduct, targetProduct);
         targetProduct.setDescription(sourceProduct.getDescription());
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         targetProduct.setPreferredTileSize(referenceTileSize);
@@ -249,6 +249,12 @@ public class ResamplingOp extends Operator {
                     if (targetVectorDataNode != null) {
                         targetProduct.addMask(mask.getName(), targetVectorDataNode, mask.getDescription(), mask.getImageColor(),
                                               mask.getImageTransparency());
+                    }
+                } else {
+                    final VectorDataNode targetNode = targetProduct.getVectorDataGroup().get(vectorDataNodeName);
+                    if (targetNode != null) {
+                        targetProduct.addMask(mask.getName(), targetNode, mask.getDescription(),
+                                mask.getImageColor(), mask.getImageTransparency());
                     }
                 }
             } else if (imageType.canTransferMask(mask, targetProduct)) {
