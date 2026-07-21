@@ -2,6 +2,7 @@ package org.esa.snap.core.gpf.common.resample;
 
 import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.LineTimeCoding;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
@@ -11,6 +12,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.DummyProductBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 
 import java.awt.Color;
@@ -159,6 +161,25 @@ public class ResamplingOpTest {
             fail("Exception expected");
         } catch (OperatorException oe) {
             assertEquals("If targetHeight is set, targetWidth must be set, too.", oe.getMessage());
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4214")
+    public void testTargetResolutionIsRejectedForGeographicCrs() throws Exception {
+        Product product = new Product("geographic", "test", 10, 10);
+        product.addBand("band", ProductData.TYPE_INT8);
+        product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, 10, 10, 0.0, 0.0, 0.00027, 0.00027));
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("targetResolution", 300);
+
+        try {
+            GPF.createProduct("Resample", parameters, product);
+            fail("Exception expected");
+        } catch (OperatorException e) {
+            assertEquals("Use of targetResolution is not possible for products with a geographic CRS because its units are degrees. " +
+                                 "Reproject the source product to a projected CRS with linear units before resampling.", e.getMessage());
         }
     }
 

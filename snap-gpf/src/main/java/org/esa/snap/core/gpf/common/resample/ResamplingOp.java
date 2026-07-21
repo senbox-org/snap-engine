@@ -46,6 +46,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
@@ -780,8 +781,15 @@ public class ResamplingOp extends Operator {
         if (targetWidth == null && targetHeight != null) {
             throw new OperatorException("If targetHeight is set, targetWidth must be set, too.");
         }
-        if (targetResolution != null && !(sourceProduct.getSceneGeoCoding() instanceof CrsGeoCoding)) {
-            throw new OperatorException("Use of targetResolution is only possible for products with crs geo-coding.");
+        if (targetResolution != null) {
+            if (!(sourceProduct.getSceneGeoCoding() instanceof CrsGeoCoding)) {
+                throw new OperatorException("Use of targetResolution is only possible for products with crs geo-coding.");
+            }
+            CrsGeoCoding crsGeoCoding = (CrsGeoCoding) sourceProduct.getSceneGeoCoding();
+            if (crsGeoCoding.getMapCRS() instanceof GeographicCRS) {
+                throw new OperatorException("Use of targetResolution is not possible for products with a geographic CRS because its units are degrees. " +
+                                                    "Reproject the source product to a projected CRS with linear units before resampling.");
+            }
         }
     }
 
