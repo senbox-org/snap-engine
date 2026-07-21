@@ -32,6 +32,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,6 +130,19 @@ public class ProductSubsetBuilderTest {
 
         testPalette(imageInfo.getColorPaletteDef(), new Color[]{Color.red, Color.green});
         testPalette(imageInfo2.getColorPaletteDef(), new Color[]{Color.blue, Color.black});
+    }
+
+    @Test
+    @STTM("SNAP-4232")
+    public void testVectorMasksArePreserved() throws IOException {
+        VectorDataNode vectorDataNode = new VectorDataNode("detector_footprint-B04-09",
+                                                            Placemark.createGeometryFeatureType());
+        product.getVectorDataGroup().add(vectorDataNode);
+        product.addMask("detector_footprint-B04-09", vectorDataNode, "test mask", Color.RED, 0.5);
+
+        Product subset = ProductSubsetBuilder.createProductSubset(product, null, "subset", "");
+
+        assertNotNull(subset.getMaskGroup().get("detector_footprint-B04-09"));
     }
 
     private void testPalette(ColorPaletteDef palette, Color[] colors) {
