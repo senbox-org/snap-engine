@@ -16,16 +16,55 @@
 
 package org.esa.snap.core.util;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
 
 import static org.junit.Assert.*;
 
 
 public class ImageUtilsTest {
+
+    @Test
+    @STTM("SNAP-4240")
+    public void testGetImageInputStream_forFile_isRandomAccess() throws Exception {
+        // Regression: getImageInputStream wrapped a plain InputStream, yielding a
+        // forward-caching ImageInputStream whose seek() re-streams from position 0.
+        // Callers that open a fresh stream per tile and seek to increasing offsets
+        // (DimapProductReader) then become O(n^2). A File input must yield a
+        // random-access FileImageInputStream so seek() is O(1).
+        final File tmp = File.createTempFile("imageutils-randomaccess", ".img");
+        try {
+            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(tmp))) {
+                for (int i = 0; i < 1000; i++) {
+                    out.writeShort(i);
+                }
+            }
+
+            try (ImageInputStream iis = ImageUtils.getImageInputStream(tmp)) {
+                assertTrue("expected random-access FileImageInputStream, got " + iis.getClass().getName(),
+                        iis instanceof FileImageInputStream);
+
+                // seek far forward then read - must return the right sample
+                iis.seek(900L * 2);
+                assertEquals(900, iis.readShort());
+                // seek backward - random access must still work
+                iis.seek(10L * 2);
+                assertEquals(10, iis.readShort());
+            }
+        } finally {
+            Files.deleteIfExists(tmp.toPath());
+        }
+    }
 
     @Test
     public void testCreateRenderedImage() {
