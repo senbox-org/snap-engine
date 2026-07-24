@@ -35,8 +35,26 @@ public class CacheManager implements MemoryUsageTracker {
         productCaches = new ArrayList<>();
         allocatedMemory = 0;
 
-        memoryLimit = Config.instance("snap").preferences().getLong("snap.dataio.cache.memoryLimit", TwoGB);
+        final long defaultLimit = defaultMemoryLimit(Runtime.getRuntime().maxMemory());
+        memoryLimit = Config.instance("snap").preferences().getLong("snap.dataio.cache.memoryLimit", defaultLimit);
         disposeThreshold = Config.instance("snap").preferences().getLong("snap.dataio.cache.disposeThreshold", OneMb);
+    }
+
+    /**
+     * Default cache budget for a given heap ceiling. A fixed 2 GB budget competes with
+     * the JAI tile cache and transient decode buffers and can exhaust a modest heap, so
+     * scale to a quarter of the available heap and cap at 2 GB. If the heap ceiling is
+     * unbounded ({@link Long#MAX_VALUE}), fall back to the fixed 2 GB default.
+     */
+    static long defaultMemoryLimit(long maxMemory) {
+        if (maxMemory == Long.MAX_VALUE) {
+            return TwoGB;
+        }
+        return Math.min(TwoGB, maxMemory / 4);
+    }
+
+    public long getMemoryLimit() {
+        return memoryLimit;
     }
 
     public void setMemoryLimit(long memoryLimit) {

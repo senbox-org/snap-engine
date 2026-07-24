@@ -356,6 +356,31 @@ public class CacheData2DTest {
     }
 
     @Test
+    @STTM("SNAP-4196")
+    public void testEnsureData_repeatedRead_tracksAllocationOnce() throws IOException {
+        // Regression: ensureData() called trackAllocation() on EVERY read, including
+        // cache hits where no new buffer was loaded. That inflated the CacheManager's
+        // allocatedMemory counter without bound as tiles were re-read (pyramid build,
+        // pan/zoom, statistics), forcing perpetual eviction and cache thrashing.
+        // A resident tile must be counted once, no matter how often it is read.
+        final CacheDataProvider cacheDataProvider = new MockProvider(ProductData.TYPE_UINT16);
+        final TestMemoryUsageTracker memoryUsageTracker = new TestMemoryUsageTracker();
+        final CacheData2D cacheData2D = createCacheData(new int[]{350, 200}, new int[]{10, 10});
+
+        final CacheContext cacheContext = new CacheContext(new VariableDescriptor(), cacheDataProvider, memoryUsageTracker);
+        cacheData2D.setCacheContext(cacheContext);
+
+        // read the same tile three times - the buffer is loaded only on the first read
+        for (int i = 0; i < 3; i++) {
+            cacheData2D.copyData(new int[]{0, 0}, new int[]{5, 5}, new int[]{5, 5}, 10,
+                    ProductData.createInstance(ProductData.TYPE_UINT16, 100));
+        }
+
+        // 10x10 UINT16 = 200 bytes, tracked once - not 3x
+        assertEquals(200, memoryUsageTracker.getAllocatedBytes());
+    }
+
+    @Test
     @STTM("SNAP-4121")
     public void testGetSizeInBytes() throws IOException {
         final CacheData2D cacheData2D = createCacheData(new int[]{350, 200}, new int[]{10, 10});
