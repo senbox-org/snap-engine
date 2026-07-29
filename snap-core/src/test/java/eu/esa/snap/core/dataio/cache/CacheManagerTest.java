@@ -18,6 +18,27 @@ public class CacheManagerTest {
     }
 
     @Test
+    @STTM("SNAP-4196")
+    public void testDefaultMemoryLimit_scalesWithHeap() {
+        // A fixed 2 GB default competes with the JAI tile cache and transient decode
+        // buffers and can OOM a modest heap. The default budget must scale down to a
+        // quarter of the available heap, capped at 2 GB for large heaps.
+        final long twoGB = 1024L * 1024 * 1024 * 2;
+
+        // small 1 GB heap -> 256 MB
+        assertEquals(256L * 1024 * 1024, CacheManager.defaultMemoryLimit(1024L * 1024 * 1024));
+
+        // 4 GB heap -> 1 GB (a quarter, below the cap)
+        assertEquals(1024L * 1024 * 1024, CacheManager.defaultMemoryLimit(4L * 1024 * 1024 * 1024));
+
+        // large 16 GB heap -> capped at 2 GB
+        assertEquals(twoGB, CacheManager.defaultMemoryLimit(16L * 1024 * 1024 * 1024));
+
+        // no heap ceiling reported -> fixed 2 GB fallback
+        assertEquals(twoGB, CacheManager.defaultMemoryLimit(Long.MAX_VALUE));
+    }
+
+    @Test
     @STTM("SNAP-4121")
     public void testGetInstance() {
         final CacheManager instance_1 =  CacheManager.getInstance();
@@ -149,7 +170,7 @@ public class CacheManagerTest {
     public void testRelease() throws IOException {
         final CacheManager cacheManager = CacheManager.getInstance();
         cacheManager.setMemoryLimit(30000);
-        cacheManager.setDisposeThreshold(1000);
+        cacheManager.setDisposeThreshold(100);
 
         final ProductCache productCache = new ProductCache(new TestCacheDataProvider(new int[] {40, 200}, new int[] {10, 20}, ProductData.TYPE_FLOAT32));
         cacheManager.register(productCache);
@@ -168,11 +189,15 @@ public class CacheManagerTest {
         sizeInBytes = cacheManager.getSizeInBytes();
         assertEquals(28160, sizeInBytes);
 
-        // now trigger release 0peration, next allocation is 4k and will overshoot
+        // now trigger release operation: this read overshoots the 30000 limit
+        // (resident would reach 30560), and with the 100-byte dispose threshold the
+        // 560-byte overshoot triggers eviction of the oldest 800-byte tile buffer.
+        // With correct allocation accounting (SNAP-4196) the tracked memory equals the
+        // real resident size, so this is deterministic.
         dataBuffer = new DataBuffer(ProductData.createInstance(ProductData.TYPE_FLOAT32, 2000), new int[]{20, 80}, new int[] {20, 100});
         productCache.read("who_cares", new int[]{20, 80}, new int[] {20, 100}, dataBuffer );
 
         sizeInBytes = cacheManager.getSizeInBytes();
-        assertEquals(25760, sizeInBytes);
+        assertEquals(29760, sizeInBytes);
     }
 }

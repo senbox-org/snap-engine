@@ -100,6 +100,7 @@ class CacheData2D extends AbstractCacheData {
 
     private DataBuffer ensureData() throws IOException {
         final DataBuffer localData;
+        final boolean loaded;
         synchronized (this) {
             if (data == null) {
                 final String name = context.getVariableDescriptor().name;
@@ -109,10 +110,19 @@ class CacheData2D extends AbstractCacheData {
                 final CacheDataProvider dataProvider = context.getDataProvider();
                 data = dataProvider.readCacheBlock(name, offsets, shapes, null);
                 lastAccessTime = System.currentTimeMillis();
+                loaded = true;
+            } else {
+                loaded = false;
             }
             localData = data;
         }
-        trackAllocation(localData);
+        // Only report the allocation when the buffer was actually loaded on this call.
+        // On a cache hit the tile is already resident and counted; reporting it again
+        // inflates the CacheManager's allocatedMemory without bound and triggers
+        // perpetual eviction / cache thrashing.
+        if (loaded) {
+            trackAllocation(localData);
+        }
         return localData;
     }
 
