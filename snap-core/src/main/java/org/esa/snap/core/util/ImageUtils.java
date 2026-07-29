@@ -28,6 +28,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
@@ -54,6 +55,8 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Vector;
 
 /**
@@ -505,6 +508,17 @@ public class ImageUtils {
     }
 
     public static ImageInputStream getImageInputStream(Object input) throws IOException {
+        // For a real file, return a random-access FileImageInputStream whose seek() is O(1).
+        // Wrapping a plain InputStream (the previous behaviour) yields a forward-caching
+        // ImageInputStream whose seek() must re-stream from position 0 - so a caller that
+        // opens a fresh stream per tile and seeks to increasing offsets (DimapProductReader)
+        // degrades to O(n^2), getting progressively slower down a large band.
+        if (!(input instanceof InputStream)) {
+            final Path productPath = ProductUtils.getProductPath(input);
+            if (Files.isRegularFile(productPath)) {
+                return new FileImageInputStream(productPath.toFile());
+            }
+        }
         final InputStream imageIOInput = ProductUtils.getProductInputStream(input);
         return ImageIO.createImageInputStream(imageIOInput);
     }
