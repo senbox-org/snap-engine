@@ -546,7 +546,7 @@ public class ColorPaletteDef implements Cloneable {
 
         }
 
-        printStringArrayListToFile(file, "Generic 256 Point RGB Color Palette", fileContents);
+//        printStringArrayListToFile(file, "Generic 256 Point RGB Color Palette", fileContents);
     }
 
     /**
