@@ -1,2 +1,2 @@
-${project.version}
+12.0.0
 
