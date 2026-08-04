@@ -5,6 +5,8 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.LineTimeCoding;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Placemark;
+import org.esa.snap.core.datamodel.PointDescriptor;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VectorDataNode;
@@ -43,6 +45,26 @@ public class ResamplingOpTest {
         Product resampledProduct = GPF.createProduct("Resample", parameters, product);
 
         assertNotNull(resampledProduct.getMaskGroup().get("detector_footprint-B04-09"));
+    }
+
+    @Test
+    @STTM("SNAP-4244,SNAP-4232")
+    public void testVectorMasksWithFeatureCollectionNotEmptyArePreserved() {
+        Product product = new Product("product4test_vector_masks_with_feature_collection_not_empty_are_preserved", "test", 5, 5);
+        product.addBand("B1", ProductData.TYPE_FLOAT32);
+        Placemark placemark = Placemark.createPointPlacemark(PointDescriptor.getInstance(), "placemark_1", null, null,
+                new PixelPos(2, 2), null, null);
+        VectorDataNode vectorDataNode = new VectorDataNode("B1-p1",
+                org.esa.snap.core.datamodel.Placemark.createPointFeatureType("d"));
+        vectorDataNode.getFeatureCollection().add(placemark.getFeature());
+        product.getVectorDataGroup().add(vectorDataNode);
+        assertNotNull(product.getMaskGroup().get("B1-p1"));
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("referenceBand", "B1");
+        Product resampledProduct = GPF.createProduct("Resample", parameters, product);
+
+        assertNotNull(resampledProduct.getMaskGroup().get("B1-p1"));
     }
 
     @Test
