@@ -234,6 +234,10 @@ public class ResamplingOp extends Operator {
         for (int i = 0; i < sourceMaskGroup.getNodeCount(); i++) {
             final Mask mask = sourceMaskGroup.get(i);
             final Mask.ImageType imageType = mask.getImageType();
+            //some masks are copied when the vector data nodes with non-empty feature collection are copied, so, skip them
+            if (targetProduct.getMaskGroup().contains(mask.getName())) {
+                continue;
+            }
             if (imageType.getName().equals(Mask.BandMathsType.TYPE_NAME)) {
                 String expression = Mask.BandMathsType.getExpression(mask);
                 final Mask targetMask = Mask.BandMathsType.create(mask.getName(), mask.getDescription(),
