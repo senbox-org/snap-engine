@@ -513,7 +513,7 @@ public class ImageUtils {
         // ImageInputStream whose seek() must re-stream from position 0 - so a caller that
         // opens a fresh stream per tile and seeks to increasing offsets (DimapProductReader)
         // degrades to O(n^2), getting progressively slower down a large band.
-        if (!(input instanceof InputStream)) {
+        if (!(input instanceof InputStream || input.getClass().getName().contains("vfs"))) {
             final Path productPath = ProductUtils.getProductPath(input);
             if (Files.isRegularFile(productPath)) {
                 return new FileImageInputStream(productPath.toFile());
