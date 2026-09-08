@@ -58,6 +58,9 @@
                     <publicPackages>
                         <publicPackage>org.esa.snap.engine_utilities.*</publicPackage>
                         <publicPackage>org.apache.commons.compress.compressors.*</publicPackage>
+                        <!-- archivers.zip gives dependent modules ZIP64-safe random access to
+                             STORED zip entries (ZipFile/ZipArchiveEntry.getDataOffset) -->
+                        <publicPackage>org.apache.commons.compress.archivers.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
