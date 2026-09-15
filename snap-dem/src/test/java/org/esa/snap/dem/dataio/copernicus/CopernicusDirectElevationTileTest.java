@@ -18,10 +18,10 @@ public class CopernicusDirectElevationTileTest {
 
     @Test
     @STTM("SNAP-4213")
-    public void wholeTileCacheReadsSourceOnlyOnce() throws Exception {
+    public void derivedBlockHeightReadsWholeSourceOnlyOnce() throws Exception {
         CountingSource source = new CountingSource(4, 4);
         CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(new FakeElevationModel(),
-                source, 4, 4, 0, 0, 1024, 2, false);
+                source, 4, 4, 0, 0, 0, false);
 
         assertEquals(12.0f, tile.getSample(2, 1), 0.0f);
         assertEquals(31.0f, tile.getSample(1, 3), 0.0f);
@@ -31,10 +31,11 @@ public class CopernicusDirectElevationTileTest {
 
     @Test
     @STTM("SNAP-4213")
-    public void blockCacheReadsOnlyRequestedBlocks() throws Exception {
-        CountingSource source = new CountingSource(4, 8);
+    public void onlyRequestedBlocksAreRead() throws Exception {
+        // a source whose internal tiling really is 2 rows, so the 2-row request is already aligned
+        CountingSource source = new CountingSource(4, 8, 2);
         CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(new FakeElevationModel(),
-                source, 4, 8, 0, 0, 0, 2, false);
+                source, 4, 8, 0, 0, 2, false);
 
         assertEquals(1.0f, tile.getSample(1, 0), 0.0f);
         assertEquals(11.0f, tile.getSample(1, 1), 0.0f);
@@ -48,7 +49,7 @@ public class CopernicusDirectElevationTileTest {
     public void nonSquareSourceIsHorizontallyResampledLazily() throws Exception {
         CountingSource source = new CountingSource(2, 2);
         CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(new FakeElevationModel(),
-                source, 4, 2, 0, 0, 0, 1, false);
+                source, 4, 2, 0, 0, 1, false);
 
         assertEquals(0.0f, tile.getSample(0, 0), 0.0f);
         assertEquals(0.5f, tile.getSample(1, 0), 0.0f);
@@ -61,11 +62,22 @@ public class CopernicusDirectElevationTileTest {
     private static final class CountingSource implements CopernicusTileSource {
         private final int width;
         private final int height;
+        private final int preferredBlockHeight;
         private int readCount;
 
         private CountingSource(int width, int height) {
+            this(width, height, height);
+        }
+
+        private CountingSource(int width, int height, int preferredBlockHeight) {
             this.width = width;
             this.height = height;
+            this.preferredBlockHeight = preferredBlockHeight;
+        }
+
+        @Override
+        public int getPreferredBlockHeight() {
+            return preferredBlockHeight;
         }
 
         @Override
