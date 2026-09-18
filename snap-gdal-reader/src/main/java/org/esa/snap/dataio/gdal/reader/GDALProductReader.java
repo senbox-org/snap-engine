@@ -200,7 +200,10 @@ public class GDALProductReader extends AbstractProductReader {
     private static Datum getDatum(String gcpProjection) {
         String datums = gcpProjection.replaceAll("[\\s\\S]*?AUTHORITY\\[\"EPSG\",\"([\\d]+)\"]?[\\s\\S]*", "$1");
         final Datum datum;
-        if (datums.replaceAll("\\d*", "").isEmpty()) {
+        // An empty string also survives the digits-only check below, and parsing it
+        // throws - which fails the whole read for any dataset carrying no EPSG
+        // authority code at all, such as a GeoTIFF with no GeoKeyDirectory tag.
+        if (!datums.isEmpty() && datums.replaceAll("\\d*", "").isEmpty()) {
             final int value = Integer.parseInt(datums);
             if (value == EPSGCodes.GCS_WGS_72) {
                 datum = Datum.WGS_72;
