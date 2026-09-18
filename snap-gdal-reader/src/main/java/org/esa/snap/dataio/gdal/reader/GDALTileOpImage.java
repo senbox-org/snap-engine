@@ -246,19 +246,59 @@ class GDALTileOpImage extends AbstractSubsetTileOpImage {
                                 .map(Path::toString)
                                 .collect(Collectors.joining(","))));
             }
-            final Band band;
             Band gdalRasterBand = (dataset instanceof VRTDataset
                     ? ((VRTDataset) dataset).getDataset()
                     : dataset).getRasterBand(this.bandIndex);
-            int level = getLevel();
-            if (level > 0 && gdalRasterBand.getOverviewCount() > 0) {
-                band = gdalRasterBand.getOverview(level - 1);
+            final Band band = selectResolutionBand(gdalRasterBand, getLevel());
+            if (band != gdalRasterBand) {
                 gdalRasterBand.delete();
-            } else {
-                band = gdalRasterBand;
             }
             return band;
         }
+    }
+
+    /**
+     * Chooses the band a pyramid level is read from.
+     * <p>
+     * A level is sized {@code size >> level}, so overview <i>n</i> is the right
+     * source for level <i>n</i>+1 only when the overviews decimate by two. That
+     * is not guaranteed: {@code gdaladdo 4 8 16} is a common way to build a
+     * Cloud-Optimized GeoTIFF, and taking overview {@code level - 1} regardless
+     * then fills a level canvas from an overview half its size in each axis,
+     * leaving three quarters of the level as no-data.
+     * <p>
+     * Instead pick the smallest resolution that is still at least as fine as the
+     * level needs, and let GDAL decimate the remainder on read; fall back to full
+     * resolution when no overview is fine enough. For overviews that do step by
+     * two this selects exactly the same band as before.
+     */
+    static Band selectResolutionBand(final Band fullResolutionBand, final int level) {
+        if (level <= 0) {
+            return fullResolutionBand;
+        }
+        final Integer overviewCount = fullResolutionBand.getOverviewCount();
+        final Integer fullWidth = fullResolutionBand.getXSize();
+        if (overviewCount == null || overviewCount <= 0 || fullWidth == null) {
+            return fullResolutionBand;
+        }
+        final int requiredWidth = Math.max(1, fullWidth >> level);
+
+        Band best = null;
+        int bestWidth = Integer.MAX_VALUE;
+        for (int i = 0; i < overviewCount; i++) {
+            final Band overview = fullResolutionBand.getOverview(i);
+            final Integer width = overview == null ? null : overview.getXSize();
+            if (width != null && width >= requiredWidth && width < bestWidth) {
+                if (best != null) {
+                    best.delete();
+                }
+                best = overview;
+                bestWidth = width;
+            } else if (overview != null) {
+                overview.delete();
+            }
+        }
+        return best == null ? fullResolutionBand : best;
     }
 
     private static class VRTDataset extends Dataset {
