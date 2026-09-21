@@ -8,6 +8,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.runtime.Config;
 
 import java.io.File;
 
@@ -17,6 +18,14 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
 
     public CopernicusElevationModel(final ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
+        // A tile is filled one aligned block at a time and kept until the tile is evicted, so the
+        // number of cached tiles is what bounds DEM memory: at 30 m a fully covered tile holds
+        // 3600 x 3600 floats (49.4 MiB). The default matches BaseElevationModel and SNAP 13;
+        // lower it to cap DEM memory on a small heap. Never below 1: updateCache() evicts down to
+        // the bound immediately after inserting, so a bound of 0 would dispose every tile at the
+        // moment it is handed out and fail every read.
+        setMaxCacheSize(Math.max(1,
+                Config.instance().preferences().getInt("snap.dem.copernicus.maxCachedTiles", 60)));
     }
 
     @Override
