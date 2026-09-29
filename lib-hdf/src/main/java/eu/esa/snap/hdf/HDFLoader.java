@@ -19,7 +19,7 @@ public class HDFLoader implements Activator {
 
     public static AtomicBoolean loaded = new AtomicBoolean(false);
 
-    private static Boolean hdf5LibAvailable = null;
+    private static volatile Boolean hdf5LibAvailable = null;
     private static final Logger logger = Logger.getLogger(HDFLoader.class.getName());
 
 
@@ -29,7 +29,9 @@ public class HDFLoader implements Activator {
     public static void ensureHDF5Initialised() {
         if (hdf5LibAvailable == null) {
             synchronized (logger) {
-                hdf5LibAvailable = checkAndInitHdf5Lib();
+                if (hdf5LibAvailable == null) {
+                    hdf5LibAvailable = checkAndInitHdf5Lib();
+                }
             }
         }
         if (!hdf5LibAvailable) {
@@ -59,54 +61,70 @@ public class HDFLoader implements Activator {
         }
     }
 
+    // Installs the native libraries and sets their paths, once. Callers arriving while another thread is setting up
+    // wait until it is complete, so this is safe while the activator runs in the background.
     private static void setupHDFNativeLibrary() {
-        if (!loaded.getAndSet(true)) {
-            final Path auxdataDirectory = installHDFNativeLibrary();
-            if (auxdataDirectory == null){
-                SystemUtils.LOG.severe("HDF configuration error: failed to retrieve auxdata path");
+        if (loaded.get()) {
+            return;
+        }
+        synchronized (HDFLoader.class) {
+            if (loaded.get()) {
                 return;
             }
-
-            final String arch = System.getProperty("os.arch").toLowerCase();
-            final String sysName = System.getProperty("os.name").toLowerCase();
-            Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
-
-            String hdf4Library = null;
-            String hdf5Library = null;
-
             try {
-                String nativeLibraryRoot = NativeLibraryTools.HDF_NATIVE_LIBRARIES_ROOT;
-                NativeLibraryTools.copyLoaderLibrary(nativeLibraryRoot);
+                doSetupHDFNativeLibrary();
+            } finally {
+                loaded.set(true);
+            }
+        }
+    }
 
-                if (arch.equals("amd64")) {
-                    if (sysName.contains("windows")) {
-                        System.load(jna_path.resolve("hdf.dll").toString());
-                        System.load(jna_path.resolve("mfhdf.dll").toString());
-                        System.load(jna_path.resolve("hdf5.dll").toString());
-                        hdf4Library = "hdf_java.dll";
-                        hdf5Library = "hdf5_java.dll";
-                    } else {
-                        // linux
-                        hdf4Library = "libhdf_java.so";
-                        hdf5Library = "libhdf5_java.so";
-                    }
-                } else if (sysName.contains("mac")) {
-                    // mac intel and arm
-                    jna_path = auxdataDirectory.toAbsolutePath().resolve("macosx");
-                    hdf4Library = "libhdf_java.dylib";
-                    hdf5Library = "libhdf5_java.dylib";
+    private static void doSetupHDFNativeLibrary() {
+        final Path auxdataDirectory = installHDFNativeLibrary();
+        if (auxdataDirectory == null){
+            SystemUtils.LOG.severe("HDF configuration error: failed to retrieve auxdata path");
+            return;
+        }
+
+        final String arch = System.getProperty("os.arch").toLowerCase();
+        final String sysName = System.getProperty("os.name").toLowerCase();
+        Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
+
+        String hdf4Library = null;
+        String hdf5Library = null;
+
+        try {
+            String nativeLibraryRoot = NativeLibraryTools.HDF_NATIVE_LIBRARIES_ROOT;
+            NativeLibraryTools.copyLoaderLibrary(nativeLibraryRoot);
+
+            if (arch.equals("amd64")) {
+                if (sysName.contains("windows")) {
+                    System.load(jna_path.resolve("hdf.dll").toString());
+                    System.load(jna_path.resolve("mfhdf.dll").toString());
+                    System.load(jna_path.resolve("hdf5.dll").toString());
+                    hdf4Library = "hdf_java.dll";
+                    hdf5Library = "hdf5_java.dll";
+                } else {
+                    // linux
+                    hdf4Library = "libhdf_java.so";
+                    hdf5Library = "libhdf5_java.so";
                 }
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } else if (sysName.contains("mac")) {
+                // mac intel and arm
+                jna_path = auxdataDirectory.toAbsolutePath().resolve("macosx");
+                hdf4Library = "libhdf_java.dylib";
+                hdf5Library = "libhdf5_java.dylib";
             }
 
-            if (hdf4Library != null || hdf5Library != null) {
-                SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-                System.setProperty(HDFLibrary.HDFPATH_PROPERTY_KEY, jna_path.resolve(hdf4Library).toString());
-                System.setProperty(H5.H5PATH_PROPERTY_KEY, jna_path.resolve(hdf5Library).toString());
-            }
+        if (hdf4Library != null || hdf5Library != null) {
+            SystemUtils.LOG.fine("****hdf_jna_path = " + jna_path);
+
+            System.setProperty(HDFLibrary.HDFPATH_PROPERTY_KEY, jna_path.resolve(hdf4Library).toString());
+            System.setProperty(H5.H5PATH_PROPERTY_KEY, jna_path.resolve(hdf5Library).toString());
         }
     }
 
@@ -135,6 +153,12 @@ public class HDFLoader implements Activator {
     @Override
     public void start() {
         setupHDFNativeLibrary();
+    }
+
+    @Override
+    public boolean isDeferrable() {
+        // all users of the native libraries go through ensureHDF5Initialised()
+        return true;
     }
 
     @Override

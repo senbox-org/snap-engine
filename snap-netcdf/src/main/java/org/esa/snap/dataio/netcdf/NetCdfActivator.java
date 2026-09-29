@@ -20,80 +20,97 @@ public class NetCdfActivator implements Activator {
 
     public static AtomicBoolean activated = new AtomicBoolean(false);
 
+    /**
+     * Installs and loads the NetCDF native libraries, once. Callers arriving while another thread is activating wait
+     * until the libraries are loaded, so this is safe to call on demand while the activator runs in the background.
+     */
     public static void activate() {
-
-        if (!activated.getAndSet(true)) {
-            final Path auxdataDirectory = installResourceFiles();
-            if (auxdataDirectory == null){
-                SystemUtils.LOG.severe("NetCDF configuration error: failed to retrieve auxdata path");
+        if (activated.get()) {
+            return;
+        }
+        synchronized (NetCdfActivator.class) {
+            if (activated.get()) {
                 return;
             }
-
-            final String arch = System.getProperty("os.arch").toLowerCase();
-            final Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
-
             try {
-                String nativeLibraryRoot = NativeLibraryTools.NETCDF_NATIVE_LIBRARIES_ROOT;
-                NativeLibraryTools.copyLoaderLibrary(nativeLibraryRoot);
-
-                final URL loaderLibraryUrl = NativeLibraryTools.getLoaderLibraryFilePath(nativeLibraryRoot).toUri().toURL();
-
-                try( NativeLibraryClassLoader nativeLibraryClassLoader = new NativeLibraryClassLoader(new URL[]{loaderLibraryUrl}, new Path[]{jna_path})) {
-                    final Method loaderMethod = nativeLibraryClassLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);
-
-                    switch (arch) {
-                        case "amd64" -> {
-                            String sysName = System.getProperty("os.name").toLowerCase();
-
-                            if (sysName.contains("windows")) {
-                                // windows
-                                // the order of loading is important! tb 2024-09-10
-                                loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
-                                loaderMethod.invoke(null, jna_path.resolve("hdf5_netcdf.dll"));
-                                loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
-                                loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
-
-                            } else {
-                                // linux
-                                // the order of loading is important! tb 2024-09-10
-                                loaderMethod.invoke(null, jna_path.resolve("libcurl.so.4"));
-                                loaderMethod.invoke(null, jna_path.resolve("libz.so.1"));
-                                loaderMethod.invoke(null, jna_path.resolve("libhdf5.so.9.0.0"));
-                                loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.so.9.0.0"));
-                                loaderMethod.invoke(null, jna_path.resolve("libnetcdf.so"));
-                            }
-                        }
-                        case "x86_64" -> {
-                            // mac intel
-                            // the order of loading is important! tb 2024-09-10
-                            loaderMethod.invoke(null, jna_path.resolve("libapple_nghttp2.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libcurl.4.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libz.1.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libhdf5.200.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.200.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
-                        }
-                        case "aarch64" -> {
-                            // mac arm
-                            // the order of loading is important! tb 2024-09-10
-                            loaderMethod.invoke(null, jna_path.resolve("libzstd.1.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libhdf5.310.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.310.dylib"));
-                            loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
-                        }
-                        default -> throw new IllegalAccessException("Not known system!!");
-                    }
-                }
-            } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                     IllegalAccessException e) {
-                throw new RuntimeException(e);
+                doActivate();
+            } finally {
+                activated.set(true);
             }
-
-            SystemUtils.LOG.fine("****netcdf_jna_path = " + jna_path);
-            Nc4Iosp.setLibraryAndPath(jna_path.toString(), null);
         }
+    }
+
+    private static void doActivate() {
+        final Path auxdataDirectory = installResourceFiles();
+        if (auxdataDirectory == null){
+            SystemUtils.LOG.severe("NetCDF configuration error: failed to retrieve auxdata path");
+            return;
+        }
+
+        final String arch = System.getProperty("os.arch").toLowerCase();
+        final Path jna_path = auxdataDirectory.toAbsolutePath().resolve(arch);
+
+        try {
+            String nativeLibraryRoot = NativeLibraryTools.NETCDF_NATIVE_LIBRARIES_ROOT;
+            NativeLibraryTools.copyLoaderLibrary(nativeLibraryRoot);
+
+            final URL loaderLibraryUrl = NativeLibraryTools.getLoaderLibraryFilePath(nativeLibraryRoot).toUri().toURL();
+
+            try( NativeLibraryClassLoader nativeLibraryClassLoader = new NativeLibraryClassLoader(new URL[]{loaderLibraryUrl}, new Path[]{jna_path})) {
+                final Method loaderMethod = nativeLibraryClassLoader.loadClass(NativeLibraryTools.NATIVE_LOADER_LIBRARY_JAR).getMethod("loadNativeLibrary", Path.class);
+
+                switch (arch) {
+                    case "amd64" -> {
+                        String sysName = System.getProperty("os.name").toLowerCase();
+
+                        if (sysName.contains("windows")) {
+                            // windows
+                            // the order of loading is important! tb 2024-09-10
+                            loaderMethod.invoke(null, jna_path.resolve("zlib1.dll"));
+                            loaderMethod.invoke(null, jna_path.resolve("hdf5_netcdf.dll"));
+                            loaderMethod.invoke(null, jna_path.resolve("hdf5_hl.dll"));
+                            loaderMethod.invoke(null, jna_path.resolve("netcdf.dll"));
+
+                        } else {
+                            // linux
+                            // the order of loading is important! tb 2024-09-10
+                            loaderMethod.invoke(null, jna_path.resolve("libcurl.so.4"));
+                            loaderMethod.invoke(null, jna_path.resolve("libz.so.1"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5.so.9.0.0"));
+                            loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.so.9.0.0"));
+                            loaderMethod.invoke(null, jna_path.resolve("libnetcdf.so"));
+                        }
+                    }
+                    case "x86_64" -> {
+                        // mac intel
+                        // the order of loading is important! tb 2024-09-10
+                        loaderMethod.invoke(null, jna_path.resolve("libapple_nghttp2.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libcurl.4.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libz.1.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libhdf5.200.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.200.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
+                    }
+                    case "aarch64" -> {
+                        // mac arm
+                        // the order of loading is important! tb 2024-09-10
+                        loaderMethod.invoke(null, jna_path.resolve("libzstd.1.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libsz.2.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libhdf5.310.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libhdf5_hl.310.dylib"));
+                        loaderMethod.invoke(null, jna_path.resolve("libnetcdf.dylib"));
+                    }
+                    default -> throw new IllegalAccessException("Not known system!!");
+                }
+            }
+        } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        SystemUtils.LOG.fine("****netcdf_jna_path = " + jna_path);
+        Nc4Iosp.setLibraryAndPath(jna_path.toString(), null);
     }
 
     private static Path installResourceFiles() {
@@ -121,6 +138,12 @@ public class NetCdfActivator implements Activator {
     @Override
     public void start() {
         activate();
+    }
+
+    @Override
+    public boolean isDeferrable() {
+        // readers and writers call activate() themselves before using the native libraries
+        return true;
     }
 
     @Override
