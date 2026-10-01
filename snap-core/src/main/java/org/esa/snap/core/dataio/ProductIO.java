@@ -616,6 +616,8 @@ public class ProductIO {
             if (!pm.isCanceled()) {
                 throw new IOException("Writing of band tile data took too long", e);
             }
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 
