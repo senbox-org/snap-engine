@@ -29,27 +29,10 @@ public class OpenJPEGInstaller {
 
         try {
             resourceInstaller.install(".*", ProgressMonitor.NULL);
-            fixUpPermissions(auxdataDirectory);
         } catch (IOException e) {
             SystemUtils.LOG.severe("OpenJPEG configuration error: failed to create " + auxdataDirectory);
             return;
         }
-    }
-
-    private static void fixUpPermissions(Path destPath) throws IOException {
-        Stream<Path> files = Files.list(destPath);
-        files.forEach(path -> {
-            if (Files.isDirectory(path)) {
-                try {
-                    fixUpPermissions(path);
-                } catch (IOException e) {
-                    SystemUtils.LOG.severe("OpenJPEG configuration error: failed to fix permissions on " + path);
-                }
-            }
-            else {
-                setExecutablePermissions(path);
-            }
-        });
     }
 
     private static void setExecutablePermissions(Path executablePathName) {

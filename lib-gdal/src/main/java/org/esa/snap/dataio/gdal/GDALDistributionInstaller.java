@@ -50,7 +50,6 @@ class GDALDistributionInstaller {
             processInstalledWindowsDistribution(gdalDistributionRootFolderPath);
         } else if (org.apache.commons.lang3.SystemUtils.IS_OS_LINUX || org.apache.commons.lang3.SystemUtils.IS_OS_MAC_OSX) {
             final String currentFolderPath = EnvironmentVariables.getCurrentDirectory();
-            GDALInstaller.fixUpPermissions(gdalDistributionRootFolderPath);
             try {
                 logger.log(Level.FINE, "Process the GDAL library on Linux. The current folder is '" + currentFolderPath + "'.");
                 processInstalledLinuxDistribution(gdalDistributionRootFolderPath);
