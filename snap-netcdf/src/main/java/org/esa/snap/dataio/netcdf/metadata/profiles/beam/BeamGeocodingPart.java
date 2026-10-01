@@ -15,8 +15,17 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -38,7 +47,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
@@ -78,7 +87,14 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                     parent.addContent(rootElement.detach());
                     final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
                     final Object objectFromXml = pers.createObjectFromXml(parent, p);
-                    if (objectFromXml instanceof GeoCoding) {
+                    if (objectFromXml instanceof ComponentGeoCoding) {
+                        ComponentGeoCoding geocoding = (ComponentGeoCoding) objectFromXml;
+                        if (Boolean.getBoolean(ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY) && PixelForward.KEY.equals(geocoding.getForwardCoding())) {
+                            geocoding = new ComponentGeoCoding(geocoding.getGeoRaster(), ComponentFactory.getForward(PixelInterpolatingForward.KEY), ComponentFactory.getInverse(PixelQuadTreeInverse.KEY_INTERPOLATING), geocoding.getGeoChecks(), geocoding.getGeoCRS());
+                            geocoding.initialize();
+                        }
+                        return geocoding;
+                    } else if (objectFromXml instanceof GeoCoding) {
                         return (GeoCoding) objectFromXml;
                     }
                 } catch (JDOMException | IOException e) {
