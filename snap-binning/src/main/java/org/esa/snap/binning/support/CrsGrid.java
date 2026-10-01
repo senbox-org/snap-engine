@@ -18,7 +18,7 @@ import org.esa.snap.core.gpf.common.reproject.ReprojectionOp;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.FeatureUtils;
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.data.ows.CRSEnvelope;
+import org.geotools.ows.wms.CRSEnvelope;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
