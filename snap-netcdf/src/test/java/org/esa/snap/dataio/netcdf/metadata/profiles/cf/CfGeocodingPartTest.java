@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
 import com.bc.ceres.annotation.STTM;
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -74,8 +75,9 @@ public class CfGeocodingPartTest {
         variableList.add(lonVar);
         variableList.add(anyVar);
         variableList.add(latVar);
+        final ImmutableList<Variable> variables = ImmutableList.copyOf(variableList);
 
-        when(netcdfFile.getVariables()).thenReturn(variableList);
+        when(netcdfFile.getVariables()).thenReturn(variables);
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);
@@ -100,8 +102,9 @@ public class CfGeocodingPartTest {
         final List<Variable> variableList = new ArrayList<>();
         variableList.add(anyVar);
         variableList.add(latVar);
+        final ImmutableList<Variable> variables = ImmutableList.copyOf(variableList);
 
-        when(netcdfFile.getVariables()).thenReturn(variableList);
+        when(netcdfFile.getVariables()).thenReturn(variables);
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);
@@ -126,8 +129,9 @@ public class CfGeocodingPartTest {
         final List<Variable> variableList = new ArrayList<>();
         variableList.add(lonVar);
         variableList.add(anyVar);
+        final ImmutableList<Variable> variables = ImmutableList.copyOf(variableList);
 
-        when(netcdfFile.getVariables()).thenReturn(variableList);
+        when(netcdfFile.getVariables()).thenReturn(variables);
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);

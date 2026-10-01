@@ -32,7 +32,7 @@
     </description>
 
     <properties>
-        <netcdf.version>5.3.3</netcdf.version>
+        <netcdf.version>5.9.1</netcdf.version>
     </properties>
 
     <dependencies>
@@ -67,7 +67,27 @@
 
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>netcdfAll</artifactId>
+            <artifactId>cdm-core</artifactId>
+            <version>${netcdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-image</artifactId>
+            <version>${netcdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>grib</artifactId>
+            <version>${netcdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf4</artifactId>
+            <version>${netcdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>udunits</artifactId>
             <version>${netcdf.version}</version>
         </dependency>
 
@@ -140,7 +160,6 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>edu.ucar.netcdfAll</publicPackage>
                         <publicPackage>ucar.ma2</publicPackage>
                         <publicPackage>ucar.nc2</publicPackage>
                         <publicPackage>ucar.nc2.constants</publicPackage>
