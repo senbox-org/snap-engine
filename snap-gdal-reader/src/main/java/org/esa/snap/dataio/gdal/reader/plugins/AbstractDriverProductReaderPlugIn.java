@@ -52,7 +52,7 @@ public abstract class AbstractDriverProductReaderPlugIn implements ProductReader
     }
 
     @Override
-    public final String[] getFormatNames() {
+    public String[] getFormatNames() {
         return new String[] { this.pluginFormatName };
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractDriverProductReaderPlugIn implements ProductReader
     }
 
     @Override
-    public final ProductReader createReaderInstance() {
+    public ProductReader createReaderInstance() {
         return new GDALProductReader(this);
     }
 
