@@ -49,7 +49,8 @@ public class AddElevationOpTest {
         assertNotNull(elevationBand);
         assertEquals(-500.0, elevationBand.getNoDataValue(), 1e-8);
         final float sampleFloat = elevationBand.getSampleFloat(37, 29);
-        assertEquals(38.6651268, sampleFloat, 1e-8);
+        // pixel-centre sample (SNAP-4264); the pre-fix half-pixel SE offset gave 38.6651268
+        assertEquals(55.2593727, sampleFloat, 1e-5);
     }
 
     private static String getResourcePath(String name) throws URISyntaxException {
