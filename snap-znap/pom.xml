@@ -44,7 +44,6 @@
         <dependency>
             <groupId>com.bc.zarr</groupId>
             <artifactId>jzarr</artifactId>
-            <version>0.3.7</version>
         </dependency>
 
         <dependency>

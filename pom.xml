@@ -48,7 +48,6 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.19.0</commons-io.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-lang.version>2.6</commons-lang.version>
         <commons-math3.version>3.6.1</commons-math3.version>
         <commons-net.version>3.11.1</commons-net.version>
         <commons-text.version>1.13.1</commons-text.version>
@@ -57,14 +56,17 @@
         <guava.version>33.4.8-jre</guava.version>
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
-        <jackson.version>2.19.0</jackson.version>
+        <netcdf.version>5.3.3</netcdf.version>
+        <jackson.version>2.22.3</jackson.version>
         <jide.version>3.7.15</jide.version>
         <jna.version>5.17.0</jna.version>
-        <jsoup.version>1.20.1</jsoup.version>
+        <jsoup.version>1.23.2</jsoup.version>
         <slf4j.version>2.0.17</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <org.locationtech.version>1.17.0</org.locationtech.version>
-        <mockito.version>5.17.0</mockito.version>
+        <mockito.version>5.22.0</mockito.version>
+        <junit5.version>5.10.2</junit5.version>
         <velocity.version>2.4.1</velocity.version>
+        <tao.version>1.5.3</tao.version>
 
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -386,12 +388,6 @@
                 <version>${commons-lang3.version}</version>
             </dependency>
 
-            <!-- keep for backwards compatibility with imageio-ext libs -->
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -454,6 +450,12 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${apache.poi.version}</version>
             </dependency>
+            <!-- poi brings log4j-api 2.24.3 (CVE-2026-49844) -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.25.5</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -486,7 +488,7 @@
             <dependency>
                 <groupId>io.airlift</groupId>
                 <artifactId>aircompressor</artifactId>
-                <version>0.27</version>
+                <version>2.0.3</version>
             </dependency>
 
             <dependency>
@@ -694,22 +696,13 @@
 
             <!-- XML helper ############################################# -->
 
+            <!-- the BOM is needed because jackson-annotations is versioned 2.x (no patch) since 2.20 -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
 
@@ -732,7 +725,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.27.3</version>
+                <version>3.27.7</version>
                 <scope>test</scope>
             </dependency>
 
@@ -879,6 +872,181 @@
                 <version>21.0.4</version>
             </dependency>
 
+
+            <!-- Libraries used by individual modules ############################################# -->
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hdfgroup</groupId>
+                <artifactId>jarhdf</artifactId>
+                <version>${hdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hdfgroup</groupId>
+                <artifactId>jarhdf5</artifactId>
+                <version>${hdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hdfgroup</groupId>
+                <artifactId>hdfobject</artifactId>
+                <version>${hdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gov.nasa.gsfc.heasarc</groupId>
+                <artifactId>nom-tam-fits</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.jexcelapi</groupId>
+                <artifactId>jxl</artifactId>
+                <version>2.6.12</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.me.jstott</groupId>
+                <artifactId>jcoord</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>nz.ac.waikato.cms.weka</groupId>
+                <artifactId>LibSVM</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+            <dependency>
+                <groupId>nz.ac.waikato.cms.weka</groupId>
+                <artifactId>weka-dev</artifactId>
+                <version>3.9.6</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge</groupId>
+                <artifactId>javaml</artifactId>
+                <version>0.1.7</version>
+            </dependency>
+            <dependency>
+                <groupId>be.abeel</groupId>
+                <artifactId>ajt</artifactId>
+                <version>2.11</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.locationtech.jts</groupId>
+                <artifactId>jts-core</artifactId>
+                <version>${org.locationtech.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.coobird</groupId>
+                <artifactId>thumbnailator</artifactId>
+                <version>0.4.20</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jaitools</groupId>
+                <artifactId>jt-vectorize</artifactId>
+                <version>1.6.0</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>netcdfAll</artifactId>
+                <version>${netcdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.orbisgis</groupId>
+                <artifactId>h2gis</artifactId>
+                <version>1.5.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.mwiede</groupId>
+                <artifactId>jsch</artifactId>
+                <version>0.2.23</version>
+            </dependency>
+            <dependency>
+                <groupId>oro</groupId>
+                <artifactId>oro</artifactId>
+                <version>2.0.8</version>
+            </dependency>
+            <dependency>
+                <groupId>werken-xpath</groupId>
+                <artifactId>werken-xpath</artifactId>
+                <version>0.9.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>24.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.bc.zarr</groupId>
+                <artifactId>jzarr</artifactId>
+                <version>0.3.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jasypt</groupId>
+                <artifactId>jasypt</artifactId>
+                <version>1.9.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit5.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- runs the JUnit 4 tests of modules that also depend on junit-jupiter -->
+            <dependency>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+                <version>${junit5.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-data-model</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-data-sources</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-datasources-usgs</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-datasources-asf</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-datasources-eocat</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-datasources-fedeo</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.c-s.tao</groupId>
+                <artifactId>tao-datasources-das</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -943,11 +1111,11 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.19</version>
+                    <version>2.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <source>21</source>
                         <target>21</target>
@@ -968,7 +1136,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.4.2</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -999,7 +1167,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.5.3</version>
                     <configuration>
                         <!--
                              If enabled some assertions in GeoTools fail.
@@ -1065,11 +1233,10 @@
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.11.2</version>
                     <configuration>
                         <subpackages>org.esa.snap.core:com.bc.ceres</subpackages>
                         <!-- Not possible to exclude packages; it is not considered by the plugin (as of v2.10.3, 18.11.2015) -->
-                        <!-- Maybe this works with v3.5.0 -->
                         <excludePackageNames>org.esa.snap.core.gpf.internal:*.internal:*.impl:*.experimental
                         </excludePackageNames>
                         <!--                        <additionalparam>-exclude-->
@@ -1105,18 +1272,48 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.5.3</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.1</version>
+                </plugin>
+                <!-- explicit, otherwise the version depends on Maven's default bindings / the nbm packaging lifecycle -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.2.0</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.6.1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>
+
+                <!-- maven-surefire-report-plugin 3.5.x needs the Doxia 2 based site plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>4.0.0-M16</version>
                 </plugin>
 
                 <plugin>
@@ -1142,7 +1339,7 @@
                 <plugin>
                     <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>14.0</version>
+                    <version>14.3</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -1173,7 +1370,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.6.0</version>
                     <executions>
                         <execution>
                             <id>create-nbmSpecVersion</id>
@@ -1258,13 +1455,12 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>14.0</version>
+                <version>14.3</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
@@ -1274,7 +1470,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.2.5,)</version>
+                                    <version>[3.6.3,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>21</version>
@@ -1287,7 +1483,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -1329,7 +1525,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.11.2</version>
                 <reportSets>
                     <reportSet>
                         <id>aggregate</id>
