@@ -122,12 +122,12 @@ public class PgxProductReader extends AbstractProductReader {
         synchronized (this) {
             final int width = destBand.getRasterWidth();
             if (sourceOffsetX == 0 && sourceWidth == width && destBuffer.getNumElems() == sourceWidth * sourceHeight) {
-                long pos = dataPosition + sourceOffsetY * width * 2;
+                final long pos = dataPosition + (long) sourceOffsetY * width * 2;
                 stream.seek(pos);
                 destBuffer.readFrom(stream);
             } else if (destWidth == sourceWidth || destHeight == sourceHeight) {
                 for (int i = 0; i < sourceHeight; i++) {
-                    long pos = dataPosition + ((i + sourceOffsetY) * width + sourceOffsetX) * 2;
+                    final long pos = dataPosition + ((long) (i + sourceOffsetY) * width + sourceOffsetX) * 2;
                     stream.seek(pos);
                     destBuffer.readFrom(i * sourceWidth, sourceWidth, stream);
                 }

@@ -187,7 +187,7 @@ public class EnviProductWriter extends AbstractProductWriter {
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
             try {
                 synchronized (outputStream) {
-                    final long max = sourceHeight * sourceWidth;
+                    final long max = (long) sourceHeight * sourceWidth;
                     for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
                         sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
                         outputPos += sourceBandWidth;

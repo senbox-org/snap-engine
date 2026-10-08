@@ -69,7 +69,7 @@ public class N4FileWriteable extends NFileWriteable {
                 int imageWidth = nhDims[indexWidth].getLength();
                 int imageHeight = nhDims[indexHeight].getLength();
                 long imageSize = (long) imageHeight * imageWidth;
-                for (int scalingFactor = 2; imageSize / (chunkLens[indexHeight] * chunkLens[indexWidth]) > Short.MAX_VALUE / 2; scalingFactor *= 2) {
+                for (int scalingFactor = 2; imageSize / ((long) chunkLens[indexHeight] * chunkLens[indexWidth]) > Short.MAX_VALUE / 2; scalingFactor *= 2) {
                     chunkLens[indexHeight] = tileSize.height * scalingFactor;
                     chunkLens[indexWidth] = tileSize.width * scalingFactor;
                 }

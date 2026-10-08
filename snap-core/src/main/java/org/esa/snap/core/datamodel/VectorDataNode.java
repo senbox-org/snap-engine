@@ -178,7 +178,7 @@ public class VectorDataNode extends ProductNode {
 
     @Override
     public long getRawStorageSize(ProductSubsetDef subsetDef) {
-        return featureType.getAttributeCount() * featureCollection.size() * 256;
+        return (long) featureType.getAttributeCount() * featureCollection.size() * 256;
     }
 
     public String getDefaultStyleCss() {

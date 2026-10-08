@@ -148,11 +148,11 @@ class Tile {
         }
 
         // pixel_size_ration is always > 0
-        nl = params.nl_grid * pixel_size_ratio;
-        ns = params.ns_grid * pixel_size_ratio;
+        nl = (long) params.nl_grid * pixel_size_ratio;
+        ns = (long) params.ns_grid * pixel_size_ratio;
 
-        nl_tile = params.nl_tile * pixel_size_ratio;
-        ns_tile = params.ns_tile * pixel_size_ratio;
+        nl_tile = (long) params.nl_tile * pixel_size_ratio;
+        ns_tile = (long) params.ns_tile * pixel_size_ratio;
 
         nl_offset = 0;
         ns_offset = 0;

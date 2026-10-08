@@ -128,9 +128,8 @@ public class RecordReader {
      * <p>Note that the method creates a new record instance each time it is called.
      *
      * @param index the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
-     * @throws java.io.IOException if an I/O error occurs
-     * @throws java.lang.IndexOutOfBoundsException
-     *                             if the index is out of bounds
+     * @throws java.io.IOException                 if an I/O error occurs
+     * @throws java.lang.IndexOutOfBoundsException if the index is out of bounds
      * @see #readRecord(int, org.esa.snap.dataio.envisat.Record)
      */
     public final Record readRecord(int index) throws IOException {
@@ -144,9 +143,8 @@ public class RecordReader {
      *
      * @param index  the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
      * @param record record to be recycled, can be <code>null</code>
-     * @throws java.io.IOException if an I/O error occurs
-     * @throws java.lang.IndexOutOfBoundsException
-     *                             if the index is out of bounds
+     * @throws java.io.IOException                 if an I/O error occurs
+     * @throws java.lang.IndexOutOfBoundsException if the index is out of bounds
      */
     public Record readRecord(int index, Record record) throws IOException {
 
@@ -158,7 +156,7 @@ public class RecordReader {
         if (_dsd.getDatasetType() == 'M') {
             index = _productFile.getMappedMDSRIndex(index);
         }
-        final long pos = _dsd.getDatasetOffset() + (index * _dsd.getRecordSize());
+        final long pos = _dsd.getDatasetOffset() + ((long) index * _dsd.getRecordSize());
         final ImageInputStream istream = _productFile.getDataInputStream();
         synchronized (istream) {
             istream.seek(pos);
@@ -181,33 +179,29 @@ public class RecordReader {
      * Reads a segment of a single field from the record with the given zero-based index from from the product file.
      * <p> In order to reduce memory allocation, the method accepts an mandantory record argument.
      * It will be used to read in the data.
-     *                             
-     * @param sourceY the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
-     * @param fieldOffset the offset in byte this field has in its containing record
+     *
+     * @param sourceY             the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
+     * @param fieldOffset         the offset in byte this field has in its containing record
      * @param dataFieldSampleSize the sample rate of the data field element
-     * @param minX the first element of the field to read
-     * @param maxX the last element of the field to be read
-     * @param field the field into which the data is read
-     * 
-     * @throws java.io.IOException if an I/O error occurs
-     * @throws java.lang.IndexOutOfBoundsException
-     *                             if the index is out of bounds
+     * @param minX                the first element of the field to read
+     * @param maxX                the last element of the field to be read
+     * @param field               the field into which the data is read
+     * @throws java.io.IOException                 if an I/O error occurs
+     * @throws java.lang.IndexOutOfBoundsException if the index is out of bounds
      */
     public void readFieldSegment(int sourceY, long fieldOffset, int dataFieldSampleSize, int minX, int maxX, Field field) throws IOException {
         if (_dsd.getDatasetType() == 'M' || _dsd.getDatasetType() == 'A') {
             sourceY = _productFile.getMappedMDSRIndex(sourceY);
         }
-        final long pos = _dsd.getDatasetOffset() + 
-        					sourceY * _dsd.getRecordSize() + 
-        					fieldOffset + 
-        					minX * dataFieldSampleSize * field.getData().getElemSize();
+        final long pos = _dsd.getDatasetOffset() +
+                (long) sourceY * _dsd.getRecordSize() +
+                fieldOffset +
+                (long) minX * dataFieldSampleSize * field.getData().getElemSize();
         final ImageInputStream istream = _productFile.getDataInputStream();
         synchronized (istream) {
             istream.seek(pos);
-            field.getData().readFrom(minX * dataFieldSampleSize, (maxX-minX+1) * dataFieldSampleSize, istream);
+            field.getData().readFrom(minX * dataFieldSampleSize, (maxX - minX + 1) * dataFieldSampleSize, istream);
         }
-        
     }
-
 }
 

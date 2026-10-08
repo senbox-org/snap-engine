@@ -37,12 +37,12 @@ public final class RegularGaussianGrid extends AbstractGaussianGrid {
 
     @Override
     public long getNumBins() {
-        return getNumRows() * getConfig().getRegularColumnCount();
+        return (long) getNumRows() * getConfig().getRegularColumnCount();
     }
 
     @Override
     protected long getFirstBinIndexUnchecked(int rowIndex) {
-        return rowIndex * getNumCols(rowIndex);
+        return (long) rowIndex * getNumCols(rowIndex);
     }
 
     @Override
@@ -54,5 +54,4 @@ public final class RegularGaussianGrid extends AbstractGaussianGrid {
     protected double getCenterLon(int rowIndex, int colIndex) {
         return getConfig().getRegularLongitudePoints()[colIndex];
     }
-
 }

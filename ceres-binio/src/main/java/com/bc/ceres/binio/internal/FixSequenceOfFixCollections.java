@@ -88,16 +88,15 @@ final class FixSequenceOfFixCollections extends AbstractSequenceOfCollections {
     }
 
     @Override
-    public SequenceData getSequence(int index) throws IOException {
+    public SequenceData getSequence(int index)  {
         final Type elementType = getType().getElementType();
-        if (elementType instanceof SequenceType) {
-            final SequenceType sequenceElementType = (SequenceType) elementType;
+        if (elementType instanceof SequenceType sequenceElementType) {
             if (segment != null) {
                 return InstanceFactory.createFixSequence(getContext(), this, sequenceElementType, segment,
                                                          index * sequenceElementType.getSize());
             } else {
                 return InstanceFactory.createSequence(getContext(), this, sequenceElementType,
-                                                      getPosition() + index * sequenceElementType.getSize(),
+                                                      getPosition() + (long) index * sequenceElementType.getSize(),
                                                       getContext().getFormat().getByteOrder());
             }
         }
@@ -105,16 +104,15 @@ final class FixSequenceOfFixCollections extends AbstractSequenceOfCollections {
     }
 
     @Override
-    public CompoundData getCompound(int index) throws IOException {
+    public CompoundData getCompound(int index) {
         final Type elementType = getType().getElementType();
-        if (elementType instanceof CompoundType) {
-            final CompoundType compoundElementType = (CompoundType) elementType;
+        if (elementType instanceof CompoundType compoundElementType) {
             if (segment != null) {
                 return InstanceFactory.createFixCompound(getContext(), this, compoundElementType, segment,
                                                          index * compoundElementType.getSize());
             } else {
                 return InstanceFactory.createCompound(getContext(), this, compoundElementType,
-                                                      getPosition() + index * compoundElementType.getSize(),
+                                                      getPosition() + (long) index * compoundElementType.getSize(),
                                                       getContext().getFormat().getByteOrder());
             }
         }
