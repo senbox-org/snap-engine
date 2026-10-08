@@ -20,6 +20,7 @@ import com.bc.ceres.binding.ConversionException;
 
 import java.text.NumberFormat;
 
+@Deprecated
 public class NumberFormatConverter implements com.bc.ceres.binding.Converter<Object> {
 
     private NumberFormat format;

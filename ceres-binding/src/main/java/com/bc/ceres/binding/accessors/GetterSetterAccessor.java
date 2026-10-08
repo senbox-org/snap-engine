@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
  * @author Norman
  * @since Ceres 0.14
  */
+@Deprecated
 public class GetterSetterAccessor implements PropertyAccessor {
     private final Object object;
     private final Method getter;

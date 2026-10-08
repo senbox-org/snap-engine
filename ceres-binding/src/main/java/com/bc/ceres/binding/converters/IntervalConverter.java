@@ -20,6 +20,7 @@ import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.ValueRange;
 
 public class IntervalConverter implements com.bc.ceres.binding.Converter<ValueRange> {
+
     @Override
     public Class<ValueRange> getValueType() {
         return ValueRange.class;
@@ -30,7 +31,15 @@ public class IntervalConverter implements com.bc.ceres.binding.Converter<ValueRa
         if (text.isEmpty()) {
             return null;
         }
-        return ValueRange.parseValueRange(text);
+
+        ValueRange valueRange;
+        try {
+            valueRange = ValueRange.parseValueRange(text);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException(e);
+        }
+
+        return valueRange;
     }
 
     @Override

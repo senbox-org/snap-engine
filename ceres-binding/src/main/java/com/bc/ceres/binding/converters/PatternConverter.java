@@ -43,6 +43,9 @@ public class PatternConverter implements Converter<Pattern> {
 
     @Override
     public String format(Pattern value) {
+        if (value == null) {
+            return "";
+        }
         return value.toString();
     }
 }
