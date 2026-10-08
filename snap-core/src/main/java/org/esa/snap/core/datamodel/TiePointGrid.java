@@ -99,7 +99,7 @@ public class TiePointGrid extends RasterDataNode {
                         double offsetY,
                         double subSamplingX,
                         double subSamplingY) {
-        super(name, ProductData.TYPE_FLOAT32, gridWidth * gridHeight);
+        super(name, ProductData.TYPE_FLOAT32, (long) gridWidth * gridHeight);
         Assert.argument(gridWidth >= 2, "gridWidth >= 2");
         Assert.argument(gridHeight >= 2, "gridHeight >= 2");
         Assert.argument(subSamplingX > 0.0F, "subSamplingX > 0.0");

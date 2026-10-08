@@ -90,7 +90,7 @@ public class TiffIFD {
 
     public long getRequiredIfdSize() {
         final TiffDirectoryEntry[] entries = entrySet.getEntries();
-        return BYTES_FOR_NUMBER_OF_ENTRIES + entries.length * TiffDirectoryEntry.BYTES_PER_ENTRY + BYTES_FOR_NEXT_IFD_OFFSET;
+        return BYTES_FOR_NUMBER_OF_ENTRIES + (long) entries.length * TiffDirectoryEntry.BYTES_PER_ENTRY + BYTES_FOR_NEXT_IFD_OFFSET;
     }
 
     public long getRequiredReferencedValuesSize() {

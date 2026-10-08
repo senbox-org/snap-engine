@@ -168,7 +168,7 @@ public class DSD {
         Guardian.assertGreaterThan("recordSize", recordSize, 0);
         this.datasetOffset = datasetOffset;
         this.recordSize = recordSize;
-        this.datasetSize = this.numRecords * this.recordSize;
+        this.datasetSize = (long) this.numRecords * this.recordSize;
     }
 
     /**

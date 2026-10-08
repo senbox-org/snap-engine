@@ -325,7 +325,7 @@ public class BandLineReader {
                 break;
             }
             ProductData data = field.getData();
-            offset += data.getElemSize() * data.getNumElems();
+            offset += (long) data.getElemSize() * data.getNumElems();
         }
         return offset;
     }

@@ -192,7 +192,7 @@ public class ProductFunctions {
         long size = 0;
         for (Band band : product.getBands()) {
             if (!(band instanceof VirtualBand)) {
-                size += band.getRasterWidth() * band.getRasterHeight();
+                size += (long) band.getRasterWidth() * band.getRasterHeight();
             }
         }
         return size;

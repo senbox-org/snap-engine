@@ -89,9 +89,8 @@ final class VarSequenceOfFixCollections extends AbstractSequenceOfCollections {
     public SequenceData getSequence(int index) throws IOException {
         ensureSizeResolved(index);
         final Type elementType = resolvedSequenceType.getElementType();
-        if (elementType instanceof SequenceType) {
-            final SequenceType sequenceElementType = (SequenceType) elementType;
-            return InstanceFactory.createSequence(getContext(), this, sequenceElementType, getPosition() + index * sequenceElementType.getSize(), getContext().getFormat().getByteOrder());
+        if (elementType instanceof SequenceType sequenceElementType) {
+            return InstanceFactory.createSequence(getContext(), this, sequenceElementType, getPosition() + (long) index * sequenceElementType.getSize(), getContext().getFormat().getByteOrder());
         }
         throw new DataAccessException(getTypeErrorMsg());
     }
@@ -100,9 +99,8 @@ final class VarSequenceOfFixCollections extends AbstractSequenceOfCollections {
     public CompoundData getCompound(int index) throws IOException {
         ensureSizeResolved(index);
         final Type elementType = resolvedSequenceType.getElementType();
-        if (elementType instanceof CompoundType) {
-            final CompoundType compoundElementType = (CompoundType) elementType;
-            return InstanceFactory.createCompound(getContext(), this, compoundElementType, getPosition() + index * compoundElementType.getSize(), getContext().getFormat().getByteOrder());
+        if (elementType instanceof CompoundType compoundElementType) {
+            return InstanceFactory.createCompound(getContext(), this, compoundElementType, getPosition() + (long) index * compoundElementType.getSize(), getContext().getFormat().getByteOrder());
         }
         throw new DataAccessException(getTypeErrorMsg());
     }

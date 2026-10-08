@@ -604,7 +604,7 @@ public class FileTileCache implements TileCache {
             this.file = new File(cacheDir, getImageId(tileId.owner.get()) + "-" + tileId.tileX + "-" + tileId.tileY);
             this.tileCacheMetric = tileCacheMetric;
             this.sampleModel = tile.getSampleModel();
-            this.tileSize = sampleModel.getNumDataElements() * DataBuffer.getDataTypeSize(sampleModel.getTransferType());
+            this.tileSize = (long) sampleModel.getNumDataElements() * DataBuffer.getDataTypeSize(sampleModel.getTransferType());
             this.location = tile.getBounds().getLocation();
             this.writable = tile instanceof WritableRaster;
             this.tileTimeStamp = System.currentTimeMillis();
