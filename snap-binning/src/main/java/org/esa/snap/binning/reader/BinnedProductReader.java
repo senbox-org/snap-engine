@@ -411,7 +411,7 @@ public class BinnedProductReader extends AbstractProductReader {
             band.setDescription(variableMetadata.description);
             band.setUnit(variableMetadata.variable.getUnitsString());
             band.setNoDataValue(variableMetadata.fillValue);
-            band.setNoDataValueUsed(variableMetadata.fillValue != Double.NaN);
+            band.setNoDataValueUsed(!Double.isNaN(variableMetadata.fillValue));
             band.setSpectralWavelength(getWavelengthFromBandName(varName));
             product.addBand(band);
             final VariableReader variableReader = new VariableReader(variableMetadata.variable);
@@ -429,7 +429,7 @@ public class BinnedProductReader extends AbstractProductReader {
             band.setDescription(variableMetadata.description);
             band.setUnit(variableMetadata.variable.getUnitsString());
             band.setNoDataValue(variableMetadata.fillValue);
-            band.setNoDataValueUsed(variableMetadata.fillValue != Double.NaN);
+            band.setNoDataValueUsed(!Double.isNaN(variableMetadata.fillValue));
             band.setSpectralWavelength(getWavelengthFromBandName(varName));
 
             product.addBand(band);

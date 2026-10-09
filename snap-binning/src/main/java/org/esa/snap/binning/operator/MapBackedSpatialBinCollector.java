@@ -85,7 +85,7 @@ class MapBackedSpatialBinCollector implements SpatialBinCollector {
         spatialBinMap.clear();
     }
 
-    private class SortedMapWrappingSpatialBinCollection implements SpatialBinCollection {
+    private static class SortedMapWrappingSpatialBinCollection implements SpatialBinCollection {
 
         private SortedMap<Long, List<SpatialBin>> map;
 

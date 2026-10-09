@@ -59,9 +59,7 @@ class InstallInfo {
             }
             return installInfo;
         } catch (XStreamException e) {
-            IOException ioe = new IOException("Failed to read install info.");
-            ioe.initCause(e);
-            throw ioe;
+            throw new IOException("Failed to read install info. " + e.getMessage());
         }
     }
 
@@ -70,9 +68,7 @@ class InstallInfo {
             this.date = new Date();
             createXStream().toXML(this, writer);
         } catch (XStreamException e) {
-            IOException ioe = new IOException("Failed to write install info.");
-            ioe.initCause(e);
-            throw ioe;
+            throw new IOException("Failed to write install info. " + e.getMessage());
         }
     }
 

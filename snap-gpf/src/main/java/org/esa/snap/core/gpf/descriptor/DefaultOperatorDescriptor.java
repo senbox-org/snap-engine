@@ -75,12 +75,12 @@ public class DefaultOperatorDescriptor implements OperatorDescriptor {
 
     @Override
     public boolean isInternal() {
-        return internal != null ? internal : false;
+        return internal != null && internal;
     }
 
     @Override
     public boolean isAutoWriteDisabled() {
-        return autoWriteSuppressed != null ? autoWriteSuppressed : false;
+        return autoWriteSuppressed != null && autoWriteSuppressed;
     }
 
     @Override

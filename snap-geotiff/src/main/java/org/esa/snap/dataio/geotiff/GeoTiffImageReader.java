@@ -13,16 +13,11 @@ import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
-import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
-import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
-import org.geotools.util.factory.Hints;
+import org.geotools.coverage.grid.io.imageio.geotiff.*;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
+import org.geotools.util.factory.Hints;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
@@ -41,12 +36,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
-import java.io.BufferedInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystem;
@@ -277,31 +267,37 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         RenderedImage translatedRightImage = TranslateDescriptor.create(rightImage, -1.0f * rightImage.getWidth(), 0f, new InterpolationNearest(), null);
 
         double bgValue = noDataValue != null ? noDataValue : 0.0;
-        double[] backgroundValues = new double[] {bgValue};
-        double[][] sourceThreshold = new double[][]{{ Double.NEGATIVE_INFINITY }};
+        double[] backgroundValues = new double[]{bgValue};
+        double[][] sourceThreshold = new double[][]{{Double.NEGATIVE_INFINITY}};
         // Now mosaic the two images.
         return MosaicDescriptor.create(new RenderedImage[]{translatedRightImage, translatedLeftImage}, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, sourceThreshold, backgroundValues, null);
     }
 
     private Double readNoDataValue() {
         Double noDataValue = null;
+        TIFFImageMetadata imageMetadata;
+
         try {
-            TIFFImageMetadata imageMetadata = getImageMetadata();
-            TIFFField field = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
-            if (field != null) {
-                String strValue = field.getAsString(0);
+            imageMetadata = getImageMetadata();
+        } catch (IOException e) {
+            return noDataValue;
+        }
 
-                if (strValue != null) {
-                    strValue = strValue.trim();
+        TIFFField field = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
+        if (field != null) {
+            String strValue = field.getAsString(0);
 
-                    if (strValue.equalsIgnoreCase("nan")) {
-                        noDataValue = Double.NaN;
-                    } else {
-                        noDataValue = Double.valueOf(strValue);
-                    }
+            if (strValue != null) {
+                strValue = strValue.trim();
+
+                if (strValue.equalsIgnoreCase("nan")) {
+                    noDataValue = Double.NaN;
+                } else {
+                    noDataValue = Double.valueOf(strValue);
                 }
             }
-        } catch(IOException e) {}
+        }
+
         return noDataValue;
     }
 

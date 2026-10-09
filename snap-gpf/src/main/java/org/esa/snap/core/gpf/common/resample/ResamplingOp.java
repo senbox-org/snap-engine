@@ -387,7 +387,7 @@ public class ResamplingOp extends Operator {
                     sourceBand.getRasterWidth() != referenceWidth ||
                     sourceBand.getRasterHeight() != referenceHeight ||
                     sourceTransform.getTranslateX() != referenceImageToModelTransform.getTranslateX() ||
-                    sourceTransform.getTranslateX() != referenceImageToModelTransform.getTranslateX())) {
+                    sourceTransform.getTranslateY() != referenceImageToModelTransform.getTranslateY())) {
                 targetBand = new Band(sourceBand.getName(), sourceBand.getDataType(), referenceWidth, referenceHeight);
                 MultiLevelImage targetImage = sourceBand.getSourceImage();
                 MultiLevelImage sourceImage = createMaskedImage(sourceBand, Double.NaN);

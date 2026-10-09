@@ -325,7 +325,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
         }
         final int positionInt = (int) Math.floor(position);
         final float fraction = position - positionInt;
-        return positionInt / subSampling + fraction;
+        return (float) positionInt / subSampling + fraction;
     }
 
     @Override

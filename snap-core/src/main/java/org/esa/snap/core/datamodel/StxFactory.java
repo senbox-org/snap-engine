@@ -147,8 +147,8 @@ public class StxFactory {
         double maximum = this.maximum != null ? this.maximum.doubleValue() : Double.NaN;
         double mean = this.mean != null ? this.mean.doubleValue() : Double.NaN;
         double stdDev = this.standardDeviation != null ? this.standardDeviation.doubleValue() : Double.NaN;
-        boolean logHistogram = this.logHistogram != null ? this.logHistogram : false;
-        boolean intHistogram = this.intHistogram != null ? this.intHistogram : false;
+        boolean logHistogram = this.logHistogram != null && this.logHistogram;
+        boolean intHistogram = this.intHistogram != null && this.intHistogram;
         int level = this.resolutionLevel != null ? this.resolutionLevel : 0;
 
         double coeffOfVariation = this.coefficientOfVariation != null ? this.coefficientOfVariation.doubleValue() : Double.NaN;

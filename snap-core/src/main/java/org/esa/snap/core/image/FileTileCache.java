@@ -554,7 +554,7 @@ public class FileTileCache implements TileCache {
         }
     }
 
-    final class TileId {
+    static final class TileId {
         final WeakReference<RenderedImage> owner;
         final int tileX;
         final int tileY;

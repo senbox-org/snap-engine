@@ -874,7 +874,7 @@ public class ReprojectionOp extends Operator {
 
     }
 
-    private class ReprojectionSettings {
+    private static class ReprojectionSettings {
 
         private GeoCoding geoCoding;
         private MultiLevelModel sourceModel;

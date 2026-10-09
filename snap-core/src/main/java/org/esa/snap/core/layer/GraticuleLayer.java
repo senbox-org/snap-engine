@@ -1000,7 +1000,7 @@ public class GraticuleLayer extends Layer {
             final double PAPER_WIDTH = 8.5;
 
             double heightToWidthRatioPaper = (PAPER_HEIGHT) / (PAPER_WIDTH);
-            double heightToWidthRatioRaster = raster.getRasterHeight() / raster.getRasterWidth();
+            double heightToWidthRatioRaster = (double) raster.getRasterHeight() / raster.getRasterWidth();
 
             if (heightToWidthRatioRaster > heightToWidthRatioPaper) {
                 // use height

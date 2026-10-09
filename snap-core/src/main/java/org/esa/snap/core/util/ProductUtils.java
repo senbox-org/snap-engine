@@ -69,7 +69,7 @@ import java.util.*;
  */
 public class ProductUtils {
 
-    private static String GLOBAL_ATTRIBUTES_KEY = "Global_Attributes";
+    private static final String GLOBAL_ATTRIBUTES_KEY = "Global_Attributes";
     public static String METADATA_PROJECTION_KEY = "map_projection";
     public static String[] METADATA_POSSIBLE_PROJECTION_KEYS = {METADATA_PROJECTION_KEY, "projection", "crs"};
     public static String[] METADATA_POSSIBLE_START_TIME_KEYS = {"time_coverage_start"};
@@ -555,8 +555,9 @@ public class ProductUtils {
             }
         }
     }
-    public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames){
-        copyMasks( sourceProduct, targetProduct, sourceMaskNames,true);
+
+    public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames) {
+        copyMasks(sourceProduct, targetProduct, sourceMaskNames, true);
     }
 
     public static void copyMasks(Product sourceProduct, Product targetProduct, String[] sourceMaskNames, boolean adaptToSceneRasterSize) {
@@ -564,8 +565,7 @@ public class ProductUtils {
         double scaleY = (double) sourceProduct.getSceneRasterHeight() / targetProduct.getSceneRasterHeight();
         GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
         AffineTransform referenceImageToModelTransform = null;
-        if (sceneGeoCoding != null && sceneGeoCoding.getImageToMapTransform() instanceof AffineTransform) {
-            AffineTransform mapTransform = (AffineTransform) sceneGeoCoding.getImageToMapTransform();
+        if (sceneGeoCoding != null && sceneGeoCoding.getImageToMapTransform() instanceof AffineTransform mapTransform) {
             referenceImageToModelTransform = new AffineTransform(scaleX * mapTransform.getScaleX(), 0, 0, scaleY * mapTransform.getScaleY(),
                     mapTransform.getTranslateX(), mapTransform.getTranslateY());
         } else {
@@ -580,7 +580,7 @@ public class ProductUtils {
                 String expression = Mask.BandMathsType.getExpression(sourceMask);
                 Mask targetMask = Mask.BandMathsType.create(sourceMask.getName(), sourceMask.getDescription(),
                         adaptToSceneRasterSize ? targetProduct.getSceneRasterWidth() : sourceMask.getRasterWidth(),
-                        adaptToSceneRasterSize ?targetProduct.getSceneRasterHeight(): sourceMask.getRasterHeight(),
+                        adaptToSceneRasterSize ? targetProduct.getSceneRasterHeight() : sourceMask.getRasterHeight(),
                         expression,
                         sourceMask.getImageColor(), sourceMask.getImageTransparency());
                 targetProduct.addMask(targetMask);
@@ -841,7 +841,7 @@ public class ProductUtils {
         final int binCount = sourceStx.getHistogramBinCount();
         final boolean intHist = sourceStx.isIntHistogram();
         final boolean logHist = sourceStx.isLogHistogram();
-        final double low  = srcHist.getLowValue(0);
+        final double low = srcHist.getLowValue(0);
         final double high = srcHist.getHighValue(0);
 
         WrappedHistogram wrapped = new WrappedHistogram(binCount, low, high, intHist, logHist);
@@ -941,9 +941,7 @@ public class ProductUtils {
         targetRaster.setNoDataValueUsed(sourceRaster.isNoDataValueUsed());
         targetRaster.setNoDataValue(sourceRaster.getNoDataValue());
         targetRaster.setValidPixelExpression(sourceRaster.getValidPixelExpression());
-        if (sourceRaster instanceof Band && targetRaster instanceof Band) {
-            Band sourceBand = (Band) sourceRaster;
-            Band targetBand = (Band) targetRaster;
+        if (sourceRaster instanceof Band sourceBand && targetRaster instanceof Band targetBand) {
             copySpectralBandProperties(sourceBand, targetBand);
             Product targetProduct = targetBand.getProduct();
             if (targetProduct == null) {
@@ -1217,7 +1215,7 @@ public class ProductUtils {
                     for (String key : possibleAttributes) {
                         String[] keyVariations = StringUtils.getStringCaseVariations(key);
                         for (String keyVariation : keyVariations) {
-                            if (keyVariation != null && !keyVariation.toLowerCase().equals(attribute.toLowerCase())) {
+                            if (keyVariation != null && !keyVariation.equalsIgnoreCase(attribute)) {
                                 deleteMetaDataField(product, keyVariation);
                             }
                         }
@@ -1298,23 +1296,13 @@ public class ProductUtils {
             }
 
             // this wont do anything if attribute is not a String type
-            try {
-                if (value != null) {
-                    metadataElement.setAttributeString(field, value);
-                } else {
-                    metadataElement.setAttributeString(field, UNDEFINED_VALUE);
-                }
-            } catch (Exception e) {
-
-            }
+            metadataElement.setAttributeString(field, Objects.requireNonNullElse(value, UNDEFINED_VALUE));
 
             if (metadataAttribute != null) {
                 metadataAttribute.setReadOnly(true);
             }
         }
     }
-
-
 
 
     public static String getMetaData(Product product, String[] keys) {
@@ -1347,7 +1335,6 @@ public class ProductUtils {
     }
 
 
-
     static ProductData.UTC parseUtcDate(String timeString) {
         try {
             if (timeString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z")) {
@@ -1375,7 +1362,6 @@ public class ProductUtils {
         }
         return null;
     }
-
 
 
     public static boolean isMetadataKeyExists(Product product, String key) {
@@ -1412,8 +1398,6 @@ public class ProductUtils {
     }
 
 
-
-
     public static String getMetaData(Product product, String key, boolean exact) {
         // Created by Daniel Knowles
         if (key == null) {
@@ -1435,14 +1419,6 @@ public class ProductUtils {
             return metaData;
         }
     }
-
-
-
-
-
-
-
-
 
 
     public static String getMetaDataOrbit(Product product) {
@@ -1470,6 +1446,7 @@ public class ProductUtils {
 
         return metaData;
     }
+
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
 
         ProductNodeGroup<VectorDataNode> vectorDataGroup = sourceProduct.getVectorDataGroup();
@@ -2524,7 +2501,7 @@ public class ProductUtils {
         }
     }
 
-    public static Path getProductPath(Object input){
+    public static Path getProductPath(Object input) {
         if (input instanceof Path path) {
             return path;
         } else if (input instanceof File file) {

@@ -102,12 +102,9 @@ public class FieldRef {
             }
             int fieldIndex = Integer.parseInt(fieldIndexStr) - 1;
             return new FieldRef(datasetName, fieldIndex);
-        } catch (NumberFormatException e) {
-        } catch (IndexOutOfBoundsException e) {
-        } catch (IllegalArgumentException e) {
+        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+            throw new NumberFormatException("invalid field reference string: " + fieldRefStr); /*I18N*/
         }
-
-        throw new NumberFormatException("invalid field reference string: " + fieldRefStr); /*I18N*/
     }
 
     /**

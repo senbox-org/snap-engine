@@ -45,8 +45,8 @@ class GeoPosToPixelPosFilter implements CoordinateSequenceFilter {
         PixelPos pixelPos = geoCoding.getPixelPos(new GeoPos(coord.y, coord.x), null);
         // rounding needed because closed geometries yield errors if their first and last coordinate
         // do not exactly match
-        double x = Math.round(pixelPos.x * 10000) / 10000;
-        double y = Math.round(pixelPos.y * 10000) / 10000;
+        double x = Math.round(pixelPos.x * 10000) / 10000.f;
+        double y = Math.round(pixelPos.y * 10000) / 10000.f;
         coord.setCoordinate(new Coordinate(x, y));
         count++;
     }

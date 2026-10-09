@@ -40,7 +40,7 @@ public class DefaultSourceProductDescriptor implements SourceProductDescriptor {
 
     @Override
     public boolean isOptional() {
-        return optional != null ? optional : false;
+        return optional != null && optional;
     }
 
     @Override
