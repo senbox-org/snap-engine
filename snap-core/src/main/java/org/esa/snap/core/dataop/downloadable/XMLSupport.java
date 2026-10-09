@@ -98,10 +98,7 @@ public final class XMLSupport {
                     "\n\nPlease check the characters being used and if your operating system locale is set correctly";
             SystemUtils.LOG.severe(msg);
             throw new IOException(msg);
-        } catch (IOException e) {
-            //System.out.println("Path to xml is not valid: " + e.getMessage());
-            throw e;
-        } catch (SAXException | ParserConfigurationException e) {
+        }  catch (SAXException | ParserConfigurationException e) {
             SystemUtils.LOG.severe("cannot parse xml : " + e.getMessage());
             throw new IOException(e.getMessage());
         }

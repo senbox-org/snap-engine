@@ -137,7 +137,7 @@ public class ModuleRegistry {
         Assert.notNull(symbolicName, "symbolicName");
         Object o = symbolicNameToModulesMap.get(symbolicName);
         if (o == null) {
-            return new ModuleImpl[0];
+            return ModuleImpl.EMPTY_ARRAY;
         } else if (o instanceof ModuleImpl) {
             ModuleImpl module = (ModuleImpl) o;
             return new ModuleImpl[]{module};

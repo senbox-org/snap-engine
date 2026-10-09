@@ -37,6 +37,7 @@ public class ObservableInputStream extends FilterInputStream {
      * @param in       The input stream to be monitored.
      * @param listener the listener to be informed
      */
+    @Deprecated
     public ObservableInputStream(InputStream in, InputStreamObserver listener) {
         super(in);
         try {

@@ -331,8 +331,8 @@ public class EnviHeader {
                 }
                 utmZone = Integer.parseInt(zoneNumStr.toString());
 
-                GeoPos centrePos = crsGeoCoding.getGeoPos(new PixelPos(rasterDataNode.getRasterWidth() / 2,
-                                                                       rasterDataNode.getRasterHeight() / 2), null);
+                GeoPos centrePos = crsGeoCoding.getGeoPos(new PixelPos(rasterDataNode.getRasterWidth() / 2.f,
+                                                                       rasterDataNode.getRasterHeight() / 2.f), null);
                 utmHemisphere = centrePos.getLat() > 0 ? "North" : "South";
             }
             referencePixelX = imgGeom.getReferencePixelX();

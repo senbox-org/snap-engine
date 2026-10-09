@@ -183,9 +183,7 @@ public abstract class ElevationFile {
             SystemUtils.LOG.warning("http error:" + e.getMessage() + " on " + remotePath);
             remoteFileExists = false;
         } catch (CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
+            throw new IOException(e);
         }
         return false;
     }

@@ -111,7 +111,7 @@ public class CsvWriterBuilder {
         }
     }
 
-    class ProductCsvWriter implements CsvWriter {
+    static class ProductCsvWriter implements CsvWriter {
         // todo - let CsvProductWriter implement the WriteStrategy interface, too
         private String targetFile;
 

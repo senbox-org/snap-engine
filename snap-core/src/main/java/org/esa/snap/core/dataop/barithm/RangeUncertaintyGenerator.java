@@ -27,7 +27,7 @@ public class RangeUncertaintyGenerator implements UncertaintyGenerator {
         return new TermDecompiler().decompile(result);
     }
 
-    private class RangeUncertaintyTransformer implements TermTransformer {
+    private static class RangeUncertaintyTransformer implements TermTransformer {
         private final TermSimplifier simplifier = new TermSimplifier();
         private final String relation;
 

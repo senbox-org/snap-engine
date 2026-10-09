@@ -114,7 +114,7 @@ public class ModuleResolver {
         if (moduleStack.contains(moduleKey)) {
             String message = createCyclicDependecyExceptionMessage(module);
             module.addResolveError(new ResolveException(message));
-            return new ModuleImpl[0];
+            return ModuleImpl.EMPTY_ARRAY;
         }
 
         try {

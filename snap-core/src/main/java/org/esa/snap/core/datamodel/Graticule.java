@@ -167,7 +167,7 @@ public class Graticule {
 
         if (latMajorStep == 0) {
             int height = raster.getRasterHeight();
-            double ratio = height / (desiredNumGridLines - 1);
+            double ratio = (double) height / (desiredNumGridLines - 1);
 
             double tmpLatMajorStep = ratio * geoDelta.lat;
 
@@ -176,7 +176,7 @@ public class Graticule {
 
         if (lonMajorStep == 0) {
             int width = raster.getRasterWidth();
-            double ratio = width / (desiredNumGridLines - 1);
+            double ratio = (double) width / (desiredNumGridLines - 1);
 
             double tmpLonMajorStep = ratio * geoDelta.lon;
 
@@ -184,9 +184,9 @@ public class Graticule {
         }
 
         final int desiredMinorSteps = getDesiredMinorSteps(raster);
-        final double ratioLatMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+        final double ratioLatMinor = (double) raster.getRasterHeight() / (desiredMinorSteps - 1);
         final double latMinorStep = ratioLatMinor * geoDelta.lat;
-        final double ratioLonMinor = raster.getRasterHeight() / (desiredMinorSteps - 1);
+        final double ratioLonMinor = (double) raster.getRasterHeight() / (desiredMinorSteps - 1);
         final double lonMinorStep = ratioLonMinor * geoDelta.lon;
 
         int geoBoundaryStep = getGeoBoundaryStep(geoCoding, raster);

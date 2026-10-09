@@ -31,9 +31,7 @@ import org.esa.snap.core.jexp.impl.TermDecompiler;
 import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -174,18 +172,18 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
                 Assert.state(dataType.equals(ProductData.TYPE_UINT8), "dataType.equals(ProductData.TYPE_UINT8)");
             }
 
-            boolean mask = this.mask != null ? this.mask : false;
+            boolean mask = this.mask != null && this.mask;
             int dataType = this.dataType != null ? this.dataType : (mask ? ProductData.TYPE_UINT8 : ProductData.TYPE_FLOAT32);
             ResolutionLevel level = this.level != null ? this.level : ResolutionLevel.MAXRES;
             return new VirtualBandOpImage(term,
-                                          dataType,
-                                          fillValue,
-                                          mask,
-                                          sourceSize.width,
-                                          sourceSize.height,
-                                          tileSize,
-                                          imageConfig,
-                                          level);
+                    dataType,
+                    fillValue,
+                    mask,
+                    sourceSize.width,
+                    sourceSize.height,
+                    tileSize,
+                    imageConfig,
+                    level);
         }
     }
 
@@ -199,11 +197,11 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
                                Map imageConfig,
                                ResolutionLevel level) {
         super(ImageManager.getDataBufferType(dataType),
-              sourceWidth,
-              sourceHeight,
-              tileSize,
-              imageConfig,
-              level);
+                sourceWidth,
+                sourceHeight,
+                tileSize,
+                imageConfig,
+                level);
         this.term = term;
         this.dataType = dataType;
         this.mask = mask;
@@ -240,9 +238,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
             return super.computeTile(tileX, tileY);
         } else {
             if (noDataRaster == null) {
-                if (noDataRaster == null) {
-                    noDataRaster = createNoDataRaster(fillValue == null ? 0.0 : fillValue.doubleValue());
-                }
+                noDataRaster = createNoDataRaster(fillValue == null ? 0.0 : fillValue.doubleValue());
             }
             return noDataRaster.createTranslatedChild(tileXToX(tileX), tileYToY(tileY));
         }
@@ -252,8 +248,8 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
     protected void computeRect(PlanarImage[] planarImages, WritableRaster writableRaster, Rectangle destRect) {
         final Term effectiveTerm = effectiveTerms.remove(getTileIndices(destRect)[0]);
         final ProductData productData = ProductData.createInstance(dataType,
-                                                                   ImageUtils.getPrimitiveArray(
-                                                                           writableRaster.getDataBuffer()));
+                ImageUtils.getPrimitiveArray(
+                        writableRaster.getDataBuffer()));
         final int x = destRect.x - writableRaster.getMinX();
         final int y = destRect.y - writableRaster.getMinY();
         final int w = writableRaster.getWidth();
@@ -262,8 +258,8 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
         final int rowCount = destRect.height;
         final int pixelCount = colCount * rowCount;
         final RasterDataEvalEnv env = new RasterDataEvalEnv(destRect.x, destRect.y,
-                                                            colCount, rowCount,
-                                                            getLevelImageSupport());
+                colCount, rowCount,
+                getLevelImageSupport());
 
         if (mask) {
             for (int i = 0, k = w * y; i < pixelCount; i += colCount, k += w) {

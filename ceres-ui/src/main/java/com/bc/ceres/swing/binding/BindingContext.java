@@ -548,7 +548,7 @@ public class BindingContext {
         boolean conditionIsTrue = condition.evaluate(this);
         final JComponent[] components = getBinding(targetPropertyName).getComponents();
         for (JComponent component : components) {
-            component.setEnabled(conditionIsTrue ? targetState : !targetState);
+            component.setEnabled(conditionIsTrue == targetState);
         }
     }
 

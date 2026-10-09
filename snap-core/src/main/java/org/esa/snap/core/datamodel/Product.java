@@ -2058,7 +2058,7 @@ public class Product extends ProductNode implements Closeable {
                             sb.append(".");
                             sb.append(flagAttr.getName());
                             sb.append(":\t");
-                            sb.append(flagSet ? "true" : "false");
+                            sb.append(flagSet);
                             sb.append("\n");
                         }
                     }
@@ -2242,7 +2242,7 @@ public class Product extends ProductNode implements Closeable {
                             sb.append(".");
                             sb.append(flagAttr.getName());
                             sb.append(":\t");
-                            sb.append(flagSet ? "true" : "false");
+                            sb.append(flagSet);
                             sb.append("\n");
                         }
                     }

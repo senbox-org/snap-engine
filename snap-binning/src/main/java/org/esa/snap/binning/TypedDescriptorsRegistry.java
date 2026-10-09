@@ -69,7 +69,7 @@ public class TypedDescriptorsRegistry {
         private static final TypedDescriptorsRegistry instance = new TypedDescriptorsRegistry();
     }
 
-    private class SpecificRegistry<TD extends TypedDescriptor> {
+    private static class SpecificRegistry<TD extends TypedDescriptor> {
 
         private final Map<String, TD> nameMap;
 

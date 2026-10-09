@@ -668,7 +668,7 @@ public final class ReinterpretOpImage extends PointOpImage {
         double transform(double x);
     }
 
-    private final class Pow10 implements ScalingTransform {
+    private static final class Pow10 implements ScalingTransform {
         public double transform(double x) {
             // This is ~500 ms per 4 mega-pixels on my Intel i7 2.8 GHz CPU
             //return Math.exp(LOG10 * x);
@@ -679,7 +679,7 @@ public final class ReinterpretOpImage extends PointOpImage {
         }
     }
 
-    private final class Log10 implements ScalingTransform {
+    private static final class Log10 implements ScalingTransform {
         public double transform(double x) {
             // This is slightly below 300 ms per 4 mega-pixels on my Intel i7 2.8 GHz CPU
             return Math.log10(x);

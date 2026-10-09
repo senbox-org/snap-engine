@@ -54,7 +54,7 @@ public class ImageDescriptorBuilder {
     }
 
 
-    private class ImageDescriptorImpl implements ImageDescriptor {
+    private static class ImageDescriptorImpl implements ImageDescriptor {
 
         private int imageWidth;
         private int imageHeight;

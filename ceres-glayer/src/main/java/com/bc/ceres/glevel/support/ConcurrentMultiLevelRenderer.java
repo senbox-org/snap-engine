@@ -600,9 +600,9 @@ public class ConcurrentMultiLevelRenderer implements MultiLevelRenderer {
 
         public void adjustTrimSize(PlanarImage image, int numRequiredTiles) {
             if (adaptive) {
-                SampleModel sm = image.getSampleModel();
-                long pixelSize = (long) (sm.getNumBands() * sm.getSampleSize(0)) / 8;
-                long tileSize = (long) sm.getWidth() * (long) sm.getHeight() * pixelSize;
+                final SampleModel sm = image.getSampleModel();
+                final long pixelSize = ((long) sm.getNumBands() * sm.getSampleSize(0)) / 8;
+                final long tileSize = (long) sm.getWidth() * (long) sm.getHeight() * pixelSize;
                 long trimSize = Math.round(tileFactor * numRequiredTiles) * tileSize;
                 if (minSize >= 0 && trimSize < minSize) {
                     trimSize = minSize;
@@ -690,13 +690,14 @@ public class ConcurrentMultiLevelRenderer implements MultiLevelRenderer {
             this.y = y;
             this.i2m = new AffineTransform(i2m);
             this.bounds = i2m.createTransformedShape(new Rectangle(x, y, image.getWidth(), image.getHeight())).getBounds2D();
-            this.size = image.getWidth() * image.getHeight() * (image.getSampleModel().getNumBands() * image.getSampleModel().getSampleSize(0)) / 8;
+            final SampleModel sampleModel = image.getSampleModel();
+            this.size = image.getWidth() * image.getHeight() * ((long) sampleModel.getNumBands() * sampleModel.getSampleSize(0)) / 8;
             this.lastAccessTime = System.currentTimeMillis();
         }
 
         @Override
         public String toString() {
-            return String.format("TileImage[tileIndex=%s,size=%d,bounds=%s]", String.valueOf(tileIndex), size, String.valueOf(bounds));
+            return String.format("TileImage[tileIndex=%s,size=%d,bounds=%s]", tileIndex, size,bounds);
         }
 
         @Override
