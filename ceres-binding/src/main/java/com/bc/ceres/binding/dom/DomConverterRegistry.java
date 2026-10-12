@@ -38,6 +38,7 @@ public class DomConverterRegistry {
      * @param type      The type.
      * @param converter The converter.
      */
+    @Deprecated
     public void setDomConverter(Class<?> type, DomConverter converter) {
         converterMap.put(type, converter);
     }
