@@ -40,11 +40,11 @@ public class PropertyTest {
     long plong;
     Long olong;
 
+    // accessed via reflection, don't remove tb 2026-10-12
     float pfloat;
-    Float ofloat;
-
+    float ofloat;
     double pdouble;
-    Double odouble;
+    double odouble;
 
     @Test
     public void testFactoryUsingClassFieldAccessor() throws ValidationException {
@@ -76,6 +76,92 @@ public class PropertyTest {
         testPLong(Property.create("plong", Long.TYPE), 0L);
         testOLong(Property.create("olong", Long.class), null);
         testOLong(Property.create("olong", 42L), 42L);
+    }
+
+    @Test
+    public void testSetGetContainer() {
+        final PropertyContainer container = new PropertyContainer();
+
+        Property property = Property.create("plong", Long.TYPE);
+        assertNull(property.getContainer());
+
+        property.setContainer(container);
+        assertEquals(container, property.getContainer());
+    }
+
+    @Test
+    public void testAddRemovePropertyChangeListener() throws ValidationException {
+        final Property property = Property.create("olong", Long.class);
+
+        final PropertyContainer container = new PropertyContainer();
+        property.setContainer(container);
+
+        final ValueModelChangeListener listener = new ValueModelChangeListener();
+
+        property.addPropertyChangeListener(listener);
+        property.setValue(234L);
+
+        assertEquals(1, listener.events.size());
+        assertEquals(234L, listener.events.getFirst().getNewValue());
+
+        property.removePropertyChangeListener(listener);
+        listener.events.clear();
+
+        property.setValue(4456L);
+        assertEquals(0, listener.events.size());
+    }
+
+    @Test
+    public void testAddRemovePropertyChangeListener_noContainer() {
+        final Property property = Property.create("plong", Long.class);
+
+        try {
+            property.addPropertyChangeListener(new ValueModelChangeListener());
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+
+        try {
+            property.removePropertyChangeListener(new ValueModelChangeListener());
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+    }
+
+    @Test
+    public void testCreateWithType() {
+        final Property property = Property.create("TheString", String.class, "default", true);
+
+        assertEquals("TheString", property.getName());
+        assertEquals(String.class, property.getType());
+        assertEquals("default", property.getValue());
+    }
+
+    @Test
+    public void testGetValueAsText() throws ValidationException {
+        final Property property = Property.create("plong", Long.class);
+        property.setValue(1657L);
+
+        assertEquals("1657", property.getValueAsText());
+    }
+
+    @Test
+    public void testSetValueFromText() throws ValidationException {
+        final Property property = Property.create("plong", Long.class);
+
+        property.setValueFromText("2208");
+        assertEquals(2208L, (long) property.getValue());
+    }
+
+    @Test
+    public void testSetValueFromText_illegalType() throws ValidationException {
+        final Property property = Property.create("plong", Long.class);
+
+        try {
+            property.setValueFromText("so long");
+            fail("ValidationException expected");
+        } catch (ValidationException expected) {
+        }
     }
 
     private void testPLong(Property vm, Object expectedValue) throws ValidationException {

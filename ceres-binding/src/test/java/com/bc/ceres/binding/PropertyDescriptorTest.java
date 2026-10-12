@@ -19,6 +19,8 @@ package com.bc.ceres.binding;
 
 import org.junit.Test;
 
+import java.util.regex.Pattern;
+
 import static org.junit.Assert.*;
 
 public class PropertyDescriptorTest {
@@ -71,7 +73,88 @@ public class PropertyDescriptorTest {
                           descriptor.getValueSet().getItems());
     }
 
-    public enum Letter {
+    @Test
+    public void testCopyConstruction() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("was_ist_das_denn", Double.TYPE);
+        descriptor.setAttribute("wo", 12);
+        descriptor.setAttribute("wie", 14);
+        descriptor.setAttribute("wann", 16);
+
+        final PropertyDescriptor copyConstructed = new PropertyDescriptor(descriptor);
+        assertEquals("was_ist_das_denn", copyConstructed.getName());
+        assertEquals(Double.TYPE, copyConstructed.getType());
+        assertEquals(14, copyConstructed.getAttribute("wie"));
+    }
+
+    @Test
+    public void testSetGetUnit() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertNull(descriptor.getUnit());
+        descriptor.setUnit("m");
+        assertEquals("m", descriptor.getUnit());
+    }
+
+    @Test
+    public void testSetGetDescription() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertNull(descriptor.getDescription());
+        descriptor.setDescription("describe");
+        assertEquals("describe", descriptor.getDescription());
+    }
+
+    @Test
+    public void testSetIsNotEmpty() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertFalse(descriptor.isNotEmpty());
+        descriptor.setNotEmpty(true);
+        assertTrue(descriptor.isNotEmpty());
+    }
+
+    @Test
+    public void testSetIsTransient() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertFalse(descriptor.isTransient());
+        descriptor.setTransient(true);
+        assertTrue(descriptor.isTransient());
+    }
+
+    @Test
+    public void testSetGetFormat() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertNull(descriptor.getFormat());
+        descriptor.setFormat("complex");
+        assertEquals("complex", descriptor.getFormat());
+    }
+
+    @Test
+    public void testSetGetValueRange() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertNull(descriptor.getValueRange());
+
+        descriptor.setValueRange(new ValueRange(8, 22));
+        ValueRange valueRange = descriptor.getValueRange();
+        assertEquals(8, valueRange.getMin(), 1e-8);
+        assertEquals(22, valueRange.getMax(), 1e-8);
+    }
+
+    @Test
+    public void testSetGetPattern() {
+        final PropertyDescriptor descriptor = new PropertyDescriptor("depth", Double.TYPE);
+
+        assertNull(descriptor.getPattern());
+
+        Pattern pattern = Pattern.compile("[AB]");
+        descriptor.setPattern(pattern);
+        assertEquals(pattern, descriptor.getPattern());
+    }
+
+        private enum Letter {
         A,B,C,D,
     }
 }

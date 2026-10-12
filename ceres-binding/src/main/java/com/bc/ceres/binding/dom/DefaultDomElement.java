@@ -24,8 +24,9 @@ import java.util.HashMap;
 
 public class DefaultDomElement implements DomElement {
 
+    private final String name;
+
     private DomElement parent;
-    private String name;
     private String value;
     private ArrayList<String> attributeList;
     private HashMap<String, String> attributeMap;
@@ -79,8 +80,8 @@ public class DefaultDomElement implements DomElement {
         Assert.notNull(name, "name");
         Assert.notNull(value, "value");
         if (attributeList == null) {
-            attributeList = new ArrayList<String>();
-            attributeMap = new HashMap<String, String>();
+            attributeList = new ArrayList<>();
+            attributeMap = new HashMap<>();
         }
         if (!attributeMap.containsKey(name)) {
             attributeList.add(name);
@@ -108,8 +109,8 @@ public class DefaultDomElement implements DomElement {
         if (elementList == null) {
             return new DomElement[0];
         }
-        ArrayList<DomElement> children = new ArrayList<DomElement>(elementList.size());
-        for (DomElement domElement : elementList) {
+        final ArrayList<DomElement> children = new ArrayList<>(elementList.size());
+        for (final DomElement domElement : elementList) {
             if (elementName.equals(domElement.getName())) {
                 children.add(domElement);
             }
@@ -119,7 +120,13 @@ public class DefaultDomElement implements DomElement {
 
     @Override
     public DomElement getChild(int index) {
-        return elementList != null ? elementList.get(index) : null;
+        if (elementList == null) {
+            return null;
+        }
+        if (index >= elementList.size()) {
+            return null;
+        }
+        return elementList.get(index);
     }
 
     @Override
@@ -147,7 +154,7 @@ public class DefaultDomElement implements DomElement {
 
     @Override
     public String toXml() {
-        StringBuilder builder = new StringBuilder(256);
+        final StringBuilder builder = new StringBuilder(256);
 
         builder.append("<");
         builder.append(getName());
@@ -169,7 +176,7 @@ public class DefaultDomElement implements DomElement {
                 builder.append(getValue());
                 builder.append('\n');
             }
-            for (DomElement element : elementList) {
+            for (final DomElement element : elementList) {
                 for (String line : element.toXml().split("\\n")) {
                     builder.append("    ");
                     builder.append(line);
@@ -193,5 +200,4 @@ public class DefaultDomElement implements DomElement {
 
         return builder.toString();
     }
-
 }

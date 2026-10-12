@@ -12,6 +12,7 @@ import java.util.Map;
  */
 public class ClassScanner {
 
+    @Deprecated
     public static Map<String, Field> getFields(Class<?> type) {
         return getFields(type, FieldFilter.ALL);
     }
@@ -39,12 +40,7 @@ public class ClassScanner {
     }
 
     public interface FieldFilter {
-        FieldFilter ALL = new FieldFilter() {
-            @Override
-            public boolean accept(Field field) {
-                return true;
-            }
-        };
+        FieldFilter ALL = field -> true;
 
         boolean accept(Field field);
     }
