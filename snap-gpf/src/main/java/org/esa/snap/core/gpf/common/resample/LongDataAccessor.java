@@ -5,7 +5,7 @@ import javax.media.jai.RasterAccessor;
 /**
  * @author Tonio Fincke
  */
-public abstract class LongDataAccessor implements DataAccessor {
+abstract class LongDataAccessor implements DataAccessor {
 
     abstract long getSrcData(int index);
 

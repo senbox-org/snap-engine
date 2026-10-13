@@ -3,16 +3,7 @@ package org.esa.snap.statistics;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.multilevel.MultiLevelImage;
-import java.util.Date;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.HistogramStxOp;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.QualitativeStxOp;
-import org.esa.snap.core.datamodel.StxFactory;
-import org.esa.snap.core.datamodel.SummaryStxOp;
-import org.esa.snap.core.datamodel.VectorDataNode;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -27,15 +18,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.Histogram;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class StatisticComputer {
@@ -48,8 +37,9 @@ public class StatisticComputer {
     private final int initialBinCount;
     private final Logger logger;
     private final TimeInterval[] timeIntervals;
-    private String featureId;
+    private final String featureId;
 
+    @Deprecated
     public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
                              String featureId, Logger logger) {
         this(shapefile, bandConfigurations, initialBinCount,

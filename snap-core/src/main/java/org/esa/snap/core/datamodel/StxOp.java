@@ -27,7 +27,7 @@ import java.awt.image.DataBuffer;
  * @author Norman Fomferra
  * @since BEAM 4.5.1, full revision in 4.10
  */
-abstract class StxOp {
+public abstract class StxOp {
 
     private final String name;
 
