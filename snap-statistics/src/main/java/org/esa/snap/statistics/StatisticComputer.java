@@ -218,7 +218,7 @@ public class StatisticComputer {
         return stxOpMappingsList[intervalIndex];
     }
 
-    static class StxOpMapping {
+    public static class StxOpMapping {
 
         final Map<String, SummaryStxOp> summaryMap;
         final Map<String, HistogramStxOp> histogramMap;
