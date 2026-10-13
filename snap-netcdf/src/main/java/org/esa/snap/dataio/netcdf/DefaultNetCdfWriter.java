@@ -36,6 +36,7 @@ import java.util.logging.Level;
 /**
  * Default NetCDF writer configured by an implementation of {@link AbstractNetCdfWriterPlugIn}.
  */
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class DefaultNetCdfWriter extends AbstractProductWriter {
 
     private HashMap<String, NVariable> variableMap;
@@ -73,7 +74,7 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
         }
     }
 
-    public void configureProfile(NetCdfWriteProfile profile, AbstractNetCdfWriterPlugIn plugIn) throws IOException {
+    private void configureProfile(NetCdfWriteProfile profile, AbstractNetCdfWriterPlugIn plugIn)  {
         profile.setInitialisationPartWriter(plugIn.createInitialisationPartWriter());
         profile.addProfilePartWriter(plugIn.createMetadataPartWriter());
         profile.addProfilePartWriter(plugIn.createBandPartWriter());

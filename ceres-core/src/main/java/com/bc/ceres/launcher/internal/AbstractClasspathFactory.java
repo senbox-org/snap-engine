@@ -29,7 +29,7 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
     protected static final String CERES_LAUNCHER_PREFIX = "ceres-launcher";
     protected static final String CERES_CORE_PREFIX = "ceres-core";
 
-    protected enum LibType {
+    public enum LibType {
         LIBRARY,
         MODULE,
     }
@@ -52,7 +52,7 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
     public URL[] createClasspath() throws RuntimeConfigException {
         processClasspathEntries();
         File[] files = getClasspathFiles();
-        ArrayList<URL> classpathUrls = new ArrayList<URL>(files.length);
+        ArrayList<URL> classpathUrls = new ArrayList<>(files.length);
         for (File file : files) {
             try {
                 URL url = file.toURI().toURL();
@@ -63,7 +63,7 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
             }
         }
         trace(String.format("%d library(s) added to classpath", classpathUrls.size()));
-        return classpathUrls.toArray(new URL[classpathUrls.size()]);
+        return classpathUrls.toArray(new URL[0]);
     }
 
     protected abstract File[] getClasspathFiles() throws RuntimeConfigException;

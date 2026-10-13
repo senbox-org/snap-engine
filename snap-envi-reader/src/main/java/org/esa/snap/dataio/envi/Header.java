@@ -6,12 +6,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Header {
 
@@ -69,7 +64,7 @@ public class Header {
         return headerParser.getInt(EnviConstants.HEADER_KEY_BYTE_ORDER, 0);
     }
 
-    public EnviMapInfo getMapInfo() {
+    EnviMapInfo getMapInfo() {
         String mapInfoString = headerParser.getString(EnviConstants.HEADER_KEY_MAP_INFO, null);
         if (mapInfoString != null) {
             return parseMapInfo(mapInfoString);
@@ -77,7 +72,7 @@ public class Header {
         return null;
     }
 
-    public EnviProjectionInfo getProjectionInfo() {
+    EnviProjectionInfo getProjectionInfo() {
         String projectionInfoString = headerParser.getString(EnviConstants.HEADER_KEY_PROJECTION_INFO, null);
         if (projectionInfoString != null) {
             return parseProjectionInfo(projectionInfoString);
@@ -136,9 +131,9 @@ public class Header {
         return headerParser.getInts(EnviConstants.HEADER_KEY_CLASS_LOOKUP);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    /////// END OF PUBLIC
-    ///////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////
+    /// //// END OF PUBLIC
+    /// ////////////////////////////////////////////////////////////////////////
 
     private static EnviMapInfo parseMapInfo(String line) {
         try {

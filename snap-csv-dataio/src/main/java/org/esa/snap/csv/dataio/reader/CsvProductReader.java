@@ -45,6 +45,7 @@ import static org.esa.snap.csv.dataio.Constants.*;
  * @author Olaf Danne
  * @author Thomas Storm
  */
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class CsvProductReader extends AbstractProductReader {
 
     private CsvSourceParser parser;

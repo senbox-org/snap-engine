@@ -19,7 +19,7 @@ package com.bc.ceres.swing.update;
 import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;
 
-class ModuleItem implements Comparable<ModuleItem> {
+public class ModuleItem implements Comparable<ModuleItem> {
 
     public static final ModuleItem[] EMPTY_ARRAY = new ModuleItem[0];
 
