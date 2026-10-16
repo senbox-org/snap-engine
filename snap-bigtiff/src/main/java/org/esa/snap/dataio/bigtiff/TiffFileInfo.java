@@ -108,7 +108,7 @@ public class TiffFileInfo {
                 value = value.replace("\u0000", "");
                 strings.addAll(Arrays.asList(value.split("\\|")));
             }
-            return strings.toArray(new String[strings.size()]);
+            return strings.toArray(new String[0]);
         }
         return new String[0];
     }

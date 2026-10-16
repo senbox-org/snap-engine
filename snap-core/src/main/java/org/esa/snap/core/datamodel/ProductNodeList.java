@@ -259,8 +259,8 @@ public final class ProductNodeList<T extends ProductNode> {
      *
      * @return a string array containing all node names, never <code>null</code>
      */
-    public final ProductNode[] toArray() {
-        return nodes.toArray(new ProductNode[nodes.size()]);
+    public ProductNode[] toArray() {
+        return nodes.toArray(new ProductNode[0]);
     }
 
     /**

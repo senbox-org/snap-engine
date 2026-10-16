@@ -76,7 +76,7 @@ public abstract class AbstractAggregator implements Aggregator {
                 featureNames.add(varName + "_" + postfix);
             }
         }
-        return featureNames.toArray(new String[featureNames.size()]);
+        return featureNames.toArray(new String[0]);
     }
 
     public boolean requiresGrowableSpatialData() {

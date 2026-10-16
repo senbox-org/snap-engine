@@ -136,7 +136,7 @@ public class GETASSE30FileInfo {
         _easting = eastingNorthing[0];
         _northing = eastingNorthing[1];
 
-        _width = (int) Math.sqrt(fileSize / 2);
+        _width = (int) Math.sqrt(fileSize * 0.5);
         _height = _width;
         if (_width * _height * 2L != fileSize) {
             throw new IOException("Illegal file size: " + fileSize);
@@ -156,7 +156,7 @@ public class GETASSE30FileInfo {
 
     public static boolean isValidFileSize(final long size) {
         if (size > 0 && size % 2 == 0) {
-            final long w = (long) Math.sqrt(size / 2);
+            final long w = (long) Math.sqrt(size * 0.5);
             if (2 * w * w == size) {
                 return true;
             }

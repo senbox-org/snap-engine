@@ -159,7 +159,7 @@ public class ModuleResolver {
                 }
             }
         }
-        return resolvedModules.toArray(new ModuleImpl[resolvedModules.size()]);
+        return resolvedModules.toArray(ModuleImpl.EMPTY_ARRAY);
     }
 
     private void initModuleClassLoader(ModuleImpl module) {
@@ -188,7 +188,7 @@ public class ModuleResolver {
                 dependencyCl.add(moduleDependency.getClassLoader());
             }
         }
-        return dependencyCl.toArray(new ClassLoader[dependencyCl.size()]);
+        return dependencyCl.toArray(new ClassLoader[0]);
     }
 
     private static URL[] getNativeLibs(ModuleImpl module) {
@@ -210,7 +210,7 @@ public class ModuleResolver {
             }
         }
 
-        return libPaths.toArray(new URL[libPaths.size()]);
+        return libPaths.toArray(new URL[0]);
     }
 
     private static void initRefCount(ModuleImpl module) {

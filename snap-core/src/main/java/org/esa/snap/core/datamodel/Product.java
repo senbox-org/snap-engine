@@ -893,7 +893,7 @@ public class Product extends ProductNode implements Closeable {
      */
     public boolean isMultiSize() {
         final List<RasterDataNode> rasterDataNodes = getRasterDataNodes();
-        return !ProductUtils.areRastersEqualInSize(rasterDataNodes.toArray(new RasterDataNode[rasterDataNodes.size()]));
+        return !ProductUtils.areRastersEqualInSize(rasterDataNodes.toArray(new RasterDataNode[0]));
     }
 
     /**
@@ -1669,7 +1669,7 @@ public class Product extends ProductNode implements Closeable {
         if (listeners == null) {
             return new ProductNodeListener[0];
         }
-        return listeners.toArray(new ProductNodeListener[listeners.size()]);
+        return listeners.toArray(new ProductNodeListener[0]);
     }
 
     protected boolean hasProductNodeListeners() {
@@ -1707,7 +1707,7 @@ public class Product extends ProductNode implements Closeable {
     }
 
     private void fireEvent(final ProductNodeEvent event) {
-        fireEvent(event, listeners.toArray(new ProductNodeListener[listeners.size()]));
+        fireEvent(event, listeners.toArray(new ProductNodeListener[0]));
     }
 
     /**
@@ -2308,7 +2308,7 @@ public class Product extends ProductNode implements Closeable {
         removedNodes.addAll(maskGroup.getRemovedNodes());
         removedNodes.addAll(quicklookGroup.getRemovedNodes());
         removedNodes.addAll(vectorDataGroup.getRemovedNodes());
-        return removedNodes.toArray(new ProductNode[removedNodes.size()]);
+        return removedNodes.toArray(new ProductNode[0]);
     }
 
     /**

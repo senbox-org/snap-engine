@@ -239,7 +239,7 @@ public class BandArithmetic {
                 collectRefRasterDataSymbols(term, list, set);
             }
         }
-        return list.toArray(new RasterDataSymbol[list.size()]);
+        return list.toArray(new RasterDataSymbol[0]);
     }
 
     public static String getValidMaskExpression(String expression,
@@ -424,7 +424,7 @@ public class BandArithmetic {
                 set.add(raster);
             }
         }
-        return list.toArray(new RasterDataNode[list.size()]);
+        return list.toArray(new RasterDataNode[0]);
     }
 
     private static boolean isNameChar(char c) {

@@ -70,7 +70,7 @@ public class SpatialBinner {
      * @return The exceptions occurred during processing.
      */
     public Exception[] getExceptions() {
-        return exceptions.toArray(new Exception[exceptions.size()]);
+        return exceptions.toArray(new Exception[0]);
     }
 
     /**

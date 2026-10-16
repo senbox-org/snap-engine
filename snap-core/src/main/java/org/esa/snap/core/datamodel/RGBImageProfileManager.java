@@ -74,7 +74,7 @@ public class RGBImageProfileManager {
     }
 
     public RGBImageProfile[] getAllProfiles() {
-        return _profiles.toArray(new RGBImageProfile[_profiles.size()]);
+        return _profiles.toArray(new RGBImageProfile[0]);
     }
 
     /**

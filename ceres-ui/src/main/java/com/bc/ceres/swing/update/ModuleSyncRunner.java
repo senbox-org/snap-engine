@@ -65,7 +65,6 @@ class ModuleSyncRunner {
             }
         }
 
-        return syncList.values().toArray(new ModuleItem[syncList.size()]);
+        return syncList.values().toArray(ModuleItem.EMPTY_ARRAY);
     }
-
 }

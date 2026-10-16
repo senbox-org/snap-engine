@@ -217,7 +217,7 @@ public abstract class ExtensionManager {
             Assert.notNull(extensibleType, "extensibleType");
             List<ExtensionFactory> extensionFactoryList = extensionFactoryListMap.get(extensibleType);
             if (extensionFactoryList != null) {
-                return extensionFactoryList.toArray(new ExtensionFactory[extensionFactoryList.size()]);
+                return extensionFactoryList.toArray(new ExtensionFactory[0]);
             } else {
                 return NO_EXTENSION_FACTORIES;
             }

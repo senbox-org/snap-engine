@@ -216,7 +216,7 @@ public class GeoTIFFMetadata {
     }
 
     public KeyEntry[] getGeoKeyEntries() {
-        return _geoKeyEntries.values().toArray(new KeyEntry[_geoKeyEntries.size()]);
+        return _geoKeyEntries.values().toArray(new KeyEntry[0]);
     }
 
     public KeyEntry getGeoKeyEntry(int keyID) {

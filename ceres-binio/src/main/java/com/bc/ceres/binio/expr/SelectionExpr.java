@@ -42,7 +42,7 @@ public class SelectionExpr extends AbstractExpression {
 
         this.condition = condition;
         this.condition.setParent(this);
-        this.cases = caseList.toArray(new SelectionExpr.Case[caseList.size()]);
+        this.cases = caseList.toArray(new Case[0]);
         for (Case aCase : this.cases) {
             aCase.expression.setParent(this);
 

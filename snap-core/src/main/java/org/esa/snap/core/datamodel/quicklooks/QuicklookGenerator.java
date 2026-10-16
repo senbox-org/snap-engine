@@ -88,7 +88,7 @@ public class QuicklookGenerator {
                     bandList.add(band);
                 }
             }
-            final Band[] bands = bandList.toArray(new Band[bandList.size()]);
+            final Band[] bands = bandList.toArray(new Band[0]);
 
             checkCancelled(pm);
             if (bands.length < 3) {
@@ -185,14 +185,14 @@ public class QuicklookGenerator {
                 }
             }
             if (bandList.size() > 2) {
-                return bandList.toArray(new Band[bandList.size()]);
+                return bandList.toArray(new Band[0]);
             }
         }
 
         checkCancelled(pm);
         String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         if (bandList.size() > 1 && !bandList.get(0).getName().equals(quicklookBandName)) {
-            return bandList.toArray(new Band[bandList.size()]);
+            return bandList.toArray(new Band[0]);
         }
         if(quicklookBandName == null) {
             return null;

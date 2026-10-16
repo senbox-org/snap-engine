@@ -221,7 +221,7 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
             }
         }
         figureSelection.removeAllFigures();
-        figureSelection.addFigures(selectedFigures.toArray(new Figure[selectedFigures.size()]));
+        figureSelection.addFigures(selectedFigures.toArray(new Figure[0]));
     }
 
     @Override

@@ -237,8 +237,8 @@ public class GraticuleLayer extends Layer {
             textGlyphArrayList.add(textGlyph);
         }
 
-        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
+        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[0]);
+        if (textGlyphs.length > 0) {
             drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.WEST, true, raster);
         }
     }
@@ -257,8 +257,8 @@ public class GraticuleLayer extends Layer {
             textGlyphArrayList.add(textGlyph);
         }
 
-        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
+        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[0]);
+        if (textGlyphs.length > 0) {
             drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.EAST, true, raster);
         }
     }
@@ -277,8 +277,8 @@ public class GraticuleLayer extends Layer {
             textGlyphArrayList.add(textGlyph);
         }
 
-        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
+        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[0]);
+        if (textGlyphs.length > 0) {
             drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.NORTH, true, raster);
         }
     }
@@ -297,8 +297,8 @@ public class GraticuleLayer extends Layer {
             textGlyphArrayList.add(textGlyph);
         }
 
-        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
+        final Graticule.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new Graticule.TextGlyph[0]);
+        if (textGlyphs.length > 0) {
             drawTextLabels(g2d, textGlyphs, Graticule.TextLocation.SOUTH, true, raster);
         }
     }

@@ -349,7 +349,7 @@ public abstract class VirtualDir {
             if (!dirSeen) {
                 throw new FileNotFoundException(getBasePath() + "!" + path);
             }
-            return nameSet.toArray(new String[nameSet.size()]);
+            return nameSet.toArray(new String[0]);
         }
 
         @Override
@@ -545,7 +545,7 @@ public abstract class VirtualDir {
                     fileNames.add(filename);
                 }
             }
-            return fileNames.toArray(new String[fileNames.size()]);
+            return fileNames.toArray(new String[0]);
         }
 
         @Override

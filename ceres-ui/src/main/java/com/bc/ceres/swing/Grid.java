@@ -328,7 +328,6 @@ public class Grid extends JPanel implements GridSelectionModel.Listener {
     @Override
     public void gridSelectionChanged(GridSelectionModel.Event event) {
         int[] selectedRowIndices = selectionModel.getSelectedRowIndices();
-        System.out.println("selectedRowIndices = " + Arrays.toString(selectedRowIndices));
         adjustHeaderRowSelector();
         adjustDataRowSelectors();
     }
@@ -572,7 +571,7 @@ public class Grid extends JPanel implements GridSelectionModel.Listener {
 
         @Override
         public int[] getSelectedRowIndices() {
-            Integer[] integers = rowIndices.toArray(new Integer[rowIndices.size()]);
+            Integer[] integers = rowIndices.toArray(new Integer[0]);
             int[] indices = new int[integers.length];
             for (int i = 0; i < integers.length; i++) {
                 indices[i] = integers[i];

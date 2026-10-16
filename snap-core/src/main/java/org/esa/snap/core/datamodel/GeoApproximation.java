@@ -80,7 +80,7 @@ public final class GeoApproximation {
                 rectangleList.add(tiling.getTileRect(tileX, tileY));
             }
         }
-        final Rectangle[] rectangles = rectangleList.toArray(new Rectangle[rectangleList.size()]);
+        final Rectangle[] rectangles = rectangleList.toArray(new Rectangle[0]);
         return createApproximations(lonSamples, latSamples, maskSamples, accuracy, rectangles,
                                     new DefaultSteppingFactory());
     }
@@ -210,7 +210,7 @@ public final class GeoApproximation {
                 approximations.add(approximation);
             }
         }
-        return approximations.toArray(new GeoApproximation[approximations.size()]);
+        return approximations.toArray(new GeoApproximation[0]);
     }
 
     /**

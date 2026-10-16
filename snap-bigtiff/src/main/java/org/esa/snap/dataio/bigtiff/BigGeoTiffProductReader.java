@@ -628,7 +628,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         final double maxDiff = diff + diff100000;
         final double minDiff = diff - diff100000;
 
-        final Double[] values = set.toArray(new Double[set.size()]);
+        final Double[] values = set.toArray(new Double[0]);
         for (int i = 1; i < values.length; i++) {
             final double currentDiff = values[i] - values[i - 1];
             if (currentDiff > maxDiff || currentDiff < minDiff) {

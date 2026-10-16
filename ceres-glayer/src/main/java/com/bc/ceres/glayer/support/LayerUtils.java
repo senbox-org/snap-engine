@@ -127,7 +127,7 @@ public class LayerUtils {
         }
         final ArrayList<Layer> layerArrayList = new ArrayList<Layer>();
         collectLayerPath(root, layer, layerArrayList);
-        return layerArrayList.toArray(new Layer[layerArrayList.size()]);
+        return layerArrayList.toArray(new Layer[0]);
     }
 
     public static Collection<Layer[]> getLayerPaths(Layer root, LayerFilter filter) {

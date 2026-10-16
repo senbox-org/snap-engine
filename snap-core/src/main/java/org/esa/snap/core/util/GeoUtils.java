@@ -817,7 +817,7 @@ public class GeoUtils {
             }
 
         }
-        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+        return geoPoints.toArray(new GeoPos[0]);
     }
 
     private static GeneralPath[] createGeoBoundaryPaths(GeoCoding geoCoding, Rectangle region, int step, boolean usePixelCenter) {
@@ -830,7 +830,7 @@ public class GeoUtils {
         final GeoPos[] geoPoints = createGeoBoundary(geoCoding, region, step, usePixelCenter);
         normalizeGeoPolygon(geoPoints);
         final ArrayList<GeneralPath> pathList = assemblePathList(geoPoints);
-        return pathList.toArray(new GeneralPath[pathList.size()]);
+        return pathList.toArray(new GeneralPath[0]);
     }
 
     /**

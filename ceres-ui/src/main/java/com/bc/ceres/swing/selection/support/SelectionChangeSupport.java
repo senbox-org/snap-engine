@@ -56,7 +56,7 @@ public class SelectionChangeSupport {
     }
 
     public SelectionChangeListener[] getSelectionChangeListeners() {
-        return selectionListeners.toArray(new SelectionChangeListener[selectionListeners.size()]);
+        return selectionListeners.toArray(new SelectionChangeListener[0]);
     }
 
     public SelectionChangeEvent createEvent(SelectionContext selectionContext, Selection selection) {
