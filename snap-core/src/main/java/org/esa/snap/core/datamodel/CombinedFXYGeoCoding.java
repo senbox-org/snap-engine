@@ -19,9 +19,7 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.util.Guardian;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -98,59 +96,58 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
             int gcwWidthSrc = 0;
             int gcwHeight = dimension.height;
 
-            if (subsetDef != null) {
 
-                final Rectangle subsetRegion;
-                // get region if set, otherwise set it to full size
-                if (subsetDef.getRegion() != null) {
-                    subsetRegion = subsetDef.getRegion();
-                } else {
-                    subsetRegion = new Rectangle(0, 0, srcScene.getRasterWidth(), srcScene.getRasterHeight());
-                }
-
-                if (!wrapper.intersects(subsetRegion)) {
-                    wrappers[i] = null;
-                    continue;
-                }
-
-                if (gcwPosX < subsetRegion.x) {
-                    gcPixelOffsetX += (subsetRegion.x - gcwPosX) * gcPixelSizeX;
-                }
-                gcPixelOffsetX += ccdCarryover * gcPixelSizeX;
-                if (gcwPosY < subsetRegion.y) {
-                    gcPixelOffsetY += (subsetRegion.y - gcwPosY) * gcPixelSizeY;
-                }
-
-                final Rectangle intersection = wrapper.intersection(subsetRegion);
-                intersection.x += ccdCarryover;
-                intersection.width -= ccdCarryover;
-
-                gcwPosXSrc = intersection.x - subsetRegion.x;
-                gcwPosY = intersection.y - subsetRegion.y;
-                gcwWidthSrc = intersection.width;
-                gcwHeight = intersection.height;
-
-                final int subSamplingX = subsetDef.getSubSamplingX();
-                final int subSamplingY = subsetDef.getSubSamplingY();
-
-                if (subSamplingX != 1) {
-                    ccdCarryover = subSamplingX - (gcwWidthSrc % subSamplingX);
-                }
-
-
-                gcPixelSizeX *= subSamplingX;
-                gcPixelSizeY *= subSamplingY;
-
-                gcwPosX = gcwPosXSrc / subSamplingX;
-                gcwPosY /= subSamplingY;
-                gcwWidth = (gcwWidthSrc - 1) / subSamplingX + 1;
-                gcwHeight = (gcwHeight - 1) / subSamplingY + 1;
+            final Rectangle subsetRegion;
+            // get region if set, otherwise set it to full size
+            final Rectangle subsetDefRegion = subsetDef.getRegion();
+            if (subsetDefRegion != null) {
+                subsetRegion = subsetDefRegion;
+            } else {
+                subsetRegion = new Rectangle(0, 0, srcScene.getRasterWidth(), srcScene.getRasterHeight());
             }
 
+            if (!wrapper.intersects(subsetRegion)) {
+                wrappers[i] = null;
+                continue;
+            }
+
+            if (gcwPosX < subsetRegion.x) {
+                gcPixelOffsetX += (subsetRegion.x - gcwPosX) * gcPixelSizeX;
+            }
+            gcPixelOffsetX += ccdCarryover * gcPixelSizeX;
+            if (gcwPosY < subsetRegion.y) {
+                gcPixelOffsetY += (subsetRegion.y - gcwPosY) * gcPixelSizeY;
+            }
+
+            final Rectangle intersection = wrapper.intersection(subsetRegion);
+            intersection.x += ccdCarryover;
+            intersection.width -= ccdCarryover;
+
+            gcwPosXSrc = intersection.x - subsetRegion.x;
+            gcwPosY = intersection.y - subsetRegion.y;
+            gcwWidthSrc = intersection.width;
+            gcwHeight = intersection.height;
+
+            final int subSamplingX = subsetDef.getSubSamplingX();
+            final int subSamplingY = subsetDef.getSubSamplingY();
+
+            if (subSamplingX != 1) {
+                ccdCarryover = subSamplingX - (gcwWidthSrc % subSamplingX);
+            }
+
+
+            gcPixelSizeX *= subSamplingX;
+            gcPixelSizeY *= subSamplingY;
+
+            gcwPosX = gcwPosXSrc / subSamplingX;
+            gcwPosY /= subSamplingY;
+            gcwWidth = (gcwWidthSrc - 1) / subSamplingX + 1;
+            gcwHeight = (gcwHeight - 1) / subSamplingY + 1;
+
             final FXYGeoCoding gc = sourceGC.createCloneWithNewOffsetAndSize(gcPixelOffsetX,
-                                                                             gcPixelOffsetY,
-                                                                             gcPixelSizeX,
-                                                                             gcPixelSizeY);
+                    gcPixelOffsetY,
+                    gcPixelSizeX,
+                    gcPixelSizeY);
             wrappers[i] = new CodingWrapper(gc, gcwPosX, gcwPosY, gcwWidth, gcwHeight);
         }
         destScene.setGeoCoding(new CombinedFXYGeoCoding(wrappers));
@@ -255,8 +252,8 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         public CodingWrapper clone() {
             return new CodingWrapper((FXYGeoCoding) _geoGoding.clone(),
-                                     _location.x, _location.y,
-                                     _dimension.width, _dimension.height);
+                    _location.x, _location.y,
+                    _dimension.width, _dimension.height);
         }
 
         private Point getLocation() {
@@ -293,7 +290,7 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         private GeoPos getGeoPos(final PixelPos pixelPos, final GeoPos geoPos) {
             final PixelPos localPixelPos = new PixelPos();
             localPixelPos.setLocation(pixelPos.getX() - _location.x,
-                                      pixelPos.getY() - _location.y);
+                    pixelPos.getY() - _location.y);
             return _geoGoding.getGeoPos(localPixelPos, geoPos);
         }
 

@@ -434,12 +434,10 @@ public class FileTileCache implements TileCache {
 
     final String getImageId(RenderedImage owner) {
         String id = idMap.get(owner);
-        if (id == null) {
-            synchronized (this) {
-                if (id == null) {
-                    id = createImageId(owner, idMap.size());
-                    idMap.put(owner, id);
-                }
+        synchronized (this) {
+            if (id == null) {
+                id = createImageId(owner, idMap.size());
+                idMap.put(owner, id);
             }
         }
         return id;

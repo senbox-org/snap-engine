@@ -108,48 +108,44 @@ public class QuicklookGenerator {
     }
 
     public BufferedImage createQuickLookImage(final Product product, Band[] quicklookBands,
-                                       final ProgressMonitor pm) throws IOException, InterruptedException {
-        Product productSubset = product;
+                                              final ProgressMonitor pm) throws IOException, InterruptedException {
+        Product productSubset;
 
-        final boolean subsample = true;
-        if (subsample) {
-            checkCancelled(pm);
-            final int width = maxWidth * 2;// * (MULTILOOK_FACTOR * 2);
-            final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-            int scaleFactor = Math.round(Math.max(product.getSceneRasterWidth(), product.getSceneRasterHeight()) / (float) width);
-            if (scaleFactor < 1) {
-                scaleFactor = 1;
-            }
-            productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
 
-            checkCancelled(pm);
-            productSubset = product.createSubset(productSubsetDef, null, null);
-
-            final List<Band> bandList = new ArrayList<>();
-            for (Band band : quicklookBands) {
-                checkCancelled(pm);
-                if (productSubset.getBand(band.getName()) != null) {
-                    bandList.add(productSubset.getBand(band.getName()));
-                } else if (band instanceof VirtualBand) {
-                    ProductUtils.copyVirtualBand(productSubset, (VirtualBand) band, band.getName(), true);
-                    bandList.add(productSubset.getBand(band.getName()));
-                }
-            }
-            quicklookBands = bandList.toArray(new Band[0]);
+        checkCancelled(pm);
+        final int width = maxWidth * 2;// * (MULTILOOK_FACTOR * 2);
+        final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
+        int scaleFactor = Math.round(Math.max(product.getSceneRasterWidth(), product.getSceneRasterHeight()) / (float) width);
+        if (scaleFactor < 1) {
+            scaleFactor = 1;
         }
+        productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
+
+        checkCancelled(pm);
+        productSubset = product.createSubset(productSubsetDef, null, null);
+
+        final List<Band> bandList = new ArrayList<>();
+        for (Band band : quicklookBands) {
+            checkCancelled(pm);
+            if (productSubset.getBand(band.getName()) != null) {
+                bandList.add(productSubset.getBand(band.getName()));
+            } else if (band instanceof VirtualBand) {
+                ProductUtils.copyVirtualBand(productSubset, (VirtualBand) band, band.getName(), true);
+                bandList.add(productSubset.getBand(band.getName()));
+            }
+        }
+        quicklookBands = bandList.toArray(new Band[0]);
 
         final BufferedImage image;
         checkCancelled(pm);
-        if(quicklookBands.length < 3 && quicklookBands[0].getIndexCoding() != null) {
+        if (quicklookBands.length < 3 && quicklookBands[0].getIndexCoding() != null) {
             image = ProductUtils.createColorIndexedImage(quicklookBands[0], ProgressMonitor.NULL);
         } else {
             final ImageInfo imageInfo = ProductUtils.createImageInfo(quicklookBands, true, SubProgressMonitor.create(pm, 20));
             image = ProductUtils.createRgbImage(quicklookBands, imageInfo, SubProgressMonitor.create(pm, 80));
         }
 
-        if (subsample) {
-            productSubset.dispose();
-        }
+        productSubset.dispose();
 
         checkCancelled(pm);
         return new FixedSizeThumbnailMaker()
@@ -194,7 +190,7 @@ public class QuicklookGenerator {
         if (bandList.size() > 1 && !bandList.get(0).getName().equals(quicklookBandName)) {
             return bandList.toArray(new Band[0]);
         }
-        if(quicklookBandName == null) {
+        if (quicklookBandName == null) {
             return null;
         }
         return new Band[]{product.getBand(quicklookBandName)};
@@ -363,7 +359,7 @@ public class QuicklookGenerator {
 
             return true;
         } catch (IOException e) {
-            SystemUtils.LOG.severe("Unable to save quicklook: " + quickLookFile +" "+ e.getMessage());
+            SystemUtils.LOG.severe("Unable to save quicklook: " + quickLookFile + " " + e.getMessage());
         }
         return false;
     }

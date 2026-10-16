@@ -355,8 +355,8 @@ public abstract class VirtualDir {
         @Override
         public boolean exists(String path) {
             try {
-                ZipEntry zipEntry = getEntry(path);
-                return zipEntry != null;
+                getEntry(path); // throws exception if not found tb 2026-10-16
+                return true;
             } catch (FileNotFoundException e) {
                 return false;
             }
@@ -539,7 +539,7 @@ public abstract class VirtualDir {
             try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(startingPath)) {
                 for (Path child : directoryStream) {
                     String filename = child.getFileName().toString();
-                    if (filename.endsWith("/") && filename.length() > 0) {
+                    if (filename.endsWith("/") ) {
                         filename = filename.substring(0, filename.length() - 1);
                     }
                     fileNames.add(filename);

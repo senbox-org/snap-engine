@@ -504,7 +504,7 @@ public final class AsarProductFile extends ProductFile {
         if (fullProductType == null) {
             fullProductType = getDddbProductTypeReplacement(getProductType(), getIODDVersion());
         }
-        return fullProductType != null ? fullProductType : super.getDddbProductType();
+        return fullProductType;
     }
 
     static String getDddbProductTypeReplacement(final String productType, final IODD ioddVersion) {

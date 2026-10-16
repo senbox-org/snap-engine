@@ -33,6 +33,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
+@Deprecated
 public class FigureSelectionContext extends ExtensibleObject implements SelectionContext {
 
     private final FigureEditor figureEditor;
@@ -98,8 +99,8 @@ public class FigureSelectionContext extends ExtensibleObject implements Selectio
 
     @Override
     public void insert(Transferable contents) throws IOException, UnsupportedFlavorException {
-        Figure[] figures = (Figure[]) contents.getTransferData(FigureTransferable.FIGURES_DATA_FLAVOR);
-        if (figures != null && figures.length  > 0) {
+        final Figure[] figures = (Figure[]) contents.getTransferData(FigureTransferable.FIGURES_DATA_FLAVOR);
+        if (figures.length  > 0) {
             figureEditor.insertFigures(true, figures);
         }
     }
