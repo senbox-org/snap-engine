@@ -108,14 +108,15 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
             }
 
+            // the offsets locate the subset in the original product: accumulate them over nested subsets
             final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
             if (offsetX != null && region != null) {
-                offsetX.getData().setElemUInt(region.x);
+                offsetX.getData().setElemUInt(offsetX.getData().getElemUInt() + region.x);
             }
 
             final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
             if (offsetY != null && region != null) {
-                offsetY.getData().setElemUInt(region.y);
+                offsetY.getData().setElemUInt(offsetY.getData().getElemUInt() + region.y);
             }
 
             boolean isSARProduct = trgAbsRoot.getAttributeDouble("radar_frequency", 99999) != 99999;
