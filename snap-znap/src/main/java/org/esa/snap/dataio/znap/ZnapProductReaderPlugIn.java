@@ -25,6 +25,7 @@ import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.core.dataio.ProductReaderUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        final Path inputPath = convertToPath(input);
+        final Path inputPath = ProductReaderUtils.convertToPath(input);
         if (inputPath == null) {
             return DecodeQualification.UNABLE;
         }
@@ -94,7 +95,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public Class<?>[] getInputTypes() {
-        return IO_TYPES;
+        return ProductReaderUtils.IO_TYPES;
     }
 
     @Override
