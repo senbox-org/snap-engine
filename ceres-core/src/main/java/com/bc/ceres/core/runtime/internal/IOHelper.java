@@ -77,7 +77,7 @@ public class IOHelper {
                 if (n > 0) {
                     outputStream.write(buffer, 0, n);
                     pm.worked(n);
-                } else if (n < buffer.length) {
+                } else {
                     break;
                 }
             }

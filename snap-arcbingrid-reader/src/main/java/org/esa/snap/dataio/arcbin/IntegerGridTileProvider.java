@@ -293,8 +293,7 @@ class IntegerGridTileProvider implements GridTileProvider {
 
     int getMin(int minSize, byte[] bytes) throws ProductIOException {
         if (minSize > 4) {
-            throw new ProductIOException(
-                    MessageFormat.format("Corrupt 'minsize' of %d in block header.  Read aborted.", minSize));
+            throw new ProductIOException(MessageFormat.format("Corrupt 'minsize' of %d in block header.  Read aborted.", minSize));
         }
         int min = 0;
         if (minSize == 4) {

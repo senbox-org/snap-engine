@@ -25,21 +25,10 @@ import org.esa.snap.core.dataio.persistence.Persistence;
 import org.esa.snap.core.dataio.persistence.PersistenceDecoder;
 import org.esa.snap.core.dataio.placemark.PlacemarkIO;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
-import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
-import org.esa.snap.core.util.Debug;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.ImageUtils;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.XmlWriter;
+import org.esa.snap.core.util.*;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.math.FXYSum;
 import org.geotools.referencing.CRS;
@@ -58,22 +47,14 @@ import javax.swing.filechooser.FileFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -97,7 +78,6 @@ public class DimapProductHelpers {
      * @param dom                the DOM in BEAM-DIMAP format
      * @param defaultProductType the product type
      * @param regionRasterSize   the region size to be displayed
-     *
      * @return an in-memory data product representation
      */
     public static Product createProduct(Document dom, String defaultProductType, Dimension regionRasterSize) {
@@ -115,10 +95,8 @@ public class DimapProductHelpers {
      * @param dom      the JDOM in BEAM-DIMAP format
      * @param product  the product to retrieve the data files for
      * @param inputDir the directory where to search for the data files
-     *
      * @return a <code>Map</code> object which contains all the band data references from the given jDom.<br> Returns
-     *         an empty <code>Map</code> if the jDom does not contain band data files
-     *
+     * an empty <code>Map</code> if the jDom does not contain band data files
      * @throws IllegalArgumentException if one of the parameters is null.
      */
     public static Map<Band, File> getBandDataFiles(final Document dom, final Product product,
@@ -170,9 +148,7 @@ public class DimapProductHelpers {
      *
      * @param dom              the DOM in BEAM-DIMAP format
      * @param tiePointGridName the name of the tie point grid
-     *
      * @return the <code>String</code> object which points to the data for the tie point grid.
-     *
      * @throws IllegalArgumentException if the parameter dom is null or the parameter tiePointGridName is null or empty
      */
     public static String getTiePointDataFile(Document dom, String tiePointGridName) throws IllegalArgumentException {
@@ -277,7 +253,7 @@ public class DimapProductHelpers {
                     }
                 }
                 if (i < crsElems.size() && crsElems.get(i) != null
-                    && ((Element) crsElems.get(i)).getChild(DimapProductConstants.TAG_WKT) != null) {
+                        && ((Element) crsElems.get(i)).getChild(DimapProductConstants.TAG_WKT) != null) {
                     final Element wktElement = ((Element) crsElems.get(i)).getChild(DimapProductConstants.TAG_WKT);
                     final String key = wktElement.getTextTrim() + " " + geoPosElem.getChild(
                             DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM).getTextTrim();
@@ -289,16 +265,16 @@ public class DimapProductHelpers {
                         wktToCrsGeocodingMap.put(key, crsGeoCoding);
                     }
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_SIMPLIFIED_LOCATION_MODEL) != null
-                           && geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_INSERT) != null) {
+                        && geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_INSERT) != null) {
                     geoCodings[bandIndex] = createFXYGeoCoding(datum, geoPosElem);
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_SEARCH_RADIUS) != null
-                           && geoPosElem.getChild(DimapProductConstants.TAG_LATITUDE_BAND) != null) {
+                        && geoPosElem.getChild(DimapProductConstants.TAG_LATITUDE_BAND) != null) {
                     geoCodings[bandIndex] = createPixelGeoCoding(product, datum, geoPosElem);
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS) != null) {
                     final Element geoPositionPointsElement = geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS);
                     geoCodings[bandIndex] = createGeoCodingFromGeoPositionPointsElement(product,
-                                                                                        datum,
-                                                                                        geoPositionPointsElement);
+                            datum,
+                            geoPositionPointsElement);
                 } else {
                     final List<Element> children = geoPosElem.getChildren();
                     for (Element child : children) {
@@ -351,7 +327,7 @@ public class DimapProductHelpers {
                 }
             } else {
                 Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): " +
-                            "the tag <" + tagCoordRefSys + "> contains no tag <" + tagHorizontalCs + ">"); /*I18N*/
+                        "the tag <" + tagCoordRefSys + "> contains no tag <" + tagHorizontalCs + ">"); /*I18N*/
             }
             // 1. fallback: try to find a TiePointGeoCoding
             final Element tpgElem = coordRefSysElem.getChild(DimapProductConstants.TAG_GEOCODING_TIE_POINT_GRIDS);
@@ -380,7 +356,7 @@ public class DimapProductHelpers {
                 }
             } else {
                 Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): " +
-                            "the coordinate reference system tag contains no horizontal coordinat system tag"); /*I18N*/
+                        "the coordinate reference system tag contains no horizontal coordinat system tag"); /*I18N*/
             }
             // 2. fallback: try to find a MapGeoCoding
             final Element mapElem = coordRefSysElem.getChild(DimapProductConstants.TAG_GEOCODING_MAP);
@@ -402,13 +378,13 @@ public class DimapProductHelpers {
                                 final float refPixelWidth = Float.parseFloat(strings[5]);
                                 final float refPixelHeight = Float.parseFloat(strings[6]);
                                 final MapInfo mapInfo = new MapInfo(projection,
-                                                                    refPixelX,
-                                                                    refPixelY,
-                                                                    refPixelEasting,
-                                                                    refPixelNorthing,
-                                                                    refPixelWidth,
-                                                                    refPixelHeight,
-                                                                    Datum.WGS_84);
+                                        refPixelX,
+                                        refPixelY,
+                                        refPixelEasting,
+                                        refPixelNorthing,
+                                        refPixelWidth,
+                                        refPixelHeight,
+                                        Datum.WGS_84);
                                 if (strings.length == 9) {
                                     mapInfo.setSceneWidth(product.getSceneRasterWidth());
                                     mapInfo.setSceneHeight(product.getSceneRasterHeight());
@@ -435,13 +411,13 @@ public class DimapProductHelpers {
                 }
             } else {
                 Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): neither '" /*I18N*/
-                            + DimapProductConstants.TAG_GEOCODING_TIE_POINT_GRIDS + "' nor '" /*I18N*/
-                            + DimapProductConstants.TAG_GEOCODING_MAP + "' found in '" /*I18N*/
-                            + tagCoordRefSys + "' element"); /*I18N*/
+                        + DimapProductConstants.TAG_GEOCODING_TIE_POINT_GRIDS + "' nor '" /*I18N*/
+                        + DimapProductConstants.TAG_GEOCODING_MAP + "' found in '" /*I18N*/
+                        + tagCoordRefSys + "' element"); /*I18N*/
             }
         } else {
             Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): missing '" /*I18N*/
-                        + tagCoordRefSys + "' element"); /*I18N*/
+                    + tagCoordRefSys + "' element"); /*I18N*/
         }
 
         // 3. fallback: try to create a TiePointGeoCoding from "latitude" and "longitude"
@@ -493,9 +469,9 @@ public class DimapProductHelpers {
             final Placemark[] placemarks = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
             try {
                 gcpGeoCoding = new GcpGeoCoding(method, placemarks,
-                                                product.getSceneRasterWidth(),
-                                                product.getSceneRasterHeight(),
-                                                datum);
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(),
+                        datum);
             } catch (Exception e) {
                 // ignore
             }
@@ -541,7 +517,7 @@ public class DimapProductHelpers {
                 }
                 final AffineTransform i2m = new AffineTransform(matrix);
                 Rectangle imageBounds = new Rectangle(product.getSceneRasterWidth(),
-                                                      product.getSceneRasterHeight());
+                        product.getSceneRasterHeight());
                 try {
                     return new CrsGeoCoding(crs, imageBounds, i2m);
                 } catch (TransformException e) {
@@ -590,7 +566,7 @@ public class DimapProductHelpers {
                 }
                 final AffineTransform i2m = new AffineTransform(matrix);
                 Rectangle imageBounds = new Rectangle(width,
-                                                      height);
+                        height);
                 try {
                     return new CrsGeoCoding(crs, imageBounds, i2m);
                 } catch (TransformException e) {
@@ -669,7 +645,7 @@ public class DimapProductHelpers {
         final FXYSum ySum = FXYSum.createFXYSum(rlmOrder, yCoeffs);
 
         return new FXYGeoCoding(ulX, ulY, xDim, yDim, xSum, ySum, phiSum, lambdaSum,
-                                datum);
+                datum);
     }
 
     private static Datum createDatum(Document dom) {
@@ -857,7 +833,7 @@ public class DimapProductHelpers {
             final Ellipsoid ellipsoid = new Ellipsoid(ellipsoidName, semiMinor, semiMajor);
             final Datum datum = new Datum(datumName, ellipsoid, 0, 0, 0); // @todo nf/nf - read also DX,DY,DZ
             final MapInfo mapInfo = new MapInfo(projection, pixelX, pixelY, easting, northing, pixelSizeX, pixelSizeY,
-                                                datum);
+                    datum);
             mapInfo.setOrientation(orientation);
             mapInfo.setNoDataValue(noDataValue);
             mapInfo.setOrthorectified(orthorectified);
@@ -956,11 +932,8 @@ public class DimapProductHelpers {
         }
         for (Object elementObj : elements) {
             final Element element = (Element) elementObj;
-            final Placemark placemark = PlacemarkIO.createPlacemark(element, PinDescriptor.getInstance(),
-                                                                    product.getSceneGeoCoding());
-            if (placemark != null) {
-                product.getPinGroup().add(placemark);
-            }
+            final Placemark placemark = PlacemarkIO.createPlacemark(element, PinDescriptor.getInstance(), product.getSceneGeoCoding());
+            product.getPinGroup().add(placemark);
         }
     }
 
@@ -977,7 +950,7 @@ public class DimapProductHelpers {
         for (Object elementObj : elements) {
             final Element element = (Element) elementObj;
             final Placemark placemark = PlacemarkIO.createPlacemark(element, GcpDescriptor.getInstance(),
-                                                                    product.getSceneGeoCoding());
+                    product.getSceneGeoCoding());
             if (placemark != null) {
                 product.getGcpGroup().add(placemark);
             }
@@ -1059,7 +1032,6 @@ public class DimapProductHelpers {
      * Creates a parsed {@link Document} from the given {@link InputStream inputStream}.
      *
      * @param inputStream the stream to be parsed
-     *
      * @return a parsed inputStream
      */
     public static Document createDom(final InputStream inputStream) {
@@ -1078,9 +1050,7 @@ public class DimapProductHelpers {
      * Converts a given BEAM <code>unit</code> into a DIMAP conform unit.
      *
      * @param unit a BEAM unit
-     *
      * @return the converted unit
-     *
      * @see DimapProductHelpers#convertDimapUnitToBeamUnit(String)
      */
     public static String convertBeamUnitToDimapUnit(final String unit) {
@@ -1101,9 +1071,7 @@ public class DimapProductHelpers {
      * Converts a given DIMAP <code>unit</code> into a BEAM conform unit.
      *
      * @param unit a DIMAP unit
-     *
      * @return the converted unit
-     *
      * @see DimapProductHelpers#convertBeamUnitToDimapUnit(String)
      */
     public static String convertDimapUnitToBeamUnit(final String unit) {
@@ -1380,8 +1348,8 @@ public class DimapProductHelpers {
                     SystemUtils.LOG.severe(
                             "Number format exception at reading DIMAP product tag '" + tag + "'");
                     SystemUtils.LOG.log(Level.SEVERE,
-                                        "Number format exception at reading DIMAP product tag '" + tag + "'",
-                                        e);
+                            "Number format exception at reading DIMAP product tag '" + tag + "'",
+                            e);
                     return null;
                 }
             } else {
@@ -1398,8 +1366,8 @@ public class DimapProductHelpers {
                     SystemUtils.LOG.severe(
                             "Number format exception at reading DIMAP product tag '" + tag + "'");
                     SystemUtils.LOG.log(Level.SEVERE,
-                                        "Number format exception at reading DIMAP product tag '" + tag + "'",
-                                        e);
+                            "Number format exception at reading DIMAP product tag '" + tag + "'",
+                            e);
                     return null;
                 }
             } else {
@@ -1488,7 +1456,7 @@ public class DimapProductHelpers {
                             // for products prior version 2.13.0. We need still need to analyse the data as it was
                             // in the old versions. So we use DISCONT_AUTO as default fallback value here.
                             final String intVal = cyclicElem.getAttributeValue(DimapProductConstants.ATTRIB_TIE_POINT_DISCONTINUITY,
-                                                                               String.valueOf(TiePointGrid.DISCONT_AUTO));
+                                    String.valueOf(TiePointGrid.DISCONT_AUTO));
                             final int discontinuity = Integer.parseInt(intVal);
                             tiePointGrid.setDiscontinuity(discontinuity);
                         }
@@ -1507,18 +1475,18 @@ public class DimapProductHelpers {
 
         private void addFlagsCoding() {
             addSampleCoding(DimapProductConstants.TAG_FLAG_CODING,
-                            DimapProductConstants.TAG_FLAG,
-                            DimapProductConstants.TAG_FLAG_NAME,
-                            DimapProductConstants.TAG_FLAG_INDEX,
-                            DimapProductConstants.TAG_FLAG_DESCRIPTION);
+                    DimapProductConstants.TAG_FLAG,
+                    DimapProductConstants.TAG_FLAG_NAME,
+                    DimapProductConstants.TAG_FLAG_INDEX,
+                    DimapProductConstants.TAG_FLAG_DESCRIPTION);
         }
 
         private void addIndexCoding() {
             addSampleCoding(DimapProductConstants.TAG_INDEX_CODING,
-                            DimapProductConstants.TAG_INDEX,
-                            DimapProductConstants.TAG_INDEX_NAME,
-                            DimapProductConstants.TAG_INDEX_VALUE,
-                            DimapProductConstants.TAG_INDEX_DESCRIPTION);
+                    DimapProductConstants.TAG_INDEX,
+                    DimapProductConstants.TAG_INDEX_NAME,
+                    DimapProductConstants.TAG_INDEX_VALUE,
+                    DimapProductConstants.TAG_INDEX_DESCRIPTION);
         }
 
         private void addSampleCoding(String tagNameSampleCoding,
@@ -1541,7 +1509,7 @@ public class DimapProductHelpers {
                     sampleCoding = flagCoding;
                 }
                 addSamples(tagNameSampleElements, tagNameSampleName, tagNameSampleValue, tagNameSampleDescription,
-                           flagCodingElem, sampleCoding);
+                        flagCodingElem, sampleCoding);
             }
         }
 
@@ -1552,8 +1520,7 @@ public class DimapProductHelpers {
             for (Element element : list) {
                 String name = element.getChildTextTrim(tagNameSampleName);
                 String description = element.getChildTextTrim(tagNameSampleDescription);
-                if (sampleCoding instanceof FlagCoding) {
-                    final FlagCoding fc = (FlagCoding) sampleCoding;
+                if (sampleCoding instanceof FlagCoding fc) {
                     String maskText = element.getChildTextTrim(DimapProductConstants.TAG_FLAG_MASK);
                     int mask = maskText != null
                             ? Integer.parseInt(maskText)
@@ -1565,8 +1532,7 @@ public class DimapProductHelpers {
                     } else {
                         fc.addFlag(name, mask, description);
                     }
-                }
-                else if (sampleCoding instanceof IndexCoding) {
+                } else if (sampleCoding instanceof IndexCoding) {
                     int idx = Integer.parseInt(element.getChildTextTrim(tagNameSampleValue));
                     ((IndexCoding) sampleCoding).addIndex(name, idx, description);
                 }
@@ -1576,14 +1542,12 @@ public class DimapProductHelpers {
         private void addMasks() {
             final Element parent = getRootElement().getChild(DimapProductConstants.TAG_MASKS);
             if (parent != null) {
-                @SuppressWarnings({"unchecked"})
-                final List<Element> children = parent.getChildren(DimapProductConstants.TAG_MASK);
+                @SuppressWarnings({"unchecked"}) final List<Element> children = parent.getChildren(DimapProductConstants.TAG_MASK);
                 for (final Element child : children) {
                     final DimapPersistable persistable = DimapPersistence.getPersistable(child);
                     if (persistable != null) {
                         final Object object = persistable.createObjectFromXml(child, product);
-                        if (object instanceof Mask) {
-                            final Mask mask = (Mask) object;
+                        if (object instanceof Mask mask) {
                             final String maskName = mask.getName();
                             final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
                             if (maskGroup.contains(maskName)) {
@@ -1924,7 +1888,7 @@ public class DimapProductHelpers {
                 }
             } else {
                 SystemUtils.LOG.warning(String.format("RasterDataNode '%s': can't set image-to-model transform, " +
-                                                      "source image already set", rasterDataNode.getName()));
+                        "source image already set", rasterDataNode.getName()));
             }
         }
 

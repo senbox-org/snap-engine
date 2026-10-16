@@ -155,8 +155,12 @@ public final class ProductNodeList<T extends ProductNode> {
      *
      * @return true if the node was added, otherwise false.
      */
-    public final boolean add(T node) {
-        return node != null && nodes.add(node);
+    public boolean add(T node) {
+        if (node == null) {
+            return false;
+        }
+        nodes.add(node);
+        return true;
     }
 
     /**
@@ -168,7 +172,7 @@ public final class ProductNodeList<T extends ProductNode> {
      *
      * @throws ArrayIndexOutOfBoundsException if the index was invalid.
      */
-    public final void add(int index, T node) {
+    public void add(int index, T node) {
         if (node != null) {
             nodes.add(index, node);
         }

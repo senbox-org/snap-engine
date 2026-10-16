@@ -49,17 +49,13 @@ public class ProductFlipperExt extends ProductFlipper {
                 final MetadataAttribute firstLineTimeAttr = absSrc.getAttribute("first_line_time");
                 if (firstLineTimeAttr != null) {
                     final ProductData.UTC firstLineTime = ProductData.UTC.parse(firstLineTimeAttr.getData().getElemString());
-                    if (firstLineTime != null) {
-                        absTgt.getAttribute("last_line_time").getData().setElems(firstLineTime.getArray());
-                    }
+                    absTgt.getAttribute("last_line_time").getData().setElems(firstLineTime.getArray());
                 }
 
                 final MetadataAttribute lastLineTimeAttr = absSrc.getAttribute("last_line_time");
                 if (lastLineTimeAttr != null) {
                     final ProductData.UTC lastLineTime = ProductData.UTC.parse(lastLineTimeAttr.getData().getElemString());
-                    if (lastLineTime != null) {
-                        absTgt.getAttribute("first_line_time").getData().setElems(lastLineTime.getArray());
-                    }
+                    absTgt.getAttribute("first_line_time").getData().setElems(lastLineTime.getArray());
                 }
 
                 final MetadataAttribute lineTimeIntervalAttr = absSrc.getAttribute("line_time_interval");

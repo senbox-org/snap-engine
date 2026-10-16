@@ -17,12 +17,8 @@
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.Assert;
-import com.bc.ceres.core.runtime.Dependency;
-import com.bc.ceres.core.runtime.Extension;
-import com.bc.ceres.core.runtime.ExtensionPoint;
+import com.bc.ceres.core.runtime.*;
 import com.bc.ceres.core.runtime.Module;
-import com.bc.ceres.core.runtime.ModuleState;
-import com.bc.ceres.core.runtime.Version;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -37,9 +33,9 @@ import java.util.Stack;
  */
 public class ModuleResolver {
 
-    private ClassLoader moduleParentClassLoader;
-    private boolean resolvingLibs;
-    private Stack<String> moduleStack;
+    private final ClassLoader moduleParentClassLoader;
+    private final boolean resolvingLibs;
+    private final Stack<String> moduleStack;
 
     /**
      * Constructs a new module resolver.
@@ -131,7 +127,7 @@ public class ModuleResolver {
             trace.append('[').append(s).append(']');
         }
         return MessageFormat.format("Cyclic dependencies detected for module [{0}], trace: {1}",
-                                    module.getSymbolicName(), trace);
+                module.getSymbolicName(), trace);
     }
 
     private ModuleImpl[] resolveModuleDependenciesImpl(ModuleImpl module) {
@@ -143,20 +139,16 @@ public class ModuleResolver {
                 resolvedModules.add(dependencyItem.module);
             }
             ResolveException[] resolveErrors = dependencyItem.module.getResolveErrors();
-            if (resolveErrors.length > 0) {
-                for (ResolveException resolveError : resolveErrors) {
-                    if (dependencyItem.optional) {
-                        module.addResolveWarning(resolveError);
-                    } else {
-                        module.addResolveError(resolveError);
-                    }
+            for (ResolveException resolveError : resolveErrors) {
+                if (dependencyItem.optional) {
+                    module.addResolveWarning(resolveError);
+                } else {
+                    module.addResolveError(resolveError);
                 }
             }
             ResolveException[] resolveWarnings = dependencyItem.module.getResolveWarnings();
-            if (resolveWarnings.length > 0) {
-                for (ResolveException resolveWarning : resolveWarnings) {
-                    module.addResolveWarning(resolveWarning);
-                }
+            for (ResolveException resolveWarning : resolveWarnings) {
+                module.addResolveWarning(resolveWarning);
             }
         }
         return resolvedModules.toArray(ModuleImpl.EMPTY_ARRAY);
@@ -173,7 +165,7 @@ public class ModuleResolver {
             ClassLoader[] dependencyClassLoaders = getDependencyClassLoaders(module);
 
             module.setClassLoader(new ModuleClassLoader(dependencyClassLoaders, dependencyLibs,
-                                                        nativeLibs, moduleParentClassLoader));
+                    nativeLibs, moduleParentClassLoader));
         }
     }
 
@@ -203,7 +195,7 @@ public class ModuleResolver {
                         libPaths.add(UrlHelper.fileToUrl(libFile));
                     } else {
                         String msg = String.format("Native library [%s] found in module [%s] is not accessible.",
-                                                   libFile, module.getSymbolicName());
+                                libFile, module.getSymbolicName());
                         module.addResolveWarning(new ResolveException(msg));
                     }
                 }
@@ -250,7 +242,7 @@ public class ModuleResolver {
 
         // add all declared libs to the classpath
         resolveLibs(module,
-                    moduleFile, resolvingLibs, libDependencies);
+                moduleFile, resolvingLibs, libDependencies);
 
         // add all implicite libs to the classpath
         for (String impliciteLib : module.getImpliciteLibs()) {
@@ -289,8 +281,8 @@ public class ModuleResolver {
                 if (!libResolved && resolvingLibs) {
                     if (!dependency.isOptional()) {
                         String msg = String.format("Mandatory library [%s] declared by module [%s] not found.",
-                                                   dependency.getLibName(),
-                                                   module.getSymbolicName());
+                                dependency.getLibName(),
+                                module.getSymbolicName());
                         module.addResolveError(new ResolveException(msg));
                     }
                 }
@@ -336,15 +328,13 @@ public class ModuleResolver {
                             module.addResolveError(new ResolveException(msg));
                         }
                     } else {
-                        if (dependencyModules.length > 0) {
-                            ModuleImpl dependencyModule = findLatestModuleVersion(dependencyModules);
-                            collectDependencyModule(module, dependencyModule, dependency.isOptional(), list);
-                        }
+                        ModuleImpl dependencyModule = findLatestModuleVersion(dependencyModules);
+                        collectDependencyModule(module, dependencyModule, dependency.isOptional(), list);
                     }
                 } else if (!dependency.isOptional()) {
                     String msg = String.format("Mandatory dependency [%s] declared by module [%s] not found.",
-                                               dependency.getModuleSymbolicName(),
-                                               module.getSymbolicName());
+                            dependency.getModuleSymbolicName(),
+                            module.getSymbolicName());
                     module.addResolveError(new ResolveException(msg));
                 }
             }
@@ -408,7 +398,7 @@ public class ModuleResolver {
                 bestModule = module;
                 break;
             } else if (version.compareTo(requiredVersion) > 0
-                       && version.compareTo(bestVersion) < 0) {
+                    && version.compareTo(bestVersion) < 0) {
                 bestModule = module;
                 bestVersion = version;
             }
@@ -454,8 +444,8 @@ public class ModuleResolver {
             }
         } catch (MalformedURLException e) {
             String msg = String.format("Library file path [%s] used by module [%s] cannot be converted to an URL.",
-                                       lib.getPath(),
-                                       module.getSymbolicName());
+                    lib.getPath(),
+                    module.getSymbolicName());
             module.addResolveError(new ResolveException(msg, e));
         }
     }

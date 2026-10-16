@@ -4,11 +4,7 @@ import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.math.Range;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.CRS;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateFilter;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -812,10 +808,7 @@ public class GeoUtils {
         final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
         for (final PixelPos pixelPos : points) {
             final GeoPos gcGeoPos = geoCoding.getGeoPos(pixelPos, null);
-            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
-                geoPoints.add(gcGeoPos);
-            }
-
+            geoPoints.add(gcGeoPos);
         }
         return geoPoints.toArray(new GeoPos[0]);
     }
@@ -836,12 +829,12 @@ public class GeoUtils {
     /**
      * Projects the polygon from its geocoding to the target geocoding
      *
-     * @param polygon the polygon in pixel coordinates (X,Y)
+     * @param polygon          the polygon in pixel coordinates (X,Y)
      * @param polygonGeoCoding the polygon geocoding
-     * @param geoCoding the target geocoding
+     * @param geoCoding        the target geocoding
      * @return the polygon in pixel coordinates (X,Y), projected to the target geocoding
      */
-    public static Polygon projectPolygonToGeocoding(Polygon polygon, GeoCoding polygonGeoCoding, GeoCoding geoCoding){
+    public static Polygon projectPolygonToGeocoding(Polygon polygon, GeoCoding polygonGeoCoding, GeoCoding geoCoding) {
         final Polygon polygonToMap = projectPolygonToMap(polygon, polygonGeoCoding);
         return projectPolygonToImage(polygonToMap, geoCoding);
     }
@@ -849,7 +842,7 @@ public class GeoUtils {
     /**
      * Projects the polygon from geo coordinates (Lat,Lon) to pixel coordinates (X,Y) using its geocoding
      *
-     * @param polygon the polygon with geo coordinates (Lat,Lon)
+     * @param polygon   the polygon with geo coordinates (Lat,Lon)
      * @param geoCoding the polygon geocoding
      * @return the polygon with pixel coordinates (X,Y)
      */
@@ -860,7 +853,7 @@ public class GeoUtils {
     /**
      * Projects the polygon from pixel coordinates (X,Y) to map coordinates (Lat,Lon) using its geocoding
      *
-     * @param polygon the polygon with pixel coordinates (X,Y)
+     * @param polygon   the polygon with pixel coordinates (X,Y)
      * @param geoCoding the polygon geocoding
      * @return the polygon with geo coordinates (Lat,Lon)
      */
