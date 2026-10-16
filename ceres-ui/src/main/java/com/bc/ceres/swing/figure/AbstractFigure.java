@@ -270,7 +270,7 @@ public abstract class AbstractFigure implements Figure {
                 added.add(figure);
             }
         }
-        return added.toArray(new Figure[added.size()]);
+        return added.toArray(new Figure[0]);
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class AbstractFigure implements Figure {
                 removed.add(figure);
             }
         }
-        return removed.toArray(new Figure[removed.size()]);
+        return removed.toArray(new Figure[0]);
     }
 
     protected Figure[] removeFiguresImpl() {
@@ -391,10 +391,11 @@ public abstract class AbstractFigure implements Figure {
 
     @Override
     public synchronized FigureChangeListener[] getChangeListeners() {
+        final FigureChangeListener[] emptyArray = new FigureChangeListener[0];
         if (listenerList != null) {
-            return listenerList.toArray(new FigureChangeListener[listenerList.size()]);
+            return listenerList.toArray(emptyArray);
         } else {
-            return new FigureChangeListener[0];
+            return emptyArray;
         }
     }
 
@@ -459,7 +460,7 @@ public abstract class AbstractFigure implements Figure {
         handleList.add(new ScaleHandle(this, ScaleHandle.S, 0.0, +distance, handleStyle));
         handleList.add(new ScaleHandle(this, ScaleHandle.W, -distance, 0.0, handleStyle));
 
-        return handleList.toArray(new Handle[handleList.size()]);
+        return handleList.toArray(new Handle[0]);
     }
 
     protected FigureStyle getHandleStyle() {

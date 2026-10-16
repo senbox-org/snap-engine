@@ -171,7 +171,7 @@ public class DefaultModuleManager implements ModuleManager {
                 updates.add(installedModuleItem);
             }
         }
-        return updates.toArray(new ModuleItem[updates.size()]);
+        return updates.toArray(ModuleItem.EMPTY_ARRAY);
     }
 
 

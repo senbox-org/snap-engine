@@ -130,7 +130,7 @@ public final class Launcher {
                 }
             }
         }
-        return urlList.toArray(new URL[urlList.size()]);
+        return urlList.toArray(new URL[0]);
     }
 
     public void launch(String[] args) throws Exception {

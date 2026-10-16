@@ -184,7 +184,7 @@ public class ShapeRasterizer {
             y0 = y1;
         }
 
-        return list.toArray(new Point[list.size()]);
+        return list.toArray(new Point[0]);
     }
 
     /**
@@ -219,7 +219,7 @@ public class ShapeRasterizer {
             pathIterator.next();
         }
 
-        return list.toArray(new Point2D[list.size()]);
+        return list.toArray(new Point2D[0]);
     }
 
     /**

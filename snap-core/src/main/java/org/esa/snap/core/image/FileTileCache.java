@@ -257,7 +257,7 @@ public class FileTileCache implements TileCache {
      */
     public synchronized void flush() {
         TileId[] tileIds;
-        tileIds = tileMap.keySet().toArray(new TileId[tileMap.size()]);
+        tileIds = tileMap.keySet().toArray(new TileId[0]);
         for (TileId tileId : tileIds) {
             removeTile(tileId);
         }
@@ -272,7 +272,7 @@ public class FileTileCache implements TileCache {
      * @since JAI 1.1
      */
     public synchronized void memoryControl() {
-        CachedTileImpl[] tiles = tileMap.values().toArray(new CachedTileImpl[tileMap.size()]);
+        CachedTileImpl[] tiles = tileMap.values().toArray(new CachedTileImpl[0]);
         Arrays.sort(tiles, createTileComparator());
         for (CachedTileImpl tile : tiles) {
             if (memoryInUse <= memoryThreshold * memoryCapacity) {

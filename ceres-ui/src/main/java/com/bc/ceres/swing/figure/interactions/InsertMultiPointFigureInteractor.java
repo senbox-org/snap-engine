@@ -164,7 +164,6 @@ public class InsertMultiPointFigureInteractor extends FigureEditorInteractor {
     }
 
     protected Point2D[] getPoints() {
-        return points.toArray(new Point2D[points.size()]);
+        return points.toArray(new Point2D[0]);
     }
-
 }

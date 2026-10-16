@@ -85,7 +85,7 @@ public class ModuleLoader {
                 }
                 pm.worked(1);
             }
-            return moduleList.toArray(new ModuleImpl[moduleList.size()]);
+            return moduleList.toArray(new ModuleImpl[0]);
         } finally {
             pm.done();
         }
@@ -130,7 +130,7 @@ public class ModuleLoader {
                 }
                 pm.worked(toWork);
             }
-            return moduleList.toArray(new ModuleImpl[moduleList.size()]);
+            return moduleList.toArray(ModuleImpl.EMPTY_ARRAY);
         } finally {
             pm.done();
         }
@@ -184,7 +184,7 @@ public class ModuleLoader {
     private void writeInstallInfo(File moduleDir, List<String> installedFiles) throws IOException {
         File installInfoFile = new File(moduleDir, ModuleInstaller.INSTALL_INFO_XML);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(installInfoFile))) {
-            InstallInfo installInfo = new InstallInfo(installedFiles.toArray(new String[installedFiles.size()]));
+            InstallInfo installInfo = new InstallInfo(installedFiles.toArray(new String[0]));
             installInfo.write(writer);
         }
     }

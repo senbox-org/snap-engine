@@ -41,7 +41,7 @@ class TiffDirectoryEntrySet {
     }
 
     public TiffDirectoryEntry[] getEntries() {
-        return (TiffDirectoryEntry[]) entryMap.values().toArray(new TiffDirectoryEntry[entryMap.size()]);
+        return (TiffDirectoryEntry[]) entryMap.values().toArray(new TiffDirectoryEntry[0]);
     }
 
     public TiffDirectoryEntry getEntry(final TiffShort tag) {

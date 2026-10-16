@@ -138,7 +138,7 @@ public class ACEFileInfo {
 
     public static boolean isValidFileSize(final long size) {
         if (size > 0 && size % 2 == 0) {
-            final long w = (long) Math.sqrt(size / 2);
+            final long w = (long) Math.sqrt(size * 0.5);
             if (2 * w * w == size) {
                 return true;
             }

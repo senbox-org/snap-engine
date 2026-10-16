@@ -635,13 +635,13 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
             String libDirPath = (String) stringTokenizer.nextElement();
             libDirPathList.add(libDirPath);
         }
-        return libDirPathList.toArray(new String[libDirPathList.size()]);
+        return libDirPathList.toArray(new String[0]);
     }
 
     private static String assembleLibDirPaths(String[] libDirPaths) {
         StringBuilder sb = new StringBuilder(64);
         for (String libDirPath : libDirPaths) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(File.pathSeparator);
             }
             sb.append(libDirPath);

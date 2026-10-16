@@ -75,7 +75,7 @@ public class MapProjectionRegistry {
      * @return an array of all registered map-projections, never <code>null</code>
      */
     public static MapProjection[] getProjections() {
-        return projectionList.toArray(new MapProjection[projectionList.size()]);
+        return projectionList.toArray(new MapProjection[0]);
     }
 
     /**

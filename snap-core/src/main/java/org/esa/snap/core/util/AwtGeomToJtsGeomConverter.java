@@ -58,7 +58,7 @@ public class AwtGeomToJtsGeomConverter {
 
     public MultiLineString createMultiLineString(Shape shape) {
         List<LineString> lineStringList = createLineStringList(shape);
-        LineString[] lineStrings = lineStringList.toArray(new LineString[lineStringList.size()]);
+        LineString[] lineStrings = lineStringList.toArray(new LineString[0]);
         return geometryFactory.createMultiLineString(lineStrings);
     }
 
@@ -68,7 +68,7 @@ public class AwtGeomToJtsGeomConverter {
         LinearRing[] interiorRings = null;
         if (linearRings.size() > 1) {
             List<LinearRing> subList = linearRings.subList(1, linearRings.size());
-            interiorRings = subList.toArray(new LinearRing[subList.size()]);
+            interiorRings = subList.toArray(new LinearRing[0]);
         }
         return geometryFactory.createPolygon(exteriorRing, interiorRings);
     }
@@ -87,7 +87,7 @@ public class AwtGeomToJtsGeomConverter {
         List<List<Coordinate>> pathList = createPathList(shape, true);
         List<LinearRing> linearRingList = new ArrayList<LinearRing>();
         for (List<Coordinate> path : pathList) {
-            Coordinate[] pathCoordinates = path.toArray(new Coordinate[path.size()]);
+            Coordinate[] pathCoordinates = path.toArray(new Coordinate[0]);
             linearRingList.add(geometryFactory.createLinearRing(pathCoordinates));
         }
         return linearRingList;
@@ -97,7 +97,7 @@ public class AwtGeomToJtsGeomConverter {
         List<List<Coordinate>> pathList = createPathList(geometry, false);
         List<LineString> strings = new ArrayList<LineString>();
         for (List<Coordinate> path : pathList) {
-            strings.add(geometryFactory.createLineString(path.toArray(new Coordinate[path.size()])));
+            strings.add(geometryFactory.createLineString(path.toArray(new Coordinate[0])));
         }
         return strings;
     }

@@ -109,9 +109,9 @@ public class TreeNode<T> {
         return suceess;
     }
 
-    public TreeNode<T>[] getChildren() {
+    public TreeNode[] getChildren() {
         if (children != null) {
-            return children.toArray(new TreeNode[children.size()]);
+            return children.toArray(new TreeNode[0]);
         } else {
             return new TreeNode[0];
         }
