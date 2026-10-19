@@ -22,6 +22,7 @@ import org.esa.snap.remote.products.repository.listener.ProductListDownloaderLis
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
+import org.esa.snap.remote.products.repository.geometry.PolygonArea;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.configuration.ConfigurationManager;
 import ro.cs.tao.datasource.DataQuery;
@@ -474,14 +475,7 @@ public class RemoteRepositoriesManager {
             String parameterName = entry.getKey();
             if (parameterName.equals(CommonParameterNames.FOOTPRINT)) {
                 Rectangle2D selectionArea = (Rectangle2D) entry.getValue();
-
-                ro.cs.tao.eodata.Polygon2D polygon2D = new ro.cs.tao.eodata.Polygon2D();
-                polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                polygon2D.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
-                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
-                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
-                polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                query.addParameter(parameterName, polygon2D);
+                query.addParameter(parameterName, buildQueryPolygon(selectionArea));
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
                 query.addParameter(parameterName, entry.getValue());
             }
@@ -513,6 +507,28 @@ public class RemoteRepositoriesManager {
             }
         }
         return query;
+    }
+
+    /**
+     * The polygon of an area of interest for a remote query: the vertices of a {@link PolygonArea}, else the corners
+     * of the rectangle.
+     */
+    static ro.cs.tao.eodata.Polygon2D buildQueryPolygon(Rectangle2D selectionArea) {
+        ro.cs.tao.eodata.Polygon2D polygon2D = new ro.cs.tao.eodata.Polygon2D();
+        if (selectionArea instanceof PolygonArea) {
+            PolygonArea polygonArea = (PolygonArea) selectionArea;
+            for (int i = 0; i < polygonArea.getVertexCount(); i++) {
+                polygon2D.append(polygonArea.getLongitude(i), polygonArea.getLatitude(i));
+            }
+            polygon2D.append(polygonArea.getLongitude(0), polygonArea.getLatitude(0)); // closed
+            return polygon2D;
+        }
+        polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+        polygon2D.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
+        polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
+        polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
+        polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+        return polygon2D;
     }
 
     private static List<RepositoryProduct> convertProducts(RemoteMission mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
