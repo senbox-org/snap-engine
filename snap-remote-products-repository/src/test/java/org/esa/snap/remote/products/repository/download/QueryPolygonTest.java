@@ -26,7 +26,11 @@ public class QueryPolygonTest {
     public void testRectangleQueriesItsCorners() {
         final List<Point2D> points = RemoteRepositoriesManager.buildQueryPolygon(new Rectangle2D.Double(10, 45, 4, 3)).getPoints();
         assertEquals(5, points.size());
+        // unchanged corner order of the remote query: top left, bottom left, bottom right, top right
         assertEquals(new Point2D.Double(10, 45), points.get(0));
+        assertEquals(new Point2D.Double(10, 48), points.get(1));
         assertEquals(new Point2D.Double(14, 48), points.get(2));
+        assertEquals(new Point2D.Double(14, 45), points.get(3));
+        assertEquals(new Point2D.Double(10, 45), points.get(4));
     }
 }

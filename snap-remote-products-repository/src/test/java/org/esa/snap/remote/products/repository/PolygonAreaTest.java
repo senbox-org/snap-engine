@@ -61,6 +61,50 @@ public class PolygonAreaTest {
         } catch (UnsupportedOperationException expected) {
             // expected
         }
+        try {
+            triangle().setRect(new Rectangle2D.Double(0, 0, 1, 1));
+            fail("the bounds follow the vertices");
+        } catch (UnsupportedOperationException expected) {
+            // expected
+        }
+        try {
+            triangle().add(100, 100);
+            fail("the bounds follow the vertices");
+        } catch (UnsupportedOperationException expected) {
+            // expected
+        }
+        // the public fields of Rectangle2D.Double do not change the bounds
+        final PolygonArea area = triangle();
+        area.x = -50;
+        area.width = 500;
+        assertEquals(10, area.getX(), 0);
+        assertEquals(4, area.getWidth(), 0);
+        assertEquals(new Rectangle2D.Double(10, 45, 4, 3), area.getBounds2D());
+        assertFalse(area.contains(0, 46));
+        assertTrue(area.contains(11, 46));
+    }
+
+    @Test
+    public void testSelfIntersectingPolygonsRejected() {
+        try {
+            // a bow tie: the edges 0-1 and 2-3 cross
+            new PolygonArea(new double[]{10, 14, 10, 14}, new double[]{45, 48, 48, 45});
+            fail("crossing edges");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
+        // the same vertices in the right order are a valid quadrilateral
+        assertEquals(4, new PolygonArea(new double[]{10, 14, 14, 10}, new double[]{45, 45, 48, 48}).getVertexCount());
+    }
+
+    @Test
+    public void testInvalidVerticesRejected() {
+        try {
+            new PolygonArea(new double[]{10, Double.NaN, 12}, new double[]{45, 45, 48});
+            fail("NaN vertex");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
     }
 
     @Test
