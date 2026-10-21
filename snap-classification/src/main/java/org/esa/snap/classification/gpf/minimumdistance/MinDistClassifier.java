@@ -4,12 +4,15 @@ import net.sf.javaml.classification.AbstractMeanClassifier;
 import net.sf.javaml.core.Instance;
 import net.sf.javaml.distance.EuclideanDistance;
 
+import java.io.Serial;
+
 /**
  * Minimum Distance
  */
 public class MinDistClassifier extends AbstractMeanClassifier {
+        @Serial
         private static final long serialVersionUID = 3044426429892220857L;
-        private EuclideanDistance dist;
+        private final EuclideanDistance dist;
 
         public MinDistClassifier(EuclideanDistance dist) {
             this.dist = dist;

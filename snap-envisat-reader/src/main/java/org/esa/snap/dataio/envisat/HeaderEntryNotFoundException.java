@@ -17,11 +17,14 @@ package org.esa.snap.dataio.envisat;
 
 import org.esa.snap.core.dataio.ProductIOException;
 
+import java.io.Serial;
+
 /**
  * Thrown if an entry in an ENVISAT header could not be found.
  */
 public class HeaderEntryNotFoundException extends ProductIOException {
 
+    @Serial
     private static final long serialVersionUID = -946209513433311834L;
 
     /**

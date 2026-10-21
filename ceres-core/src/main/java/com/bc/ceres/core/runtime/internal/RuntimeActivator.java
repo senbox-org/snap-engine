@@ -54,7 +54,7 @@ public class RuntimeActivator implements Activator {
     private Map<String, RuntimeRunnable> applications;
     private List<ServiceRegistration> serviceRegistrations;
     private ModuleContext moduleContext;
-    private ClassLoader resourcesClassLoader;
+    private volatile ClassLoader resourcesClassLoader;
 
     public static RuntimeActivator getInstance() {
         return instance;

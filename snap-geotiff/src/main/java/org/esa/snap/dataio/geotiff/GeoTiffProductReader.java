@@ -60,6 +60,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
 
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class GeoTiffProductReader extends AbstractProductReader {
 
     // non standard ASCII tag (code 42112) to extract GDAL metadata,
@@ -147,8 +148,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
         DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage) destBand.getSourceImage();
         GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource) defaultMultiLevelImage.getSource();
         Raster data;
-        synchronized (this.geoTiffImageReader) {
-            data = this.geoTiffImageReader.readRect(geoTiffMultiLevelSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+        synchronized (geoTiffImageReader) {
+            data = geoTiffImageReader.readRect(geoTiffMultiLevelSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
         }
         DataBuffer dataBuffer = data.getDataBuffer();
         SampleModel sampleModel = data.getSampleModel();

@@ -32,6 +32,7 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 
 
 /**
@@ -46,6 +47,7 @@ import java.awt.geom.Rectangle2D;
  * @version $Revision$ $Date$
  */
 public class AdjustableViewScrollPane extends JPanel {
+    @Serial
     private static final long serialVersionUID = -2634482999458990218L;
 
     // Extension of model bounds in view coordinates
@@ -53,19 +55,20 @@ public class AdjustableViewScrollPane extends JPanel {
     // Maximum scroll bar value
     private static final int MAX_SB_VALUE = 10000;
 
-    private JScrollBar horizontalScrollBar;
-    private JScrollBar verticalScrollBar;
+    private final boolean debug = false;
+
+    private final JScrollBar horizontalScrollBar;
+    private final JScrollBar verticalScrollBar;
+    private final Rectangle2D scrollArea;
+    private final ViewportChangeHandler viewportChangeHandler;
+
     private JComponent cornerComponent;
     private JComponent viewComponent;
     private AdjustableView adjustableView;
-    private Rectangle2D scrollArea;
     private boolean updatingScrollBars;
     private boolean scrollBarsUpdated;
-    private ViewportChangeHandler viewportChangeHandler;
     private boolean hsbVisible;
     private boolean vsbVisible;
-
-    private boolean debug = false;
 
     /**
      * Constructs a new view pane with an empty view component.
