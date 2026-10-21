@@ -84,6 +84,7 @@ import java.util.List;
  * @author Marco Zuehlke
  * @since BEAM 4.2
  */
+@SuppressWarnings("SynchronizeOnNonFinalField")
 @OperatorMetadata(alias = "Write",
         category = "Input-Output",
         version = "1.3",

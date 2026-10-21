@@ -15,6 +15,8 @@
  */
 package org.esa.snap.core.util;
 
+import java.io.Serial;
+
 /**
  * The {@code AssertionFailure} class is an error caused by a failed program assertion.
  *
@@ -25,6 +27,7 @@ package org.esa.snap.core.util;
  * @see Debug#assertTrue(boolean, String)
  */
 public class AssertionFailure extends Error {
+    @Serial
     private static final long serialVersionUID = 1799159745096232860L;
 
     /**

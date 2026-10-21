@@ -16,6 +16,8 @@
 package org.esa.snap.dataio.envisat;
 
 
+import java.io.Serial;
+
 /**
  * An exception that can occur while parsing the ENVISAT MPH or SPH.
  *
@@ -25,6 +27,7 @@ package org.esa.snap.dataio.envisat;
  */
 public class HeaderParseException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 2631398493013961975L;
 
     /**

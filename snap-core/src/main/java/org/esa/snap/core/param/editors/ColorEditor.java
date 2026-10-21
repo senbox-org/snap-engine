@@ -82,7 +82,7 @@ public class ColorEditor extends AbstractParamXEditor {
         getParameter().setValue(color, null);
     }
 
-    class ColorDisplay extends JComponent {
+    public class ColorDisplay extends JComponent {
 
         public ColorDisplay() {
             setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 1, 1),
