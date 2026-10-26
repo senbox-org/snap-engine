@@ -77,7 +77,7 @@ public class ToolParameterDescriptor extends DefaultParameterDescriptor {
             //TODO
             getter = DefaultParameterDescriptor.class.getDeclaredMethod("is" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1));
             return getter.invoke(this);
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
         //the "is..." getter could not be called
         try {
