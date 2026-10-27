@@ -21,6 +21,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
+import org.esa.snap.dataio.netcdf.remote.RemoteFileAccess;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.iosp.IOServiceProvider;
 import ucar.nc2.iosp.hdf4.H4iosp;
@@ -109,6 +110,9 @@ public class NetcdfFileOpener {
     }
 
     public static NetcdfFile open(Object input) throws IOException {
+        if (RemoteFileAccess.isRemoteLocation(input)) {
+            return openRemote(input.toString().trim());
+        }
         try {
             byte[] buffer = new byte[MAGIC_BUFFER_LENGTH];
             readMagicBytes(input, buffer);
@@ -142,6 +146,35 @@ public class NetcdfFileOpener {
             throw new IOException("Error while opening netcdf file", t);
         }
         return null;
+    }
+
+    /**
+     * Opens an http(s) location with byte-range reads, without downloading the file.
+     * Only formats the pure-Java readers handle (nc3, hdf4, hdf5/nc4) are supported.
+     */
+    private static NetcdfFile openRemote(String location) throws IOException {
+        RandomAccessFile raf = RemoteFileAccess.open(location);
+        try {
+            IOServiceProvider spi = null;
+            if (raf.length() >= MAGIC_BUFFER_LENGTH) {
+                byte[] buffer = new byte[MAGIC_BUFFER_LENGTH];
+                raf.seek(0);
+                raf.readFully(buffer);
+                spi = getIOSpi(buffer);
+            }
+            if (spi == null && H5header.isValidFile(raf)) {
+                spi = new H5iosp();
+            }
+            if (spi == null) {
+                raf.close();
+                return null;
+            }
+            raf.seek(0);
+            return new DummyNetcdfFile(spi, raf, location);
+        } catch (IOException | RuntimeException e) {
+            raf.close();
+            throw e;
+        }
     }
 
     public static NetcdfFile openNativeNc4(Object input) throws IOException {
