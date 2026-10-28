@@ -27,8 +27,9 @@ import java.util.logging.Logger;
  * <p>
  * On open it follows the server's redirects by hand, sending credentials only to hosts a
  * {@link RemoteAuthProvider} claims (for NASA Earthdata Cloud: the archive host and Earthdata Login,
- * not the signed CloudFront URL it redirects to). Data is fetched in aligned blocks held in a shared
- * {@link BlockCache}; a read spanning several missing blocks fetches them in parallel. If the resolved
+ * not the signed CloudFront URL it redirects to). Data is held in aligned blocks in a shared
+ * {@link BlockCache}; consecutive missing blocks are fetched with one request, and separate runs of
+ * blocks in parallel. If the resolved
  * URL expires (HTTP 401/403) the original location is resolved again once.
  */
 class HttpRangeRandomAccessFile extends ucar.unidata.io.RandomAccessFile {
@@ -61,6 +62,8 @@ class HttpRangeRandomAccessFile extends ucar.unidata.io.RandomAccessFile {
     private volatile URI resolved;
     private long length;
     private volatile boolean closed;
+    /** End of the previous read, to tell sequential reads from scattered ones. */
+    private long lastReadEnd = -1;
 
     HttpRangeRandomAccessFile(String location) throws IOException {
         this(location, RemoteFileAccess.BLOCK_SIZE);
@@ -102,10 +105,34 @@ class HttpRangeRandomAccessFile extends ucar.unidata.io.RandomAccessFile {
         }
         long first = pos / blockSize;
         long last = (pos + len - 1) / blockSize;
-        if (!RemoteFileAccess.CACHE.contains(cacheKey, last)) {
-            readAhead(last + 1);
+        if (last > first && RemoteFileAccess.CACHE.contains(cacheKey, first)) {
+            // The start is cached: return what is cached rather than wait for the rest. The buffered reads
+            // of netCDF-Java ask for a full buffer even when they need only a few bytes (a small chunk),
+            // and a short read is allowed: a caller that needs more asks again.
+            long end = first;
+            while (end < last && RemoteFileAccess.CACHE.contains(cacheKey, end + 1)) {
+                end++;
+            }
+            if (end < last) {
+                last = end;
+                len = (int) ((last + 1) * blockSize - pos);
+            }
         }
-        if (last > first) {
+        boolean sequential = Math.abs(pos - lastReadEnd) <= blockSize;
+        lastReadEnd = pos + len;
+        if (!RemoteFileAccess.CACHE.contains(cacheKey, last)) {
+            // Fetch the missing blocks of this read in as few requests as possible. When the file is being
+            // read sequentially, also start loading the blocks after it in the background; scattered reads
+            // (such as walking a chunk index) do not read ahead, as the extra bytes would go unused.
+            loadBlocks(range(first, last));
+            if (sequential && RemoteFileAccess.READ_AHEAD > 0) {
+                long lastBlock = (length - 1) / blockSize;
+                long to = Math.min(last + RemoteFileAccess.READ_AHEAD, lastBlock);
+                if (to > last) {
+                    loadBlocks(range(last + 1, to));
+                }
+            }
+        } else if (last > first) {
             prefetch(first, last);
         }
         int done = 0;
@@ -184,50 +211,79 @@ class HttpRangeRandomAccessFile extends ucar.unidata.io.RandomAccessFile {
             LOG.fine("Skipping prefetch of " + blocks.size() + " blocks of " + location + ": larger than half the cache");
             return;
         }
-        List<Future<byte[]>> futures = new ArrayList<>();
-        for (long i : blocks) {
-            if (!RemoteFileAccess.CACHE.contains(cacheKey, i)) {
-                long index = i;
-                futures.add(PREFETCH.submit(() -> block(index)));
-            }
-        }
-        awaitAll(futures);
-    }
-
-    /**
-     * Starts background fetches of the blocks after a cache miss. Chunks of one variable are usually
-     * stored next to each other, so the next reads often find their blocks already loaded or in flight.
-     */
-    private void readAhead(long from) {
-        long lastBlock = (length - 1) / blockSize;
-        long to = Math.min(from + RemoteFileAccess.READ_AHEAD - 1, lastBlock);
-        for (long i = from; i <= to; i++) {
-            if (!RemoteFileAccess.CACHE.containsOrLoading(cacheKey, i)) {
-                long index = i;
-                PREFETCH.submit(() -> {
-                    try {
-                        block(index);
-                    } catch (IOException e) {
-                        LOG.log(Level.FINE, "Read-ahead failed for " + location, e);
-                    }
-                });
-            }
-        }
+        awaitAll(loadBlocks(blocks));
     }
 
     private void prefetch(long first, long last) throws IOException {
-        List<Future<byte[]>> futures = new ArrayList<>();
-        for (long i = first; i <= last; i++) {
-            if (!RemoteFileAccess.CACHE.contains(cacheKey, i)) {
-                long index = i;
-                futures.add(PREFETCH.submit(() -> block(index)));
-            }
-        }
-        awaitAll(futures);
+        awaitAll(loadBlocks(range(first, last)));
     }
 
-    private void awaitAll(List<Future<byte[]>> futures) throws IOException {
-        for (Future<byte[]> f : futures) {
+    private static java.util.SortedSet<Long> range(long first, long last) {
+        java.util.SortedSet<Long> blocks = new java.util.TreeSet<>();
+        for (long i = first; i <= last; i++) {
+            blocks.add(i);
+        }
+        return blocks;
+    }
+
+    /**
+     * Starts loading the wanted blocks that are neither cached nor already loading. Consecutive missing
+     * blocks are fetched with one request each, up to {@code snap.netcdf.remote.maxRequestKB}.
+     *
+     * @return loads to wait for, including loads other threads had already started
+     */
+    private List<java.util.concurrent.CompletableFuture<?>> loadBlocks(java.util.SortedSet<Long> wanted) {
+        List<java.util.concurrent.CompletableFuture<?>> waits = new ArrayList<>();
+        List<Long> claimed = new ArrayList<>();
+        for (long i : wanted) {
+            if (RemoteFileAccess.CACHE.claim(cacheKey, i)) {
+                claimed.add(i);
+            } else {
+                java.util.concurrent.CompletableFuture<byte[]> pending = RemoteFileAccess.CACHE.pending(cacheKey, i);
+                if (pending != null) {
+                    waits.add(pending);
+                }
+            }
+        }
+        int maxRun = Math.max(1, RemoteFileAccess.MAX_REQUEST / blockSize);
+        int start = 0;
+        while (start < claimed.size()) {
+            int end = start;
+            while (end + 1 < claimed.size() && claimed.get(end + 1) == claimed.get(end) + 1 && end + 1 - start < maxRun) {
+                end++;
+            }
+            long a = claimed.get(start);
+            long b = claimed.get(end);
+            waits.add(java.util.concurrent.CompletableFuture.runAsync(() -> fetchRun(a, b), PREFETCH));
+            start = end + 1;
+        }
+        return waits;
+    }
+
+    /**
+     * Fetches blocks a..b (claimed by the caller) in one request and stores them in the cache.
+     */
+    private void fetchRun(long a, long b) {
+        long next = a;
+        try {
+            long start = a * blockSize;
+            long end = Math.min((b + 1) * blockSize, length) - 1;
+            byte[] data = fetchRange(start, end);
+            for (; next <= b; next++) {
+                int from = (int) ((next - a) * blockSize);
+                int to = (int) Math.min(from + (long) blockSize, data.length);
+                RemoteFileAccess.CACHE.complete(cacheKey, next, java.util.Arrays.copyOfRange(data, from, to));
+            }
+        } catch (Throwable e) {
+            for (; next <= b; next++) {
+                RemoteFileAccess.CACHE.fail(cacheKey, next, e);
+            }
+            throw e instanceof RuntimeException re ? re : new java.util.concurrent.CompletionException(e);
+        }
+    }
+
+    private void awaitAll(List<? extends Future<?>> futures) throws IOException {
+        for (Future<?> f : futures) {
             try {
                 f.get();
             } catch (InterruptedException e) {

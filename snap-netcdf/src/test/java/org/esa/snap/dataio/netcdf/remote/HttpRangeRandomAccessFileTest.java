@@ -103,7 +103,46 @@ public class HttpRangeRandomAccessFileTest {
              NetcdfFile local = NetcdfFileOpener.open(localFile)) {
             assertSameValues("B1", local.findVariable("B1").read(), remote.findVariable("B1").read());
         }
-        assertTrue("expected many block requests, got " + rangeRequests.get(), rangeRequests.get() > 10);
+        long blocks = (localFile.length() + 4095) / 4096;
+        assertTrue("consecutive blocks should share requests: " + rangeRequests.get() + " requests for " + blocks + " blocks",
+                rangeRequests.get() > 0 && rangeRequests.get() < blocks / 4);
+    }
+
+    @Test
+    public void testReadsAcrossCachedAndMissingBlocksReturnTheFileBytes() throws Exception {
+        byte[] expected = java.nio.file.Files.readAllBytes(localFile.toPath());
+        java.util.Random random = new java.util.Random(42);
+        try (HttpRangeRandomAccessFile raf = new HttpRangeRandomAccessFile(archiveUrl(), 1024)) {
+            for (int i = 0; i < 400; i++) {
+                int pos = random.nextInt(expected.length - 1);
+                int len = 1 + random.nextInt(Math.min(20000, expected.length - pos));
+                byte[] actual = new byte[len];
+                raf.seek(pos);
+                raf.readFully(actual);
+                assertArrayEquals("bytes " + pos + "+" + len, java.util.Arrays.copyOfRange(expected, pos, pos + len), actual);
+            }
+        }
+    }
+
+    @Test
+    public void testConcurrentHandlesShareBlocksAndReadCorrectData() throws Exception {
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(8);
+        try (NetcdfFile local = NetcdfFileOpener.open(localFile)) {
+            ucar.ma2.Array expected = local.findVariable("B1").read();
+            java.util.List<java.util.concurrent.Future<ucar.ma2.Array>> reads = new java.util.ArrayList<>();
+            for (int i = 0; i < 16; i++) {
+                reads.add(pool.submit(() -> {
+                    try (NetcdfFile remote = NetcdfFiles.open(new HttpRangeRandomAccessFile(archiveUrl(), 1024), archiveUrl(), null, null)) {
+                        return remote.findVariable("B1").read();
+                    }
+                }));
+            }
+            for (java.util.concurrent.Future<ucar.ma2.Array> read : reads) {
+                assertSameValues("B1", expected, read.get());
+            }
+        } finally {
+            pool.shutdownNow();
+        }
     }
 
     @Test
@@ -132,6 +171,23 @@ public class HttpRangeRandomAccessFileTest {
             assertSameValues("lat", local.findVariable("lat").read(), remote.findVariable("lat").read());
             assertSameValues("lon", local.findVariable("lon").read(), remote.findVariable("lon").read());
             assertEquals("reads after the prefetch should all be cache hits", afterPrefetch, rangeRequests.get());
+        }
+    }
+
+    @Test
+    public void testWarmedChunkIndexIsWalkedWithoutRequests() throws Exception {
+        try (NetcdfFile remote = new NetcdfFile(new ucar.nc2.iosp.hdf5.H5iosp(), new HttpRangeRandomAccessFile(archiveUrl(), 1024), archiveUrl(), null) {
+        }) {
+            java.util.List<ucar.nc2.Variable> variables = java.util.List.of(remote.findVariable("lat"), remote.findVariable("lon"));
+            int before = rangeRequests.get();
+            try (HttpRangeRandomAccessFile raf = new HttpRangeRandomAccessFile(archiveUrl(), 1024)) {
+                ChunkLocator.warmIndexes(variables, raf);
+            }
+            int afterWarm = rangeRequests.get();
+            assertTrue("the index nodes should have been fetched", afterWarm > before);
+            assertEquals(150, ChunkLocator.chunkRanges(variables.get(0)).size());
+            assertEquals(150, ChunkLocator.chunkRanges(variables.get(1)).size());
+            assertEquals("walking a warmed index needs no requests", afterWarm, rangeRequests.get());
         }
     }
 
