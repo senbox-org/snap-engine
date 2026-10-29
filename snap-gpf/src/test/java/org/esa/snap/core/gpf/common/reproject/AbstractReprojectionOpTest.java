@@ -99,10 +99,8 @@ public abstract class AbstractReprojectionOpTest {
         sourceProduct.setEndTime(ProductData.UTC.parse("02-Jan-2008 10:45:50"));
         Band floatDataBand = sourceProduct.addBand(FLOAT_BAND_NAME, ProductData.TYPE_FLOAT32);
         floatDataBand.setRasterData(createDataFor(floatDataBand));
-        floatDataBand.setSynthetic(true);
         Band intDataBand = sourceProduct.addBand(INT_BAND_NAME, ProductData.TYPE_INT16);
         intDataBand.setRasterData(createDataFor(intDataBand));
-        intDataBand.setSynthetic(true);
     }
 
     @Before
@@ -123,7 +121,7 @@ public abstract class AbstractReprojectionOpTest {
     }
 
     protected void assertPixelValidState(Band targetBand, double sourceX, double sourceY,
-                                         boolean expectedValid) throws IOException {
+                                         boolean expectedValid) {
         final PixelPos targetPP = computeTargetPP(targetBand, sourceX, sourceY);
         assertTargetPixelValidState(targetBand, targetPP, expectedValid);
     }

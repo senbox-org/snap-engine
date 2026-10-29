@@ -30,7 +30,6 @@ public abstract class DataNode extends ProductNode {
 
     public static final String PROPERTY_NAME_DATA = "data";
     public final static String PROPERTY_NAME_READ_ONLY = "readOnly";
-    public final static String PROPERTY_NAME_SYNTHETIC = "synthetic";
     public final static String PROPERTY_NAME_UNIT = "unit";
 
     /**
@@ -41,7 +40,6 @@ public abstract class DataNode extends ProductNode {
     private ProductData data;
     private boolean readOnly;
     private String unit;
-    private boolean synthetic;
 
     /**
      * Constructs a new data node with the given name, data type and number of elements.
@@ -205,27 +203,6 @@ public abstract class DataNode extends ProductNode {
 
     public String getUnit() {
         return unit;
-    }
-
-    //    /**
-//     * @deprecated since BEAM 4.10 (not used, no replacement)
-//     */
-//    @Deprecated
-    public boolean isSynthetic() {
-        return synthetic;
-    }
-
-    //    /**
-//     * @deprecated since BEAM 4.10 (not used, no replacement)
-//     */
-//    @Deprecated
-    public void setSynthetic(boolean synthetic) {
-        final boolean oldValue = this.synthetic;
-        if (oldValue != synthetic) {
-            this.synthetic = synthetic;
-            fireProductNodeChanged(PROPERTY_NAME_SYNTHETIC, oldValue, synthetic);
-            setModified(true);
-        }
     }
 
     /**

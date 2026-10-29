@@ -49,7 +49,6 @@ public abstract class FilterBand extends Band {
         Guardian.assertNotNull("source", source);
         this.source = source;
         setOwner(source.getProduct());
-        setSynthetic(true);
         setNoDataValue(Double.NaN);
         setNoDataValueUsed(true);
     }
@@ -106,8 +105,7 @@ public abstract class FilterBand extends Band {
     @Override
     public void writeRasterData(int offsetX, int offsetY,
                                 int width, int height,
-                                ProductData rasterData, ProgressMonitor pm) throws IOException {
+                                ProductData rasterData, ProgressMonitor pm) {
         throw new IllegalStateException("write not supported for filtered band");
     }
-
 }

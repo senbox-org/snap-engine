@@ -75,7 +75,6 @@ public class MetadataAttribute extends DataNode {
     public MetadataAttribute createDeepClone() {
         MetadataAttribute clone = new MetadataAttribute(getName(), getData().createDeepClone(), isReadOnly());
         clone.setDescription(getDescription());
-        clone.setSynthetic(isSynthetic());
         clone.setUnit(getUnit());
         return clone;
     }
