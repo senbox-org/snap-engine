@@ -30,6 +30,7 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
+import static eu.esa.snap.core.dataio.CfConstants.*;
 import static org.junit.Assert.*;
 
 /**
@@ -63,7 +64,7 @@ public class CfFlagCodingPartTest {
 
         NVariable someFlagsVariable = n3writable.findVariable("flag_band");
         assertNotNull(someFlagsVariable);
-        Attribute flagMasksAttrib = someFlagsVariable.findAttribute("flag_masks");
+        Attribute flagMasksAttrib = someFlagsVariable.findAttribute(FLAG_MASKS);
         assertNotNull(flagMasksAttrib);
         if (someFlagsVariable.findAttribute("_Unsigned").getStringValue().equals("true")) {
             someFlagsVariable.setDataType(someFlagsVariable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
@@ -146,11 +147,11 @@ public class CfFlagCodingPartTest {
         CfBandPart.writeCfBandAttributes(flagBand, var);
         CfFlagCodingPart.writeFlagCoding(flagBand, n3w);
 
-        Attribute meaningsAttr = var.findAttribute("flag_meanings");
+        Attribute meaningsAttr = var.findAttribute(FLAG_MEANINGS);
         assertEquals("maskOnly maskWithValue", meaningsAttr.getStringValue());
 
         // assertions for flag_masks
-        Attribute masksAttr = var.findAttribute("flag_masks");
+        Attribute masksAttr = var.findAttribute(FLAG_MASKS);
         assertNotNull(masksAttr);
         assertEquals(2, masksAttr.getLength());
         Array masksArr = masksAttr.getValues();
@@ -159,7 +160,7 @@ public class CfFlagCodingPartTest {
         assertTrue(masksAttr.getDataType().isUnsigned());
 
         // assertions for flag_values
-        Attribute valuesAttr = var.findAttribute("flag_values");
+        Attribute valuesAttr = var.findAttribute(FLAG_VALUES);
         assertNotNull(valuesAttr);
         assertEquals(2, valuesAttr.getLength());
         Array valuesArr = valuesAttr.getValues();
@@ -194,7 +195,7 @@ public class CfFlagCodingPartTest {
         CfFlagCodingPart.writeFlagCoding(flagBand, n3w);
 
         // assertions for flag_masks
-        Attribute masksAttr = var.findAttribute("flag_masks");
+        Attribute masksAttr = var.findAttribute(FLAG_MASKS);
         assertNotNull(masksAttr);
         assertEquals(2, masksAttr.getLength());
         Array masksArr = masksAttr.getValues();
@@ -202,8 +203,7 @@ public class CfFlagCodingPartTest {
         assertEquals(mask2, masksArr.getInt(1));
         assertTrue(masksAttr.getDataType().isUnsigned());
 
-        // assertions for flag_values
-        Attribute valuesAttr = var.findAttribute("flag_values");
+        final Attribute valuesAttr = var.findAttribute(FLAG_VALUES);
         assertNull(valuesAttr);
 
         Attribute descAttr = var.findAttribute("long_name");

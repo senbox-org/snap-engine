@@ -38,6 +38,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
+
 /**
  * Utility class that writes SeaDAS-Level-3-alike NetCDF files containing binned Level-3 data.
  *
@@ -94,17 +96,17 @@ class SeaDASLevel3BinWriter extends AbstractBinWriter {
         startNumVar.addAttribute(new Attribute("comment", "1-based bin number of first bin in the grid for each row (see bi_begin);\n" +
                 "always the same set of values for the set of rows."));
         startNumVar.addAttribute(new Attribute("missing_value", 0));
-        startNumVar.addAttribute(new Attribute("_FillValue", 0));
+        startNumVar.addAttribute(new Attribute(FILL_VALUE, 0));
 
         final Variable beginOffsetVar = netcdfFile.addVariable("bi_begin_offset", DataType.INT, Arrays.asList( binIndexDim));
         beginOffsetVar.addAttribute(new Attribute("comment", "0-based offset of the first data-containing bin in for each row."));
         beginOffsetVar.addAttribute(new Attribute("missing_value", -1));
-        beginOffsetVar.addAttribute(new Attribute("_FillValue", -1));
+        beginOffsetVar.addAttribute(new Attribute(FILL_VALUE, -1));
 
         final Variable beginVar = netcdfFile.addVariable("bi_begin", DataType.INT, Arrays.asList( binIndexDim));
         beginVar.addAttribute(new Attribute("comment", "1-based bin number of first data-containing bin for each row (see bi_start_num)."));
         beginVar.addAttribute(new Attribute("missing_value", 0));
-        beginVar.addAttribute(new Attribute("_FillValue", 0));
+        beginVar.addAttribute(new Attribute(FILL_VALUE, 0));
 
         final Variable extendVar = netcdfFile.addVariable("bi_extent", DataType.INT, Arrays.asList( binIndexDim));
         extendVar.addAttribute(new Attribute("comment", "number of bins actually stored (i.e. containing data for each row)."));
@@ -123,7 +125,7 @@ class SeaDASLevel3BinWriter extends AbstractBinWriter {
         final ArrayList<Variable> featureVars = new ArrayList<Variable>(resultFeatureNames.length);
         for (String featureName : resultFeatureNames) {
             final Variable featureVar = netcdfFile.addVariable ("bl_" + featureName, DataType.FLOAT, Arrays.asList( binListDim));
-            featureVar.addAttribute(new Attribute("_FillValue", Float.NaN));
+            featureVar.addAttribute(new Attribute(FILL_VALUE, Float.NaN));
             featureVars.add(featureVar);
         }
 

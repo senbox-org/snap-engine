@@ -59,6 +59,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.util.List;
 
+import static eu.esa.snap.core.dataio.CfConstants.UNITS;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
 
 public class CfGeocodingPart extends ProfilePartIO {
@@ -212,14 +213,14 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     private void addGeographicCoordinateVariables(NFileWriteable ncFile, GeoPos ul, GeoPos br, String latVarName, String lonVarName) throws IOException {
         final NVariable lat = ncFile.addVariable(latVarName, DataType.DOUBLE, null, latVarName);
-        lat.addAttribute("units", "degrees_north");
+        lat.addAttribute(UNITS, "degrees_north");
         lat.addAttribute("long_name", "latitude");
         lat.addAttribute("standard_name", "latitude");
         lat.addAttribute(Constants.VALID_MIN_ATT_NAME, br.getLat());
         lat.addAttribute(Constants.VALID_MAX_ATT_NAME, ul.getLat());
 
         final NVariable lon = ncFile.addVariable(lonVarName, DataType.DOUBLE, null, lonVarName);
-        lon.addAttribute("units", "degrees_east");
+        lon.addAttribute(UNITS, "degrees_east");
         lon.addAttribute("long_name", "longitude");
         lon.addAttribute("standard_name", "longitude");
         lon.addAttribute(Constants.VALID_MIN_ATT_NAME, ul.getLon());
@@ -229,12 +230,12 @@ public class CfGeocodingPart extends ProfilePartIO {
     private void addLatLonBands(final NFileWriteable ncFile, Dimension tileSize,
                                 String latVarName, String lonVarName) throws IOException {
         final NVariable lat = ncFile.addVariable(latVarName, DataType.DOUBLE, tileSize, "y x");
-        lat.addAttribute("units", "degrees_north");
+        lat.addAttribute(UNITS, "degrees_north");
         lat.addAttribute("long_name", "latitude coordinate");
         lat.addAttribute("standard_name", "latitude");
 
         final NVariable lon = ncFile.addVariable(lonVarName, DataType.DOUBLE, tileSize, "y x");
-        lon.addAttribute("units", "degrees_east");
+        lon.addAttribute(UNITS, "degrees_east");
         lon.addAttribute("long_name", "longitude coordinate");
         lon.addAttribute("standard_name", "longitude");
     }

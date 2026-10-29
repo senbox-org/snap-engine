@@ -37,6 +37,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
+import static eu.esa.snap.core.dataio.CfConstants.UNITS;
+
 /**
  * Utility class that writes SeaDAS-Level-3-alike NetCDF files containing binned Level-3 data.
  *
@@ -86,16 +89,16 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         final Variable numScenesVar = netcdfFile.addVariable("bl_nscenes", DataType.INT, Arrays.asList(binListDim));
 
         Variable longitude = netcdfFile.addVariable("longitude", DataType.FLOAT, Arrays.asList(binListDim));
-        longitude.addAttribute(new Attribute("units", "degrees_east"));
+        longitude.addAttribute(new Attribute(UNITS, "degrees_east"));
         Variable latitude = netcdfFile.addVariable("latitude", DataType.FLOAT, Arrays.asList(binListDim));
-        latitude.addAttribute(new Attribute("units", "degrees_north"));
+        latitude.addAttribute(new Attribute(UNITS, "degrees_north"));
 
         final BinManager binManager = binningContext.getBinManager();
         final String[] resultFeatureNames = binManager.getResultFeatureNames();
         final ArrayList<Variable> featureVars = new ArrayList<Variable>(resultFeatureNames.length);
         for (String featureName : resultFeatureNames) {
             final Variable featureVar = netcdfFile.addVariable(featureName, DataType.FLOAT, Arrays.asList(binListDim));
-            featureVar.addAttribute(new Attribute("_FillValue", Float.NaN));
+            featureVar.addAttribute(new Attribute(FILL_VALUE, Float.NaN));
             featureVars.add(featureVar);
         }
 

@@ -27,6 +27,9 @@ import ucar.nc2.iosp.netcdf3.N3iosp;
 
 import java.util.List;
 
+import static eu.esa.snap.core.dataio.CfConstants.ADD_OFFSET;
+import static eu.esa.snap.core.dataio.CfConstants.SCALE_FACTOR;
+
 /**
  * Provides some NetCDF related utility methods.
  */
@@ -96,7 +99,7 @@ public class ReaderUtils {
     }
 
     public static double getScalingFactor(Variable variable) {
-        Attribute attribute = variable.findAttribute(Constants.SCALE_FACTOR_ATT_NAME);
+        Attribute attribute = variable.findAttribute(SCALE_FACTOR);
         if (attribute == null) {
             attribute = variable.findAttribute(Constants.SLOPE_ATT_NAME);
         }
@@ -110,7 +113,7 @@ public class ReaderUtils {
     }
 
     public static double getAddOffset(Variable variable) {
-        Attribute attribute = variable.findAttribute(Constants.ADD_OFFSET_ATT_NAME);
+        Attribute attribute = variable.findAttribute(ADD_OFFSET);
         if (attribute == null) {
             attribute = variable.findAttribute(Constants.INTERCEPT_ATT_NAME);
         }

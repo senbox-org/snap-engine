@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static eu.esa.snap.core.dataio.CfConstants.*;
 import static org.esa.snap.dataio.netcdf.util.ReaderUtils.*;
 
 public class CfBandPart extends ProfilePartIO {
@@ -73,18 +74,18 @@ public class CfBandPart extends ProfilePartIO {
         String unit = rasterDataNode.getUnit();
         if (unit != null) {
             unit = CfCompliantUnitMapper.tryFindUnitString(unit);
-            variable.addAttribute("units", unit);
+            variable.addAttribute(UNITS, unit);
         }
 
         double noDataValue;
         if (!rasterDataNode.isLog10Scaled()) {
             final double scalingFactor = rasterDataNode.getScalingFactor();
             if (scalingFactor != 1.0) {
-                variable.addAttribute(Constants.SCALE_FACTOR_ATT_NAME, scalingFactor);
+                variable.addAttribute(SCALE_FACTOR, scalingFactor);
             }
             final double scalingOffset = rasterDataNode.getScalingOffset();
             if (scalingOffset != 0.0) {
-                variable.addAttribute(Constants.ADD_OFFSET_ATT_NAME, scalingOffset);
+                variable.addAttribute(ADD_OFFSET, scalingOffset);
             }
             noDataValue = rasterDataNode.getNoDataValue();
         } else {
@@ -95,7 +96,7 @@ public class CfBandPart extends ProfilePartIO {
         }
         if (rasterDataNode.isNoDataValueUsed()) {
             Number fillValue = DataTypeUtils.convertTo(noDataValue, variable.getDataType());
-            variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue, variable.getDataType().isUnsigned());
+            variable.addAttribute(FILL_VALUE, fillValue, variable.getDataType().isUnsigned());
         }
         variable.addAttribute("coordinates", "lat lon");
         if (rasterDataNode instanceof Band band) {
@@ -226,7 +227,7 @@ public class CfBandPart extends ProfilePartIO {
     }
 
     private static Number getNoDataValue(Variable variable) {
-        Attribute attribute = variable.findAttribute(Constants.FILL_VALUE_ATT_NAME);
+        Attribute attribute = variable.findAttribute(FILL_VALUE);
         if (attribute == null) {
             attribute = variable.findAttribute(Constants.MISSING_VALUE_ATT_NAME);
         }
@@ -250,15 +251,15 @@ public class CfBandPart extends ProfilePartIO {
     private static void addSampleCodingOrMasksIfApplicable(Product p, Band band, Variable variable,
                                                            String sampleCodingName,
                                                            boolean msb) {
-        Attribute flagMeanings = variable.findAttribute("flag_meanings");
+        Attribute flagMeanings = variable.findAttribute(FLAG_MEANINGS);
         if (flagMeanings == null) {
             flagMeanings = variable.findAttribute("flag_meaning");
         }
         if (flagMeanings == null) {
             return;
         }
-        final Attribute flagMasks = variable.findAttribute("flag_masks");
-        final Attribute flagValues = variable.findAttribute("flag_values");
+        final Attribute flagMasks = variable.findAttribute(FLAG_MASKS);
+        final Attribute flagValues = variable.findAttribute(FLAG_VALUES);
 
         if (flagMasks != null) {
             if (!p.getFlagCodingGroup().contains(sampleCodingName)) {

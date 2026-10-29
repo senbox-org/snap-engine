@@ -91,11 +91,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_MASKS;
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_MEANINGS;
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_VALUES;
 import static org.esa.snap.core.util.StringUtils.isNotNullAndNotEmpty;
 import static org.esa.snap.core.util.SystemUtils.LOG;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MASKS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MEANINGS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_VALUES;
 import static org.esa.snap.dataio.znap.CFConstantsAndUtils.tryFindUnitString;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_BINARY_FORMAT;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_GEOCODING;

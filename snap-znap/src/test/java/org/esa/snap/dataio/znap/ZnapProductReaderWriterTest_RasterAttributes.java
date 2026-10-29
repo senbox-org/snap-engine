@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
+import static eu.esa.snap.core.dataio.CfConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZnapProductReaderWriterTest_RasterAttributes {
@@ -74,7 +75,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("units");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(UNITS);
         assertThat(target.getUnit()).isEqualTo("An example unit");
     }
 
@@ -111,7 +112,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("scale_factor");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(SCALE_FACTOR);
         assertThat(target.getScalingFactor()).isEqualTo(321.3);
     }
 
@@ -124,7 +125,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("add_offset");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(ADD_OFFSET);
         assertThat(target.getScalingOffset()).isEqualTo(221.3);
     }
 
@@ -138,7 +139,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("_FillValue");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(FILL_VALUE);
         assertThat(target.getNoDataValue()).isEqualTo(1.0E5);
     }
 
@@ -155,7 +156,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(2);
-        assertThat(attributes.keySet().toArray()).isEqualTo(new String[]{"_FillValue", "_Unsigned"});
+        assertThat(attributes.keySet().toArray()).isEqualTo(new String[]{FILL_VALUE, "_Unsigned"});
         assertThat(target.getNoDataValue()).isEqualTo(232.0);
     }
 
@@ -172,7 +173,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("_FillValue");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(FILL_VALUE);
         assertThat(target.getNoDataValue()).isEqualTo(-24.0);
     }
 
@@ -189,8 +190,8 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("_FillValue");
-        assertThat(attributes.get("_FillValue")).isEqualTo(1256.523F);
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(FILL_VALUE);
+        assertThat(attributes.get(FILL_VALUE)).isEqualTo(1256.523F);
         assertThat(((Double)target.getNoDataValue()).floatValue()).isEqualTo(1256.523F);
     }
 
@@ -203,7 +204,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         //verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("_FillValue");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(FILL_VALUE);
         assertThat(target.getNoDataValue()).isEqualTo(893756.7899);
     }
 

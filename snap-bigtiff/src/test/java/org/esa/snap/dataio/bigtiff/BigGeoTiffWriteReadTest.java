@@ -72,6 +72,7 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.SCALE_FACTOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -551,7 +552,7 @@ public class BigGeoTiffWriteReadTest {
         parameters.parameter("semi_minor").setValue(ellipsoid.getSemiMinorAxis());
         parameters.parameter("central_meridian").setValue(0.0);
         parameters.parameter("latitude_of_origin").setValue(90.0);
-        parameters.parameter("scale_factor").setValue(1.0);
+        parameters.parameter(SCALE_FACTOR).setValue(1.0);
 
         final MathTransform transform1 = transformFactory.createParameterizedTransform(parameters);
         final DefaultProjectedCRS crs = new DefaultProjectedCRS(parameters.getDescriptor().getName().getCode(),

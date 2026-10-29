@@ -18,6 +18,7 @@ import ucar.nc2.Variable;
 import java.io.File;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.UNITS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -41,10 +42,10 @@ public class CfLayerCacheReaderTest {
         writer.addDimension("lon", WIDTH);
 
         Variable lat = writer.addVariable("lat", DataType.DOUBLE, "lat");
-        lat.addAttribute(new Attribute("units", "degrees_north"));
+        lat.addAttribute(new Attribute(UNITS, "degrees_north"));
         lat.addAttribute(new Attribute("standard_name", "latitude"));
         Variable lon = writer.addVariable("lon", DataType.DOUBLE, "lon");
-        lon.addAttribute(new Attribute("units", "degrees_east"));
+        lon.addAttribute(new Attribute(UNITS, "degrees_east"));
         lon.addAttribute(new Attribute("standard_name", "longitude"));
         Variable data = writer.addVariable("data", DataType.INT, "time lat lon");
 
