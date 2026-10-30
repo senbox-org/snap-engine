@@ -196,10 +196,10 @@ public class OperatorExecutorTest {
         operatorExecutor.execute(ProgressMonitor.NULL);
 
         assertEquals(1, recordingTileScheduler.recordedCalls.size());
-        assertEquals("scheduleTiles", recordingTileScheduler.recordedCalls.get(0));
+        assertEquals("scheduleTiles", recordingTileScheduler.recordedCalls.getFirst());
 
         assertEquals(1, recordingTileScheduler.requestedTileIndices.size());
-        assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.get(0));
+        assertEquals(new Point(0, 0), recordingTileScheduler.requestedTileIndices.getFirst());
     }
 
 
@@ -225,7 +225,6 @@ public class OperatorExecutorTest {
         Product sourceProduct = createSourceProduct();
         Band bandB = sourceProduct.addBand("b", ProductData.TYPE_INT8);
         bandB.setRasterData(createDataFor(bandB));
-        bandB.setSynthetic(true);
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestOP(sourceProduct);
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
@@ -249,7 +248,6 @@ public class OperatorExecutorTest {
         Product sourceProduct = createSourceProduct();
         Band bandB = sourceProduct.addBand("b", ProductData.TYPE_INT8);
         bandB.setRasterData(createDataFor(bandB));
-        bandB.setSynthetic(true);
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestOP(sourceProduct);
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
@@ -273,7 +271,6 @@ public class OperatorExecutorTest {
         Product sourceProduct = createSourceProduct();
         Band bandB = sourceProduct.addBand("b", ProductData.TYPE_INT8);
         bandB.setRasterData(createDataFor(bandB));
-        bandB.setSynthetic(true);
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestStackOP(sourceProduct);
         OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
@@ -296,7 +293,6 @@ public class OperatorExecutorTest {
         Product product = new Product("source", "source", 100, 100);
         Band bandA = product.addBand("a", ProductData.TYPE_INT8);
         bandA.setRasterData(createDataFor(bandA));
-        bandA.setSynthetic(true);
         return product;
     }
 

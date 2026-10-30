@@ -31,7 +31,6 @@ import org.esa.snap.core.util.StringUtils;
 
 import java.awt.Dimension;
 import java.awt.image.RenderedImage;
-import java.io.IOException;
 
 /**
  * A band contains the data for geophysical parameter in remote sensing data products. Bands are two-dimensional images
@@ -76,7 +75,6 @@ public class VirtualBand extends Band {
                        final String expression) {
         super(name, dataType, width, height);
         setSpectralBandIndex(-1);
-        setSynthetic(true);
         if (expression == null || expression.trim().isEmpty()) {
             throw new IllegalArgumentException("Expression must be not null and not empty");
         }
@@ -148,7 +146,7 @@ public class VirtualBand extends Band {
      */
     @Override
     public void writePixels(final int x, final int y, final int w, final int h, final int[] pixels,
-                            ProgressMonitor pm) throws IOException {
+                            ProgressMonitor pm) {
         throw new IllegalStateException("write not supported for virtual band");
     }
 
@@ -165,7 +163,7 @@ public class VirtualBand extends Band {
      */
     @Override
     public synchronized void writePixels(final int x, final int y, final int w, final int h, final float[] pixels,
-                                         ProgressMonitor pm) throws IOException {
+                                         ProgressMonitor pm) {
         throw new IllegalStateException("write not supported for virtual band");
     }
 
@@ -183,7 +181,7 @@ public class VirtualBand extends Band {
      */
     @Override
     public void writePixels(final int x, final int y, final int w, final int h, final double[] pixels,
-                            ProgressMonitor pm) throws IOException {
+                            ProgressMonitor pm) {
         throw new IllegalStateException("write not supported for virtual band");
     }
 
