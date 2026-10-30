@@ -37,8 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
-import static eu.esa.snap.core.dataio.CfConstants.UNITS;
+import static eu.esa.snap.core.dataio.CfConstants.*;
 
 /**
  * Utility class that writes SeaDAS-Level-3-alike NetCDF files containing binned Level-3 data.
@@ -67,7 +66,7 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         final NetcdfFileWriter netcdfFile = NetcdfFileWriter.createNew(getTargetFilePath(),false);
         netcdfFile.setLargeFile(true);
 
-        netcdfFile.addGlobalAttribute("title", "Level-3 Binned Data");
+        netcdfFile.addGlobalAttribute(TITLE, "Level-3 Binned Data");
         netcdfFile.addGlobalAttribute("super_sampling", binningContext.getSuperSampling());
         if (getRegion() != null) {
             netcdfFile.addGlobalAttribute("region", getRegion().toText());

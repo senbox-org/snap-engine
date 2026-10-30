@@ -26,10 +26,11 @@ import ucar.nc2.Attribute;
 
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+
 public class CfDescriptionPart extends ProfilePartIO {
 
     private static final String DESCRIPTION = "description";
-    private static final String TITLE = "title";
     private static final String COMMENT = "comment";
     private static final String[] DESCRIPTION_ATTRIBUTE_NAMES = new String[]{DESCRIPTION, TITLE, COMMENT};
 

@@ -47,6 +47,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static eu.esa.snap.core.dataio.CfConstants.CONVENTIONS;
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+
 public class BeamMetadataPart extends ProfilePartIO {
 
     private static final String SPLITTER = ":";
@@ -55,7 +58,7 @@ public class BeamMetadataPart extends ProfilePartIO {
     private static final String METADATA_VARIABLE = "metadata";
     private static final String DESCRIPTION_SUFFIX = "descr";
     private static final String UNIT_SUFFIX = "unit";
-    private static final List<String> SNAP_GLOBAL_ATTRIBUTES = Arrays.asList("Conventions", "TileSize", "product_type", "metadata_profile", "metadata_version", "start_date", "stop_date", "auto_grouping", "quicklook_band_name", "tiepoint_coordinates", "title");
+    private static final List<String> SNAP_GLOBAL_ATTRIBUTES = Arrays.asList(CONVENTIONS, "TileSize", "product_type", "metadata_profile", "metadata_version", "start_date", "stop_date", "auto_grouping", "quicklook_band_name", "tiepoint_coordinates", TITLE);
     private boolean isNC4 = false;
 
     @Override

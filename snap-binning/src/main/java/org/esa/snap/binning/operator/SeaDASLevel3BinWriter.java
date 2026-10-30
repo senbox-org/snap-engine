@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
+import static eu.esa.snap.core.dataio.CfConstants.*;
 
 /**
  * Utility class that writes SeaDAS-Level-3-alike NetCDF files containing binned Level-3 data.
@@ -69,7 +69,7 @@ class SeaDASLevel3BinWriter extends AbstractBinWriter {
         final NetcdfFileWriter netcdfFile = NetcdfFileWriter.createNew(getTargetFilePath(),false);
         netcdfFile.setLargeFile(true);
 
-        netcdfFile.addGlobalAttribute("title", "Level-3 Binned Data");
+        netcdfFile.addGlobalAttribute(TITLE, "Level-3 Binned Data");
         netcdfFile.addGlobalAttribute("super_sampling", binningContext.getSuperSampling());
         if (getRegion() != null) {
             netcdfFile.addGlobalAttribute("region", getRegion().toText());
@@ -95,17 +95,17 @@ class SeaDASLevel3BinWriter extends AbstractBinWriter {
         final Variable startNumVar = netcdfFile.addVariable("bi_start_num", DataType.INT, Arrays.asList( binIndexDim));
         startNumVar.addAttribute(new Attribute("comment", "1-based bin number of first bin in the grid for each row (see bi_begin);\n" +
                 "always the same set of values for the set of rows."));
-        startNumVar.addAttribute(new Attribute("missing_value", 0));
+        startNumVar.addAttribute(new Attribute(MISSING_VALUE, 0));
         startNumVar.addAttribute(new Attribute(FILL_VALUE, 0));
 
         final Variable beginOffsetVar = netcdfFile.addVariable("bi_begin_offset", DataType.INT, Arrays.asList( binIndexDim));
         beginOffsetVar.addAttribute(new Attribute("comment", "0-based offset of the first data-containing bin in for each row."));
-        beginOffsetVar.addAttribute(new Attribute("missing_value", -1));
+        beginOffsetVar.addAttribute(new Attribute(MISSING_VALUE, -1));
         beginOffsetVar.addAttribute(new Attribute(FILL_VALUE, -1));
 
         final Variable beginVar = netcdfFile.addVariable("bi_begin", DataType.INT, Arrays.asList( binIndexDim));
         beginVar.addAttribute(new Attribute("comment", "1-based bin number of first data-containing bin for each row (see bi_start_num)."));
-        beginVar.addAttribute(new Attribute("missing_value", 0));
+        beginVar.addAttribute(new Attribute(MISSING_VALUE, 0));
         beginVar.addAttribute(new Attribute(FILL_VALUE, 0));
 
         final Variable extendVar = netcdfFile.addVariable("bi_extent", DataType.INT, Arrays.asList( binIndexDim));

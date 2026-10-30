@@ -85,7 +85,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
         // add attributes meanings, description, masks and  (if present) values
         var.addAttribute(FLAG_MEANINGS, meanings.toString());
         if (desc != null && !desc.isEmpty()) {
-            var.addAttribute("long_name", desc);
+            var.addAttribute(LONG_NAME, desc);
         }
         Object maskStorage = toStorageArray(dType, masks);
         Array maskArray = Array.factory(dType, new int[]{numFlags}, maskStorage);

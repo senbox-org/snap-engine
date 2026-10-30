@@ -62,7 +62,7 @@ public class ZnapProductReaderWriterTest_RasterAttributes {
         transferToTarget();
         // verification
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributes.keySet().iterator().next()).isEqualTo("long_name");
+        assertThat(attributes.keySet().iterator().next()).isEqualTo(LONG_NAME);
         assertThat(target.getDescription()).isEqualTo("some extended description");
     }
 

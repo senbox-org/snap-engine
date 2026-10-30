@@ -69,7 +69,7 @@ public class CfBandPart extends ProfilePartIO {
     public static void writeCfBandAttributes(RasterDataNode rasterDataNode, NVariable variable) throws IOException {
         final String description = rasterDataNode.getDescription();
         if (description != null) {
-            variable.addAttribute("long_name", description);
+            variable.addAttribute(LONG_NAME, description);
         }
         String unit = rasterDataNode.getUnit();
         if (unit != null) {
@@ -229,7 +229,7 @@ public class CfBandPart extends ProfilePartIO {
     private static Number getNoDataValue(Variable variable) {
         Attribute attribute = variable.findAttribute(FILL_VALUE);
         if (attribute == null) {
-            attribute = variable.findAttribute(Constants.MISSING_VALUE_ATT_NAME);
+            attribute = variable.findAttribute(MISSING_VALUE);
         }
         if (attribute != null) {
             return getAttributeValue(attribute);

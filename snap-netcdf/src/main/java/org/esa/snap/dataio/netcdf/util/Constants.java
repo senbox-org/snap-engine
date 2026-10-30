@@ -44,10 +44,7 @@ public interface Constants {
 
     String SLOPE_ATT_NAME = "slope";
     String INTERCEPT_ATT_NAME = "intercept";
-    String MISSING_VALUE_ATT_NAME = "missing_value";
     String ORIG_NAME_ATT_NAME = "orig_name";
-    String VALID_MIN_ATT_NAME = "valid_min";
-    String VALID_MAX_ATT_NAME = "valid_max";
     String STEP_ATT_NAME = "step";
     String START_DATE_ATT_NAME = "start_date";
     String START_TIME_ATT_NAME = "start_time";

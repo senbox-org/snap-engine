@@ -37,6 +37,8 @@ import ucar.nc2.Variable;
 import java.awt.Color;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+
 public class BeamMaskPart extends ProfilePartIO {
 
     public static final String EXPRESSION = "expression";
@@ -152,7 +154,7 @@ public class BeamMaskPart extends ProfilePartIO {
 
                 final String description = mask.getDescription();
                 if (description != null && description.trim().length() > 0) {
-                    variable.addAttribute("title", description);
+                    variable.addAttribute(TITLE, description);
                 }
 
                 final PropertyContainer imageConfig = mask.getImageConfig();

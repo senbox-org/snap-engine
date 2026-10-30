@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
 
 
 public class BinnedProductReader extends AbstractProductReader {
@@ -184,7 +185,7 @@ public class BinnedProductReader extends AbstractProductReader {
         final String productName = FileUtils.getFilenameWithoutExtension(productFile);
 
         String productType = "BINNED";
-        Attribute titleAttribute = netcdfFile.findGlobalAttribute("title");
+        Attribute titleAttribute = netcdfFile.findGlobalAttribute(TITLE);
         if (titleAttribute != null) {
             productType = titleAttribute.getStringValue();
         }

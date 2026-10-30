@@ -77,7 +77,7 @@ public class CfFlagCodingPartTest {
             assertEquals(1 << i, flagMasksAttrib.getValues().getInt(i));
         }
 
-        Attribute descriptionAttrib = someFlagsVariable.findAttribute("long_name");
+        Attribute descriptionAttrib = someFlagsVariable.findAttribute(LONG_NAME);
         assertNotNull(flagCoding.getDescription(), descriptionAttrib.getStringValue());
 
     }
@@ -168,7 +168,7 @@ public class CfFlagCodingPartTest {
         assertEquals(maskAndValValue, valuesArr.getInt(1));
         assertTrue( valuesAttr.getDataType().isUnsigned());
 
-        Attribute descAttr = var.findAttribute("long_name");
+        Attribute descAttr = var.findAttribute(LONG_NAME);
         assertEquals("Flags with and without values", descAttr.getStringValue());
     }
 
@@ -206,7 +206,7 @@ public class CfFlagCodingPartTest {
         final Attribute valuesAttr = var.findAttribute(FLAG_VALUES);
         assertNull(valuesAttr);
 
-        Attribute descAttr = var.findAttribute("long_name");
+        Attribute descAttr = var.findAttribute(LONG_NAME);
         assertEquals("Flags without values", descAttr.getStringValue());
     }
 

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static eu.esa.snap.core.dataio.CfConstants.STANDARD_NAME;
 import static eu.esa.snap.core.dataio.CfConstants.UNITS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -67,11 +68,11 @@ public class GloballyShiftedDataTest {
         ncFile.addDimension("lon", WIDTH);
         Variable lat = ncFile.addVariable("lat", DataType.DOUBLE, "lat");
         lat.addAttribute(new Attribute(UNITS, "degrees_north"));
-        lat.addAttribute(new Attribute("standard_name", "latitude"));
+        lat.addAttribute(new Attribute(STANDARD_NAME, "latitude"));
 
         Variable lon = ncFile.addVariable("lon", DataType.DOUBLE, "lon");
         lon.addAttribute(new Attribute(UNITS, "degrees_east"));
-        lon.addAttribute(new Attribute("standard_name", "longitude"));
+        lon.addAttribute(new Attribute(STANDARD_NAME, "longitude"));
 
         Variable data = ncFile.addVariable("data", DataType.INT, "lat lon");
 
